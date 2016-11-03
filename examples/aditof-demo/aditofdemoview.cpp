@@ -530,7 +530,7 @@ void AdiTofDemoView::_displayDepthImage() {
         cv::Mat displayedImage(frameHeight, frameWidth, CV_16UC1, data);
         cv::Point2d pointxy(320, 240);
         m_distanceVal = static_cast<int>(
-            m_distanceVal * 0.9 + displayedImage.at<ushort>(pointxy) * 0.1);
+            m_distanceVal * 0.7 + displayedImage.at<ushort>(pointxy) * 0.3);
         char text[20];
         sprintf(text, "%d", m_distanceVal);
         displayedImage.convertTo(displayedImage, CV_8U, 255.0 / 4095);
