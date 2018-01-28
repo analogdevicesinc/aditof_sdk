@@ -21,7 +21,6 @@ file(GLOB HEADERS
 )
 
 set(TARGET_STRING "connections/mipi")
-
 if( WIN32 )
         set(OS_SPECIFIC_DIR "connections/usb/windows")
 elseif( APPLE )
@@ -41,9 +40,6 @@ elseif( XAVIER )
 elseif( XAVIERNX )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR xaviernx)
-elseif( TOYBRICK )
-        set(OS_SPECIFIC_DIR ${TARGET_STRING})
-        set(TARGET_SPECIFIC_DIR toybrick)
 elseif ( UNIX )
         set(OS_SPECIFIC_DIR "connections/usb/linux")
 else()
@@ -54,14 +50,9 @@ if (NOT APPLE AND NOT WIN32)
     option(RUN_LDCONFIG "Run ldconfig after install." ON)
 endif()
 
-if ( USE_CHICONY AND (RASPBERRYPI OR TOYBRICK) )
+if ( USE_CHICONY AND RASPBERRYPI )
 	set(CHICONY_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.cpp)
 	set(CHICONY_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h)
-endif()
-
-if ( USE_FX1 AND TOYBRICK )
-	set(FX1_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/fx1/*.cpp)
-	set(FX1_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/fx1/*.h)
 endif()
 
 # Platform specific sources and headers
@@ -71,7 +62,6 @@ file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.cpp
     ${CHICONY_SRC}
-    ${FX1_SRC}
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
@@ -79,7 +69,6 @@ file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
     ${CHICONY_H}
-    ${FX1_H}
 )
 
 file(GLOB NETWORK_SOURCES
@@ -122,7 +111,6 @@ target_include_directories(${PROJECT_NAME}
         src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
         src/cameras/ad-96tof1-ebz/
         src/cameras/chicony-006/
-        src/cameras/fx1/
         src/connections/network/
         ${Protobuf_INCLUDE_DIRS}
         ${GENERATED_PROTO_FILES_DIR}
@@ -166,7 +154,7 @@ if ( RASPBERRYPI )
     include (${CMAKE_SOURCE_DIR}/cmake/raspberrypi-revision-config.cmake)
 endif()
 
-if ( JETSON OR XAVIER OR XAVIERNX)
+if ( JETSON OR XAVIER )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -latomic")
 endif()
 
