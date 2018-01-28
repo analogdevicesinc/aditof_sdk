@@ -1,3 +1,12 @@
+#ifndef BASECODE_H
+#define BASECODE_H
+
+#if defined(XAVIER) || defined(XAVIERNX)
+    #define VIRTUAL_CHANNEL_CONFIG 0x00e4
+#else
+    #define VIRTUAL_CHANNEL_CONFIG 0x00e0
+#endif
+
 static const uint16_t basecode[] = {
     0xc022, 0x0001,
     0xc600, 0x0000,
@@ -3590,7 +3599,7 @@ static const uint16_t basecode[] = {
     0xc36b, 0x0000,
     0xc3da, 0x0007,
     0xc3db, 0x0000,
-    0xc3dc, 0x00e0,
+    0xc3dc, VIRTUAL_CHANNEL_CONFIG,
     0xc3de, 0x0000,
     0xc3df, 0x0000,
     0xc08f, 0x0040,
@@ -3601,3 +3610,5 @@ static const uint16_t basecode[] = {
     0x4001, 0x0007,
     0x7c22, 0x0004
 };
+
+#endif // BASECODE_H
