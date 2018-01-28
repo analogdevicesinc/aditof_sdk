@@ -402,12 +402,57 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
             return status;
         }
 
+<<<<<<< HEAD
         /* Set the frame format in the driver */
         CLEAR(fmt);
         fmt.type = m_implData->videoBuffersType;
         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
         fmt.fmt.pix.width = details.width;
         fmt.fmt.pix.height = details.height;
+||||||| constructed merge base
+<<<<<<< HEAD
+            /* Set the frame format in the driver */
+            CLEAR(fmt);
+            fmt.type = dev->videoBuffersType;
+            fmt.fmt.pix.width = details.width;
+            fmt.fmt.pix.height = details.height;
+=======
+    /* Set the frame format in the driver */
+    CLEAR(fmt);
+    fmt.type = m_implData->videoBuffersType;
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
+    fmt.fmt.pix.width = details.width;
+    fmt.fmt.pix.height = details.height;
+>>>>>>> toybrick_rk3399pro
+
+            if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
+                LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
+                             << " error: " << strerror(errno);
+                       return Status::GENERIC_ERROR;
+            }
+=======
+//<<<<<<< HEAD
+            /* Set the frame format in the driver */
+//            CLEAR(fmt);
+            fmt.type = dev->videoBuffersType;
+//            fmt.fmt.pix.width = details.width;
+//            fmt.fmt.pix.height = details.height;
+//=======
+
+    /* Set the frame format in the driver */
+    CLEAR(fmt);
+//    fmt.type = m_implData->videoBuffersType;
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
+    fmt.fmt.pix.width = details.width;
+    fmt.fmt.pix.height = details.height;
+///>>>>>>> toybrick_rk3399pro
+
+            if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
+                LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
+                             << " error: " << strerror(errno);
+                       return Status::GENERIC_ERROR;
+            }
+>>>>>>> merge toybrick branch
 
         if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
             LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
@@ -655,6 +700,42 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
             }
 #endif
         }
+<<<<<<< HEAD
+||||||| constructed merge base
+=======*/
+            memcpy(buffer + (width * height) / 2, pdata, buf.bytesused);
+        } else {
+			uint32_t j = 0, j1 = width*height/2;
+			for(uint32_t i = 0; i < height; i+=2) {
+				memcpy(buffer + j, pdata + i*width*2, width*2);
+				j+= width;
+				memcpy(buffer + j1, pdata + (i+1)*width*2, width*2);
+				j1+= width;
+			}
+			for(uint32_t i = 0; i < width*height; i += 2) {
+				buffer[i] = ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
+				buffer[i+1] = ((buffer[i+1] & 0x00FF) << 4) | ((buffer[i + 1]) & 0xF000) >> 12;
+			}
+		}
+//>>>>>>> toybrick_rk3399pro
+=======
+=======*/
+            memcpy(buffer + (width * height) / 2, pdata[0], buf[0].bytesused);
+        } else {
+			uint32_t j = 0, j1 = width*height/2;
+			for(uint32_t i = 0; i < height; i+=2) {
+				memcpy(buffer + j, pdata + i*width*2, width*2);
+				j+= width;
+				memcpy(buffer + j1, pdata + (i+1)*width*2, width*2);
+				j1+= width;
+			}
+			for(uint32_t i = 0; i < width*height; i += 2) {
+				buffer[i] = ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
+				buffer[i+1] = ((buffer[i+1] & 0x00FF) << 4) | ((buffer[i + 1]) & 0xF000) >> 12;
+			}
+		}
+//>>>>>>> toybrick_rk3399pro
+>>>>>>> merge toybrick branch
     } else {
         // clang-format off
         uint16_t *depthPtr = buffer;

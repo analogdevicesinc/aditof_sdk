@@ -21,7 +21,6 @@ file(GLOB HEADERS
 )
 
 set(TARGET_STRING "connections/mipi")
-
 if( WIN32 )
         set(OS_SPECIFIC_DIR "connections/usb/windows")
 elseif( APPLE )
@@ -54,7 +53,7 @@ if (NOT APPLE AND NOT WIN32)
     option(RUN_LDCONFIG "Run ldconfig after install." ON)
 endif()
 
-if ( USE_CHICONY AND (RASPBERRYPI OR TOYBRICK) )
+if ( USE_CHICONY AND RASPBERRYPI )
 	set(CHICONY_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.cpp)
 	set(CHICONY_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h)
 endif()
@@ -179,7 +178,7 @@ if ( RASPBERRYPI )
     include (${CMAKE_SOURCE_DIR}/cmake/raspberrypi-revision-config.cmake)
 endif()
 
-if ( JETSON OR XAVIER OR XAVIERNX)
+if ( JETSON OR XAVIER )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -latomic")
 endif()
 
