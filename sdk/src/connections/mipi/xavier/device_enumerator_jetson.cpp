@@ -50,7 +50,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     // we've got the right device and is compatible with the SDK
     DeviceConstructionData devData;
     devData.deviceType = DeviceType::LOCAL;
-    devData.driverPath = "/dev/video0;/dev/v4l-subdev2|/dev/video1;/dev/v4l-subdev3";
+    devData.driverPath = "/dev/video0;/dev/v4l-subdev0|/dev/video1;/dev/v4l-subdev2";
     devices.emplace_back(devData);
 
     DLOG(INFO) << "Looking at: " << devData.driverPath
