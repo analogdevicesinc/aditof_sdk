@@ -21,6 +21,7 @@ file(GLOB HEADERS
 )
 
 set(TARGET_STRING "connections/mipi")
+
 if( WIN32 )
         set(OS_SPECIFIC_DIR "connections/usb/windows")
 elseif( APPLE )
@@ -34,15 +35,25 @@ elseif ( RASPBERRYPI )
 elseif( JETSON )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR jetson)
+<<<<<<< HEAD
 elseif( TOYBRICK )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR toybrick)
 elseif( XAVIER )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR xavier)
+||||||| constructed merge base
+elseif( XAVIER )
+        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(TARGET_SPECIFIC_DIR xavier)
+=======
+>>>>>>> update cmake and remove toybrick implementation
 elseif( XAVIERNX )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR xaviernx)
+elseif( TOYBRICK )
+        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(TARGET_SPECIFIC_DIR toybrick)
 elseif ( UNIX )
         set(OS_SPECIFIC_DIR "connections/usb/linux")
 else()
@@ -53,16 +64,25 @@ if (NOT APPLE AND NOT WIN32)
     option(RUN_LDCONFIG "Run ldconfig after install." ON)
 endif()
 
-if ( USE_CHICONY AND RASPBERRYPI )
+if ( USE_CHICONY AND (RASPBERRYPI OR TOYBRICK) )
 	set(CHICONY_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.cpp)
 	set(CHICONY_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h)
 endif()
 
+<<<<<<< HEAD
 if ( USE_FXTOF1 AND TOYBRICK )
 	set(FXTOF1_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.cpp)
 	set(FXTOF1_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.h)
 endif()
 
+||||||| constructed merge base
+=======
+if ( USE_FX1 )
+	set(FX1_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/fx1/*.cpp)
+	set(FX1_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/fx1/*.h)
+endif()
+
+>>>>>>> update cmake and remove toybrick implementation
 # Platform specific sources and headers
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
@@ -71,7 +91,12 @@ file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.cpp
     ${CHICONY_SRC}
+<<<<<<< HEAD
     ${FXTOF1_SRC}
+||||||| constructed merge base
+=======
+    ${FX1_SRC}
+>>>>>>> update cmake and remove toybrick implementation
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
@@ -134,7 +159,12 @@ target_include_directories(${PROJECT_NAME}
         src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
         src/cameras/ad-96tof1-ebz/
         src/cameras/chicony-006/
+<<<<<<< HEAD
         src/cameras/ad-fxtof1-ebz/
+||||||| constructed merge base
+=======
+        src/cameras/fx1/
+>>>>>>> update cmake and remove toybrick implementation
         src/connections/network/
         ${Protobuf_INCLUDE_DIRS}
         ${GENERATED_PROTO_FILES_DIR}
@@ -178,7 +208,7 @@ if ( RASPBERRYPI )
     include (${CMAKE_SOURCE_DIR}/cmake/raspberrypi-revision-config.cmake)
 endif()
 
-if ( JETSON OR XAVIER )
+if ( JETSON )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -latomic")
 endif()
 
