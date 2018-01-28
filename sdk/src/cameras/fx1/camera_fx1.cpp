@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "camera_chicony_006.h"
+#include "camera_fx1.h"
 
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
@@ -40,9 +40,8 @@
 #include <fstream>
 #include <glog/logging.h>
 #include <iterator>
+#include <map>
 #include <math.h>
-
-using namespace std;
 
 struct rangeStruct {
     std::string mode;
@@ -50,20 +49,25 @@ struct rangeStruct {
     int maxDepth;
 };
 
-static const std::array<rangeStruct, 3>
-    rangeValues = 
-         {{{"near", 250, 1000}, {"medium", 1000, 4500}}};
+// A map that contains the specific values for each revision
+static const std::map<std::string, std::array<rangeStruct, 3>>
+    RangeValuesForRevision = {
+        {"RevA", {{{"near", 250, 800}, {"medium", 300, 3000}}}}
+};
 
 static const std::string skCustomMode = "custom";
 
-CameraChicony::CameraChicony(std::unique_ptr<aditof::DeviceInterface> device)
+static const std::vector<std::string> availableControls = {
+    "noise_reduction_threshold", "ir_gamma_correction"};
+
+CameraFx1::CameraFx1(std::unique_ptr<aditof::DeviceInterface> device)
     : m_device(std::move(device)), m_devStarted(false),
-      m_availableControls({ "noise_reduction_threshold", "ir_gamma_correction" }) {
-}
+      m_devProgrammed(false), m_availableControls(availableControls),
+      m_revision("RevA") {}
 
-CameraChicony::~CameraChicony() = default;
+CameraFx1::~CameraFx1() = default;
 
-aditof::Status CameraChicony::initialize() {
+aditof::Status CameraFx1::initialize() {
     using namespace aditof;
 
     LOG(INFO) << "Initializing camera";
@@ -75,94 +79,97 @@ aditof::Status CameraChicony::initialize() {
         return status;
     }
 
+    status = m_calibration.readCalMap(m_device);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to read calibration data from eeprom";
+        return status;
+    }
+
     m_details.bitCount = 12;
 
     LOG(INFO) << "Camera initialized";
 
-    status = m_calibration.initialize(m_device);
-    if (status != Status::OK) {
-        LOG(WARNING) << "Failed to initialize calibration";
-        return status;
-    }
-    
+    m_calibration.getIntrinsic(INTRINSIC, m_details.intrinsics.cameraMatrix);
+    m_calibration.getIntrinsic(DISTORTION_COEFFICIENTS,
+                               m_details.intrinsics.distCoeffs);
+
+    // For now we use the unit cell size values specified in the datasheet
+    m_details.intrinsics.pixelWidth = 0.0056;
+    m_details.intrinsics.pixelHeight = 0.0056;
     return Status::OK;
 }
 
-aditof::Status CameraChicony::start() {
+aditof::Status CameraFx1::start() {
     // return m_device->start(); // For now we keep the device open all the time
     return aditof::Status::OK;
 }
 
-aditof::Status CameraChicony::stop() {
-    using namespace aditof;
-    Status status = Status::OK;
-
+aditof::Status CameraFx1::stop() {
     // return m_device->stop(); // For now we keep the device open all the time
-    status = m_calibration.close();
-
-    return status;
+    return aditof::Status::OK;
 }
 
-aditof::Status CameraChicony::setMode(const std::string &mode,
-                                      const std::string &modeFilename) {
+aditof::Status CameraFx1::setMode(const std::string &mode,
+                                  const std::string &modeFilename) {
     using namespace aditof;
     Status status = Status::OK;
 
-    LOG(INFO) << "Chosen mode: " << mode.c_str();
-    if ((mode != skCustomMode) ^ (modeFilename.empty())) {
-        LOG(WARNING) << " mode must be set to: '" << skCustomMode
-                     << "' and a firmware must be provided";
+    // Set the values specific to the Revision requested
+    std::array<rangeStruct, 3> rangeValues =
+        RangeValuesForRevision.at(m_revision);
 
-        return Status::INVALID_ARGUMENT;
-    }
+    LOG(INFO) << "Chosen mode: " << mode.c_str();
 
     auto iter = std::find_if(rangeValues.begin(), rangeValues.end(),
-                                 [&mode](struct rangeStruct rangeMode) {
-                                     return rangeMode.mode == mode;
-                                 });
+                             [&mode](struct rangeStruct rangeMode) {
+                                 return rangeMode.mode == mode;
+                             });
     if (iter != rangeValues.end()) {
         m_details.maxDepth = (*iter).maxDepth;
-		m_details.minDepth = (*iter).minDepth;
+        m_details.minDepth = (*iter).minDepth;
     } else {
-        m_details.maxDepth = 4096;
+        m_details.maxDepth = 1;
     }
 
-    if (!modeFilename.empty()) {
-        std::ifstream firmwareFile(modeFilename.c_str(), std::ios::binary);
+    LOG(INFO) << "Camera range for mode: " << mode
+              << " is: " << m_details.minDepth << " mm and "
+              << m_details.maxDepth << " mm";
 
-        if (!firmwareFile) {
-            LOG(WARNING) << "Cannot find (or open) file: "
-                         << modeFilename.c_str();
+
+    if(!m_devProgrammed) {
+        std::vector<uint16_t> firmwareData;
+        status = m_calibration.getAfeFirmware(mode, firmwareData);
+        if (status != Status::OK) {
+            LOG(WARNING) << "Failed to read firmware from eeprom";
+            return Status::UNREACHABLE;
+        } else {
+            LOG(INFO) << "Found firmware for mode: " << mode;
+        }
+
+        LOG(INFO) << "Firmware size: " << firmwareData.size() * sizeof(uint16_t)
+                  << " bytes";
+        status = m_device->program((uint8_t *)firmwareData.data(),
+                                   2 * firmwareData.size());
+        if (status != Status::OK) {
+            LOG(WARNING) << "Failed to program AFE";
             return Status::UNREACHABLE;
         }
+        m_devProgrammed = true;
+    }
 
-        firmwareFile.seekg(0, std::ios_base::end);
-        size_t length = static_cast<size_t>(firmwareFile.tellg());
-        firmwareFile.seekg(0, std::ios_base::beg);
-        std::vector<uint8_t> firmwareData;
-        firmwareData.reserve(length);
-        std::copy(std::istreambuf_iterator<char>(firmwareFile),
-                  std::istreambuf_iterator<char>(),
-                  std::back_inserter(firmwareData));
-        status = m_device->program(firmwareData.data(), firmwareData.size());
-        firmwareFile.close();
-    } else {
-        if (mode != "near" && mode != "medium") {
-            LOG(WARNING) << "Unsupported mode";
-            return Status::INVALID_ARGUMENT;
-        }
-
-        LOG(INFO) << "Camera range for mode: " << mode
-                  << " is: " << m_details.minDepth << " mm and "
-                  << m_details.maxDepth << " mm";
-
-        m_calibration.setMode(mode);
+    status = m_calibration.setMode(m_device, mode,
+                                   m_details.maxDepth,
+                                   m_details.frameType.width,
+                                   m_details.frameType.height);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to set calibration mode";
+        return status;
     }
 
     // register writes for enabling only one video stream (depth/ ir)
     // must be done here after programming the camera in order for them to
     // work properly. Setting the mode of the camera, programming it
-    // with a different firmware would reset the value in the oxc3da register
+    // with a different firmware would reset the value in the 0xc3da register
     if (m_details.frameType.type == "depth_only") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
@@ -178,7 +185,7 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
     return status;
 }
 
-aditof::Status CameraChicony::getAvailableModes(
+aditof::Status CameraFx1::getAvailableModes(
     std::vector<std::string> &availableModes) const {
     using namespace aditof;
     Status status = Status::OK;
@@ -187,12 +194,10 @@ aditof::Status CameraChicony::getAvailableModes(
     availableModes.emplace_back("near");
     availableModes.emplace_back("medium");
 
-    availableModes.emplace_back(skCustomMode);
-
     return status;
 }
 
-aditof::Status CameraChicony::setFrameType(const std::string &frameType) {
+aditof::Status CameraFx1::setFrameType(const std::string &frameType) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -233,7 +238,7 @@ aditof::Status CameraChicony::setFrameType(const std::string &frameType) {
     return status;
 }
 
-aditof::Status CameraChicony::getAvailableFrameTypes(
+aditof::Status CameraFx1::getAvailableFrameTypes(
     std::vector<std::string> &availableFrameTypes) const {
     using namespace aditof;
     Status status = Status::OK;
@@ -252,8 +257,8 @@ aditof::Status CameraChicony::getAvailableFrameTypes(
     return status;
 }
 
-aditof::Status CameraChicony::requestFrame(aditof::Frame *frame,
-                                           aditof::FrameUpdateCallback /*cb*/) {
+aditof::Status CameraFx1::requestFrame(aditof::Frame *frame,
+                                          aditof::FrameUpdateCallback /*cb*/) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -273,10 +278,19 @@ aditof::Status CameraChicony::requestFrame(aditof::Frame *frame,
         return status;
     }
 
+    if (m_details.mode != skCustomMode &&
+        (m_details.frameType.type == "depth_ir" ||
+         m_details.frameType.type == "depth_only")) {
+
+        m_calibration.calibrateCameraGeometry(
+            frameDataLocation,
+            m_details.frameType.width * m_details.frameType.height / 2);
+    }
+
     return Status::OK;
 }
 
-aditof::Status CameraChicony::getDetails(aditof::CameraDetails &details) const {
+aditof::Status CameraFx1::getDetails(aditof::CameraDetails &details) const {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -285,11 +299,12 @@ aditof::Status CameraChicony::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<aditof::DeviceInterface> CameraChicony::getDevice() {
+std::shared_ptr<aditof::DeviceInterface> CameraFx1::getDevice() {
     return m_device;
 }
 
-aditof::Status CameraChicony::getAvailableControls(std::vector<std::string> &controls) const {
+aditof::Status
+CameraFx1::getAvailableControls(std::vector<std::string> &controls) const {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -298,11 +313,13 @@ aditof::Status CameraChicony::getAvailableControls(std::vector<std::string> &con
     return status;
 }
 
-aditof::Status CameraChicony::setControl(const std::string &control, const std::string &value) {
+aditof::Status CameraFx1::setControl(const std::string &control,
+                                        const std::string &value) {
     using namespace aditof;
     Status status = Status::OK;
 
-    auto it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
+    auto it = std::find(m_availableControls.begin(), m_availableControls.end(),
+                        control);
     if (it == m_availableControls.end()) {
         LOG(WARNING) << "Unsupported control";
         return Status::INVALID_ARGUMENT;
@@ -319,11 +336,13 @@ aditof::Status CameraChicony::setControl(const std::string &control, const std::
     return status;
 }
 
-aditof::Status CameraChicony::getControl(const std::string &control, std::string &value) const {
+aditof::Status CameraFx1::getControl(const std::string &control,
+                                        std::string &value) const {
     using namespace aditof;
     Status status = Status::OK;
 
-    auto it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
+    auto it = std::find(m_availableControls.begin(), m_availableControls.end(),
+                        control);
     if (it == m_availableControls.end()) {
         LOG(WARNING) << "Unsupported control";
         return Status::INVALID_ARGUMENT;
@@ -340,17 +359,12 @@ aditof::Status CameraChicony::getControl(const std::string &control, std::string
     return status;
 }
 
-aditof::Status CameraChicony::setNoiseReductionTreshold(uint16_t treshold) {
+aditof::Status CameraFx1::setNoiseReductionTreshold(uint16_t treshold) {
     using namespace aditof;
 
-    if (m_details.mode.compare("far") == 0) {
-        LOG(WARNING) << "Far mode does not support noise reduction!";
-        return Status::UNAVAILABLE;
-    }
-
     const size_t REGS_CNT = 5;
-    uint16_t afeRegsAddr[REGS_CNT] = { 0x4001, 0x7c22, 0xc34a, 0x4001, 0x7c22 };
-    uint16_t afeRegsVal[REGS_CNT] = { 0x0006, 0x0004, 0x8000, 0x0007, 0x0004 };
+    uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001, 0x7c22};
+    uint16_t afeRegsVal[REGS_CNT] = {0x0006, 0x0004, 0x8000, 0x0007, 0x0004};
 
     afeRegsVal[2] |= treshold;
     m_noiseReductionThreshold = treshold;
@@ -358,30 +372,29 @@ aditof::Status CameraChicony::setNoiseReductionTreshold(uint16_t treshold) {
     return m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
 }
 
-aditof::Status CameraChicony::setIrGammaCorrection(float gamma) {
+aditof::Status CameraFx1::setIrGammaCorrection(float gamma) {
     using namespace aditof;
     aditof::Status status = Status::OK;
-    const float x_val[] = { 256, 512, 768, 896, 1024, 1536, 2048, 3072, 4096 };
+    const float x_val[] = {256, 512, 768, 896, 1024, 1536, 2048, 3072, 4096};
     uint16_t y_val[9];
 
     for (int i = 0; i < 9; i++) {
         y_val[i] = (uint16_t)(pow(x_val[i] / 4096.0f, gamma) * 1024.0f);
     }
 
-    uint16_t afeRegsAddr[] = { 0x4001, 0x7c22, 0xc372, 0xc373, 0xc374, 0xc375,
-        0xc376, 0xc377, 0xc378, 0xc379, 0xc37a, 0xc37b,
-        0xc37c, 0xc37d, 0x4001, 0x7c22 };
-    uint16_t afeRegsVal[] = { 0x0006,   0x0004,   0x7888,   0xa997,
-        0x000a,   y_val[0], y_val[1], y_val[2],
-        y_val[3], y_val[4], y_val[5], y_val[6],
-        y_val[7], y_val[8], 0x0007,   0x0004 };
+    uint16_t afeRegsAddr[] = {0x4001, 0x7c22, 0xc372, 0xc373, 0xc374, 0xc375,
+                              0xc376, 0xc377, 0xc378, 0xc379, 0xc37a, 0xc37b,
+                              0xc37c, 0xc37d, 0x4001, 0x7c22};
+    uint16_t afeRegsVal[] = {0x0006,   0x0004,   0x7888,   0xa997,
+                             0x000a,   y_val[0], y_val[1], y_val[2],
+                             y_val[3], y_val[4], y_val[5], y_val[6],
+                             y_val[7], y_val[8], 0x0007,   0x0004};
 
     status = m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 8);
     if (status != Status::OK) {
         return status;
     }
-    status = m_device->writeAfeRegisters(afeRegsAddr + 8,
-        afeRegsVal + 8, 8);
+    status = m_device->writeAfeRegisters(afeRegsAddr + 8, afeRegsVal + 8, 8);
     if (status != Status::OK) {
         return status;
     }

@@ -29,37 +29,56 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_DEFINITIONS_H
-#define DEVICE_DEFINITIONS_H
+#include "device_enumerator_impl.h"
 
+#include <dirent.h>
+#include <glog/logging.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <string>
+#include <unistd.h>
 
-/**
- * @brief Namespace aditof
- */
-namespace aditof {
+aditof::Status DeviceEnumeratorImpl::findDevices(
+    std::vector<aditof::DeviceConstructionData> &devices) {
+    using namespace aditof;
+    Status status = Status::OK;
 
-/**
- * @enum SensorType
- * @brief Provides the types of sensor assosiated with the device
- */
-enum class SensorType {
-    SENSOR_96TOF1,  //!< 96Tof 1 sensor
-    SENSOR_CHICONY, //!< Chicony sensor
-    SENSOR_FX1 ,    //!< FX1 sensor
-};
+    LOG(INFO) << "Looking for devices on the target";
 
-/**
- * @struct DeviceDetails
- * @brief Provides details about the device
- */
-struct DeviceDetails {
-    /**
-     * @brief The type of sensor
-     */
-    SensorType sensorType;
-};
+    // TO DO: Do we still need to do this?
+    // Find all video device paths
+    std::vector<std::string> videoPaths;
+    const std::string videoDirPath("/dev/");
+    const std::string videoBaseName("video");
 
-} // namespace aditof
+    DIR *dirp = opendir(videoDirPath.c_str());
+    struct dirent *dp;
+    while ((dp = readdir(dirp))) {
+        if (!strncmp(dp->d_name, videoBaseName.c_str(),
+                     videoBaseName.length())) {
+            std::string fullvideoPath = videoDirPath + std::string(dp->d_name);
+            videoPaths.emplace_back(fullvideoPath);
+        }
+    }
+    closedir(dirp);
 
-#endif // DEVICE_DEFINITIONS_H
+    for (const auto &video : videoPaths) {
+        std::string devPath;
+
+        if (devPath.empty()) {
+            continue;
+        }
+    }
+    // TO DO: Don't guess the device, find a way to identify it so we are sure
+    // we've got the right device and is compatible with the SDK
+    DeviceConstructionData devData;
+    devData.deviceType = DeviceType::LOCAL;
+    devData.driverPath = "/dev/video2;/dev/v4l-subdev0";
+    devices.emplace_back(devData);
+
+    DLOG(INFO) << "Looking at: " << devData.driverPath
+               << " for an eligible TOF camera";
+
+    return status;
+}

@@ -114,8 +114,10 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
 
-#ifdef CHICONY_006
+#if defined(CHICONY_006)
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
+#elif defined(FX1)
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_FX1;
 #else
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 #endif
@@ -401,11 +403,20 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
                 return status;
             }
 
+<<<<<<< HEAD
             /* Set the frame format in the driver */
             CLEAR(fmt);
             fmt.type = dev->videoBuffersType;
             fmt.fmt.pix.width = details.width;
             fmt.fmt.pix.height = details.height;
+=======
+    /* Set the frame format in the driver */
+    CLEAR(fmt);
+    fmt.type = m_implData->videoBuffersType;
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
+    fmt.fmt.pix.width = details.width;
+    fmt.fmt.pix.height = details.height;
+>>>>>>> toybrick_rk3399pro
 
             if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
                 LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
@@ -616,6 +627,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
         if (m_implData->frameDetails.type == "depth_only") {
             memcpy(buffer, pdata[0], buf[0].bytesused);
         } else if (m_implData->frameDetails.type == "ir_only") {
+/*<<<<<<< HEAD
             memcpy(buffer + (width * height) / 2, pdata[0], buf[0].bytesused);
         // Not Packed and type == "depth_ir"
         } else {
@@ -633,6 +645,22 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
 		ptr_buff_ir[k + 1] = (*(ptr_ir + k + 1) >> 4);
 	    }
         }
+=======*/
+            memcpy(buffer + (width * height) / 2, pdata, buf.bytesused);
+        } else {
+			uint32_t j = 0, j1 = width*height/2;
+			for(uint32_t i = 0; i < height; i+=2) {
+				memcpy(buffer + j, pdata + i*width*2, width*2);
+				j+= width;
+				memcpy(buffer + j1, pdata + (i+1)*width*2, width*2);
+				j1+= width;
+			}
+			for(uint32_t i = 0; i < width*height; i += 2) {
+				buffer[i] = ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
+				buffer[i+1] = ((buffer[i+1] & 0x00FF) << 4) | ((buffer[i + 1]) & 0xF000) >> 12;
+			}
+		}
+//>>>>>>> toybrick_rk3399pro
     } else {
         // clang-format off
         uint16_t *depthPtr = buffer;
@@ -837,8 +865,10 @@ aditof::Status LocalDevice::readAfeTemp(float &temperature) {
         }
 
         temp_sensor_close(&tdev);
-    } else if (m_deviceDetails.sensorType ==
-               aditof::SensorType::SENSOR_CHICONY) {
+    } else if ((m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_CHICONY) ||
+			   (m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_FX1)) {
         int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
@@ -872,8 +902,10 @@ aditof::Status LocalDevice::readLaserTemp(float &temperature) {
         }
 
         temp_sensor_close(&tdev);
-    } else if (m_deviceDetails.sensorType ==
-               aditof::SensorType::SENSOR_CHICONY) {
+    } else if ((m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_CHICONY) ||
+               (m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_FX1)) {
         int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";

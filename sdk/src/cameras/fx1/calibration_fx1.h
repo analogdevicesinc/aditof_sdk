@@ -29,32 +29,60 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CALIBRATION_CHICONY_006_H
-#define CALIBRATION_CHICONY_006_H
+#ifndef CALIBRATION_FX1_H
+#define CALIBRATION_FX1_H
 
 #include <aditof/device_interface.h>
 #include <aditof/status_definitions.h>
 #include <iostream>
-#include <list>
+#include <vector>
 #include <memory>
 #include <stdint.h>
-#include <unordered_map>
 
-class CalibrationChicony006 {
-  public:
-    CalibrationChicony006();
-    ~CalibrationChicony006();
+#define INTRINSIC 5
+#define DISTORTION_COEFFICIENTS 6
 
-  public:
-    aditof::Status initialize(std::shared_ptr<aditof::DeviceInterface> device);
-    aditof::Status close();
-    aditof::Status setMode(const std::string& mode);
-    
-  private:
-	aditof::Status readEeprom(uint32_t address, uint8_t *data, size_t length);
-
-  private:
-      std::shared_ptr<aditof::DeviceInterface> m_device;
+//! mode_struct - Structure to hold the packet consisting of map of parameters
+/*!
+    mode_struct provides structure to hold the packet(sub map) of parameters
+*/
+struct mode_struct {
+    uint16_t pulse_cnt;
+    uint8_t  depth_pwr[48];
+    uint16_t depth_x0;
+    uint16_t depth_offset[49];
+    uint16_t depth3;
+    uint16_t depth2;
 };
 
-#endif /*CALIBRATION_CHICONY_006_H*/
+class CalibrationFx1 {
+  public:
+    CalibrationFx1();
+    ~CalibrationFx1();
+
+  public:
+    aditof::Status readCalMap(std::shared_ptr<aditof::DeviceInterface> device);
+    aditof::Status getAfeFirmware(const std::string &mode,
+                                  std::vector<uint16_t> &data) const;
+    aditof::Status getIntrinsic(float key, std::vector<float> &data) const;
+    aditof::Status setMode(std::shared_ptr<aditof::DeviceInterface> device,
+                           const std::string &mode, int range,
+                           unsigned int frameWidth, unsigned int frameheight);
+    aditof::Status calibrateCameraGeometry(uint16_t *frame,
+                                           uint32_t frame_size);
+
+  private:
+    void buildGeometryCalibrationCache(const std::vector<float> &cameraMatrix,
+                                       unsigned int width, unsigned int height);
+
+  private:
+    uint16_t *m_depth_cache;
+    double *m_geometry_cache;
+    int m_range;
+    mode_struct m_mode_settings[2];
+    std::vector<float> m_intrinsics;
+    std::vector<uint16_t> m_afe_code;
+    bool m_cal_valid;
+};
+
+#endif /*CALIBRATION_FX1_H*/

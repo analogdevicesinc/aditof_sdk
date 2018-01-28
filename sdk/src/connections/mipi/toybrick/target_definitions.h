@@ -29,37 +29,11 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_DEFINITIONS_H
-#define DEVICE_DEFINITIONS_H
+#ifndef TARGET_DEFINITIONS_H
+#define TARGET_DEFINITIONS_H
 
-#include <string>
+static const char *TEMP_SENSOR_DEV_PATH = "/sys/class/hwmon/hwmon0/temp1_input";
+static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/1-0056/eeprom";
+static const char *CAPTURE_DEVICE_NAME = "rkisp10_mainpath";
 
-/**
- * @brief Namespace aditof
- */
-namespace aditof {
-
-/**
- * @enum SensorType
- * @brief Provides the types of sensor assosiated with the device
- */
-enum class SensorType {
-    SENSOR_96TOF1,  //!< 96Tof 1 sensor
-    SENSOR_CHICONY, //!< Chicony sensor
-    SENSOR_FX1 ,    //!< FX1 sensor
-};
-
-/**
- * @struct DeviceDetails
- * @brief Provides details about the device
- */
-struct DeviceDetails {
-    /**
-     * @brief The type of sensor
-     */
-    SensorType sensorType;
-};
-
-} // namespace aditof
-
-#endif // DEVICE_DEFINITIONS_H
+#endif // TARGET_DEFINITIONS_H
