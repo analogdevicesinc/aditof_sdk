@@ -29,12 +29,15 @@ elseif( APPLE )
 elseif( DRAGONBOARD )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR dragonboard)
+	add_definitions(-DDRAGONBOARD)
 elseif ( RASPBERRYPI )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR raspberrypi)
+	add_definitions(-DRASPBERRYPI)
 elseif( JETSON )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR jetson)
+<<<<<<< HEAD
 <<<<<<< HEAD
 elseif( TOYBRICK )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
@@ -48,12 +51,22 @@ elseif( XAVIER )
         set(TARGET_SPECIFIC_DIR xavier)
 =======
 >>>>>>> update cmake and remove toybrick implementation
+||||||| constructed merge base
+=======
+	add_definitions(-DJETSON)
+elseif( XAVIER )
+	set(OS_SPECIFIC_DIR ${TARGET_STRING})
+	set(TARGET_SPECIFIC_DIR xavier)
+	add_definitions(-DXAVIER)
+>>>>>>> add flag for target board
 elseif( XAVIERNX )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR xaviernx)
+	add_definitions(-DXAVIERNX)
 elseif( TOYBRICK )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR toybrick)
+	add_definitions(-DTOYBRICK)
 elseif ( UNIX )
         set(OS_SPECIFIC_DIR "connections/usb/linux")
 else()
