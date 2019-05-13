@@ -1,0 +1,20 @@
+//C0B6 0003 // LD_INVERT_POL, set high for active low pulse wider than 1 cycle 
+//Use with LD_INVERT_POL. When LD_INVERT_POL=1, POSBLK and NEGBLK are flipped
+//C08C	0000 // LDPOSBLKOUTSTBY, 1=high, 0=low
+//C08D	0013 // LDNEGBLKOUTSTBY, 1=low, 0=high
+
+C08C	0010 // LDPOSBLKOUTSTBY, 1=high, 0=low
+C08D	0003 // LDNEGBLKOUTSTBY, 1=low, 0=high
+
+C0A9 0002 // Use ISA for LD tap info
+//C0A9	0000 // Use standby for LD tap info
+C090	0040 // POSLOC for LD1 (LD1)
+C091	0040 // NEGLOC for LD1 (LD1)
+C092	0040 // POSLOC for LD2 (LD2)
+C093	0040 // NEGLOC for LD2 (LD2)
+C094	0040 // POSLOC for LD3 (LD3)
+C095	0040 // NEGLOC for LD3 (LD3)
+C096	0040 // POSLOC for LD4 (LD4)
+C097	0040 // NEGLOC for LD4 (LD4)
+C098	0040 // POSLOC for LD5 (SUB)
+C099	0040 // NEGLOC for LD5 (SUB)

@@ -1,0 +1,95 @@
+// Step 5a
+C022	0001	// Software reset
+C031	0001	// SCK serial clock select
+//c0c2	0001	//*used only for simulation. Remove before loading in Si*
+C020	0007	// Enable AFE A,B and Ref A,B
+//Wait 500us
+// Step 5b
+C021	0000	// CLI divide set to 1x clock
+C020	0107	// Enable timing core
+//Wait 100us
+// Step 5c
+C030	0001	// CLI serial clock select
+C310 1000
+C01C 0400
+c000 0001
+C001	0002	// CDS gain A = 6dB
+C005	0002	// CDS gain B = 6dB
+c002 000f // VGA gain A
+c006 000f // VGA gain B
+c003 01ec // clamplevel_a
+c007 01ec // clamplevel_b
+C023	0001	// Input enable for START pin
+C024	0FF2	// Output enable VD/HD, GPO 
+C026	0001	// Master mode
+C048	2000	// Internal clock phase
+C04F 000c // HBLK RETIME
+C050 0011 // HCLK blanking levels
+c051 0000 // HBLK FINERETIME
+C055	FFFF	// H1 max drive strength
+C056	FFFF	// H2 max drive strength
+//C057	FFFF	// H3 max drive strength
+//C058	FFFF	// H4 max drive strength
+//C059	FFFF	// H5 max drive strength
+//C05A	0000	// H6 max drive strength
+//C05B	0000 // H7 max drive strength
+//C05C	0000	// H8 max drive strength
+C05D	0044	// HL max drive strength
+C05E	0044	// RG max drive strength
+C038	4000	// H1 phase
+C039	0040	// H2 phase
+C040	0040	// HL1
+C042	6040	// RG1
+C070	0100	
+C071	0302
+C072	0504
+C073	0706
+C074	0908
+C075	0b0a
+C076	0d0c
+C077	0f0e
+C078	1110
+C079	1312
+C01B	0000
+C088	0000	// XV1~XV16 STBY polarities
+C089	0000	// XV17~XV20 STBY polarities
+C08A	00FF	// XSG1 STBY polarities
+C08B	0000	// HBLK STBY polarities
+C08F	0010	// Misc. STBY polarities
+C0A4	4444	// HPT1, HPT2 max drive
+C0A5	4444	// HPT3, HPT4 max drive
+C0A6	4444	// HPT5, HPT6 max drive
+C0A7	4444	// HPT7, HPT8 max drive
+C0A8	4444	// HPT9, HPT10 max drive
+C0AA 0505 // AFE startup write
+C0AB 0505 // AFE startup write
+C0AC 0505 // AFE startup write
+C0AD 0505 // AFE startup write
+C0AE 0505 // AFE startup write
+C0AF 0505 // AFE startup write
+C0B0 0505 // AFE startup write
+C0B1 0505 // AFE startup write
+C0B2 0505 // AFE startup write
+C0B3 0505 // AFE startup write
+C0E0	0002	// Disable CClamp
+C300	03D8	// Set bit[3]=1 for startup
+C04D	0030	// Startup write
+C300	0311	// bit[3]=0, normal operation
+//C301 0508 // AFE Width = 540 pixels
+//C302 000a // AFE Height = 720 lines
+//C303 0a10 // Output width = 1080 pixels
+//C304 000a // Output height = 720 lines
+//C300	0311	// enable DF, reorder mode 1
+//c02f 0008
+//c0f2 2000
+//c0f1 2000
+
+C0FC 1000 //TP sel // fixed data for Ch.B only
+C0C3 0000 //Ch A [15:0] fixed pattern FC0
+C0C5 0000 //Ch B [15:0] fixed pattern FC0
+
+c044 6303
+c045 6303
+c046 0043
+c047 0043
+c02D 0000

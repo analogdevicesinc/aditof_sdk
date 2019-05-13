@@ -1,0 +1,87 @@
+//PWL
+C771 0000 // Enable PWL for LD1~LD4
+C772 36DB // Set PWL threshold to 3
+
+// TAL Settings
+C75D	0013 	
+C75D	0000	
+C75F	0000 	
+C73D	0007	
+//C730	1313	//Enable falling [14:8] and rising [6:0] TAL circuits, [0]/[8] = TAL1, [4]/[12] = TAL5, etc.			
+C739	0047 	
+C750	0560	//TAL1
+C751	0560	//TAL2
+C752	0000	//TAL3
+C753	0000	//TAL4
+C754	0560	//TAL5
+
+
+// Required writes for TAL5
+//C73B	0000 // [0]:1 =>enable interrupt
+//C731	1010 
+
+
+7C0B	00FF	// Enable all ISATG channels
+7D05	0001	// Master mode setting
+//7D02	00FF	// Enable ISATG channels
+7C06	0001	// Internal setting
+7C07	0000	// Internal setting
+7CE2	00FF	// clear GPO outputs LOW
+C07F	0001	// Enable ISATG outputs
+C080	FFFF	// Enable ISATG XV outputs
+C081	FFFF	// Enable ISATG XV outputs
+C082	FFFF	// Enable ISATG XSG outputs
+C083	FFFF	// Enable ISATG HBLK outputs
+// SUB & LD1 enable
+C084	0011	// Enable ISATG LD Pos Blk
+C085	0011	// Enable ISATG LD Neg Blk
+
+C086	FF00	// Enable ISATG GPO outputs
+C087	FFFF	// Enable ISATG Misc outputs
+//C08E	0008	// GPO STBY polarities (enable GPO4 VSUB, VLD)
+C08E	000f	// GPO STBY polarities (enable GPO2,3,4)
+
+//C08F 0000 // OUTSTANDBY [8:7]=Field_index set to 0x3 to output RAW data through TOF block
+//C087 00CF // OUTEN
+c08F 0040
+c087 0027
+
+// GPO settings for GPO1 (SUBSW)
+7CE3	000F	// GPO toggles valid
+7CE5	0003	// GPO execute mode
+7D08	0001 //primary counter max value
+7CA0	0357 // GPO1 toggle0, GPO1=SUBSW1
+7CA1	0000
+7CA2	0030 // GPO1 toggle1
+7CA3	0349 // Line 842-1=841
+//7CA8 0357 // GPO2 toggle 0, GPO2=SUBSW2
+//7CA9 0000
+//7CAA 0030 // GPO2 toggle 1
+//7CAB 020A //
+//7D02	0001 // GPO channel enable, [0]=GPO1(SUBSW1)   // 170317
+7D0D	0001 // primary counter=1
+//7D03 0007 // enable primary, line and pixel counter
+c086	0011 // output enable GPO1 (SUBSW1), GPO5 (CCD Field_index)
+
+//C08E 0001
+
+//C08E	000c	// 170608 del GPO STBY polarities
+
+//C08E	00CC   
+7C32	0002    // start address at 0x4002
+7C20	FFFF	// IMASK, disable interrupts
+7D00	0002	// TG running mode enable
+4000	0000	// mode Id:1
+7C22	0000	// ILAT, clear all interrupts
+7C21	0000	// Clear PMASK
+//7C20	FFFB	// Enable initial interrupt
+7C20	FFEB	// 170608 Sync Enable OFF, Enable initial interrupt
+7C22	0004	// Trigger ISATG program load
+
+//c027	0000
+//C310 1000
+//c08e 0000
+
+//C01B 0000 //[6]=1 to output ISA VD/HD
+//C08F 00C0 // [8:7]=Field_index set to 0x3 to output RAW data through TOF block
+//C087 003F

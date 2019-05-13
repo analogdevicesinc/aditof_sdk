@@ -1,0 +1,58 @@
+// Step 4a
+C022	0001	// Software reset
+C031	0001	// SCK serial clock select
+//c0c2	0001	//*used only for simulation. Remove before loading in Si*
+C020	0007	// Enable AFE, REF, REFBUF
+// Step 4b
+//Wait 500us
+C021	0000	// CLI divide set to 1x clock
+C020	0157	// Enable timing core
+C720	1900	// Enable 3.3V LDO [12:9]=LDO_VCTRL (1100=3.3V), [8]=LDO_EN
+//C720 0000
+// Step 4c
+//Wait 100us
+C030	0001	// CLI serial clock select
+C027	0001	// [0]=SYNC_POL, 0=rising edge, 1=falling edge
+C025	0001	// [0]=Configure RSTB_SYNC pin. 0=RSTB(default), 1=SYNC.
+C01C	0400
+C000	0001	// [0]=CLAMP_EN, 1=enable
+C001	0002	// CDS gain = 6dB
+C002	000f	// VGA gain
+C003	01ec	// CLAMPLEVEL
+C023	0001	// Input enable for START pin
+C024	0FF2	// Output enable VD/HD, GPO 
+C026	0001	// 1=Master mode
+C04F	000c	// HBLK RETIME
+C050	0011	// HCLK blanking levels
+c051	0000	// HBLK FINERETIME
+C055	FFFF	// H1_1 max drive strength
+C056	FFFF	// H1_2 max drive strength
+C057	FFFF	// H2_1 max drive strength
+C058	FFFF	// H2_2 max drive strength
+C05D	0044	// HL max drive strength
+C05E	0044	// RG max drive strength
+C038	4000	// H1_1 phase
+C039	4000	// H1_2 phase
+C03A	0040	// H2_1 phase
+C03B	0040	// H2_2 phase
+C040	0040	// HL_1 phase
+C041	0040	// HL_2 phase
+C042	6040	// RG_1 phase
+C043	6040	// RG_2 phase
+C088	0000	// XV1~XV16 STBY polarities
+C089	0000	// XV17~XV20 STBY polarities
+C08A	00FF	// XSG1 STBY polarities
+C08B	0000	// HBLK STBY polarities
+C08F	0000	// Misc. STBY polarities
+C0A4	4444	// LD1, LD2 max drive
+C0A5	4444	// LD3, LD4 max drive
+C0A6	0044	// LD5, LD6 max drive
+C0E0	0002	// Disable CClamp
+c044	6303	//[14:8]=SHPNEGLOC, [6:0]=SHPPOSLOC
+c046	0043	//[6:0]=SHDPOSLOC
+c02D	0000
+C02C 0001 // Enable GPO5~8 mode (Startup write)
+//c02f 0008
+//c0f2 2000
+//c0f1 2000
+C01B 1140 //[6]=1 to output ISA VD/HD

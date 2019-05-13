@@ -1,0 +1,12 @@
+description=Time of flight board programming service
+StartLimitIntervalSec=10
+
+[Service]
+Type=forking
+Restart=always
+RestartSec=5
+User=linaro
+ExecStart=/home/linaro/workspace/github/tof_sdk/apps/daemon/build/aditof-daemon
+
+[Install]
+WantedBy=multi-user.target

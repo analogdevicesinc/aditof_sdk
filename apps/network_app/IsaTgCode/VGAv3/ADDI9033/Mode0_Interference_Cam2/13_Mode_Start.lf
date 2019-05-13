@@ -1,0 +1,45 @@
+//C431 0082
+//C423 0000
+//C426 0020
+//C427 0002
+//C4C0 003C
+//C4C3 003C
+//C4D5 0003
+//C4DA 0000
+//C4D7 0001
+//C4F0 0001
+
+C4C0 001C //
+C4C3 001C //
+C4D7 0000 //Power up MIPI bias
+C4D5 0002 //Power up PLL divider
+C4DA 0001 //Power up MIPI PLL
+C4F0 0000 //Power up MIPI D-PHY
+C427 0003 //ULPS xSHUTDOWN on Data Lane 0
+C427 0001 //ULPS disable Escape Mode Data 0
+C427 0000 //
+C426 0030 //ULPS xSHUTDOWN on clock lane
+C426 0010 //ULPS disable escape mode clock
+C426 0000 //
+C423 0080 //Deassert clock lane reset
+C431 0080 //Low power control
+
+4001	0007	//Mode Start
+7c22	0004	//Run program
+
+//C0FC 1818 //TP sel // ramp data
+//C0C3 0010 //Ch A [15:0] +1 slope
+//C0C5 00f0 //Ch B [15:0] +1 slope
+
+//C0FC 1010 //TP sel // fixed data
+//C0C3 fff0 //Ch A [15:0]
+//C0C5 ffff //Ch B [15:0]
+
+
+//Output HPT1 BLK from GPO2
+//C02F 000F //Observe signals on GPO pins only 
+//C0F2 1010 //Debug_cfg2
+//C0F1 2000 //Debug_cfg1
+
+//C02F 0010 // output parallel data on GPIO5
+//C0F1 3000 // output parallel data on GPIOs

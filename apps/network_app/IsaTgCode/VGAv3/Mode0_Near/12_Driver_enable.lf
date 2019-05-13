@@ -1,0 +1,25 @@
+// Step 7c
+C020	1107	// Enable H-drivers
+C028	00F1	// Enable V-drivers	 
+//Wait 20us
+// Step 7d
+C100	0077	// V1 max drive strength
+C101	0077	// V2 max drive strength
+C102	0077	// V3 max drive strength
+C103	0077	// V4 max drive strength
+C104	0000	// V5 max drive strength
+C105	0000	// V6 max drive strength
+C106	0000	// V7 max drive strength
+C107	0000	// V8 max drive strength
+C108	00FF	// V9 max drive strength
+C109	00FF	// V10 max drive strength
+C10A	00FF	// V11 max drive strength
+C10B	00FF	// V12 max drive strength
+C10C	00FF	// V13 max drive strength
+C10D	00FF	// V14 max drive strength
+C10E	00FF	// V15 max drive strength
+C10F	00FF	// V16 max drive strength
+C110	0000	// V17 max drive strength
+C111	0000	// V18 max drive strength
+C112	0000	// V19 max drive strength
+C113	0000	// V20 max drive strength

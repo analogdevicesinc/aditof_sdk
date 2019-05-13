@@ -1,0 +1,51 @@
+// Setting for non-inverting LD driver (ADI LD board)
+C08C	0010 // LDPOSBLKOUTSTBY, 1=high, 0=low
+C08D	000F // LDNEGBLKOUTSTBY, 1=low, 0=high
+
+// Setting for inverting LD driver (Panasonic LD board)
+//C08C	0013 // LDPOSBLKOUTSTBY, 1=high, 0=low
+//C08D	0000 // LDNEGBLKOUTSTBY, 1=low, 0=high
+
+// Setting for inverting LD driver L-Company LD board)
+//C08D	0000 // LDNEGBLKOUTSTBY, 1=low, 0=high
+//C08C	001F // LDPOSBLKOUTSTBY, 1=high, 0=low
+
+
+C0A9 0002 // Use ISA for LD tap info
+//C0A9	0000 // Use standby for LD tap info
+//C090	0048 // POSLOC for LD1 (LD1)
+//C091	0042 // NEGLOC for LD1 (LD1)
+//C092	0048 // POSLOC for LD2 (LD2)
+//C093	0042 // NEGLOC for LD2 (LD2)
+
+//C094	0048 // POSLOC for LD3 (LD3)
+//C095	0042 // NEGLOC for LD3 (LD3)
+//C096	0048 // POSLOC for LD4 (LD4)
+//C097	0042 // NEGLOC for LD4 (LD4)
+
+
+//C098	004f // POSLOC for LD5 (SUB)
+//C099	001A // NEGLOC for LD5 (SUB)
+
+
+//C098	0048 // POSLOC for LD5 (SUB)
+//C099	0042 // NEGLOC for LD5 (SUB)
+
+//C090	0000 // POSLOC for LD1 (LD1)
+//C091	0040 // NEGLOC for LD1 (LD1)
+//C092	0000 // POSLOC for LD2 (LD2)
+//C093	0040 // NEGLOC for LD2 (LD2)
+//C094	0000 // POSLOC for LD3 (LD3)
+//C095	0040 // NEGLOC for LD3 (LD3)
+//C096	0000 // POSLOC for LD4 (LD4)
+//C097	0040 // NEGLOC for LD4 (LD4)
+//C098	0057 // POSLOC for LD5 (SUB)
+//C099	005A // NEGLOC for LD5 (SUB)
+
+// Setting for non-inverting LD driver (ADI LD board)
+//C0B6 0000 // LD_INVERT_POL, set high for active low pulse wider than 1 cycle 
+
+// Setting for inverting LD driver (Panasonic LD board)
+//C0B6 0003 // LD_INVERT_POL, set high for active low pulse wider than 1 cycle 
+
+//C0B6 000F // LD_INVERT_POL, set high for active low pulse wider than 1 cycle 

@@ -1,0 +1,290 @@
+/*RepeatNum Addrs & Original Values for all modes/fields/seqs:*/
+/*Addr Ori   chan_modex_seqname*/
+4104  03e8 /*vx0_mode00_field00_seq01*/
+5406  03e8 /*vx1_mode00_field00_seq01*/
+4110  07d0 /*vx0_mode00_field00_seq03*/
+542a  07d0 /*vx1_mode00_field00_seq03*/
+4116  0fa0 /*vx0_mode00_field00_seq05*/
+543c  0fa0 /*vx1_mode00_field00_seq05*/
+4122  03e8 /*vx0_mode00_field00_seq07*/
+5460  03e8 /*vx1_mode00_field00_seq07*/
+dummy/*vx0_mode00_field00_seq09*/
+dummy/*vx1_mode00_field00_seq09*/
+4128  0fa0 /*vx0_mode00_field00_seq11*/
+5472  0fa0 /*vx1_mode00_field00_seq11*/
+40b0  03e8 /*vxsg_mode00_field00_seq15*/
+40c2  07d0 /*vxsg_mode00_field00_seq18*/
+40c8  0fa0 /*vxsg_mode00_field00_seq21*/
+dummy/*vxsg_mode00_field00_seq24*/
+dummy/*vxsg_mode00_field00_seq27*/
+dummy/*vxsg_mode00_field00_seq30*/
+41b0  03e8 /*vx0_mode01_field00_seq01*/
+54ea  03e8 /*vx1_mode01_field00_seq01*/
+41bc  07d0 /*vx0_mode01_field00_seq03*/
+550e  07d0 /*vx1_mode01_field00_seq03*/
+41c2  0fa0 /*vx0_mode01_field00_seq05*/
+5520  0fa0 /*vx1_mode01_field00_seq05*/
+41ce  03e8 /*vx0_mode01_field00_seq07*/
+5544  03e8 /*vx1_mode01_field00_seq07*/
+dummy/*vx0_mode01_field00_seq09*/
+dummy/*vx1_mode01_field00_seq09*/
+41d4  0fa0 /*vx0_mode01_field00_seq11*/
+5556  0fa0 /*vx1_mode01_field00_seq11*/
+415c  03e8 /*vxsg_mode01_field00_seq15*/
+416e  07d0 /*vxsg_mode01_field00_seq18*/
+4174  0fa0 /*vxsg_mode01_field00_seq21*/
+dummy/*vxsg_mode01_field00_seq24*/
+dummy/*vxsg_mode01_field00_seq27*/
+dummy/*vxsg_mode01_field00_seq30*/
+425c  03e8 /*vx0_mode02_field00_seq01*/
+55cc  03e8 /*vx1_mode02_field00_seq01*/
+4268  07d0 /*vx0_mode02_field00_seq03*/
+55f0  07d0 /*vx1_mode02_field00_seq03*/
+426e  0fa0 /*vx0_mode02_field00_seq05*/
+5602  0fa0 /*vx1_mode02_field00_seq05*/
+427a  03e8 /*vx0_mode02_field00_seq07*/
+5626  03e8 /*vx1_mode02_field00_seq07*/
+dummy/*vx0_mode02_field00_seq09*/
+dummy/*vx1_mode02_field00_seq09*/
+4280  0fa0 /*vx0_mode02_field00_seq11*/
+5638  0fa0 /*vx1_mode02_field00_seq11*/
+4208  03e8 /*vxsg_mode02_field00_seq15*/
+421a  07d0 /*vxsg_mode02_field00_seq18*/
+4220  0fa0 /*vxsg_mode02_field00_seq21*/
+dummy/*vxsg_mode02_field00_seq24*/
+dummy/*vxsg_mode02_field00_seq27*/
+dummy/*vxsg_mode02_field00_seq30*/
+4308  03e8 /*vx0_mode03_field00_seq01*/
+56ae  03e8 /*vx1_mode03_field00_seq01*/
+4314  07d0 /*vx0_mode03_field00_seq03*/
+56d2  07d0 /*vx1_mode03_field00_seq03*/
+431a  0fa0 /*vx0_mode03_field00_seq05*/
+56e4  0fa0 /*vx1_mode03_field00_seq05*/
+4326  03e8 /*vx0_mode03_field00_seq07*/
+5708  03e8 /*vx1_mode03_field00_seq07*/
+dummy/*vx0_mode03_field00_seq09*/
+dummy/*vx1_mode03_field00_seq09*/
+432c  0fa0 /*vx0_mode03_field00_seq11*/
+571a  0fa0 /*vx1_mode03_field00_seq11*/
+42b4  03e8 /*vxsg_mode03_field00_seq15*/
+42c6  07d0 /*vxsg_mode03_field00_seq18*/
+42cc  0fa0 /*vxsg_mode03_field00_seq21*/
+dummy/*vxsg_mode03_field00_seq24*/
+dummy/*vxsg_mode03_field00_seq27*/
+dummy/*vxsg_mode03_field00_seq30*/
+43b4  03e8 /*vx0_mode04_field00_seq01*/
+5790  03e8 /*vx1_mode04_field00_seq01*/
+43c0  07d0 /*vx0_mode04_field00_seq03*/
+57b4  07d0 /*vx1_mode04_field00_seq03*/
+43c6  0fa0 /*vx0_mode04_field00_seq05*/
+57c6  0fa0 /*vx1_mode04_field00_seq05*/
+43d2  03e8 /*vx0_mode04_field00_seq07*/
+57ea  03e8 /*vx1_mode04_field00_seq07*/
+dummy/*vx0_mode04_field00_seq09*/
+dummy/*vx1_mode04_field00_seq09*/
+43d8  0fa0 /*vx0_mode04_field00_seq11*/
+57fc  0fa0 /*vx1_mode04_field00_seq11*/
+4360  03e8 /*vxsg_mode04_field00_seq15*/
+4372  07d0 /*vxsg_mode04_field00_seq18*/
+4378  0fa0 /*vxsg_mode04_field00_seq21*/
+dummy/*vxsg_mode04_field00_seq24*/
+dummy/*vxsg_mode04_field00_seq27*/
+dummy/*vxsg_mode04_field00_seq30*/
+4460  03e8 /*vx0_mode05_field00_seq01*/
+5872  03e8 /*vx1_mode05_field00_seq01*/
+446c  07d0 /*vx0_mode05_field00_seq03*/
+5896  07d0 /*vx1_mode05_field00_seq03*/
+4472  0fa0 /*vx0_mode05_field00_seq05*/
+58a8  0fa0 /*vx1_mode05_field00_seq05*/
+447e  03e8 /*vx0_mode05_field00_seq07*/
+58cc  03e8 /*vx1_mode05_field00_seq07*/
+dummy/*vx0_mode05_field00_seq09*/
+dummy/*vx1_mode05_field00_seq09*/
+4484  0fa0 /*vx0_mode05_field00_seq11*/
+58de  0fa0 /*vx1_mode05_field00_seq11*/
+440c  03e8 /*vxsg_mode05_field00_seq15*/
+441e  07d0 /*vxsg_mode05_field00_seq18*/
+4424  0fa0 /*vxsg_mode05_field00_seq21*/
+dummy/*vxsg_mode05_field00_seq24*/
+dummy/*vxsg_mode05_field00_seq27*/
+dummy/*vxsg_mode05_field00_seq30*/
+450c  03e8 /*vx0_mode06_field00_seq01*/
+5954  03e8 /*vx1_mode06_field00_seq01*/
+4518  07d0 /*vx0_mode06_field00_seq03*/
+5978  07d0 /*vx1_mode06_field00_seq03*/
+451e  0fa0 /*vx0_mode06_field00_seq05*/
+598a  0fa0 /*vx1_mode06_field00_seq05*/
+452a  03e8 /*vx0_mode06_field00_seq07*/
+59ae  03e8 /*vx1_mode06_field00_seq07*/
+dummy/*vx0_mode06_field00_seq09*/
+dummy/*vx1_mode06_field00_seq09*/
+4530  0fa0 /*vx0_mode06_field00_seq11*/
+59c0  0fa0 /*vx1_mode06_field00_seq11*/
+44b8  03e8 /*vxsg_mode06_field00_seq15*/
+44ca  07d0 /*vxsg_mode06_field00_seq18*/
+44d0  0fa0 /*vxsg_mode06_field00_seq21*/
+dummy/*vxsg_mode06_field00_seq24*/
+dummy/*vxsg_mode06_field00_seq27*/
+dummy/*vxsg_mode06_field00_seq30*/
+45b8  03e8 /*vx0_mode07_field00_seq01*/
+5a36  03e8 /*vx1_mode07_field00_seq01*/
+45c4  07d0 /*vx0_mode07_field00_seq03*/
+5a5a  07d0 /*vx1_mode07_field00_seq03*/
+45ca  0fa0 /*vx0_mode07_field00_seq05*/
+5a6c  0fa0 /*vx1_mode07_field00_seq05*/
+45d6  03e8 /*vx0_mode07_field00_seq07*/
+5a90  03e8 /*vx1_mode07_field00_seq07*/
+dummy/*vx0_mode07_field00_seq09*/
+dummy/*vx1_mode07_field00_seq09*/
+45dc  0fa0 /*vx0_mode07_field00_seq11*/
+5aa2  0fa0 /*vx1_mode07_field00_seq11*/
+4564  03e8 /*vxsg_mode07_field00_seq15*/
+4576  07d0 /*vxsg_mode07_field00_seq18*/
+457c  0fa0 /*vxsg_mode07_field00_seq21*/
+dummy/*vxsg_mode07_field00_seq24*/
+dummy/*vxsg_mode07_field00_seq27*/
+dummy/*vxsg_mode07_field00_seq30*/
+4664  03e8 /*vx0_mode08_field00_seq01*/
+5b18  03e8 /*vx1_mode08_field00_seq01*/
+4670  07d0 /*vx0_mode08_field00_seq03*/
+5b3c  07d0 /*vx1_mode08_field00_seq03*/
+4676  0fa0 /*vx0_mode08_field00_seq05*/
+5b4e  0fa0 /*vx1_mode08_field00_seq05*/
+4682  03e8 /*vx0_mode08_field00_seq07*/
+5b72  03e8 /*vx1_mode08_field00_seq07*/
+dummy/*vx0_mode08_field00_seq09*/
+dummy/*vx1_mode08_field00_seq09*/
+4688  0fa0 /*vx0_mode08_field00_seq11*/
+5b84  0fa0 /*vx1_mode08_field00_seq11*/
+4610  03e8 /*vxsg_mode08_field00_seq15*/
+4622  07d0 /*vxsg_mode08_field00_seq18*/
+4628  0fa0 /*vxsg_mode08_field00_seq21*/
+dummy/*vxsg_mode08_field00_seq24*/
+dummy/*vxsg_mode08_field00_seq27*/
+dummy/*vxsg_mode08_field00_seq30*/
+4710  03e8 /*vx0_mode09_field00_seq01*/
+5bfa  03e8 /*vx1_mode09_field00_seq01*/
+471c  07d0 /*vx0_mode09_field00_seq03*/
+5c1e  07d0 /*vx1_mode09_field00_seq03*/
+4722  0fa0 /*vx0_mode09_field00_seq05*/
+5c30  0fa0 /*vx1_mode09_field00_seq05*/
+472e  03e8 /*vx0_mode09_field00_seq07*/
+5c54  03e8 /*vx1_mode09_field00_seq07*/
+dummy/*vx0_mode09_field00_seq09*/
+dummy/*vx1_mode09_field00_seq09*/
+4734  0fa0 /*vx0_mode09_field00_seq11*/
+5c66  0fa0 /*vx1_mode09_field00_seq11*/
+46bc  03e8 /*vxsg_mode09_field00_seq15*/
+46ce  07d0 /*vxsg_mode09_field00_seq18*/
+46d4  0fa0 /*vxsg_mode09_field00_seq21*/
+dummy/*vxsg_mode09_field00_seq24*/
+dummy/*vxsg_mode09_field00_seq27*/
+dummy/*vxsg_mode09_field00_seq30*/
+47bc  03e8 /*vx0_mode10_field00_seq01*/
+5cdc  03e8 /*vx1_mode10_field00_seq01*/
+47c8  07d0 /*vx0_mode10_field00_seq03*/
+5d00  07d0 /*vx1_mode10_field00_seq03*/
+47ce  0fa0 /*vx0_mode10_field00_seq05*/
+5d12  0fa0 /*vx1_mode10_field00_seq05*/
+47da  03e8 /*vx0_mode10_field00_seq07*/
+5d36  03e8 /*vx1_mode10_field00_seq07*/
+dummy/*vx0_mode10_field00_seq09*/
+dummy/*vx1_mode10_field00_seq09*/
+47e0  0fa0 /*vx0_mode10_field00_seq11*/
+5d48  0fa0 /*vx1_mode10_field00_seq11*/
+4768  03e8 /*vxsg_mode10_field00_seq15*/
+477a  07d0 /*vxsg_mode10_field00_seq18*/
+4780  0fa0 /*vxsg_mode10_field00_seq21*/
+dummy/*vxsg_mode10_field00_seq24*/
+dummy/*vxsg_mode10_field00_seq27*/
+dummy/*vxsg_mode10_field00_seq30*/
+4868  03e8 /*vx0_mode11_field00_seq01*/
+5dbe  03e8 /*vx1_mode11_field00_seq01*/
+4874  07d0 /*vx0_mode11_field00_seq03*/
+5de2  07d0 /*vx1_mode11_field00_seq03*/
+487a  0fa0 /*vx0_mode11_field00_seq05*/
+5df4  0fa0 /*vx1_mode11_field00_seq05*/
+4886  03e8 /*vx0_mode11_field00_seq07*/
+5e18  03e8 /*vx1_mode11_field00_seq07*/
+dummy/*vx0_mode11_field00_seq09*/
+dummy/*vx1_mode11_field00_seq09*/
+488c  0fa0 /*vx0_mode11_field00_seq11*/
+5e2a  0fa0 /*vx1_mode11_field00_seq11*/
+4814  03e8 /*vxsg_mode11_field00_seq15*/
+4826  07d0 /*vxsg_mode11_field00_seq18*/
+482c  0fa0 /*vxsg_mode11_field00_seq21*/
+dummy/*vxsg_mode11_field00_seq24*/
+dummy/*vxsg_mode11_field00_seq27*/
+dummy/*vxsg_mode11_field00_seq30*/
+4914  03e8 /*vx0_mode12_field00_seq01*/
+5ea0  03e8 /*vx1_mode12_field00_seq01*/
+4920  07d0 /*vx0_mode12_field00_seq03*/
+5ec4  07d0 /*vx1_mode12_field00_seq03*/
+4926  0fa0 /*vx0_mode12_field00_seq05*/
+5ed6  0fa0 /*vx1_mode12_field00_seq05*/
+4932  03e8 /*vx0_mode12_field00_seq07*/
+5efa  03e8 /*vx1_mode12_field00_seq07*/
+dummy/*vx0_mode12_field00_seq09*/
+dummy/*vx1_mode12_field00_seq09*/
+4938  0fa0 /*vx0_mode12_field00_seq11*/
+5f0c  0fa0 /*vx1_mode12_field00_seq11*/
+48c0  03e8 /*vxsg_mode12_field00_seq15*/
+48d2  07d0 /*vxsg_mode12_field00_seq18*/
+48d8  0fa0 /*vxsg_mode12_field00_seq21*/
+dummy/*vxsg_mode12_field00_seq24*/
+dummy/*vxsg_mode12_field00_seq27*/
+dummy/*vxsg_mode12_field00_seq30*/
+49c0  03e8 /*vx0_mode13_field00_seq01*/
+5f82  03e8 /*vx1_mode13_field00_seq01*/
+49cc  07d0 /*vx0_mode13_field00_seq03*/
+5fa6  07d0 /*vx1_mode13_field00_seq03*/
+49d2  0fa0 /*vx0_mode13_field00_seq05*/
+5fb8  0fa0 /*vx1_mode13_field00_seq05*/
+49de  03e8 /*vx0_mode13_field00_seq07*/
+5fdc  03e8 /*vx1_mode13_field00_seq07*/
+dummy/*vx0_mode13_field00_seq09*/
+dummy/*vx1_mode13_field00_seq09*/
+49e4  0fa0 /*vx0_mode13_field00_seq11*/
+5fee  0fa0 /*vx1_mode13_field00_seq11*/
+496c  03e8 /*vxsg_mode13_field00_seq15*/
+497e  07d0 /*vxsg_mode13_field00_seq18*/
+4984  0fa0 /*vxsg_mode13_field00_seq21*/
+dummy/*vxsg_mode13_field00_seq24*/
+dummy/*vxsg_mode13_field00_seq27*/
+dummy/*vxsg_mode13_field00_seq30*/
+4a6c  03e8 /*vx0_mode14_field00_seq01*/
+6064  03e8 /*vx1_mode14_field00_seq01*/
+4a78  07d0 /*vx0_mode14_field00_seq03*/
+6088  07d0 /*vx1_mode14_field00_seq03*/
+4a7e  0fa0 /*vx0_mode14_field00_seq05*/
+609a  0fa0 /*vx1_mode14_field00_seq05*/
+4a8a  03e8 /*vx0_mode14_field00_seq07*/
+60be  03e8 /*vx1_mode14_field00_seq07*/
+dummy/*vx0_mode14_field00_seq09*/
+dummy/*vx1_mode14_field00_seq09*/
+4a90  0fa0 /*vx0_mode14_field00_seq11*/
+60d0  0fa0 /*vx1_mode14_field00_seq11*/
+4a18  03e8 /*vxsg_mode14_field00_seq15*/
+4a2a  07d0 /*vxsg_mode14_field00_seq18*/
+4a30  0fa0 /*vxsg_mode14_field00_seq21*/
+dummy/*vxsg_mode14_field00_seq24*/
+dummy/*vxsg_mode14_field00_seq27*/
+dummy/*vxsg_mode14_field00_seq30*/
+4b18  03e8 /*vx0_mode15_field00_seq01*/
+6146  03e8 /*vx1_mode15_field00_seq01*/
+4b24  07d0 /*vx0_mode15_field00_seq03*/
+616a  07d0 /*vx1_mode15_field00_seq03*/
+4b2a  0fa0 /*vx0_mode15_field00_seq05*/
+617c  0fa0 /*vx1_mode15_field00_seq05*/
+4b36  03e8 /*vx0_mode15_field00_seq07*/
+61a0  03e8 /*vx1_mode15_field00_seq07*/
+dummy/*vx0_mode15_field00_seq09*/
+dummy/*vx1_mode15_field00_seq09*/
+4b3c  0fa0 /*vx0_mode15_field00_seq11*/
+61b2  0fa0 /*vx1_mode15_field00_seq11*/
+4ac4  03e8 /*vxsg_mode15_field00_seq15*/
+4ad6  07d0 /*vxsg_mode15_field00_seq18*/
+4adc  0fa0 /*vxsg_mode15_field00_seq21*/
+dummy/*vxsg_mode15_field00_seq24*/
+dummy/*vxsg_mode15_field00_seq27*/
+dummy/*vxsg_mode15_field00_seq30*/

@@ -1,0 +1,24 @@
+// Step 7c
+C020	1157	// Enable H-drivers  // use LDO
+//C020 1177 // Enable H-drivers  // use LDO // enable channel B for temperature sensor
+C028	00F1	// Enable V-drivers	 
+//Wait 20us
+C600	0000    // 170417 add
+// Step 7d
+C100	0023	// V1 max drive strength  V2A ->0x0023
+C101	0023	// V2 max drive strength  V2B ->0x0023
+C102	0023	// V3 max drive strength  V4A ->0x0023
+C103	0023	// V4 max drive strength  V4B ->0x0023
+C104	0000	// V5 max drive strength
+C105	0000	// V6 max drive strength
+C106	0000	// V7 max drive strength
+C107	0000	// V8 max drive strength
+C108	0047	// V9 max drive strength  V1  ->0x0047
+C109	0069	// V10 max drive strength V3  ->0x0069
+C10A	0047	// V11 max drive strength V5  ->0x0047
+C10B	0047	// V12 max drive strength V6  ->0x0047
+C10C	0047	// V13 max drive strength V7  ->0x0047
+C10D	0047	// V14 max drive strength V8  ->0x0047
+C10E	0047	// V15 max drive strength V9  ->0x0047
+C10F	0047	// V16 max drive strength V10 ->0x0047
+

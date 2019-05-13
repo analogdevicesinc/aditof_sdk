@@ -1,0 +1,1088 @@
+4000  0000 //mode_flag
+4001  0000 //op_mode
+4002  000b //opcodejump
+4003  0560 //pcorestartaddr
+4004  0588 //api_mode0
+4005  05b4 //api_mode1
+4006  05ba //api_mode2
+4007  060e //api_mode3
+4008  062f //api_mode4
+4009  0000 //api_mode6
+400a  0000 //api_mode7
+400b  0000 //api_mode8
+400c  129a //version
+400d  0000 //tal_detector_en_store
+400e  0000 //tal_en_store
+400f  0000 //run_1frame_flag
+4010  0481 //mode_table_ptr
+4011  0000 //tapadv_incr
+4012  0000 //tapadv_seq1_blk_flg
+4013  0000 //tapadv_seq3_blk_flg
+4014  0000 //tapadv_seq5_blk_flg
+4015  0000 //mode0_vc
+4016  0000 //mode1_vc
+4017  0000 //mode2_vc
+4018  0000 //mode3_vc
+4019  0000 //mode4_vc
+401a  0000 //mode5_vc
+401b  0000 //mode6_vc
+401c  0000 //mode7_vc
+409e  046e //modedatastart
+40a0  0202 //vxsg_mode00_field00_seq13
+40a1  01c7 
+40a2  01c8 
+40a3  0202 
+40a4  002b 
+40a5  0000 
+40a6  0240 //vxsg_mode00_field00_seq14
+40a7  01c7 
+40a8  01cb 
+40a9  0202 
+40aa  0038 
+40ab  0000 
+40ac  0a06 //vxsg_mode00_field00_seq15
+40ad  01cc 
+40ae  01cd 
+40af  0202 
+40b0  00a0 
+40b1  000f 
+40b2  0200 //vxsg_mode00_field00_seq16
+40b3  01c7 
+40b4  01cb 
+40b5  0202 
+40b6  004b 
+40b7  0000 
+40b8  0200 //vxsg_mode00_field00_seq17
+40b9  01c7 
+40ba  01cb 
+40bb  0202 
+40bc  0038 
+40bd  0000 
+40be  0600 //vxsg_mode00_field00_seq22
+40bf  01c7 
+40c0  01cb 
+40c1  0202 
+40c2  000b 
+40c3  004b 
+40c4  0200 //vxsg_mode00_field00_seq31
+40c5  01c9 
+40c6  01ca 
+40c7  0202 
+40c8  004b 
+40c9  0000 
+40ca  0200 //vxsg_mode00_field00_seq35
+40cb  01e8 
+40cc  01e9 
+40cd  0202 
+40ce  002b 
+40cf  0000 
+40d0  0648 //vxsg_mode00_field00_seq36
+40d1  01e4 
+40d2  01e6 
+40d3  0404 
+40d4  02f0 
+40d5  001b 
+40d6  0200 //vxsg_mode00_field00_seq37
+40d7  01e4 
+40d8  01e6 
+40d9  0404 
+40da  001b 
+40db  0000 
+40dc  0648 //vxsg_mode00_field00_seq51
+40dd  01e4 
+40de  01e6 
+40df  0404 
+40e0  02aa 
+40e1  001b 
+40e2  1e21 //mode00_vxsg_link_var_var
+40e3  181b 
+40e4  1b15 
+40e5  1518 
+40e6  121b 
+40e7  1b15 
+40e8  1518 
+40e9  181b 
+40ea  1b15 
+40eb  0c0f 
+40ec  0609 
+40ed  ff03 
+40ee  0212 //vx0_mode00_field00_seq00
+40ef  0219 
+40f0  0226 
+40f1  1919 
+40f2  0032 
+40f3  0000 
+40f4  0a40 //vx0_mode00_field00_seq01
+40f5  01c5 
+40f6  01c6 
+40f7  0202 
+40f8  00a0 
+40f9  0049 
+40fa  0200 //vx0_mode00_field00_seq02
+40fb  015e 
+40fc  0168 
+40fd  1414 
+40fe  0063 
+40ff  0000 
+4100  0a00 //vx0_mode00_field00_seq03
+4101  01c5 
+4102  01c6 
+4103  0202 
+4104  00a0 
+4105  0049 
+4106  0a00 //vx0_mode00_field00_seq05
+4107  01c5 
+4108  01c6 
+4109  0202 
+410a  00a0 
+410b  0049 
+410c  0600 //vx0_mode00_field00_seq06
+410d  0172 
+410e  0186 
+410f  2828 
+4110  000b 
+4111  0063 
+4112  0a00 //vx0_mode00_field00_seq07
+4113  01c5 
+4114  01c6 
+4115  0202 
+4116  00a0 
+4117  0049 
+4118  0a10 //vx0_mode00_field00_seq11
+4119  01c5 
+411a  01c6 
+411b  0202 
+411c  00a0 
+411d  0049 
+411e  0210 //vx0_mode00_field00_seq12
+411f  019a 
+4120  01af 
+4121  2b2a 
+4122  003b 
+4123  0000 
+4124  0200 //vx0_mode00_field00_seq32
+4125  01ea 
+4126  01f5 
+4127  1716 
+4128  002f 
+4129  0000 
+412a  0648 //vx0_mode00_field00_seq33
+412b  01ce 
+412c  01d9 
+412d  1615 
+412e  02f0 
+412f  0032 
+4130  0200 //vx0_mode00_field00_seq34
+4131  0201 
+4132  020d 
+4133  1717 
+4134  0032 
+4135  0000 
+4136  0648 //vx0_mode00_field00_seq50
+4137  01ce 
+4138  01d9 
+4139  1615 
+413a  02aa 
+413b  0032 
+413c  2427 //mode00_vx0_link_var_var
+413d  1e21 
+413e  1b21 
+413f  1518 
+4140  1e21 
+4141  1221 
+4142  0c0f 
+4143  0609 
+4144  ff03 
+4145  ffff 
+4146  0202 //vxsg_mode01_field00_seq13
+4147  01c7 
+4148  01c8 
+4149  0202 
+414a  002b 
+414b  0000 
+414c  0240 //vxsg_mode01_field00_seq14
+414d  01c7 
+414e  01cb 
+414f  0202 
+4150  0038 
+4151  0000 
+4152  0a06 //vxsg_mode01_field00_seq15
+4153  0234 
+4154  01cd 
+4155  0202 
+4156  01a4 
+4157  000f 
+4158  0200 //vxsg_mode01_field00_seq16
+4159  01c7 
+415a  01cb 
+415b  0202 
+415c  004b 
+415d  0000 
+415e  0200 //vxsg_mode01_field00_seq17
+415f  01c7 
+4160  01cb 
+4161  0202 
+4162  0038 
+4163  0000 
+4164  0600 //vxsg_mode01_field00_seq22
+4165  01c7 
+4166  01cb 
+4167  0202 
+4168  000b 
+4169  004b 
+416a  0200 //vxsg_mode01_field00_seq31
+416b  01c9 
+416c  01ca 
+416d  0202 
+416e  004b 
+416f  0000 
+4170  0200 //vxsg_mode01_field00_seq35
+4171  01e8 
+4172  01e9 
+4173  0202 
+4174  002b 
+4175  0000 
+4176  0648 //vxsg_mode01_field00_seq36
+4177  01e4 
+4178  01e6 
+4179  0404 
+417a  02f0 
+417b  001b 
+417c  0200 //vxsg_mode01_field00_seq37
+417d  01e4 
+417e  01e6 
+417f  0404 
+4180  001b 
+4181  0000 
+4182  0648 //vxsg_mode01_field00_seq51
+4183  01e4 
+4184  01e6 
+4185  0404 
+4186  0d2d 
+4187  001b 
+4188  1e21 //mode01_vxsg_link_var_var
+4189  181b 
+418a  1b15 
+418b  1518 
+418c  121b 
+418d  1b15 
+418e  1518 
+418f  181b 
+4190  1b15 
+4191  0c0f 
+4192  0609 
+4193  ff03 
+4194  0212 //vx0_mode01_field00_seq00
+4195  0219 
+4196  0226 
+4197  1919 
+4198  0032 
+4199  0000 
+419a  0a40 //vx0_mode01_field00_seq01
+419b  0233 
+419c  01c6 
+419d  0202 
+419e  01a4 
+419f  0049 
+41a0  0200 //vx0_mode01_field00_seq02
+41a1  015e 
+41a2  0168 
+41a3  1414 
+41a4  0063 
+41a5  0000 
+41a6  0a00 //vx0_mode01_field00_seq03
+41a7  0233 
+41a8  01c6 
+41a9  0202 
+41aa  01a4 
+41ab  0049 
+41ac  0a00 //vx0_mode01_field00_seq05
+41ad  0233 
+41ae  01c6 
+41af  0202 
+41b0  01a4 
+41b1  0049 
+41b2  0600 //vx0_mode01_field00_seq06
+41b3  0172 
+41b4  0186 
+41b5  2828 
+41b6  000b 
+41b7  0063 
+41b8  0a00 //vx0_mode01_field00_seq07
+41b9  0233 
+41ba  01c6 
+41bb  0202 
+41bc  01a4 
+41bd  0049 
+41be  0a10 //vx0_mode01_field00_seq11
+41bf  0233 
+41c0  01c6 
+41c1  0202 
+41c2  01a4 
+41c3  0049 
+41c4  0210 //vx0_mode01_field00_seq12
+41c5  019a 
+41c6  01af 
+41c7  2b2a 
+41c8  003b 
+41c9  0000 
+41ca  0200 //vx0_mode01_field00_seq32
+41cb  01ea 
+41cc  01f5 
+41cd  1716 
+41ce  002f 
+41cf  0000 
+41d0  0648 //vx0_mode01_field00_seq33
+41d1  01ce 
+41d2  01d9 
+41d3  1615 
+41d4  02f0 
+41d5  0032 
+41d6  0200 //vx0_mode01_field00_seq34
+41d7  0201 
+41d8  020d 
+41d9  1717 
+41da  0032 
+41db  0000 
+41dc  0648 //vx0_mode01_field00_seq50
+41dd  01ce 
+41de  01d9 
+41df  1615 
+41e0  0d2d 
+41e1  0032 
+41e2  2427 //mode01_vx0_link_var_var
+41e3  1e21 
+41e4  1b21 
+41e5  1518 
+41e6  1e21 
+41e7  1221 
+41e8  0c0f 
+41e9  0609 
+41ea  ff03 
+41eb  ffff 
+41ec  0202 //vxsg_mode02_field00_seq13
+41ed  01c7 
+41ee  01c8 
+41ef  0202 
+41f0  002b 
+41f1  0000 
+41f2  0240 //vxsg_mode02_field00_seq14
+41f3  01c7 
+41f4  01cb 
+41f5  0202 
+41f6  0038 
+41f7  0000 
+41f8  0a06 //vxsg_mode02_field00_seq15
+41f9  01cc 
+41fa  01cd 
+41fb  0202 
+41fc  09c4 
+41fd  000f 
+41fe  0200 //vxsg_mode02_field00_seq16
+41ff  01c7 
+4200  01cb 
+4201  0202 
+4202  004b 
+4203  0000 
+4204  0200 //vxsg_mode02_field00_seq17
+4205  01c7 
+4206  01cb 
+4207  0202 
+4208  0038 
+4209  0000 
+420a  0600 //vxsg_mode02_field00_seq22
+420b  01c7 
+420c  01cb 
+420d  0202 
+420e  000b 
+420f  004b 
+4210  0200 //vxsg_mode02_field00_seq31
+4211  01c9 
+4212  01ca 
+4213  0202 
+4214  004b 
+4215  0000 
+4216  0200 //vxsg_mode02_field00_seq35
+4217  01e8 
+4218  01e9 
+4219  0202 
+421a  002b 
+421b  0000 
+421c  0648 //vxsg_mode02_field00_seq36
+421d  01e4 
+421e  01e6 
+421f  0404 
+4220  0074 
+4221  001b 
+4222  0200 //vxsg_mode02_field00_seq37
+4223  01e4 
+4224  01e6 
+4225  0404 
+4226  001b 
+4227  0000 
+4228  0648 //vxsg_mode02_field00_seq51
+4229  01e4 
+422a  01e6 
+422b  0404 
+422c  005e 
+422d  001b 
+422e  1e21 //mode02_vxsg_link_var_var
+422f  181b 
+4230  1b15 
+4231  1518 
+4232  121b 
+4233  1b15 
+4234  1518 
+4235  181b 
+4236  1b15 
+4237  0c0f 
+4238  0609 
+4239  ff03 
+423a  0212 //vx0_mode02_field00_seq00
+423b  0219 
+423c  0226 
+423d  1919 
+423e  0032 
+423f  0000 
+4240  0a40 //vx0_mode02_field00_seq01
+4241  01c5 
+4242  01c6 
+4243  0202 
+4244  09c4 
+4245  0049 
+4246  0200 //vx0_mode02_field00_seq02
+4247  015e 
+4248  0168 
+4249  1414 
+424a  0063 
+424b  0000 
+424c  0a00 //vx0_mode02_field00_seq03
+424d  01c5 
+424e  01c6 
+424f  0202 
+4250  09c4 
+4251  0049 
+4252  0a00 //vx0_mode02_field00_seq05
+4253  01c5 
+4254  01c6 
+4255  0202 
+4256  09c4 
+4257  0049 
+4258  0600 //vx0_mode02_field00_seq06
+4259  0172 
+425a  0186 
+425b  2828 
+425c  000b 
+425d  0063 
+425e  0a00 //vx0_mode02_field00_seq07
+425f  01c5 
+4260  01c6 
+4261  0202 
+4262  09c4 
+4263  0049 
+4264  0a10 //vx0_mode02_field00_seq11
+4265  01c5 
+4266  01c6 
+4267  0202 
+4268  09c4 
+4269  0049 
+426a  0200 //vx0_mode02_field00_seq12
+426b  019a 
+426c  01af 
+426d  2b2a 
+426e  003b 
+426f  0000 
+4270  0200 //vx0_mode02_field00_seq32
+4271  01ea 
+4272  01f5 
+4273  1716 
+4274  002f 
+4275  0000 
+4276  0648 //vx0_mode02_field00_seq33
+4277  01ce 
+4278  01d9 
+4279  1615 
+427a  0074 
+427b  0032 
+427c  0210 //vx0_mode02_field00_seq34
+427d  0201 
+427e  020d 
+427f  1717 
+4280  0032 
+4281  0000 
+4282  0648 //vx0_mode02_field00_seq50
+4283  01ce 
+4284  01d9 
+4285  1615 
+4286  005e 
+4287  0032 
+4288  2427 //mode02_vx0_link_var_var
+4289  1e21 
+428a  1b21 
+428b  1518 
+428c  1e21 
+428d  1221 
+428e  0c0f 
+428f  0609 
+4290  ff03 
+4291  ffff 
+4292  0207 //mode00_field00_vdhd_des0
+4293  2235 
+4294  03a0 
+4295  0000 
+4296  8807 //mode00_field00_vdhd_des1
+4297  2236 
+4298  064f 
+4299  0000 
+429a  4207 //mode00_field00_vdhd_des1_ch
+429b  2236 
+429c  03a0 
+429d  0000 
+429e  0207 //mode01_field00_vdhd_des0
+429f  2235 
+42a0  03a0 
+42a1  0000 
+42a2  8807 //mode01_field00_vdhd_des1
+42a3  2236 
+42a4  12ee 
+42a5  0000 
+42a6  4207 //mode01_field00_vdhd_des1_ch
+42a7  2236 
+42a8  03a0 
+42a9  0000 
+42aa  0207 //mode02_field00_vdhd_des0
+42ab  2235 
+42ac  03a0 
+42ad  0000 
+42ae  8807 //mode02_field00_vdhd_des1
+42af  2236 
+42b0  064f 
+42b1  0000 
+42b2  4207 //mode02_field00_vdhd_des1_ch
+42b3  2236 
+42b4  03a0 
+42b5  0000 
+42b6  1012 //mode00_vdhd_link_var_var
+42b7  ff0e 
+42b8  0b0d //mode01_vdhd_link_var_var
+42b9  ff09 
+42ba  0608 //mode02_vdhd_link_var_var
+42bb  ff04 
+42bc  0002 //vx0_f_exp_pos//Abs:102
+42bd  0007 //Abs:109
+42be  0006 //Abs:115
+42bf  0006 //Abs:121
+42c0  0006 //Abs:127
+42c1  0006 //Abs:133
+42c2  0006 //Abs:139
+42c3  000b //Abs:150
+42c4  0007 //Abs:157
+42c5  0006 //Abs:163
+42c6  0006 //Abs:169
+42c7  0006 //Abs:175
+42c8  0005 //Abs:180
+42c9  0007 //Abs:187
+42ca  0006 //Abs:193
+42cb  0006 //Abs:199
+42cc  0006 //Abs:205
+42cd  0006 //Abs:211
+42ce  0006 //Abs:217
+42cf  0005 //Abs:222
+42d0  0002 //vx0_f_exp_vec//Vector(s):Img_V2
+42d1  0001 //Vector(s):Img_V1
+42d2  0100 //Vector(s):Img_V9
+42d3  0080 //Vector(s):Img_V8
+42d4  0020 //Vector(s):Img_V6
+42d5  0010 //Vector(s):Img_V5
+42d6  0004 //Vector(s):Img_V3
+42d7  0002 //Vector(s):Img_V2
+42d8  0200 //Vector(s):Img_V10
+42d9  0100 //Vector(s):Img_V9
+42da  0040 //Vector(s):Img_V7
+42db  0020 //Vector(s):Img_V6
+42dc  0008 //Vector(s):Img_V4
+42dd  0004 //Vector(s):Img_V3
+42de  0001 //Vector(s):Img_V1
+42df  0200 //Vector(s):Img_V10
+42e0  0080 //Vector(s):Img_V8
+42e1  0040 //Vector(s):Img_V7
+42e2  0010 //Vector(s):Img_V5
+42e3  0008 //Vector(s):Img_V4
+42e4  0002 //vx0_r_exp_pos//Abs:102
+42e5  0007 //Abs:109
+42e6  0006 //Abs:115
+42e7  0006 //Abs:121
+42e8  0006 //Abs:127
+42e9  0006 //Abs:133
+42ea  0006 //Abs:139
+42eb  000b //Abs:150
+42ec  0007 //Abs:157
+42ed  0006 //Abs:163
+42ee  0006 //Abs:169
+42ef  0006 //Abs:175
+42f0  0005 //Abs:180
+42f1  0007 //Abs:187
+42f2  0006 //Abs:193
+42f3  0006 //Abs:199
+42f4  0006 //Abs:205
+42f5  0006 //Abs:211
+42f6  0006 //Abs:217
+42f7  0005 //Abs:222
+42f8  0006 //Abs:228
+42f9  0007 //Abs:235
+42fa  0006 //Abs:241
+42fb  0006 //Abs:247
+42fc  0006 //Abs:253
+42fd  0006 //Abs:259
+42fe  0006 //Abs:265
+42ff  000b //Abs:276
+4300  0007 //Abs:283
+4301  0006 //Abs:289
+4302  0006 //Abs:295
+4303  0006 //Abs:301
+4304  0005 //Abs:306
+4305  0007 //Abs:313
+4306  0006 //Abs:319
+4307  0006 //Abs:325
+4308  0006 //Abs:331
+4309  0006 //Abs:337
+430a  0006 //Abs:343
+430b  0005 //Abs:348
+430c  0008 //vx0_r_exp_vec//Vector(s):Img_V4
+430d  0010 //Vector(s):Img_V5
+430e  0040 //Vector(s):Img_V7
+430f  0080 //Vector(s):Img_V8
+4310  0200 //Vector(s):Img_V10
+4311  0001 //Vector(s):Img_V1
+4312  0004 //Vector(s):Img_V3
+4313  0008 //Vector(s):Img_V4
+4314  0020 //Vector(s):Img_V6
+4315  0040 //Vector(s):Img_V7
+4316  0100 //Vector(s):Img_V9
+4317  0200 //Vector(s):Img_V10
+4318  0002 //Vector(s):Img_V2
+4319  0004 //Vector(s):Img_V3
+431a  0010 //Vector(s):Img_V5
+431b  0020 //Vector(s):Img_V6
+431c  0080 //Vector(s):Img_V8
+431d  0100 //Vector(s):Img_V9
+431e  0001 //Vector(s):Img_V1
+431f  0002 //Vector(s):Img_V2
+4320  0008 //Vector(s):Img_V4
+4321  0010 //Vector(s):Img_V5
+4322  0040 //Vector(s):Img_V7
+4323  0080 //Vector(s):Img_V8
+4324  0200 //Vector(s):Img_V10
+4325  0001 //Vector(s):Img_V1
+4326  0004 //Vector(s):Img_V3
+4327  0008 //Vector(s):Img_V4
+4328  0020 //Vector(s):Img_V6
+4329  0040 //Vector(s):Img_V7
+432a  0100 //Vector(s):Img_V9
+432b  0200 //Vector(s):Img_V10
+432c  0002 //Vector(s):Img_V2
+432d  0004 //Vector(s):Img_V3
+432e  0010 //Vector(s):Img_V5
+432f  0020 //Vector(s):Img_V6
+4330  0080 //Vector(s):Img_V8
+4331  0100 //Vector(s):Img_V9
+4332  0001 //Vector(s):Img_V1
+4333  0002 //Vector(s):Img_V2
+4334  0002 //vx0_x2_exp_pos//Abs:62
+4335  0028 //Abs:102
+4336  0007 //Abs:109
+4337  0006 //Abs:115
+4338  0006 //Abs:121
+4339  0006 //Abs:127
+433a  0006 //Abs:133
+433b  0006 //Abs:139
+433c  000b //Abs:150
+433d  0007 //Abs:157
+433e  0006 //Abs:163
+433f  0006 //Abs:169
+4340  0006 //Abs:175
+4341  0005 //Abs:180
+4342  0007 //Abs:187
+4343  0006 //Abs:193
+4344  0006 //Abs:199
+4345  0006 //Abs:205
+4346  0006 //Abs:211
+4347  0006 //Abs:217
+4348  0005 //Abs:222
+4349  0006 //Abs:228
+434a  0007 //Abs:235
+434b  0006 //Abs:241
+434c  0006 //Abs:247
+434d  0006 //Abs:253
+434e  0006 //Abs:259
+434f  0006 //Abs:265
+4350  000b //Abs:276
+4351  0007 //Abs:283
+4352  0006 //Abs:289
+4353  0006 //Abs:295
+4354  0006 //Abs:301
+4355  0005 //Abs:306
+4356  0007 //Abs:313
+4357  0006 //Abs:319
+4358  0006 //Abs:325
+4359  0006 //Abs:331
+435a  0006 //Abs:337
+435b  0006 //Abs:343
+435c  0005 //Abs:348
+435d  000c //Abs:360
+435e  8020 //vx0_x2_exp_vec//Vector(s):Img_GPO0
+435f  0002 //Vector(s):Img_V2
+4360  0001 //Vector(s):Img_V1
+4361  0100 //Vector(s):Img_V9
+4362  0080 //Vector(s):Img_V8
+4363  0020 //Vector(s):Img_V6
+4364  0010 //Vector(s):Img_V5
+4365  0004 //Vector(s):Img_V3
+4366  0002 //Vector(s):Img_V2
+4367  0200 //Vector(s):Img_V10
+4368  0100 //Vector(s):Img_V9
+4369  0040 //Vector(s):Img_V7
+436a  0020 //Vector(s):Img_V6
+436b  0008 //Vector(s):Img_V4
+436c  0004 //Vector(s):Img_V3
+436d  0001 //Vector(s):Img_V1
+436e  0200 //Vector(s):Img_V10
+436f  0080 //Vector(s):Img_V8
+4370  0040 //Vector(s):Img_V7
+4371  0010 //Vector(s):Img_V5
+4372  0008 //Vector(s):Img_V4
+4373  0002 //Vector(s):Img_V2
+4374  0001 //Vector(s):Img_V1
+4375  0100 //Vector(s):Img_V9
+4376  0080 //Vector(s):Img_V8
+4377  0020 //Vector(s):Img_V6
+4378  0010 //Vector(s):Img_V5
+4379  0004 //Vector(s):Img_V3
+437a  0002 //Vector(s):Img_V2
+437b  0200 //Vector(s):Img_V10
+437c  0100 //Vector(s):Img_V9
+437d  0040 //Vector(s):Img_V7
+437e  0020 //Vector(s):Img_V6
+437f  0008 //Vector(s):Img_V4
+4380  0004 //Vector(s):Img_V3
+4381  0001 //Vector(s):Img_V1
+4382  0200 //Vector(s):Img_V10
+4383  0080 //Vector(s):Img_V8
+4384  0040 //Vector(s):Img_V7
+4385  0010 //Vector(s):Img_V5
+4386  0008 //Vector(s):Img_V4
+4387  0002 //Vector(s):Img_V2
+4388  0002 //Vector(s):Img_V2
+4389  0000 // Vector(s):
+438a  000a //vx0_m1_m2_vloop_exp_1ld_1sub_pos//Abs:87
+438b  0004 //Rel:4
+438c  0000 //vx0_m1_m2_vloop_exp_1ld_1sub_vec//Vector(s):
+438d  0000 // Vector(s):
+438e  0001 //vxsg_x1_hblk_pos//Abs:46
+438f  0001 //Rel:1
+4390  0000 //vxsg_x1_hblk_vec//Vector(s):Img_H1BLK,Img_H2BLK,Img_H3BLK,Img_H4BLK,Img_HL2BLK,Img_RGBLK2
+4391  80c3 // Vector(s):0 1 6 7 
+4392  0002 //vxsg_x2_hblk_exp_pos//Abs:78
+4393  00a6 //Abs:244
+4394  000f //vxsg_x2_hblk_exp_vec//Vector(s):Img_V1SG,Img_V2SG,Img_V3SG,Img_V4SG
+4395  80c3 //Vector(s):Img_H1BLK,Img_H2BLK,Img_H3BLK,Img_H4BLK,Img_HL2BLK,Img_RGBLK2
+4396  0000 //vxsg_m1_n1_g1_sg_exp_vec//Vector(s):Img_V1SG,Img_V2SG,Img_V3SG,Img_V4SG
+4397  000f // Vector(s):0 1 2 3 
+4398  0002 //vxsg_nohblk_loop_exp_pos//Abs:76
+4399  000c //Abs:88
+439a  8400 //vxsg_nohblk_loop_exp_vec//Vector(s):Img_CLPOB2,
+439b  8400 //Vector(s):Img_CLPOB2,
+439c  0002 //vx0_j_readout_pos//Abs:53
+439d  0007 //Abs:60
+439e  0006 //Abs:66
+439f  0006 //Abs:72
+43a0  0006 //Abs:78
+43a1  0006 //Abs:84
+43a2  0006 //Abs:90
+43a3  000b //Abs:101
+43a4  0007 //Abs:108
+43a5  0006 //Abs:114
+43a6  0006 //Abs:120
+43a7  0006 //Abs:126
+43a8  0005 //Abs:131
+43a9  0007 //Abs:138
+43aa  0006 //Abs:144
+43ab  0006 //Abs:150
+43ac  0006 //Abs:156
+43ad  0006 //Abs:162
+43ae  0006 //Abs:168
+43af  0005 //Abs:173
+43b0  000c //Abs:185
+43b1  0000 //Abs:197
+43b2  0002 //vx0_j_readout_vec//Vector(s):Img_V2
+43b3  0001 //Vector(s):Img_V1
+43b4  0100 //Vector(s):Img_V9
+43b5  0080 //Vector(s):Img_V8
+43b6  0020 //Vector(s):Img_V6
+43b7  0010 //Vector(s):Img_V5
+43b8  0004 //Vector(s):Img_V3
+43b9  0002 //Vector(s):Img_V2
+43ba  0200 //Vector(s):Img_V10
+43bb  0100 //Vector(s):Img_V9
+43bc  0040 //Vector(s):Img_V7
+43bd  0020 //Vector(s):Img_V6
+43be  0008 //Vector(s):Img_V4
+43bf  0004 //Vector(s):Img_V3
+43c0  0001 //Vector(s):Img_V1
+43c1  0200 //Vector(s):Img_V10
+43c2  0080 //Vector(s):Img_V8
+43c3  0040 //Vector(s):Img_V7
+43c4  0010 //Vector(s):Img_V5
+43c5  0008 //Vector(s):Img_V4
+43c6  0002 //Vector(s):Img_V2
+43c7  0002 //Vector(s):Img_V2
+43c8  0002 //vxsg_hblk_readout_pos//Abs:30
+43c9  0010 //Abs:46
+43ca  0002 //Abs:48
+43cb  00c4 //Abs:244
+43cc  8100 //vxsg_hblk_readout_vec//Vector(s):Img_CLPOB1
+43cd  8003 //Vector(s):Img_H1BLK,Img_H2BLK
+43ce  8100 //Vector(s):Img_CLPOB1
+43cf  8003 //Vector(s):Img_H1BLK,Img_H2BLK
+43d0  0002 //vxsg_hblk_readout_start_pos//Abs:46
+43d1  00c6 //Abs:244
+43d2  8003 //vxsg_hblk_readout_start_vec//Vector(s):Img_H1BLK,Img_H2BLK
+43d3  8003 //Vector(s):Img_H1BLK,Img_H2BLK
+43d4  0002 //vx0_j_readout_start_pos//Abs:50
+43d5  0003 //Abs:53
+43d6  0007 //Abs:60
+43d7  0006 //Abs:66
+43d8  0006 //Abs:72
+43d9  0006 //Abs:78
+43da  0006 //Abs:84
+43db  0006 //Abs:90
+43dc  000b //Abs:101
+43dd  0007 //Abs:108
+43de  0006 //Abs:114
+43df  0006 //Abs:120
+43e0  0006 //Abs:126
+43e1  0005 //Abs:131
+43e2  0007 //Abs:138
+43e3  0006 //Abs:144
+43e4  0006 //Abs:150
+43e5  0006 //Abs:156
+43e6  0006 //Abs:162
+43e7  0006 //Abs:168
+43e8  0005 //Abs:173
+43e9  000c //Abs:185
+43ea  8200 //vx0_j_readout_start_vec//Vector(s):Img_GPO4
+43eb  0002 //Vector(s):Img_V2
+43ec  0001 //Vector(s):Img_V1
+43ed  0100 //Vector(s):Img_V9
+43ee  0080 //Vector(s):Img_V8
+43ef  0020 //Vector(s):Img_V6
+43f0  0010 //Vector(s):Img_V5
+43f1  0004 //Vector(s):Img_V3
+43f2  0002 //Vector(s):Img_V2
+43f3  0200 //Vector(s):Img_V10
+43f4  0100 //Vector(s):Img_V9
+43f5  0040 //Vector(s):Img_V7
+43f6  0020 //Vector(s):Img_V6
+43f7  0008 //Vector(s):Img_V4
+43f8  0004 //Vector(s):Img_V3
+43f9  0001 //Vector(s):Img_V1
+43fa  0200 //Vector(s):Img_V10
+43fb  0080 //Vector(s):Img_V8
+43fc  0040 //Vector(s):Img_V7
+43fd  0010 //Vector(s):Img_V5
+43fe  0008 //Vector(s):Img_V4
+43ff  0002 //Vector(s):Img_V2
+4400  0002 //Vector(s):Img_V2
+4401  0000 // Vector(s):
+4402  0002 //vx0_j_readout_end_pos//Abs:53
+4403  0007 //Abs:60
+4404  0006 //Abs:66
+4405  0006 //Abs:72
+4406  0006 //Abs:78
+4407  0006 //Abs:84
+4408  0006 //Abs:90
+4409  000b //Abs:101
+440a  0007 //Abs:108
+440b  0006 //Abs:114
+440c  0006 //Abs:120
+440d  0006 //Abs:126
+440e  0005 //Abs:131
+440f  0007 //Abs:138
+4410  0006 //Abs:144
+4411  0006 //Abs:150
+4412  0006 //Abs:156
+4413  0006 //Abs:162
+4414  0006 //Abs:168
+4415  0005 //Abs:173
+4416  0007 //Abs:180
+4417  0005 //Abs:185
+4418  000c //Abs:197
+4419  0000 //Rel:0
+441a  0002 //vx0_j_readout_end_vec//Vector(s):Img_V2
+441b  0001 //Vector(s):Img_V1
+441c  0100 //Vector(s):Img_V9
+441d  0080 //Vector(s):Img_V8
+441e  0020 //Vector(s):Img_V6
+441f  0010 //Vector(s):Img_V5
+4420  0004 //Vector(s):Img_V3
+4421  0002 //Vector(s):Img_V2
+4422  0200 //Vector(s):Img_V10
+4423  0100 //Vector(s):Img_V9
+4424  0040 //Vector(s):Img_V7
+4425  0020 //Vector(s):Img_V6
+4426  0008 //Vector(s):Img_V4
+4427  0004 //Vector(s):Img_V3
+4428  0001 //Vector(s):Img_V1
+4429  0200 //Vector(s):Img_V10
+442a  0080 //Vector(s):Img_V8
+442b  0040 //Vector(s):Img_V7
+442c  0010 //Vector(s):Img_V5
+442d  0008 //Vector(s):Img_V4
+442e  8200 //Vector(s):Img_GPO4
+442f  0002 //Vector(s):Img_V2
+4430  0002 //Vector(s):Img_V2
+4431  0000 // Vector(s):
+4432  0002 //vx0_x1_exp_taldummy_pos//Abs:53
+4433  0007 //Abs:60
+4434  0006 //Abs:66
+4435  0006 //Abs:72
+4436  0006 //Abs:78
+4437  0006 //Abs:84
+4438  0006 //Abs:90
+4439  000b //Abs:101
+443a  0007 //Abs:108
+443b  0006 //Abs:114
+443c  0006 //Abs:120
+443d  0006 //Abs:126
+443e  0005 //Abs:131
+443f  0007 //Abs:138
+4440  0006 //Abs:144
+4441  0006 //Abs:150
+4442  0006 //Abs:156
+4443  0006 //Abs:162
+4444  0006 //Abs:168
+4445  0005 //Abs:173
+4446  000c //Abs:185
+4447  000c //Abs:197
+4448  026f //Abs:820
+4449  000a //Abs:830
+444a  001e //Abs:860
+444b  0000 //Rel:0
+444c  0002 //vx0_x1_exp_taldummy_vec//Vector(s):Img_V2
+444d  0001 //Vector(s):Img_V1
+444e  0100 //Vector(s):Img_V9
+444f  0080 //Vector(s):Img_V8
+4450  0020 //Vector(s):Img_V6
+4451  0010 //Vector(s):Img_V5
+4452  0004 //Vector(s):Img_V3
+4453  0002 //Vector(s):Img_V2
+4454  0200 //Vector(s):Img_V10
+4455  0100 //Vector(s):Img_V9
+4456  0040 //Vector(s):Img_V7
+4457  0020 //Vector(s):Img_V6
+4458  0008 //Vector(s):Img_V4
+4459  0004 //Vector(s):Img_V3
+445a  0001 //Vector(s):Img_V1
+445b  0200 //Vector(s):Img_V10
+445c  0080 //Vector(s):Img_V8
+445d  0040 //Vector(s):Img_V7
+445e  0010 //Vector(s):Img_V5
+445f  0008 //Vector(s):Img_V4
+4460  0002 //Vector(s):Img_V2
+4461  0002 //Vector(s):Img_V2
+4462  0000 //Vector(s):
+4463  0000 //Vector(s):
+4464  8020 //Vector(s):Img_GPO0
+4465  0000 // Vector(s):
+4466  000a //vx0_m1_m2_vloop_exp_1ld_1sub_far_pos//Abs:113
+4467  001e //Rel:30
+4468  0002 //vxsg_nohblk_loop_exp_far_pos//Abs:76
+4469  0026 //Abs:114
+446a  c000 //mode00_field00_vdhd_p0
+446b  c028 
+446c  8000 //mode00_field00_vdhd_p1
+446d  8028 
+446e  0000 //modedatastartmark
+446f  0091 //mode00_init
+4470  0000 
+4471  0010 
+4472  0060 
+4473  00ff 
+4474  0a47 
+4475  0091 //mode01_init
+4476  0000 
+4477  0010 
+4478  0060 
+4479  00ff 
+447a  0a47 
+447b  0091 //mode02_init
+447c  0000 
+447d  0010 
+447e  0060 
+447f  00ff 
+4480  0a47 
+4481  048d //mode00_table_ptr
+4482  0496 //mode01_table_ptr
+4483  049f //mode02_table_ptr
+4484  04ba //mode00_seq_isr
+4485  04ca 
+4486  04da 
+4487  04ea //mode01_seq_isr
+4488  04fa 
+4489  050a 
+448a  051a //mode02_seq_isr
+448b  052a 
+448c  053a 
+448d  046f //mode00_table
+448e  015b 
+448f  009e 
+4490  0468 
+4491  0071 
+4492  ffff 
+4493  ffff 
+4494  0484 
+4495  ff67 
+4496  0475 //mode01_table
+4497  015c 
+4498  00f1 
+4499  04e2 
+449a  00c4 
+449b  ffff 
+449c  ffff 
+449d  0487 
+449e  ff67 
+449f  047b //mode02_table
+44a0  015d 
+44a1  0144 
+44a2  055c 
+44a3  0117 
+44a4  ffff 
+44a5  ffff 
+44a6  048a 
+44a7  ff67 
+44a8  0000 //mode00_roi
+44a9  0000 
+44aa  0000 
+44ab  0000 
+44ac  0000 
+44ad  0000 
+44ae  0000 //mode01_roi
+44af  0000 
+44b0  0000 
+44b1  0000 
+44b2  0000 
+44b3  0000 
+44b4  0000 //mode02_roi
+44b5  0000 
+44b6  0000 
+44b7  0000 
+44b8  0000 
+44b9  0000 
+46a9  0000 //tapadv_seq1_desc_ptr
+46aa  0000 //tapadv_seq3_desc_ptr
+46ab  0000 //tapadv_seq5_desc_ptr
+46ac  0000 //tapadv_seq7_desc_ptr
+46ad  0000 //tapadv_seq11_desc_ptr
+46ae  0000 //tapadv_loop_cnt
+
+

@@ -1,0 +1,21 @@
+C4F0 0000
+4001	0007	//Mode Starts
+7c22	0004	//Run program
+
+4001	0006	//Mode Abort
+7c22	0004	
+C4F0 0001
+
+C4F0 0000
+4001	0007	//Mode Starts
+7c22	0004	//Run program
+
+
+//C0FC 1818 //TP sel // ramp data
+//C0C3 00f0 //Ch A [15:0] +1 slope
+//C0C5 00f0 //Ch B [15:0] +1 slope
+
+//Output HPT1 BLK from GPO2
+//C02F 000F //Observe signals on GPO pins only 
+//C0F2 1010 //Debug_cfg2
+//C0F1 2000 //Debug_cfg1

@@ -1,0 +1,63 @@
+// Step 6a
+C400	0082	// Configure for 2 data lanes
+C4AA	0001	// Startup1 value	RAW12 data
+C401	0004	// DPHY Parameter1
+C402	0003	// DPHY Parameter2
+C403	0004	// DPHY Parameter3
+C404	0003	// DPHY Parameter4
+C405	0002	// DPHY Parameter5
+C406	0003	// DPHY Parameter6
+C407	0009	// DPHY Parameter7
+C408	0003	// DPHY Parameter8
+c41E	0080 // disable LS/LE
+C4D4	00C2	// Required Startup2 value
+C4C4	0002
+C4F0	0000	// Power-on the MIPI DPHY
+C4DF	00B0	// Enable DPHY calibration
+C4E2	0007	// Trigger DPHY calibration
+//Wait 30us
+C600	0000    // 170417 add
+// Step 6b
+C4DF	0000	// Disable DPHY calibration
+C4E2	0006	// Stop DPHY calibration
+C4E2	0002
+C4D3	001F
+C431	0082	// LP_CONTROL startup setting 
+C4D4	0042	// Required Startup2 value
+C4D4	00C2	// Required Startup2 value
+C4DA	0001	// Enable MIPI PLL
+C437	001E	// Required Startup3 value
+C436	002D	// Required Startup4 value
+//Wait 100us
+C600	0000    // 170417 add
+// Step 6c
+C400	0002	// Enable MIPI Tx
+//Wait 500ns
+C600	0000    // 170417 add
+// Step 6d
+//C431	0080	// LP_CONTROL normal setting  170329 move // 170417 remove
+
+C431	0082
+C423	0000
+C426	0020
+C427	0002
+C4C0	003C
+C4C3	003C
+C4D5	0003
+C4DA	0000
+C4D7	0001
+C4F0	0001
+
+
+//C49C	0040 //swap MIPI outputs
+//C49E	0001 //swap MIPI outputs
+//C4C1	0000 //required write when DATA/CLK are swapped
+//C4C4	0000 //required write when DATA/CLK are swapped
+//C4C7	0039 //required write when DATA/CLK are swapped
+
+C49C	0010 
+C49E	0004
+C4C1	0039 
+C4C4	0000
+C4C7    0000
+

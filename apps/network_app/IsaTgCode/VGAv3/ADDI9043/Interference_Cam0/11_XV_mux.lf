@@ -1,0 +1,33 @@
+// Step 7c
+C020	1167	// Enable H-drivers
+C028	00F1	// Enable V-drivers	 
+//Wait 20us
+// Step 7d
+C100	0077	// V1 max drive strength
+C101	0077	// V2 max drive strength
+C102	0077	// V3 max drive strength
+C103	0077	// V4 max drive strength
+C104	0000	// V5 max drive strength
+C105	0000	// V6 max drive strength
+C106	0000	// V7 max drive strength
+C107	0000	// V8 max drive strength
+C108	00FF	// V9 max drive strength
+C109	00FF	// V10 max drive strength
+C10A	00FF	// V11 max drive strength
+C10B	00FF	// V12 max drive strength
+C10C	00FF	// V13 max drive strength
+C10D	00FF	// V14 max drive strength
+C10E	00FF	// V15 max drive strength
+C10F	00FF	// V16 max drive strength
+
+
+C070	0101 //[12:8]=XV2, [4:0]=XV1	
+C071	0303 //[12:8]=XV4, [4:0]=XV3	
+C072	0504 //[12:8]=XV6, [4:0]=XV5	
+C073	0706 //[12:8]=XV8, [4:0]=XV7	
+C074	0200 //[12:8]=XV10, [4:0]=XV9	
+C075	0504 //[12:8]=XV12, [4:0]=XV11	
+C076	0706 //[12:8]=XV14, [4:0]=XV13	
+C077	0908 //[12:8]=XV16, [4:0]=XV15	
+C078	110A //[12:8]=XV18, [4:0]=XV17	
+C079	1312 //[12:8]=XV20, [4:0]=XV19	
