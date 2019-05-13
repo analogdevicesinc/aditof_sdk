@@ -54,6 +54,9 @@ sudo ./aditof-demo
 ```
 On HDMI Monitor connected to DragonBoard™ 410c, you should now be able to see three windows pop up,  one for settings control, one showing 'Depth Image' and one showing 'IR Image'.
 
+#### API doxygen documentation
+https://analogdevicesinc.github.io/aditof_sdk/
+
 #### Directory Structure
 | Directory | Description |
 | --------- | ----------- |
