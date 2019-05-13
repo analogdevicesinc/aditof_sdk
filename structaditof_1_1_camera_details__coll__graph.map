@@ -1,0 +1,6 @@
+<map id="aditof::CameraDetails" name="aditof::CameraDetails">
+<area shape="rect" id="node1" title="Describes the properties of a camera." alt="" coords="193,95,357,121"/>
+<area shape="rect" id="node2" href="$structaditof_1_1_frame_details.html" title="Describes the properties of a frame." alt="" coords="5,5,160,32"/>
+<area shape="rect" id="node3" href="$structaditof_1_1_depth_parameters.html" title="Describes the depth parameters of a camera." alt="" coords="185,5,365,32"/>
+<area shape="rect" id="node4" href="$structaditof_1_1_intrinsic_parameters.html" title="Describes the intrinsic parameters of a camera." alt="" coords="389,5,582,32"/>
+</map>
