@@ -1,0 +1,4 @@
+<map id="aditof::FiltersFactory" name="aditof::FiltersFactory">
+<area shape="rect" id="node1" title="A factory for creating filters." alt="" coords="37,80,192,107"/>
+<area shape="rect" id="node2" href="$classaditof_1_1_frame_processor_factory.html" title="Base class for factories that create FrameProcessor instances." alt="" coords="5,5,224,32"/>
+</map>
