@@ -944,10 +944,7 @@ static void v4l2_subdev_close()
     close (v4l2_subdev_fd);
 }
 
-int readAfeTemp(float &temperature) {
-    using namespace aditof;
-    Status status = Status::OK;
-
+static int readAfeTemp(float* temperature) {
     temp_sensor tdev;
 
     if (temp_sensor_open(TEMP_SENSOR_DEV_PATH, AFE_TEMP_SENSOR_I2C_ADDR,
@@ -956,7 +953,7 @@ int readAfeTemp(float &temperature) {
         return -1;
     }
 
-    if (temp_sensor_read(&tdev, &temperature) == -1) {
+    if (temp_sensor_read(&tdev, temperature) == -1) {
         printf ("Error reading AFE_TEMP_SENSOR");
         return -1;
     }
@@ -966,10 +963,7 @@ int readAfeTemp(float &temperature) {
     return 0;
 }
 
-int readLaserTemp(float &temperature) {
-    using namespace aditof;
-    Status status = Status::OK;
-
+static int readLaserTemp(float* temperature) {
     temp_sensor tdev;
 
     if (temp_sensor_open(TEMP_SENSOR_DEV_PATH, LASER_TEMP_SENSOR_I2C_ADDR,
@@ -978,7 +972,7 @@ int readLaserTemp(float &temperature) {
         return -1;
     }
 
-    if (temp_sensor_read(&tdev, &temperature) == -1) {
+    if (temp_sensor_read(&tdev, temperature) == -1) {
         printf ("Error reading LASER_TEMP_SENSOR");
         return -1;
     }
@@ -1993,9 +1987,9 @@ static void uvc_events_process_control(
                 USB_REQ_DEBUG("Received GET_CUR on %d\n", cs);
 				
 				float temperature;
-				readAfeTemp(temperature);
+				readAfeTemp(&temperature);
 				*((float*)resp->data) = temperature;
-                readLaserTemp(temperature);
+                readLaserTemp(&temperature);
 				*((float*)&resp->data[4]) = temperature;
                 resp->length = 8;
                 break;
