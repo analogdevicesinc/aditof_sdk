@@ -4,7 +4,7 @@
 #include <string.h>
 
 AditofDemoRecorder::AditofDemoRecorder()
-    : m_frameDetails{0, 0, ""}, m_recordTreadStop(true),
+    : m_frameDetails{0, 0, "", {0.0f, 1.0f}}, m_recordTreadStop(true),
       m_playbackThreadStop(true), m_shouldReadNewFrame(true),
       m_playBackEofReached(false), m_numberOfFrames(0) {}
 
