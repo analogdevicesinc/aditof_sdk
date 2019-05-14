@@ -44,10 +44,10 @@
 
 #define RUNTIME_FPGA_PROGRAM
 
-#define LASER_BOARD_TEMP_SENSOR 0x49
-#define AFE_TEMP_SENSOR 0x4b
+#define TEMP_SENSOR_DEV_PATH "/dev/i2c-1"
+#define LASER_TEMP_SENSOR_I2C_ADDR 0x49
+#define AFE_TEMP_SENSOR_I2C_ADDR 0x4b
 
-char *device  = "/dev/i2c-1";
 char *eeprom_device  = (char *)"/sys/bus/i2c/devices/0-0056/eeprom";
 
 /* Enable debug prints. */
@@ -944,29 +944,50 @@ static void v4l2_subdev_close()
     close (v4l2_subdev_fd);
 }
 
-int tempsensor_read_reg (unsigned short *value)
-{
-    unsigned short temp_val[2];
-    unsigned short *t_val = value;
-    /* read the afe board temperature data  */
-    if(get_temp_sensor_data(device, AFE_TEMP_SENSOR, &temp_val[0]) == -1)
+int readAfeTemp(float &temperature) {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    temp_sensor tdev;
+
+    if (temp_sensor_open(TEMP_SENSOR_DEV_PATH, AFE_TEMP_SENSOR_I2C_ADDR,
+                         &tdev) < 0) {
+        printf ("Temp sensor open error");
         return -1;
+    }
 
-    *t_val = temp_val[0];
-    t_val++;
-    *t_val = temp_val[1];
-    t_val++;
-
-    /* Read the laser board temperature data */
-    if(get_temp_sensor_data(device, LASER_BOARD_TEMP_SENSOR, &temp_val[0]) == -1)
+    if (temp_sensor_read(&tdev, &temperature) == -1) {
+        printf ("Error reading AFE_TEMP_SENSOR");
         return -1;
+    }
 
-    *t_val = temp_val[0];
-    t_val++;
-    *t_val = temp_val[1];
+    temp_sensor_close(&tdev);
 
     return 0;
 }
+
+int readLaserTemp(float &temperature) {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    temp_sensor tdev;
+
+    if (temp_sensor_open(TEMP_SENSOR_DEV_PATH, LASER_TEMP_SENSOR_I2C_ADDR,
+                         &tdev) < 0) {
+        printf ("Temp sensor open error");
+        return -1;
+    }
+
+    if (temp_sensor_read(&tdev, &temperature) == -1) {
+        printf ("Error reading LASER_TEMP_SENSOR");
+        return -1;
+    }
+
+    temp_sensor_close(&tdev);
+
+    return 0;
+}
+
 
 static void v4l2_close(struct v4l2_device *dev)
 {
@@ -1970,8 +1991,12 @@ static void uvc_events_process_control(
 
             case UVC_GET_CUR:
                 USB_REQ_DEBUG("Received GET_CUR on %d\n", cs);
-
-                tempsensor_read_reg((unsigned short*)resp->data);
+				
+				float temperature;
+				readAfeTemp(temperature);
+				*((float*)resp->data) = temperature;
+                readLaserTemp(temperature);
+				*((float*)&resp->data[4]) = temperature;
                 resp->length = 8;
                 break;
 

@@ -1170,7 +1170,7 @@ aditof::Status UsbDevice::readAfeTemp(float &temperature) {
                         s.Property.Flags =
                             KSPROPERTY_TYPE_GET | KSPROPERTY_TYPE_TOPOLOGY;
                         s.NodeId = i;
-                        LONG64 integerTemperature;
+                        float integerTemperature[2];
                         hr = pKsUnk->KsProperty((PKSPROPERTY)&s, sizeof(s),
                                                 (LPVOID)&integerTemperature,
                                                 (long)readlength,
@@ -1179,7 +1179,7 @@ aditof::Status UsbDevice::readAfeTemp(float &temperature) {
                             LOG(WARNING) << "Error in reading temperature";
                             return Status::GENERIC_ERROR;
                         }
-                        temperature = static_cast<float>(integerTemperature);
+                        temperature = integerTemperature[0];
                     }
                 }
             }
@@ -1252,16 +1252,16 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
                         s.Property.Flags =
                             KSPROPERTY_TYPE_GET | KSPROPERTY_TYPE_TOPOLOGY;
                         s.NodeId = i;
-                        LONG64 integerTemperature;
+                        float integerTemperature[2];
                         hr = pKsUnk->KsProperty((PKSPROPERTY)&s, sizeof(s),
-                                                (LPVOID)&integerTemperature,
+                                                (LPVOID)integerTemperature,
                                                 (long)readlength,
                                                 &ulBytesReturned);
                         if (FAILED(hr)) {
                             LOG(WARNING) << "Error in reading temperature";
                             return Status::GENERIC_ERROR;
                         }
-                        temperature = static_cast<float>(integerTemperature);
+                        temperature = integerTemperature[1];
                     }
                 }
             }
