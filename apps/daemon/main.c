@@ -1,5 +1,4 @@
 #include "gpios.h"
-#include "leds.h"
 
 #include <fcntl.h>
 #include <poll.h>
@@ -14,17 +13,22 @@
 
 #include <stdio.h>
 
-#define BUTTON1_GPIO 17
-#define BUTTON2_GPIO 19
+#define BUTTON1_GPIO 28
+#define BUTTON2_GPIO 24
+#define LED1_GPIO 17
+#define LED2_GPIO 19
 
 #define UVC_APP_SCRIPT_NAME "config_pipe.sh"
 #define UVC_APP_START_COMMAND                                                  \
-    "/home/linaro/workspace/github/tof_sdk/apps/uvc-app/config_pipe.sh"
+    "/home/linaro/workspace/github/aditof_sdk/apps/uvc-app/config_pipe.sh"
 
 static const char *program_name = NULL;
 static struct gpio gpio1;
 static struct gpio gpio2;
 static const int count = 2;
+
+static struct gpio led1;
+static struct gpio led2;
 
 static void set_handler(int signal, void (*handler)(int)) {
     struct sigaction sig;
@@ -34,14 +38,13 @@ static void set_handler(int signal, void (*handler)(int)) {
 }
 
 static void sig_handler(int sig) {
-    syslog(LOG_INFO, "%s terminated with signal: %i", program_name, sig);
-    closelog();
+   syslog(LOG_INFO, "%s terminated with signal: %i", program_name, sig);
+   closelog();
 
-    gpio_unexport(&gpio1);
-    gpio_unexport(&gpio2);
-
-    gpio_free(&gpio1);
-    gpio_free(&gpio2);
+    gpio_destroy(&gpio1);
+    gpio_destroy(&gpio2);
+    gpio_destroy(&led1);
+    gpio_destroy(&led2);
 
     exit(EXIT_SUCCESS);
 }
@@ -79,11 +82,10 @@ void init_daemon(void) {
 
 void init_buttons(void) {
 
-    gpio_init(&gpio1, BUTTON1_GPIO);
-    gpio_init(&gpio2, BUTTON2_GPIO);
-
-    gpio_export(&gpio1);
-    gpio_export(&gpio2);
+    gpio_init(&gpio1, BUTTON1_GPIO, true);
+    gpio_init(&gpio2, BUTTON2_GPIO, true);
+    gpio_init(&led1, LED1_GPIO, false);
+    gpio_init(&led2, LED2_GPIO, false);
 
     gpio_set_edge(&gpio1, "rising");
     gpio_set_edge(&gpio2, "rising");
@@ -190,7 +192,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     uvc_app_started = !uvc_app_started;
-                    set_user_led_brightness(2, uvc_app_started ? 1 : 0);
+                    gpio_set_value(&led2, uvc_app_started ? 1 : 0);
                     break;
                 }
                 }

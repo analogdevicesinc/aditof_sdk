@@ -5,8 +5,8 @@ StartLimitIntervalSec=10
 Type=forking
 Restart=always
 RestartSec=5
-User=linaro
-ExecStart=/home/linaro/workspace/github/tof_sdk/apps/daemon/build/aditof-daemon
+User=root
+ExecStart=/home/linaro/workspace/github/aditof_sdk/apps/daemon/build/aditof-daemon
 
 [Install]
 WantedBy=multi-user.target

@@ -9,7 +9,15 @@
 
 #define GPIO_PATH "/sys/class/gpio"
 
-size_t write_int_to_file(int n, FILE *fp) {
+int write_int_to_file(int n, const char *filename) {
+
+    FILE *fp = fopen(filename, "w");
+    if (!fp) {
+        fprintf(stderr, "Failed to open file %s. Reason: %s\n", filename,
+                strerror(errno));
+        return -1;
+    }
+
     char buf[8];
     snprintf(buf, sizeof(buf), "%i", n);
     size_t buf_len = strlen(buf);
@@ -18,9 +26,42 @@ size_t write_int_to_file(int n, FILE *fp) {
         fprintf(stderr, "Failed to write int: %d to file. Reason: %s\n", n,
                 strerror(errno));
     }
+
+    fclose(fp);
+
+    return 0;
 }
 
-void gpio_init(struct gpio *gpio, int id) {
+size_t write_string_to_file(const char *string, const char *filename) {
+    
+    FILE *fp = fopen(filename, "w");
+    if (!fp) {
+        fprintf(stderr, "Failed to open file %s. Reason: %s\n", filename,
+                strerror(errno));
+        return 0;
+    }
+    
+    size_t len = strlen(string);
+    int ret = fwrite(string, sizeof(char), len, fp);
+    if (ret != len) {
+        fprintf(stderr, "Failed to write string: %s to file. Reason: %s\n", string,
+                strerror(errno));
+    }
+
+    fclose(fp);
+
+    return ret;
+}
+
+void gpio_export(struct gpio *gpio) {
+    write_int_to_file(gpio->id, GPIO_PATH "/export");
+}
+
+void gpio_unexport(struct gpio *gpio) {
+    write_int_to_file(gpio->id, GPIO_PATH "/unexport");
+}
+
+void gpio_init(struct gpio *gpio, int id, bool direction) {
     char tmp_path[128];
     size_t tmp_path_len;
 
@@ -36,9 +77,24 @@ void gpio_init(struct gpio *gpio, int id) {
     tmp_path_len = strlen(tmp_path) + 1;
     gpio->value_path = malloc(tmp_path_len);
     memcpy(gpio->value_path, tmp_path, tmp_path_len);
+
+    snprintf(tmp_path, sizeof(tmp_path), GPIO_PATH "/gpio%i/direction", id);
+    tmp_path_len = strlen(tmp_path) + 1;
+    gpio->direction_path = malloc(tmp_path_len);
+    memcpy(gpio->direction_path, tmp_path, tmp_path_len);
+
+    gpio_export(gpio);
+
+    if (direction)
+        write_string_to_file("in", gpio->direction_path);
+    else
+        write_string_to_file("out", gpio->direction_path);
 }
 
-void gpio_free(struct gpio *gpio) {
+void gpio_destroy(struct gpio *gpio) {
+
+    gpio_unexport(gpio);
+
     gpio->id = -1;
     gpio->value = -1;
 
@@ -47,29 +103,9 @@ void gpio_free(struct gpio *gpio) {
 
     free(gpio->value_path);
     gpio->value_path = NULL;
-}
 
-void gpio_export(struct gpio *gpio) {
-    FILE *fp = fopen(GPIO_PATH "/export", "w");
-    if (!fp) {
-        fprintf(stderr, "Failed to open file when exporting gpio. Reason: %s\n",
-                strerror(errno));
-        return;
-    }
-    write_int_to_file(gpio->id, fp);
-    fclose(fp);
-}
-
-void gpio_unexport(struct gpio *gpio) {
-    FILE *fp = fopen(GPIO_PATH "/unexport", "w");
-    if (!fp) {
-        fprintf(stderr,
-                "Failed to open file when un-exporting gpio. Reason: %s\n",
-                strerror(errno));
-        return;
-    }
-    write_int_to_file(gpio->id, fp);
-    fclose(fp);
+    free(gpio->direction_path);
+    gpio->direction_path = NULL;
 }
 
 void gpio_set_edge(struct gpio *gpio, const char *edge) {
@@ -94,4 +130,9 @@ void gpio_set_edge(struct gpio *gpio, const char *edge) {
     }
 
     fclose(fp);
+}
+
+void gpio_set_value(struct gpio *gpio, int value)
+{
+    write_int_to_file(value, gpio->value_path);
 }
