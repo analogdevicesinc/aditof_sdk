@@ -49,11 +49,11 @@ std::string getKeyPressed(int key, bool &backspace) {
     case 102:
         return "f";
     case 8:
-	backspace = true;
-	return "";
+        backspace = true;
+        return "";
 
     default:
-	return "";
+        return "";
     }
 }
 
@@ -71,12 +71,12 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
                                const std::string &name)
     : m_ctrl(ctrl), m_viewName(name), m_depthFrameAvailable(false),
       m_irFrameAvailable(false), m_stopWorkersFlag(false), m_center(true),
-      m_waitKeyBarrier(0) {
+      m_waitKeyBarrier(0), m_distanceVal(0) {
     // cv::setNumThreads(2);
     m_depthImageWorker =
-	std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
+        std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
     m_irImageWorker =
-	std::thread(std::bind(&AdiTofDemoView::_displayIrImage, this));
+        std::thread(std::bind(&AdiTofDemoView::_displayIrImage, this));
 }
 AdiTofDemoView::~AdiTofDemoView() {
     std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
@@ -139,10 +139,10 @@ void AdiTofDemoView::render() {
     int numberOfFrames = 0;
 
     std::string modes[3] = {"near", "medium", "far"};
-	
-	char afe_temp_str[32] = "AFE TEMP:";
-	char laser_temp_str[32] = "LASER TEMP:";
-	int temp_cnt = 0;
+
+    char afe_temp_str[32] = "AFE TEMP:";
+    char laser_temp_str[32] = "LASER TEMP:";
+    int temp_cnt = 0;
 
     while (true) {
         // Fill the frame with a nice color
@@ -194,105 +194,106 @@ void AdiTofDemoView::render() {
 
         // TODO: set camera mode here
         if (checkboxChanged) {
-	    int selectedMode =
-		(2 - static_cast<int>(std::log2(modeCurrentValue)));
-	    m_ctrl->setMode(modes[selectedMode]);
+            int selectedMode =
+                (2 - static_cast<int>(std::log2(modeCurrentValue)));
+            m_ctrl->setMode(modes[selectedMode]);
         }
 
-	cvui::beginColumn(frame, 50, 20);
+        cvui::beginColumn(frame, 50, 20);
         cvui::space(10);
         cvui::text("Mode: ", 0.6);
         cvui::space(10);
-	cvui::beginRow(frame, 50, 60);
+        cvui::beginRow(frame, 50, 60);
         cvui::checkbox("Near", &nearModeChecked);
         cvui::space(10);
         cvui::checkbox("Medium", &mediumModeChecked);
         cvui::space(10);
         cvui::checkbox("Far", &farModeChecked);
-	cvui::endRow();
-	cvui::endColumn();
+        cvui::endRow();
+        cvui::endColumn();
 
-	cvui::text(frame, 50, 100, "Video: ", 0.6);
+        cvui::text(frame, 50, 100, "Video: ", 0.6);
 
-	if (cvui::button(frame, 50, 125, 90, 30,
+        if (cvui::button(frame, 50, 125, 90, 30,
                          (captureEnabled ? "Stop" : "Play"))) {
             if (livePlayChecked) {
-		if (m_ctrl->hasCamera()) {
-		    captureEnabled = !captureEnabled;
-		    if (captureEnabled) {
-			m_ctrl->startCapture();
-			m_ctrl->requestFrame();
-			status = "Playing from device!";
-		    } else {
-			cv::destroyWindow(windows[1]);
-			cv::destroyWindow(windows[2]);
-			m_ctrl->stopCapture();
-			status = "";
-		    }
+                if (m_ctrl->hasCamera()) {
+                    captureEnabled = !captureEnabled;
+                    if (captureEnabled) {
+                        m_ctrl->startCapture();
+                        m_ctrl->requestFrame();
+                        status = "Playing from device!";
+                    } else {
+                        cv::destroyWindow(windows[1]);
+                        cv::destroyWindow(windows[2]);
+                        m_ctrl->stopCapture();
+                        status = "";
+                    }
                 } else {
-		    status = "No cameras connected!";
-		}
-	    } else {
-		if (fileName.empty()) {
-		    fieldColor = errorColor;
-		    status = "Enter a valid file name!";
-		} else {
-		    playbackEnabled = !playbackEnabled;
-		    static std::string oldStatus = "";
-		    captureEnabled = !captureEnabled;
-		    if (playbackEnabled) {
-			oldStatus = status;
-			status = "Playing from file: " + fileName;
-			numberOfFrames = m_ctrl->startPlayback(fileName, displayFps);
-		    } else {
-			status = oldStatus;
-			m_ctrl->stopPlayback();
-			cv::destroyWindow(windows[1]);
-			cv::destroyWindow(windows[2]);
-		    }
-		}
-	    }
+                    status = "No cameras connected!";
+                }
+            } else {
+                if (fileName.empty()) {
+                    fieldColor = errorColor;
+                    status = "Enter a valid file name!";
+                } else {
+                    playbackEnabled = !playbackEnabled;
+                    static std::string oldStatus = "";
+                    captureEnabled = !captureEnabled;
+                    if (playbackEnabled) {
+                        oldStatus = status;
+                        status = "Playing from file: " + fileName;
+                        numberOfFrames =
+                            m_ctrl->startPlayback(fileName, displayFps);
+                    } else {
+                        status = oldStatus;
+                        m_ctrl->stopPlayback();
+                        cv::destroyWindow(windows[1]);
+                        cv::destroyWindow(windows[2]);
+                    }
+                }
+            }
         }
-	if (cvui::button(frame, 150, 125, 90, 30, "Record")) {
-	    if (fileName.empty()) {
-		status = "Enter a file name!";
-	    } else if (!captureEnabled) {
-		status = "Start live playing before recording!";
-	    } else {
-		recordEnabled = !recordEnabled;
-		static std::string oldStatus = "";
-		if (recordEnabled) {
-		    oldStatus = status;
-		    status = "Recording into " + fileName;
-		    m_ctrl->startRecording(
-			fileName, frameHeight, frameWidth,
-			static_cast<unsigned int>(displayFps));
-		} else {
-		    m_ctrl->stopRecording();
-		    status = oldStatus;
-		}
-	    }
+        if (cvui::button(frame, 150, 125, 90, 30, "Record")) {
+            if (fileName.empty()) {
+                status = "Enter a file name!";
+            } else if (!captureEnabled) {
+                status = "Start live playing before recording!";
+            } else {
+                recordEnabled = !recordEnabled;
+                static std::string oldStatus = "";
+                if (recordEnabled) {
+                    oldStatus = status;
+                    status = "Recording into " + fileName;
+                    m_ctrl->startRecording(
+                        fileName, frameHeight, frameWidth,
+                        static_cast<unsigned int>(displayFps));
+                } else {
+                    m_ctrl->stopRecording();
+                    status = oldStatus;
+                }
+            }
         }
 
-	cvui::rect(frame, 50, 165, 190, 30, fieldColor);
-	cvui::text(frame, 60, 172, fileName);
+        cvui::rect(frame, 50, 165, 190, 30, fieldColor);
+        cvui::text(frame, 60, 172, fileName);
 
-	cvui::text(frame, 50, 202, status);
-	cvui::beginRow(frame, 50, 220);
-	cvui::checkbox("Live", &livePlayChecked);
-	cvui::space(10);
-	cvui::checkbox("Playback", &playbackChecked);
-	cvui::endRow();
+        cvui::text(frame, 50, 202, status);
+        cvui::beginRow(frame, 50, 220);
+        cvui::checkbox("Live", &livePlayChecked);
+        cvui::space(10);
+        cvui::checkbox("Playback", &playbackChecked);
+        cvui::endRow();
 
-	static int currentFrame = 0;
-	if (playbackEnabled) {
-		int x = currentFrame++;
-		cvui::trackbar(frame, 250, 160, 120, &x, 0, numberOfFrames + 1, 1);
-	} else {
-		currentFrame = 0;
-	}
+        static int currentFrame = 0;
+        if (playbackEnabled) {
+            int x = currentFrame++;
+            cvui::trackbar(frame, 250, 160, 120, &x, 0, numberOfFrames + 1, 1);
+        } else {
+            currentFrame = 0;
+        }
 
-	int fileNameField = cvui::iarea(50, 165, 190, 30);
+        int fileNameField = cvui::iarea(50, 165, 190, 30);
 
         if (fileNameField == cvui::CLICK) {
             fieldColor = selectedColor;
@@ -397,73 +398,75 @@ void AdiTofDemoView::render() {
             cvui::text(frame, 350, 380, "FPS:" + std::to_string(displayFps));
         }
 
-		if(temp_cnt++ == 64) {
-			std::pair<float, float> temp = m_ctrl->getTemperature();
-			temp_cnt = 0;
-			sprintf(afe_temp_str, "AFE TEMP: %.1f", temp.first);
-			sprintf(laser_temp_str, "LASER TEMP: %.1f", temp.second);
-		}		
-		cvui::text(frame, 20, 380, afe_temp_str);        
-		cvui::text(frame, 180, 380, laser_temp_str);
+        if (captureEnabled) {
+            if (temp_cnt++ == 64) {
+                std::pair<float, float> temp = m_ctrl->getTemperature();
+                temp_cnt = 0;
+                sprintf(afe_temp_str, "AFE TEMP: %.1f", temp.first);
+                sprintf(laser_temp_str, "LASER TEMP: %.1f", temp.second);
+            }
+            cvui::text(frame, 20, 380, afe_temp_str);
+            cvui::text(frame, 180, 380, laser_temp_str);
+        }
 
-		if (captureEnabled && !playbackEnabled) {
-				frameCount++;
-				auto endTime = std::chrono::system_clock::now();
-				std::chrono::duration<double> elapsed = endTime - startTime;
-				if (elapsed.count() >= 2) {
-					displayFps = frameCount / elapsed.count();
-					frameCount = 0;
-					startTime = endTime;
-				}
-		}
+        if (captureEnabled && !playbackEnabled) {
+            frameCount++;
+            auto endTime = std::chrono::system_clock::now();
+            std::chrono::duration<double> elapsed = endTime - startTime;
+            if (elapsed.count() >= 2) {
+                displayFps = frameCount / elapsed.count();
+                frameCount = 0;
+                startTime = endTime;
+            }
+        }
 
-		cvui::beginColumn(frame, 50, 250);
-		cvui::space(10);
-		cvui::text("Settings: ", 0.6);
-		cvui::space(10);
-		cvui::checkbox("Center Point", &m_center);
-		cvui::endColumn();
+        cvui::beginColumn(frame, 50, 250);
+        cvui::space(10);
+        cvui::text("Settings: ", 0.6);
+        cvui::space(10);
+        cvui::checkbox("Center Point", &m_center);
+        cvui::endColumn();
 
         cvui::imshow(m_viewName, frame);
 
         if (captureEnabled) {
 
-	    if (playbackEnabled) {
-		std::this_thread::sleep_for(
-		    std::chrono::milliseconds(1000 / displayFps));
-	    }
+            if (playbackEnabled) {
+                std::this_thread::sleep_for(
+                    std::chrono::milliseconds(1000 / displayFps));
+            }
 
-	    if (m_ctrl->playbackFinished() && playbackEnabled) {
-		captureEnabled = false;
-		playbackEnabled = false;
-		status = "Finished playing from: " + fileName;
-		m_ctrl->stopPlayback();
-		cv::destroyWindow(windows[1]);
-		cv::destroyWindow(windows[2]);
-	    } else {
-		m_capturedFrame = m_ctrl->getFrame();
+            if (m_ctrl->playbackFinished() && playbackEnabled) {
+                captureEnabled = false;
+                playbackEnabled = false;
+                status = "Finished playing from: " + fileName;
+                m_ctrl->stopPlayback();
+                cv::destroyWindow(windows[1]);
+                cv::destroyWindow(windows[2]);
+            } else {
+                m_capturedFrame = m_ctrl->getFrame();
 
-		aditof::FrameDetails frameDetails;
-		m_capturedFrame->getDetails(frameDetails);
-		frameWidth = frameDetails.width;
-		frameHeight = frameDetails.height;
+                aditof::FrameDetails frameDetails;
+                m_capturedFrame->getDetails(frameDetails);
+                frameWidth = frameDetails.width;
+                frameHeight = frameDetails.height;
 
-		std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
-		m_depthFrameAvailable = true;
-		m_irFrameAvailable = true;
-		lock.unlock();
-		m_frameCapturedCv.notify_all();
-		m_ctrl->requestFrame();
-	    }
-	}
+                std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
+                m_depthFrameAvailable = true;
+                m_irFrameAvailable = true;
+                lock.unlock();
+                m_frameCapturedCv.notify_all();
+                m_ctrl->requestFrame();
+            }
+        }
 
-	std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
-	if (captureEnabled) {
-	    m_barrierCv.wait(imshow_lock,
-			     [&]() { return m_waitKeyBarrier == 2; });
-	    m_waitKeyBarrier = 0;
-	}
-	int key = cv::waitKey(10);
+        std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
+        if (captureEnabled) {
+            m_barrierCv.wait(imshow_lock,
+                             [&]() { return m_waitKeyBarrier == 2; });
+            m_waitKeyBarrier = 0;
+        }
+        int key = cv::waitKey(10);
 
         bool backspace = false;
         std::string pressedValidKey = detail::getKeyPressed(key, backspace);
@@ -502,94 +505,95 @@ void AdiTofDemoView::render() {
 
 void AdiTofDemoView::_displayDepthImage() {
     while (!m_stopWorkersFlag) {
-	std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
-	m_frameCapturedCv.wait(
-	    lock, [&]() { return m_depthFrameAvailable || m_stopWorkersFlag; });
+        std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
+        m_frameCapturedCv.wait(
+            lock, [&]() { return m_depthFrameAvailable || m_stopWorkersFlag; });
 
-	if (m_stopWorkersFlag) {
-	    break;
-	}
+        if (m_stopWorkersFlag) {
+            break;
+        }
 
-	m_depthFrameAvailable = false;
+        m_depthFrameAvailable = false;
 
-	std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
-	lock.unlock(); // Lock is no longer needed
+        std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
+        lock.unlock(); // Lock is no longer needed
 
-	uint16_t *data;
-	localFrame->getData(aditof::FrameDataType::DEPTH, &data);
+        uint16_t *data;
+        localFrame->getData(aditof::FrameDataType::DEPTH, &data);
 
-	aditof::FrameDetails frameDetails;
-	localFrame->getDetails(frameDetails);
+        aditof::FrameDetails frameDetails;
+        localFrame->getDetails(frameDetails);
 
-	int frameHeight = static_cast<int>(frameDetails.height) / 2;
-	int frameWidth = static_cast<int>(frameDetails.width);
+        int frameHeight = static_cast<int>(frameDetails.height) / 2;
+        int frameWidth = static_cast<int>(frameDetails.width);
 
-	cv::Mat displayedImage(frameHeight, frameWidth, CV_16UC1, data);
-	cv::Point2d pointxy(320, 240);
-	int val = displayedImage.at<ushort>(pointxy);
-	char text[20];
-	sprintf(text, "%d", val);
-	displayedImage.convertTo(displayedImage, CV_8U, 255.0 / 4095);
-	applyColorMap(displayedImage, displayedImage, cv::COLORMAP_RAINBOW);
-	flip(displayedImage, displayedImage, 1);
-	int color;
-	if (val > 2500)
-	    color = 0;
-	else
-	    color = 4096;
+        cv::Mat displayedImage(frameHeight, frameWidth, CV_16UC1, data);
+        cv::Point2d pointxy(320, 240);
+        m_distanceVal = static_cast<int>(
+            m_distanceVal * 0.9 + displayedImage.at<ushort>(pointxy) * 0.1);
+        char text[20];
+        sprintf(text, "%d", m_distanceVal);
+        displayedImage.convertTo(displayedImage, CV_8U, 255.0 / 4095);
+        applyColorMap(displayedImage, displayedImage, cv::COLORMAP_RAINBOW);
+        flip(displayedImage, displayedImage, 1);
+        int color;
+        if (m_distanceVal > 2500)
+            color = 0;
+        else
+            color = 4096;
 
-	std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
-	if (m_center) {
-	    cv::circle(displayedImage, pointxy, 4,
-		       cv::Scalar(color, color, color), -1, 8, 0);
-	    cv::putText(displayedImage, text, pointxy, cv::FONT_HERSHEY_DUPLEX,
-			2, cv::Scalar(color, color, color));
-	}
-	cvui::imshow("Depth Image", displayedImage);
-	m_waitKeyBarrier += 1;
-	if (m_waitKeyBarrier == 2) {
-	    imshow_lock.unlock();
-	    m_barrierCv.notify_one();
-	}
+        std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
+        if (m_center) {
+            cv::circle(displayedImage, pointxy, 4,
+                       cv::Scalar(color, color, color), -1, 8, 0);
+            cv::putText(displayedImage, text, pointxy, cv::FONT_HERSHEY_DUPLEX,
+                        2, cv::Scalar(color, color, color));
+        }
+        cvui::imshow("Depth Image", displayedImage);
+        m_waitKeyBarrier += 1;
+        if (m_waitKeyBarrier == 2) {
+            imshow_lock.unlock();
+            m_barrierCv.notify_one();
+        }
     }
 }
 
 void AdiTofDemoView::_displayIrImage() {
     while (!m_stopWorkersFlag) {
-	std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
-	m_frameCapturedCv.wait(
-	    lock, [&]() { return m_irFrameAvailable || m_stopWorkersFlag; });
+        std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
+        m_frameCapturedCv.wait(
+            lock, [&]() { return m_irFrameAvailable || m_stopWorkersFlag; });
 
-	if (m_stopWorkersFlag) {
-	    break;
-	}
+        if (m_stopWorkersFlag) {
+            break;
+        }
 
-	m_irFrameAvailable = false;
+        m_irFrameAvailable = false;
 
-	std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
-	lock.unlock(); // Lock is no longer needed
+        std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
+        lock.unlock(); // Lock is no longer needed
 
-	uint16_t *irData;
-	localFrame->getData(aditof::FrameDataType::IR, &irData);
+        uint16_t *irData;
+        localFrame->getData(aditof::FrameDataType::IR, &irData);
 
-	aditof::FrameDetails frameDetails;
-	localFrame->getDetails(frameDetails);
+        aditof::FrameDetails frameDetails;
+        localFrame->getDetails(frameDetails);
 
-	int frameHeight = static_cast<int>(frameDetails.height) / 2;
-	int frameWidth = static_cast<int>(frameDetails.width);
+        int frameHeight = static_cast<int>(frameDetails.height) / 2;
+        int frameWidth = static_cast<int>(frameDetails.width);
 
-	cv::Mat displayedImage =
-	    cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
-	displayedImage.convertTo(displayedImage, CV_8U, 255.0 / 4095);
-	flip(displayedImage, displayedImage, 1);
+        cv::Mat displayedImage =
+            cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
+        displayedImage.convertTo(displayedImage, CV_8U, 255.0 / 4095);
+        flip(displayedImage, displayedImage, 1);
 
-	std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
-	cvui::imshow("IR Image", displayedImage);
-	m_waitKeyBarrier += 1;
-	if (m_waitKeyBarrier == 2) {
-	    imshow_lock.unlock();
-	    m_barrierCv.notify_one();
-	}
-	displayedImage.release();
+        std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
+        cvui::imshow("IR Image", displayedImage);
+        m_waitKeyBarrier += 1;
+        if (m_waitKeyBarrier == 2) {
+            imshow_lock.unlock();
+            m_barrierCv.notify_one();
+        }
+        displayedImage.release();
     }
 }
