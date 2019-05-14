@@ -18,8 +18,6 @@
 /********************************************************************************/
 #pragma once
 
-#include "stdafx.h"
-#include <aviriff.h>
 #include <dshow.h>
 #include <initguid.h>
 #include <strmif.h>
