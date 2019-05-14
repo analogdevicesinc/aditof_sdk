@@ -8,21 +8,21 @@
 #define CONFIGURATION_REG 0x3
 
 /*
- * Open the temperature sensor device 
+ * Open the temperature sensor device
  */
-int temp_sensor_open(char *dev_fqn, int addr,temp_sensor* t);
+int temp_sensor_open(char *dev_fqn, int addr, temp_sensor *t);
 /*
  * read the temperature sensor data
  */
-int get_temp_sensor_data(char * device, int i2c_addr, unsigned short *temp_val);
-/* 
+int temp_sensor_read(temp_sensor *t, float *temp_val);
+/*
  * read the temperature sensor data of size 1 byte
  */
-int temp_read_byte_data(temp_sensor* t, __u16 addr_reg);
-/* 
+int temp_read_byte_data(temp_sensor *t, __u16 addr_reg);
+/*
  * close the teperature sensor device
  */
-int temp_sensor_close(temp_sensor* t);
+int temp_sensor_close(temp_sensor *t);
 /*
  * write the 1 byte daat to temperature sensor device
  */

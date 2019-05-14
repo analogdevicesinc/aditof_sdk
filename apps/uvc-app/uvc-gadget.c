@@ -285,9 +285,9 @@ unsigned short reg_addr;
 
 /* EEPROM data */
 eeprom edev;
-unsigned short eeprom_read_addr = 0;
+unsigned int   eeprom_read_addr = 0;
 unsigned int   eeprom_read_len = 0;
-unsigned short eeprom_write_addr = 0;
+unsigned int   eeprom_write_addr = 0;
 unsigned int   eeprom_write_len = 0;
 unsigned char  eeprom_data[128 * 1024];
 
@@ -2342,14 +2342,14 @@ static int uvc_events_process_data(struct uvc_device *dev, struct uvc_request_da
                 reg_addr = *((unsigned short*)(data->data));
             }
             else if (dev->set_cur_cs == 5) { /* EEPROM Read Address */
-                 eeprom_read_addr = ((unsigned short)(data->data[0]) << 8) + (unsigned short)(data->data[1]);
-                 eeprom_read_len = data->data[2];
+                 eeprom_read_addr = *((unsigned int*)&(data->data[0]));
+                 eeprom_read_len = data->data[4];
             }
             else if (dev->set_cur_cs == 6) {
-                eeprom_write_addr = ((unsigned short)(data->data[0]) << 8) + (unsigned short)(data->data[1]);
-                memcpy(&eeprom_data[eeprom_write_len], &data->data[3], data->data[2]);
-				eeprom_write_len += data->data[2];
-				if(data->data[2] < MAX_PACKET_SIZE - 3) {
+                eeprom_write_addr = *((unsigned int*)&(data->data[0]));
+                memcpy(&eeprom_data[eeprom_write_len], &data->data[5], data->data[4]);
+				eeprom_write_len += data->data[4];
+				if(data->data[4] < MAX_PACKET_SIZE - 5) {
 					eeprom_write_buf(&edev, eeprom_write_addr, eeprom_data, eeprom_write_len);
 					eeprom_write_len = 0;
 				}

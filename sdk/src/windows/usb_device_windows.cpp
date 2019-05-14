@@ -777,12 +777,11 @@ aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
                         size_t addr = address;
 
                         while (readBytes < length) {
-                            packet[0] = (addr & 0xFF00) >> 8;
-                            packet[1] = addr & 0xFF;
+                            *((uint32_t*)&packet[0]) = addr;
                             readlength = length - readBytes < MAX_BUF_SIZE
                                              ? length - readBytes
                                              : MAX_BUF_SIZE;
-                            packet[2] = static_cast<uint8_t>(readlength);
+                            packet[4] = static_cast<uint8_t>(readlength);
 
                             // This set property will send the address of the
                             // EEPROM
@@ -885,13 +884,12 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
                         size_t writtenBytes = 0;
 
                         while (writtenBytes < length) {
-                            packet[0] = address >> 8;
-                            packet[1] = address & 0xFF;
-                            writeLen = length - writtenBytes > MAX_BUF_SIZE - 3
-                                           ? MAX_BUF_SIZE - 3
+							*((uint32_t*)&packet[0]) = address;
+                            writeLen = length - writtenBytes > MAX_BUF_SIZE - 5
+                                           ? MAX_BUF_SIZE - 5
                                            : length - writtenBytes;
-                            packet[2] = static_cast<uint8_t>(writeLen);
-                            memcpy(&packet[3], data + writtenBytes, writeLen);
+                            packet[4] = static_cast<uint8_t>(writeLen);
+                            memcpy(&packet[5], data + writtenBytes, writeLen);
 
                             // This set property will send the address and data
                             // to EEPROM
@@ -909,6 +907,7 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
                                 return Status::GENERIC_ERROR;
                             }
                             writtenBytes += writeLen;
+							address += writeLen;
                         }
                     }
                 }
