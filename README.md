@@ -64,6 +64,5 @@ https://analogdevicesinc.github.io/aditof_sdk/
 | doc | Contains the documentation |
 | examples | Contains the source code of examples to be built and executed on Hosts |
 | sdk | Contains the source code of software development kit used by examples |
-| References | Contains the prebuilt SDK internal libraries and open source libraries like OpenCV |
-| IO_Library | TBD: Contains the host specific code for USB interactions |
-| ADI_TOF_UTIL | TBD: Contains the source code of sdk internal libraries |
+| scripts | Contains scripts that are used when developing |
+
