@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     FLAGS_alsologtostderr = 1;
 
     auto controller = std::make_shared<AdiTofDemoController>();
-    auto view = std::make_shared<AdiTofDemoView>(controller, "Hello World");
+    auto view = std::make_shared<AdiTofDemoView>(controller, "aditof-demo v0.1");
     view->render();
 
     return 0;
