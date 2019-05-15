@@ -9,12 +9,12 @@ sudo apt update
 sudo apt install v4l-utils -y
 
 #get the software
-if [ ! -d "tof_sdk" ]; then
-git clone https://github.com/adi-sdg/tof_sdk
+if [ ! -d "aditof_sdk" ]; then
+git clone https://github.com/analogdevicesinc/aditof_sdk
 fi
 
 #build the software
-cd tof_sdk
+cd aditof_sdk
 git checkout master 
 cd apps/uvc-app/
 make clean all

@@ -30,13 +30,13 @@ In Client Server mode, DragonBoard™ 410c needs to be set up with a 'micro USB 
 [*Mac Host - MacOS High-Sierra and MacOS Mojave*]()
 
 * When installation specified in above steps are completed, follow below steps to setup the demo in Client Server mode:
-* On DragonBoard™ 410c, go to directory "tof_sdk\apps\uvc-app" and run config_pipe.sh as below:
+* On DragonBoard™ 410c, go to directory "aditof_sdk\apps\uvc-app" and run config_pipe.sh as below:
 ```
 sudo ./config_pipe.sh
 ```
 * On Host:
-1. On Linux host, go to directory "tof_sdk\build\examples\aditof-demo\" and run aditof-demo
-2. On Windows host, go to directory "tof_sdk\build\examples\aditof-demo\Release\" and run aditof-demo.exe
+1. On Linux host, go to directory "aditof_sdk\build\examples\aditof-demo\" and run aditof-demo
+2. On Windows host, go to directory "aditof_sdk\build\examples\aditof-demo\Release\" and run aditof-demo.exe
 
 On Monitor connected to Host PC, you should now be able to see three windows pop up, one for settings control, one showing 'Depth Image' and one showing 'IR Image'.
 
@@ -47,7 +47,7 @@ In Standalone mode, DragonBoard™ 410c need to be setup with 'HDMI cable', 'USB
 * To use TOF SDK and Examples directly on DragonBoard™ 410c, follow below installation steps.\
 [*Dragonboard-410c - Host*](./doc/dragonboard_host_build.md)
 * When installation steps specified above are completed, follow below steps to setup the demo in Standalone mode:
-* On DragonBoard™ 410c, go to directory "tof_sdk\build\examples\aditof-demo\" and execute below steps:
+* On DragonBoard™ 410c, go to directory "aditof_sdk\build\examples\aditof-demo\" and execute below steps:
 ```
 sudo ./config_pipe.sh
 sudo ./aditof-demo

@@ -20,8 +20,8 @@
 
 #### Download and build SDK and Examples
 Follow below steps to download and build the SDK and Examples 
-1. git clone https://github.com/adi-sdg/tof_sdk
-2. cd tof_sdk
+1. git clone https://github.com/analogdevicesinc/aditof_sdk
+2. cd aditof_sdk
 3. mkdir build && cd build
 4. cmake ..
 5. make

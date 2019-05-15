@@ -15,7 +15,7 @@ tar -C toolchain -xvf gcc-linaro-7.2.1-2017.11-rc1-x86_64_aarch64-linux-gnu.tar.
 rm -frv gcc-linaro-7.2.1-2017.11-rc1-x86_64_aarch64-linux-gnu.tar.xz
 
 # Get Kernel source code, rootfs binaries, and boot image tools
-git clone https://github.com/adi-sdg/dragonboard_410c_kernel.git
+git clone https://github.com/analogdevicesinc/aditof_linux.git
 wget https://builds.96boards.org/releases/dragonboard410c/linaro/debian/17.04/initrd.img-4.9.27-linaro-lt-qcom
 wget https://releases.linaro.org/96boards/dragonboard410c/linaro/debian/17.04/linaro-stretch-alip-qcom-snapdragon-arm64-20170510-233.img.gz
 git clone https://source.codeaurora.org/quic/kernel/skales
