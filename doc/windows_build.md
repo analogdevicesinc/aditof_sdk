@@ -21,13 +21,13 @@
 
 #### Download and build SDK and Examples
 * Follow below steps to download and generate MS Visual Studio project
-1. git clone https://github.com/adi-sdg/tof_sdk
-2. cd tof_sdk
+1. git clone https://github.com/analogdevicesinc/aditof_sdk
+2. cd aditof_sdk
 3. scripts/generate_msvcX_solution.bat (where X is the version of visual studio installed, ex: 2015)
 
 * Follow below steps to build the SDK and Examples
-1. Open 'adi_tof_project.sln' generated in 'tof_sdk/build' in MS Visual Studio 2015
+1. Open 'adi_tof_project.sln' generated in 'aditof_sdk/build' in MS Visual Studio 2015
 2. Select 'Release' build
 3. Build the solution
-4. Application binary are created in 'tof_sdk/build/example/aditof-demo/Release' directory
+4. Application binary are created in 'aditof_sdk/build/example/aditof-demo/Release' directory
 

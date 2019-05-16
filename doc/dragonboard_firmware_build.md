@@ -5,8 +5,8 @@
 sudo apt-get install git build-essential fakeroot libncurses5-dev libssl-dev ccache
 wget http://snapshots.linaro.org/components/toolchain/binaries/7.2-2017.11-rc1/aarch64-linux-gnu/gcc-linaro-7.2.1-2017.11-rc1-x86_64_aarch64-linux-gnu.tar.xz
 
-git clone https://github.com/adi-sdg/dragonboard_410c_kernel.git
-cd dragonboard_410c_kernel
+git clone https://github.com/analogdevicesinc/aditof_linux.git
+cd aditof_linux
 git clone https://source.codeaurora.org/quic/kernel/skales
 wget https://builds.96boards.org/releases/dragonboard410c/linaro/debian/17.04/initrd.img-4.9.27-linaro-lt-qcom
 wget https://releases.linaro.org/96boards/dragonboard410c/linaro/debian/17.04/linaro-stretch-alip-qcom-snapdragon-arm64-20170510-233.img.gz
