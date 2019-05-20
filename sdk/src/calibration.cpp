@@ -215,6 +215,7 @@ aditof::Status
 Calibration::readCalMap(std::shared_ptr<DeviceInterface> device) {
     using namespace aditof;
 
+    Status status = Status::OK;
     uint8_t *data;
     float read_size = 100;
     uint32_t j = 0;
@@ -231,7 +232,13 @@ Calibration::readCalMap(std::shared_ptr<DeviceInterface> device) {
     }
 
     data = (uint8_t *)malloc(read_size);
-    device->readEeprom(4, data, (size_t)read_size);
+
+    status = device->readEeprom(4, data, (size_t)read_size);
+    if (status != Status::OK) {
+        free(data);
+        LOG(WARNING) << "Failed to read from eeprom";
+        return status;
+    }
 
     while (j < read_size) {
         key = *(float *)(data + j);
