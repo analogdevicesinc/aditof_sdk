@@ -6,14 +6,15 @@
 AdiTofDemoController::AdiTofDemoController()
     : m_cameraInUse(-1), m_frameRequested(false),
       m_recorder(new AditofDemoRecorder()) {
-    aditof::System &system = aditof::System::instance();
+
+    aditof::System system;
     system.initialize();
 
     system.getCameraList(m_cameras);
     if (m_cameras.size()) {
         // Use the first camera that is found
         m_cameraInUse = 0;
-	auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
+        auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
 
         camera->initialize();
 
@@ -33,8 +34,6 @@ AdiTofDemoController::AdiTofDemoController()
         }
 
         camera->setMode(modes.front());
-
-        camera->start();
 
     } else {
         LOG(WARNING) << "No cameras found!";
@@ -78,8 +77,8 @@ std::string AdiTofDemoController::getMode() const {
 }
 
 void AdiTofDemoController::setMode(const std::string &mode) {
-	if (m_cameraInUse == -1) {
-	return;
+    if (m_cameraInUse == -1) {
+        return;
     }
     auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
     camera->setMode(mode);
@@ -89,16 +88,16 @@ std::pair<float, float> AdiTofDemoController::getTemperature() {
     auto returnValue = std::make_pair<float, float>(0.0, 0.0);
 
     if (m_cameraInUse == -1) {
-	return returnValue;
+        return returnValue;
     }
 
-	auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
-    
-	std::shared_ptr<DeviceInterface> device = camera->getDevice();
-	
-	device->readAfeTemp(returnValue.first);
-	device->readLaserTemp(returnValue.second);
-	
+    auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
+
+    std::shared_ptr<DeviceInterface> device = camera->getDevice();
+
+    device->readAfeTemp(returnValue.first);
+    device->readLaserTemp(returnValue.second);
+
     return returnValue;
 }
 
@@ -109,23 +108,22 @@ aditof::Status AdiTofDemoController::writeAFEregister(
 }
 
 aditof::Status AdiTofDemoController::readAFEregister(uint16_t * /*address*/,
-						     uint16_t * /*data*/,
-						     uint16_t /*noOfEntries*/) {
+                                                     uint16_t * /*data*/,
+                                                     uint16_t /*noOfEntries*/) {
     // TODO: implement read afe regs
     return aditof::Status::OK;
 }
 
 void AdiTofDemoController::startRecording(const std::string &fileName,
-					  unsigned int height,
-					  unsigned int width,
-					  unsigned int fps) {
+                                          unsigned int height,
+                                          unsigned int width,
+                                          unsigned int fps) {
     m_recorder->startRecording(fileName, height, width, fps);
 }
 
 void AdiTofDemoController::stopRecording() { m_recorder->stopRecording(); }
 
-int AdiTofDemoController::startPlayback(const std::string &fileName,
-					 int &fps) {
+int AdiTofDemoController::startPlayback(const std::string &fileName, int &fps) {
     return m_recorder->startPlayback(fileName, fps);
 }
 
@@ -137,19 +135,19 @@ bool AdiTofDemoController::playbackFinished() const {
 
 std::shared_ptr<aditof::Frame> AdiTofDemoController::getFrame() {
     if (m_recorder->isPlaybackEnabled()) {
-	return m_recorder->readNewFrame();
+        return m_recorder->readNewFrame();
     }
     return m_queue.dequeue();
 }
 
 void AdiTofDemoController::requestFrame() {
     if (m_recorder->isPlaybackEnabled()) {
-	m_recorder->requestFrame();
+        m_recorder->requestFrame();
     } else {
-	std::unique_lock<std::mutex> lock(m_requestMutex);
-	m_frameRequested = true;
-	lock.unlock();
-	m_requestCv.notify_one();
+        std::unique_lock<std::mutex> lock(m_requestMutex);
+        m_frameRequested = true;
+        lock.unlock();
+        m_requestCv.notify_one();
     }
 }
 
@@ -157,22 +155,26 @@ bool AdiTofDemoController::hasCamera() const { return !m_cameras.empty(); }
 
 void AdiTofDemoController::captureFrames() {
     while (!m_stopFlag.load()) {
-	std::unique_lock<std::mutex> lock(m_requestMutex);
-	m_requestCv.wait(lock, [&] { return m_frameRequested || m_stopFlag; });
+        std::unique_lock<std::mutex> lock(m_requestMutex);
+        m_requestCv.wait(lock, [&] { return m_frameRequested || m_stopFlag; });
 
-	if (m_stopFlag) {
-	    break;
-	}
+        if (m_stopFlag) {
+            break;
+        }
 
-	auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
+        auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
         auto frame = std::make_shared<aditof::Frame>();
-        camera->requestFrame(frame);
+        aditof::Status status = camera->requestFrame(frame);
+        if (status != aditof::Status::OK) {
+            m_frameRequested = false;
+            continue;
+        }
 
-	if (m_recorder->isRecordingEnabled()) {
-	    m_recorder->recordNewFrame(frame);
-	}
+        if (m_recorder->isRecordingEnabled()) {
+            m_recorder->recordNewFrame(frame);
+        }
 
-	m_queue.enqueue(frame);
-	m_frameRequested = false;
+        m_queue.enqueue(frame);
+        m_frameRequested = false;
     }
 }

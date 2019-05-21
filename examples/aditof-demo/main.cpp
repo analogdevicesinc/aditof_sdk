@@ -12,7 +12,8 @@ int main(int argc, char **argv) {
     FLAGS_alsologtostderr = 1;
 
     auto controller = std::make_shared<AdiTofDemoController>();
-    auto view = std::make_shared<AdiTofDemoView>(controller, "aditof-demo v0.1");
+    auto view =
+        std::make_shared<AdiTofDemoView>(controller, "aditof-demo v0.1");
     view->render();
 
     return 0;
@@ -33,19 +34,28 @@ int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
 
-    System &system = System::instance();
-    system.initialize();
+    Status status = Status::OK;
+
+    System system;
+    status = system.initialize();
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not initialize system!";
+        return 0;
+    }
 
     std::vector<std::shared_ptr<Camera>> cameras;
     system.getCameraList(cameras);
-
     if (cameras.empty()) {
         LOG(WARNING) << "No cameras found";
         return 0;
     }
 
     auto camera = cameras.front();
-    camera->initialize();
+    status = camera->initialize();
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not initialize camera!";
+        return 0;
+    }
 
     std::vector<std::string> frameTypes;
     camera->getAvailableFrameTypes(frameTypes);
@@ -53,27 +63,44 @@ int main(int argc, char *argv[]) {
         std::cout << "no frame type avaialble!";
         return 0;
     }
-    camera->setFrameType(frameTypes.front());
+    status = camera->setFrameType(frameTypes.front());
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not set camera frame type!";
+        return 0;
+    }
 
     std::vector<std::string> modes;
     camera->getAvailableModes(modes);
     if (modes.empty()) {
-        std::cout << "no camera modes available!";
+        LOG(ERROR) << "no camera modes available!";
         return 0;
     }
-    camera->setMode(modes.front());
-
-    camera->start();
+    status = camera->setMode(modes.front());
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not set camera mode!";
+        return 0;
+    }
 
     auto frame = std::make_shared<aditof::Frame>();
-    camera->requestFrame(frame);
 
-    camera->stop();
+    status = camera->requestFrame(frame);
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not request frame!" << i;
+        return 0;
+    } else {
+        LOG(INFO) << "succesfully requested frame!" << i;
+    }
 
     uint16_t *data1;
-    frame->getData(FrameDataType::RAW, &data1);
+    status = frame->getData(FrameDataType::RAW, &data1);
+
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not get frame data!";
+        return 0;
+    }
+
     if (!data1) {
-        std::cout << "no memory allocated in frame";
+        LOG(ERROR) << "no memory allocated in frame";
         return 0;
     }
 

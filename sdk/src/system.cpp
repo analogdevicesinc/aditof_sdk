@@ -6,11 +6,8 @@ namespace aditof {
 
 System::System() : m_impl(new SystemImpl) {}
 System::~System() = default;
-
-System &System::instance() {
-    static System instance;
-    return instance;
-}
+System::System(System &&) noexcept = default;
+System &System::operator=(System &&) noexcept = default;
 
 Status System::initialize() { return m_impl->initialize(); }
 
