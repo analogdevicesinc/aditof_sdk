@@ -7,6 +7,12 @@
 
 #include "aditofdemocontroller.h"
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#ifdef OPENCV2
+#include <opencv2/contrib/contrib.hpp>
+#endif
+
 class AdiTofDemoView {
   public:
     AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
@@ -22,6 +28,9 @@ class AdiTofDemoView {
   private:
     std::shared_ptr<AdiTofDemoController> m_ctrl;
     std::string m_viewName;
+
+    cv::Mat m_depthImage;
+    cv::Mat m_irImage;
 
     std::thread m_depthImageWorker;
     std::thread m_irImageWorker;
