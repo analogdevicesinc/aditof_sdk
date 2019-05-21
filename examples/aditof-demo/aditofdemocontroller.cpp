@@ -33,8 +33,6 @@ AdiTofDemoController::AdiTofDemoController()
             return;
         }
 
-        camera->setMode(modes.front());
-
     } else {
         LOG(WARNING) << "No cameras found!";
     }
