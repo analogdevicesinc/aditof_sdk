@@ -442,11 +442,7 @@ aditof::Status UsbDevice::start() {
     using namespace aditof;
     Status status = Status::OK;
 
-    HRESULT hr = m_implData->pControl->Run();
-    if (FAILED(hr)) {
-        LOG(WARNING) << "ERROR: Could not start graph";
-        return Status::GENERIC_ERROR;
-    }
+    // Nothing to do
 
     return status;
 }
@@ -564,7 +560,11 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
                         KSP_NODE s;
                         ULONG ulBytesReturned;
 
-                        hr = m_implData->pControl->Pause();
+                        OAFilterState state;
+                        m_implData->pControl->GetState(1, &state);
+                        if (state == _FilterState::State_Running) {
+                            hr = m_implData->pControl->Pause();
+                        }
 
                         s.Property.Set = EXT_UNIT_GUID;
                         s.Property.Id = 1;
@@ -777,7 +777,7 @@ aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
                         size_t addr = address;
 
                         while (readBytes < length) {
-                            *((uint32_t*)&packet[0]) = addr;
+                            *((uint32_t *)&packet[0]) = addr;
                             readlength = length - readBytes < MAX_BUF_SIZE
                                              ? length - readBytes
                                              : MAX_BUF_SIZE;
@@ -884,7 +884,7 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
                         size_t writtenBytes = 0;
 
                         while (writtenBytes < length) {
-							*((uint32_t*)&packet[0]) = address;
+                            *((uint32_t *)&packet[0]) = address;
                             writeLen = length - writtenBytes > MAX_BUF_SIZE - 5
                                            ? MAX_BUF_SIZE - 5
                                            : length - writtenBytes;
@@ -907,7 +907,7 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
                                 return Status::GENERIC_ERROR;
                             }
                             writtenBytes += writeLen;
-							address += writeLen;
+                            address += writeLen;
                         }
                     }
                 }
