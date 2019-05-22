@@ -15,24 +15,25 @@ class Camera;
 
 /**
  * @class System
- * @brief The TOF system that manages the cameras. Only one instance can exist.
+ * @brief The TOF system that manages the cameras.
  */
 class SDK_API System {
-  private:
-    System();
-
   public:
+    System();
     ~System();
     System(const System &) = delete;
     System &operator=(const System &) = delete;
-    System(System &&) = delete;
-    System &operator=(System &&) = delete;
+
+    // Make System movable and non-copyable
+    /**
+     * @brief Move constructor
+     */
+    System(System &&op) noexcept;
 
     /**
-     * @brief Retrieves the one and only instance.
-     * @return System&
+     * @brief Move assignment
      */
-    static System &instance();
+    System &operator=(System &&op) noexcept;
 
   public:
     /**
