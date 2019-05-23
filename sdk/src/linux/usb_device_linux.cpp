@@ -461,15 +461,26 @@ aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
     using namespace aditof;
 
     struct uvc_xu_control_query cq;
+    uint8_t packet[MAX_BUF_SIZE];
+    size_t readBytes = 0;
+    size_t readLength = 0;
+    size_t addr = address;
 
-    for (size_t i = 0; i < length; ++i, ++address) {
+    while (readBytes < length) {
+        readLength = length - readBytes < MAX_BUF_SIZE ? length - readBytes
+                                                       : MAX_BUF_SIZE;
+
+        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
+        packet_ptr[0] = addr;
+        packet[4] = MAX_BUF_SIZE;
+
         // This set property will send the EEPROM address to be read
         CLEAR(cq);
         cq.query = UVC_SET_CUR; // bRequest
-        cq.data = reinterpret_cast<unsigned char *>(&address);
-        cq.size = 2;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 5; // WValue for EEPROM register reads
+        cq.data = static_cast<unsigned char *>(packet);
+        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
+        cq.unit = 0x03;         // wIndex
+        cq.selector = 5;        // WValue for EEPROM register reads
 
         if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
             LOG(WARNING) << "Error in sending address to device, error: "
@@ -480,16 +491,20 @@ aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
         // This get property will get the value read from EEPROM address
         CLEAR(cq);
         cq.query = UVC_GET_CUR; // bRequest
-        cq.data = reinterpret_cast<unsigned char *>(&data[i]);
-        cq.size = 2;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 5; // WValue for EEPROM register reads
+        cq.data = static_cast<unsigned char *>(packet);
+        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
+        cq.unit = 0x03;         // wIndex
+        cq.selector = 5;        // WValue for EEPROM register reads
 
         if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
             LOG(WARNING) << "Error in reading data from device, error: "
                          << errno << "(" << strerror(errno) << ")";
             return Status::GENERIC_ERROR;
         }
+
+        memcpy(&data[readBytes], packet, readLength);
+        readBytes += readLength;
+        addr += readLength;
     }
 
     return Status::OK;
@@ -500,28 +515,36 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
     using namespace aditof;
 
     struct uvc_xu_control_query cq;
-    uint8_t packet[3];
+    uint8_t packet[MAX_BUF_SIZE];
+    size_t writeLen = 0;
+    size_t writtenBytes = 0;
 
-    for (size_t i = 0; i < length; ++i, ++address) {
+    while (writtenBytes < length) {
+        writeLen = length - writtenBytes > MAX_BUF_SIZE - 5
+                       ? MAX_BUF_SIZE - 5
+                       : length - writtenBytes;
+
+        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
+        packet_ptr[0] = address;
+        packet[4] = writeLen;
+        memcpy(&packet[5], data + writtenBytes, writeLen);
+
         // This set property will send the EEPROM address and data to be written
         // at the address
         CLEAR(cq);
-
-        packet[0] = address >> 8;
-        packet[1] = address & 0xFF;
-        packet[2] = data[i];
-
         cq.query = UVC_SET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(&packet[0]);
-        cq.size = 3;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 6; // WValue for EEPROM register writes
+        cq.data = static_cast<unsigned char *>(packet);
+        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
+        cq.unit = 0x03;         // wIndex
+        cq.selector = 6;        // WValue for EEPROM register writes
 
         if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
             LOG(WARNING) << "Error in sending address to device, error: "
                          << errno << "(" << strerror(errno) << ")";
             return Status::GENERIC_ERROR;
         }
+        writtenBytes += writeLen;
+        address += writeLen;
     }
 
     return Status::OK;
