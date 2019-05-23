@@ -85,10 +85,10 @@ int main(int argc, char *argv[]) {
 
     status = camera->requestFrame(frame);
     if (status != Status::OK) {
-        LOG(ERROR) << "Could not request frame!" << i;
+        LOG(ERROR) << "Could not request frame!";
         return 0;
     } else {
-        LOG(INFO) << "succesfully requested frame!" << i;
+        LOG(INFO) << "succesfully requested frame!";
     }
 
     uint16_t *data1;

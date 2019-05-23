@@ -81,21 +81,6 @@ aditof::Status UsbDevice::open() {
 aditof::Status UsbDevice::start() {
     using namespace aditof;
 
-    if (m_implData->started) {
-        LOG(INFO) << "Device already started";
-        return Status::BUSY;
-    }
-    LOG(INFO) << "Starting device";
-
-    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (-1 == xioctl(m_implData->fd, VIDIOC_STREAMON, &type)) {
-        LOG(WARNING) << "VIDIOC_STREAMON, error:" << errno << "("
-                     << strerror(errno) << ")";
-        return Status::GENERIC_ERROR;
-    }
-
-    m_implData->started = true;
-
     return Status::OK;
 }
 
@@ -309,6 +294,15 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
 
     // TO DO: Check if it is really neccessary or if the delay is not to much
     usleep(sleepDuration);
+
+    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (-1 == xioctl(m_implData->fd, VIDIOC_STREAMON, &type)) {
+        LOG(WARNING) << "VIDIOC_STREAMON, error:" << errno << "("
+                     << strerror(errno) << ")";
+        return Status::GENERIC_ERROR;
+    }
+
+    m_implData->started = true;
 
     return Status::OK;
 }
