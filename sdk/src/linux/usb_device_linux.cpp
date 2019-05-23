@@ -130,15 +130,15 @@ UsbDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
 
     details.width = 640;
     details.height = 960;
-	details.cal_data.offset = 0;
-	details.cal_data.gain = 1;
+    details.cal_data.offset = 0;
+    details.cal_data.gain = 1;
     details.type = "depth_ir";
     types.push_back(details);
 
     details.width = 668;
     details.height = 750;
-	details.cal_data.offset = 0;
-	details.cal_data.gain = 1;
+    details.cal_data.offset = 0;
+    details.cal_data.gain = 1;
     details.type = "raw";
     types.push_back(details);
 
@@ -316,7 +316,7 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
 aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
-	
+
     if (!buffer) {
         LOG(WARNING) << "Invalid adddress to buffer provided";
         return Status::INVALID_ARGUMENT;
@@ -381,70 +381,71 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     };
 
     j = 0;
-	unsigned int width = m_implData->fmt.fmt.pix.width;
-	unsigned int height = m_implData->fmt.fmt.pix.height;
-	unsigned int offset[2] = {0, height * width / 2};
-	unsigned int offset_idx = 0;
-	
-	if((width == 668)) {
-		for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
-			if ((i != 0) & (i % (336 * 3) == 0)) {
-				j -= 4;
-			}
+    unsigned int width = m_implData->fmt.fmt.pix.width;
+    unsigned int height = m_implData->fmt.fmt.pix.height;
+    unsigned int offset[2] = {0, height * width / 2};
+    unsigned int offset_idx = 0;
 
-			buffer[j] =
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i))
-				 << 4) |
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					 2)) &
-				 0x000F);
-			j++;
-			
-			buffer[j] =
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					 1))
-				 << 4) |
-				((((unsigned short)*(
-					  ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					  2)) &
-				  0x00F0) >>
-				 4);
-			j++;
-		}
-	}
-	else {
-		for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
+    if ((width == 668)) {
+        for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
+            if ((i != 0) & (i % (336 * 3) == 0)) {
+                j -= 4;
+            }
 
-			offset_idx = ((j / width) % 2);
-			
-			buffer[offset[offset_idx]] =
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i))
-				 << 4) |
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					 2)) &
-				 0x000F);
-			offset[offset_idx]++;
-			
-			buffer[offset[offset_idx]] =
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					 1))
-				 << 4) |
-				((((unsigned short)*(
-					  ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					  2)) &
-				  0x00F0) >>
-				 4);
-			offset[offset_idx]++;
-			
-			j += 2;
-		}
-	}
+            buffer[j] =
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i))
+                 << 4) |
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i + 2)) &
+                 0x000F);
+            j++;
+
+            buffer[j] =
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i + 1))
+                 << 4) |
+                ((((unsigned short)*(
+                      ((unsigned char *)m_implData->buffers[buf.index].start) +
+                      i + 2)) &
+                  0x00F0) >>
+                 4);
+            j++;
+        }
+    } else {
+        for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
+
+            offset_idx = ((j / width) % 2);
+
+            buffer[offset[offset_idx]] =
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i))
+                 << 4) |
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i + 2)) &
+                 0x000F);
+            offset[offset_idx]++;
+
+            buffer[offset[offset_idx]] =
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i + 1))
+                 << 4) |
+                ((((unsigned short)*(
+                      ((unsigned char *)m_implData->buffers[buf.index].start) +
+                      i + 2)) &
+                  0x00F0) >>
+                 4);
+            offset[offset_idx]++;
+
+            j += 2;
+        }
+    }
 
     if (-1 == xioctl(m_implData->fd, VIDIOC_QBUF, &buf)) {
         LOG(WARNING) << "VIDIOC_QBUF, error: " << errno << "("
