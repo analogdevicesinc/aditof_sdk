@@ -632,12 +632,12 @@ aditof::Status UsbDevice::readAfeTemp(float &temperature) {
     using namespace aditof;
 
     struct uvc_xu_control_query cq;
-    short tmp;
+    float buffer[2];
 
     // This get property will get the value from temperature sensor
     CLEAR(cq);
     cq.query = UVC_GET_CUR; // bRequest
-    cq.data = reinterpret_cast<unsigned char *>(&tmp);
+    cq.data = reinterpret_cast<unsigned char *>(buffer);
     cq.size = 8;     // MAX_BUF_SIZE;
     cq.unit = 0x03;  // wIndex
     cq.selector = 3; // WValue for TempSensor register reads
@@ -646,17 +646,32 @@ aditof::Status UsbDevice::readAfeTemp(float &temperature) {
                      << "(" << strerror(errno) << ")";
         return Status::GENERIC_ERROR;
     }
-    // TO DO: convert this raw value to temperature
-    temperature = tmp;
+
+    temperature = buffer[0];
 
     return Status::OK;
 }
 
 aditof::Status UsbDevice::readLaserTemp(float &temperature) {
     using namespace aditof;
-    Status status = Status::OK;
 
-    // TO DO
+    struct uvc_xu_control_query cq;
+    float buffer[2];
 
-    return status;
+    // This get property will get the value from temperature sensor
+    CLEAR(cq);
+    cq.query = UVC_GET_CUR; // bRequest
+    cq.data = reinterpret_cast<unsigned char *>(buffer);
+    cq.size = 8;     // MAX_BUF_SIZE;
+    cq.unit = 0x03;  // wIndex
+    cq.selector = 3; // WValue for TempSensor register reads
+    if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
+        LOG(WARNING) << "Error in reading data from device, error: " << errno
+                     << "(" << strerror(errno) << ")";
+        return Status::GENERIC_ERROR;
+    }
+
+    temperature = buffer[1];
+
+    return Status::OK;
 }
