@@ -248,8 +248,9 @@ Calibration::readCalMap(std::shared_ptr<DeviceInterface> device) {
         sub_packet_map.size = *(float *)(data + j);
         j += 4;
 
-        for (int i = 0; i < sub_packet_map.size /
-                                (sizeof(float));) // Parse all the sub-packets
+        for (unsigned int i = 0;
+             i < sub_packet_map.size /
+                     (sizeof(float));) // Parse all the sub-packets
         {
             float parameter_key;
             parameter_key =
@@ -264,7 +265,7 @@ Calibration::readCalMap(std::shared_ptr<DeviceInterface> device) {
             uint32_t number_elements =
                 sub_packet_map.packet[parameter_key].size / sizeof(float);
             std::list<float> elements;
-            for (int k = 0; k < number_elements; k++) {
+            for (unsigned int k = 0; k < number_elements; k++) {
                 sub_packet_map.packet[parameter_key].value.push_back(
                     *(float *)(data +
                                j)); // Parse size of parameter from sub packet
