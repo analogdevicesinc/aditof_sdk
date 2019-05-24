@@ -50,7 +50,6 @@ aditof::Status CameraImpl::setMode(const std::string &mode,
                                    const std::string &modeFilename) {
     using namespace aditof;
     Status status = Status::OK;
-    uint8_t cal_mode;
 
     LOG(INFO) << "Chosen mode: " << mode.c_str();
 
