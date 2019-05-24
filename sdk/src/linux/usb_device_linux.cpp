@@ -81,21 +81,6 @@ aditof::Status UsbDevice::open() {
 aditof::Status UsbDevice::start() {
     using namespace aditof;
 
-    if (m_implData->started) {
-        LOG(INFO) << "Device already started";
-        return Status::BUSY;
-    }
-    LOG(INFO) << "Starting device";
-
-    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (-1 == xioctl(m_implData->fd, VIDIOC_STREAMON, &type)) {
-        LOG(WARNING) << "VIDIOC_STREAMON, error:" << errno << "("
-                     << strerror(errno) << ")";
-        return Status::GENERIC_ERROR;
-    }
-
-    m_implData->started = true;
-
     return Status::OK;
 }
 
@@ -130,15 +115,15 @@ UsbDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
 
     details.width = 640;
     details.height = 960;
-	details.cal_data.offset = 0;
-	details.cal_data.gain = 1;
+    details.cal_data.offset = 0;
+    details.cal_data.gain = 1;
     details.type = "depth_ir";
     types.push_back(details);
 
     details.width = 668;
     details.height = 750;
-	details.cal_data.offset = 0;
-	details.cal_data.gain = 1;
+    details.cal_data.offset = 0;
+    details.cal_data.gain = 1;
     details.type = "raw";
     types.push_back(details);
 
@@ -310,13 +295,22 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
     // TO DO: Check if it is really neccessary or if the delay is not to much
     usleep(sleepDuration);
 
+    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (-1 == xioctl(m_implData->fd, VIDIOC_STREAMON, &type)) {
+        LOG(WARNING) << "VIDIOC_STREAMON, error:" << errno << "("
+                     << strerror(errno) << ")";
+        return Status::GENERIC_ERROR;
+    }
+
+    m_implData->started = true;
+
     return Status::OK;
 }
 
 aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
-	
+
     if (!buffer) {
         LOG(WARNING) << "Invalid adddress to buffer provided";
         return Status::INVALID_ARGUMENT;
@@ -381,70 +375,71 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     };
 
     j = 0;
-	unsigned int width = m_implData->fmt.fmt.pix.width;
-	unsigned int height = m_implData->fmt.fmt.pix.height;
-	unsigned int offset[2] = {0, height * width / 2};
-	unsigned int offset_idx = 0;
-	
-	if((width == 668)) {
-		for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
-			if ((i != 0) & (i % (336 * 3) == 0)) {
-				j -= 4;
-			}
+    unsigned int width = m_implData->fmt.fmt.pix.width;
+    unsigned int height = m_implData->fmt.fmt.pix.height;
+    unsigned int offset[2] = {0, height * width / 2};
+    unsigned int offset_idx = 0;
 
-			buffer[j] =
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i))
-				 << 4) |
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					 2)) &
-				 0x000F);
-			j++;
-			
-			buffer[j] =
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					 1))
-				 << 4) |
-				((((unsigned short)*(
-					  ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					  2)) &
-				  0x00F0) >>
-				 4);
-			j++;
-		}
-	}
-	else {
-		for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
+    if ((width == 668)) {
+        for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
+            if ((i != 0) & (i % (336 * 3) == 0)) {
+                j -= 4;
+            }
 
-			offset_idx = ((j / width) % 2);
-			
-			buffer[offset[offset_idx]] =
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i))
-				 << 4) |
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					 2)) &
-				 0x000F);
-			offset[offset_idx]++;
-			
-			buffer[offset[offset_idx]] =
-				(((unsigned short)*(
-					 ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					 1))
-				 << 4) |
-				((((unsigned short)*(
-					  ((unsigned char *)m_implData->buffers[buf.index].start) + i +
-					  2)) &
-				  0x00F0) >>
-				 4);
-			offset[offset_idx]++;
-			
-			j += 2;
-		}
-	}
+            buffer[j] =
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i))
+                 << 4) |
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i + 2)) &
+                 0x000F);
+            j++;
+
+            buffer[j] =
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i + 1))
+                 << 4) |
+                ((((unsigned short)*(
+                      ((unsigned char *)m_implData->buffers[buf.index].start) +
+                      i + 2)) &
+                  0x00F0) >>
+                 4);
+            j++;
+        }
+    } else {
+        for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
+
+            offset_idx = ((j / width) % 2);
+
+            buffer[offset[offset_idx]] =
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i))
+                 << 4) |
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i + 2)) &
+                 0x000F);
+            offset[offset_idx]++;
+
+            buffer[offset[offset_idx]] =
+                (((unsigned short)*(
+                     ((unsigned char *)m_implData->buffers[buf.index].start) +
+                     i + 1))
+                 << 4) |
+                ((((unsigned short)*(
+                      ((unsigned char *)m_implData->buffers[buf.index].start) +
+                      i + 2)) &
+                  0x00F0) >>
+                 4);
+            offset[offset_idx]++;
+
+            j += 2;
+        }
+    }
 
     if (-1 == xioctl(m_implData->fd, VIDIOC_QBUF, &buf)) {
         LOG(WARNING) << "VIDIOC_QBUF, error: " << errno << "("
@@ -460,15 +455,26 @@ aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
     using namespace aditof;
 
     struct uvc_xu_control_query cq;
+    uint8_t packet[MAX_BUF_SIZE];
+    size_t readBytes = 0;
+    size_t readLength = 0;
+    size_t addr = address;
 
-    for (size_t i = 0; i < length; ++i, ++address) {
+    while (readBytes < length) {
+        readLength = length - readBytes < MAX_BUF_SIZE ? length - readBytes
+                                                       : MAX_BUF_SIZE;
+
+        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
+        packet_ptr[0] = addr;
+        packet[4] = MAX_BUF_SIZE;
+
         // This set property will send the EEPROM address to be read
         CLEAR(cq);
         cq.query = UVC_SET_CUR; // bRequest
-        cq.data = reinterpret_cast<unsigned char *>(&address);
-        cq.size = 2;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 5; // WValue for EEPROM register reads
+        cq.data = static_cast<unsigned char *>(packet);
+        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
+        cq.unit = 0x03;         // wIndex
+        cq.selector = 5;        // WValue for EEPROM register reads
 
         if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
             LOG(WARNING) << "Error in sending address to device, error: "
@@ -479,16 +485,20 @@ aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
         // This get property will get the value read from EEPROM address
         CLEAR(cq);
         cq.query = UVC_GET_CUR; // bRequest
-        cq.data = reinterpret_cast<unsigned char *>(&data[i]);
-        cq.size = 2;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 5; // WValue for EEPROM register reads
+        cq.data = static_cast<unsigned char *>(packet);
+        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
+        cq.unit = 0x03;         // wIndex
+        cq.selector = 5;        // WValue for EEPROM register reads
 
         if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
             LOG(WARNING) << "Error in reading data from device, error: "
                          << errno << "(" << strerror(errno) << ")";
             return Status::GENERIC_ERROR;
         }
+
+        memcpy(&data[readBytes], packet, readLength);
+        readBytes += readLength;
+        addr += readLength;
     }
 
     return Status::OK;
@@ -499,28 +509,36 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
     using namespace aditof;
 
     struct uvc_xu_control_query cq;
-    uint8_t packet[3];
+    uint8_t packet[MAX_BUF_SIZE];
+    size_t writeLen = 0;
+    size_t writtenBytes = 0;
 
-    for (size_t i = 0; i < length; ++i, ++address) {
+    while (writtenBytes < length) {
+        writeLen = length - writtenBytes > MAX_BUF_SIZE - 5
+                       ? MAX_BUF_SIZE - 5
+                       : length - writtenBytes;
+
+        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
+        packet_ptr[0] = address;
+        packet[4] = writeLen;
+        memcpy(&packet[5], data + writtenBytes, writeLen);
+
         // This set property will send the EEPROM address and data to be written
         // at the address
         CLEAR(cq);
-
-        packet[0] = address >> 8;
-        packet[1] = address & 0xFF;
-        packet[2] = data[i];
-
         cq.query = UVC_SET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(&packet[0]);
-        cq.size = 3;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 6; // WValue for EEPROM register writes
+        cq.data = static_cast<unsigned char *>(packet);
+        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
+        cq.unit = 0x03;         // wIndex
+        cq.selector = 6;        // WValue for EEPROM register writes
 
         if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
             LOG(WARNING) << "Error in sending address to device, error: "
                          << errno << "(" << strerror(errno) << ")";
             return Status::GENERIC_ERROR;
         }
+        writtenBytes += writeLen;
+        address += writeLen;
     }
 
     return Status::OK;
@@ -608,12 +626,12 @@ aditof::Status UsbDevice::readAfeTemp(float &temperature) {
     using namespace aditof;
 
     struct uvc_xu_control_query cq;
-    short tmp;
+    float buffer[2];
 
     // This get property will get the value from temperature sensor
     CLEAR(cq);
     cq.query = UVC_GET_CUR; // bRequest
-    cq.data = reinterpret_cast<unsigned char *>(&tmp);
+    cq.data = reinterpret_cast<unsigned char *>(buffer);
     cq.size = 8;     // MAX_BUF_SIZE;
     cq.unit = 0x03;  // wIndex
     cq.selector = 3; // WValue for TempSensor register reads
@@ -622,17 +640,32 @@ aditof::Status UsbDevice::readAfeTemp(float &temperature) {
                      << "(" << strerror(errno) << ")";
         return Status::GENERIC_ERROR;
     }
-    // TO DO: convert this raw value to temperature
-    temperature = tmp;
+
+    temperature = buffer[0];
 
     return Status::OK;
 }
 
 aditof::Status UsbDevice::readLaserTemp(float &temperature) {
     using namespace aditof;
-    Status status = Status::OK;
 
-    // TO DO
+    struct uvc_xu_control_query cq;
+    float buffer[2];
 
-    return status;
+    // This get property will get the value from temperature sensor
+    CLEAR(cq);
+    cq.query = UVC_GET_CUR; // bRequest
+    cq.data = reinterpret_cast<unsigned char *>(buffer);
+    cq.size = 8;     // MAX_BUF_SIZE;
+    cq.unit = 0x03;  // wIndex
+    cq.selector = 3; // WValue for TempSensor register reads
+    if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
+        LOG(WARNING) << "Error in reading data from device, error: " << errno
+                     << "(" << strerror(errno) << ")";
+        return Status::GENERIC_ERROR;
+    }
+
+    temperature = buffer[1];
+
+    return Status::OK;
 }
