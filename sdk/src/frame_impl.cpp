@@ -1,6 +1,7 @@
 #include "frame_impl.h"
 #include "frame_operations.h"
 
+#include <cmath>
 #include <fstream>
 #include <glog/logging.h>
 
@@ -60,8 +61,16 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
         float offset = m_details.cal_data.offset;
         float gain = m_details.cal_data.gain;
 
-        for (int i = 0; i < m_details.width * m_details.height / 2; i++) {
-            m_depthData[i] = (uint16_t)((float)m_depthData[i] * gain + offset);
+        auto equal = [](float a, float b) -> bool {
+            return fabs(a - b) < 1e-6;
+        };
+
+        if (!equal(gain, 1.0f) || !equal(offset, 0.0f)) {
+            for (unsigned int i = 0; i < m_details.width * m_details.height / 2;
+                 i++) {
+                m_depthData[i] = static_cast<uint16_t>(
+                    static_cast<float>(m_depthData[i]) * gain + offset);
+            }
         }
         *dataPtr = m_depthData;
         break;
