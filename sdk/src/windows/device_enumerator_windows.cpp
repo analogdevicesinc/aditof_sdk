@@ -12,13 +12,13 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
 
     hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 
-    string devName("ADI TOF DEPTH SENSOR");
+    std::string devName("ADI TOF DEPTH SENSOR");
     ICreateDevEnum *DevEnum = NULL;
 
     hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER,
                           IID_PPV_ARGS(&DevEnum));
     if (FAILED(hr)) {
-        cout << "Create Device Enumeration Failed" << endl;
+        std::cout << "Create Device Enumeration Failed" << std::endl;
         return Status::GENERIC_ERROR;
     }
 
@@ -28,7 +28,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
 
     if (hr != S_OK) {
         DevEnum->Release();
-        cout << "Device Enumeration Error" << endl;
+        std::cout << "Device Enumeration Error" << std::endl;
         return Status::GENERIC_ERROR;
     }
 
@@ -44,8 +44,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
             hr = PropBag->Read(L"FriendlyName", &varName, 0);
 
             if (SUCCEEDED(hr)) {
-                string str(static_cast<LPCTSTR>(CString(varName.bstrVal)));
-                if (str.find(devName) != string::npos) {
+                std::string str(static_cast<LPCTSTR>(CString(varName.bstrVal)));
+                if (str.find(devName) != std::string::npos) {
                     DeviceConstructionData devData;
                     devData.deviceType = DeviceType::USB;
                     devData.driverPath = str;

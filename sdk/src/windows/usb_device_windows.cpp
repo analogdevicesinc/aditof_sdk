@@ -37,7 +37,7 @@ static std::wstring s2ws(const std::string &s) {
 }
 
 static aditof::Status getDevice(IBaseFilter **pVideoInputFilter,
-                                string devName) {
+                                const std::string &devName) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -74,7 +74,7 @@ static aditof::Status getDevice(IBaseFilter **pVideoInputFilter,
             hr = PropBag->Read(L"FriendlyName", &varName, nullptr);
 
             if (SUCCEEDED(hr)) {
-                string str(static_cast<LPCTSTR>(CString(varName.bstrVal)));
+                std::string str(static_cast<LPCTSTR>(CString(varName.bstrVal)));
                 if (str == devName) {
                     // We found it, so send it back to the caller
                     hr =
