@@ -8,11 +8,11 @@ Calibration::Calibration() {
     std::unordered_map<float, param_struct> Header;
     Header[EEPROM_VERSION].value = {0};
     Header[EEPROM_VERSION].size =
-        sizeof(Header[EEPROM_VERSION].value.size() * 4);
+        sizeof(Header[EEPROM_VERSION].value.size()) * 4;
     Header[TOTAL_SIZE].value = {1000};
-    Header[TOTAL_SIZE].size = sizeof(Header[TOTAL_SIZE].value.size() * 4);
+    Header[TOTAL_SIZE].size = sizeof(Header[TOTAL_SIZE].value.size()) * 4;
     Header[NUMBER_OF_MODES].value = {3};
-    Header[NUMBER_OF_MODES].size = sizeof(Header[TOTAL_SIZE].value.size() * 4);
+    Header[NUMBER_OF_MODES].size = sizeof(Header[TOTAL_SIZE].value.size()) * 4;
 
     std::unordered_map<float, param_struct> CameraIntrinsic;
     CameraIntrinsic[EEPROM_VERSION].value = {0};
