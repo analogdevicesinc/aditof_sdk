@@ -25,7 +25,6 @@ Calibration::Calibration() {
     CameraIntrinsic[CAL_DATE].size =
         (CameraIntrinsic[CAL_SER_NUM].value.size() * 4);
     CameraIntrinsic[INTRINSIC].value = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    std::cout << CameraIntrinsic[INTRINSIC].value.size() << std::endl;
     CameraIntrinsic[INTRINSIC].size =
         (CameraIntrinsic[INTRINSIC].value.size() * 4);
 
