@@ -131,6 +131,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
             mediaPaths.emplace_back(fullMediaPath);
         }
     }
+    closedir(dirp);
 
     // Identify any eligible time of flight cameras
     for (const auto &media : mediaPaths) {
