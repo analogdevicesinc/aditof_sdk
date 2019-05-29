@@ -1,0 +1,128 @@
+language: cpp
+
+os: linux
+dist: trusty
+
+cache:
+  directories:
+    - ${TRAVIS_BUILD_DIR}/deps
+
+matrix:
+  include:
+    - stage: Build
+      
+      #CLANG 3.9
+      env: COMPILER=clang++-3.9
+      addons: { apt: { packages: ["clang-3.9", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-3.9"] } }
+      
+      #CLANG 4.0
+    - env: COMPILER=clang++-4.0
+      addons: { apt: { packages: ["clang-4.0", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-4.0"] } }
+            
+      #CLANG 5.0
+    - env: COMPILER=clang++-5.0
+      addons: { apt: { packages: ["clang-5.0", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-5.0"] } }
+
+      #CLANG 6.0
+    - env: COMPILER=clang++-6.0
+      addons: { apt: { packages: ["clang-6.0", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-6.0"] } }
+
+      #CLANG 7
+    - env: COMPILER=clang++-7
+      addons: { apt: { packages: ["clang-7", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-7"] } }
+
+    - env: COMPILER=clang++-8
+           CMAKE_OPTIONS=-DWITH_EXAMPLES=on
+      addons: { apt: { packages: ["libopencv-contrib-dev", "libopencv-dev", "clang-8", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-8"] } }
+
+      #GCC 6
+    - env: COMPILER=g++-6
+      addons: { apt: { packages: ["g++-6", "cmake"], sources: ["ubuntu-toolchain-r-test"] } }
+
+      #GCC 7
+    - env: COMPILER=g++-7 
+      addons: { apt: { packages: ["g++-7", "cmake"], sources: ["ubuntu-toolchain-r-test"] } }
+
+      #GCC 8
+    - env: COMPILER=g++-8
+           CMAKE_OPTIONS=-DWITH_EXAMPLES=on
+      addons: { apt: { packages: ["libopencv-contrib-dev", "libopencv-dev", "g++-8", "cmake"], sources: ["ubuntu-toolchain-r-test"] } }
+
+      #MacOS Mojave
+    - compiler: "clang"
+      os: osx
+      osx_image: xcode10.2
+      env: CMAKE_OPTIONS=-DWITH_EXAMPLES=on
+      addons: { homebrew: { packages: ["libuvc", "opencv"]}}
+
+      #MacOS High Sierra
+    - compiler: "clang"
+      os: osx
+      osx_image: xcode10.1
+      addons: { homebrew: { packages: ["libuvc"]}}
+
+    - stage: Code Quality
+
+      #Check if the code is formated properly
+      env: BUILD_TYPE=clang_format
+      addons: { apt: { packages: ["clang-format-6.0", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-6.0"] } }
+
+      #Cppcheck static analysis
+    - dist: xenial
+      env: BUILD_TYPE=cppcheck
+      addons: { apt: { packages: ["cppcheck", "cmake"] } }
+
+    - stage: Deploy Documentation
+
+      #Deploy doxygen
+      dist: xenial
+      env: BUILD_TYPE=deploy_doxygen
+      addons: { apt: { packages: ["cmake", "graphviz"] } }
+      
+install:
+  ############################################################################
+  # Setup used compiler and make sure to override CXX env variable.
+  ############################################################################
+  - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
+  - ${CXX} --version
+
+  ############################################################################
+  # All dependencies will be placed in a /deps folder
+  ############################################################################
+  - export DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR}
+
+  ############################################################################
+  # Install dependencies for each BUILD_TYPE specified as env variable
+  ############################################################################
+  - ./ci/travis/deps.sh
+
+before_script:
+
+  ############################################################################
+  # Config git user for travis to use to push documentation
+  ############################################################################
+  - git config --global user.name "Travis Bot"
+  - git config --global user.email "<>"
+
+  ############################################################################
+  # Disable examples building by default if no CMAKE_OPTIONS are specified
+  ############################################################################
+  - if [[ "$CMAKE_OPTIONS" == "" ]]; then export CMAKE_OPTIONS="-DWITH_EXAMPLES=off"; fi
+
+  ############################################################################
+  # If the sdk will be built make sure to setup the build folder and execute
+  # cmake inside it using the specified CMAKE_OPTIONS of each build
+  ############################################################################
+  - |
+    if [[ "$BUILD_TYPE" == "" ]]; then
+      pushd "${TRAVIS_BUILD_DIR}"
+      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS}
+      popd
+    fi
+
+script:
+  ############################################################################
+  # Run the build
+  ############################################################################
+  - ./ci/travis/run_build.sh
