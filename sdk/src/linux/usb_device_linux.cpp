@@ -380,7 +380,7 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     unsigned int offset[2] = {0, height * width / 2};
     unsigned int offset_idx = 0;
 
-    if ((width == 668)) {
+    if (width == 668) {
         for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
             if ((i != 0) & (i % (336 * 3) == 0)) {
                 j -= 4;

@@ -18,4 +18,6 @@ DeviceFactory::buildDevice(const aditof::DeviceConstructionData &data) {
         return std::unique_ptr<DeviceInterface>(new LocalDevice(data));
     }
     }
+
+    return nullptr;
 }

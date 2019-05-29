@@ -7,9 +7,8 @@
 
 #include <glog/logging.h>
 
-SystemImpl::SystemImpl() {
-    m_enumerator = DeviceEnumeratorFactory::buildDeviceEnumerator();
-}
+SystemImpl::SystemImpl()
+    : m_enumerator(DeviceEnumeratorFactory::buildDeviceEnumerator()) {}
 
 SystemImpl::~SystemImpl() = default;
 

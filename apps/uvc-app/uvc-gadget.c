@@ -1213,11 +1213,10 @@ static void uvc_video_fill_buffer(struct uvc_device *dev, struct v4l2_buffer *bu
     }
 }
 
-static int uvc_video_process(struct uvc_device *dev)
-{
+static int uvc_video_process(struct uvc_device *dev) {
     struct v4l2_buffer ubuf;
     struct v4l2_buffer vbuf;
-    unsigned int i;
+    unsigned int i = 0;
     int ret;
     /*
      * Return immediately if UVC video output device has not started
