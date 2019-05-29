@@ -94,7 +94,7 @@ add_library(${PROJECT_NAME} SHARED
 
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
-set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION 1.0.0 SOVERSION 1.0)
+set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION 1.0.0 SOVERSION 1.0 CXX_STANDARD 11)
 target_link_libraries( ${PROJECT_NAME} PUBLIC glog::glog)
 
 if( APPLE)
