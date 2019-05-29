@@ -2,57 +2,16 @@
 Analog Devices 3D ToF software suite
 
 #### Overview
-3D ToF SDK brief overview.
-The SDK and Examples can be used in Client-Server mode, where DragonBoard™ 410c acts as a Client, fetching
-the image and depth information from TOF sensor and sending it over USB OTG port to the preferred host.
-The SDK and Examples can also be used in standalone mode by directly running them on DragonBoard™ 410c.
+The **ADI ToF SDK** is a cross platform library for the Analog Devices depth cameras based on the ADDI9036 TOF Signal Processor. It provides support for data processing on the embedded processor platform as well as for USB, Ethernet or Wi-Fi to connect to a host computer, this flexibility enables evaluation across a wide range of use cases and environments.
 
-#### Setting up the DragonBoard™ 410c
+The SDK provides an API to control the ToF camera and stream IR and depth data. Windows and Linux support are built into the SDK as well as sample code and wrappers for various languages including Python, C/C++ and Matlab.
 
-If you are setting up the DragonBoard™ 410c for the first time using the prebuilt Kernel and Rootfs image, follow below instructions:\
-[*Dragonboard-410c - First time setup*](./doc/dragonboard_first_time.md)
+#### Supported platforms
+Designed using a modular approach, the 3D ToF hardware prototyping platform enables connectivity to the 96Boards development boards suite as well RaspberryPI or any other hardware platforms that have the RaspberryPI camera connector. 
 
-If you want to build and then use Kernel and Rootfs for bringing up DragonBoard™ 410c, follow below instructions:\
-[*Dragonboard-410c - Build Kernel and Rootfs*](./doc/dragonboard_firmware_build.md)
-
-#### Environment Setup for Client Server Mode over USB
-
-In Client Server mode, DragonBoard™ 410c needs to be set up with a 'micro USB to USB cable', as below:
-<p align="center"><img src="./doc/img/hwsetup/dragonboard_target_mode_setup.png" width="70%" /><br><br></p>
-
-* To use TOF SDK and Examples in Client Server mode, follow below installation steps on DragonBoard™ 410c.\
-1. On DragonBoard™ 410c\
-[*Dragonboard-410c - Target*](./doc/dragonboard_target_build.md)
-
-2. On Host\
-[*Linux Host - Ubuntu 14.04 and Ubuntu 16.04*](./doc/linux_build.md).
-[*MS Windows Host - MS Windows 7 and MS Windows 10*](./doc/windows_build.md).
-[*Mac Host - MacOS High-Sierra and MacOS Mojave*]()
-
-* When installation specified in above steps are completed, follow below steps to setup the demo in Client Server mode:
-* On DragonBoard™ 410c, go to directory "aditof_sdk\apps\uvc-app" and run config_pipe.sh as below:
-```
-sudo ./config_pipe.sh
-```
-* On Host:
-1. On Linux host, go to directory "aditof_sdk\build\examples\aditof-demo\" and run aditof-demo
-2. On Windows host, go to directory "aditof_sdk\build\examples\aditof-demo\Release\" and run aditof-demo.exe
-
-On Monitor connected to Host PC, you should now be able to see three windows pop up, one for settings control, one showing 'Depth Image' and one showing 'IR Image'.
-
-#### Environment Setup for Standalone Mode
-In Standalone mode, DragonBoard™ 410c need to be setup with 'HDMI cable', 'USB Keyboard' and 'USB Mouse', as below:
-<p align="center"><img src="./doc/img/hwsetup/dragonboard_host_mode_setup.png" width="70%" /><br><br></p>
-
-* To use TOF SDK and Examples directly on DragonBoard™ 410c, follow below installation steps.\
-[*Dragonboard-410c - Host*](./doc/dragonboard_host_build.md)
-* When installation steps specified above are completed, follow below steps to setup the demo in Standalone mode:
-* On DragonBoard™ 410c, go to directory "aditof_sdk\build\examples\aditof-demo\" and execute below steps:
-```
-sudo ./config_pipe.sh
-sudo ./aditof-demo
-```
-On HDMI Monitor connected to DragonBoard™ 410c, you should now be able to see three windows pop up,  one for settings control, one showing 'Depth Image' and one showing 'IR Image'.
+| Platform | SD card image |
+| --------- | ----------- |
+| DragonBoard 410c | [aditof-v0.2-dragonboard410c-sdimage.tar.xz](http://swdownloads.analog.com/cse/aditof/aditof-v0.2-dragonboard410c-sdimage.tar.xz) |
 
 #### API doxygen documentation
 https://analogdevicesinc.github.io/aditof_sdk/
