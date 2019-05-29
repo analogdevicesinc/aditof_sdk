@@ -750,6 +750,10 @@ aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
         }
     }
 
+    if (!pKsTopologyInfo) {
+        return Status::GENERIC_ERROR;
+    }
+
     // get nodes number in usb video device capture filter
     if (pKsTopologyInfo->get_NumNodes(&uiNumNodes) == S_OK) {
         // go thru all nodes searching for the node of the
@@ -858,6 +862,10 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
         }
     }
 
+    if (!pKsTopologyInfo) {
+        return Status::GENERIC_ERROR;
+    }
+
     // get nodes number in usb video device capture filter
     if (pKsTopologyInfo->get_NumNodes(&uiNumNodes) == S_OK) {
         // go thru all nodes searching for the node of the
@@ -946,6 +954,10 @@ aditof::Status UsbDevice::readAfeRegisters(const uint16_t *address,
 
             return Status::GENERIC_ERROR;
         }
+    }
+
+    if (!pKsTopologyInfo) {
+        return Status::GENERIC_ERROR;
     }
 
     // get nodes number in usb video device capture filter
@@ -1044,6 +1056,10 @@ aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
 
             return Status::GENERIC_ERROR;
         }
+    }
+
+    if (!pKsTopologyInfo) {
+        return Status::GENERIC_ERROR;
     }
 
     // get nodes number in usb video device capture filter
