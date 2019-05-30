@@ -52,7 +52,7 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     return status;
 }
 
-aditof::Status UsbDevice::program(const char *firmware, size_t size) {
+aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -61,7 +61,7 @@ aditof::Status UsbDevice::program(const char *firmware, size_t size) {
     return status;
 }
 
-aditof::Status UsbDevice::getFrame(unsigned short *buffer) {
+aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -70,7 +70,7 @@ aditof::Status UsbDevice::getFrame(unsigned short *buffer) {
     return status;
 }
 
-aditof::Status UsbDevice::readEeprom(unsigned short address, char *data,
+aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
                                      size_t length) {
     using namespace aditof;
     Status status = Status::OK;
@@ -80,7 +80,7 @@ aditof::Status UsbDevice::readEeprom(unsigned short address, char *data,
     return status;
 }
 
-aditof::Status UsbDevice::writeEeprom(unsigned short address, const char *data,
+aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
                                       size_t length) {
     using namespace aditof;
     Status status = Status::OK;
@@ -90,9 +90,8 @@ aditof::Status UsbDevice::writeEeprom(unsigned short address, const char *data,
     return status;
 }
 
-aditof::Status UsbDevice::readAfeRegisters(unsigned short *address,
-                                           unsigned short *data,
-                                           size_t lenght) {
+aditof::Status UsbDevice::readAfeRegisters(const uint16_t *address,
+                                           uint16_t *data, size_t length) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -101,8 +100,8 @@ aditof::Status UsbDevice::readAfeRegisters(unsigned short *address,
     return status;
 }
 
-aditof::Status UsbDevice::writeAfeRegisters(unsigned short *address,
-                                            const unsigned short *value,
+aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
+                                            const uint16_t *data,
                                             size_t length) {
     using namespace aditof;
     Status status = Status::OK;
