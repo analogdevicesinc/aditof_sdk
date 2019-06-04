@@ -10,7 +10,7 @@ Writing the image on the SD card will take about 15 to 20 minutes for a 16GB ima
     ~~~
 * Unpack the .tar.xz archive
     ~~~sh
-    tar xf archive.tar.gz
+    tar xf xxx.tar.gz
     ~~~
 * Write the image on the SD card
     ~~~sh

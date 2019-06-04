@@ -21,9 +21,9 @@ https://analogdevicesinc.github.io/aditof_sdk/
 ## Directory Structure
 | Directory | Description |
 | --------- | ----------- |
-| apps | Contains the source code of application to be built and executed on target |
-| doc | Contains the documentation |
-| examples | Contains the source code of examples to be built and executed on Hosts |
-| sdk | Contains the source code of software development kit used by examples |
-| scripts | Contains scripts that are used when developing |
+| apps | Applications specific to various targets and hosts |
+| doc | Documentation |
+| examples | Example code for the supported programming languages |
+| sdk | Software Development Kit source code |
+| scripts | Useful development scripts |
 
