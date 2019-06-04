@@ -1,4 +1,4 @@
-# aditof_sdk
+# aditof_sdk [![Build status](https://ci.appveyor.com/api/projects/status/46t36hmy77ejrf88/branch/master?svg=true)](https://ci.appveyor.com/project/analogdevicesinc/aditof-sdk/branch/master)
 Analog Devices 3D ToF software suite
 
 #### Overview
