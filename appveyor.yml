@@ -1,0 +1,26 @@
+version: '1.0.{build}'
+
+image: Visual Studio 2017
+
+configuration:
+    - Release
+
+cache:
+    - C:\projects\aditof-sdk\deps -> ci\appveyor\install_deps.bat
+    - C:\tools\opencv -> ci\appveyor\install_deps.bat
+
+install:
+    - C:\projects\aditof-sdk\ci\appveyor\install_deps.bat
+    - cd %APPVEYOR_BUILD_FOLDER%
+   
+before_build:
+    - mkdir build
+    - cd build
+    - cmake -G "Visual Studio 15 2017 Win64" -DOpenCV_DIR="C:\tools\opencv\build\x64\vc15\lib" ..
+    
+build:
+    project: $(APPVEYOR_BUILD_FOLDER)\build\$(APPVEYOR_PROJECT_NAME).sln
+
+after_build:
+    - ISCC C:\projects\aditof-sdk\build\aditof-setup.iss
+    - appveyor PushArtifact C:\aditof-setup.exe
