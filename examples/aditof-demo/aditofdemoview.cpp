@@ -461,12 +461,12 @@ void AdiTofDemoView::render() {
             m_waitKeyBarrier = 0;
         }
 
-	if (captureEnabled) {
-	    cvui::imshow("Depth Image", m_depthImage);
-	    cvui::imshow("IR Image", m_irImage);
-	    m_depthImage.release();
-	    m_irImage.release();
-	}
+        if (captureEnabled) {
+            cvui::imshow("Depth Image", m_depthImage);
+            cvui::imshow("IR Image", m_irImage);
+            m_depthImage.release();
+            m_irImage.release();
+        }
 
         int key = cv::waitKey(10);
 
@@ -529,15 +529,15 @@ void AdiTofDemoView::_displayDepthImage() {
         int frameHeight = static_cast<int>(frameDetails.height) / 2;
         int frameWidth = static_cast<int>(frameDetails.width);
 
-	m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
+        m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
         cv::Point2d pointxy(320, 240);
-        m_distanceVal = static_cast<int>(m_distanceVal * 0.7 +
-					 m_depthImage.at<ushort>(pointxy) * 0.3);
+        m_distanceVal = static_cast<int>(
+            m_distanceVal * 0.7 + m_depthImage.at<ushort>(pointxy) * 0.3);
         char text[20];
         sprintf(text, "%d", m_distanceVal);
-	m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / 4095);
-	applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
-	flip(m_depthImage, m_depthImage, 1);
+        m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / 5999);
+        applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
+        flip(m_depthImage, m_depthImage, 1);
         int color;
         if (m_distanceVal > 2500)
             color = 0;
@@ -546,10 +546,10 @@ void AdiTofDemoView::_displayDepthImage() {
 
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         if (m_center) {
-	    cv::circle(m_depthImage, pointxy, 4, cv::Scalar(color, color, color),
-		       -1, 8, 0);
-	    cv::putText(m_depthImage, text, pointxy, cv::FONT_HERSHEY_DUPLEX, 2,
-			cv::Scalar(color, color, color));
+            cv::circle(m_depthImage, pointxy, 4,
+                       cv::Scalar(color, color, color), -1, 8, 0);
+            cv::putText(m_depthImage, text, pointxy, cv::FONT_HERSHEY_DUPLEX, 2,
+                        cv::Scalar(color, color, color));
         }
         m_waitKeyBarrier += 1;
         if (m_waitKeyBarrier == 2) {
@@ -583,9 +583,9 @@ void AdiTofDemoView::_displayIrImage() {
         int frameHeight = static_cast<int>(frameDetails.height) / 2;
         int frameWidth = static_cast<int>(frameDetails.width);
 
-	m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
-	m_irImage.convertTo(m_irImage, CV_8U, 255.0 / 4095);
-	flip(m_irImage, m_irImage, 1);
+        m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
+        m_irImage.convertTo(m_irImage, CV_8U, 255.0 / 5999);
+        flip(m_irImage, m_irImage, 1);
 
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         m_waitKeyBarrier += 1;
