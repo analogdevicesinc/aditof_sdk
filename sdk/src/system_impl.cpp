@@ -21,9 +21,7 @@ aditof::Status SystemImpl::initialize() {
     for (const auto &data : devsData) {
         std::unique_ptr<DeviceInterface> device =
             DeviceFactory::buildDevice(data);
-        std::unique_ptr<CameraImpl> cameraImpl(
-            new CameraImpl(std::move(device)));
-        auto camera = std::make_shared<Camera>(std::move(cameraImpl));
+        auto camera = std::make_shared<Camera>(std::move(device));
         m_cameras.push_back(camera);
     }
 

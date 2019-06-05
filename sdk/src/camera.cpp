@@ -1,9 +1,11 @@
 #include "camera.h"
 #include "camera_impl.h"
+#include "device_interface.h"
 
 namespace aditof {
 
-Camera::Camera(std::unique_ptr<CameraImpl> impl) : m_impl(std::move(impl)) {}
+Camera::Camera(std::unique_ptr<DeviceInterface> device)
+    : m_impl(new CameraImpl(std::move(device))) {}
 
 Camera::~Camera() = default;
 

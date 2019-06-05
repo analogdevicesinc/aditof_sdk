@@ -25,7 +25,7 @@ class SDK_API Camera {
     /**
      * @brief Constructor
      */
-    Camera(std::unique_ptr<CameraImpl> impl);
+    Camera(std::unique_ptr<DeviceInterface> device);
 
     /**
      * @brief Destructor
