@@ -6,7 +6,6 @@
 #include "status_definitions.h"
 
 #include <functional>
-#include <memory>
 #include <vector>
 
 class CameraImpl;
@@ -25,7 +24,7 @@ class SDK_API Camera {
     /**
      * @brief Constructor
      */
-    Camera(std::unique_ptr<DeviceInterface> device);
+    Camera(DeviceInterface *device);
 
     /**
      * @brief Destructor
@@ -107,8 +106,7 @@ class SDK_API Camera {
      * @param cb - Callback to be called when frame is updated
      * @return Status
      */
-    Status requestFrame(std::shared_ptr<Frame> frame,
-                        FrameUpdateCallback cb = nullptr);
+    Status requestFrame(Frame *frame, FrameUpdateCallback cb = nullptr);
 
     /**
      * @brief Gets the current details of the camera
@@ -118,13 +116,15 @@ class SDK_API Camera {
     Status getDetails(CameraDetails &details) const;
 
     /**
-     * @brief Gets the device of the camera
+     * @brief Gets the device of the camera. The device is own by the camera,
+     * therefore when the camera gets destroy the reference to the device will
+     * not be valid anymore.
      * @return DeviceInterface
      */
-    std::shared_ptr<DeviceInterface> getDevice();
+    DeviceInterface *getDevice();
 
   private:
-    std::unique_ptr<CameraImpl> m_impl;
+    CameraImpl *m_impl;
 };
 
 } // namespace aditof

@@ -8,10 +8,10 @@
 #include <glog/logging.h>
 #include <iterator>
 
-CameraImpl::CameraImpl(std::unique_ptr<DeviceInterface> device)
-    : m_device(std::move(device)), m_devStarted(false) {}
+CameraImpl::CameraImpl(DeviceInterface *device)
+    : m_device(device), m_devStarted(false) {}
 
-CameraImpl::~CameraImpl() = default;
+CameraImpl::~CameraImpl() { delete m_device; }
 
 aditof::Status CameraImpl::initialize() {
     using namespace aditof;
@@ -177,7 +177,7 @@ aditof::Status CameraImpl::getAvailableFrameTypes(
     return status;
 }
 
-aditof::Status CameraImpl::requestFrame(std::shared_ptr<aditof::Frame> frame,
+aditof::Status CameraImpl::requestFrame(aditof::Frame *frame,
                                         aditof::FrameUpdateCallback /*cb*/) {
     using namespace aditof;
     Status status = Status::OK;
@@ -210,4 +210,4 @@ aditof::Status CameraImpl::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<DeviceInterface> CameraImpl::getDevice() { return m_device; }
+DeviceInterface *CameraImpl::getDevice() { return m_device; }

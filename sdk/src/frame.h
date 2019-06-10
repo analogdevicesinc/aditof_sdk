@@ -5,8 +5,6 @@
 #include "sdk_exports.h"
 #include "status_definitions.h"
 
-#include <memory>
-
 class FrameImpl;
 
 namespace aditof {
@@ -70,7 +68,7 @@ class SDK_API Frame {
     Status getData(FrameDataType dataType, uint16_t **dataPtr);
 
   private:
-    std::unique_ptr<FrameImpl> m_impl;
+    FrameImpl *m_impl;
 };
 
 } // namespace aditof

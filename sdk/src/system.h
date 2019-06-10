@@ -4,7 +4,6 @@
 #include "sdk_exports.h"
 #include "status_definitions.h"
 
-#include <memory>
 #include <vector>
 
 class SystemImpl;
@@ -19,10 +18,15 @@ class Camera;
  */
 class SDK_API System {
   public:
+    /**
+     * @brief Constructor
+     */
     System();
+
+    /**
+     * @brief Destructor
+     */
     ~System();
-    System(const System &) = delete;
-    System &operator=(const System &) = delete;
 
     // Make System movable and non-copyable
     /**
@@ -37,7 +41,9 @@ class SDK_API System {
 
   public:
     /**
-     * @brief Initializes the system. Detects available TOF cameras.
+     * @brief Initializes the system. Detects available TOF cameras and stores
+     * them internally. The System object owns the cameras, which will be
+     * destroyed the objects gets out of scope.
      * @return Status
      */
     Status initialize();
@@ -48,11 +54,10 @@ class SDK_API System {
      * @param[out] cameraList - A container to be set with the available cameras
      * @return Status
      */
-    Status
-    getCameraList(std::vector<std::shared_ptr<Camera>> &cameraList) const;
+    Status getCameraList(std::vector<Camera *> &cameraList) const;
 
   private:
-    std::unique_ptr<SystemImpl> m_impl;
+    SystemImpl *m_impl;
 };
 
 } // namespace aditof
