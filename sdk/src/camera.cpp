@@ -4,14 +4,22 @@
 
 namespace aditof {
 
-Camera::Camera(std::unique_ptr<DeviceInterface> device)
-    : m_impl(new CameraImpl(std::move(device))) {}
+Camera::Camera(DeviceInterface *device) : m_impl(new CameraImpl(device)) {}
 
-Camera::~Camera() = default;
+Camera::~Camera() {
+    if (m_impl)
+        delete m_impl;
+};
 
-Camera::Camera(Camera &&) noexcept = default;
+Camera::Camera(Camera &&other) noexcept {
+    this->m_impl = other.m_impl;
+    other.m_impl = nullptr;
+}
 
-Camera &Camera::operator=(Camera &&) noexcept = default;
+Camera &Camera::operator=(Camera &&other) noexcept {
+    std::swap(m_impl, other.m_impl);
+    return *this;
+}
 
 Status Camera::initialize() { return m_impl->initialize(); }
 
@@ -38,8 +46,7 @@ Status Camera::getAvailableFrameTypes(
     return m_impl->getAvailableFrameTypes(availableFrameTypes);
 }
 
-Status Camera::requestFrame(std::shared_ptr<Frame> frame,
-                            FrameUpdateCallback cb) {
+Status Camera::requestFrame(Frame *frame, FrameUpdateCallback cb) {
     return m_impl->requestFrame(frame, cb);
 }
 
@@ -47,8 +54,6 @@ Status Camera::getDetails(CameraDetails &details) const {
     return m_impl->getDetails(details);
 }
 
-std::shared_ptr<DeviceInterface> Camera::getDevice() {
-    return m_impl->getDevice();
-}
+DeviceInterface *Camera::getDevice() { return m_impl->getDevice(); }
 
 } // namespace aditof

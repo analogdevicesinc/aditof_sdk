@@ -7,10 +7,8 @@ AdiTofDemoController::AdiTofDemoController()
     : m_cameraInUse(-1), m_frameRequested(false),
       m_recorder(new AditofDemoRecorder()) {
 
-    aditof::System system;
-    system.initialize();
-
-    system.getCameraList(m_cameras);
+    m_system.initialize();
+    m_system.getCameraList(m_cameras);
     if (m_cameras.size()) {
         // Use the first camera that is found
         m_cameraInUse = 0;
@@ -91,7 +89,7 @@ std::pair<float, float> AdiTofDemoController::getTemperature() {
 
     auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
 
-    std::shared_ptr<DeviceInterface> device = camera->getDevice();
+    DeviceInterface *device = camera->getDevice();
 
     device->readAfeTemp(returnValue.first);
     device->readLaserTemp(returnValue.second);
@@ -162,7 +160,7 @@ void AdiTofDemoController::captureFrames() {
 
         auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
         auto frame = std::make_shared<aditof::Frame>();
-        aditof::Status status = camera->requestFrame(frame);
+        aditof::Status status = camera->requestFrame(frame.get());
         if (status != aditof::Status::OK) {
             m_frameRequested = false;
             continue;

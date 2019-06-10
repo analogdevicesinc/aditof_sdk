@@ -10,7 +10,11 @@
 SystemImpl::SystemImpl()
     : m_enumerator(DeviceEnumeratorFactory::buildDeviceEnumerator()) {}
 
-SystemImpl::~SystemImpl() = default;
+SystemImpl::~SystemImpl() {
+    for (auto &cam : m_cameras) {
+        delete cam;
+    }
+}
 
 aditof::Status SystemImpl::initialize() {
     using namespace aditof;
@@ -19,9 +23,8 @@ aditof::Status SystemImpl::initialize() {
     std::vector<aditof::DeviceConstructionData> devsData;
     m_enumerator->findDevices(devsData);
     for (const auto &data : devsData) {
-        std::unique_ptr<DeviceInterface> device =
-            DeviceFactory::buildDevice(data);
-        auto camera = std::make_shared<Camera>(std::move(device));
+        DeviceInterface *device = DeviceFactory::buildDevice(data);
+        aditof::Camera *camera = new Camera(device);
         m_cameras.push_back(camera);
     }
 
@@ -30,8 +33,8 @@ aditof::Status SystemImpl::initialize() {
     return status;
 }
 
-aditof::Status SystemImpl::getCameraList(
-    std::vector<std::shared_ptr<aditof::Camera>> &cameraList) const {
+aditof::Status
+SystemImpl::getCameraList(std::vector<aditof::Camera *> &cameraList) const {
     using namespace aditof;
     Status status = Status::OK;
 

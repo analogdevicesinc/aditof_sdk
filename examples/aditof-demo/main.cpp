@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    std::vector<std::shared_ptr<Camera>> cameras;
+    std::vector<Camera *> cameras;
     system.getCameraList(cameras);
     if (cameras.empty()) {
         LOG(WARNING) << "No cameras found";
@@ -81,9 +81,9 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    auto frame = std::make_shared<aditof::Frame>();
+    aditof::Frame frame;
 
-    status = camera->requestFrame(frame);
+    status = camera->requestFrame(&frame);
     if (status != Status::OK) {
         LOG(ERROR) << "Could not request frame!";
         return 0;
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     }
 
     uint16_t *data1;
-    status = frame->getData(FrameDataType::RAW, &data1);
+    status = frame.getData(FrameDataType::RAW, &data1);
 
     if (status != Status::OK) {
         LOG(ERROR) << "Could not get frame data!";
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
     }
 
     FrameDetails fDetails;
-    frame->getDetails(fDetails);
+    frame.getDetails(fDetails);
     for (unsigned int i = 0; i < fDetails.width * fDetails.height; ++i) {
         std::cout << data1[i] << " ";
     }

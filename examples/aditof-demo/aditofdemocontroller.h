@@ -2,9 +2,9 @@
 #define HELLOWORLDCONTROLLER_H
 
 #include <camera.h>
+#include <device_interface.h>
 #include <frame.h>
 #include <system.h>
-#include <device_interface.h>
 
 #include <atomic>
 #include <functional>
@@ -34,7 +34,7 @@ class AdiTofDemoController {
                                    uint16_t noOfEntries = 1);
 
     void startRecording(const std::string &fileName, unsigned int height,
-			unsigned int width, unsigned int fps);
+                        unsigned int width, unsigned int fps);
     void stopRecording();
     int startPlayback(const std::string &fileName, int &fps);
     void stopPlayback();
@@ -50,7 +50,8 @@ class AdiTofDemoController {
     void captureFrames();
 
   private:
-    std::vector<std::shared_ptr<aditof::Camera>> m_cameras;
+    aditof::System m_system;
+    std::vector<aditof::Camera *> m_cameras;
     int m_cameraInUse;
     std::thread m_workerThread;
     std::atomic<bool> m_stopFlag;

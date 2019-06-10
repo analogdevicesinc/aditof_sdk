@@ -5,7 +5,6 @@
 #include "camera_definitions.h"
 #include "status_definitions.h"
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -17,7 +16,7 @@ class DeviceInterface;
 
 class CameraImpl {
   public:
-    CameraImpl(std::unique_ptr<DeviceInterface> device);
+    CameraImpl(DeviceInterface *device);
     ~CameraImpl();
 
   public: // from Camera
@@ -31,15 +30,15 @@ class CameraImpl {
     aditof::Status setFrameType(const std::string &frameType);
     aditof::Status
     getAvailableFrameTypes(std::vector<std::string> &availableFrameTypes) const;
-    aditof::Status requestFrame(std::shared_ptr<aditof::Frame> frame,
+    aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
 
-    std::shared_ptr<DeviceInterface> getDevice();
+    DeviceInterface *getDevice();
 
   private:
     aditof::CameraDetails m_details;
-    std::shared_ptr<DeviceInterface> m_device;
+    DeviceInterface *m_device;
     bool m_devStarted;
     Calibration m_calibration;
 };
