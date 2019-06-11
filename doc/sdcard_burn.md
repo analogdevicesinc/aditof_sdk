@@ -20,5 +20,5 @@ Writing the image on the SD card will take about 15 to 20 minutes for a 16GB ima
 
 ## Windows
 * Unpack the .tar.xz archive using [7-Zip](https://www.7-zip.org/)
-* Install the [balenEtcher](https://www.balena.io/etcher/) app
+* Install the [balenaEtcher](https://www.balena.io/etcher/) app
 * Write the .img file to the SD card using the balenaEtcher app
