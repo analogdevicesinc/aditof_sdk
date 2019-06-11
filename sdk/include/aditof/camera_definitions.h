@@ -18,7 +18,7 @@ class Frame;
 /**
  * @brief Callback for frame updates
  */
-typedef std::function<void(Status, std::shared_ptr<Frame>)> FrameUpdateCallback;
+typedef std::function<void(Status, Frame *)> FrameUpdateCallback;
 
 /**
  * @enum ConnectionType
