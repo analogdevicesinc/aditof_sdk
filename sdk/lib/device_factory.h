@@ -2,7 +2,7 @@
 #define DEVICE_FACTORY_H
 
 #include "device_construction_data.h"
-#include "device_interface.h"
+#include <aditof/device_interface.h>
 
 class DeviceFactory {
   public:

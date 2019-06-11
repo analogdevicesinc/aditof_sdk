@@ -5,42 +5,12 @@ add_definitions(-DSDK_EXPORTS)
 
 find_package(glog 0.3.5 REQUIRED)
 
-set(SOURCES
-        src/frame_operations.cpp
-        src/frame_impl.cpp
-        src/frame.cpp
-        src/camera_impl.cpp
-        src/camera.cpp
-        src/system_impl.cpp
-        src/system.cpp
-        src/device_enumerator_impl.cpp
-        src/device_enumerator_factory.cpp
-        src/usb_device.cpp
-        src/ethernet_device.cpp
-        src/device_factory.cpp
-        src/calibration.cpp
+file(GLOB SOURCES
+    ${CMAKE_SOURCE_DIR}/sdk/lib/*.cpp
+)
 
-        src/status_definitions.h
-        src/frame_definitions.h
-        src/frame_operations.h
-        src/frame_impl.h
-        src/frame.h
-        src/camera_definitions.h
-        src/camera_impl.h
-        src/camera.h
-        src/system_impl.h
-        src/system.h
-        src/device_construction_data.h
-        src/device_enumerator_interface.h
-        src/device_enumerator_impl.h
-        src/device_enumerator_factory.h
-        src/device_interface.h
-        src/usb_device.h
-        src/local_device.h
-        src/ethernet_device.h
-        src/device_factory.h
-        src/sdk_exports.h
-        src/calibration.h
+file(GLOB HEADERS
+    ${CMAKE_SOURCE_DIR}/sdk/include/aditof/*.h
 )
 
 if( WIN32 )
@@ -58,32 +28,32 @@ endif()
 # Platform specific sources and headers
 if( WIN32 )
     file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.c)
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/windows/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/windows/*.c)
     file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.h)
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/windows/*.h)
 elseif( APPLE )
     file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/macos/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/macos/*.c)
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/macos/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/macos/*.c)
     file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/macos/*.h)
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/macos/*.h)
 elseif( DRAGONBOARD )
     file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/dragonboard/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/dragonboard/*.c)
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dragonboard/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dragonboard/*.c)
     file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/dragonboard/*.h)
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dragonboard/*.h)
 elseif ( UNIX )
     file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.c)
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/linux/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/linux/*.c)
     file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.h)
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/linux/*.h)
 endif()
 
 if ( NOT DRAGONBOARD )
-    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
+    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/lib/local_device.cpp)
 endif()
 
 add_library(${PROJECT_NAME} SHARED
@@ -92,7 +62,8 @@ add_library(${PROJECT_NAME} SHARED
     ${PLATFORM_HEADERS}
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC src/)
+target_include_directories(${PROJECT_NAME} PUBLIC include/)
+target_include_directories(${PROJECT_NAME} PRIVATE lib/)
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION 1.0 CXX_STANDARD 11)
 target_link_libraries( ${PROJECT_NAME} PUBLIC glog::glog)

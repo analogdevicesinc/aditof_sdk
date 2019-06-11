@@ -2,7 +2,7 @@
 #define DEVICE_ENUMERATOR_INTERFACE_H
 
 #include "device_construction_data.h"
-#include "status_definitions.h"
+#include <aditof/status_definitions.h>
 
 #include <vector>
 

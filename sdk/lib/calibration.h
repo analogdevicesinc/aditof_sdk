@@ -1,8 +1,8 @@
 #ifndef CALIBRATION_H
 #define CALIBRATION_H
 
-#include "device_interface.h"
-#include "status_definitions.h"
+#include <aditof/device_interface.h>
+#include <aditof/status_definitions.h>
 #include <iostream>
 #include <list>
 #include <memory>

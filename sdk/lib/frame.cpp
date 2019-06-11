@@ -1,5 +1,5 @@
-#include "frame.h"
 #include "frame_impl.h"
+#include <aditof/frame.h>
 
 namespace aditof {
 

@@ -1,6 +1,6 @@
-#include "system.h"
-#include "camera.h"
 #include "system_impl.h"
+#include <aditof/camera.h>
+#include <aditof/system.h>
 
 namespace aditof {
 

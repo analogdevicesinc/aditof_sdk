@@ -1,13 +1,15 @@
-#ifndef ETHERNET_DEVICE_H
-#define ETHERNET_DEVICE_H
+#ifndef LOCAL_DEVICE_H
+#define LOCAL_DEVICE_H
 
 #include "device_construction_data.h"
-#include "device_interface.h"
+#include <aditof/device_interface.h>
 
-class EthernetDevice : public DeviceInterface {
+#include <memory>
+
+class LocalDevice : public DeviceInterface {
   public:
-    EthernetDevice(const aditof::DeviceConstructionData &data);
-    ~EthernetDevice() = default;
+    LocalDevice(const aditof::DeviceConstructionData &data);
+    ~LocalDevice();
 
   public: // implements DeviceInterface
     virtual aditof::Status open();
@@ -29,6 +31,11 @@ class EthernetDevice : public DeviceInterface {
                                              size_t length);
     virtual aditof::Status readAfeTemp(float &temperature);
     virtual aditof::Status readLaserTemp(float &temperature);
+
+  private:
+    struct ImplData;
+    aditof::DeviceConstructionData m_devData;
+    std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // ETHERNET_DEVICE_H
+#endif // LOCAL_DEVICE_H
