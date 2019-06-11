@@ -28,8 +28,10 @@ struct UsbDevice::ImplData {
 
 UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new UsbDevice::ImplData) {
+    m_implData->fd = 0;
     m_implData->started = false;
     m_implData->buffers = nullptr;
+    m_implData->buffersCount = 0;
 }
 
 UsbDevice::~UsbDevice() {
@@ -48,9 +50,11 @@ UsbDevice::~UsbDevice() {
     if (m_implData->buffers)
         free(m_implData->buffers);
 
-    if (-1 == close(m_implData->fd))
-        LOG(WARNING) << "close, error:" << errno << "(" << strerror(errno)
-                     << ")";
+    if (m_implData->fd != 0) {
+        if (-1 == close(m_implData->fd))
+            LOG(WARNING) << "close, error:" << errno << "(" << strerror(errno)
+                         << ")";
+    }
 }
 
 aditof::Status UsbDevice::open() {
