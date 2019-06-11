@@ -6,16 +6,18 @@ The **ADI ToF SDK** is a cross platform library for the Analog Devices depth cam
 
 The SDK provides an API to control the ToF camera and stream IR and depth data. Windows and Linux support are built into the SDK as well as sample code and wrappers for various languages including Python, C/C++ and Matlab.
 
-| Operating System | GitHub master status |
-| --------- | ----------- |
-| Windows | [![Build status](https://ci.appveyor.com/api/projects/status/46t36hmy77ejrf88/branch/master?svg=true)](https://ci.appveyor.com/project/analogdevicesinc/aditof-sdk/branch/master) |
-| Linux | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) |
-## Supported platforms
+## Supported host platforms
+| Operating System | Getting started guide | GitHub master status | Downloads |
+| --------- | ----------- | ----------- | ----------- |
+| Windows | [User Guide](doc/windows/user_guide.md) | [![Build status](https://ci.appveyor.com/api/projects/status/46t36hmy77ejrf88/branch/master?svg=true)](https://ci.appveyor.com/project/analogdevicesinc/aditof-sdk/branch/master) | [aditof-demo installer](https://ci.appveyor.com/project/analogdevicesinc/aditof-sdk/branch/master/artifacts) |
+| Linux | [User Guide](doc/linux/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | - |
+
+## Supported embedded platforms
 Designed using a modular approach, the 3D ToF hardware prototyping platform enables connectivity to the 96Boards development boards suite as well RaspberryPI or any other hardware platforms that have the RaspberryPI camera connector. 
 
-| Platform | Getting started guide | SD card image |
-| --------- | ----------- | ----------- |
-| DragonBoard 410c | [DragonBoard 410c User Guide](doc/dragonboard410c/user_guide.md) | [aditof-v0.2-dragonboard410c-sdimage.tar.xz](http://swdownloads.analog.com/cse/aditof/aditof-v0.2-dragonboard410c-sdimage.tar.xz) |
+| Platform | Getting started guide | GitHub master status | Downloads |
+| --------- | ----------- | ----------- | ----------- |
+| DragonBoard 410c | [User Guide](doc/dragonboard410c/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [SD card image v0.2](http://swdownloads.analog.com/cse/aditof/aditof-v0.2-dragonboard410c-sdimage.tar.xz) |
 
 [How to write the SD card image onto the SD card?](doc/sdcard_burn.md)
 
