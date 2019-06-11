@@ -6,3 +6,4 @@
 #include <aditof/frame_operations.h>
 #include <aditof/status_definitions.h>
 #include <aditof/system.h>
+#include <aditof/version.h>

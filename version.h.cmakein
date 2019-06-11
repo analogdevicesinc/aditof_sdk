@@ -1,0 +1,17 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+#include <string>
+
+#define ADITOF_API_VERSION_MAJOR "@ADITOF_VERSION_MAJOR@"
+#define ADITOF_API_VERSION_MINOR "@ADITOF_VERSION_MINOR@"
+#define ADITOF_API_VERSION_PATCH "@ADITOF_VERSION_PATCH@"
+#define ADITOF_API_VERSION                                                     \
+    (ADITOF_API_VERSION_MAJOR "." ADITOF_API_VERSION_MINOR                     \
+                              "." ADITOF_API_VERSION_PATCH)
+
+namespace aditof {
+const std::string getApiVersion() { return std::string(ADITOF_API_VERSION); }
+} // namespace aditof
+
+#endif // VERSION_H
