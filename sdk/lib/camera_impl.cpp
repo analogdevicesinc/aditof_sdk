@@ -1,7 +1,7 @@
 #include "camera_impl.h"
-#include "device_interface.h"
-#include "frame.h"
-#include "frame_operations.h"
+#include <aditof/device_interface.h>
+#include <aditof/frame.h>
+#include <aditof/frame_operations.h>
 
 #include <algorithm>
 #include <fstream>

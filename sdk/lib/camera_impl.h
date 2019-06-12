@@ -2,8 +2,8 @@
 #define CAMERA_IMPL_H
 
 #include "calibration.h"
-#include "camera_definitions.h"
-#include "status_definitions.h"
+#include <aditof/camera_definitions.h>
+#include <aditof/status_definitions.h>
 
 #include <string>
 #include <vector>

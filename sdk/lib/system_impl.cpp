@@ -1,9 +1,9 @@
 #include "system_impl.h"
-#include "camera.h"
 #include "camera_impl.h"
 #include "device_construction_data.h"
 #include "device_enumerator_factory.h"
 #include "device_factory.h"
+#include <aditof/camera.h>
 
 #include <glog/logging.h>
 

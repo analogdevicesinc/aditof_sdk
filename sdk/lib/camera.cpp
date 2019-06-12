@@ -1,6 +1,7 @@
-#include "camera.h"
+#include <aditof/camera.h>
+
 #include "camera_impl.h"
-#include "device_interface.h"
+#include <aditof/device_interface.h>
 
 namespace aditof {
 

@@ -22,3 +22,6 @@ endif()
 
 ############################### Installer #######################################
 configure_file(aditof-setup.iss.cmakein ${CMAKE_CURRENT_BINARY_DIR}/aditof-setup.iss @ONLY)
+
+############################### Version #######################################
+configure_file(version.h.cmakein ${CMAKE_SOURCE_DIR}/sdk/include/aditof/version.h @ONLY)

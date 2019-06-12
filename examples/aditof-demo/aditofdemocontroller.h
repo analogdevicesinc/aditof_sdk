@@ -1,10 +1,10 @@
 #ifndef HELLOWORLDCONTROLLER_H
 #define HELLOWORLDCONTROLLER_H
 
-#include <camera.h>
-#include <device_interface.h>
-#include <frame.h>
-#include <system.h>
+#include <aditof/camera.h>
+#include <aditof/device_interface.h>
+#include <aditof/frame.h>
+#include <aditof/system.h>
 
 #include <atomic>
 #include <functional>

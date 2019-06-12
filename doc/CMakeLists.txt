@@ -7,7 +7,7 @@ if (NOT DOXYGEN_PATH)
     message(FATAL_ERROR "doxygen not found!")
 endif()
 
-set(SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../sdk/src)
+set(SOURCES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../sdk/include/aditof)
 
 ############################ Doc variables ####################################
 set(PROJECT_NAME "Time-of-Flight-SDK")
