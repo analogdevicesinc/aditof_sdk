@@ -6,6 +6,8 @@ The **ADI ToF SDK** is a cross platform library for the Analog Devices depth cam
 
 The SDK provides an API to control the ToF camera and stream IR and depth data. Windows and Linux support are built into the SDK as well as sample code and wrappers for various languages including Python, C/C++ and Matlab.
 
+License : [![License](https://img.shields.io/badge/license-LGPL2-blue.svg)](https://github.com/analogdevicesinc/aditof_sdk/blob/master/LICENSE)
+
 ## Supported host platforms
 | Operating System | Documentation | GitHub master status | Downloads |
 | --------- | ----------- | ----------- | ----------- |
