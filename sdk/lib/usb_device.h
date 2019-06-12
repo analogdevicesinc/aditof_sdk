@@ -1,15 +1,15 @@
-#ifndef LOCAL_DEVICE_H
-#define LOCAL_DEVICE_H
+#ifndef USB_DEVICE_H
+#define USB_DEVICE_H
 
 #include "device_construction_data.h"
-#include "device_interface.h"
+#include <aditof/device_interface.h>
 
 #include <memory>
 
-class LocalDevice : public DeviceInterface {
+class UsbDevice : public DeviceInterface {
   public:
-    LocalDevice(const aditof::DeviceConstructionData &data);
-    ~LocalDevice();
+    UsbDevice(const aditof::DeviceConstructionData &data);
+    ~UsbDevice();
 
   public: // implements DeviceInterface
     virtual aditof::Status open();
@@ -34,8 +34,9 @@ class LocalDevice : public DeviceInterface {
 
   private:
     struct ImplData;
+
     aditof::DeviceConstructionData m_devData;
     std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // LOCAL_DEVICE_H
+#endif // USB_DEVICE_H

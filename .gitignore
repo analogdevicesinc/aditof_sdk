@@ -1,1 +1,3 @@
 build/
+
+sdk/include/aditof/version.h

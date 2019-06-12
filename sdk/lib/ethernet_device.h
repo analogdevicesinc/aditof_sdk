@@ -1,15 +1,13 @@
-#ifndef USB_DEVICE_H
-#define USB_DEVICE_H
+#ifndef ETHERNET_DEVICE_H
+#define ETHERNET_DEVICE_H
 
 #include "device_construction_data.h"
-#include "device_interface.h"
+#include <aditof/device_interface.h>
 
-#include <memory>
-
-class UsbDevice : public DeviceInterface {
+class EthernetDevice : public DeviceInterface {
   public:
-    UsbDevice(const aditof::DeviceConstructionData &data);
-    ~UsbDevice();
+    EthernetDevice(const aditof::DeviceConstructionData &data);
+    ~EthernetDevice() = default;
 
   public: // implements DeviceInterface
     virtual aditof::Status open();
@@ -31,12 +29,6 @@ class UsbDevice : public DeviceInterface {
                                              size_t length);
     virtual aditof::Status readAfeTemp(float &temperature);
     virtual aditof::Status readLaserTemp(float &temperature);
-
-  private:
-    struct ImplData;
-
-    aditof::DeviceConstructionData m_devData;
-    std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // USB_DEVICE_H
+#endif // ETHERNET_DEVICE_H

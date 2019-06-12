@@ -1,6 +1,6 @@
 ﻿#ifndef ADITOFDEMORECORDER_H
 #define ADITOFDEMORECORDER_H
-#include <frame.h>
+#include <aditof/frame.h>
 
 #include <atomic>
 #include <fstream>
@@ -14,7 +14,7 @@ class AditofDemoRecorder {
     ~AditofDemoRecorder();
 
     void startRecording(const std::string &fileName, unsigned int height,
-			unsigned int width, unsigned int fps);
+                        unsigned int width, unsigned int fps);
     void stopRecording();
 
     int startPlayback(const std::string &fileName, int &fps);

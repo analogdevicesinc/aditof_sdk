@@ -1,8 +1,8 @@
 #ifndef FRAME_IMPL
 #define FRAME_IMPL
 
-#include "frame_definitions.h"
-#include "status_definitions.h"
+#include <aditof/frame_definitions.h>
+#include <aditof/status_definitions.h>
 
 #include <stdint.h>
 
