@@ -51,22 +51,26 @@ The framerate at which data is acquired from the system is constantly updated on
 
 #### Installing the dependencies
 * Glog:
-1. git clone https://github.com/google/glog
-2. cd glog
-3. git checkout tags/v0.3.5
-4. mkdir build_0_3_5 && cd build_0_3_5
-5. cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=./local_path/glog -G "Visual Studio 14 2015 Win64" ..
-6. cmake --build . --target install --config Debug
-7. cmake --build . --target install --config Release
+```console
+git clone https://github.com/google/glog
+cd glog
+git checkout tags/v0.3.5
+mkdir build_0_3_5 && cd build_0_3_5
+cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=./local_path/glog -G "Visual Studio 14 2015 Win64" ..
+cmake --build . --target install --config Debug
+cmake --build . --target install --config Release
+```
 
 #### Download and build SDK only
 * Follow below steps to download and generate MS Visual Studio project
-1. git clone https://github.com/analogdevicesinc/aditof_sdk
-2. cd aditof_sdk
-3. mkdir build
-4. cd build
-5. cmake -G "Visual Studio 14 2015 Win64" -DWITH_EXAMPLES=off ..
-6. cmake --build . --config Release
+```console
+git clone https://github.com/analogdevicesinc/aditof_sdk
+cd aditof_sdk
+mkdir build
+cd build
+cmake -G "Visual Studio 14 2015 Win64" -DWITH_EXAMPLES=off ..
+cmake --build . --config Release
+```
 
 ### SDK with examples
 
@@ -78,16 +82,23 @@ The framerate at which data is acquired from the system is constantly updated on
 1. Install the latest release of opencv from: https://opencv.org/releases/
 2. Then the following OpenCV environment variables need to be set:
 
-* OPENCV_DIR=path_to_opencv_installation_dir\build
-* OPENCV_PATH=path_to_opencv_installation_dir\build\x64\vc14\bin
+```
+OPENCV_DIR=path_to_opencv_installation_dir\build
+OPENCV_PATH=path_to_opencv_installation_dir\build\x64\vc14\bin
+```
 
 For instance, if OpenCV were to be install at: C:\opencv, then the variable should look like this:
-* OPENCV_DIR=C:\opencv\build
-* OPENCV_PATH=C:\opencv\build\x64\vc14\bin
+```
+OPENCV_DIR=C:\opencv\build
+OPENCV_PATH=C:\opencv\build\x64\vc14\bin
+```
 
 #### Build SDK with examples
-1. cd aditof_sdk
-2. scripts/generate_msvc2015_solution.bat
-3. Open 'adi_tof_project.sln' generated in 'aditof_sdk/build' in MS Visual Studio 2015
-4. Select 'Release' build
-5. Application binary are created in 'aditof_sdk/build/example/aditof-demo/Release' directory
+- Generate the VisualStudio solution
+```console
+cd aditof_sdk
+scripts/generate_msvc2015_solution.bat
+```
+- Open 'adi_tof_project.sln' generated in 'aditof_sdk/build' in MS Visual Studio 2015
+- Select 'Release' build
+- Application binaries are created in 'aditof_sdk/build/example/aditof-demo/Release' directory
