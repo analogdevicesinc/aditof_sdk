@@ -1,37 +1,14 @@
-# 3D Time of Flight : aditof-demo Sample 
+# aditof-demo evaluation application 
 
 #### Overview
 
-aditof-demo example demonstrates how user can connect to ADI TOF DEPTH SENSOR device and request frames. Its written in C++ with use of OpenCV for rendering the IR and Depth image data in seperate windows.
-The control window is provided to change the Range and Exposure settings of ADI TOF DEPTH SENSOR device.
+The aditof-demo is a cross platform application meant for system evaluation. It can run both on an embedded platform or a host PC by making use of the different conectivity options provided by the SDK.  
 
-#### Expected Output
+For more information about using the application on various platforms see the corresponding user guide below.
 
-When the demo is up and running, there will be three windows for IR image, Depth image and Control, as shown in below:
-
-* Place holder for aditof-demo snapshot image
-
-#### Code Snippets
-
-First, initialize the ADI TOF SDK instance as below:
-```
-    ADI_TOF m_adiTof;
-    int status = m_adiTof.Init();
-    m_adiTof.setDepthRange(m_currentRange, m_currentLevel);
-    m_adiTof.setPulseCount(m_currentPulse);
-```
-
-Next, get frame from the ADI TOF SDK as below:
-```
-    m_adiTof.ProcFrame();
-    auto framePtr = std::make_shared<Frame>(m_adiTof.punDepth, m_adiTof.punIR, m_adiTof.width, m_adiTof.height);
-```
-
-Above code should be in a loop to keep getting frames as they become available with ADI TOF SDK.
-
-Lastly, when done processing the frames, close the ADI TOF SDK instance as below:
-```
-m_adiTof.Release();
-```
-
+| Platfrom | Documentation |
+| --------- | ----------- |
+| Windows PC | [User Guide](doc/windows/user_guide.md) |
+| Linux PC | [User Guide](doc/linux/user_guide.md) | 
+| DragonBoard 410c | [User Guide](doc/dragonboard410c/user_guide.md) |
 
