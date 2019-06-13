@@ -67,4 +67,8 @@ linaro@linaro-alip:~/workspace/github/aditof_sdk$ cd build
 linaro@linaro-alip:~/workspace/github/aditof_sdk$ cmake -DDRAGONBOARD=1 ..
 linaro@linaro-alip:~/workspace/github/aditof_sdk$ make -j8
 ``` 
-Note: if the above commands return permission errors try running them as *sudo*.
+***Note:*** if the above commands return permission errors try running them as *sudo*
+
+## Linux Kernel
+A customized [Linaro kernel](https://github.com/analogdevicesinc/aditof_linux) is provided for the DragonBoard410c including the [V4L2 driver for the ADDI903x](https://github.com/analogdevicesinc/aditof_linux/blob/d3/release/ov5640_4.9.27/drivers/media/i2c/addi903x.c) and other improvements to support all the ADI depth camera features. 
+
