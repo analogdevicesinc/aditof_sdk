@@ -42,5 +42,52 @@ The framerate at which data is acquired from the system is constantly updated on
 
 ## Building the SDK
 
-To be continued...
+### SDK only
 
+#### Pre-requisites
+* Install MS Visual Studio 14 2015
+* Install MS .NET Framework 4.5
+* Glog
+
+#### Installing the dependencies
+* Glog:
+1. git clone https://github.com/google/glog
+2. cd glog
+3. git checkout tags/v0.3.5
+4. mkdir build_0_3_5 && cd build_0_3_5
+5. cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=./local_path/glog -G "Visual Studio 14 2015 Win64" ..
+6. cmake --build . --target install --config Debug
+7. cmake --build . --target install --config Release
+
+#### Download and build SDK only
+* Follow below steps to download and generate MS Visual Studio project
+1. git clone https://github.com/analogdevicesinc/aditof_sdk
+2. cd aditof_sdk
+3. mkdir build
+4. cd build
+5. cmake -G "Visual Studio 14 2015 Win64" -DWITH_EXAMPLES=off ..
+6. cmake --build . --config Release
+
+### SDK with examples
+
+#### Additional pre-requisites
+* OpenCV
+
+#### Installing the additional dependencies
+* OpenCV:
+1. Install the latest release of opencv from: https://opencv.org/releases/
+2. Then the following OpenCV environment variables need to be set:
+
+* OPENCV_DIR=path_to_opencv_installation_dir\build
+* OPENCV_PATH=path_to_opencv_installation_dir\build\x64\vc14\bin
+
+For instance, if OpenCV were to be install at: C:\opencv, then the variable should look like this:
+* OPENCV_DIR=C:\opencv\build
+* OPENCV_PATH=C:\opencv\build\x64\vc14\bin
+
+#### Build SDK with examples
+1. cd aditof_sdk
+2. scripts/generate_msvc2015_solution.bat
+3. Open 'adi_tof_project.sln' generated in 'aditof_sdk/build' in MS Visual Studio 2015
+4. Select 'Release' build
+5. Application binary are created in 'aditof_sdk/build/example/aditof-demo/Release' directory
