@@ -35,5 +35,24 @@ To be continued....
 
 ## Building the SDK
 
-To be continued....
+### SDK dependencies
+To build the SDK and run the included applications and example code the following dependencies must be installed in the system:
+ - v4l-utils
+ - libopencv-dev
+ - cmake
+ - glog v0.3.5
+
+This [script](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/scripts/db410c_sdk_deps.sh) will get and install all the SDK dependencies and will also download the SDK source code and build it. By default all the code will be stored in */home/linaro/workspace/github*.
+ 
+The SD card image already contains all the SDK dependencies and there's no need to install them again. To update and build the SDK just follow the steps below.
+
+```console
+linaro@linaro-alip:~/workspace/github/aditof_sdk$ git pull
+linaro@linaro-alip:~/workspace/github/aditof_sdk$ rm -rf build
+linaro@linaro-alip:~/workspace/github/aditof_sdk$ mkdir build
+linaro@linaro-alip:~/workspace/github/aditof_sdk$ cd build
+linaro@linaro-alip:~/workspace/github/aditof_sdk$ cmake -DDRAGONBOARD=1 ..
+linaro@linaro-alip:~/workspace/github/aditof_sdk$ make -j8
+```
+ 
 
