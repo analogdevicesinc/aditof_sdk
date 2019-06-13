@@ -55,7 +55,7 @@ To build the SDK and run the included applications and example code the followin
  - cmake
  - glog v0.3.5
 
-This [script](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/scripts/db410c_sdk_deps.sh) will get and install all the SDK dependencies and will also download the SDK source code and build it. By default all the code will be stored in */home/linaro/workspace/github*.
+This [script](https://github.com/analogdevicesinc/aditof_sdk/blob/master/scripts/dragonboard410c/db410c_sdk_deps.sh) will get and install all the SDK dependencies and will also download the SDK source code and build it. By default all the code will be stored in */home/linaro/workspace/github*.
  
 The SD card image already contains all the SDK dependencies and there's no need to install them again. To update and build the SDK just follow the steps below.
 
