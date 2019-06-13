@@ -35,7 +35,7 @@ make -j8
 cd /home/linaro/workspace/github/aditof_sdk/apps/uvc-app
 make -j8
 
-#build and istall the USB daemon
+#build and install the USB daemon
 cd /home/linaro/workspace/github/aditof_sdk/apps/daemon
 sudo cp tof-programming.service /etc/systemd/system/
 mkdir build
