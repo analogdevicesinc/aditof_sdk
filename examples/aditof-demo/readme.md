@@ -1,6 +1,6 @@
 # aditof-demo evaluation application 
 
-#### Overview
+## Overview
 
 The aditof-demo is a cross platform application meant for system evaluation. It can run both on an embedded platform or a host PC by making use of the different conectivity options provided by the SDK.  
 
