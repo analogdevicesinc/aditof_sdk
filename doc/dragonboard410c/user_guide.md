@@ -31,7 +31,20 @@ To run the system in standalone mode, besides the accesories that are provided i
 
 Once Linux boots you'll see on the HDMI monitor the Linux desktop and on the top left corner a shortcut to the evaluation application. Double clicking on the icon will start the evaluation application.  A console window will open to show the application's status and, after a few seconds, the evaluation application GUI will be displayed. 
 
-To be continued.... 
+![aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/db410c_aditof_demo.jpg)
+
+The evaluation application allows to do live streaming of depth and IR data as well as recording the depth and IR data and playing back from a file. The depth data is displayed as a color map ranging from warm to cold colors as the distance from the camera increases. A point in the middle of the depth image shows the distance in mm to the target.
+
+There are 3 operating modes that determine the range of the system:
+ - Near - 20cm to 80cm
+ - Medium - 80cm to 300cm
+ - Far - 300cm to 600cm
+
+When in a certain operating mode the system will measure distances outside of the mode's range but those will not be accurate. 
+ 
+The evaluation application also displays the temperature in deg C of the camera (AFE) and laser boards as read from the temperature sensors installed on each board.
+
+The framerate at which data is acquired from the system is constantly updated on the GUI. The camera board outputs data at 30 frames per second (fps), but due to system load the evaluation application processes the frames at a lower rate.
 
 ## Building the SDK
 
@@ -53,6 +66,5 @@ linaro@linaro-alip:~/workspace/github/aditof_sdk$ mkdir build
 linaro@linaro-alip:~/workspace/github/aditof_sdk$ cd build
 linaro@linaro-alip:~/workspace/github/aditof_sdk$ cmake -DDRAGONBOARD=1 ..
 linaro@linaro-alip:~/workspace/github/aditof_sdk$ make -j8
-```
- 
-
+``` 
+Note: if the above commands return permission errors try running them as *sudo*.
