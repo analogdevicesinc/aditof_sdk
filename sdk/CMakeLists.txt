@@ -52,8 +52,8 @@ elseif ( UNIX )
         ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.h)
 endif()
 
-if ( NOT DRAGONBOARD )
-    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
+if ( DRAGONBOARD )
+    list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
 endif()
 
 add_library(${PROJECT_NAME} SHARED
