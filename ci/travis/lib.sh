@@ -6,6 +6,37 @@ echo_red() { printf "\033[1;31m$*\033[m\n"; }
 echo_green() { printf "\033[1;32m$*\033[m\n"; }
 
 ############################################################################
+# Check if the file passed as arguments is ignored or not by clang format
+############################################################################
+is_not_ignored() {
+    local file="$1"
+
+    fileData=`cat .clangformatignore`
+
+    for entry in $fileData; do
+        if [ -d "${entry}" ]; then
+            pushd ${entry}
+            fileName=`basename ${file}`
+            found=$(find -name ${fileName} | wc -l)
+            if [ ${found} -gt 0 ]; then
+                popd
+                return 1
+            else
+                popd
+            fi
+        else
+            if [ -f "${entry}" ]; then
+                if [ "${file}" == "${entry}" ]; then
+                    return 1
+                fi
+            fi
+        fi
+    done;
+    return 0
+}
+
+
+############################################################################
 # Check if the file given as input has .h or .cpp extension
 ############################################################################
 is_source_file() {
@@ -34,7 +65,7 @@ check_clangformat() {
     fi
 
     git diff --name-only --diff-filter=d $COMMIT_RANGE | while read -r file; do
-        if is_source_file "$file"
+        if is_source_file "$file" && is_not_ignored "$file"
         then
             /usr/bin/clang-format-6.0 -i "$file"
         fi
