@@ -47,9 +47,14 @@ The framerate at which data is acquired from the system is constantly updated on
 #### Pre-requisites
 * Install MS Visual Studio 14 2015
 * Install MS .NET Framework 4.5
+* CMake
 * Glog
 
 #### Installing the dependencies
+* CMake
+
+Windows installer can be downloaded from: https://cmake.org/download/
+
 * Glog:
 ```console
 git clone https://github.com/google/glog
