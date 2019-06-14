@@ -1,14 +1,15 @@
 # 3D Time of Flight : doc
 
 #### Overview
-This folder contains the user guides, helper documents, doxygen documents, etc for the 3D ToF SDK and Examples
+This folder contains the user guides, helper documents, doxygen documents, etc. for the 3D ToF SDK and examples.
 
 #### Directory Structure
 | Directory/File | Description |
 | --------- | ----------- |
+| dragonboard410c | Instructions to build and use all necessary software on Dragonboard 410c |
+| linux | Instructions to build and use all necessary software on a Linux host |
+| windows | Instructions to build and use all necessary software on a Windows host |
+| img | Images used in various documentation files |
 | CMakeLists.txt | Rules for generating the doxygen documentation on request |
-| linux_build.md | Contains the steps for building the SDK on Linux host |
-| windows_build.md | Contains the steps for building the SDK on Windows host  |
-| macos_build.md | Contains the steps for building the SDK on Windows host  |
-
-
+| sdcard_burn.md | Instructions to write the SD card image onto a SD card |
+| sdk.doxy.in | The doxygen configuration before cmake content gets added |
