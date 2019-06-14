@@ -20,7 +20,7 @@ mkdir x32\%folder%\lib
 
 cp C:\projects\aditof-sdk\build\sdk\Release\aditof.dll C:\aditof-sdk\x64\%folder%\bin
 cp C:\projects\aditof-sdk\build\sdk\Release\aditof.lib C:\aditof-sdk\x64\%folder%\lib
-cp C:\projects\aditof-sdk\build\bindings\python\Release\*.pyd C:\aditof-sdk\x64\%folder%\bin\python
+cp C:\projects\aditof-sdk\build\bindings\python\Release\aditofpython.cp36-win_amd64.pyd C:\aditof-sdk\x64\%folder%\bin\python
 
 
 ren "C:\projects\aditof-sdk\build_debug\sdk\Debug\aditof.dll" "aditofd.dll"
@@ -31,11 +31,11 @@ ren "C:\projects\aditof-sdk\build_debug\sdk\Debug\aditof.pdb" "aditofd.pdb"
 cp C:\projects\aditof-sdk\build_debug\sdk\Debug\aditofd.dll C:\aditof-sdk\x64\%folder%\bin
 cp C:\projects\aditof-sdk\build_debug\sdk\Debug\aditofd.pdb C:\aditof-sdk\x64\%folder%\bin
 cp C:\projects\aditof-sdk\build_debug\sdk\Debug\aditofd.lib C:\aditof-sdk\x64\%folder%\lib
-cp C:\projects\aditof-sdk\build\bindings\python\Debug\*.pyd C:\aditof-sdk\x64\%folder%\bin\python
+cp C:\projects\aditof-sdk\build_debug\bindings\python\Debug\aditofpython.cp36-win_amd64.pyd C:\aditof-sdk\x64\%folder%\bin\python
 
 cp C:\projects\aditof-sdk\build_x32\sdk\Release\aditof.dll C:\aditof-sdk\x32\%folder%\bin
 cp C:\projects\aditof-sdk\build_x32\sdk\Release\aditof.lib C:\aditof-sdk\x32\%folder%\lib
-cp C:\projects\aditof-sdk\build_x32\bindings\python\Release\*.pyd C:\aditof-sdk\x32\%folder%\bin\python
+cp C:\projects\aditof-sdk\build_x32\bindings\python\Release\aditofpython.cp36-win32.pyd C:\aditof-sdk\x32\%folder%\bin\python
 
 ren "C:\projects\aditof-sdk\build_debug_x32\sdk\Debug\aditof.dll" "aditofd.dll"
 ren "C:\projects\aditof-sdk\build_debug_x32\sdk\Debug\aditof.lib" "aditofd.lib"
@@ -44,7 +44,7 @@ ren "C:\projects\aditof-sdk\build_debug_x32\sdk\Debug\aditof.pdb" "aditofd.pdb"
 cp C:\projects\aditof-sdk\build_debug_x32\sdk\Debug\aditofd.dll C:\aditof-sdk\x32\%folder%\bin
 cp C:\projects\aditof-sdk\build_debug_x32\sdk\Debug\aditofd.pdb C:\aditof-sdk\x32\%folder%\bin
 cp C:\projects\aditof-sdk\build_debug_x32\sdk\Debug\aditofd.lib C:\aditof-sdk\x32\%folder%\lib
-cp C:\projects\aditof-sdk\build_debug_x32\bindings\python\Debug\*.pyd C:\aditof-sdk\x32\%folder%\bin\python
+cp C:\projects\aditof-sdk\build_debug_x32\bindings\python\Debug\aditofpython.cp36-win32.pyd C:\aditof-sdk\x32\%folder%\bin\python
 
 cp -r C:\projects\aditof-sdk\sdk\include\ C:\aditof-sdk\include
 
