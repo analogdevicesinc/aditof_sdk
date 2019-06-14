@@ -39,8 +39,8 @@ There are 3 operating modes that determine the range of the system:
  - Medium - 80cm to 300cm
  - Far - 300cm to 600cm
 
-When in a certain operating mode the system will measure distances outside of the mode's range but those will not be accurate. 
- 
+When in a certain operating mode the system will measure distances outside of the mode's range but those will not be accurate.
+
 The evaluation application also displays the temperature in deg C of the camera (AFE) and laser boards as read from the temperature sensors installed on each board.
 
 The framerate at which data is acquired from the system is constantly updated on the GUI. The camera board outputs data at 30 frames per second (fps), but due to USB connection limitations the host PC acquires the frames at a lower rate.
@@ -60,9 +60,8 @@ git clone https://github.com/google/glog
 cd glog
 git checkout tags/v0.3.5
 mkdir build_0_3_5 && cd build_0_3_5
-cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=./local_path/glog -G "Visual Studio 14 2015 Win64" ..
-cmake --build . --target install --config Debug
-cmake --build . --target install --config Release
+cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=/opt/glog ..
+sudo cmake --build . --target install
 ```
 * CMake:
 ```console
@@ -70,7 +69,6 @@ sudo apt install cmake
 ```
 
 #### Download and build SDK only
-* Follow below steps to download and generate MS Visual Studio project
 ```console
 git clone https://github.com/analogdevicesinc/aditof_sdk
 cd aditof_sdk
