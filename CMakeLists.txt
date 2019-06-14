@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 project(adi_tof_project)
 
 ############################### Version #######################################
-set(ADITOF_VERSION_MAJOR 0)
-set(ADITOF_VERSION_MINOR 2)
+set(ADITOF_VERSION_MAJOR 1)
+set(ADITOF_VERSION_MINOR 0)
 set(ADITOF_VERSION_PATCH 0)
 
 set(VERSION "${ADITOF_VERSION_MAJOR}.${ADITOF_VERSION_MINOR}.${ADITOF_VERSION_PATCH}")
