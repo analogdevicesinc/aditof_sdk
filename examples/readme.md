@@ -6,7 +6,6 @@ The examples in this directory provide sample applications to demonstrate how 3D
 
 | Name | Language | Description |
 | --------- | ----------- | -------------- |
-| aditof-demo | C++ | Contains source code of sample application using OpenCV |
-
-
+| aditof-demo | C++ | An application that uses OpenCV to display infrared and depth images |
+| first-frame | C++ | An example code that shows the step required to get to the point where camera frames can be captured |
 
