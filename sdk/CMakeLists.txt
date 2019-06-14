@@ -6,7 +6,7 @@ add_definitions(-DSDK_EXPORTS)
 find_package(glog 0.3.5 REQUIRED)
 
 file(GLOB SOURCES
-    ${CMAKE_SOURCE_DIR}/sdk/lib/*.cpp
+    ${CMAKE_SOURCE_DIR}/sdk/src/*.cpp
 )
 
 file(GLOB HEADERS
@@ -28,32 +28,32 @@ endif()
 # Platform specific sources and headers
 if( WIN32 )
     file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/windows/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/windows/*.c)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.c)
     file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/windows/*.h)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.h)
 elseif( APPLE )
     file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/macos/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/macos/*.c)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/macos/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/macos/*.c)
     file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/macos/*.h)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/macos/*.h)
 elseif( DRAGONBOARD )
     file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dragonboard/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dragonboard/*.c)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/dragonboard/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/dragonboard/*.c)
     file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/dragonboard/*.h)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/dragonboard/*.h)
 elseif ( UNIX )
     file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/linux/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/linux/*.c)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.c)
     file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/linux/*.h)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.h)
 endif()
 
 if ( NOT DRAGONBOARD )
-    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/lib/local_device.cpp)
+    list(APPEND SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
 endif()
 
 add_library(${PROJECT_NAME} SHARED
@@ -63,7 +63,7 @@ add_library(${PROJECT_NAME} SHARED
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
-target_include_directories(${PROJECT_NAME} PRIVATE lib/)
+target_include_directories(${PROJECT_NAME} PRIVATE src/)
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION 1.0 CXX_STANDARD 11)
 target_link_libraries( ${PROJECT_NAME} PUBLIC glog::glog)
