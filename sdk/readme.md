@@ -1,11 +1,11 @@
 # 3D Time of Flight : sdk 
 
 #### Overview
-Container for SDK source and header files
+Contains the SDK source and header files.
 
 #### Directory Structure
 | Directory/File | Description |
 | --------- | ----------- |
-| src | Contains the source code of sdk |
+| include | Contains the public headers of the SDK |
+| src | Contains the source code of the SDK |
 | CMakeLists.txt | Rules for building the SDK source code on various platforms |
-
