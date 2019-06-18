@@ -7,12 +7,13 @@
 - Connect USB cable to the host PC
 - Connect the 5V power supply to the camera board and set the camera power switch S2 to on. Once the camera board is powered up the DS1 LED will turn on
 - Connect the 12V power supply to the DragonBoard 410c. Once power is connected to the DragonBoard the system will boot the Linux OS from the SD card
+- Wait for the board to finish booting. The booting progress can be monitored by observing the user leds 1, 2, 3 and 4 on the DragonBoard410c which are placed between the two USB type A connectors. During boot the leds (especially led 3 and 1) will blink very rapidly. When led 1 is the only one left bliking (about once a second) the boot has finished.
 
 ![Host connections](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/db410c_usb.JPG)
 
 ### Enable the USB connection to the host PC
 - After the DragonBoard boots up press the S3 button on the camera board. This will start on the DragonBoard the application that manages the USB host interface
-- Once the USB connection is active the DS4 LED will light up on the camera board and the USB camera driver will be loaded on the PC enabling the communication between the host PC and the camera system
+- Once the USB connection is active the DS4 LED will light up on the camera board and the USB camera driver will be loaded on the PC enabling the communication between the host PC and the camera system. The ADI TOF DEPTH SENSOR may also show up under Cameras instead of Imaging devices.
 
 ![Windows driver](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/windows_db410c_usb.JPG)
 
@@ -23,9 +24,13 @@
 
 ## Running the evaluation application
 
-You can either build the evaluation application from source following the steps described in the ***Building the SDK*** section below or install it using the [aditof-demo installer](https://ci.appveyor.com/project/analogdevicesinc/aditof-sdk/branch/master/artifacts)
+You can either build the evaluation application from source following the steps described in the ***Building the SDK*** section below or install it using the [aditof-demo installer](https://github.com/analogdevicesinc/aditof_sdk/releases/latest)
+
+Navigate to the location where you chose to install the evaluation application and run aditof-demo.exe. Alternatively, run the shortcut Aditof-Demo from desktop if you enabled the installer to create one.
 
 ![aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/windows_aditof_demo.jpg)
+
+A terminal window will open to display status messages (also warning and error messages, in case there are any issues). Shorty the main window will show up.
 
 The evaluation application allows to do live streaming of depth and IR data as well as recording the depth and IR data and playing back from a file. The depth data is displayed as a color map ranging from warm to cold colors as the distance from the camera increases. A point in the middle of the depth image shows the distance in mm to the target.
 
@@ -34,8 +39,8 @@ There are 3 operating modes that determine the range of the system:
  - Medium - 80cm to 300cm
  - Far - 300cm to 600cm
 
-When in a certain operating mode the system will measure distances outside of the mode's range but those will not be accurate. 
- 
+When in a certain operating mode the system will measure distances outside of the mode's range but those will not be accurate.
+
 The evaluation application also displays the temperature in deg C of the camera (AFE) and laser boards as read from the temperature sensors installed on each board.
 
 The framerate at which data is acquired from the system is constantly updated on the GUI. The camera board outputs data at 30 frames per second (fps), but due to USB connection limitations the host PC acquires the frames at a lower rate.
