@@ -59,7 +59,7 @@ matrix:
     - compiler: "clang"
       os: osx
       osx_image: xcode10.1
-      addons: { homebrew: { packages: ["libuvc"]}}
+      addons: { homebrew: { packages: ["libuvc"], update: true }}
 
     - stage: Code Quality
 
