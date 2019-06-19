@@ -31,6 +31,7 @@ Designed using a modular approach, the 3D ToF hardware prototyping platform enab
 | Directory | Description |
 | --------- | ----------- |
 | apps | Applications specific to various targets and hosts |
+| bindings | Sdk bindings to other languages |
 | ci | Useful scripts for continuous integration |
 | doc | Documentation |
 | examples | Example code for the supported programming languages |
