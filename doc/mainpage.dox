@@ -1,0 +1,81 @@
+/** \mainpage
+ 
+ @tableofcontents
+ 
+ @section license License
+ Aditof SDK is licensed under the GNU General Public License v2.0.
+
+ @section architecture Architecture
+ The Aditof SDK consist of two layers.
+   
+ A high level API allows clients to easily grab a camera object, configure it and request frames.
+ There are three main interfaces to accomplish this. The **System** object is responsible for detecting cameras that are connected and for the construction and owning of **Camera** objects.
+ The **Camera** object is associated to the physical camera and makes possible the communication with the hardware.
+ Frames can be retrieved from the **Camera** by using the **Frame** object which behaves as a data container and also holds information about the data it contains such as frame resolution.
+  
+ The other layer is the low level API which exposes the **DeviceInterface** through which low level operations can be made to the camera hardware.
+ For example one can read or write the internal registers of the hardware device or read it's internal temperature.
+ 
+ @subsection top-level-diagram Top Level Diagram
+ A top level overview of the Aditof SDK consisting of the high level API and low level API:
+ ![Aditof SDK Top Level Diagram](img/sdk_top_level_diagram.png)
+ 
+ @subsection class-diagram Class Diagram
+ The class diagram add more details on top of what the top level diagram describes.
+  
+ The **System**, **Camera** and **Frame** use the pimpl (pointer to implementation) idiom which provides some advantages such as helping achieve binary compatibility.
+ The **DeviceInterface** and **DeviceEnumeratorInterface** mark the invisible line between high level and low level API.
+ The **DeviceInterface** abstracts over the connection type made with the hardware device thus keeping the implementation specifics hidden from the client code (high level layer or external client code).
+ The responsibility of the **DeviceEnumeratorInterface** is to detect any hardware that is compatibile with Aditof SDK.
+     
+ ![Aditof SDK Class Diagram](img/sdk_class_diagram.png)
+
+ @subsection sequence-diagrams Sequence Diagrams
+ The sequence diagrams show the order in which calls need to be made to achieve a result and how the calls are propagated throughout the entire SDK.
+
+ @subsubsection initialization-sequence Initialization Sequence
+ The initialization sequence shows what needs to be done in order to initialize System and Camera before doing any other operation on them.
+ ![Aditof SDK Initialization Sequence Diagram](img/sdk_initialization_sequence_diagram.png)
+
+ @subsubsection acquire-frame-sequence Acquire Frame Sequence
+ The acquire frame sequence shows how a frame is obtained and how the calls propagate down the stack towards the hardware.
+ ![Aditof SDK Acquire Frame Sequence Diagram](img/sdk_acquire_frame_sequence_diagram.png)
+ 
+ @section api API
+ The below code snipped shows an example of how the Aditof SDK can be used to get a frame from one camera.
+
+~~~{.cpp}
+ #include "aditof/aditof.h"
+ 
+ 
+aditof::System system;
+aditof::Status status;
+std::vector<aditof::Camera *> cameras;
+ 
+// Initialize TOF system
+status = system.initialize();
+status = system.getCameraList(cameras);
+ 
+// Initialize first TOF camera
+aditof::Camera *camera1 = cameras.front();
+status = camera1->initialize();
+ 
+// Choose the frame type the camera should produce
+std::vector<std::string> frameTypes;
+camera1->getAvailableFrameTypes(frameTypes);
+status = camera1->setFrameType(frameTypes.front());
+
+// Place the camera in a specific mode
+std::vector<std::string> modes;
+camera1->getAvailableModes(modes);
+status = camera1->setMode(modes.front());
+
+// Create a TOF frame and request data from the TOF camera
+aditof::Frame frame;
+ 
+status = camera1->start();
+status = camera1->requestFrame(&frame);
+status = camera1->stop();
+~~~
+
+ */

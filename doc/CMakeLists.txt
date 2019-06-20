@@ -16,7 +16,8 @@ set(DOCUMENTED_FILES "${SOURCES_DIR}/frame.h \\
                       ${SOURCES_DIR}/camera.h \\
                       ${SOURCES_DIR}/camera_definitions.h \\
                       ${SOURCES_DIR}/system.h \\
-                      ${SOURCES_DIR}/status_definitions.h
+                      ${SOURCES_DIR}/status_definitions.h \\
+                      ${CMAKE_CURRENT_SOURCE_DIR}/mainpage.dox
                       "
 )
 
@@ -25,3 +26,5 @@ configure_file(
     sdk.doxy.in
     ${CMAKE_BINARY_DIR}/doxygen_doc/sdk-api.doxy
 )
+
+file(COPY img DESTINATION ../doxygen_doc/html)
