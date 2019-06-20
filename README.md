@@ -12,7 +12,7 @@ Platfrom details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green
 ## Supported host platforms
 | Operating System | Documentation | GitHub master status | Downloads |
 | --------- | ----------- | ----------- | ----------- |
-| Windows | [User Guide](doc/windows/user_guide.md) | [![Build status](https://ci.appveyor.com/api/projects/status/46t36hmy77ejrf88/branch/master?svg=true)](https://ci.appveyor.com/project/analogdevicesinc/aditof-sdk/branch/master) | [aditof-demo installer](https://github.com/analogdevicesinc/aditof_sdk/releases/latest) |
+| Windows | [User Guide](doc/windows/user_guide.md) | [![Build status](https://ci.appveyor.com/api/projects/status/46t36hmy77ejrf88/branch/master?svg=true)](https://ci.appveyor.com/project/analogdevicesinc/aditof-sdk/branch/master) | [![aditof-demo installer](https://img.shields.io/badge/release-aditof_demo_installer-blue.svg)](https://github.com/analogdevicesinc/aditof_sdk/releases/latest) |
 | Linux | [User Guide](doc/linux/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | - |
 
 ## Supported embedded platforms
