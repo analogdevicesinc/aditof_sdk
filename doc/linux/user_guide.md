@@ -14,7 +14,7 @@
 ### Enable the USB connection to the host PC
 - After the DragonBoard boots up press the S3 button on the camera board. This will start on the DragonBoard the application that manages the USB host interface
 - Once the USB connection is active the DS4 LED will light up on the camera board and the USB camera driver will be loaded on the PC enabling the communication between the host PC and the camera system
- - To check whether the camera has been recongnized by the USB bus, open up a terminal a run command:
+ - To check if the camera has been recongnized by the host PC, open up a terminal and run command:
  ```
  dmesg
  ```
@@ -45,6 +45,13 @@ When in a certain operating mode the system will measure distances outside of th
 The evaluation application also displays the temperature in deg C of the camera (AFE) and laser boards as read from the temperature sensors installed on each board.
 
 The framerate at which data is acquired from the system is constantly updated on the GUI. The camera board outputs data at 30 frames per second (fps), but due to USB connection limitations the host PC acquires the frames at a lower rate.
+
+### Note
+ - Use the custom X button which is under the title bar on the top-right side to close the application. Otherwise the application will hang.
+
+### Troubleshooting
+- The demo application hangs after closing the main window
+  - Due to some limitations the application always hangs if it is closed using the regular X button from the window top bar (title bar). To avoid this unpleasant hang, we've made available a second X button in the top right corner right above the title bar that can be used to safely close the demo application. We hope this to be a temporary workaround.
 
 ## Building the SDK
 

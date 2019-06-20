@@ -45,6 +45,13 @@ The evaluation application also displays the temperature in deg C of the camera 
 
 The framerate at which data is acquired from the system is constantly updated on the GUI. The camera board outputs data at 30 frames per second (fps), but due to USB connection limitations the host PC acquires the frames at a lower rate.
 
+### Note
+ - Use the custom X button which is under the title bar on the top-right side to close the application. Otherwise the application will hang.
+
+### Troubleshooting
+- The demo application hangs after closing the main window
+  - Due to some limitations the application always hangs if it is closed using the regular X button from the window top bar (title bar). To avoid this unpleasant hang, we've made available a second X button in the top right corner right above the title bar that can be used to safely close the demo application. We hope this to be a temporary workaround.
+
 ## Building the SDK
 
 ### SDK only
