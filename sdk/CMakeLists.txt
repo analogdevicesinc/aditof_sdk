@@ -14,43 +14,25 @@ file(GLOB HEADERS
 )
 
 if( WIN32 )
-	set(OS_NAME Windows)
+        set(OS_SPECIFIC_DIR windows)
 elseif( APPLE )
-	set(OS_NAME MacOS)
+        set(OS_SPECIFIC_DIR macos)
 elseif( DRAGONBOARD )
-	set(OS_NAME Dragonboard)
+        set(OS_SPECIFIC_DIR dragonboard)
 elseif ( UNIX )
-	set(OS_NAME Linux)
+        set(OS_SPECIFIC_DIR linux)
 else()
-	set(OS_NAME Unknown)
+    message(FATAL_ERROR "Platform not supported")
 endif()
 
 # Platform specific sources and headers
-if( WIN32 )
-    file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.c)
-    file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/windows/*.h)
-elseif( APPLE )
-    file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/macos/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/macos/*.c)
-    file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/macos/*.h)
-elseif( DRAGONBOARD )
-    file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/dragonboard/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/dragonboard/*.c)
-    file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/dragonboard/*.h)
-elseif ( UNIX )
-    file(GLOB PLATFORM_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.c)
-    file(GLOB PLATFORM_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/linux/*.h)
-endif()
+file(GLOB PLATFORM_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.c
+)
+file(GLOB PLATFORM_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
+)
 
 if ( DRAGONBOARD )
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
@@ -68,11 +50,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE src/)
 set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION 1.0 CXX_STANDARD 11)
 target_link_libraries( ${PROJECT_NAME} PUBLIC glog::glog)
 
-if( APPLE)
-		find_library( LIBUVC_LIB libuvc.dylib /usr/local/lib/ )
-		if( NOT LIBUVC_LIB)
-			MESSAGE( SEND_ERROR "Cannot find the libuvc library")
-		endif( NOT LIBUVC_LIB)
-                target_link_libraries( ${PROJECT_NAME} PRIVATE ${LIBUVC_LIB})
-endif( APPLE)
-
+if( APPLE )
+    find_library( LIBUVC_LIB libuvc.dylib /usr/local/lib/ )
+    if( NOT LIBUVC_LIB)
+        MESSAGE( SEND_ERROR "Cannot find the libuvc library")
+    endif( NOT LIBUVC_LIB)
+    target_link_libraries( ${PROJECT_NAME} PRIVATE ${LIBUVC_LIB})
+endif( APPLE )
