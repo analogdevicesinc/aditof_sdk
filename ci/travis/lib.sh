@@ -91,7 +91,7 @@ check_cppcheck() {
 ############################################################################
 check_doxygen() {
     pushd ${TRAVIS_BUILD_DIR}/doc
-    (cd build && ! doxygen doxygen_doc/sdk-api.doxy 2>&1 | grep -E "warning|error") || {
+    (cd build/doxygen_doc && ! doxygen sdk-api.doxy 2>&1 | grep -E "warning|error") || {
         echo_red "Documentation incomplete or errors in the generation of it have occured!"
         exit 1
     }
@@ -114,7 +114,7 @@ deploy_doxygen() {
         rm -rf *
         popd
         
-        cp -R build/html/* doc/html/
+        cp -R build/doxygen_doc/html/* doc/html/
 
         pushd doc/html
         CURRENT_COMMIT=$(git log -1 --pretty=%B)
