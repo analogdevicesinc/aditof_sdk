@@ -2,6 +2,7 @@
 #include <aditof/frame_operations.h>
 
 #include <cmath>
+#include <cstring>
 #include <fstream>
 #include <glog/logging.h>
 
@@ -14,6 +15,28 @@ FrameImpl::~FrameImpl() {
         delete[] m_rawData;
         m_rawData = nullptr;
     }
+}
+
+FrameImpl::FrameImpl(const FrameImpl &op) {
+    allocFrameData(op.m_details);
+    memcpy(m_rawData, op.m_rawData,
+           sizeof(uint16_t) * op.m_details.width * op.m_details.height);
+    m_details = op.m_details;
+}
+
+FrameImpl &FrameImpl::operator=(const FrameImpl &op) {
+    if (this != &op) {
+        if (m_rawData) {
+            delete[] m_rawData;
+            m_rawData = nullptr;
+        }
+        allocFrameData(op.m_details);
+        memcpy(m_rawData, op.m_rawData,
+               sizeof(uint16_t) * op.m_details.width * op.m_details.height);
+        m_details = op.m_details;
+    }
+
+    return *this;
 }
 
 aditof::Status FrameImpl::setDetails(const aditof::FrameDetails &details) {
@@ -29,11 +52,8 @@ aditof::Status FrameImpl::setDetails(const aditof::FrameDetails &details) {
         delete[] m_rawData;
         m_rawData = nullptr;
     }
-    m_rawData = new uint16_t[details.width * details.height];
+    allocFrameData(details);
     m_details = details;
-
-    m_depthData = m_rawData;
-    m_irData = m_rawData + (details.width * details.height) / 2;
 
     return status;
 }
@@ -78,4 +98,10 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
     }
 
     return Status::OK;
+}
+
+void FrameImpl::allocFrameData(const aditof::FrameDetails &details) {
+    m_rawData = new uint16_t[details.width * details.height];
+    m_depthData = m_rawData;
+    m_irData = m_rawData + (details.width * details.height) / 2;
 }
