@@ -10,11 +10,16 @@ class FrameImpl {
   public:
     FrameImpl();
     ~FrameImpl();
+    FrameImpl(const FrameImpl &op);
+    FrameImpl &operator=(const FrameImpl &op);
 
   public: // from TofFrame
     aditof::Status setDetails(const aditof::FrameDetails &details);
     aditof::Status getDetails(aditof::FrameDetails &details) const;
     aditof::Status getData(aditof::FrameDataType dataType, uint16_t **dataPtr);
+
+  private:
+    void allocFrameData(const aditof::FrameDetails &details);
 
   private:
     aditof::FrameDetails m_details;
