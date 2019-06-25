@@ -128,3 +128,23 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
 
     return status;
 }
+
+aditof::Status UsbDevice::setCalibrationParams(const std::string &mode,
+                                               float gain, float offset) {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    // TO DO
+
+    return status;
+}
+
+aditof::Status UsbDevice::applyCalibrationToFrame(uint16_t *frame,
+                                                  const std::string &mode) {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    // TO DO
+
+    return status;
+}

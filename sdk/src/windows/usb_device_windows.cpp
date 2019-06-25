@@ -1,14 +1,23 @@
 #include "usb_device.h"
+#include "utils.h"
 #include "windows_utils.h"
 
 #include <atlstr.h>
 #include <glog/logging.h>
+#include <unordered_map>
 
 #define MAX_PACKET_SIZE 58
 #define MAX_BUF_SIZE (MAX_PACKET_SIZE + 2)
 
 static const GUID EXT_UNIT_GUID = {0xFFFFFFFF, 0xFFFF, 0xFFFF, 0xFF, 0xFF, 0xFF,
                                    0xFF,       0xFF,   0xFF,   0xFF, 0xFF};
+
+struct CalibrationData {
+    std::string mode;
+    float gain;
+    float offset;
+    uint16_t *cache;
+};
 
 struct UsbDevice::ImplData {
     ICaptureGraphBuilder2 *pCaptureGraph; // Capture graph builder object
@@ -23,6 +32,7 @@ struct UsbDevice::ImplData {
     IMediaEventEx *pMediaEvent;
     SampleGrabberCallback *pCB;
     GUID videoType;
+    std::unordered_map<std::string, CalibrationData> calibration_cache;
 };
 
 static std::wstring s2ws(const std::string &s) {
@@ -206,6 +216,12 @@ UsbDevice::~UsbDevice() {
         HR = m_implData->pControl->Pause();
 
         HR = m_implData->pControl->Stop();
+    }
+
+    for (auto it = m_implData->calibration_cache.begin();
+         it != m_implData->calibration_cache.begin(); ++it) {
+        delete[] it->second.cache;
+        it->second.cache = nullptr;
     }
 
     // Disconnect filters from capture device
@@ -1273,4 +1289,40 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
     }
 
     return status;
+}
+
+aditof::Status UsbDevice::setCalibrationParams(const std::string &mode,
+                                               float gain, float offset) {
+    const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
+    CalibrationData calib_data;
+    calib_data.mode = mode;
+    calib_data.gain = gain;
+    calib_data.offset = offset;
+    calib_data.cache =
+        aditof::Utils::getCalibrationData(gain, offset, pixelMaxValue);
+    m_implData->calibration_cache[mode] = calib_data;
+
+    return aditof::Status::OK;
+}
+
+aditof::Status UsbDevice::applyCalibrationToFrame(uint16_t *frame,
+                                                  const std::string &mode) {
+    auto equal = [](float a, float b) -> bool { return fabs(a - b) < 1e-6; };
+
+    float gain = m_implData->calibration_cache[mode].gain;
+    float offset = m_implData->calibration_cache[mode].offset;
+
+    if (equal(gain, 1.0f) && equal(offset, 0.0f)) {
+        return aditof::Status::OK;
+    }
+
+    VIDEOINFOHEADER *pVi =
+        reinterpret_cast<VIDEOINFOHEADER *>(m_implData->pAmMediaType->pbFormat);
+    unsigned int width = HEADER(pVi)->biWidth;
+    unsigned int height = HEADER(pVi)->biHeight;
+
+    aditof::Utils::applyCalibrationToFrame(
+        m_implData->calibration_cache[mode].cache, frame, width, height);
+
+    return aditof::Status::OK;
 }

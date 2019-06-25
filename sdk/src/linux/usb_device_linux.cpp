@@ -1,12 +1,15 @@
 #include "usb_device.h"
+#include "utils.h"
 #include "utils_linux.h"
 
+#include <cmath>
 #include <fcntl.h>
 #include <glog/logging.h>
 #include <linux/usb/video.h>
 #include <linux/uvcvideo.h>
 #include <linux/videodev2.h>
 #include <sys/mman.h>
+#include <unordered_map>
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -18,12 +21,20 @@ struct buffer {
     size_t length;
 };
 
+struct CalibrationData {
+    std::string mode;
+    float gain;
+    float offset;
+    uint16_t *cache;
+};
+
 struct UsbDevice::ImplData {
     int fd;
     struct buffer *buffers;
     unsigned int buffersCount;
     struct v4l2_format fmt;
     bool started;
+    std::unordered_map<std::string, CalibrationData> calibration_cache;
 };
 
 UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
@@ -37,6 +48,12 @@ UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
 UsbDevice::~UsbDevice() {
     if (m_implData->started) {
         stop();
+    }
+
+    for (auto it = m_implData->calibration_cache.begin();
+         it != m_implData->calibration_cache.begin(); ++it) {
+        delete[] it->second.cache;
+        it->second.cache = nullptr;
     }
 
     for (unsigned int i = 0; i < m_implData->buffersCount; ++i) {
@@ -672,4 +689,39 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
     temperature = buffer[1];
 
     return Status::OK;
+}
+
+aditof::Status UsbDevice::setCalibrationParams(const std::string &mode,
+                                               float gain, float offset) {
+
+    const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
+    CalibrationData calib_data;
+    calib_data.mode = mode;
+    calib_data.gain = gain;
+    calib_data.offset = offset;
+    calib_data.cache =
+        aditof::Utils::getCalibrationData(gain, offset, pixelMaxValue);
+    m_implData->calibration_cache[mode] = calib_data;
+
+    return aditof::Status::OK;
+}
+
+aditof::Status UsbDevice::applyCalibrationToFrame(uint16_t *frame,
+                                                  const std::string &mode) {
+    auto equal = [](float a, float b) -> bool { return fabs(a - b) < 1e-6; };
+
+    float gain = m_implData->calibration_cache[mode].gain;
+    float offset = m_implData->calibration_cache[mode].offset;
+
+    if (equal(gain, 1.0f) && equal(offset, 0.0f)) {
+        return aditof::Status::OK;
+    }
+
+    unsigned int width = m_implData->fmt.fmt.pix.width;
+    unsigned int height = m_implData->fmt.fmt.pix.height;
+
+    aditof::Utils::applyCalibrationToFrame(
+        m_implData->calibration_cache[mode].cache, frame, width, height);
+
+    return aditof::Status::OK;
 }
