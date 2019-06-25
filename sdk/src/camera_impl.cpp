@@ -99,6 +99,17 @@ aditof::Status CameraImpl::setMode(const std::string &mode,
         }
     }
 
+    std::vector<std::string> modes;
+    getAvailableModes(modes);
+
+    for (const std::string &mode : modes) {
+        float gain = 1.0, offset = 0.0;
+        Status status = m_calibration.getGainOffset(mode, gain, offset);
+        if (status == Status::OK) {
+            m_device->setCalibrationParams(mode, gain, offset);
+        }
+    }
+
     return status;
 }
 
@@ -109,7 +120,7 @@ CameraImpl::getAvailableModes(std::vector<std::string> &availableModes) const {
 
     // Dummy data. To remove when implementig this method
     availableModes.emplace_back("near");
-    availableModes.emplace_back("mid");
+    availableModes.emplace_back("medium");
     availableModes.emplace_back("far");
 
     // TO DO
@@ -196,6 +207,10 @@ aditof::Status CameraImpl::requestFrame(aditof::Frame *frame,
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from device";
         return status;
+    }
+
+    if (m_details.frameType.type == "depth_ir") {
+        m_device->applyCalibrationToFrame(frameDataLocation, m_details.mode);
     }
 
     return Status::OK;
