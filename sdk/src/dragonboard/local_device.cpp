@@ -703,7 +703,7 @@ aditof::Status LocalDevice::setCalibrationParams(const std::string &mode,
     calib_data.gain = gain;
     calib_data.offset = offset;
     calib_data.cache =
-        aditof::Utils::getCalibrationData(gain, offset, pixelMaxValue);
+        aditof::Utils::buildCalibrationCache(gain, offset, pixelMaxValue);
 
     m_implData->calibration_cache[mode] = calib_data;
 
@@ -725,8 +725,8 @@ aditof::Status LocalDevice::applyCalibrationToFrame(uint16_t *frame,
     unsigned int width = m_implData->frameDetails.width;
     unsigned int height = m_implData->frameDetails.height;
 
-    aditof::Utils::applyCalibrationToFrame(
-        m_implData->calibration_cache[mode].cache, frame, width, height);
+    aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
+                                  frame, width, height);
 
     return aditof::Status::OK;
 }

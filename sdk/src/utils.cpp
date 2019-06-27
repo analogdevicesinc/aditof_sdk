@@ -1,7 +1,7 @@
 #include "utils.h"
 
-uint16_t *aditof::Utils::getCalibrationData(float gain, float offset,
-                                            int16_t maxPixelValue) {
+uint16_t *aditof::Utils::buildCalibrationCache(float gain, float offset,
+                                               int16_t maxPixelValue) {
     uint16_t *cache = new uint16_t[maxPixelValue];
     for (int16_t current = 0; current < maxPixelValue; ++current) {
         cache[current] =
@@ -10,9 +10,8 @@ uint16_t *aditof::Utils::getCalibrationData(float gain, float offset,
     return cache;
 }
 
-void aditof::Utils::applyCalibrationToFrame(uint16_t *calibrationData,
-                                            uint16_t *frame, unsigned int width,
-                                            unsigned int height) {
+void aditof::Utils::calibrateFrame(uint16_t *calibrationData, uint16_t *frame,
+                                   unsigned int width, unsigned int height) {
     uint16_t *cache = calibrationData;
 
     unsigned int size = width * height / 2;
