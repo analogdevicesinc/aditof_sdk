@@ -50,6 +50,11 @@ struct LocalDevice::ImplData {
     aditof::FrameDetails frameDetails;
     bool started;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
+
+    ImplData()
+        : fd(-1), sfd(-1), nVideoBuffers(0),
+          videoBuffers(nullptr), frameDetails{0, 0, "", {0.0f, 1.0f}},
+          started(false) {}
 };
 
 // TO DO: This exists in linux_utils.h which is not included on Dragoboard.
@@ -66,7 +71,6 @@ static int xioctl(int fh, unsigned int request, void *arg) {
 
 LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new LocalDevice::ImplData) {
-    CLEAR(*m_implData);
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
 }
