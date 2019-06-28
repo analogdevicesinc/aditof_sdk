@@ -125,3 +125,14 @@ aditof::Status EthernetDevice::readLaserTemp(float &temperature) {
 
     return status;
 }
+
+aditof::Status EthernetDevice::setCalibrationParams(const std::string &mode,
+                                                    float gain, float offset) {
+    return aditof::Status::GENERIC_ERROR;
+}
+
+aditof::Status
+EthernetDevice::applyCalibrationToFrame(uint16_t *frame,
+                                        const std::string &mode) {
+    return aditof::Status::GENERIC_ERROR;
+}

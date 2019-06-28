@@ -31,6 +31,10 @@ class DeviceInterface {
                                              size_t length) = 0;
     virtual aditof::Status readAfeTemp(float &temperature) = 0;
     virtual aditof::Status readLaserTemp(float &temperature) = 0;
+    virtual aditof::Status setCalibrationParams(const std::string &mode,
+                                                float gain, float offset) = 0;
+    virtual aditof::Status applyCalibrationToFrame(uint16_t *frame,
+                                                   const std::string &mode) = 0;
 };
 
 #endif // DEVICE_INTERFACE_H

@@ -31,6 +31,10 @@ class UsbDevice : public DeviceInterface {
                                              size_t length);
     virtual aditof::Status readAfeTemp(float &temperature);
     virtual aditof::Status readLaserTemp(float &temperature);
+    virtual aditof::Status setCalibrationParams(const std::string &mode,
+                                                float gain, float offset);
+    virtual aditof::Status applyCalibrationToFrame(uint16_t *frame,
+                                                   const std::string &mode);
 
   private:
     struct ImplData;

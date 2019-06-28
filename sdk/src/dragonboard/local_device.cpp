@@ -1,4 +1,5 @@
 #include "local_device.h"
+#include "utils.h"
 #include <aditof/frame_operations.h>
 
 extern "C" {
@@ -7,12 +8,14 @@ extern "C" {
 }
 
 #include <algorithm>
+#include <cmath>
 #include <fcntl.h>
 #include <glog/logging.h>
 #include <linux/videodev2.h>
 #include <sstream>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <unordered_map>
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -31,6 +34,13 @@ struct buffer {
     size_t length;
 };
 
+struct CalibrationData {
+    std::string mode;
+    float gain;
+    float offset;
+    uint16_t *cache;
+};
+
 struct LocalDevice::ImplData {
     int fd;
     int sfd;
@@ -39,6 +49,12 @@ struct LocalDevice::ImplData {
     struct v4l2_plane planes[8];
     aditof::FrameDetails frameDetails;
     bool started;
+    std::unordered_map<std::string, CalibrationData> calibration_cache;
+
+    ImplData()
+        : fd(-1), sfd(-1), nVideoBuffers(0),
+          videoBuffers(nullptr), frameDetails{0, 0, "", {0.0f, 1.0f}},
+          started(false) {}
 };
 
 // TO DO: This exists in linux_utils.h which is not included on Dragoboard.
@@ -55,12 +71,19 @@ static int xioctl(int fh, unsigned int request, void *arg) {
 
 LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new LocalDevice::ImplData) {
-    CLEAR(*m_implData);
+    m_implData->calibration_cache =
+        std::unordered_map<std::string, CalibrationData>();
 }
 
 LocalDevice::~LocalDevice() {
     if (m_implData->started) {
         stop();
+    }
+
+    for (auto it = m_implData->calibration_cache.begin();
+         it != m_implData->calibration_cache.begin(); ++it) {
+        delete[] it->second.cache;
+        it->second.cache = nullptr;
     }
 
     for (unsigned int i = 0; i < m_implData->nVideoBuffers; i++) {
@@ -670,4 +693,40 @@ aditof::Status LocalDevice::readLaserTemp(float &temperature) {
     temp_sensor_close(&tdev);
 
     return status;
+}
+
+aditof::Status LocalDevice::setCalibrationParams(const std::string &mode,
+                                                 float gain, float offset) {
+    const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
+    CalibrationData calib_data;
+    calib_data.mode = mode;
+    calib_data.gain = gain;
+    calib_data.offset = offset;
+    calib_data.cache =
+        aditof::Utils::buildCalibrationCache(gain, offset, pixelMaxValue);
+
+    m_implData->calibration_cache[mode] = calib_data;
+
+    return aditof::Status::OK;
+}
+
+aditof::Status LocalDevice::applyCalibrationToFrame(uint16_t *frame,
+                                                    const std::string &mode) {
+
+    auto equal = [](float a, float b) -> bool { return fabs(a - b) < 1e-6; };
+
+    float gain = m_implData->calibration_cache[mode].gain;
+    float offset = m_implData->calibration_cache[mode].offset;
+
+    if (equal(gain, 1.0f) && equal(offset, 0.0f)) {
+        return aditof::Status::OK;
+    }
+
+    unsigned int width = m_implData->frameDetails.width;
+    unsigned int height = m_implData->frameDetails.height;
+
+    aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
+                                  frame, width, height);
+
+    return aditof::Status::OK;
 }
