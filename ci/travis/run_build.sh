@@ -24,6 +24,7 @@ build_deploy_doxygen() {
     mkdir build && cd build && cmake .. 
     check_doxygen
     deploy_doxygen
+    popd
 }
 
 build_dragonboard() {
