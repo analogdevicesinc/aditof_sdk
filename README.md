@@ -20,7 +20,7 @@ Designed using a modular approach, the 3D ToF hardware prototyping platform enab
 
 | Platform | Documentation | GitHub master status | Downloads |
 | --------- | ----------- | ----------- | ----------- |
-| DragonBoard 410c | [User Guide](doc/dragonboard410c/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [SD card image v0.2](http://swdownloads.analog.com/cse/aditof/aditof-v0.2-dragonboard410c-sdimage.tar.xz) |
+| DragonBoard 410c | [User Guide](doc/dragonboard410c/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-SD_card_image_v0.2-blue.svg)](http://swdownloads.analog.com/cse/aditof/aditof-v0.2-dragonboard410c-sdimage.tar.xz) |
 
 [How to write the SD card image onto the SD card?](doc/sdcard_burn.md)
 
