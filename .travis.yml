@@ -7,12 +7,20 @@ cache:
   directories:
     - ${TRAVIS_BUILD_DIR}/deps
 
+services:
+  - docker
+
 matrix:
   include:
     - stage: Build
       
+      # Dragonboard
+      dist: xenial
+      name: Dragonboard
+      env: BUILD_TYPE=dragonboard
+
       #CLANG 3.9
-      env: COMPILER=clang++-3.9
+    - env: COMPILER=clang++-3.9
       addons: { apt: { packages: ["clang-3.9", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-3.9"] } }
       
       #CLANG 4.0

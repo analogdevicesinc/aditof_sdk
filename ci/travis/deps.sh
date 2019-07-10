@@ -24,4 +24,21 @@ deps_deploy_doxygen() {
     echo_green "Doxygen version: " `doxygen --version`
 }
 
+deps_dragonboard() {
+    sudo apt-get -qq update
+	sudo service docker restart
+    sudo docker pull rycus86/arm64v8-debian-qemu
+
+    # Clone glog now so we don't need git inside of
+    # the docker container
+    pushd "${DEPS_DIR}"
+    [ -d "glog" ] || {
+       git clone https://github.com/google/glog
+    }
+    pushd glog
+    git checkout tags/v0.3.5
+    popd
+    popd
+}
+
 deps_${BUILD_TYPE:-default}

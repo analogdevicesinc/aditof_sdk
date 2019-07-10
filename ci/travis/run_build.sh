@@ -24,6 +24,16 @@ build_deploy_doxygen() {
     mkdir build && cd build && cmake .. 
     check_doxygen
     deploy_doxygen
+    popd
+}
+
+build_dragonboard() {
+    docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+    sudo docker run --rm=true \
+			-v `pwd`:/aditof_sdk:rw \
+			rycus86/arm64v8-debian-qemu \
+            /bin/bash -xe /aditof_sdk/ci/travis/inside_debian_docker.sh aditof_sdk
 }
 
 build_${BUILD_TYPE:-default}
