@@ -1,7 +1,7 @@
 #!/bin/bash
 
 apt update
-apt install sudo
+apt install -y sudo
 
 sudo apt install -y build-essential cmake python-dev python3-dev \
         libopencv-contrib-dev libopencv-dev
