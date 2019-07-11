@@ -1,7 +1,8 @@
-#include "device_factory.h"
 #include "ethernet_device.h"
 #include "local_device.h"
 #include "usb_device.h"
+
+#include <aditof/device_factory.h>
 
 DeviceInterface *
 DeviceFactory::buildDevice(const aditof::DeviceConstructionData &data) {

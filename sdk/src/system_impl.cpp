@@ -1,9 +1,9 @@
 #include "system_impl.h"
+#include "aditof/camera.h"
+#include "aditof/device_construction_data.h"
+#include "aditof/device_factory.h"
 #include "camera_impl.h"
-#include "device_construction_data.h"
 #include "device_enumerator_factory.h"
-#include "device_factory.h"
-#include <aditof/camera.h>
 
 #include <glog/logging.h>
 
@@ -22,6 +22,7 @@ aditof::Status SystemImpl::initialize() {
 
     std::vector<aditof::DeviceConstructionData> devsData;
     m_enumerator->findDevices(devsData);
+
     for (const auto &data : devsData) {
         DeviceInterface *device = DeviceFactory::buildDevice(data);
         aditof::Camera *camera = new Camera(device);
