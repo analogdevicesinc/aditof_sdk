@@ -1,8 +1,8 @@
 #ifndef DEVICE_ENUMERATOR_INTERFACE_H
 #define DEVICE_ENUMERATOR_INTERFACE_H
 
-#include "device_construction_data.h"
-#include <aditof/status_definitions.h>
+#include "aditof/device_construction_data.h"
+#include "aditof/status_definitions.h"
 
 #include <vector>
 

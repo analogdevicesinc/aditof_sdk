@@ -1,8 +1,8 @@
 #ifndef ETHERNET_DEVICE_H
 #define ETHERNET_DEVICE_H
 
-#include "device_construction_data.h"
-#include <aditof/device_interface.h>
+#include "aditof/device_construction_data.h"
+#include "aditof/device_interface.h"
 
 class EthernetDevice : public DeviceInterface {
   public:
