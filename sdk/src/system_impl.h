@@ -21,6 +21,8 @@ class SystemImpl {
     aditof::Status initialize();
     aditof::Status
     getCameraList(std::vector<aditof::Camera *> &cameraList) const;
+    aditof::Status getCameraListAtIp(std::vector<aditof::Camera *> &cameraList,
+                                     const std::string &ip) const;
 
   private:
     std::unique_ptr<DeviceEnumeratorInterface> m_enumerator;
