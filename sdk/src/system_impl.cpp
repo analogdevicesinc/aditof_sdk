@@ -43,3 +43,29 @@ SystemImpl::getCameraList(std::vector<aditof::Camera *> &cameraList) const {
 
     return status;
 }
+
+aditof::Status
+SystemImpl::getCameraListAtIp(std::vector<aditof::Camera *> &cameraList,
+                              const std::string &ip) const {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    cameraList.clear();
+
+    std::vector<aditof::DeviceConstructionData> devsData;
+    auto ethernetEnumerator =
+        DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(ip);
+    status = ethernetEnumerator->findDevices(devsData);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to get find devices on target with ip: " << ip;
+        return status;
+    }
+
+    for (const auto &data : devsData) {
+        DeviceInterface *device = DeviceFactory::buildDevice(data);
+        aditof::Camera *camera = new Camera(device);
+        cameraList.push_back(camera);
+    }
+
+    return Status::OK;
+}
