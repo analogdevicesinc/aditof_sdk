@@ -4,6 +4,7 @@
 #include "sdk_exports.h"
 #include "status_definitions.h"
 
+#include <string>
 #include <vector>
 
 class SystemImpl;
@@ -55,6 +56,16 @@ class SDK_API System {
      * @return Status
      */
     Status getCameraList(std::vector<Camera *> &cameraList) const;
+
+    /**
+     * @brief Populates the given list with Camera objects that correspond to
+     * the available cameras from the remote target.
+     * @param[out] cameraList - A container to be set with the available cameras
+     * @param ip - The IP of the remote target
+     * @return Status
+     */
+    Status getCameraListAtIp(std::vector<Camera *> &cameraList,
+                             const std::string &ip) const;
 
   private:
     SystemImpl *m_impl;

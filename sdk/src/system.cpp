@@ -27,4 +27,9 @@ Status System::getCameraList(std::vector<Camera *> &cameraList) const {
     return m_impl->getCameraList(cameraList);
 }
 
+Status System::getCameraListAtIp(std::vector<Camera *> &cameraList,
+                                 const std::string &ip) const {
+    return m_impl->getCameraListAtIp(cameraList, ip);
+}
+
 } // namespace aditof
