@@ -1,7 +1,7 @@
 #ifndef DEVICE_ENUMERATOR_FACTORY_H
 #define DEVICE_ENUMERATOR_FACTORY_H
 
-#include "device_enumerator_interface.h"
+#include "aditof/device_enumerator_interface.h"
 
 #include <memory>
 
