@@ -4,10 +4,12 @@
 #include "aditof/device_construction_data.h"
 #include "aditof/device_interface.h"
 
+#include <memory>
+
 class EthernetDevice : public DeviceInterface {
   public:
     EthernetDevice(const aditof::DeviceConstructionData &data);
-    ~EthernetDevice() = default;
+    ~EthernetDevice();
 
   public: // implements DeviceInterface
     virtual aditof::Status open();
@@ -33,6 +35,11 @@ class EthernetDevice : public DeviceInterface {
                                                 float gain, float offset);
     virtual aditof::Status applyCalibrationToFrame(uint16_t *frame,
                                                    const std::string &mode);
+
+  private:
+    struct ImplData;
+
+    std::unique_ptr<ImplData> m_implData;
 };
 
 #endif // ETHERNET_DEVICE_H
