@@ -8,7 +8,7 @@
 class DeviceEnumeratorEthernet : public DeviceEnumeratorInterface {
   public:
     DeviceEnumeratorEthernet(const std::string &ip);
-    ~DeviceEnumeratorEthernet() = default;
+    ~DeviceEnumeratorEthernet();
 
   public: // implements DeviceEnumeratorInterface
     virtual aditof::Status
