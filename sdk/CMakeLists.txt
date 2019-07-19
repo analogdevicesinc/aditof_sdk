@@ -4,6 +4,12 @@ project(aditof)
 add_definitions(-DSDK_EXPORTS)
 
 find_package(glog 0.3.5 REQUIRED)
+find_package(Protobuf REQUIRED)
+find_package(PkgConfig)
+pkg_check_modules(LIB_WEBSOCKETS REQUIRED libwebsockets)
+
+protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/buffer.proto)
+get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
 
 file(GLOB SOURCES
     ${CMAKE_SOURCE_DIR}/sdk/src/*.cpp
@@ -48,16 +54,29 @@ add_library(${PROJECT_NAME} SHARED
     ${SOURCES}
     ${PLATFORM_SOURCES}
     ${PLATFORM_HEADERS}
+    ${PROTO_SRCS}
+    ${PROTO_HDRS}
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
 target_include_directories(${PROJECT_NAME} PRIVATE
     src/
     src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
+    ${GENERATED_PROTO_FILES_DIR}
+    ${LIB_WEBSOCKETS_INCLUDE_DIRS}
 )
 
-set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION 1.0 CXX_STANDARD 11)
-target_link_libraries( ${PROJECT_NAME} PUBLIC glog::glog)
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+                       VERSION ${VERSION}
+                       SOVERSION 1.0
+                       CXX_STANDARD 11
+                       LINK_FLAGS "-L${LIB_WEBSOCKETS_LIBRARY_DIRS}"
+)
+target_link_libraries( ${PROJECT_NAME} PUBLIC
+                       glog::glog
+                       protobuf
+                       ${LIB_WEBSOCKETS_LIBRARIES}
+)
 
 if ( RASPBERRYPI )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon")
