@@ -406,7 +406,7 @@ aditof::Status EthernetDevice::writeEeprom(uint32_t address,
     net->send_buff.set_func_name("WriteEeprom");
     net->send_buff.add_func_int32_param(static_cast<::google::int32>(address));
     net->send_buff.add_func_int32_param(static_cast<::google::int32>(length));
-    net->send_buff.set_func_bytes_param(0, data, length);
+    net->send_buff.add_func_bytes_param(data, length);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -443,8 +443,8 @@ aditof::Status EthernetDevice::readAfeRegisters(const uint16_t *address,
 
     net->send_buff.set_func_name("ReadAfeRegisters");
     net->send_buff.add_func_int32_param(static_cast<::google::int32>(length));
-    net->send_buff.set_func_bytes_param(0, address, length * sizeof(uint16_t));
-    net->send_buff.set_func_bytes_param(1, data, length * sizeof(uint16_t));
+    net->send_buff.add_func_bytes_param(address, length * sizeof(uint16_t));
+    net->send_buff.add_func_bytes_param(data, length * sizeof(uint16_t));
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -485,8 +485,8 @@ aditof::Status EthernetDevice::writeAfeRegisters(const uint16_t *address,
 
     net->send_buff.set_func_name("WriteAfeRegisters");
     net->send_buff.add_func_int32_param(static_cast<::google::int32>(length));
-    net->send_buff.set_func_bytes_param(0, address, length * sizeof(uint16_t));
-    net->send_buff.set_func_bytes_param(1, data, length * sizeof(uint16_t));
+    net->send_buff.add_func_bytes_param(address, length * sizeof(uint16_t));
+    net->send_buff.add_func_bytes_param(data, length * sizeof(uint16_t));
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
