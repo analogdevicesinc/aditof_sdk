@@ -23,9 +23,9 @@ endif()
 if (WITH_PYTHON)
         add_subdirectory(bindings/python)
 endif()
-#if (DRAGONBOARD)
+if (DRAGONBOARD)
         add_subdirectory(apps/server)
-#endif()
+endif()
 
 ############################### Installer #######################################
 configure_file(aditof-setup.iss.cmakein ${CMAKE_CURRENT_BINARY_DIR}/aditof-setup.iss @ONLY)
