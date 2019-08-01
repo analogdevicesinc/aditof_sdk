@@ -24,7 +24,8 @@ extern "C" {
 #define V4L2_CID_AD_DEV_READ_REG 0xA00A01
 #define CTRL_PACKET_SIZE 4096
 
-#define EEPROM_DEV_PATH "/sys/bus/i2c/devices/0-0056/eeprom"
+#define EEPROM_DEV_PATH "/sys/bus/i2c/devices/1-0056/eeprom"
+#define CAPTURE_DEVICE_NAME "unicam"
 
 #define TEMP_SENSOR_DEV_PATH "/dev/i2c-1"
 #define LASER_TEMP_SENSOR_I2C_ADDR 0x49
@@ -50,6 +51,7 @@ struct LocalDevice::ImplData {
     struct v4l2_plane planes[8];
     aditof::FrameDetails frameDetails;
     bool started;
+    enum v4l2_buf_type videoBuffersType;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
 
     ImplData()
@@ -148,7 +150,7 @@ aditof::Status LocalDevice::open() {
         return Status::GENERIC_ERROR;
     }
 
-    if (strcmp((char *)cap.card, "Qualcomm Camera Subsystem")) {
+    if (strcmp((char *)cap.card, CAPTURE_DEVICE_NAME)) {
         LOG(WARNING) << "CAPTURE Device " << cap.card;
         return Status::GENERIC_ERROR;
     }
@@ -157,6 +159,12 @@ aditof::Status LocalDevice::open() {
           (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_CAPTURE_MPLANE))) {
         LOG(WARNING) << devName << " is not a video capture device";
         return Status::GENERIC_ERROR;
+    }
+
+    if (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE_MPLANE) {
+        m_implData->videoBuffersType == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+    } else {
+        m_implData->videoBuffersType == V4L2_BUF_TYPE_VIDEO_CAPTURE;
     }
 
     if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
@@ -199,7 +207,7 @@ aditof::Status LocalDevice::start() {
     struct v4l2_buffer buf;
     for (unsigned int i = 0; i < m_implData->nVideoBuffers; i++) {
         CLEAR(buf);
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+        buf.type = m_implData->videoBuffersType;
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = i;
         buf.m.planes = m_implData->planes;
@@ -212,9 +220,8 @@ aditof::Status LocalDevice::start() {
         }
     }
 
-    enum v4l2_buf_type type;
-    type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-    if (xioctl(m_implData->fd, VIDIOC_STREAMON, &type) == -1) {
+    if (xioctl(m_implData->fd, VIDIOC_STREAMON,
+	    &m_implData->videoBuffersType) == -1) {
         LOG(WARNING) << "VIDIOC_STREAMON error "
                      << "errno: " << errno << " error: " << strerror(errno);
         return Status::GENERIC_ERROR;
@@ -235,9 +242,8 @@ aditof::Status LocalDevice::stop() {
     }
     LOG(INFO) << "Stopping device";
 
-    enum v4l2_buf_type type;
-    type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-    if (xioctl(m_implData->fd, VIDIOC_STREAMOFF, &type) == -1) {
+    if (xioctl(m_implData->fd, VIDIOC_STREAMOFF,
+	    &m_implData->videoBuffersType) == -1) {
         LOG(WARNING) << "VIDIOC_STREAMOFF error "
                      << "errno: " << errno << " error: " << strerror(errno);
         return Status::GENERIC_ERROR;
@@ -279,6 +285,7 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
     struct v4l2_requestbuffers req;
     struct v4l2_format fmt;
     struct v4l2_buffer buf;
+    size_t length, offset;
 
     if (details != m_implData->frameDetails) {
         for (unsigned int i = 0; i < m_implData->nVideoBuffers; i++) {
@@ -298,7 +305,7 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
 
     /* Set the frame format in the driver */
     CLEAR(fmt);
-    fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+    fmt.type = m_implData->videoBuffersType;
     fmt.fmt.pix.width = details.width;
     fmt.fmt.pix.height = details.height;
 
@@ -311,7 +318,7 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
     /* Allocate the video buffers in the driver */
     CLEAR(req);
     req.count = 4;
-    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+    req.type = m_implData->videoBuffersType;
     req.memory = V4L2_MEMORY_MMAP;
 
     if (xioctl(m_implData->fd, VIDIOC_REQBUFS, &req) == -1) {
@@ -330,7 +337,7 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
     for (m_implData->nVideoBuffers = 0; m_implData->nVideoBuffers < req.count;
          m_implData->nVideoBuffers++) {
         CLEAR(buf);
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+        buf.type = m_implData->videoBuffersType;
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = m_implData->nVideoBuffers;
         buf.m.planes = m_implData->planes;
@@ -342,9 +349,17 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
             return Status::GENERIC_ERROR;
         }
 
+        if (m_implData->videoBuffersType == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+            length = buf.length;
+            offset = buf.m.offset;
+        } else {
+            length = buf.m.planes[0].length;
+            offset = buf.m.planes[0].m.mem_offset;
+        }
+
         m_implData->videoBuffers[m_implData->nVideoBuffers].start =
-            mmap(NULL, buf.m.planes[0].length, PROT_READ | PROT_WRITE,
-                 MAP_SHARED, m_implData->fd, buf.m.planes[0].m.mem_offset);
+            mmap(NULL, length, PROT_READ | PROT_WRITE,
+                 MAP_SHARED, m_implData->fd, offset);
 
         if (m_implData->videoBuffers[m_implData->nVideoBuffers].start ==
             MAP_FAILED) {
@@ -354,7 +369,7 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
         }
 
         m_implData->videoBuffers[m_implData->nVideoBuffers].length =
-            buf.m.planes[0].length;
+            length;
     }
 
     m_implData->frameDetails = details;
@@ -464,7 +479,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
     }
 
     CLEAR(buf);
-    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+    buf.type = m_implData->videoBuffersType;
     buf.memory = V4L2_MEMORY_MMAP;
     buf.length = 1;
     buf.m.planes = m_implData->planes;
