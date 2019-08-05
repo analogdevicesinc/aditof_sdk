@@ -12,7 +12,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     std::vector<aditof::DeviceConstructionData> &devices) {
     using namespace aditof;
     Status status = Status::OK;
-
+    // TO DO: Do we still need to do this?
     // Find all video device paths
     std::vector<std::string> videoPaths;
     const std::string videoDirPath("/dev/");
@@ -36,7 +36,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
             continue;
         }
     }
-
+    // TO DO: Don't guess the device, find a way to identify it so we are sure
+    // we've got the right device and is compatible with the SDK
     DeviceConstructionData devData;
     devData.deviceType = DeviceType::LOCAL;
     devData.driverPath = "/dev/video0";
