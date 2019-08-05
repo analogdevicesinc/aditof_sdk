@@ -21,7 +21,7 @@ elseif( DRAGONBOARD )
         set(OS_SPECIFIC_DIR dragonboard)
         set(TARGET_NAME dragonboard)
 elseif ( RASPBERRYPI )
-        set(OS_SPECIFIC_DIR raspberrypi)
+        set(OS_SPECIFIC_DIR dragonboard)
         set(TARGET_NAME raspberrypi)
         SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon")
 elseif ( UNIX )
@@ -34,6 +34,7 @@ endif()
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_NAME}/*.cpp
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
