@@ -1,10 +1,12 @@
 # DragonBoard410c User guide
 
-## Prerequisites
-
-To run the system in standalone mode, besides the accesories that are provided in the AD-96TOF1-EBZ box you'll need an additional HDMI cable to connect to a monitor and a USB keyboard and mouse.
-
 ## Setting up the system
+
+### Required hardware
+- [AD-96TOF1-EBZ development kit](https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/ad-96tof1-ebz.html)
+- [DragonBoard410c](https://www.96boards.org/product/dragonboard410c/)
+- DragonBoard410c 12V power supply (e.g. AK-ND-49)
+- To run the system in standalone mode, besides the accesories that are provided in the AD-96TOF1-EBZ box you'll need an additional HDMI cable to connect to a monitor and a USB keyboard and mouse
 
 ### Power on sequence
 - plug the SD card that came in the AD-96TOF1-EBZ box into the DragonBoard410c SD card slot. To benefit from the most recent software updates it is higly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
