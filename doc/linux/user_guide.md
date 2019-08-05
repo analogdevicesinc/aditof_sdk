@@ -2,6 +2,12 @@
 
 ## Setting up the system
 
+### Required hardware
+- [AD-96TOF1-EBZ development kit](https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/ad-96tof1-ebz.html)
+- [DragonBoard410c](https://www.96boards.org/product/dragonboard410c/)
+- DragonBoard410c 12V power supply (e.g. AK-ND-49)
+- Micro-USB to USB Cable
+
 ### Power on sequence
 - Plug the SD card that came in the AD-96TOF1-EBZ box into the DragonBoard410c SD card slot. To benefit from the most recent software updates it is higly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
 - Connect USB cable to the host PC
