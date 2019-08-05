@@ -35,9 +35,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         if (devPath.empty()) {
             continue;
         }
-
     }
-    
+
     DeviceConstructionData devData;
     devData.deviceType = DeviceType::LOCAL;
     devData.driverPath = "/dev/video0";
