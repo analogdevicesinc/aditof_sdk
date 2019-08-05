@@ -19,11 +19,13 @@ elseif( APPLE )
         set(OS_SPECIFIC_DIR macos)
 elseif( DRAGONBOARD )
         set(OS_SPECIFIC_DIR dragonboard)
-elseif ( UNIX )
-        set(OS_SPECIFIC_DIR linux)
+        set(TARGET_NAME dragonboard)
 elseif ( RASPBERRYPI )
         set(OS_SPECIFIC_DIR raspberrypi)
+        set(TARGET_NAME raspberrypi)
         SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon")
+elseif ( UNIX )
+        set(OS_SPECIFIC_DIR linux)
 else()
     message(FATAL_ERROR "Platform not supported")
 endif()
@@ -35,6 +37,7 @@ file(GLOB PLATFORM_SOURCES
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_NAME}/*.h
 )
 
 if ( DRAGONBOARD )

@@ -1,4 +1,5 @@
 #include "local_device.h"
+#include "target_definitions.h"
 #include "utils.h"
 #include <aditof/frame_operations.h>
 
@@ -23,9 +24,6 @@ extern "C" {
 #define V4L2_CID_AD_DEV_SET_CHIP_CONFIG 0xA00A00
 #define V4L2_CID_AD_DEV_READ_REG 0xA00A01
 #define CTRL_PACKET_SIZE 4096
-
-#define EEPROM_DEV_PATH "/sys/bus/i2c/devices/1-0056/eeprom"
-#define CAPTURE_DEVICE_NAME "unicam"
 
 #define TEMP_SENSOR_DEV_PATH "/dev/i2c-1"
 #define LASER_TEMP_SENSOR_I2C_ADDR 0x49
@@ -221,7 +219,7 @@ aditof::Status LocalDevice::start() {
     }
 
     if (xioctl(m_implData->fd, VIDIOC_STREAMON,
-	    &m_implData->videoBuffersType) == -1) {
+               &m_implData->videoBuffersType) == -1) {
         LOG(WARNING) << "VIDIOC_STREAMON error "
                      << "errno: " << errno << " error: " << strerror(errno);
         return Status::GENERIC_ERROR;
@@ -243,7 +241,7 @@ aditof::Status LocalDevice::stop() {
     LOG(INFO) << "Stopping device";
 
     if (xioctl(m_implData->fd, VIDIOC_STREAMOFF,
-	    &m_implData->videoBuffersType) == -1) {
+               &m_implData->videoBuffersType) == -1) {
         LOG(WARNING) << "VIDIOC_STREAMOFF error "
                      << "errno: " << errno << " error: " << strerror(errno);
         return Status::GENERIC_ERROR;
@@ -358,8 +356,8 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
         }
 
         m_implData->videoBuffers[m_implData->nVideoBuffers].start =
-            mmap(NULL, length, PROT_READ | PROT_WRITE,
-                 MAP_SHARED, m_implData->fd, offset);
+            mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED,
+                 m_implData->fd, offset);
 
         if (m_implData->videoBuffers[m_implData->nVideoBuffers].start ==
             MAP_FAILED) {
@@ -368,8 +366,7 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
             return Status::GENERIC_ERROR;
         }
 
-        m_implData->videoBuffers[m_implData->nVideoBuffers].length =
-            length;
+        m_implData->videoBuffers[m_implData->nVideoBuffers].length = length;
     }
 
     m_implData->frameDetails = details;
