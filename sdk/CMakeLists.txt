@@ -23,7 +23,6 @@ elseif( DRAGONBOARD )
 elseif ( RASPBERRYPI )
         set(OS_SPECIFIC_DIR target)
         set(TARGET_SPECIFIC_DIR raspberrypi)
-        SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon")
 elseif ( UNIX )
         set(OS_SPECIFIC_DIR linux)
 else()
@@ -56,6 +55,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE src/)
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION 1.0 CXX_STANDARD 11)
 target_link_libraries( ${PROJECT_NAME} PUBLIC glog::glog)
+
+if ( RASPBERRYPI )
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon")
+endif()
 
 if( APPLE )
     find_library( LIBUVC_LIB libuvc.dylib /usr/local/lib/ )
