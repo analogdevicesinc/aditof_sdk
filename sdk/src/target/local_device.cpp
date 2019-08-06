@@ -160,9 +160,9 @@ aditof::Status LocalDevice::open() {
     }
 
     if (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE_MPLANE) {
-        m_implData->videoBuffersType == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+        m_implData->videoBuffersType = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
     } else {
-        m_implData->videoBuffersType == V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        m_implData->videoBuffersType = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     }
 
     if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
