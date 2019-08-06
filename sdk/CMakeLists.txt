@@ -40,7 +40,7 @@ file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.h
 )
 
-if ( OS_SPECIFIC_DIR EQUAL target )
+if ( "${OS_SPECIFIC_DIR}" STREQUAL "target" )
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
 endif()
 
@@ -51,7 +51,10 @@ add_library(${PROJECT_NAME} SHARED
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
-target_include_directories(${PROJECT_NAME} PRIVATE src/)
+target_include_directories(${PROJECT_NAME} PRIVATE
+    src/
+    src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
+)
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION 1.0 CXX_STANDARD 11)
 target_link_libraries( ${PROJECT_NAME} PUBLIC glog::glog)
