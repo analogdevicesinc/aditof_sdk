@@ -18,7 +18,11 @@ if( WIN32 )
 elseif( APPLE )
         set(OS_SPECIFIC_DIR macos)
 elseif( DRAGONBOARD )
-        set(OS_SPECIFIC_DIR dragonboard)
+        set(OS_SPECIFIC_DIR target)
+        set(TARGET_SPECIFIC_DIR dragonboard)
+elseif ( RASPBERRYPI )
+        set(OS_SPECIFIC_DIR target)
+        set(TARGET_SPECIFIC_DIR raspberrypi)
 elseif ( UNIX )
         set(OS_SPECIFIC_DIR linux)
 else()
@@ -29,12 +33,14 @@ endif()
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.h
 )
 
-if ( DRAGONBOARD )
+if ( "${OS_SPECIFIC_DIR}" STREQUAL "target" )
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
 endif()
 
@@ -45,10 +51,17 @@ add_library(${PROJECT_NAME} SHARED
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include/)
-target_include_directories(${PROJECT_NAME} PRIVATE src/)
+target_include_directories(${PROJECT_NAME} PRIVATE
+    src/
+    src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
+)
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES VERSION ${VERSION} SOVERSION 1.0 CXX_STANDARD 11)
 target_link_libraries( ${PROJECT_NAME} PUBLIC glog::glog)
+
+if ( RASPBERRYPI )
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon")
+endif()
 
 if( APPLE )
     find_library( LIBUVC_LIB libuvc.dylib /usr/local/lib/ )
