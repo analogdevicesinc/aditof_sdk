@@ -18,8 +18,11 @@ mkdir x32\%folder%\bin
 mkdir x32\%folder%\bin\python
 mkdir x32\%folder%\lib
 
+copy C:\OpenSSL-Win64\bin\libeay32.dll C:\aditof-sdk\x64\%folder%\bin
+copy C:\OpenSSL-Win64\bin\ssleay32.dll C:\aditof-sdk\x64\%folder%\bin
 copy C:\projects\aditof-sdk\build\sdk\Release\aditof.dll C:\aditof-sdk\x64\%folder%\bin
 copy C:\projects\aditof-sdk\build\sdk\Release\aditof.lib C:\aditof-sdk\x64\%folder%\lib
+
 copy "C:\projects\aditof-sdk\build\bindings\python\Release\*.pyd" C:\aditof-sdk\x64\%folder%\bin\python
 
 
@@ -33,6 +36,8 @@ copy C:\projects\aditof-sdk\build_debug\sdk\Debug\aditofd.pdb C:\aditof-sdk\x64\
 copy C:\projects\aditof-sdk\build_debug\sdk\Debug\aditofd.lib C:\aditof-sdk\x64\%folder%\lib
 copy "C:\projects\aditof-sdk\build_debug\bindings\python\Debug\*.pyd" C:\aditof-sdk\x64\%folder%\bin\python
 
+copy C:\OpenSSL-Win32\bin\libeay32.dll C:\aditof-sdk\x32\%folder%\bin
+copy C:\OpenSSL-Win32\bin\ssleay32.dll C:\aditof-sdk\x32\%folder%\bin
 copy C:\projects\aditof-sdk\build_x32\sdk\Release\aditof.dll C:\aditof-sdk\x32\%folder%\bin
 copy C:\projects\aditof-sdk\build_x32\sdk\Release\aditof.lib C:\aditof-sdk\x32\%folder%\lib
 copy "C:\projects\aditof-sdk\build_x32\bindings\python\Release\*.pyd" C:\aditof-sdk\x32\%folder%\bin\python
