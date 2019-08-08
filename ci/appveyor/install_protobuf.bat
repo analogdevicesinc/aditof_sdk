@@ -19,12 +19,11 @@ if "%arch%"=="Win64" (
 
 echo "%generator%%arch%"
 
-if not exist "glog" ( git clone --branch v0.3.5 --depth 1 https://github.com/google/glog ) 
-pushd glog
-git checkout tags/v0.3.5
-if not exist "build_0_3_5%folder_arch%" ( mkdir build_0_3_5%folder_arch% )
-pushd build_0_3_5%folder_arch%
-cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=./local_path/glog -G "%generator%%arch%" ..
+if not exist "protobuf" ( git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf ) 
+pushd protobuf
+if not exist "build_3_9_0%folder_arch%" ( mkdir build_3_9_0%folder_arch% )
+pushd build_3_9_0%folder_arch%
+cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=./local_path/protobuf -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -G "%generator%%arch%" ..\cmake\
 cmake --build . --target install --config %configuration%
 popd
 popd
