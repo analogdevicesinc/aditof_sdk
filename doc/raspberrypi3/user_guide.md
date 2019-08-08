@@ -23,7 +23,7 @@ For the AD-96TOF1-EBZ rev.B to work with the RPi the following changes must be m
 - connect the 5V power supply to the camera board and set the camera power switch S2 to on. Once the camera board is powered up the DS1 LED will turn on
 - connect the 5V power supply to the Raspberry Pi. Once power is connected to the Raspberry Pi the system will boot the Linux OS from the SD card.
 
-![RPi connections](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/rpi_standalone.JPG)
+![RPi connections](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/rpi_standalone.jpg)
 
 | Raspberry Pi GPIO Header (J8) | AD-96TOF1-EBZ pin header (P4) |
 | ------------- | ------------- |
