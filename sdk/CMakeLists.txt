@@ -2,11 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 project(aditof)
 
 add_definitions(-DSDK_EXPORTS)
-
 find_package(glog 0.3.5 REQUIRED)
-find_package(Protobuf REQUIRED)
-find_package(PkgConfig)
-pkg_check_modules(LIB_WEBSOCKETS REQUIRED libwebsockets)
+find_package(Protobuf 3.9.0 REQUIRED)
+find_package(libwebsockets REQUIRED)
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/buffer.proto)
 get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
@@ -62,20 +60,25 @@ target_include_directories(${PROJECT_NAME} PUBLIC include/)
 target_include_directories(${PROJECT_NAME} PRIVATE
     src/
     src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
+    ${Protobuf_INCLUDE_DIRS}
     ${GENERATED_PROTO_FILES_DIR}
-    ${LIB_WEBSOCKETS_INCLUDE_DIRS}
+    ${LIBWEBSOCKETS_INCLUDE_DIRS}
+    ${OPENSSL_INCLUDE_DIRS}
 )
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES
                        VERSION ${VERSION}
                        SOVERSION 1.0
                        CXX_STANDARD 11
-                       LINK_FLAGS "-L${LIB_WEBSOCKETS_LIBRARY_DIRS}"
 )
+
 target_link_libraries( ${PROJECT_NAME} PUBLIC
                        glog::glog
-                       protobuf
-                       ${LIB_WEBSOCKETS_LIBRARIES}
+)
+
+target_link_libraries( ${PROJECT_NAME} PRIVATE
+                       ${Protobuf_LIBRARIES}
+                       ${LIBWEBSOCKETS_LIBRARIES}
 )
 
 if ( RASPBERRYPI )
