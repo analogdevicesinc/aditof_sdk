@@ -7,8 +7,13 @@
 - [Raspberry Pi](https://www.raspberrypi.org/products/) The system was tested on Raspberry Pi3 Model B V1.2. It can work on other models that have a CSI camera interface input.
 - Raspberry Pi 5V power supply
 - To run the system in standalone mode, besides the accesories that are provided in the AD-96TOF1-EBZ box you'll need an additional HDMI cable to connect to a monitor and a USB keyboard and mouse
-- 15 core flat cable for connection between RPi and AD-96TOF1-EBZ
+- [RPi camera cable](https://www.adafruit.com/product/2087) for connection between RPi and AD-96TOF1-EBZ
 - jumper wires for connection of secondary I2C lines
+
+### Modifying the AD-96TOF1-EBZ rev.B to work with the RPi
+For the AD-96TOF1-EBZ rev.B to work with the RPi the following changes must be made on the camera board:
+ - short pins 2 and 3 on JP1. JP1 is located underneath the laser board so the laser board must be first detached from the camera board to have acces to this solder jumper
+ - short R98 and R109
 
 ### Power on sequence
 - plug the SD card into the Raspberry Pi SD card slot. To benefit from the most recent software updates it is higly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
