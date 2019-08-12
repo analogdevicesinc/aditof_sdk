@@ -133,11 +133,14 @@ deploy_doxygen() {
 }
 
 ############################################################################
-# Build and install v0.3.5 of glog from the /deps folder
+# Build and install v0.3.5 of glog from the specified repository
 ############################################################################
 build_and_install_glog() {
-    mkdir -p ${DEPS_DIR}/glog/build_0_3_5
-    pushd ${DEPS_DIR}/glog/build_0_3_5
+    REPO_DIR=$1
+    BUILD_DIR=${REPO_DIR}/build_0_3_5
+
+    mkdir -p ${BUILD_DIR}
+    pushd ${BUILD_DIR}
     cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=/usr ..
     make -j${NUM_JOBS}
     sudo make install
@@ -145,11 +148,14 @@ build_and_install_glog() {
 }
 
 ############################################################################
-# Build and install v3.9.0 of protobuf from the /deps folder
+# Build and install v3.9.0 of protobuf from the specified repository
 ############################################################################
 build_and_install_protobuf() {
-    mkdir -p ${DEPS_DIR}/protobuf/build_3_9_0
-    pushd ${DEPS_DIR}/protobuf/build_3_9_0
+    REPO_DIR=$1
+    BUILD_DIR=${REPO_DIR}/build_3_9_0
+
+    mkdir -p ${BUILD_DIR}
+    pushd ${BUILD_DIR}
     cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/usr
     make -j${NUM_JOBS}
     sudo make install
@@ -157,12 +163,15 @@ build_and_install_protobuf() {
 }
 
 ############################################################################
-# Build and install v3.1.0 of libwebsockets from the /deps folder
+# Build and install v3.1.0 of libwebsockets from the specified repository
 ############################################################################
 build_and_install_websockets() {
-    mkdir -p ${DEPS_DIR}/libwebsockets/build_3_1_0
-    pushd ${DEPS_DIR}/libwebsockets/build_3_1_0
-    cmake -DCMAKE_INSTALL_PREFIX=/opt/websockets -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/usr ..
+    REPO_DIR=$1
+    BUILD_DIR=${REPO_DIR}/build_3_1_0
+
+    mkdir -p ${BUILD_DIR}
+    pushd ${BUILD_DIR}
+    cmake -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/usr ..
     make -j${NUM_JOBS}
     sudo make install
     popd
