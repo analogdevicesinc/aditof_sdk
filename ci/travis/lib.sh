@@ -133,61 +133,39 @@ deploy_doxygen() {
 }
 
 ############################################################################
-# Install v0.3.5 of glog in the /deps folder
+# Build and install v0.3.5 of glog from the /deps folder
 ############################################################################
-install_glog() {
-    pushd ${DEPS_DIR}
-    [ -d "glog" ] || {
-       git clone https://github.com/google/glog
-    }
-    pushd glog
-    git checkout tags/v0.3.5
-    mkdir -p build_0_3_5
-    pushd build_0_3_5
+build_and_install_glog() {
+    mkdir -p ${DEPS_DIR}/glog/build_0_3_5
+    pushd ${DEPS_DIR}/glog/build_0_3_5
     cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=/usr ..
-    sudo cmake --build . --target install 
+    make -j${NUM_JOBS}
+    sudo make install
     popd
-    popd
-    popd
-
 }
 
 ############################################################################
-# Install v3.9.0 of protobuf in the /deps folder
+# Build and install v3.9.0 of protobuf from the /deps folder
 ############################################################################
-install_protobuf() {
-    pushd ${DEPS_DIR}
-    [ -d "protobuf" ] || {
-       git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
-    }
-    pushd protobuf
-    mkdir -p build_3_9_0
-    pushd build_3_9_0
+build_and_install_protobuf() {
+    mkdir -p ${DEPS_DIR}/protobuf/build_3_9_0
+    pushd ${DEPS_DIR}/protobuf/build_3_9_0
     cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/usr
-    sudo cmake --build . --target install
+    make -j${NUM_JOBS}
+    sudo make install
     popd
-    popd
-    popd
-
 }
 
 ############################################################################
-# Install v3.1.0 of libwebsockets in the /deps folder
+# Build and install v3.1.0 of libwebsockets from the /deps folder
 ############################################################################
-install_websockets() {
-    pushd ${DEPS_DIR}
-    [ -d "libwebsockets" ] || {
-       git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
-    }
-    pushd libwebsockets
-    mkdir -p build_3_1_0
-    pushd build_3_1_0
+build_and_install_websockets() {
+    mkdir -p ${DEPS_DIR}/libwebsockets/build_3_1_0
+    pushd ${DEPS_DIR}/libwebsockets/build_3_1_0
     cmake -DCMAKE_INSTALL_PREFIX=/opt/websockets -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/usr ..
-    sudo cmake --build . --target install
+    make -j${NUM_JOBS}
+    sudo make install
     popd
-    popd
-    popd
-
 }
 
 ############################################################################
