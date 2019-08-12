@@ -22,9 +22,9 @@ get_deps_source_code()
 }
 
 deps_default() {
-    build_and_install_glog
-    build_and_install_protobuf
-    build_and_install_websockets
+    build_and_install_glog "${DEPS_DIR}/glog"
+    build_and_install_protobuf "${DEPS_DIR}/protobuf"
+    build_and_install_websockets "${DEPS_DIR}/libwebsockets"
 }
 
 deps_cppcheck() {

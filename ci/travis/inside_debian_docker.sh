@@ -11,9 +11,9 @@ pushd ${PROJECT}
 
 . ci/travis/lib.sh
 
-build_and_install_glog
-build_and_install_protobuf
-build_and_install_websockets
+build_and_install_glog "deps/glog"
+build_and_install_protobuf "deps/protobuf"
+build_and_install_websockets "deps/libwebsockets"
 
 mkdir -p build
 pushd build
