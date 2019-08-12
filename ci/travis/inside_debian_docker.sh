@@ -11,14 +11,9 @@ pushd ${PROJECT}
 
 . ci/travis/lib.sh
 
-pushd deps/glog
-mkdir -p build
-pushd build
-cmake -DWITH_GFLAGS=off ..
-make -j${NUM_JOBS}
-sudo make install
-popd # build
-popd # deps/glog
+build_and_install_glog
+build_and_install_protobuf
+build_and_install_websockets
 
 mkdir -p build
 pushd build
