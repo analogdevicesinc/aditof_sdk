@@ -8,6 +8,8 @@ set -e
 
 deps_default() {
     install_glog
+    install_protobuf
+    install_websockets
 }
 
 deps_cppcheck() {
