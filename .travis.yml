@@ -61,13 +61,13 @@ matrix:
       os: osx
       osx_image: xcode10.2
       env: CMAKE_OPTIONS=-DWITH_EXAMPLES=on
-      addons: { homebrew: { packages: ["libuvc", "opencv"]}}
+      addons: { homebrew: { packages: ["libuvc", "opencv", "openssl"]}}
 
       #MacOS High Sierra
     - compiler: "clang"
       os: osx
       osx_image: xcode10.1
-      addons: { homebrew: { packages: ["libuvc"], update: true }}
+      addons: { homebrew: { packages: ["libuvc", "openssl"], update: true }}
 
     - stage: Code Quality
 
