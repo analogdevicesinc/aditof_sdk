@@ -4,7 +4,7 @@ project(aditof)
 add_definitions(-DSDK_EXPORTS)
 find_package(glog 0.3.5 REQUIRED)
 find_package(Protobuf 3.9.0 REQUIRED)
-find_package(libwebsockets REQUIRED)
+find_package(Libwebsockets REQUIRED)
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/buffer.proto)
 get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
@@ -17,15 +17,17 @@ file(GLOB HEADERS
     ${CMAKE_SOURCE_DIR}/sdk/include/aditof/*.h
 )
 
+set(TARGET_STRING "target")
+
 if( WIN32 )
         set(OS_SPECIFIC_DIR windows)
 elseif( APPLE )
         set(OS_SPECIFIC_DIR macos)
 elseif( DRAGONBOARD )
-        set(OS_SPECIFIC_DIR target)
+        set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR dragonboard)
 elseif ( RASPBERRYPI )
-        set(OS_SPECIFIC_DIR target)
+        set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR raspberrypi)
 elseif ( UNIX )
         set(OS_SPECIFIC_DIR linux)
@@ -44,7 +46,7 @@ file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.h
 )
 
-if ( "${OS_SPECIFIC_DIR}" STREQUAL "target" )
+if ( ${OS_SPECIFIC_DIR} STREQUAL ${TARGET_STRING} )
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
 endif()
 
