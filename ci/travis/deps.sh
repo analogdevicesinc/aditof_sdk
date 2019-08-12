@@ -6,10 +6,25 @@ set -e
 
 . ci/travis/lib.sh
 
+get_deps_source_code()
+{
+    pushd "${DEPS_DIR}"
+    [ -d "glog" ] || {
+       git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
+    }
+    [ -d "protobuf" ] || {
+       git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
+    }
+    [ -d "libwebsockets" ] || {
+       git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
+    }
+    popd
+}
+
 deps_default() {
-    install_glog
-    install_protobuf
-    install_websockets
+    build_and_install_glog
+    build_and_install_protobuf
+    build_and_install_websockets
 }
 
 deps_cppcheck() {
@@ -30,17 +45,7 @@ deps_dragonboard() {
     sudo apt-get -qq update
 	sudo service docker restart
     sudo docker pull rycus86/arm64v8-debian-qemu
-
-    # Clone glog now so we don't need git inside of
-    # the docker container
-    pushd "${DEPS_DIR}"
-    [ -d "glog" ] || {
-       git clone https://github.com/google/glog
-    }
-    pushd glog
-    git checkout tags/v0.3.5
-    popd
-    popd
 }
 
+get_deps_source_code
 deps_${BUILD_TYPE:-default}
