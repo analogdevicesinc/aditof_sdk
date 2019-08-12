@@ -4,7 +4,7 @@ apt update
 apt install -y sudo
 
 sudo apt install -y build-essential cmake python-dev python3-dev \
-        libopencv-contrib-dev libopencv-dev
+        libopencv-contrib-dev libopencv-dev libssl-dev
 
 PROJECT=$1
 pushd ${PROJECT}
