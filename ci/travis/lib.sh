@@ -144,7 +144,7 @@ install_glog() {
     git checkout tags/v0.3.5
     mkdir -p build_0_3_5
     pushd build_0_3_5
-    cmake -DWITH_GFLAGS=off ..
+    cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=/usr ..
     sudo cmake --build . --target install 
     popd
     popd
@@ -163,7 +163,7 @@ install_protobuf() {
     pushd protobuf
     mkdir -p build_3_9_0
     pushd build_3_9_0
-    cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/usr
     sudo cmake --build . --target install
     popd
     popd
@@ -182,7 +182,7 @@ install_websockets() {
     pushd libwebsockets
     mkdir -p build_3_1_0
     pushd build_3_1_0
-    cmake -DCMAKE_INSTALL_PREFIX=/opt/websockets -DLWS_STATIC_PIC=ON ..
+    cmake -DCMAKE_INSTALL_PREFIX=/opt/websockets -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/usr ..
     sudo cmake --build . --target install
     popd
     popd
