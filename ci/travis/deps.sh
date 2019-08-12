@@ -1,7 +1,5 @@
 #!/bin/bash
 
-. ci/travis/lib.sh
-
 set -e
 
 . ci/travis/lib.sh
