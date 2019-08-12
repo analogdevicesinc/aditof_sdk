@@ -141,7 +141,7 @@ build_and_install_glog() {
 
     mkdir -p ${BUILD_DIR}
     pushd ${BUILD_DIR}
-    cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=/usr ..
+    cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=/usr/local ..
     make -j${NUM_JOBS}
     sudo make install
     popd
@@ -156,7 +156,7 @@ build_and_install_protobuf() {
 
     mkdir -p ${BUILD_DIR}
     pushd ${BUILD_DIR}
-    cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/usr
+    cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/usr/local
     make -j${NUM_JOBS}
     sudo make install
     popd
@@ -171,7 +171,7 @@ build_and_install_websockets() {
 
     mkdir -p ${BUILD_DIR}
     pushd ${BUILD_DIR}
-    cmake -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/usr ..
+    cmake -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
     make -j${NUM_JOBS}
     sudo make install
     popd
