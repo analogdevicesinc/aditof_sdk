@@ -153,6 +153,44 @@ install_glog() {
 }
 
 ############################################################################
+# Install v3.9.0 of protobuf in the /deps folder
+############################################################################
+install_protobuf() {
+    pushd ${DEPS_DIR}
+    [ -d "protobuf" ] || {
+       git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
+    }
+    pushd protobuf
+    mkdir -p build_3_9_0
+    pushd build_3_9_0
+    cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    sudo cmake --build . --target install
+    popd
+    popd
+    popd
+
+}
+
+############################################################################
+# Install v3.1.0 of libwebsockets in the /deps folder
+############################################################################
+install_websockets() {
+    pushd ${DEPS_DIR}
+    [ -d "libwebsockets" ] || {
+       git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
+    }
+    pushd libwebsockets
+    mkdir -p build_3_1_0
+    pushd build_3_1_0
+    cmake -DCMAKE_INSTALL_PREFIX=/opt/websockets -DLWS_STATIC_PIC=ON ..
+    sudo cmake --build . --target install
+    popd
+    popd
+    popd
+
+}
+
+############################################################################
 # Install the latest version of doxygen in the /deps folder
 ############################################################################
 install_doxygen() {
