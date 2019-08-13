@@ -131,7 +131,7 @@ before_script:
   - |
     if [[ "$BUILD_TYPE" == "" ]]; then
       pushd "${TRAVIS_BUILD_DIR}"
-      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS}
+      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS} -DCMAKE_PREFIX_PATH="${DEPS_DIR}/installed/glog;${DEPS_DIR}/installed/protobuf;${DEPS_DIR}/installed/websockets;";
       popd
     fi
 
