@@ -124,6 +124,11 @@ before_script:
   # cmake inside it using the specified CMAKE_OPTIONS of each build
   ############################################################################
   - |
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      export CMAKE_OPTIONS="-DOPENSSL_INCLUDE_DIRS=`pkg-config --variable=includedir openssl` $CMAKE_OPTIONS"
+    fi
+
+  - |
     if [[ "$BUILD_TYPE" == "" ]]; then
       pushd "${TRAVIS_BUILD_DIR}"
       mkdir build && cd build && cmake .. ${CMAKE_OPTIONS}
