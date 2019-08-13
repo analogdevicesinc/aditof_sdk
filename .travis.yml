@@ -61,13 +61,13 @@ matrix:
       os: osx
       osx_image: xcode10.2
       env: CMAKE_OPTIONS=-DWITH_EXAMPLES=on
-      addons: { homebrew: { packages: ["libuvc", "opencv", "openssl"]}}
+      addons: { homebrew: { packages: ["libuvc", "opencv"]}}
 
       #MacOS High Sierra
     - compiler: "clang"
       os: osx
       osx_image: xcode10.1
-      addons: { homebrew: { packages: ["libuvc", "openssl"], update: true }}
+      addons: { homebrew: { packages: ["libuvc"], update: true }}
 
     - stage: Code Quality
 
@@ -103,6 +103,7 @@ install:
   ############################################################################
   # Install dependencies for each BUILD_TYPE specified as env variable
   ############################################################################
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig:$PKG_CONFIG_PATH"; fi
   - ./ci/travis/deps.sh
 
 before_script:
