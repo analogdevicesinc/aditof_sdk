@@ -25,8 +25,11 @@ Designed using a modular approach, the 3D ToF hardware prototyping platform enab
 
 [How to write the SD card image onto the SD card?](doc/sdcard_burn.md)
 
-## API documentation
-[Doxygen documentation](https://analogdevicesinc.github.io/aditof_sdk/)
+## SDK documentation
+
+[Software stack documentation](https://github.com/analogdevicesinc/aditof_sdk/blob/master/sdk/readme.md)
+
+[API Doxygen documentation](https://analogdevicesinc.github.io/aditof_sdk/)
 
 ## Directory Structure
 | Directory | Description |
