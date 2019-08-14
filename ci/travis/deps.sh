@@ -20,6 +20,7 @@ get_deps_source_code()
 }
 
 deps_default() {
+    get_deps_source_code
     build_and_install_glog "${DEPS_DIR}/glog" "${DEPS_DIR}/installed/glog"
     build_and_install_protobuf "${DEPS_DIR}/protobuf" "${DEPS_DIR}/installed/protobuf"
     build_and_install_websockets "${DEPS_DIR}/libwebsockets" "${DEPS_DIR}/installed/websockets"
@@ -40,10 +41,10 @@ deps_deploy_doxygen() {
 }
 
 deps_dragonboard() {
+    get_deps_source_code
     sudo apt-get -qq update
 	sudo service docker restart
     sudo docker pull rycus86/arm64v8-debian-qemu
 }
 
-get_deps_source_code
 deps_${BUILD_TYPE:-default}
