@@ -19,22 +19,6 @@ matrix:
       name: Dragonboard
       env: BUILD_TYPE=dragonboard
 
-      #CLANG 3.9
-    - env: COMPILER=clang++-3.9
-      addons: { apt: { packages: ["clang-3.9", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-3.9"] } }
-      
-      #CLANG 4.0
-    - env: COMPILER=clang++-4.0
-      addons: { apt: { packages: ["clang-4.0", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-4.0"] } }
-            
-      #CLANG 5.0
-    - env: COMPILER=clang++-5.0
-      addons: { apt: { packages: ["clang-5.0", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-5.0"] } }
-
-      #CLANG 6.0
-    - env: COMPILER=clang++-6.0
-      addons: { apt: { packages: ["clang-6.0", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-6.0"] } }
-
       #CLANG 7
     - env: COMPILER=clang++-7
       addons: { apt: { packages: ["clang-7", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-7"] } }
