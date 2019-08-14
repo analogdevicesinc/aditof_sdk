@@ -14,6 +14,7 @@
 For the AD-96TOF1-EBZ rev.B to work with the RPi the following changes must be made on the camera board:
  - short pins 2 and 3 on JP1. JP1 is located underneath the laser board so the laser board must be first detached from the camera board to have acces to this solder jumper
  - short R98 and R109
+ - move the S1 switch to position 1 - to the dot on the switch
 
 ### Power on sequence
 - plug the SD card into the Raspberry Pi SD card slot. To benefit from the most recent software updates it is higly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
