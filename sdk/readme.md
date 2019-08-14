@@ -5,7 +5,7 @@ The SDK provides a framework for developing applications using the Analog Device
 
 ![Software stack](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/sdk_software_stack.png)
 
-# Embedded platform software components
+#### Embedded platform software components
 - V4L2 kernel driver
   - Talks to the ToF mezzanine card through MIPI and SPI/I2C
 - Gadget USB video kernel driver
@@ -17,7 +17,7 @@ The SDK provides a framework for developing applications using the Analog Device
   - Interfaces with the ToF module through the V4L2 driver
   - Based on websockets & google protocol buffers
 
-# Host PC software components
+#### Host PC software components
 - UVC driver
   - Standard UVC driver in the system for both Windows and Linux
 - Network client
@@ -31,4 +31,3 @@ The SDK provides a framework for developing applications using the Analog Device
 | include | Contains the public headers of the SDK |
 | src | Contains the source code of the SDK |
 | CMakeLists.txt | Rules for building the SDK source code on various platforms |
- 
