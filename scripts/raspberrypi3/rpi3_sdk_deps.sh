@@ -7,6 +7,7 @@ sudo apt upgrade -y
 sudo apt install v4l-utils -y
 sudo apt install libopencv-dev -y
 sudo apt install cmake -y
+sudo apt install libssl1.0-dev -y
 
 #create the work folder
 rm -rf /home/pi/workspace
@@ -35,7 +36,7 @@ cd /home/pi/workspace/github
 git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
 cd protobuf
 mkdir build_3_9_0 && cd build_3_9_0
-cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/opt/protobuf ../cmake
+cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_CXX_FLAGS="-latomic" -DCMAKE_INSTALL_PREFIX=/opt/protobuf ../cmake
 sudo cmake --build . --target install
 
 #download and build the SDK
