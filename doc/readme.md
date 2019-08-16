@@ -8,6 +8,7 @@ This folder contains the user guides, helper documents, doxygen documents, etc. 
 | --------- | ----------- |
 | dragonboard410c | Instructions to build and use all necessary software on Dragonboard 410c |
 | linux | Instructions to build and use all necessary software on a Linux host |
+| raspberrypi3 | Instructions to build and use all necessary software on Rasbpberry PI 3 |
 | windows | Instructions to build and use all necessary software on a Windows host |
 | img | Images used in various documentation files |
 | CMakeLists.txt | Rules for generating the doxygen documentation on request |
