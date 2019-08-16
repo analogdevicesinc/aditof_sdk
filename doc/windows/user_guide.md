@@ -66,7 +66,9 @@ The framerate at which data is acquired from the system is constantly updated on
 * Install MS Visual Studio 14 2015
 * Install MS .NET Framework 4.5
 * CMake
-* Glog
+* Glog v0.3.5
+* Libwebsockets v3.1
+* Protocol Buffers v3.9.0
 
 #### Installing the dependencies
 * CMake
@@ -75,11 +77,31 @@ Windows installer can be downloaded from: https://cmake.org/download/
 
 * Glog:
 ```console
-git clone https://github.com/google/glog
+git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
 cd glog
-git checkout tags/v0.3.5
 mkdir build_0_3_5 && cd build_0_3_5
 cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=./local_path/glog -G "Visual Studio 14 2015 Win64" ..
+cmake --build . --target install --config Debug
+cmake --build . --target install --config Release
+```
+
+* Libwebsockets:
+Libewbesockets needs OpenSSL. One option to get it on windows is from: https://slproweb.com/products/Win32OpenSSL.html. Make sure the get the developer package and not the light wheight package.
+```console
+git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
+cd libwebsockets
+mkdir build_3_1 && cd build_3_1
+cmake -DOPENSSL_ROOT_DIR="C:\OpenSSL-Win64" -DCMAKE_INSTALL_PREFIX=./local_path/websockets -G "Visual Studio 14 2015 Win64" ..
+cmake --build . --target install --config Debug
+cmake --build . --target install --config Release
+```
+
+* Protobuf:
+```console
+git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
+cd protobuf
+mkdir build_3_9_0 && cd build_3_9_0
+cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -DCMAKE_INSTALL_PREFIX=./local_path/protobuf -G "Visual Studio 14 2015 Win64" ..
 cmake --build . --target install --config Debug
 cmake --build . --target install --config Release
 ```
@@ -91,7 +113,7 @@ git clone https://github.com/analogdevicesinc/aditof_sdk
 cd aditof_sdk
 mkdir build
 cd build
-cmake -G "Visual Studio 14 2015 Win64" -DWITH_EXAMPLES=off ..
+cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1\local_path\websockets" -G "Visual Studio 14 2015 Win64" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=off ..
 cmake --build . --config Release
 ```
 
