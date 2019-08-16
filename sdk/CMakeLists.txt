@@ -84,7 +84,7 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE
 )
 
 if ( RASPBERRYPI )
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon")
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon -latomic")
 endif()
 
 if( APPLE )
