@@ -45,7 +45,7 @@ class Network {
 
     //! ServerConnect() - APi to initialize the websocket and connect to
     //! websocket server
-    int ServerConnect();
+    int ServerConnect(const std::string &ip);
 
     //! SendCommand() - APi to send SDK apis to connected server
     int SendCommand();

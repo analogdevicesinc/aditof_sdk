@@ -24,10 +24,10 @@ EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
 
     Network *net = new Network();
     m_implData->net = net;
-    m_implData->ip = data.driverPath;
+    m_implData->ip = data.ip;
 
     /* Make connection with LWS server running on Dragonboard */
-    if (net->ServerConnect() != 0) {
+    if (net->ServerConnect(m_implData->ip) != 0) {
         LOG(WARNING) << "Server Connect Failed";
     }
 

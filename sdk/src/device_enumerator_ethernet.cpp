@@ -15,7 +15,7 @@ aditof::Status DeviceEnumeratorEthernet::findDevices(
 
     std::unique_ptr<Network> net(new Network());
 
-    if (net->ServerConnect() != 0) {
+    if (net->ServerConnect(m_ip) != 0) {
         LOG(WARNING) << "Server Connect Failed";
         return Status::UNREACHABLE;
     }
@@ -46,6 +46,7 @@ aditof::Status DeviceEnumeratorEthernet::findDevices(
         tofData.deviceType =
             static_cast<aditof::DeviceType>(pbData.device_type());
         tofData.driverPath = pbData.driver_path();
+        tofData.ip = m_ip;
         devices.push_back(tofData);
     }
     status = static_cast<Status>(net->recv_buff.status());
