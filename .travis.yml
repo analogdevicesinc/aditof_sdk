@@ -43,18 +43,19 @@ matrix:
            CMAKE_OPTIONS=-DWITH_EXAMPLES=on -DWITH_PYTHON=on
       addons: { apt: { packages: ["libopencv-contrib-dev", "libopencv-dev", "g++-8", "cmake"], sources: ["ubuntu-toolchain-r-test"] } }
 
-      #MacOS Mojave
-    - compiler: "clang"
-      os: osx
-      osx_image: xcode11
-      env: CMAKE_OPTIONS=-DWITH_EXAMPLES=on
-      addons: { homebrew: { packages: ["libuvc", "opencv"]}}
+    # TODO: enable MacOS builds again when the sdk will support MacOS
+    #   #MacOS Mojave
+    # - compiler: "clang"
+    #   os: osx
+    #   osx_image: xcode11
+    #   env: CMAKE_OPTIONS=-DWITH_EXAMPLES=on
+    #   addons: { homebrew: { packages: ["libuvc", "opencv"]}}
 
-      #MacOS High Sierra
-    - compiler: "clang"
-      os: osx
-      osx_image: xcode10.1
-      addons: { homebrew: { packages: ["libuvc"], update: true }}
+    #   #MacOS High Sierra
+    # - compiler: "clang"
+    #   os: osx
+    #   osx_image: xcode10.1
+    #   addons: { homebrew: { packages: ["libuvc"], update: true }}
 
     - stage: Code Quality
 
