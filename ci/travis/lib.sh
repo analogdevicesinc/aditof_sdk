@@ -197,3 +197,21 @@ install_doxygen() {
     popd
     popd
 }
+
+############################################################################
+# Get source code for dependencies: glog, protobuf, libwebsockets
+############################################################################
+get_deps_source_code() {
+    CLONE_DIRECTORY=$1
+    pushd "${CLONE_DIRECTORY}"
+    [ -d "glog" ] || {
+       git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
+    }
+    [ -d "protobuf" ] || {
+       git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
+    }
+    [ -d "libwebsockets" ] || {
+       git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
+    }
+    popd
+}

@@ -4,23 +4,8 @@ set -e
 
 . ci/travis/lib.sh
 
-get_deps_source_code()
-{
-    pushd "${DEPS_DIR}"
-    [ -d "glog" ] || {
-       git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
-    }
-    [ -d "protobuf" ] || {
-       git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
-    }
-    [ -d "libwebsockets" ] || {
-       git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
-    }
-    popd
-}
-
 deps_default() {
-    get_deps_source_code
+    get_deps_source_code ${DEPS_DIR}
     build_and_install_glog "${DEPS_DIR}/glog" "${DEPS_DIR}/installed/glog"
     build_and_install_protobuf "${DEPS_DIR}/protobuf" "${DEPS_DIR}/installed/protobuf"
     build_and_install_websockets "${DEPS_DIR}/libwebsockets" "${DEPS_DIR}/installed/websockets"
