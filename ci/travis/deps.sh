@@ -26,10 +26,7 @@ deps_deploy_doxygen() {
 }
 
 deps_dragonboard() {
-    get_deps_source_code
-    sudo apt-get -qq update
-	sudo service docker restart
-    sudo docker pull rycus86/arm64v8-debian-qemu
+    pull_docker ${DOCKER}
 }
 
 deps_${BUILD_TYPE:-default}

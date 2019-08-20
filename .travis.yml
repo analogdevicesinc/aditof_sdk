@@ -18,6 +18,8 @@ matrix:
       dist: xenial
       name: Dragonboard
       env: BUILD_TYPE=dragonboard
+           DOCKER=danielguramulta/aditof-sdk-debian
+
 
       #CLANG 7
     - env: COMPILER=clang++-7

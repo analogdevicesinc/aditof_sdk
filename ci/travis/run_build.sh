@@ -28,12 +28,8 @@ build_deploy_doxygen() {
 }
 
 build_dragonboard() {
-    docker run --rm --privileged multiarch/qemu-user-static:register --reset
+    run_docker ${DOCKER} /aditof_sdk/ci/travis/inside_docker.sh -DDRAGONBOARD=TRUE
 
-    sudo docker run --rm=true \
-			-v `pwd`:/aditof_sdk:rw \
-			rycus86/arm64v8-debian-qemu \
-            /bin/bash -xe /aditof_sdk/ci/travis/inside_debian_docker.sh aditof_sdk
 }
 
 build_${BUILD_TYPE:-default}
