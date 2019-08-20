@@ -215,3 +215,42 @@ get_deps_source_code() {
     }
     popd
 }
+
+############################################################################
+# Pull the docker given as argument from docker hub
+############################################################################
+pull_docker() {
+    docker=$1
+
+    sudo apt-get -qq update
+	sudo service docker restart
+
+    docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+    docker_file=${DEPS_DIR}/docker-image.tar
+    if [[ -f ${docker_file} ]]; then
+        echo_green "Found ${docker} in cache!"
+        docker load -i ${docker_file}
+    else
+        echo_green "Pulling ${docker} from docker hub!"
+        docker pull ${docker}
+        docker save -o ${docker_file} ${docker}
+    fi
+}
+
+############################################################################
+# Run the script given as argument 2 inside the docker given as argument 1
+# with the given arguments 3
+############################################################################
+run_docker() {
+    docker=$1
+    script=$2
+    script_args=$3
+
+    docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+    sudo docker run --rm=true \
+			-v `pwd`:/aditof_sdk:rw \
+			${docker} \
+            /bin/bash -xe ${script} /aditof_sdk ${script_args}
+}
