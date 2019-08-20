@@ -29,7 +29,10 @@ build_deploy_doxygen() {
 
 build_dragonboard() {
     run_docker ${DOCKER} /aditof_sdk/ci/travis/inside_docker.sh -DDRAGONBOARD=TRUE
+}
 
+build_raspberrypi3() {
+    run_docker ${DOCKER} /aditof_sdk/ci/travis/inside_docker.sh -DRASPBERRYPI=TRUE
 }
 
 build_${BUILD_TYPE:-default}

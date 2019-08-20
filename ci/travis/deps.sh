@@ -29,4 +29,8 @@ deps_dragonboard() {
     pull_docker ${DOCKER}
 }
 
+deps_raspberrypi3() {
+    pull_docker ${DOCKER}
+}
+
 deps_${BUILD_TYPE:-default}
