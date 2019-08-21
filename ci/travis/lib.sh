@@ -197,3 +197,60 @@ install_doxygen() {
     popd
     popd
 }
+
+############################################################################
+# Get source code for dependencies: glog, protobuf, libwebsockets
+############################################################################
+get_deps_source_code() {
+    CLONE_DIRECTORY=$1
+    pushd "${CLONE_DIRECTORY}"
+    [ -d "glog" ] || {
+       git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
+    }
+    [ -d "protobuf" ] || {
+       git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
+    }
+    [ -d "libwebsockets" ] || {
+       git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
+    }
+    popd
+}
+
+############################################################################
+# Pull the docker given as argument from docker hub
+############################################################################
+pull_docker() {
+    docker=$1
+
+    sudo apt-get -qq update
+	sudo service docker restart
+
+    docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+    docker_file=${DEPS_DIR}/docker-image.tar
+    if [[ -f ${docker_file} ]]; then
+        echo_green "Found ${docker} in cache!"
+        docker load -i ${docker_file}
+    else
+        echo_green "Pulling ${docker} from docker hub!"
+        docker pull ${docker}
+        docker save -o ${docker_file} ${docker}
+    fi
+}
+
+############################################################################
+# Run the script given as argument 2 inside the docker given as argument 1
+# with the given arguments 3
+############################################################################
+run_docker() {
+    docker=$1
+    script=$2
+    script_args=$3
+
+    docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+    sudo docker run --rm=true \
+			-v `pwd`:/aditof_sdk:rw \
+			${docker} \
+            /bin/bash -xe ${script} /aditof_sdk ${script_args}
+}
