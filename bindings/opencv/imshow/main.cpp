@@ -6,7 +6,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "../../aditof_opencv.h"
+#include "../aditof_opencv.h"
 
 using namespace aditof;
 
