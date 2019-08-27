@@ -10,6 +10,7 @@ enum class DeviceType { LOCAL, USB, ETHERNET };
 struct DeviceConstructionData {
     DeviceType deviceType;
     std::string driverPath;
+    std::string ip;
 };
 
 }; // namespace aditof

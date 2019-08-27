@@ -18,7 +18,6 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <iostream>
 
-#define SERVER_IP_ADDRS "192.168.1.241" /* IP address of server to connect*/
 #define RX_BUFFER_BYTES (1229500)
 #define MAX_RETRY_CNT 3
 
@@ -106,13 +105,12 @@ bool Network::isData_Received() { return Network::Data_Received; }
 
 /*
 * ServerConnect():  intializes the websocket and connects to server
-* Parameters:       none
+* Parameters:       ip - the ip address of the server to connect to
 * returns:          0 - on success
                    -1 - on error
-* Desription:   This function is used to initializes the websocket and connects
-to server.
+* Desription:   This function initializes the websocket and connects to server.
 */
-int Network::ServerConnect() {
+int Network::ServerConnect(const std::string &ip) {
     struct lws_context_creation_info info;
     memset(&info, 0, sizeof(info));
 
@@ -127,7 +125,7 @@ int Network::ServerConnect() {
 
     struct lws_client_connect_info ccinfo = {0};
     ccinfo.context = this->context;
-    ccinfo.address = SERVER_IP_ADDRS;
+    ccinfo.address = ip.c_str();
     ccinfo.port = 5000;
     ccinfo.path = "/";
     ccinfo.host = lws_canonical_hostname(this->context);

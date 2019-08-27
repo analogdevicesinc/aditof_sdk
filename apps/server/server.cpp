@@ -26,6 +26,7 @@ static bool Client_Connected = false;
 static bool no_of_client_connected = false;
 static unsigned int frame_width = 0;
 static unsigned int frame_height = 0;
+bool latest_sent_msg_is_was_buffered = false;
 
 struct clientData {
     bool hasFragments;
@@ -113,6 +114,14 @@ int Network::callback_function(struct lws *wsi,
     }
 
     case LWS_CALLBACK_SERVER_WRITEABLE: {
+        // TO INVESTIGATE: Currently this workaround prevents the server to send
+        // the image buffer over and over again but as a side effect it lowers
+        // the FPS with about 2-3 frames. How to avoid FPS reduction?
+        if (latest_sent_msg_is_was_buffered) {
+            latest_sent_msg_is_was_buffered = false;
+            break;
+        }
+
         int siz = buff_send.ByteSize();
         unsigned char *pkt =
             new unsigned char[siz + LWS_SEND_BUFFER_PRE_PADDING];
@@ -122,6 +131,9 @@ int Network::callback_function(struct lws *wsi,
         buff_send.SerializeToCodedStream(coded_output);
 
         n = lws_write(wsi, pkt_pad, (siz), LWS_WRITE_TEXT);
+        if (lws_partial_buffered(wsi)) {
+            latest_sent_msg_is_was_buffered = true;
+        }
 #ifdef NW_DEBUG
         cout << "server is sending " << n << endl;
 #endif
