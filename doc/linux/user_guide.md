@@ -128,6 +128,6 @@ sudo apt install libopencv-dev
 ```console
 cd aditof_sdk
 mkdir build && cd build
-cmake .. -DCMAKE_PREFIX_PATH="opt/glog;opt/protobuf;/opt/websockets"
+cmake .. -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets"
 make
 ```
