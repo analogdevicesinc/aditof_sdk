@@ -101,7 +101,7 @@ cmake --build . --target install --config Release
 git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
 cd protobuf
 mkdir build_3_9_0 && cd build_3_9_0
-cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -DCMAKE_INSTALL_PREFIX=./local_path/protobuf -G "Visual Studio 14 2015 Win64" ..
+cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -DCMAKE_INSTALL_PREFIX=./local_path/protobuf -G "Visual Studio 14 2015 Win64" ../cmake
 cmake --build . --target install --config Debug
 cmake --build . --target install --config Release
 ```
@@ -138,11 +138,11 @@ OPENCV_DIR=C:\opencv\build
 OPENCV_PATH=C:\opencv\build\x64\vc14\bin
 ```
 
-#### Build SDK with examples
+#### Build SDK with examples and in Visual Studio
 - Generate the VisualStudio solution
 ```console
 cd aditof_sdk
-scripts/generate_msvc2015_solution.bat
+cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1\local_path\websockets" -G "Visual Studio 14 2015 Win64" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=on ..
 ```
 - Open 'adi_tof_project.sln' generated in 'aditof_sdk/build' in MS Visual Studio 2015
 - Select 'Release' build
