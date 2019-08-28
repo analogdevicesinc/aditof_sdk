@@ -31,7 +31,7 @@ matrix:
       addons: { apt: { packages: ["clang-7", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-7"] } }
 
     - env: COMPILER=clang++-8
-           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on"
+           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on -DWITH_OPENCV=on"
       addons: { apt: { packages: ["libopencv-contrib-dev", "libopencv-dev", "clang-8", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-8"] } }
 
       #GCC 7
@@ -40,7 +40,7 @@ matrix:
 
       #GCC 8
     - env: COMPILER=g++-8
-           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on"
+           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on -DWITH_OPENCV=on"
       addons: { apt: { packages: ["libopencv-contrib-dev", "libopencv-dev", "g++-8", "cmake"], sources: ["ubuntu-toolchain-r-test"] } }
 
     # TODO: enable MacOS builds again when the sdk will support MacOS
