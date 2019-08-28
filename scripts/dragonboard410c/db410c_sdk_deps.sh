@@ -44,7 +44,7 @@ git clone https://github.com/analogdevicesinc/aditof_sdk
 cd aditof_sdk
 mkdir build
 cd build
-cmake -DDRAGONBOARD=1 -DCMAKE_PREFIX_PATH="opt/glog;opt/protobuf;/opt/websockets" ..
+cmake -DDRAGONBOARD=1 -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
 make -j8
 
 #build the uvc-app for host USB connectivity
