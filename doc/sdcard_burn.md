@@ -17,6 +17,8 @@ Writing the image on the SD card will take about 15 to 20 minutes for a 16GB ima
     dd if=xxx.img of=/dev/xxx bs=4M
     sync
     ~~~
+    
+Note: The **lsblk** command can be used to help identifying the device to be specified for the argument: **of=/dev/xxx**.
 
 ## Windows
 * Unpack the .tar.xz archive using [7-Zip](https://www.7-zip.org/)
