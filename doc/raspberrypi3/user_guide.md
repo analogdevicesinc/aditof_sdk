@@ -78,6 +78,8 @@ To build the SDK and run the included applications and example code the followin
  - libopencv-dev
  - cmake
  - glog v0.3.5
+ - libwebsockets v3.1
+ - protocol buffers v3.9.0
 
 This [script](https://github.com/analogdevicesinc/aditof_sdk/blob/master/scripts/raspberrypi3/rpi3_sdk_deps.sh) will get and install all the SDK dependencies and will also download the SDK source code and build it. By default all the code will be stored in */home/pi/workspace/github*.
 
