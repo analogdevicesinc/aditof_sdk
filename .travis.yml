@@ -31,7 +31,7 @@ matrix:
       addons: { apt: { packages: ["clang-7", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-7"] } }
 
     - env: COMPILER=clang++-8
-           CMAKE_OPTIONS=-DWITH_EXAMPLES=on -DWITH_PYTHON=on
+           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on"
       addons: { apt: { packages: ["libopencv-contrib-dev", "libopencv-dev", "clang-8", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-8"] } }
 
       #GCC 7
@@ -40,7 +40,7 @@ matrix:
 
       #GCC 8
     - env: COMPILER=g++-8
-           CMAKE_OPTIONS=-DWITH_EXAMPLES=on -DWITH_PYTHON=on
+           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on"
       addons: { apt: { packages: ["libopencv-contrib-dev", "libopencv-dev", "g++-8", "cmake"], sources: ["ubuntu-toolchain-r-test"] } }
 
     # TODO: enable MacOS builds again when the sdk will support MacOS
@@ -94,6 +94,11 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig:$PKG_CONFIG_PATH"; fi
   - ./ci/travis/deps.sh
 
+  ############################################################################
+  # Setup path to python executable for pybind11 to use
+  ############################################################################
+  - export PYTHON=$(python-config --prefix)/bin/python3
+
 before_script:
 
   ############################################################################
@@ -119,7 +124,7 @@ before_script:
   - |
     if [[ "$BUILD_TYPE" == "" ]]; then
       pushd "${TRAVIS_BUILD_DIR}"
-      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS} -DCMAKE_PREFIX_PATH="${DEPS_DIR}/installed/glog;${DEPS_DIR}/installed/protobuf;${DEPS_DIR}/installed/websockets;";
+      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS} -DPYTHON_EXECUTABLE=${PYTHON} -DCMAKE_PREFIX_PATH="${DEPS_DIR}/installed/glog;${DEPS_DIR}/installed/protobuf;${DEPS_DIR}/installed/websockets;";
       popd
     fi
 
