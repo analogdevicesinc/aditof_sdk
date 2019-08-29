@@ -10,6 +10,7 @@
 
 ### Power on sequence
 - Plug the SD card that came in the AD-96TOF1-EBZ box into the DragonBoard410c SD card slot. To benefit from the most recent software updates it is higly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
+- Make sure that switch S6 on the DragonBoard410C is set to SD BOOT (position 2 ON, all others OFF)
 - Connect USB cable to the host PC
 - Connect the 5V power supply to the camera board and set the camera power switch S2 to on. Once the camera board is powered up the DS1 LED will turn on
 - Connect the 12V power supply to the DragonBoard 410c. Once power is connected to the DragonBoard the system will boot the Linux OS from the SD card
