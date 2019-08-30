@@ -181,6 +181,34 @@ build_and_install_websockets() {
 }
 
 ############################################################################
+# Build and install opencv from the specified repository
+############################################################################
+build_and_install_opencv() {
+    # OpenCV version may be custom so we replace the . with _ to make
+    # he build folder. example: 3.4.1 => 3_4_1
+    OPENCV_BUILD_VERSION=`echo ${OPENCV} | sed -r 's/[.]/_/g'`
+    REPO_DIR=$1
+    INSTALL_DIR=$2
+    BUILD_DIR=${REPO_DIR}/build_${OPENCV_BUILD_VERSION}
+
+    # Install some packages requiered for OpenCV
+    sudo apt-get install -y build-essential libgtk2.0-dev pkg-config libavcodec-dev \
+        libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev \
+        libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev binutils
+
+    mkdir -p ${BUILD_DIR}
+    pushd ${BUILD_DIR}
+    cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=${INSTALL_DIR} -D WITH_TBB=OFF -D WITH_IPP=OFF -D BUILD_NEW_PYTHON_SUPPORT=OFF -D WITH_V4L=OFF -D INSTALL_C_EXAMPLES=OFF -D INSTALL_PYTHON_EXAMPLES=OFF -D BUILD_EXAMPLES=OFF -D WITH_QT=OFF -D WITH_OPENGL=OFF -D WITH_OPENCL=OFF -DCPU_DISPATCH= ..
+    make -j${NUM_JOBS}
+    sudo make install
+
+	sudo sh -c 'echo "${INSTALL_DIR}/lib" > /etc/ld.so.conf.d/opencv.conf'
+	sudo ldconfig
+    
+    popd
+}
+
+############################################################################
 # Install the latest version of doxygen in the /deps folder
 ############################################################################
 install_doxygen() {
@@ -204,6 +232,12 @@ install_doxygen() {
 get_deps_source_code() {
     CLONE_DIRECTORY=$1
     pushd "${CLONE_DIRECTORY}"
+
+    # use opencv 3.4.1 by default if no other version is specified
+    if [[ "${OPENCV}" == "" ]]; then
+        export OPENCV="3.4.1"
+    fi
+
     [ -d "glog" ] || {
        git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
     }
@@ -213,6 +247,12 @@ get_deps_source_code() {
     [ -d "libwebsockets" ] || {
        git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
     }
+    if [[ ${CMAKE_OPTIONS} == *"WITH_OPENCV=on"* ]]; then
+        [ -d "opencv-${OPENCV}" ] || {
+            curl -sL https://github.com/Itseez/opencv/archive/${OPENCV}.zip > opencv.zip
+	        unzip -q opencv.zip
+        }
+    fi
     popd
 }
 
