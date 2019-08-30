@@ -9,6 +9,9 @@ deps_default() {
     build_and_install_glog "${DEPS_DIR}/glog" "${DEPS_DIR}/installed/glog"
     build_and_install_protobuf "${DEPS_DIR}/protobuf" "${DEPS_DIR}/installed/protobuf"
     build_and_install_websockets "${DEPS_DIR}/libwebsockets" "${DEPS_DIR}/installed/websockets"
+    if [[ ${CMAKE_OPTIONS} == *"WITH_OPENCV=on"* ]]; then
+        build_and_install_opencv "${DEPS_DIR}/opencv-${OPENCV}" "${DEPS_DIR}/installed/opencv"
+    fi
 }
 
 deps_cppcheck() {

@@ -11,7 +11,7 @@ RUN apt update
 RUN apt install -y sudo
 
 RUN sudo apt install -y build-essential cmake python-dev python3-dev \
-        libopencv-contrib-dev libopencv-dev libssl-dev git
+        libssl-dev git
 
 RUN chmod +x ./setup_docker.sh
 RUN ./setup_docker.sh

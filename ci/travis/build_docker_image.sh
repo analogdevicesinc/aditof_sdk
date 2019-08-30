@@ -6,6 +6,7 @@
 
 mkdir -p temp_deps
 
+export CMAKE_OPTIONS="-DWITH_OPENCV=on"
 get_deps_source_code temp_deps
 
 dockername=$1
