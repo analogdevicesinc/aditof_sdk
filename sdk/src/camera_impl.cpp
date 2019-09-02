@@ -74,6 +74,20 @@ aditof::Status CameraImpl::setMode(const std::string &mode,
         firmwareFile.close();
     } else {
         m_details.mode = mode;
+        std::vector<std::pair<std::string, int>> modeRanges = {
+            {"near", 800}, {"medium", 3000}, {"far", 6000}};
+        auto iter = std::find_if(modeRanges.begin(), modeRanges.end(),
+                                 [&mode](std::pair<std::string, int> mp) {
+                                     return mp.first == mode;
+                                 });
+        if (iter != modeRanges.end()) {
+            m_details.range = (*iter).second;
+        } else {
+            m_details.range = 1;
+        }
+
+        LOG(INFO) << "Camera range for mode: " << mode
+                  << " is: " << m_details.range << " mm";
 
         std::vector<uint16_t> firmwareData;
         status = m_calibration.getAfeFirmware(mode, firmwareData);

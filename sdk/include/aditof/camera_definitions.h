@@ -54,6 +54,11 @@ struct CameraDetails {
      * @brief The type of connection with the camera
      */
     ConnectionType connection;
+
+    /**
+     * @brief The range of the camera in mm for the operating mode
+     */
+    int range;
 };
 
 } // namespace aditof
