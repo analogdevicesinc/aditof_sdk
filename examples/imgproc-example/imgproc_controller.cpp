@@ -18,7 +18,7 @@ ImgProc_Controller::ImgProc_Controller()
         std::vector<std::string> frameTypes;
         camera->getAvailableFrameTypes(frameTypes);
         if (frameTypes.empty()) {
-            LOG(WARNING) << "no frame type available!";
+            LOG(WARNING) << "No frame type available!";
             return;
         }
         camera->setFrameType(frameTypes.front());
@@ -26,7 +26,7 @@ ImgProc_Controller::ImgProc_Controller()
         std::vector<std::string> modes;
         camera->getAvailableModes(modes);
         if (modes.empty()) {
-            LOG(WARNING) << "no camera modes available!";
+            LOG(WARNING) << "No camera modes available!";
             return;
         }
 

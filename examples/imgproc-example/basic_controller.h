@@ -16,7 +16,7 @@ class Basic_Controller {
 
   public:
     std::vector<aditof::Frame> captureFrames();
-    aditof::Frame getFirstFrame();
+    aditof::Frame getFrame();
     void printFrame(aditof::Frame frame);
 
   private:

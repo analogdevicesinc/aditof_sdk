@@ -20,6 +20,7 @@ endif()
 add_executable(${PROJECT_NAME}
                     imgproc_controller.cpp
                     basic_controller.cpp
+                    basic_gui.cpp
                     main.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIR})

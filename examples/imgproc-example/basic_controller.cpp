@@ -22,7 +22,7 @@ Basic_Controller::Basic_Controller() : m_cameraInUse(-1) {
         std::vector<std::string> frameTypes;
         camera->getAvailableFrameTypes(frameTypes);
         if (frameTypes.empty()) {
-            LOG(WARNING) << "no frame type available!";
+            LOG(WARNING) << "No frame type available!";
             return;
         }
         camera->setFrameType(frameTypes.front());
@@ -30,7 +30,7 @@ Basic_Controller::Basic_Controller() : m_cameraInUse(-1) {
         std::vector<std::string> modes;
         camera->getAvailableModes(modes);
         if (modes.empty()) {
-            LOG(WARNING) << "no camera modes available!";
+            LOG(WARNING) << "No camera modes available!";
             return;
         }
         status = camera->setMode(modes.front());
@@ -64,13 +64,14 @@ std::vector<aditof::Frame> Basic_Controller::captureFrames() {
             continue;
         }
 
+        LOG(ERROR) << "every frame";
         m_frames.push_back(*frame);
         //   m_queue.enqueue(frame);
     }
     return m_frames;
 }
 
-aditof::Frame Basic_Controller::getFirstFrame() {
+aditof::Frame Basic_Controller::getFrame() {
     auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
     auto frame = std::make_shared<aditof::Frame>();
     camera->requestFrame(frame.get());
