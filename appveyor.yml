@@ -40,6 +40,7 @@ build_script:
     - ps: pushd build
     - cmake -G "%generator% Win64" \
       -DWITH_PYTHON=on \
+      -DWITH_OPENCV=on \
       -DOpenCV_DIR="C:\tools\opencv\build\x64\vc15\lib" \
       -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stableWin64\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" \
@@ -50,6 +51,7 @@ build_script:
     - ps: pushd build_debug
     - cmake -G "%generator% Win64" \
       -DWITH_PYTHON=on \
+      -DWITH_OPENCV=on \
       -DOpenCV_DIR="C:\tools\opencv\build\x64\vc15\lib" \
       -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stableWin64\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" \
