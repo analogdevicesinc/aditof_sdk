@@ -8,5 +8,6 @@ The SDK provides bindings for OpenCV through the helper methods defined in adito
 | Directory/File | Description |
 | --------- | ----------- |
 | aditof_opencv.h | Contains the helper methods to convert from aditof::Frame to cv::Mat |
+| dnn | Contains a simple object detection example |
 | imshow | Contains a basic example that displays data provided by the Aditof SDK |
 | CMakeLists.txt | Rules to build the bindings and the examples |
