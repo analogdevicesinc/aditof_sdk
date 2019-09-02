@@ -23,6 +23,8 @@ class Basic_GUI {
     int renderCyclic();
 
     void renderDepthImage();
+    void renderIRImage();
+    void computeStuffOnImage();
 
   private:
     std::shared_ptr<aditof::Frame> m_capturedFrame;
@@ -33,12 +35,14 @@ class Basic_GUI {
     cv::Mat m_irImage;
 
     const std::string WINDOW1_NAME = "Depth Image";
-    const std::string WINDOW2_NAME = "Depth Image B&W";
-    const std::string WINDOW3_NAME = "IR Image";
+    const std::string WINDOW2_NAME = "IR Image";
+    const std::string WINDOW3_NAME = "Stuff";
 
     int m_distanceVal;
 
     int renderDepth;
+    int renderIR;
+    int computeStuff;
 };
 
 #endif
