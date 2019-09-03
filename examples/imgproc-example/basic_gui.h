@@ -24,25 +24,39 @@ class Basic_GUI {
 
     void renderDepthImage();
     void renderIRImage();
-    void computeStuffOnImage();
+    void detectEdgesfromDepth();
+    void detectObjectsfromDepth();
+
+  private:
+    cv::Mat computeUdisparity(cv::Mat ImgToProcess, int max_disp);
+    cv::Mat computeThreshold(cv::Mat ImgToProcess, int const_value);
+    void labelCompute(cv::Mat img, std::vector<std::vector<int>> &labels, int i,
+                      int j, int dist, int labelNo,
+                      std::vector<cv::Point2i> &blob);
+    int labelImage(cv::Mat img, std::vector<std::vector<int>> &labels, int dist,
+                   std::vector<std::vector<cv::Point2i>> &blobs);
+    void computeConnectedComponentsUDisp(cv::Mat input, cv::Mat threshold,
+                                         int dist, cv::String textOut, int type,
+                                         cv::Point point);
 
   private:
     std::shared_ptr<aditof::Frame> m_capturedFrame;
     std::string m_viewName;
 
     cv::Mat m_depthImage;
-    cv::Mat m_depthImageB_W;
     cv::Mat m_irImage;
 
     const std::string WINDOW1_NAME = "Depth Image";
     const std::string WINDOW2_NAME = "IR Image";
-    const std::string WINDOW3_NAME = "Stuff";
+    const std::string WINDOW3_NAME = "Edges";
+    const std::string WINDOW4_NAME = "Objects";
 
     int m_distanceVal;
 
     int renderDepth;
     int renderIR;
-    int computeStuff;
+    int detectEdges;
+    int detectObjects;
 };
 
 #endif
