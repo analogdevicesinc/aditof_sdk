@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
 project(adi_tof_project)
 
+####################### Disable In-source builds ##############################
+if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR} )
+    message(FATAL_ERROR "In-source builds are not allowed. \
+    Consider making a separate build folder and run cmake \
+    from there using this command:
+    cmake ${CMAKE_SOURCE_DIR}")
+endif()
+
 ############################### Version #######################################
 set(ADITOF_VERSION_MAJOR 1)
 set(ADITOF_VERSION_MINOR 0)
