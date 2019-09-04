@@ -15,7 +15,7 @@
 
 class Basic_GUI {
   public:
-    Basic_GUI(const std::string &name);
+    Basic_GUI(const std::string &name, int numberOfColors);
     ~Basic_GUI();
 
     void setFrame(aditof::Frame capturedframe);
@@ -27,17 +27,19 @@ class Basic_GUI {
     void detectEdgesfromDepth();
     void detectObjectsfromDepth();
 
+    void generateColorsVector();
+
   private:
     cv::Mat computeUdisparity(cv::Mat ImgToProcess, int max_disp);
+    cv::Mat computeVdisparity(cv::Mat ImgToProcess, int max_disp);
     cv::Mat computeThreshold(cv::Mat ImgToProcess, int const_value);
     void labelCompute(cv::Mat img, std::vector<std::vector<int>> &labels, int i,
                       int j, int dist, int labelNo,
                       std::vector<cv::Point2i> &blob);
-    int labelImage(cv::Mat img, std::vector<std::vector<int>> &labels, int dist,
-                   std::vector<std::vector<cv::Point2i>> &blobs);
+    void labelImage(cv::Mat img, std::vector<std::vector<int>> &labels,
+                    int dist, std::vector<std::vector<cv::Point2i>> &blobs);
     void computeConnectedComponentsUDisp(cv::Mat input, cv::Mat threshold,
-                                         int dist, cv::String textOut, int type,
-                                         cv::Point point);
+                                         int dist);
 
   private:
     std::shared_ptr<aditof::Frame> m_capturedFrame;
@@ -49,14 +51,18 @@ class Basic_GUI {
     const std::string WINDOW1_NAME = "Depth Image";
     const std::string WINDOW2_NAME = "IR Image";
     const std::string WINDOW3_NAME = "Edges";
-    const std::string WINDOW4_NAME = "Objects";
+    const std::string WINDOW4_NAME = "Histogram";
+    const std::string WINDOW5_NAME = "Detected Objects";
 
     int m_distanceVal;
 
-    int renderDepth;
-    int renderIR;
-    int detectEdges;
-    int detectObjects;
+    int m_renderDepth;
+    int m_renderIR;
+    int m_detectEdges;
+    int m_detectObjects;
+
+    std::vector<cv::Vec3b> m_colorsVector;
+    int m_numberOfColors;
 };
 
 #endif

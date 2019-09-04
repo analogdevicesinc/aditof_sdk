@@ -3,3 +3,4 @@ project(examples)
 
 add_subdirectory(aditof-demo)
 add_subdirectory(first-frame)
+add_subdirectory(imgproc-example)

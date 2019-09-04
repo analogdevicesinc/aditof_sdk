@@ -1,5 +1,5 @@
-# first-frame sample code
+# imgproc-example sample code
 
 ## Overview
 
-The first-frame is a cross platform sample code that shows how to use the aditof sdk to configure a camera so that frames can be captured from it.
+The imgproc-example is a cross platform sample code that shows how to use the aditof sdk to configure a camera so that you can detect objects from the frames acquaried.

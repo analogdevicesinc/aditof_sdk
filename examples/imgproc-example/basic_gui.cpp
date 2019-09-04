@@ -5,10 +5,12 @@
 #define CVUI_IMPLEMENTATION
 #include "cvui.h"
 
-Basic_GUI::Basic_GUI(const std::string &name) : m_viewName(name) {
-    renderDepth = 0;
-    renderIR = 0;
-    detectEdges = 0;
+Basic_GUI::Basic_GUI(const std::string &name, int numberOfColors)
+    : m_viewName(name), m_numberOfColors(numberOfColors) {
+    m_renderDepth = 0;
+    m_renderIR = 0;
+    m_detectEdges = 0;
+    m_detectObjects = 0;
 }
 Basic_GUI::~Basic_GUI() {}
 
@@ -37,7 +39,7 @@ void Basic_GUI::renderDepthImage() {
 
     m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, depthData);
     m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / 5999);
-    applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
+    //  applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
     flip(m_depthImage, m_depthImage, 1);
 
     cvui::imshow(WINDOW1_NAME, m_depthImage);
@@ -85,7 +87,8 @@ void Basic_GUI::detectObjectsfromDepth() {
     flip(m_depthImage, m_depthImage, 1);
 
     cv::Mat udisparity = computeUdisparity(m_depthImage, 255);
-    cv::Mat threshold = computeThreshold(udisparity, 20);
+    cv::Mat threshold = computeThreshold(udisparity, 10);
+    computeConnectedComponentsUDisp(m_depthImage, threshold, 3);
 
     cvui::imshow(WINDOW4_NAME, threshold);
 }
@@ -116,40 +119,40 @@ int Basic_GUI::renderCyclic() {
     cvui::text(frame, 125, 25, "Welcome", 1.2);
 
     if (cvui::button(frame, 50, 100, 100, 40,
-                     !renderDepth ? "Render Depth" : "Stop Depth")) {
-        if (renderDepth == 0)
-            renderDepth = 1;
+                     !m_renderDepth ? "Render Depth" : "Stop Depth")) {
+        if (m_renderDepth == 0)
+            m_renderDepth = 1;
         else
-            renderDepth = 0;
+            m_renderDepth = 0;
     }
 
-    if (renderDepth) {
+    if (m_renderDepth) {
         if (cvui::button(frame, 50, 200, 100, 40,
-                         !detectEdges ? "Detect edges" : "Stop Detection")) {
-            if (detectEdges == 0)
-                detectEdges = 1;
+                         !m_detectEdges ? "Detect edges" : "Stop Detection")) {
+            if (m_detectEdges == 0)
+                m_detectEdges = 1;
             else
-                detectEdges = 0;
+                m_detectEdges = 0;
         }
         if (cvui::button(frame, 250, 200, 100, 40,
-                         !detectObjects ? "Detect Objects"
-                                        : "Stop Detection")) {
-            if (detectObjects == 0)
-                detectObjects = 1;
+                         !m_detectObjects ? "Detect Objects"
+                                          : "Stop Detection")) {
+            if (m_detectObjects == 0)
+                m_detectObjects = 1;
             else
-                detectObjects = 0;
+                m_detectObjects = 0;
         }
     } else {
-        detectEdges = 0;
-        detectObjects = 0;
+        m_detectEdges = 0;
+        m_detectObjects = 0;
     }
 
     if (cvui::button(frame, 250, 100, 100, 40,
-                     !renderIR ? "Render IR" : "Stop IR")) {
-        if (renderIR == 0)
-            renderIR = 1;
+                     !m_renderIR ? "Render IR" : "Stop IR")) {
+        if (m_renderIR == 0)
+            m_renderIR = 1;
         else
-            renderIR = 0;
+            m_renderIR = 0;
     }
 
     if (cvui::button(frame, 250, 350, 100, 40, "Exit")) {
@@ -159,28 +162,29 @@ int Basic_GUI::renderCyclic() {
 
     cvui::update();
     cv::imshow(m_viewName, frame);
-    if (renderDepth) {
+    if (m_renderDepth) {
         renderDepthImage();
     } else {
         cv::destroyWindow(WINDOW1_NAME);
     }
 
-    if (renderIR) {
+    if (m_renderIR) {
         renderIRImage();
     } else {
         cv::destroyWindow(WINDOW2_NAME);
     }
 
-    if (detectEdges) {
+    if (m_detectEdges) {
         detectEdgesfromDepth();
     } else {
         cv::destroyWindow(WINDOW3_NAME);
     }
 
-    if (detectObjects) {
+    if (m_detectObjects) {
         detectObjectsfromDepth();
     } else {
         cv::destroyWindow(WINDOW4_NAME);
+        cv::destroyWindow(WINDOW5_NAME);
     }
 
     // Check if ESC key was pressed
@@ -203,6 +207,8 @@ cv::Mat Basic_GUI::computeThreshold(cv::Mat ImgToProcess, int const_value) {
                 result.at<unsigned char>(i, j) = 255;
             else
                 result.at<unsigned char>(i, j) = 0;
+            // if (j > 200) // take awat background and far away objects
+            //   result.at<unsigned char>(i, j) = 0;
         }
     }
     return result;
@@ -214,8 +220,21 @@ cv::Mat Basic_GUI::computeUdisparity(cv::Mat ImgToProcess, int max_disp) {
     for (int j = 0; j < ImgToProcess.size().width; j++) {
         for (int i = 0; i < ImgToProcess.size().height; i++) {
             int disp = static_cast<int>(ImgToProcess.at<unsigned char>(i, j));
-            if (disp > 0)
+            if (disp > 0 && disp < 100)
                 result.at<unsigned char>(disp, j)++;
+        }
+    }
+    return result;
+}
+
+cv::Mat Basic_GUI::computeVdisparity(cv::Mat ImgToProcess, int max_disp) {
+    cv::Size size = cv::Size(max_disp, ImgToProcess.size().height);
+    cv::Mat result = cv::Mat::zeros(size, CV_8U);
+    for (int j = 0; j < ImgToProcess.size().width; j++) {
+        for (int i = 0; i < ImgToProcess.size().height; i++) {
+            int disp = static_cast<int>(ImgToProcess.at<unsigned char>(i, j));
+            if (disp > 0 && disp < 100)
+                result.at<unsigned char>(i, disp)++;
         }
     }
     return result;
@@ -234,6 +253,7 @@ void Basic_GUI::labelCompute(cv::Mat img, std::vector<std::vector<int>> &labels,
     for (int k = i - dist; k < i + dist; k++) {
         for (int l = j - dist; l < j + dist; l++) {
             if (k >= 0 && k < img.size().height && l >= 0 &&
+
                 l < img.size().width) {
                 labelCompute(img, labels, k, l, dist, labelNo, blob);
             }
@@ -241,9 +261,9 @@ void Basic_GUI::labelCompute(cv::Mat img, std::vector<std::vector<int>> &labels,
     }
 }
 
-int Basic_GUI::labelImage(cv::Mat img, std::vector<std::vector<int>> &labels,
-                          int dist,
-                          std::vector<std::vector<cv::Point2i>> &blobs) {
+void Basic_GUI::labelImage(cv::Mat img, std::vector<std::vector<int>> &labels,
+                           int dist,
+                           std::vector<std::vector<cv::Point2i>> &blobs) {
     int labelNo = 0;
     std::vector<cv::Point2i> blob;
     for (int i = 0; i < img.size().height; i++) {
@@ -260,13 +280,10 @@ int Basic_GUI::labelImage(cv::Mat img, std::vector<std::vector<int>> &labels,
             blob.clear();
         }
     }
-    return labelNo;
 }
 
 void Basic_GUI::computeConnectedComponentsUDisp(cv::Mat input,
-                                                cv::Mat threshold, int dist,
-                                                cv::String textOut, int type,
-                                                cv::Point point) {
+                                                cv::Mat threshold, int dist) {
     std::vector<std::vector<cv::Point2i>> blobs;
     cv::Mat outputColor = cv::Mat::zeros(input.size(), CV_8UC3);
     cv::Mat label_image;
@@ -274,41 +291,61 @@ void Basic_GUI::computeConnectedComponentsUDisp(cv::Mat input,
 
     threshold.convertTo(label_image, CV_8U);
 
+    int height = threshold.size().height;
+    int width = threshold.size().width;
     std::vector<std::vector<int>> labels;
-    labels.resize(threshold.size().height);
-    for (int i = 0; i < threshold.size().height; i++) {
-        for (int j = 0; j < threshold.size().width; j++) {
-            labels[i].resize(threshold.size().width);
+
+    labels.resize(static_cast<unsigned int>(height));
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            labels[i].resize(static_cast<unsigned int>(width));
             labels[i][j] = 0;
         }
     }
-    int nrLabels = labelImage(label_image, labels, dist, blobs);
+    labelImage(label_image, labels, dist, blobs);
     int valdisp;
+    int colorIndex = 0;
+    cv::Vec3b color;
     for (size_t i = 0; i < blobs.size(); i++) {
+        if (m_numberOfColors > 0 && !m_colorsVector.empty()) {
+            color = m_colorsVector.at(colorIndex);
+
+            if (colorIndex >= m_numberOfColors - 1) {
+                colorIndex = 0;
+            } else {
+                colorIndex++;
+            }
+        } else {
+            color = cv::Vec3b(0, 0, 0);
+        }
+
+        for (size_t j = 0; j < blobs[i].size(); j++) {
+            int y = blobs[i][j].x;
+            int x = blobs[i][j].y;
+
+            output.at<cv::Vec3b>(x, y) = color;
+
+            for (int line = 0; line < input.size().height; line++) {
+                valdisp = static_cast<int>(input.at<unsigned char>(line, y));
+                if (valdisp == x) {
+                    outputColor.at<cv::Vec3b>(line, y) = color;
+                }
+            }
+        }
+    }
+    cvui::imshow(WINDOW5_NAME, outputColor);
+}
+
+void Basic_GUI::generateColorsVector() {
+    m_colorsVector.resize(static_cast<unsigned int>(m_numberOfColors));
+    for (int i = 0; i < m_numberOfColors; i++) {
         unsigned char r =
             static_cast<unsigned char>(255 * (rand() / (1.0 + RAND_MAX)));
         unsigned char g =
             static_cast<unsigned char>(255 * (rand() / (1.0 + RAND_MAX)));
         unsigned char b =
             static_cast<unsigned char>(255 * (rand() / (1.0 + RAND_MAX)));
-        for (size_t j = 0; j < blobs[i].size(); j++) {
-            int y = blobs[i][j].x;
-            int x = blobs[i][j].y;
-
-            output.at<cv::Vec3b>(x, y)[0] = b;
-            output.at<cv::Vec3b>(x, y)[1] = g;
-            output.at<cv::Vec3b>(x, y)[2] = r;
-
-            for (int line = 0; line < input.size().height; line++) {
-                valdisp = static_cast<int>(input.at<unsigned char>(line, y));
-                if (valdisp == x) {
-                    outputColor.at<cv::Vec3b>(line, y)[0] = b;
-                    outputColor.at<cv::Vec3b>(line, y)[1] = g;
-                    outputColor.at<cv::Vec3b>(line, y)[2] = r;
-                }
-            }
-        }
+        cv::Vec3b colorTuple(b, g, r);
+        m_colorsVector.at(i) = colorTuple;
     }
-
-    // output si outputcolor
 }
