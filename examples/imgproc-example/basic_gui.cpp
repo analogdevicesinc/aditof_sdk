@@ -38,7 +38,7 @@ void Basic_GUI::renderDepthImage() {
 
     m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, depthData);
     m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / 5999);
-    //  applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
+    applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
     flip(m_depthImage, m_depthImage, 1);
 
     cvui::imshow(WINDOW1_NAME, m_depthImage);
