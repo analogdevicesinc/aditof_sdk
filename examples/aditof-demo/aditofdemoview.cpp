@@ -535,7 +535,7 @@ void AdiTofDemoView::_displayDepthImage() {
             m_distanceVal * 0.7 + m_depthImage.at<ushort>(pointxy) * 0.3);
         char text[20];
         sprintf(text, "%d", m_distanceVal);
-        m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / 5999);
+        m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / m_ctrl->getRange());
         applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
         flip(m_depthImage, m_depthImage, 1);
         int color;
@@ -584,7 +584,7 @@ void AdiTofDemoView::_displayIrImage() {
         int frameWidth = static_cast<int>(frameDetails.width);
 
         m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
-        m_irImage.convertTo(m_irImage, CV_8U, 255.0 / 5999);
+        m_irImage.convertTo(m_irImage, CV_8U, 255.0 / m_ctrl->getRange());
         flip(m_irImage, m_irImage, 1);
 
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);

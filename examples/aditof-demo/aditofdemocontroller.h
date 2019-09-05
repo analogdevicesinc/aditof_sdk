@@ -46,6 +46,8 @@ class AdiTofDemoController {
 
     bool hasCamera() const;
 
+    int getRange() const;
+
   private:
     void captureFrames();
 

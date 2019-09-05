@@ -174,3 +174,10 @@ void AdiTofDemoController::captureFrames() {
         m_frameRequested = false;
     }
 }
+
+int AdiTofDemoController::getRange() const {
+    aditof::CameraDetails cameraDetails;
+    m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
+        cameraDetails);
+    return cameraDetails.range;
+}
