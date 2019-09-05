@@ -15,7 +15,7 @@
 
 class Basic_GUI {
   public:
-    Basic_GUI(const std::string &name, int numberOfColors);
+    Basic_GUI(const std::string &name);
     ~Basic_GUI();
 
     void setFrame(aditof::Frame capturedframe);
@@ -54,6 +54,8 @@ class Basic_GUI {
     const std::string WINDOW4_NAME = "Histogram";
     const std::string WINDOW5_NAME = "Detected Objects";
 
+    const int MINSIZEOFBLOB_NEAR = 40;
+
     int m_distanceVal;
 
     int m_renderDepth;
@@ -62,7 +64,7 @@ class Basic_GUI {
     int m_detectObjects;
 
     std::vector<cv::Vec3b> m_colorsVector;
-    int m_numberOfColors;
+    const int NUMBEROFCOLORS = 20;
 };
 
 #endif

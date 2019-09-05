@@ -5,8 +5,7 @@
 #define CVUI_IMPLEMENTATION
 #include "cvui.h"
 
-Basic_GUI::Basic_GUI(const std::string &name, int numberOfColors)
-    : m_viewName(name), m_numberOfColors(numberOfColors) {
+Basic_GUI::Basic_GUI(const std::string &name) : m_viewName(name) {
     m_renderDepth = 0;
     m_renderIR = 0;
     m_detectEdges = 0;
@@ -307,10 +306,10 @@ void Basic_GUI::computeConnectedComponentsUDisp(cv::Mat input,
     int colorIndex = 0;
     cv::Vec3b color;
     for (size_t i = 0; i < blobs.size(); i++) {
-        if (m_numberOfColors > 0 && !m_colorsVector.empty()) {
+        if (NUMBEROFCOLORS > 0 && !m_colorsVector.empty()) {
             color = m_colorsVector.at(colorIndex);
 
-            if (colorIndex >= m_numberOfColors - 1) {
+            if (colorIndex >= NUMBEROFCOLORS - 1) {
                 colorIndex = 0;
             } else {
                 colorIndex++;
@@ -319,16 +318,21 @@ void Basic_GUI::computeConnectedComponentsUDisp(cv::Mat input,
             color = cv::Vec3b(0, 0, 0);
         }
 
-        for (size_t j = 0; j < blobs[i].size(); j++) {
-            int y = blobs[i][j].x;
-            int x = blobs[i][j].y;
+        if (blobs[i].size() < MINSIZEOFBLOB_NEAR) {
+            continue;
+        } else {
+            for (size_t j = 0; j < blobs[i].size(); j++) {
+                int y = blobs[i][j].x;
+                int x = blobs[i][j].y;
 
-            output.at<cv::Vec3b>(x, y) = color;
+                output.at<cv::Vec3b>(x, y) = color;
 
-            for (int line = 0; line < input.size().height; line++) {
-                valdisp = static_cast<int>(input.at<unsigned char>(line, y));
-                if (valdisp == x) {
-                    outputColor.at<cv::Vec3b>(line, y) = color;
+                for (int line = 0; line < input.size().height; line++) {
+                    valdisp =
+                        static_cast<int>(input.at<unsigned char>(line, y));
+                    if (valdisp == x) {
+                        outputColor.at<cv::Vec3b>(line, y) = color;
+                    }
                 }
             }
         }
@@ -337,8 +341,8 @@ void Basic_GUI::computeConnectedComponentsUDisp(cv::Mat input,
 }
 
 void Basic_GUI::generateColorsVector() {
-    m_colorsVector.resize(static_cast<unsigned int>(m_numberOfColors));
-    for (int i = 0; i < m_numberOfColors; i++) {
+    m_colorsVector.resize(static_cast<unsigned int>(NUMBEROFCOLORS));
+    for (int i = 0; i < NUMBEROFCOLORS; i++) {
         unsigned char r =
             static_cast<unsigned char>(255 * (rand() / (1.0 + RAND_MAX)));
         unsigned char g =

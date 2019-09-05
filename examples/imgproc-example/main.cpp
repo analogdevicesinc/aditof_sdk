@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     // basic_controller->printFrame(firstFrame);
 
     auto basic_controller = std::make_shared<Basic_Controller>();
-    auto basic_gui = std::make_shared<Basic_GUI>("version1", 20);
+    auto basic_gui = std::make_shared<Basic_GUI>("version1");
     basic_gui->renderOnce();
     basic_gui->generateColorsVector();
     bool stopFlag = 1;
