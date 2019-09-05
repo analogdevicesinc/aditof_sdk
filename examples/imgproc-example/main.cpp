@@ -11,10 +11,6 @@ int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
 
-    // auto basic_controller = std::make_shared<Basic_Controller>();
-    //  aditof::Frame firstFrame = basic_controller->getFrame();
-    // basic_controller->printFrame(firstFrame);
-
     auto basic_controller = std::make_shared<Basic_Controller>();
     auto basic_gui = std::make_shared<Basic_GUI>("version1");
     basic_gui->renderOnce();

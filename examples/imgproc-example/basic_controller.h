@@ -25,6 +25,8 @@ class Basic_Controller {
     int m_cameraInUse;
     std::atomic<bool> m_stopFlag;
     std::vector<aditof::Frame> m_frames;
+
+    const int SELECTED_MODE = 2;
 };
 
 #endif

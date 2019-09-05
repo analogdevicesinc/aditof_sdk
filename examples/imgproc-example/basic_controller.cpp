@@ -3,8 +3,9 @@
 #include <glog/logging.h>
 #include <iostream>
 
-Basic_Controller::Basic_Controller() : m_cameraInUse(-1) {
+Basic_Controller::Basic_Controller() {
     aditof::Status status = aditof::Status::OK;
+    m_cameraInUse = -1;
 
     status = m_system.initialize();
     if (status != aditof::Status::OK) {
@@ -33,7 +34,10 @@ Basic_Controller::Basic_Controller() : m_cameraInUse(-1) {
             LOG(WARNING) << "No camera modes available!";
             return;
         }
-        status = camera->setMode(modes.front());
+
+        std::string modes_to_set[3] = {"near", "medium", "far"};
+
+        status = camera->setMode(modes_to_set[SELECTED_MODE]);
         if (status != aditof::Status::OK) {
             LOG(ERROR) << "Could not set camera mode!";
         }
