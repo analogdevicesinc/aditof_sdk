@@ -35,3 +35,7 @@ add_custom_target(doc
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/img ${DOXY_WORKING_DIR}/html/img
     WORKING_DIRECTORY ${DOXY_WORKING_DIR}
 )
+
+############### Install the documentation in the system #######################
+include(GNUInstallDirs)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doxygen_doc/html/ DESTINATION ${CMAKE_INSTALL_DOCDIR})
