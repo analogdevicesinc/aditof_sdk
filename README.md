@@ -46,16 +46,16 @@ For more details about the SDK check the links below:
 
 | Example | Language | Description |
 | --------- | ----------- | ----------- |
-| aditof-demo | C++ |	An application that uses OpenCV to display infrared and depth images |
-| first-frame | C++ | An example code that shows the steps required to get to the point where camera frames can be captured |
+| [aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/aditof-demo) | C++ |	An application that uses OpenCV to display infrared and depth images |
+| [first-frame](https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/first-frame) | C++ | An example code that shows the steps required to get to the point where camera frames can be captured |
 
 ## SDK bindings examples
 
 | Example | Language | Description |
 | --------- | ----------- | ----------- |
-| dnn | C++ with OpenCV |	Contains a simple object detection example |
-| imshow	| C++ with OpenCV |	Contains a basic example that displays data provided by the Aditof SDK |
-| first_frame.py | Python with OpenCV |	Contains a python example to capture a frame |
+| [dnn](https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/dnn) | C++ with OpenCV |	Contains a simple object detection example |
+| [imshow](https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/imshow)	| C++ with OpenCV |	Contains a basic example that displays data provided by the Aditof SDK |
+| [first_frame.py](https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python) | Python with OpenCV |	Contains a python example to capture a frame |
 
 ## Directory Structure
 | Directory | Description |
