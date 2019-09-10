@@ -1,0 +1,19 @@
+get_filename_component(aditof_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+set(aditof_INCLUDE_DIRS "@CONFIG_INCLUDE_DIRS@")
+
+if (NOT glog_FOUND)
+        find_package(glog 0.3.5 REQUIRED)
+endif()
+if (NOT Protobuf_FOUND)
+        find_package(Protobuf 3.9.0 REQUIRED)
+endif()
+if (NOT Libwebsockets_FOUND)
+        find_package(Libwebsockets REQUIRED)
+endif()
+
+if (NOT TARGET aditof::aditof)
+        include("${aditof_CMAKE_DIR}/aditof-targets.cmake")
+endif()
+
+set(aditof_LIBRARIES aditof::aditof)
