@@ -2,7 +2,7 @@
 #include <aditof/status_definitions.h>
 
 #include <opencv2/core.hpp>
-
+namespace aditof {
 aditof::Status fromFrameToDepthMat(aditof::Frame &frame, cv::Mat &mat) {
     aditof::FrameDetails frameDetails;
     frame.getDetails(frameDetails);
@@ -40,3 +40,4 @@ aditof::Status fromFrameToIrMat(aditof::Frame &frame, cv::Mat &mat) {
 
     return aditof::Status::OK;
 }
+} // namespace aditof
