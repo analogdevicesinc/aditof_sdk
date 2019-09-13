@@ -11,7 +11,7 @@ WHRatio = inWidth / float(inHeight)
 inScaleFactor = 0.007843
 meanVal = 127.5
 thr = 0.2
-WINDOW_NAME = "Display Depth with object detection"
+WINDOW_NAME = "Display detected objects"
 WINDOW_NAME_IR = "Display IR"
 
 
@@ -93,32 +93,37 @@ if __name__ == "__main__":
             print("cameras[0].requestFrame() failed with status: ", status)
 
         depth_map = np.array(frame.getData(tof.FrameDataType.Depth), dtype="uint16", copy=False)
+        ir_map = np.array(frame.getData(tof.FrameDataType.IR), dtype="uint16", copy=False)
 
-        ir_map = depth_map[int(depth_map.shape[0] / 2): depth_map.shape[0], :]
+        # Creation of the IR image
+        ir_map = ir_map[0: int(ir_map.shape[0] / 2), :]
         ir_map = cv.flip(ir_map, 1)
         ir_map = np.float32(ir_map)
         distance_scale_ir = 255.0 / camera_range
-
         ir_map = distance_scale_ir * ir_map
         ir_map = np.uint8(ir_map)
+        ir_map = cv.cvtColor(ir_map, cv.COLOR_GRAY2RGB)
 
+        # Creation of the Depth image
         new_shape = (int(depth_map.shape[0] / 2), depth_map.shape[1])
         depth_map = np.resize(depth_map, new_shape)
         depth_map = cv.flip(depth_map, 1)
-
         depth_map = np.float32(depth_map)
         distance_scale = 255.0 / camera_range
         depth_map = distance_scale * depth_map
         depth_map = np.uint8(depth_map)
-
         depth_map = cv.applyColorMap(depth_map, cv.COLORMAP_RAINBOW)
 
-        blob = cv.dnn.blobFromImage(depth_map, inScaleFactor, (inWidth, inHeight), (meanVal, meanVal, meanVal), swapRB)
+        # Combine depth and IR for more accurate results
+        result = cv.addWeighted(ir_map, 0.4, depth_map, 0.6, 0)
+
+        # Start the computations for object detection using DNN
+        blob = cv.dnn.blobFromImage(result, inScaleFactor, (inWidth, inHeight), (meanVal, meanVal, meanVal), swapRB)
         net.setInput(blob)
         detections = net.forward()
 
-        cols = depth_map.shape[1]
-        rows = depth_map.shape[0]
+        cols = result.shape[1]
+        rows = result.shape[0]
 
         if cols / float(rows) > WHRatio:
             cropSize = (int(rows * WHRatio), rows)
@@ -129,10 +134,10 @@ if __name__ == "__main__":
         y2 = y1 + cropSize[1]
         x1 = int((cols - cropSize[0]) / 2)
         x2 = x1 + cropSize[0]
-        depth_map = depth_map[y1:y2, x1:x2]
+        result = result[y1:y2, x1:x2]
 
-        cols = depth_map.shape[1]
-        rows = depth_map.shape[0]
+        cols = result.shape[1]
+        rows = result.shape[0]
 
         for i in range(detections.shape[2]):
             confidence = detections[0, 0, i, 2]
@@ -144,22 +149,25 @@ if __name__ == "__main__":
                 xRightTop = int(detections[0, 0, i, 5] * cols)
                 yRightTop = int(detections[0, 0, i, 6] * rows)
 
-                cv.rectangle(depth_map, (xLeftBottom, yLeftBottom), (xRightTop, yRightTop),
+                cv.rectangle(result, (xLeftBottom, yLeftBottom), (xRightTop, yRightTop),
                              (0, 255, 0))
+                center = ((xLeftBottom + cols) * 0.5, (yLeftBottom + rows) * 0.5)
                 if class_id in classNames:
                     label = classNames[class_id] + ": " + str(confidence)
                     labelSize, baseLine = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
                     yLeftBottom = max(yLeftBottom, labelSize[1])
-                    cv.rectangle(depth_map, (xLeftBottom, yLeftBottom - labelSize[1]),
+                    cv.rectangle(result, (xLeftBottom, yLeftBottom - labelSize[1]),
                                  (xLeftBottom + labelSize[0], yLeftBottom + baseLine),
                                  (255, 255, 255), cv.FILLED)
-                    cv.putText(depth_map, label, (xLeftBottom, yLeftBottom),
+                    cv.putText(result, label, (xLeftBottom, yLeftBottom),
                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
+        # Show image with object detection
         cv.namedWindow(WINDOW_NAME, cv.WINDOW_AUTOSIZE)
-        cv.imshow(WINDOW_NAME, depth_map)
+        cv.imshow(WINDOW_NAME, result)
 
+        # Show IR map
         cv.namedWindow(WINDOW_NAME_IR, cv.WINDOW_AUTOSIZE)
         cv.imshow(WINDOW_NAME_IR, ir_map)
 

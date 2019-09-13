@@ -5,7 +5,9 @@ This example shows how to capture a frame using the SDK and Python.
 
 NumPy library is needed for scientific computations. 
 If NumPy library is not found you should install it using pip (a package manager for Python)
-``` pip install numpy
+
+```python
+pip install numpy
 ```
 
 For initializing the system
