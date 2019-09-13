@@ -7,8 +7,8 @@ It works with model taken from [MobileNet-SSD](https://github.com/chuanqi305/Mob
 Building the project with CMake will download prototxt and caffemodel, used for object detection. 
 
 For running the python program use:
-```python
+```console
 python dnn.py --prototxt \pathTo\MobileNetSSD_deploy.prototxt  --weights \pathTo\MobileNetSSD_deploy.caffemodel
 ```
 
-![Display Image](https://github.com/analogdevicesinc/aditof_sdk/blob/dnn_pythonExample/doc/img/dnn_python.png)
+![Display Image](https://github.com/analogdevicesinc/aditof_sdk/blob/dnn_pythonExample/doc/img/dnn_python.PNG)
