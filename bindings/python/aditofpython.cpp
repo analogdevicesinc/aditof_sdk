@@ -1,4 +1,5 @@
 #include "pybind11/functional.h"
+#include "pybind11/numpy.h"
 #include "pybind11/pybind11.h"
 #include "pybind11/stl.h"
 
@@ -140,5 +141,105 @@ PYBIND11_MODULE(aditofpython, m) {
              },
              py::arg("dataType"));
 
-    // TO DO: class DeviceInterface
+    py::class_<DeviceInterface>(m, "DeviceInterface")
+        .def("open", &DeviceInterface::open)
+        .def("start", &DeviceInterface::start)
+        .def("stop", &DeviceInterface::stop)
+        .def("getAvailableFrameTypes",
+             [](DeviceInterface &device, py::list types) {
+                 std::vector<aditof::FrameDetails> typeList;
+                 aditof::Status status =
+                     device.getAvailableFrameTypes(typeList);
+
+                 for (const auto &type : typeList)
+                     types.append(type);
+
+                 return status;
+             },
+             py::arg("types"))
+        .def("setFrameType", &DeviceInterface::setFrameType, py::arg("details"))
+        .def("program",
+             [](DeviceInterface &device, py::array_t<uint8_t> firmware,
+                size_t size) {
+                 py::buffer_info buffInfo = firmware.request();
+                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
+
+                 return device.program(ptr, size);
+             },
+             py::arg("firmware"), py::arg("size"))
+        .def("getFrame",
+             [](DeviceInterface &device, py::array_t<uint16_t> buffer) {
+                 py::buffer_info buffInfo = buffer.request(true);
+                 uint16_t *ptr = static_cast<uint16_t *>(buffInfo.ptr);
+
+                 return device.getFrame(ptr);
+             },
+             py::arg("buffer"))
+        .def("readEeprom",
+             [](DeviceInterface &device, uint32_t address,
+                py::array_t<uint8_t> data, size_t length) {
+                 py::buffer_info buffInfo = data.request(true);
+                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
+
+                 return device.readEeprom(address, ptr, length);
+             },
+             py::arg("address"), py::arg("data"), py::arg("length"))
+        .def("writeEeprom",
+             [](DeviceInterface &device, uint32_t address,
+                py::array_t<uint8_t> data, size_t length) {
+                 py::buffer_info buffInfo = data.request();
+                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
+
+                 return device.writeEeprom(address, ptr, length);
+             },
+             py::arg("address"), py::arg("data"), py::arg("length"))
+        .def("readAfeRegisters",
+             [](DeviceInterface &device, py::array_t<uint16_t> address,
+                py::array_t<uint16_t> data, size_t length) {
+                 py::buffer_info addrBuffInfo = address.request();
+                 uint16_t *addrPtr = static_cast<uint16_t *>(addrBuffInfo.ptr);
+
+                 py::buffer_info dataBuffInfo = data.request(true);
+                 uint16_t *dataPtr = static_cast<uint16_t *>(dataBuffInfo.ptr);
+
+                 return device.readAfeRegisters(addrPtr, dataPtr, length);
+             },
+             py::arg("address"), py::arg("data"), py::arg("length"))
+        .def("writeAfeRegisters",
+             [](DeviceInterface &device, py::array_t<uint16_t> address,
+                py::array_t<uint16_t> data, size_t length) {
+                 py::buffer_info addrBuffInfo = address.request();
+                 uint16_t *addrPtr = static_cast<uint16_t *>(addrBuffInfo.ptr);
+
+                 py::buffer_info dataBuffInfo = data.request();
+                 uint16_t *dataPtr = static_cast<uint16_t *>(dataBuffInfo.ptr);
+
+                 return device.writeAfeRegisters(addrPtr, dataPtr, length);
+             },
+             py::arg("address"), py::arg("data"), py::arg("length"))
+        .def("readAfeTemp",
+             [](DeviceInterface &device, py::list temperature) {
+                 float temp;
+                 aditof::Status status = device.readAfeTemp(temp);
+                 temperature.append(temp);
+                 return status;
+             })
+        .def("readLaserTemp",
+             [](DeviceInterface &device, py::list temperature) {
+                 float temp;
+                 aditof::Status status = device.readLaserTemp(temp);
+                 temperature.append(temp);
+                 return status;
+             })
+        .def("setCalibrationParams", &DeviceInterface::setCalibrationParams,
+             py::arg("mode"), py::arg("gain"), py::arg("offset"))
+        .def("applyCalibrationToFrame",
+             [](DeviceInterface &device, py::array_t<uint16_t> frame,
+                const std::string &mode) {
+                 py::buffer_info buffInfo = frame.request(true);
+                 uint16_t *ptr = static_cast<uint16_t *>(buffInfo.ptr);
+
+                 return device.applyCalibrationToFrame(ptr, mode);
+             },
+             py::arg("frame"), py::arg("mode"));
 }
