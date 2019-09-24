@@ -50,7 +50,8 @@ PYBIND11_MODULE(aditofpython, m) {
         .def_readwrite("cameraId", &aditof::CameraDetails::cameraId)
         .def_readwrite("mode", &aditof::CameraDetails::mode)
         .def_readwrite("frameType", &aditof::CameraDetails::frameType)
-        .def_readwrite("connection", &aditof::CameraDetails::connection);
+        .def_readwrite("connection", &aditof::CameraDetails::connection)
+        .def_readwrite("range", &aditof::CameraDetails::range);
 
     // Helpers
 
@@ -65,8 +66,8 @@ PYBIND11_MODULE(aditofpython, m) {
             return py::buffer_info(
                 f.pData, sizeof(uint16_t),
                 py::format_descriptor<uint16_t>::format(), 2,
-                {f.details.width, f.details.height},
-                {sizeof(uint16_t) + f.details.width, sizeof(uint16_t)});
+                {f.details.height, f.details.width},
+                {sizeof(uint16_t) * f.details.width, sizeof(uint16_t)});
         });
 
     // ADI Time of Flight API
