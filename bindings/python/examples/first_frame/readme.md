@@ -1,10 +1,23 @@
-import aditofpython as tof
-import numpy as np
+# First frame Example
 
+### Overview
+This example shows how to capture a frame using the SDK and Python.
+
+NumPy library is needed for scientific computations. 
+If NumPy library is not found you should install it using pip (a package manager for Python)
+
+```python
+pip install numpy
+```
+
+For initializing the system
+```python
 system = tof.System()
 status = system.initialize()
-print("system.initialize()", status)
+```
 
+Getting a camera from the system, configuring the mode and the frame type and initializing it
+```python
 cameras = []
 status = system.getCameraList(cameras)
 print("system.getCameraList()", status)
@@ -34,15 +47,11 @@ print("camera1.setFrameType()", status)
 
 status = camera1.setMode(modes[0])
 print("camera1.setMode()", status)
+```
 
+Getting a frame from the camera
+```python
 frame = tof.Frame()
 status = camera1.requestFrame(frame)
 print("camera1.requestFrame()", status)
-
-frameDetails = tof.FrameDetails()
-status = frame.getDetails(frameDetails)
-print("frame.getDetails()", status)
-print("frame details:", "width:", frameDetails.width, "height:", frameDetails.height, "type:", frameDetails.type)
-
-image = np.array(frame.getData(tof.FrameDataType.Depth), copy=False)
-print(image)
+```
