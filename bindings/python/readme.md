@@ -17,3 +17,4 @@ import aditofpython as tof
 | CMakeLists.txt | Rules to build the Python bindings |
 | first_frame | Python example to capture a frame |
 | dnn | Simple object detection example in Python |
+| device_example | Simple Python example of using Device Manager |

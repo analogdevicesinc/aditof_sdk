@@ -11,4 +11,4 @@ For running the python program use:
 python dnn.py --prototxt \pathTo\MobileNetSSD_deploy.prototxt  --weights \pathTo\MobileNetSSD_deploy.caffemodel
 ```
 
-![Display Image](https://github.com/analogdevicesinc/aditof_sdk/blob/dnn_pythonExample/doc/img/dnn_python.PNG)
+![Display Image](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/dnn_python.PNG) 
