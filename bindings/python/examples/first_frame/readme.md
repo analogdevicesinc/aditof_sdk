@@ -1,4 +1,4 @@
-# 3D Time of Flight : Python bindings
+# First frame Example
 
 ### Overview
 This example shows how to capture a frame using the SDK and Python.
@@ -55,4 +55,3 @@ frame = tof.Frame()
 status = camera1.requestFrame(frame)
 print("camera1.requestFrame()", status)
 ```
-

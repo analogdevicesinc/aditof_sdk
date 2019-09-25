@@ -8,7 +8,7 @@ pybind11_add_module(aditofpython aditofpython.cpp)
 
 target_link_libraries(aditofpython PRIVATE aditof)
 
-add_subdirectory(dnn)
+add_subdirectory(examples/dnn)
 
 configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/setup.py.cmakein

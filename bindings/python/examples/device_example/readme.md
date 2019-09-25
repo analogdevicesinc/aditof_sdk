@@ -1,4 +1,4 @@
-# 3D Time of Flight : Python bindings
+# Device Example
 
 ### Overview
 This example shows how to get access to the low-level API of the camera.
@@ -9,4 +9,3 @@ If NumPy library is not found you should install it using pip (a package manager
 ```python
 pip install numpy
 ```
-

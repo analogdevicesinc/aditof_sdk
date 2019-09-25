@@ -1,4 +1,4 @@
-# 3D Time of Flight : Python bindings
+# DNN Example
 
 ### Overview
 This example  demonstrates object detection on a combination between the depth frame and the IR frame using the SSD Mobilenet object detection example from OpenCV and the Aditof SDK. It also shows how to compute and display the IR frame.
