@@ -27,11 +27,16 @@ using namespace google::protobuf::io;
 using namespace payload;
 using namespace std;
 
+struct clientData {
+    bool hasFragments;
+    std::vector<char> data;
+};
+
 static struct lws_protocols protocols[] = {
     {
         "network-protocol",
         Network::callback_function,
-        0,
+        sizeof(clientData),
         RX_BUFFER_BYTES,
     },
     {NULL, NULL, 0, 0} /* terminator */
@@ -298,7 +303,7 @@ int Network::recv_server_data() {
  */
 void Network::call_lws_service() {
     while (1) {
-        lws_service(this->context, 1000);
+        lws_service(this->context, 0);
 #ifdef NW_DEBUG
         cout << ".";
 #endif
@@ -345,30 +350,44 @@ int Network::callback_function(struct lws *wsi,
 #endif
         std::lock_guard<std::mutex> guard(mutex_recv);
 
-        google::protobuf::io::ArrayInputStream ais(in, (len));
-        CodedInputStream coded_input(&ais);
-        recv_buff.ParseFromCodedStream(&coded_input);
-
         const size_t remaining = lws_remaining_packet_payload(wsi);
         bool isFinal = lws_is_final_fragment(wsi);
 
-        /*Check if read bytes of data received*/
-        if (!remaining && isFinal) {
-#ifdef NW_DEBUG
-            cout << "received complete data" << endl;
-#endif
-            recv_data_error = 0;
-        } else {
-#ifdef NW_DEBUG
-            cout << "received less data " << len << "remaining: " << remaining
-                 << endl;
-#endif
-            recv_data_error = 1;
-        }
+        struct clientData *clientData = static_cast<struct clientData *>(user);
 
-        Data_Received = true;
-        /*Notify the host SDK that data is received from server*/
-        Cond_Var.notify_one();
+        if (!remaining && isFinal) {
+            if (clientData->hasFragments) {
+                // apend message
+                char *inData = static_cast<char *>(in);
+                clientData->data.insert(clientData->data.end(), inData,
+                                        inData + len);
+                in = static_cast<void *>(clientData->data.data());
+                len = clientData->data.size();
+            }
+
+            // process message
+            google::protobuf::io::ArrayInputStream ais(in, len);
+            CodedInputStream coded_input(&ais);
+            recv_buff.ParseFromCodedStream(&coded_input);
+
+            recv_data_error = 0;
+            Data_Received = true;
+
+            /*Notify the host SDK that data is received from server*/
+            Cond_Var.notify_one();
+
+        } else {
+            // append message
+            if (clientData->data.size() == 0) {
+                clientData->data.reserve(len + remaining);
+            }
+
+            std::cout << "apending data" << std::endl;
+            char *inData = static_cast<char *>(in);
+            clientData->data.insert(clientData->data.end(), inData,
+                                    inData + len);
+            clientData->hasFragments = true;
+        }
 
         break;
     }
@@ -378,6 +397,9 @@ int Network::callback_function(struct lws *wsi,
         cout << endl << "Client is sending " << send_buff.func_name() << endl;
 #endif
         std::lock_guard<std::mutex> guard(m_mutex);
+        if (send_buff.func_name().empty()) {
+            break;
+        }
 
         /* Get size of packet to be sent*/
         int siz = send_buff.ByteSize();
@@ -398,6 +420,7 @@ int Network::callback_function(struct lws *wsi,
 
         delete coded_output;
         delete[] pkt;
+        send_buff.Clear();
         break;
     }
 
