@@ -826,3 +826,14 @@ aditof::Status LocalDevice::enqueueInternalBuffer(struct v4l2_buffer &buf) {
         return aditof::Status::GENERIC_ERROR;
     }
 }
+
+aditof::Status LocalDevice::getDeviceFileDescriptor(int &fileDescriptor) {
+    using namespace aditof;
+
+    if (m_implData->fd != -1) {
+        fileDescriptor = m_implData->fd;
+        return Status::OK;
+    }
+
+    return Status::INVALID_ARGUMENT;
+}
