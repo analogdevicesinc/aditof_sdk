@@ -37,6 +37,7 @@ if (WITH_OPENCV)
 endif()
 if (DRAGONBOARD)
         add_subdirectory(apps/server)
+        add_subdirectory(apps/uvc-app)
 endif()
 
 ############################### Installer #######################################
