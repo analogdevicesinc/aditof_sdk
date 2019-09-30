@@ -49,6 +49,7 @@ typedef struct eeprom {
     char *dev;
     unsigned int length;
     FILE *fd;
+    int valid;
 } eeprom;
 
 /* This is the structure as used in the I2C_SMBUS ioctl call */
