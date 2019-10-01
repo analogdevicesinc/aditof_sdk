@@ -6,9 +6,9 @@
 #include "status_definitions.h"
 
 #include <functional>
+#include <string>
 #include <vector>
 
-class CameraImpl;
 class DeviceInterface;
 
 namespace aditof {
@@ -22,46 +22,29 @@ class Frame;
 class SDK_API Camera {
   public:
     /**
-     * @brief Constructor
-     */
-    Camera(DeviceInterface *device);
-
-    /**
      * @brief Destructor
      */
-    ~Camera();
+    virtual ~Camera() = default;
 
-    // Make Camera movable and non-copyable
-    /**
-     * @brief Move constructor
-     */
-    Camera(Camera &&op) noexcept;
-
-    /**
-     * @brief Move assignment
-     */
-    Camera &operator=(Camera &&op) noexcept;
-
-  public:
     /**
      * @brief Initialize the camera. This is required before performing any
      * operation on the camera.
      * @return Status
      */
-    Status initialize();
+    virtual Status initialize() = 0;
 
     /**
      * @brief Start the camera. This starts the streaming of data from the
      * camera.
      * @return Status
      */
-    Status start();
+    virtual Status start() = 0;
 
     /**
      * @brief Stop the camera. This makes the camera to stop streaming.
      * @return Status
      */
-    Status stop();
+    virtual Status stop() = 0;
 
     /**
      * @brief Puts the camera into the given mode.
@@ -71,30 +54,31 @@ class SDK_API Camera {
      * mode will be used.
      * @return Status
      */
-    Status setMode(const std::string &mode,
-                   const std::string &modeFilename = {});
+    virtual Status setMode(const std::string &mode,
+                           const std::string &modeFilename = {}) = 0;
 
     /**
      * @brief Returns all the modes that are supported by the camera
      * @param[out] availableModes
      * @return Status
      */
-    Status getAvailableModes(std::vector<std::string> &availableModes) const;
+    virtual Status
+    getAvailableModes(std::vector<std::string> &availableModes) const = 0;
 
     /**
      * @brief Set the camera frame type to the givn type
      * @param frameType - The frame type of the camera
      * @return Status
      */
-    Status setFrameType(const std::string &frameType);
+    virtual Status setFrameType(const std::string &frameType) = 0;
 
     /**
      * @brief Returns all the frame types that are supported by the camera
      * @param[out] availableFrameTypes
      * @return Status
      */
-    Status
-    getAvailableFrameTypes(std::vector<std::string> &availableFrameTypes) const;
+    virtual Status getAvailableFrameTypes(
+        std::vector<std::string> &availableFrameTypes) const = 0;
 
     /**
      * @brief Captures data from the camera and assigns it to the given frame.
@@ -106,14 +90,15 @@ class SDK_API Camera {
      * @param cb - Callback to be called when frame is updated
      * @return Status
      */
-    Status requestFrame(Frame *frame, FrameUpdateCallback cb = nullptr);
+    virtual Status requestFrame(Frame *frame,
+                                FrameUpdateCallback cb = nullptr) = 0;
 
     /**
      * @brief Gets the current details of the camera
      * @param[out] details
      * @return Status
      */
-    Status getDetails(CameraDetails &details) const;
+    virtual Status getDetails(CameraDetails &details) const = 0;
 
     /**
      * @brief Gets the device of the camera. The device is own by the camera,
@@ -121,10 +106,7 @@ class SDK_API Camera {
      * not be valid anymore.
      * @return DeviceInterface
      */
-    DeviceInterface *getDevice();
-
-  private:
-    CameraImpl *m_impl;
+    virtual DeviceInterface *getDevice() = 0;
 };
 
 } // namespace aditof
