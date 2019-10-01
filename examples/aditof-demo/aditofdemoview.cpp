@@ -534,7 +534,7 @@ void AdiTofDemoView::_displayDepthImage() {
         m_distanceVal = static_cast<int>(
             m_distanceVal * 0.7 + m_depthImage.at<ushort>(pointxy) * 0.3);
         char text[20];
-        sprintf(text, "%d", m_distanceVal);
+        sprintf(text, "%dmm", m_distanceVal);
         m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / m_ctrl->getRange());
         applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
         flip(m_depthImage, m_depthImage, 1);
@@ -546,9 +546,12 @@ void AdiTofDemoView::_displayDepthImage() {
 
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         if (m_center) {
-            cv::circle(m_depthImage, pointxy, 4,
-                       cv::Scalar(color, color, color), -1, 8, 0);
-            cv::putText(m_depthImage, text, pointxy, cv::FONT_HERSHEY_DUPLEX, 2,
+            cv::drawMarker(m_depthImage, pointxy,
+                           cv::Scalar(color, color, color), cv::MARKER_CROSS);
+            cv::circle(m_depthImage, pointxy, 8,
+                       cv::Scalar(color, color, color));
+            cv::putText(m_depthImage, text, pointxy + cv::Point2d(10, 20),
+                        cv::FONT_HERSHEY_DUPLEX, 2,
                         cv::Scalar(color, color, color));
         }
         m_waitKeyBarrier += 1;
