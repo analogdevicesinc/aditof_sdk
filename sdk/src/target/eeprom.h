@@ -14,7 +14,7 @@ int eeprom_close(eeprom *e);
 /*
  * write the data stored in buff to eeprom
  */
-int eeprom_write_buf(eeprom *e, unsigned int addr, unsigned char *buf,
+int eeprom_write_buf(eeprom *e, unsigned int addr, const unsigned char *buf,
                      size_t size);
 /*
  * read the data from eeprom and store it in buff

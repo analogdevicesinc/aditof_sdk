@@ -38,7 +38,7 @@ int eeprom_read_buf(eeprom *e, unsigned int addr, unsigned char *buf,
     return 0;
 }
 
-int eeprom_write_buf(eeprom *e, unsigned int addr, unsigned char *buf,
+int eeprom_write_buf(eeprom *e, unsigned int addr, const unsigned char *buf,
                      size_t size) {
     fseek(e->fd, addr, SEEK_SET);
     size_t ret = fwrite(buf, 1, size, e->fd);

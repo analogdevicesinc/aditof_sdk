@@ -617,8 +617,7 @@ aditof::Status LocalDevice::writeEeprom(uint32_t address, const uint8_t *data,
         return Status::GENERIC_ERROR;
     }
 
-    int ret =
-        eeprom_write_buf(&edev, address, const_cast<uint8_t *>(data), length);
+    int ret = eeprom_write_buf(&edev, address, data, length);
     if (ret == -1) {
         LOG(WARNING) << "EEPROM write error";
         return Status::GENERIC_ERROR;
