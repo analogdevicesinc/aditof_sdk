@@ -16,14 +16,14 @@
    }
 
  All other files can include cvui.h without defining CVUI_IMPLEMENTATION.
- 
+
  Use of cvui revolves around calling cvui::init() to initialize the lib,
  rendering cvui components to a cv::Mat (that you handle yourself) and
  finally showing that cv::Mat on the screen using cvui::imshow(), which
  is cvui's version of cv::imshow(). Alternatively you can use cv::imshow()
  to show things, but in such case you must call cvui::update() yourself
  before calling cv::imshow().
- 
+
 
  E.g.:
 
@@ -51,7 +51,7 @@
   }
 
  Read the full documentation at https://dovyski.github.io/cvui/
- 
+
 
  Copyright (c) 2016 Fernando Bevilacqua <dovyski@gmail.com>
  Licensed under the MIT license.
@@ -78,7 +78,7 @@ namespace cvui {
  automatically call `cv::waitKey()` within `cvui::update()`, so you don't
  have to worry about it. The value passed to `theDelayWaitKey` will be
  used as the delay for `cv::waitKey()`.
- 
+
 
  \param theWindowName name of the window where the components will be added.
  \param theDelayWaitKey delay value passed to `cv::waitKey()`. If a negative
@@ -253,7 +253,7 @@ cv::Point mouse(const cv::String &theWindowName = "");
 /**
  Query the mouse for events, e.g. "is any button down now?". Available queries
  are:
- 
+
 
  * `cvui::DOWN`: any mouse button was pressed. `cvui::mouse()` returns `true`
  for a single frame only.
@@ -444,7 +444,7 @@ void text(cv::Mat &theWhere, int theX, int theY, const cv::String &theText,
  \param theColor color of the text in the format `0xRRGGBB`, e.g. `0xff0000` for
  red. \param theFmt formating string as it would be supplied for `stdio's
  printf()`, e.g. `"Text: %d and %f", 7, 3.1415`.
- 
+
 
  \sa text()
 */
@@ -513,7 +513,7 @@ double counter(cv::Mat &theWhere, int theX, int theY, double *theValue,
  templates so it is imperative that you make it very explicit the type of
  `theValue`, `theMin`, `theMax` and `theStep`, otherwise you might end up with
  weird compilation errors.
- 
+
 
  Example:
 
@@ -648,7 +648,7 @@ int iarea(int theX, int theY, int theWidth, int theHeight);
 
 /**
  Start a new row.
- 
+
 
  One of the most annoying tasks when building UI is to calculate
  where each component should be placed on the screen. cvui has
@@ -862,7 +862,7 @@ void space(int theValue = 5);
 
 /**
  Display a piece of text within a `begin*()` and `end*()` block.
- 
+
 
  IMPORTANT: this function can only be used within a `begin*()/end*()` block,
  otherwise it does nothing.
@@ -985,7 +985,7 @@ bool checkbox(const cv::String &theLabel, bool *theState,
 
 /**
  Display a piece of text within a `begin*()` and `end*()` block.
- 
+
 
  IMPORTANT: this function can only be used within a `begin*()/end*()` block,
 otherwise it does nothing.
@@ -1013,7 +1013,7 @@ void printf(double theFontScale, unsigned int theColor, const char *theFmt,
 
 /**
  Display a piece of text that can be formated using `stdio's printf()` style.
- 
+
 
  IMPORTANT: this function can only be used within a `begin*()/end*()` block,
  otherwise it does nothing.
@@ -1169,7 +1169,7 @@ void window(int theWidth, int theHeight, const cv::String &theTitle);
 
 /**
  Display a rectangle within a `begin*()` and `end*()` block.
- 
+
 
  IMPORTANT: this function can only be used within a `begin*()/end*()` block,
  otherwise it does nothing.
@@ -1456,20 +1456,18 @@ void resetRenderingBuffer(cvui_block_t &theScreen);
 
 template <typename T> // T can be any floating point type (float, double, long
                       // double)
-                      TrackbarParams
-                      makeTrackbarParams(T min, T max, int theDecimals = 1,
-                                         int theSegments = 1, T theStep = -1.,
-                                         unsigned int theOptions = 0,
-                                         const char *theFormat = "%.1Lf");
+TrackbarParams makeTrackbarParams(T min, T max, int theDecimals = 1,
+                                  int theSegments = 1, T theStep = -1.,
+                                  unsigned int theOptions = 0,
+                                  const char *theFormat = "%.1Lf");
 
 template <typename T>
 bool trackbar(T *theValue, const TrackbarParams &theParams);
 
 template <typename T> // T can be any numeric type (int, double, unsigned int,
                       // etc)
-                      bool trackbar(cv::Mat &theWhere, int theX, int theY,
-                                    int theWidth, T *theValue,
-                                    const TrackbarParams &theParams);
+bool trackbar(cv::Mat &theWhere, int theX, int theY, int theWidth, T *theValue,
+              const TrackbarParams &theParams);
 
 template <typename num_type>
 TrackbarParams makeTrackbarParams(num_type theMin, num_type theMax,
