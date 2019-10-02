@@ -43,7 +43,7 @@ UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
     m_implData->started = false;
     m_implData->buffers = nullptr;
     m_implData->buffersCount = 0;
-    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_1GEN;
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 }
 
 UsbDevice::~UsbDevice() {

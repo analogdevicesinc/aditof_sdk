@@ -27,7 +27,7 @@ EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
     m_implData->net = net;
     m_implData->ip = data.ip;
 
-    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_1GEN;
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 
     std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
 

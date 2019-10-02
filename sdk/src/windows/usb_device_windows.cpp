@@ -206,7 +206,7 @@ static void destroyGraph(IGraphBuilder *pGraph) {
 UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new UsbDevice::ImplData) {
     m_implData->pMediaEvent = nullptr;
-    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_1GEN;
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 }
 
 UsbDevice::~UsbDevice() {
