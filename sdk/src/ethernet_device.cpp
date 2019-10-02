@@ -27,6 +27,8 @@ EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
     m_implData->net = net;
     m_implData->ip = data.ip;
 
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_1GEN;
+
     std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
 
     /* Make connection with LWS server running on Dragonboard */
@@ -646,6 +648,13 @@ EthernetDevice::applyCalibrationToFrame(uint16_t *frame,
 
     aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
                                   frame, width, height);
+
+    return aditof::Status::OK;
+}
+
+aditof::Status
+EthernetDevice::getDetails(aditof::DeviceDetails &details) const {
+    details = m_deviceDetails;
 
     return aditof::Status::OK;
 }

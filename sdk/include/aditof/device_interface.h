@@ -3,6 +3,7 @@
 
 #include "frame_definitions.h"
 #include "status_definitions.h"
+#include <aditof/device_definitions.h>
 
 #include <cstddef>
 #include <vector>
@@ -35,6 +36,7 @@ class DeviceInterface {
                                                 float gain, float offset) = 0;
     virtual aditof::Status applyCalibrationToFrame(uint16_t *frame,
                                                    const std::string &mode) = 0;
+    virtual aditof::Status getDetails(aditof::DeviceDetails &details) const = 0;
 };
 
 #endif // DEVICE_INTERFACE_H

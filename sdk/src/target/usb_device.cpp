@@ -77,3 +77,8 @@ UsbDevice::applyCalibrationToFrame(uint16_t * /*frame*/,
                                    const std::string & /*mode*/) {
     return aditof::Status::GENERIC_ERROR;
 }
+
+aditof::Status
+UsbDevice::getDetails(aditof::DeviceDetails & /*details*/) const {
+    return aditof::Status::GENERIC_ERROR;
+}

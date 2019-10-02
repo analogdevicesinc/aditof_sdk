@@ -35,10 +35,12 @@ class UsbDevice : public DeviceInterface {
                                                 float gain, float offset);
     virtual aditof::Status applyCalibrationToFrame(uint16_t *frame,
                                                    const std::string &mode);
+    virtual aditof::Status getDetails(aditof::DeviceDetails &details) const;
 
   private:
     struct ImplData;
 
+    aditof::DeviceDetails m_deviceDetails;
     aditof::DeviceConstructionData m_devData;
     std::unique_ptr<ImplData> m_implData;
 };

@@ -43,6 +43,7 @@ UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
     m_implData->started = false;
     m_implData->buffers = nullptr;
     m_implData->buffersCount = 0;
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_1GEN;
 }
 
 UsbDevice::~UsbDevice() {
@@ -723,5 +724,10 @@ aditof::Status UsbDevice::applyCalibrationToFrame(uint16_t *frame,
     aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
                                   frame, width, height);
 
+    return aditof::Status::OK;
+}
+
+aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
+    details = m_deviceDetails;
     return aditof::Status::OK;
 }
