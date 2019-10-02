@@ -2,8 +2,8 @@
 
 uint16_t *aditof::Utils::buildCalibrationCache(float gain, float offset,
                                                int16_t maxPixelValue) {
-    uint16_t *cache = new uint16_t[maxPixelValue];
-    for (int16_t current = 0; current < maxPixelValue; ++current) {
+    uint16_t *cache = new uint16_t[maxPixelValue + 1];
+    for (int16_t current = 0; current <= maxPixelValue; ++current) {
         cache[current] =
             static_cast<int16_t>(static_cast<float>(current) * gain + offset);
     }
