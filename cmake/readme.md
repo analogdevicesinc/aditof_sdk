@@ -42,6 +42,8 @@ make
 sudo make install
 ```
 
+After installing you should run `ldconfig` to update the links/cache that the dynamic loader uses.
+
 #### Using the SDK with other CMake projects
 To use the SDK in your own project, simply add this two lines to your projects CMakeLists.txt and your good to go:
 ```
