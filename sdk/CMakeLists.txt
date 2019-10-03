@@ -151,8 +151,3 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/aditof-config-version.cmake
     DESTINATION ${INSTALL_CONFIG_DIR}
 )
-
-#run ldconfig after install if on linux
-if (RUN_LDCONFIG)
-    install(SCRIPT "${CMAKE_SOURCE_DIR}/cmake/ldconfig.cmake")
-endif()
