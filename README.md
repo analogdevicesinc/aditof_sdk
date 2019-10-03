@@ -50,35 +50,33 @@ For more details about the SDK check the links below:
   <tr>
     <td>aditof-demo</td>
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/aditof-demo"> C++ </a> </td>
-    <td>An application that uses OpenCV to display infrared and depth images</td>
+    <td>An application that displays the infrared and depth images</td>
   </tr>
   <tr>
     <td rowspan="2">first-frame</td>
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/first-frame"> C++ </a></td>
-    <td>An example code that shows the steps required to get to the point where camera frames can be captured</td>
+    <td rowspan="2">An example code that shows the steps required to get to the point where camera frames can be captured</td>
   </tr>
   <tr>
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/first_frame"> Python </a></td>
-    <td>Contains a python example to capture a frame</td>
   </tr>
   <tr>
     <td>device_example</td>
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/device_example"> Python</a></td>
-    <td>Simple Python example of how to get access to the low-level API of the camera</td>
+    <td>A simple example of how to get access to the low-level API of the camera</td>
   </tr>
   <tr>
     <td rowspan="2">dnn</td>
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/dnn"> Python with OpenCV</a></td>
-    <td>Contains a simple object detection example in Python</td>
+    <td rowspan="2">A simple object detection example</td>
   </tr>
   <tr>
      <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/dnn"> C++ with OpenCV </a></td>
-    <td>Contains a simple object detection example in Cpp</td>
   </tr>
    <tr>
     <td>imshow</td>
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/imshow"> C++ with OpenCV </a></td>
-    <td>Contains a basic example that displays data provided by the Aditof SDK</td>
+    <td>A basic example that displays data provided by the Aditof SDK</td>
   </tr>
 </table>
 
