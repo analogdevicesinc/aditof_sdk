@@ -41,19 +41,46 @@ For more details about the SDK check the links below:
 [API Doxygen documentation](https://analogdevicesinc.github.io/aditof_sdk/)
 
 ## SDK examples
-
-| Example | Language | Description |
-| --------- | ----------- | ----------- |
-| [aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/aditof-demo) | C++ |	An application that uses OpenCV to display infrared and depth images |
-| [first-frame](https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/first-frame) | C++ | An example code that shows the steps required to get to the point where camera frames can be captured |
-
-## SDK bindings examples
-
-| Example | Language | Description |
-| --------- | ----------- | ----------- |
-| [dnn](https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/dnn) | C++ with OpenCV |	Contains a simple object detection example |
-| [imshow](https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/imshow)	| C++ with OpenCV |	Contains a basic example that displays data provided by the Aditof SDK |
-| [first_frame.py](https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python) | Python with OpenCV |	Contains a python example to capture a frame |
+<table>
+  <tr>
+    <th>Example</th>
+    <th>Language</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>aditof-demo</td>
+    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/aditof-demo"> C++ </a> </td>
+    <td>An application that uses OpenCV to display infrared and depth images</td>
+  </tr>
+  <tr>
+    <td rowspan="2">first-frame</td>
+    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/first-frame"> C++ </a></td>
+    <td>An example code that shows the steps required to get to the point where camera frames can be captured</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/first_frame"> Python </a></td>
+    <td>Contains a python example to capture a frame</td>
+  </tr>
+  <tr>
+    <td>device_example</td>
+    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/device_example"> Python</a></td>
+    <td>Simple Python example of how to get access to the low-level API of the camera</td>
+  </tr>
+  <tr>
+    <td rowspan="2">dnn</td>
+    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/dnn"> Python with OpenCV</a></td>
+    <td>Contains a simple object detection example in Python</td>
+  </tr>
+  <tr>
+     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/dnn"> C++ with OpenCV </a></td>
+    <td>Contains a simple object detection example in Cpp</td>
+  </tr>
+   <tr>
+    <td>imshow</td>
+    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/imshow"> C++ with OpenCV </a></td>
+    <td>Contains a basic example that displays data provided by the Aditof SDK</td>
+  </tr>
+</table>
 
 ## Directory Structure
 | Directory | Description |
