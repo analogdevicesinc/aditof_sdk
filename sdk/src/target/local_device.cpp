@@ -74,6 +74,7 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new LocalDevice::ImplData) {
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 }
 
 LocalDevice::~LocalDevice() {
@@ -774,5 +775,10 @@ aditof::Status LocalDevice::applyCalibrationToFrame(uint16_t *frame,
     aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
                                   frame, width, height);
 
+    return aditof::Status::OK;
+}
+
+aditof::Status LocalDevice::getDetails(aditof::DeviceDetails &details) const {
+    details = m_deviceDetails;
     return aditof::Status::OK;
 }

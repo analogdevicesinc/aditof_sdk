@@ -1,25 +1,16 @@
-#ifndef CAMERA_IMPL_H
-#define CAMERA_IMPL_H
+#ifndef CAMERA_96OTF1_H
+#define CAMERA_96OTF1_H
 
 #include "calibration.h"
-#include <aditof/camera_definitions.h>
-#include <aditof/status_definitions.h>
 
-#include <string>
-#include <vector>
+#include <aditof/camera.h>
 
-namespace aditof {
-class Frame;
-}
-
-class DeviceInterface;
-
-class CameraImpl {
+class Camera96Tof1 : public aditof::Camera {
   public:
-    CameraImpl(DeviceInterface *device);
-    ~CameraImpl();
+    Camera96Tof1(DeviceInterface *device);
+    ~Camera96Tof1();
 
-  public: // from Camera
+  public: // implements Camera
     aditof::Status initialize();
     aditof::Status start();
     aditof::Status stop();
@@ -33,7 +24,6 @@ class CameraImpl {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
-
     DeviceInterface *getDevice();
 
   private:
@@ -43,4 +33,4 @@ class CameraImpl {
     Calibration m_calibration;
 };
 
-#endif // CAMERA_IMPL_H
+#endif // CAMERA_96OTF1_H

@@ -1,9 +1,10 @@
 #include "system_impl.h"
-#include "aditof/camera.h"
-#include "aditof/device_construction_data.h"
-#include "aditof/device_enumerator_factory.h"
-#include "aditof/device_factory.h"
-#include "camera_impl.h"
+#include "camera_factory.h"
+
+#include <aditof/camera.h>
+#include <aditof/device_construction_data.h>
+#include <aditof/device_enumerator_factory.h>
+#include <aditof/device_factory.h>
 
 #include <glog/logging.h>
 
@@ -25,7 +26,7 @@ aditof::Status SystemImpl::initialize() {
 
     for (const auto &data : devsData) {
         DeviceInterface *device = DeviceFactory::buildDevice(data);
-        aditof::Camera *camera = new Camera(device);
+        aditof::Camera *camera = CameraFactory::buildCamera(device);
         m_cameras.push_back(camera);
     }
 
@@ -63,7 +64,7 @@ SystemImpl::getCameraListAtIp(std::vector<aditof::Camera *> &cameraList,
 
     for (const auto &data : devsData) {
         DeviceInterface *device = DeviceFactory::buildDevice(data);
-        aditof::Camera *camera = new Camera(device);
+        aditof::Camera *camera = CameraFactory::buildCamera(device);
         cameraList.push_back(camera);
     }
 

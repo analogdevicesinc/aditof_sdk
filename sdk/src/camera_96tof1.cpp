@@ -1,4 +1,5 @@
-#include "camera_impl.h"
+#include "camera_96tof1.h"
+
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
@@ -8,12 +9,12 @@
 #include <glog/logging.h>
 #include <iterator>
 
-CameraImpl::CameraImpl(DeviceInterface *device)
+Camera96Tof1::Camera96Tof1(DeviceInterface *device)
     : m_device(device), m_devStarted(false) {}
 
-CameraImpl::~CameraImpl() { delete m_device; }
+Camera96Tof1::~Camera96Tof1() { delete m_device; }
 
-aditof::Status CameraImpl::initialize() {
+aditof::Status Camera96Tof1::initialize() {
     using namespace aditof;
 
     LOG(INFO) << "Initializing camera";
@@ -36,18 +37,18 @@ aditof::Status CameraImpl::initialize() {
     return Status::OK;
 }
 
-aditof::Status CameraImpl::start() {
+aditof::Status Camera96Tof1::start() {
     // return m_device->start(); // For now we keep the device open all the time
     return aditof::Status::OK;
 }
 
-aditof::Status CameraImpl::stop() {
+aditof::Status Camera96Tof1::stop() {
     // return m_device->stop(); // For now we keep the device open all the time
     return aditof::Status::OK;
 }
 
-aditof::Status CameraImpl::setMode(const std::string &mode,
-                                   const std::string &modeFilename) {
+aditof::Status Camera96Tof1::setMode(const std::string &mode,
+                                     const std::string &modeFilename) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -127,8 +128,8 @@ aditof::Status CameraImpl::setMode(const std::string &mode,
     return status;
 }
 
-aditof::Status
-CameraImpl::getAvailableModes(std::vector<std::string> &availableModes) const {
+aditof::Status Camera96Tof1::getAvailableModes(
+    std::vector<std::string> &availableModes) const {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -142,7 +143,7 @@ CameraImpl::getAvailableModes(std::vector<std::string> &availableModes) const {
     return status;
 }
 
-aditof::Status CameraImpl::setFrameType(const std::string &frameType) {
+aditof::Status Camera96Tof1::setFrameType(const std::string &frameType) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -183,7 +184,7 @@ aditof::Status CameraImpl::setFrameType(const std::string &frameType) {
     return status;
 }
 
-aditof::Status CameraImpl::getAvailableFrameTypes(
+aditof::Status Camera96Tof1::getAvailableFrameTypes(
     std::vector<std::string> &availableFrameTypes) const {
     using namespace aditof;
     Status status = Status::OK;
@@ -202,8 +203,8 @@ aditof::Status CameraImpl::getAvailableFrameTypes(
     return status;
 }
 
-aditof::Status CameraImpl::requestFrame(aditof::Frame *frame,
-                                        aditof::FrameUpdateCallback /*cb*/) {
+aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
+                                          aditof::FrameUpdateCallback /*cb*/) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -230,7 +231,7 @@ aditof::Status CameraImpl::requestFrame(aditof::Frame *frame,
     return Status::OK;
 }
 
-aditof::Status CameraImpl::getDetails(aditof::CameraDetails &details) const {
+aditof::Status Camera96Tof1::getDetails(aditof::CameraDetails &details) const {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -239,4 +240,4 @@ aditof::Status CameraImpl::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-DeviceInterface *CameraImpl::getDevice() { return m_device; }
+DeviceInterface *Camera96Tof1::getDevice() { return m_device; }

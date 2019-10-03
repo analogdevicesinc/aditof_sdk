@@ -206,6 +206,7 @@ static void destroyGraph(IGraphBuilder *pGraph) {
 UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new UsbDevice::ImplData) {
     m_implData->pMediaEvent = nullptr;
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 }
 
 UsbDevice::~UsbDevice() {
@@ -1324,5 +1325,9 @@ aditof::Status UsbDevice::applyCalibrationToFrame(uint16_t *frame,
     aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
                                   frame, width, height);
 
+    return aditof::Status::OK;
+}
+
+aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
     return aditof::Status::OK;
 }

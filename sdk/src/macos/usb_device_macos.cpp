@@ -148,3 +148,12 @@ aditof::Status UsbDevice::applyCalibrationToFrame(uint16_t *frame,
 
     return status;
 }
+
+aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    // TO DO
+
+    return status;
+}
