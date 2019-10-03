@@ -11,8 +11,8 @@ WHRatio = inWidth / float(inHeight)
 inScaleFactor = 0.007843
 meanVal = 127.5
 thr = 0.2
-WINDOW_NAME = "Display detected objects"
-WINDOW_NAME_IR = "Display IR"
+WINDOW_NAME = "Display Objects"
+WINDOW_NAME_DEPTH = "Display Objects Depth"
 
 
 class ModesEnum(Enum):
@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
         # Creation of the IR image
         ir_map = ir_map[0: int(ir_map.shape[0] / 2), :]
-        ir_map = cv.flip(ir_map, 1)
+        # ir_map = cv.flip(ir_map, 1)
         ir_map = np.float32(ir_map)
         distance_scale_ir = 255.0 / camera_range
         ir_map = distance_scale_ir * ir_map
@@ -107,7 +107,8 @@ if __name__ == "__main__":
         # Creation of the Depth image
         new_shape = (int(depth_map.shape[0] / 2), depth_map.shape[1])
         depth_map = np.resize(depth_map, new_shape)
-        depth_map = cv.flip(depth_map, 1)
+        #depth_map = cv.flip(depth_map, 1)
+        distance_map = depth_map
         depth_map = np.float32(depth_map)
         distance_scale = 255.0 / camera_range
         depth_map = distance_scale * depth_map
@@ -135,6 +136,7 @@ if __name__ == "__main__":
         x1 = int((cols - cropSize[0]) / 2)
         x2 = x1 + cropSize[0]
         result = result[y1:y2, x1:x2]
+        depth_map = depth_map[y1:y2, x1:x2]
 
         cols = result.shape[1]
         rows = result.shape[0]
@@ -151,25 +153,36 @@ if __name__ == "__main__":
 
                 cv.rectangle(result, (xLeftBottom, yLeftBottom), (xRightTop, yRightTop),
                              (0, 255, 0))
-                center = ((xLeftBottom + cols) * 0.5, (yLeftBottom + rows) * 0.5)
+                cv.rectangle(depth_map, (xLeftBottom, yLeftBottom), (xRightTop, yRightTop),
+                             (0, 255, 0))
+                center = ((xLeftBottom + xRightTop) * 0.5, (yLeftBottom + yRightTop) * 0.5)
                 if class_id in classNames:
-                    label = classNames[class_id] + ": " + str(confidence)
+                    value_x = int(center[0])
+                    value_y = int(center[1])
+                    label = classNames[class_id] + ": " + \
+                            "{0:.3f}".format(distance_map[value_x, value_y] / 1000.0 * 0.3) + " " + "meters"
                     labelSize, baseLine = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
                     yLeftBottom = max(yLeftBottom, labelSize[1])
-                    cv.rectangle(result, (xLeftBottom, yLeftBottom - labelSize[1]),
-                                 (xLeftBottom + labelSize[0], yLeftBottom + baseLine),
+                    cv.rectangle(result, (value_x, value_y - labelSize[1]),
+                                 (value_x + labelSize[0], value_y + baseLine),
                                  (255, 255, 255), cv.FILLED)
-                    cv.putText(result, label, (xLeftBottom, yLeftBottom),
+                    cv.putText(result, label, (value_x, value_y),
+                               cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+
+                    cv.rectangle(depth_map, (value_x, value_y - labelSize[1]),
+                                 (value_x + labelSize[0], value_y + baseLine),
+                                 (255, 255, 255), cv.FILLED)
+                    cv.putText(depth_map, label, (value_x, value_y),
                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
         # Show image with object detection
         cv.namedWindow(WINDOW_NAME, cv.WINDOW_AUTOSIZE)
         cv.imshow(WINDOW_NAME, result)
 
-        # Show IR map
-        cv.namedWindow(WINDOW_NAME_IR, cv.WINDOW_AUTOSIZE)
-        cv.imshow(WINDOW_NAME_IR, ir_map)
+        # Show Depth map
+        cv.namedWindow(WINDOW_NAME_DEPTH, cv.WINDOW_AUTOSIZE)
+        cv.imshow(WINDOW_NAME_DEPTH, depth_map)
 
         if cv.waitKey(1) >= 0:
             break

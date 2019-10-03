@@ -96,7 +96,8 @@ int main(int argc, char *argv[]) {
     aditof::FrameDetails frameDetails;
     frame.getDetails(frameDetails);
 
-    cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("Display Objects", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("Display Objects Depth", cv::WINDOW_AUTOSIZE);
 
     cv::Size cropSize;
     if ((float)frameDetails.width / (float)(frameDetails.height / 2) >
@@ -122,7 +123,7 @@ int main(int argc, char *argv[]) {
         p[i] = cv::saturate_cast<uchar>(pow(i / 255.0, gamma) * 255.0);
 
     while (cv::waitKey(1) != 27 &&
-           getWindowProperty("Display Image", cv::WND_PROP_AUTOSIZE) >= 0) {
+           getWindowProperty("Display Objects", cv::WND_PROP_AUTOSIZE) >= 0) {
         /* Request frame from camera */
         status = camera->requestFrame(&frame);
         if (status != Status::OK) {
@@ -147,23 +148,30 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
+        cv::Mat irMat;
+        status = fromFrameToIrMat(frame, irMat);
+        if (status != Status::OK) {
+            LOG(ERROR) << "Could not convert from frame to mat!";
+            return 0;
+        }
+
         /* Distance factor */
         double distance_scale = 255.0 / 3000;
 
         /* Convert from raw values to values that opencv can understand */
         frameMat.convertTo(frameMat, CV_8U, distance_scale);
-
-        /* Use the ir mat as input for the Net as we currently don't have
-         * an rgb source */
         applyColorMap(frameMat, frameMat, cv::COLORMAP_RAINBOW);
-        // LUT(frameMat, lookUpTable, frameMat);
-        // frameMat.convertTo(frameMat, -1, 0.8, 0);
-        // cv::ximgproc::GuidedFilter guidedFIlter;
-        // cv::ximgproc::guidedFilter(frameMat, frameMat);
-        // cv::fastNlMeansDenoisingColored(frameMat, frameMat);
+
+        irMat.convertTo(irMat, CV_8U, distance_scale);
+        cv::cvtColor(irMat, irMat, cv::COLOR_GRAY2RGB);
+
+        /* Use a combination between ir mat & depth mat as input for the Net as
+         * we currently don't have an rgb source */
+        cv::Mat resultMat;
+        cv::addWeighted(irMat, 0.4, frameMat, 0.6, 0, resultMat);
 
         cv::Mat inputBlob =
-            cv::dnn::blobFromImage(frameMat, inScaleFactor,
+            cv::dnn::blobFromImage(resultMat, inScaleFactor,
                                    cv::Size(inWidth, inHeight), meanVal, false);
 
         net.setInput(inputBlob, "data");
@@ -174,6 +182,7 @@ int main(int argc, char *argv[]) {
                              detection.ptr<float>());
 
         frameMat = frameMat(crop);
+        resultMat = resultMat(crop);
 
         float confidenceThreshold = 0.4f;
 
@@ -207,6 +216,7 @@ int main(int argc, char *argv[]) {
                 cv::String conf(ss.str());
 
                 cv::rectangle(frameMat, object, cv::Scalar(0, 255, 0));
+                cv::rectangle(resultMat, object, cv::Scalar(0, 255, 0));
                 cv::String label =
                     cv::String(classNames[objectClass]) + ": " + conf;
                 int baseLine = 0;
@@ -223,11 +233,20 @@ int main(int argc, char *argv[]) {
                     cv::Scalar(255, 255, 255), cv::FILLED);
                 cv::putText(frameMat, label, center, cv::FONT_HERSHEY_SIMPLEX,
                             0.5, cv::Scalar(0, 0, 0));
+                cv::rectangle(
+                    resultMat,
+                    cv::Rect(
+                        cv::Point(center.x, center.y - labelSize.height),
+                        cv::Size(labelSize.width, labelSize.height + baseLine)),
+                    cv::Scalar(255, 255, 255), cv::FILLED);
+                cv::putText(resultMat, label, center, cv::FONT_HERSHEY_SIMPLEX,
+                            0.5, cv::Scalar(0, 0, 0));
             }
         }
 
-        /* Display the image */
-        cv::imshow("Display Image", frameMat);
+        /* Display the images */
+        cv::imshow("Display Objects", frameMat);
+        cv::imshow("Display Objects Depth", resultMat);
     }
 
     return 0;
