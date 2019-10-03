@@ -546,8 +546,17 @@ void AdiTofDemoView::_displayDepthImage() {
 
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         if (m_center) {
+#ifndef OPENCV2
             cv::drawMarker(m_depthImage, pointxy,
                            cv::Scalar(color, color, color), cv::MARKER_CROSS);
+#else
+            cv::line(m_depthImage, cv::Point(pointxy.x - 10, pointxy.y),
+                     cv::Point(pointxy.x + 10, pointxy.y),
+                     cv::Scalar(color, color, color));
+            cv::line(m_depthImage, cv::Point(pointxy.x, pointxy.y - 10),
+                     cv::Point(pointxy.x, pointxy.y + 10),
+                     cv::Scalar(color, color, color));
+#endif
             cv::circle(m_depthImage, pointxy, 8,
                        cv::Scalar(color, color, color));
             cv::putText(m_depthImage, text, pointxy + cv::Point2d(10, 20),
