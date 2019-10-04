@@ -6,7 +6,10 @@
 #include "aditof/device_factory.h"
 #include "buffer.pb.h"
 
+#include "../../sdk/src/local_device.h"
+
 #include <iostream>
+#include <linux/videodev2.h>
 #include <map>
 #include <string>
 #include <sys/time.h>
@@ -16,7 +19,7 @@ using namespace std;
 
 static int interrupted = 0;
 
-static DeviceInterface *device = nullptr;
+static LocalDevice *device = nullptr;
 static payload::ClientRequest buff_recv;
 static payload::ServerResponse buff_send;
 static std::map<string, api_Values> s_map_api_Values;
@@ -253,7 +256,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
         devData.deviceType = aditof::DeviceType::LOCAL;
         devData.driverPath = buff_recv.device_data().driver_path();
-        device = DeviceFactory::buildDevice(devData);
+        DeviceInterface *deviceI = DeviceFactory::buildDevice(devData);
+        device = dynamic_cast<LocalDevice *>(deviceI);
         if (!device) {
             errMsg = "Failed to create local device";
             status = aditof::Status::INVALID_ARGUMENT;
@@ -352,14 +356,38 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 #ifdef DEBUG
         cout << "GetFrame function\n";
 #endif
-        size_t length = frame_width * frame_height;
-        uint16_t *buffer = new uint16_t[length];
-        aditof::Status status = device->getFrame(buffer);
-        if (status == aditof::Status::OK) {
-            buff_send.add_bytes_payload(buffer, length * sizeof(uint16_t));
+        aditof::Status status = device->waitForBuffer();
+        if (status != aditof::Status::OK) {
+            buff_send.set_status(static_cast<::payload::Status>(status));
+            break;
         }
-        delete[] buffer;
-        buff_send.set_status(static_cast<::payload::Status>(status));
+
+        struct v4l2_buffer buf;
+
+        status = device->dequeueInternalBuffer(buf);
+        if (status != aditof::Status::OK) {
+            buff_send.set_status(static_cast<::payload::Status>(status));
+            break;
+        }
+
+        unsigned int buf_data_len;
+        uint8_t *buffer;
+
+        status = device->getInternalBuffer(&buffer, buf_data_len, buf);
+        if (status != aditof::Status::OK) {
+            buff_send.set_status(static_cast<::payload::Status>(status));
+            break;
+        }
+
+        buff_send.add_bytes_payload(buffer, buf_data_len * sizeof(uint8_t));
+
+        status = device->enqueueInternalBuffer(buf);
+        if (status != aditof::Status::OK) {
+            buff_send.set_status(static_cast<::payload::Status>(status));
+            break;
+        }
+
+        buff_send.set_status(payload::Status::OK);
         break;
     }
 

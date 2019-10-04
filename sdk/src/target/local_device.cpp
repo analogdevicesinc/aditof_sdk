@@ -447,67 +447,39 @@ aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
 
 aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
-    Status status = Status::OK;
 
-    fd_set fds;
-    struct timeval tv;
-    int r;
+    Status status = waitForBuffer();
+    if (status != Status::OK) {
+        return status;
+    }
+
     struct v4l2_buffer buf;
+
+    status = dequeueInternalBuffer(buf);
+    if (status != Status::OK) {
+        return status;
+    }
 
     unsigned int width;
     unsigned int height;
     unsigned int offset[2];
     unsigned int offset_idx;
-
-    FD_ZERO(&fds);
-    FD_SET(m_implData->fd, &fds);
-
-    tv.tv_sec = 4;
-    tv.tv_usec = 0;
-
-    r = select(m_implData->fd + 1, &fds, NULL, NULL, &tv);
-
-    if (r == -1) {
-        LOG(WARNING) << "select error "
-                     << "errno: " << errno << " error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
-    } else if (r == 0) {
-        LOG(WARNING) << "select timeout";
-        return Status::GENERIC_ERROR;
-    }
-
-    CLEAR(buf);
-    buf.type = m_implData->videoBuffersType;
-    buf.memory = V4L2_MEMORY_MMAP;
-    buf.length = 1;
-    buf.m.planes = m_implData->planes;
-
-    if (xioctl(m_implData->fd, VIDIOC_DQBUF, &buf) == -1) {
-        LOG(WARNING) << "VIDIOC_DQBUF error "
-                     << "errno: " << errno << " error: " << strerror(errno);
-        switch (errno) {
-        case EAGAIN:
-        case EIO:
-            break;
-        default:
-            return Status::GENERIC_ERROR;
-        }
-    }
-
-    if (buf.index >= m_implData->nVideoBuffers) {
-        LOG(WARNING) << "Not enough buffers avaialable";
-        return Status::GENERIC_ERROR;
-    }
+    unsigned int buf_data_len;
+    uint8_t *pdata;
 
     width = m_implData->frameDetails.width;
     height = m_implData->frameDetails.height;
-    const uint8_t *pdata =
-        static_cast<uint8_t *>(m_implData->videoBuffers[buf.index].start);
+
+    status = getInternalBuffer(&pdata, buf_data_len, buf);
+    if (status != Status::OK) {
+        return status;
+    }
+
     offset[0] = 0;
     offset[1] = height * width / 2;
     if ((width == 668)) {
         unsigned int j = 0;
-        for (unsigned int i = 0; i < (height * width * 3 / 2); i += 3) {
+        for (unsigned int i = 0; i < (buf_data_len); i += 3) {
             if ((i != 0) && (i % (336 * 3) == 0)) {
                 j -= 4;
             }
@@ -534,7 +506,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
          * We obtain uint16_t f1 = (a << 4) | (c & 0x000F)
          * and uint16_t f2 = (b << 4) | ((c & 0x00F0) >> 4);
          */
-        for (unsigned int i = 0; i < (height * width * 3 / 2); i += 24) {
+        for (unsigned int i = 0; i < (buf_data_len); i += 24) {
             /* Read 24 bytes from pdata and deinterleave them in 3 separate 8 bytes packs
              *                                   |-> a1 a2 a3 ... a8
              * a1 b1 c1 a2 b2 c2 ... a8 b8 c8  ->|-> b1 b2 b3 ... b8
@@ -574,10 +546,9 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
         // clang-format on
     }
 
-    if (xioctl(m_implData->fd, VIDIOC_QBUF, &buf) == -1) {
-        LOG(WARNING) << "VIDIOC_QBUF error "
-                     << "errno: " << errno << " error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
+    status = enqueueInternalBuffer(buf);
+    if (status != Status::OK) {
+        return status;
     }
 
     return status;
@@ -781,4 +752,78 @@ aditof::Status LocalDevice::applyCalibrationToFrame(uint16_t *frame,
 aditof::Status LocalDevice::getDetails(aditof::DeviceDetails &details) const {
     details = m_deviceDetails;
     return aditof::Status::OK;
+}
+
+aditof::Status LocalDevice::waitForBuffer() {
+    fd_set fds;
+    struct timeval tv;
+    int r;
+
+    FD_ZERO(&fds);
+    FD_SET(m_implData->fd, &fds);
+
+    tv.tv_sec = 4;
+    tv.tv_usec = 0;
+
+    r = select(m_implData->fd + 1, &fds, NULL, NULL, &tv);
+
+    if (r == -1) {
+        LOG(WARNING) << "select error "
+                     << "errno: " << errno << " error: " << strerror(errno);
+        return aditof::Status::GENERIC_ERROR;
+    } else if (r == 0) {
+        LOG(WARNING) << "select timeout";
+        return aditof::Status::GENERIC_ERROR;
+    }
+
+    return aditof ::Status::OK;
+}
+
+aditof::Status LocalDevice::dequeueInternalBuffer(struct v4l2_buffer &buf) {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    CLEAR(buf);
+    buf.type = m_implData->videoBuffersType;
+    buf.memory = V4L2_MEMORY_MMAP;
+    buf.length = 1;
+    buf.m.planes = m_implData->planes;
+
+    if (xioctl(m_implData->fd, VIDIOC_DQBUF, &buf) == -1) {
+        LOG(WARNING) << "VIDIOC_DQBUF error "
+                     << "errno: " << errno << " error: " << strerror(errno);
+        switch (errno) {
+        case EAGAIN:
+        case EIO:
+            break;
+        default:
+            return Status::GENERIC_ERROR;
+        }
+    }
+
+    if (buf.index >= m_implData->nVideoBuffers) {
+        LOG(WARNING) << "Not enough buffers avaialable";
+        return Status::GENERIC_ERROR;
+    }
+
+    return status;
+}
+
+aditof::Status LocalDevice::getInternalBuffer(uint8_t **buffer,
+                                              uint32_t &buf_data_len,
+                                              const struct v4l2_buffer &buf) {
+
+    *buffer = static_cast<uint8_t *>(m_implData->videoBuffers[buf.index].start);
+    buf_data_len = m_implData->frameDetails.width *
+                   m_implData->frameDetails.height * 3 / 2;
+
+    return aditof::Status::OK;
+}
+
+aditof::Status LocalDevice::enqueueInternalBuffer(struct v4l2_buffer &buf) {
+    if (xioctl(m_implData->fd, VIDIOC_QBUF, &buf) == -1) {
+        LOG(WARNING) << "VIDIOC_QBUF error "
+                     << "errno: " << errno << " error: " << strerror(errno);
+        return aditof::Status::GENERIC_ERROR;
+    }
 }

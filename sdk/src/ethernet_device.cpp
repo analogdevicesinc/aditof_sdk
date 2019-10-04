@@ -1,4 +1,5 @@
 #include "ethernet_device.h"
+#include "device_utils.h"
 #include "network.h"
 #include "utils.h"
 
@@ -357,8 +358,14 @@ aditof::Status EthernetDevice::getFrame(uint16_t *buffer) {
         return Status::GENERIC_ERROR;
     }
 
-    memcpy(buffer, net->recv_buff.bytes_payload(0).c_str(),
-           net->recv_buff.bytes_payload(0).length());
+    // Deinterleave data. The server sends raw data (uninterleaved) for better
+    // throughput (raw data chunck is smaller, deinterleaving is usually slower
+    // on target).
+
+    aditof::deinterleave(net->recv_buff.bytes_payload(0).c_str(), buffer,
+                         net->recv_buff.bytes_payload(0).length(),
+                         m_implData->frameDetails_cache.width,
+                         m_implData->frameDetails_cache.height);
 
     Status status = static_cast<Status>(net->recv_buff.status());
 
