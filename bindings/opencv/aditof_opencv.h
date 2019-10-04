@@ -1,3 +1,6 @@
+#ifndef ADITOF_OPENCV_H
+#define ADITOF_OPENCV_H
+
 #include <aditof/frame.h>
 #include <aditof/status_definitions.h>
 
@@ -41,3 +44,5 @@ aditof::Status fromFrameToIrMat(aditof::Frame &frame, cv::Mat &mat) {
     return aditof::Status::OK;
 }
 } // namespace aditof
+
+#endif // ADITOF_OPENCV_H
