@@ -97,7 +97,6 @@ if __name__ == "__main__":
 
         # Creation of the IR image
         ir_map = ir_map[0: int(ir_map.shape[0] / 2), :]
-        # ir_map = cv.flip(ir_map, 1)
         ir_map = np.float32(ir_map)
         distance_scale_ir = 255.0 / camera_range
         ir_map = distance_scale_ir * ir_map
@@ -107,7 +106,6 @@ if __name__ == "__main__":
         # Creation of the Depth image
         new_shape = (int(depth_map.shape[0] / 2), depth_map.shape[1])
         depth_map = np.resize(depth_map, new_shape)
-        #depth_map = cv.flip(depth_map, 1)
         distance_map = depth_map
         depth_map = np.float32(depth_map)
         distance_scale = 255.0 / camera_range
@@ -137,6 +135,7 @@ if __name__ == "__main__":
         x2 = x1 + cropSize[0]
         result = result[y1:y2, x1:x2]
         depth_map = depth_map[y1:y2, x1:x2]
+        distance_map = distance_map[y1:y2, x1:x2]
 
         cols = result.shape[1]
         rows = result.shape[0]
@@ -145,7 +144,6 @@ if __name__ == "__main__":
             confidence = detections[0, 0, i, 2]
             if confidence > thr:
                 class_id = int(detections[0, 0, i, 1])
-
                 xLeftBottom = int(detections[0, 0, i, 3] * cols)
                 yLeftBottom = int(detections[0, 0, i, 4] * rows)
                 xRightTop = int(detections[0, 0, i, 5] * cols)
@@ -164,16 +162,16 @@ if __name__ == "__main__":
                     labelSize, baseLine = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
                     yLeftBottom = max(yLeftBottom, labelSize[1])
-                    cv.rectangle(result, (value_x, value_y - labelSize[1]),
-                                 (value_x + labelSize[0], value_y + baseLine),
+                    cv.rectangle(result, (value_x - int(labelSize[0] * 0.5), value_y - labelSize[1]),
+                                 (value_x + int(labelSize[0] * 0.5), value_y + baseLine),
                                  (255, 255, 255), cv.FILLED)
-                    cv.putText(result, label, (value_x, value_y),
+                    cv.putText(result, label, (value_x - int(labelSize[0] * 0.5), value_y),
                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
-                    cv.rectangle(depth_map, (value_x, value_y - labelSize[1]),
-                                 (value_x + labelSize[0], value_y + baseLine),
+                    cv.rectangle(depth_map, (value_x - int(labelSize[0] * 0.5), value_y - labelSize[1]),
+                                 (value_x + int(labelSize[0] * 0.5), value_y + baseLine),
                                  (255, 255, 255), cv.FILLED)
-                    cv.putText(depth_map, label, (value_x, value_y),
+                    cv.putText(depth_map, label, (value_x - int(labelSize[0] * 0.5), value_y),
                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
         # Show image with object detection

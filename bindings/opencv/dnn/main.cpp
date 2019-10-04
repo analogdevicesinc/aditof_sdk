@@ -131,7 +131,8 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        /* Convert from frame to depth mat */
+        /* Obtain the depth mat from the frame, this will be used for distance
+         * calculation*/
         cv::Mat frameMat;
         status = fromFrameToDepthMat(frame, frameMat);
         if (status != Status::OK) {
@@ -139,8 +140,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        /* Obtain the depth mat from the frame in order to determine
-         * the distance of the identified objects */
+        /* Obtain the depth mat from the frame */
         cv::Mat depthMat;
         status = fromFrameToDepthMat(frame, depthMat);
         if (status != Status::OK) {
@@ -148,6 +148,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
+        /* Obtain the ir mat from the frame */
         cv::Mat irMat;
         status = fromFrameToIrMat(frame, irMat);
         if (status != Status::OK) {
