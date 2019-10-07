@@ -43,54 +43,54 @@ int main(int argc, char *argv[]) {
     status = system.initialize();
     if (status != Status::OK) {
         LOG(ERROR) << "Could not initialize system!";
-        return 0;
+        return -1;
     }
 
     std::vector<Camera *> cameras;
     system.getCameraList(cameras);
     if (cameras.empty()) {
         LOG(WARNING) << "No cameras found!";
-        return 0;
+        return -1;
     }
 
     auto camera = cameras.front();
     status = camera->initialize();
     if (status != Status::OK) {
         LOG(ERROR) << "Could not initialize camera!";
-        return 0;
+        return -1;
     }
 
     std::vector<std::string> frameTypes;
     camera->getAvailableFrameTypes(frameTypes);
     if (frameTypes.empty()) {
         LOG(ERROR) << "No frame type available!";
-        return 0;
+        return -1;
     }
 
     status = camera->setFrameType(frameTypes.front());
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set camera frame type!";
-        return 0;
+        return -1;
     }
 
     std::vector<std::string> modes;
     camera->getAvailableModes(modes);
     if (modes.empty()) {
         LOG(ERROR) << "No camera modes available!";
-        return 0;
+        return -1;
     }
 
     status = camera->setMode(modes[1]);
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set camera mode!";
-        return 0;
+        return -1;
     }
 
     aditof::Frame frame;
     status = camera->requestFrame(&frame);
     if (status != Status::OK) {
         LOG(ERROR) << "Could not request frame!";
-        return 0;
+        return -1;
     }
 
     aditof::FrameDetails frameDetails;
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
         status = camera->requestFrame(&frame);
         if (status != Status::OK) {
             LOG(ERROR) << "Could not request frame!";
-            return 0;
+            return -1;
         }
 
         /* Obtain the depth mat from the frame, this will be used for distance
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
         status = fromFrameToDepthMat(frame, frameMat);
         if (status != Status::OK) {
             LOG(ERROR) << "Could not convert from frame to mat!";
-            return 0;
+            return -1;
         }
 
         /* Obtain the depth mat from the frame */
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
         status = fromFrameToDepthMat(frame, depthMat);
         if (status != Status::OK) {
             LOG(ERROR) << "Could not convert from frame to mat!";
-            return 0;
+            return -1;
         }
 
         /* Obtain the ir mat from the frame */
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
         status = fromFrameToIrMat(frame, irMat);
         if (status != Status::OK) {
             LOG(ERROR) << "Could not convert from frame to mat!";
-            return 0;
+            return -1;
         }
 
         /* Distance factor */
