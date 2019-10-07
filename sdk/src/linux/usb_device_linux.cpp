@@ -2,6 +2,8 @@
 #include "utils.h"
 #include "utils_linux.h"
 
+#include "device_utils.h"
+
 #include <cmath>
 #include <fcntl.h>
 #include <glog/logging.h>
@@ -394,74 +396,14 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     if (buf.index >= m_implData->buffersCount) {
         LOG(WARNING) << "buffer index out of range";
         return Status::INVALID_ARGUMENT;
-    };
+    }
 
-    j = 0;
     unsigned int width = m_implData->fmt.fmt.pix.width;
     unsigned int height = m_implData->fmt.fmt.pix.height;
-    unsigned int offset[2] = {0, height * width / 2};
-    unsigned int offset_idx = 0;
+    const char *pdata =
+        static_cast<const char *>(m_implData->buffers[buf.index].start);
 
-    if (width == 668) {
-        for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
-            if ((i != 0) & (i % (336 * 3) == 0)) {
-                j -= 4;
-            }
-
-            buffer[j] =
-                (((unsigned short)*(
-                     ((unsigned char *)m_implData->buffers[buf.index].start) +
-                     i))
-                 << 4) |
-                (((unsigned short)*(
-                     ((unsigned char *)m_implData->buffers[buf.index].start) +
-                     i + 2)) &
-                 0x000F);
-            j++;
-
-            buffer[j] =
-                (((unsigned short)*(
-                     ((unsigned char *)m_implData->buffers[buf.index].start) +
-                     i + 1))
-                 << 4) |
-                ((((unsigned short)*(
-                      ((unsigned char *)m_implData->buffers[buf.index].start) +
-                      i + 2)) &
-                  0x00F0) >>
-                 4);
-            j++;
-        }
-    } else {
-        for (i = 0; i < (int)(height * width * 3 / 2); i += 3) {
-
-            offset_idx = ((j / width) % 2);
-
-            buffer[offset[offset_idx]] =
-                (((unsigned short)*(
-                     ((unsigned char *)m_implData->buffers[buf.index].start) +
-                     i))
-                 << 4) |
-                (((unsigned short)*(
-                     ((unsigned char *)m_implData->buffers[buf.index].start) +
-                     i + 2)) &
-                 0x000F);
-            offset[offset_idx]++;
-
-            buffer[offset[offset_idx]] =
-                (((unsigned short)*(
-                     ((unsigned char *)m_implData->buffers[buf.index].start) +
-                     i + 1))
-                 << 4) |
-                ((((unsigned short)*(
-                      ((unsigned char *)m_implData->buffers[buf.index].start) +
-                      i + 2)) &
-                  0x00F0) >>
-                 4);
-            offset[offset_idx]++;
-
-            j += 2;
-        }
-    }
+    aditof::deinterleave(pdata, buffer, height * width * 3 / 2, width, height);
 
     if (-1 == xioctl(m_implData->fd, VIDIOC_QBUF, &buf)) {
         LOG(WARNING) << "VIDIOC_QBUF, error: " << errno << "("

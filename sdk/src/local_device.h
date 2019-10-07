@@ -6,6 +6,8 @@
 
 #include <memory>
 
+struct v4l2_buffer;
+
 class LocalDevice : public DeviceInterface {
   public:
     LocalDevice(const aditof::DeviceConstructionData &data);
@@ -36,6 +38,14 @@ class LocalDevice : public DeviceInterface {
     virtual aditof::Status applyCalibrationToFrame(uint16_t *frame,
                                                    const std::string &mode);
     virtual aditof::Status getDetails(aditof::DeviceDetails &details) const;
+
+  public:
+    // Methods that give a finer control than getFrame()
+    aditof::Status waitForBuffer();
+    aditof::Status dequeueInternalBuffer(struct v4l2_buffer &buf);
+    aditof::Status getInternalBuffer(uint8_t **buffer, uint32_t &buf_data_len,
+                                     const struct v4l2_buffer &buf);
+    aditof::Status enqueueInternalBuffer(struct v4l2_buffer &buf);
 
   private:
     struct ImplData;

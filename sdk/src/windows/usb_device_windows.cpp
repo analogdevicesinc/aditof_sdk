@@ -2,6 +2,8 @@
 #include "utils.h"
 #include "windows_utils.h"
 
+#include "device_utils.h"
+
 #include <atlstr.h>
 #include <glog/logging.h>
 #include <unordered_map>
@@ -690,51 +692,9 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
         }
     }
 
-    j = 0;
-    offset[0] = 0;
-    offset[1] = currentWidth * currentHeight / 2;
-    if (currentWidth == 668) {
-        for (i = 0; i < (int)(currentWidth * currentHeight * 3 / 2); i += 3) {
-            if ((i != 0) & (i % (336 * 3) == 0)) {
-                j -= 4;
-            }
-
-            buffer[j] =
-                (((unsigned short)*(((unsigned char *)tmpbuffer) + i)) << 4) |
-                (((unsigned short)*(((unsigned char *)tmpbuffer) + i + 2)) &
-                 0x000F);
-            j++;
-
-            buffer[j] =
-                (((unsigned short)*(((unsigned char *)tmpbuffer) + i + 1))
-                 << 4) |
-                ((((unsigned short)*(((unsigned char *)tmpbuffer) + i + 2)) &
-                  0x00F0) >>
-                 4);
-            j++;
-        }
-    } else {
-        for (i = 0; i < (int)(currentWidth * currentHeight * 3 / 2); i += 3) {
-
-            offset_idx = ((j / currentWidth) % 2);
-
-            buffer[offset[offset_idx]] =
-                (((unsigned short)*(((unsigned char *)tmpbuffer) + i)) << 4) |
-                (((unsigned short)*(((unsigned char *)tmpbuffer) + i + 2)) &
-                 0x000F);
-            offset[offset_idx]++;
-
-            buffer[offset[offset_idx]] =
-                (((unsigned short)*(((unsigned char *)tmpbuffer) + i + 1))
-                 << 4) |
-                ((((unsigned short)*(((unsigned char *)tmpbuffer) + i + 2)) &
-                  0x00F0) >>
-                 4);
-            offset[offset_idx]++;
-
-            j += 2;
-        }
-    }
+    aditof::deinterleave((const char *)tmpbuffer, buffer,
+                         currentWidth * currentHeight * 3 / 2, currentWidth,
+                         currentHeight);
 
     free(tmpbuffer);
 
