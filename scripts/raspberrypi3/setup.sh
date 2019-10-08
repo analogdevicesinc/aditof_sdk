@@ -89,8 +89,6 @@ setup() {
 
         install_required_packages
 
-        source_dir=$(cd "$(dirname "$0")/../.."; pwd)
-
         if [[ -z "${build_dir}" ]]; then
                 build_dir=$(pwd)/build
         fi
@@ -121,7 +119,7 @@ setup() {
         deps_install_dir=$(pwd)
         popd
 
-        CMAKE_OPTIONS="-DWITH_PYTHON=on -DWITH_OPENCV=on"
+        CMAKE_OPTIONS="-DRASPBERRYPI=1 -DWITH_PYTHON=on -DWITH_OPENCV=on"
 
         get_deps_source_code ${deps_dir}
 
@@ -133,6 +131,7 @@ setup() {
         pushd "${build_dir}"
         cmake "${source_dir}" "${CMAKE_OPTIONS}" -DCMAKE_PREFIX_PATH="${deps_install_dir}/glog;${deps_install_dir}/protobuf;${deps_install_dir}/websockets;${deps_install_dir}/opencv-${OPENCV}"
         make -j ${NUM_JOBS}
+
 }
 
 setup $@
