@@ -66,8 +66,8 @@ aditof::Status UsbDevice::readLaserTemp(float & /*temperature*/) {
 }
 
 aditof::Status UsbDevice::setCalibrationParams(const std::string & /*mode*/,
-                                               float /*gain*/,
-                                               float /*offset*/) {
+                                               float /*gain*/, float /*offset*/,
+                                               int /*range*/) {
 
     return aditof::Status::GENERIC_ERROR;
 }

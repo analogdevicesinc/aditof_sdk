@@ -138,10 +138,12 @@ class DeviceInterface {
      * @param mode - a camera specific mode
      * @param gain - the gain correction
      * @param offset - the offset correction
+     * @param range - the maximum range, in mm, for the given mode
      * @return Status
      */
     virtual aditof::Status setCalibrationParams(const std::string &mode,
-                                                float gain, float offset) = 0;
+                                                float gain, float offset,
+                                                int range) = 0;
 
     /**
      * @brief Use the cached calibration parameters to apply corrections to the

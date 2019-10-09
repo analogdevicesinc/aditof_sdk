@@ -609,15 +609,16 @@ aditof::Status EthernetDevice::readLaserTemp(float &temperature) {
 }
 
 aditof::Status EthernetDevice::setCalibrationParams(const std::string &mode,
-                                                    float gain, float offset) {
+                                                    float gain, float offset,
+                                                    int range) {
 
     const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
     CalibrationData calib_data;
     calib_data.mode = mode;
     calib_data.gain = gain;
     calib_data.offset = offset;
-    calib_data.cache =
-        aditof::Utils::buildCalibrationCache(gain, offset, pixelMaxValue);
+    calib_data.cache = aditof::Utils::buildCalibrationCache(
+        gain, offset, pixelMaxValue, range);
     m_implData->calibration_cache[mode] = calib_data;
 
     return aditof::Status::OK;
