@@ -2,7 +2,6 @@
 #include "aditof/aditof.h"
 #include "aditof/device_construction_data.h"
 #include "aditof/device_enumerator_factory.h"
-#include "aditof/device_enumerator_impl.h"
 #include "aditof/device_factory.h"
 #include "buffer.pb.h"
 

@@ -1,4 +1,4 @@
-#include "aditof/device_enumerator_impl.h"
+#include "device_enumerator_impl.h"
 
 aditof::Status DeviceEnumeratorImpl::findDevices(
     std::vector<aditof::DeviceConstructionData> &devices) {

@@ -1,7 +1,7 @@
 #ifndef DEVICE_ENUMERATOR_IMPL_H
 #define DEVICE_ENUMERATOR_IMPL_H
 
-#include "device_enumerator_interface.h"
+#include <aditof/device_enumerator_interface.h>
 
 class DeviceEnumeratorImpl : public DeviceEnumeratorInterface {
   public:
