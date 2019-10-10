@@ -18,6 +18,12 @@ set(DOCUMENTED_FILES "${SOURCES_DIR}/frame.h \\
                       ${SOURCES_DIR}/camera_definitions.h \\
                       ${SOURCES_DIR}/system.h \\
                       ${SOURCES_DIR}/status_definitions.h \\
+                      ${SOURCES_DIR}/device_interface.h \\
+                      ${SOURCES_DIR}/device_definitions.h \\
+                      ${SOURCES_DIR}/device_construction_data.h \\
+                      ${SOURCES_DIR}/device_factory.h \\
+                      ${SOURCES_DIR}/device_enumerator_interface.h \\
+                      ${SOURCES_DIR}/device_enumerator_factory.h \\
                       ${CMAKE_CURRENT_SOURCE_DIR}/mainpage.dox
                       "
 )
