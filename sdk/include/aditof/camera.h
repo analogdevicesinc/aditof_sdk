@@ -66,7 +66,7 @@ class SDK_API Camera {
     getAvailableModes(std::vector<std::string> &availableModes) const = 0;
 
     /**
-     * @brief Set the camera frame type to the givn type
+     * @brief Set the camera frame type to the given type
      * @param frameType - The frame type of the camera
      * @return Status
      */
@@ -101,7 +101,7 @@ class SDK_API Camera {
     virtual Status getDetails(CameraDetails &details) const = 0;
 
     /**
-     * @brief Gets the device of the camera. The device is own by the camera,
+     * @brief Gets the device of the camera. The device is ownen by the camera,
      * therefore when the camera gets destroy the reference to the device will
      * not be valid anymore.
      * @return DeviceInterface
