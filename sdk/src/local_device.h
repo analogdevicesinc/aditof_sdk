@@ -8,7 +8,7 @@
 
 struct v4l2_buffer;
 
-class LocalDevice : public DeviceInterface {
+class LocalDevice : public aditof::DeviceInterface {
   public:
     LocalDevice(const aditof::DeviceConstructionData &data);
     ~LocalDevice();

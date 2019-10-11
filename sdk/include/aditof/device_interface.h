@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <vector>
 
+namespace aditof {
+
 /**
  * @class DeviceInterface
  * @brief Provides access to the low level functionality of the camera. This
@@ -165,5 +167,7 @@ class DeviceInterface {
      */
     virtual aditof::Status getDetails(aditof::DeviceDetails &details) const = 0;
 };
+
+} // namespace aditof
 
 #endif // DEVICE_INTERFACE_H

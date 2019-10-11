@@ -6,6 +6,8 @@
 
 #include <vector>
 
+namespace aditof {
+
 /**
  * @class DeviceEnumeratorInterface
  * @brief Provides the mean to find and access devices.
@@ -27,5 +29,7 @@ class DeviceEnumeratorInterface {
     virtual aditof::Status
     findDevices(std::vector<aditof::DeviceConstructionData> &devices) = 0;
 };
+
+} // namespace aditof
 
 #endif // DEVICE_ENUMERATOR_INTERFACE_H

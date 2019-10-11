@@ -6,7 +6,7 @@
 
 #include <memory>
 
-class UsbDevice : public DeviceInterface {
+class UsbDevice : public aditof::DeviceInterface {
   public:
     UsbDevice(const aditof::DeviceConstructionData &data);
     ~UsbDevice();

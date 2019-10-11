@@ -7,7 +7,7 @@
 
 class Camera96Tof1 : public aditof::Camera {
   public:
-    Camera96Tof1(DeviceInterface *device);
+    Camera96Tof1(aditof::DeviceInterface *device);
     ~Camera96Tof1();
 
   public: // implements Camera
@@ -24,11 +24,11 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
-    DeviceInterface *getDevice();
+    aditof::DeviceInterface *getDevice();
 
   private:
     aditof::CameraDetails m_details;
-    DeviceInterface *m_device;
+    aditof::DeviceInterface *m_device;
     bool m_devStarted;
     Calibration m_calibration;
 };

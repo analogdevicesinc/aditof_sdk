@@ -4,6 +4,8 @@
 
 #include <aditof/device_factory.h>
 
+using namespace aditof;
+
 DeviceInterface *
 DeviceFactory::buildDevice(const aditof::DeviceConstructionData &data) {
     using namespace aditof;

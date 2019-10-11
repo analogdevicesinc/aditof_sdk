@@ -3,6 +3,8 @@
 #include "device_enumerator_ethernet.h"
 #include "device_enumerator_impl.h"
 
+using namespace aditof;
+
 std::unique_ptr<DeviceEnumeratorInterface>
 DeviceEnumeratorFactory::buildDeviceEnumerator() {
     return std::unique_ptr<DeviceEnumeratorInterface>(new DeviceEnumeratorImpl);

@@ -6,7 +6,7 @@
 
 #include <memory>
 
-class EthernetDevice : public DeviceInterface {
+class EthernetDevice : public aditof::DeviceInterface {
   public:
     EthernetDevice(const aditof::DeviceConstructionData &data);
     ~EthernetDevice();

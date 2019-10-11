@@ -232,7 +232,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 #endif
         std::vector<aditof::DeviceConstructionData> devicesInfo;
         auto localDevEnumerator =
-            DeviceEnumeratorFactory::buildDeviceEnumerator();
+            aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
 
         aditof::Status status = localDevEnumerator->findDevices(devicesInfo);
         for (const auto &devInfo : devicesInfo) {
@@ -255,7 +255,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
         devData.deviceType = aditof::DeviceType::LOCAL;
         devData.driverPath = buff_recv.device_data().driver_path();
-        DeviceInterface *deviceI = DeviceFactory::buildDevice(devData);
+        aditof::DeviceInterface *deviceI =
+            aditof::DeviceFactory::buildDevice(devData);
         device = dynamic_cast<LocalDevice *>(deviceI);
         if (!device) {
             errMsg = "Failed to create local device";

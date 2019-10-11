@@ -9,11 +9,10 @@
 #include <string>
 #include <vector>
 
-class DeviceInterface;
-
 namespace aditof {
 
 class Frame;
+class DeviceInterface;
 
 /**
  * @class Camera

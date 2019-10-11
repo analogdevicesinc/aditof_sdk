@@ -9,7 +9,7 @@
 #include <glog/logging.h>
 
 SystemImpl::SystemImpl()
-    : m_enumerator(DeviceEnumeratorFactory::buildDeviceEnumerator()) {}
+    : m_enumerator(aditof::DeviceEnumeratorFactory::buildDeviceEnumerator()) {}
 
 SystemImpl::~SystemImpl() {
     for (auto &cam : m_cameras) {
