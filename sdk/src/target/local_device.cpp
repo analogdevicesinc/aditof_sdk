@@ -732,14 +732,8 @@ aditof::Status LocalDevice::setCalibrationParams(const std::string &mode,
 aditof::Status LocalDevice::applyCalibrationToFrame(uint16_t *frame,
                                                     const std::string &mode) {
 
-    auto equal = [](float a, float b) -> bool { return fabs(a - b) < 1e-6; };
-
     float gain = m_implData->calibration_cache[mode].gain;
     float offset = m_implData->calibration_cache[mode].offset;
-
-    if (equal(gain, 1.0f) && equal(offset, 0.0f)) {
-        return aditof::Status::OK;
-    }
 
     unsigned int width = m_implData->frameDetails.width;
     unsigned int height = m_implData->frameDetails.height;

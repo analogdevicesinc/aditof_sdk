@@ -633,18 +633,8 @@ EthernetDevice::applyCalibrationToFrame(uint16_t *frame,
     // have more computing power than the target and also avoids the overhead of
     // transporting the frame back and forth.
 
-    auto equal = [](float a, float b) -> bool {
-        float diff = a - b;
-        float epsilon = 0.000001f;
-        return (-epsilon < diff) && (diff < epsilon);
-    };
-
     float gain = m_implData->calibration_cache[mode].gain;
     float offset = m_implData->calibration_cache[mode].offset;
-
-    if (equal(gain, 1.0f) && equal(offset, 0.0f)) {
-        return aditof::Status::OK;
-    }
 
     if (m_implData->frameDetails_cache.type.empty()) {
         LOG(WARNING) << "Frame type has not been set for this device";
