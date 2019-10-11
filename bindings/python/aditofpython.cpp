@@ -233,7 +233,8 @@ PYBIND11_MODULE(aditofpython, m) {
                  return status;
              })
         .def("setCalibrationParams", &DeviceInterface::setCalibrationParams,
-             py::arg("mode"), py::arg("gain"), py::arg("offset"))
+             py::arg("mode"), py::arg("gain"), py::arg("offset"),
+             py::arg("range"))
         .def("applyCalibrationToFrame",
              [](DeviceInterface &device, py::array_t<uint16_t> frame,
                 const std::string &mode) {

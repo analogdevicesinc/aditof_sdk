@@ -54,6 +54,9 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
 
     LOG(INFO) << "Chosen mode: " << mode.c_str();
 
+    std::vector<std::pair<std::string, int>> modeRanges = {
+        {"near", 800}, {"medium", 3000}, {"far", 6000}};
+
     if (!modeFilename.empty()) {
         std::ifstream firmwareFile(modeFilename.c_str(), std::ios::binary);
 
@@ -75,8 +78,6 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         firmwareFile.close();
     } else {
         m_details.mode = mode;
-        std::vector<std::pair<std::string, int>> modeRanges = {
-            {"near", 800}, {"medium", 3000}, {"far", 6000}};
         auto iter = std::find_if(modeRanges.begin(), modeRanges.end(),
                                  [&mode](std::pair<std::string, int> mp) {
                                      return mp.first == mode;
@@ -121,7 +122,15 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         float gain = 1.0, offset = 0.0;
         Status status = m_calibration.getGainOffset(mode, gain, offset);
         if (status == Status::OK) {
-            m_device->setCalibrationParams(mode, gain, offset);
+            int range = 1;
+            auto iter = std::find_if(modeRanges.begin(), modeRanges.end(),
+                                     [&mode](std::pair<std::string, int> mp) {
+                                         return mp.first == mode;
+                                     });
+            if (iter != modeRanges.end()) {
+                range = (*iter).second;
+            }
+            m_device->setCalibrationParams(mode, gain, offset, range);
         }
     }
 

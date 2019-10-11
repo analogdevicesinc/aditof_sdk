@@ -1,11 +1,13 @@
 #include "utils.h"
 
 uint16_t *aditof::Utils::buildCalibrationCache(float gain, float offset,
-                                               int16_t maxPixelValue) {
+                                               int16_t maxPixelValue,
+                                               int range) {
     uint16_t *cache = new uint16_t[maxPixelValue + 1];
     for (int16_t current = 0; current <= maxPixelValue; ++current) {
-        cache[current] =
+        int16_t currentValue =
             static_cast<int16_t>(static_cast<float>(current) * gain + offset);
+        cache[current] = currentValue <= range ? currentValue : range;
     }
     return cache;
 }

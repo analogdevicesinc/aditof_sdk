@@ -7,7 +7,7 @@ namespace aditof {
 class Utils {
   public:
     static uint16_t *buildCalibrationCache(float gain, float offset,
-                                           int16_t maxPixelValue);
+                                           int16_t maxPixelValue, int range);
     static void calibrateFrame(uint16_t *calibrationData, uint16_t *frame,
                                unsigned int width, unsigned int height);
 };
