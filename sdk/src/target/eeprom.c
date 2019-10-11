@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 int eeprom_open(const char *dev_fqn, eeprom *e) {
+    e->valid = 0;
     e->fd = fopen(dev_fqn, "w+");
     if (e->fd == NULL) {
         fprintf(stderr, "Error eeprom_open: %s\n", strerror(errno));
@@ -22,6 +23,7 @@ int eeprom_open(const char *dev_fqn, eeprom *e) {
     }
     e->length = (unsigned int)len;
     fseek(e->fd, 0x0, SEEK_SET);
+    e->valid = 1;
 
     return 0;
 }
@@ -54,6 +56,7 @@ int eeprom_close(eeprom *e) {
     if (e) {
         fclose(e->fd);
         e->fd = NULL;
+        e->valid = 0;
     }
     return 0;
 }

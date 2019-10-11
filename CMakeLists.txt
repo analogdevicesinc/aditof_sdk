@@ -23,6 +23,8 @@ option(WITH_PYTHON "Build python bindings?" OFF)
 option(WITH_OPENCV "Build opencv bindings?" OFF)
 
 add_subdirectory(sdk)
+add_subdirectory(apps)
+
 if (WITH_EXAMPLES)
         add_subdirectory(examples)
 endif()
@@ -34,9 +36,6 @@ if (WITH_PYTHON)
 endif()
 if (WITH_OPENCV)
         add_subdirectory(bindings/opencv)
-endif()
-if (DRAGONBOARD)
-        add_subdirectory(apps/server)
 endif()
 
 ############################### Installer #######################################

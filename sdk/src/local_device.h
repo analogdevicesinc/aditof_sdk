@@ -48,6 +48,8 @@ class LocalDevice : public DeviceInterface {
                                      const struct v4l2_buffer &buf);
     aditof::Status enqueueInternalBuffer(struct v4l2_buffer &buf);
 
+    aditof::Status getDeviceFileDescriptor(int &fileDescriptor);
+
   private:
     struct ImplData;
     aditof::DeviceDetails m_deviceDetails;

@@ -20,7 +20,8 @@
 
 #define UVC_APP_SCRIPT_NAME "config_pipe.sh"
 #define UVC_APP_START_COMMAND                                                  \
-    "/home/linaro/workspace/github/aditof_sdk/apps/uvc-app/config_pipe.sh"
+    "/home/linaro/workspace/github/aditof_sdk/build/apps/uvc-app/"             \
+    "config_pipe.sh"
 
 static const char *program_name = NULL;
 static struct gpio gpio1;
