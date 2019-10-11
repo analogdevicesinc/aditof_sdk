@@ -1,7 +1,7 @@
 #ifndef DEVICE_ENUMERATOR_ETHERNET_H
 #define DEVICE_ENUMERATOR_ETHERNET_H
 
-#include "device_enumerator_interface.h"
+#include <aditof/device_enumerator_interface.h>
 
 #include <string>
 

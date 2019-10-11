@@ -1,4 +1,4 @@
-#include "aditof/device_enumerator_impl.h"
+#include "device_enumerator_impl.h"
 #include "windows_utils.h"
 
 #include <atlstr.h>

@@ -1,4 +1,4 @@
-#include "aditof/device_enumerator_ethernet.h"
+#include "device_enumerator_ethernet.h"
 #include "network.h"
 
 #include <glog/logging.h>

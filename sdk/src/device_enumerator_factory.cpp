@@ -1,6 +1,7 @@
-#include "aditof/device_enumerator_factory.h"
-#include "aditof/device_enumerator_ethernet.h"
-#include "aditof/device_enumerator_impl.h"
+#include <aditof/device_enumerator_factory.h>
+
+#include "device_enumerator_ethernet.h"
+#include "device_enumerator_impl.h"
 
 std::unique_ptr<DeviceEnumeratorInterface>
 DeviceEnumeratorFactory::buildDeviceEnumerator() {
