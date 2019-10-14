@@ -5,6 +5,8 @@
 
 #include <memory>
 
+namespace aditof {
+
 /**
  * @class DeviceEnumeratorFactory
  * @brief Provides the means to construct different types of device enumerators
@@ -24,5 +26,7 @@ class DeviceEnumeratorFactory {
     static std::unique_ptr<DeviceEnumeratorInterface>
     buildDeviceEnumeratorEthernet(const std::string &ip);
 };
+
+} // namespace aditof
 
 #endif // DEVICE_ENUMERATOR_FACTORY_H

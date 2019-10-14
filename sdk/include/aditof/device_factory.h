@@ -4,6 +4,8 @@
 #include <aditof/device_construction_data.h>
 #include <aditof/device_interface.h>
 
+namespace aditof {
+
 /**
  * @class DeviceFactory
  * @brief Provides the means to construct different types of devices
@@ -17,5 +19,7 @@ class DeviceFactory {
     static DeviceInterface *
     buildDevice(const aditof::DeviceConstructionData &data);
 };
+
+} // namespace aditof
 
 #endif // DEVICE_FACTORY_H

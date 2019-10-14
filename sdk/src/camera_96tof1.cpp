@@ -9,7 +9,7 @@
 #include <glog/logging.h>
 #include <iterator>
 
-Camera96Tof1::Camera96Tof1(DeviceInterface *device)
+Camera96Tof1::Camera96Tof1(aditof::DeviceInterface *device)
     : m_device(device), m_devStarted(false) {}
 
 Camera96Tof1::~Camera96Tof1() { delete m_device; }
@@ -249,4 +249,4 @@ aditof::Status Camera96Tof1::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-DeviceInterface *Camera96Tof1::getDevice() { return m_device; }
+aditof::DeviceInterface *Camera96Tof1::getDevice() { return m_device; }

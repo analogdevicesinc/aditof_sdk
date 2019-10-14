@@ -8,9 +8,8 @@
 
 namespace aditof {
 class Camera;
-}
-
 class DeviceEnumeratorInterface;
+} // namespace aditof
 
 class SystemImpl {
   public:
@@ -25,7 +24,7 @@ class SystemImpl {
                                      const std::string &ip) const;
 
   private:
-    std::unique_ptr<DeviceEnumeratorInterface> m_enumerator;
+    std::unique_ptr<aditof::DeviceEnumeratorInterface> m_enumerator;
     std::vector<aditof::Camera *> m_cameras;
 };
 

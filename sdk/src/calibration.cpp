@@ -168,7 +168,7 @@ aditof::Status Calibration::getGainOffset(std::string mode, float &gain,
     \param calibration_map - Calibarion map to be displayed
     \param file_name - File where the calibration map needs to be stored
 */
-aditof::Status Calibration::saveCalMap(DeviceInterface *device) {
+aditof::Status Calibration::saveCalMap(aditof::DeviceInterface *device) {
     using namespace aditof;
 
     std::vector<float> data;
@@ -209,7 +209,7 @@ aditof::Status Calibration::saveCalMap(DeviceInterface *device) {
     \param calibration_map - Calibarion map to be read
     \param file_name - File from where the calibration map needs to be read
 */
-aditof::Status Calibration::readCalMap(DeviceInterface *device) {
+aditof::Status Calibration::readCalMap(aditof::DeviceInterface *device) {
     using namespace aditof;
 
     Status status = Status::OK;

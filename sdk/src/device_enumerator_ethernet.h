@@ -5,7 +5,7 @@
 
 #include <string>
 
-class DeviceEnumeratorEthernet : public DeviceEnumeratorInterface {
+class DeviceEnumeratorEthernet : public aditof::DeviceEnumeratorInterface {
   public:
     DeviceEnumeratorEthernet(const std::string &ip);
     ~DeviceEnumeratorEthernet();

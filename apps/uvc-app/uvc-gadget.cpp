@@ -1935,7 +1935,7 @@ int main(int argc, char *argv[]) {
     enum io_method uvc_io_method = IO_METHOD_USERPTR;
 
     std::vector<aditof::DeviceConstructionData> devsData;
-    auto enumerator = DeviceEnumeratorFactory::buildDeviceEnumerator();
+    auto enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
 
     enumerator->findDevices(devsData);
 
@@ -1944,8 +1944,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    LocalDevice *device =
-        dynamic_cast<LocalDevice *>(DeviceFactory::buildDevice(devsData[0]));
+    LocalDevice *device = dynamic_cast<LocalDevice *>(
+        aditof::DeviceFactory::buildDevice(devsData[0]));
 
     if (!device) {
         printf("Error when building LocalDevice!\n");

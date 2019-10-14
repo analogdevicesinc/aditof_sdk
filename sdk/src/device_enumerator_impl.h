@@ -3,7 +3,7 @@
 
 #include <aditof/device_enumerator_interface.h>
 
-class DeviceEnumeratorImpl : public DeviceEnumeratorInterface {
+class DeviceEnumeratorImpl : public aditof::DeviceEnumeratorInterface {
   public:
     ~DeviceEnumeratorImpl() = default;
 
