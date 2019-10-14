@@ -3,6 +3,7 @@ project(examples)
 
 add_subdirectory(aditof-demo)
 add_subdirectory(first-frame)
+add_subdirectory(first-frame-ethernet)
 
 include(GNUInstallDirs)
 
@@ -18,7 +19,9 @@ if(WIN32)
     add_custom_target(copy-dll-example
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:aditof> $<TARGET_FILE_DIR:aditof-demo>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:aditof> $<TARGET_FILE_DIR:first-frame>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:aditof> $<TARGET_FILE_DIR:first-frame-ethernet>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:OpenSSL::SSL> $<TARGET_FILE_DIR:aditof-demo>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:OpenSSL::SSL> $<TARGET_FILE_DIR:first-frame>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:OpenSSL::SSL> $<TARGET_FILE_DIR:first-frame-ethernet>
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
