@@ -104,27 +104,30 @@ if %opt%==0 (
 )
 echo Setup will continue with the configuration: %config_type%
 
-
 ::check if the generator is correct
 set /a opt=0
+set vs=15
 if %generator%=="Visual Studio 15 2017 Win64" (
     set /a opt=1
+    set vs=15
 )
 if %generator%=="Visual Studio 14 2015 Win64" (
     set /a opt=1
+    set vs=14
 )
-if %generator%=="Visual Studio 15 2017" (
-    set /a opt=1
-)
-if %generator%=="Visual Studio 14 2015" (
-    set /a opt=1
-)
+::if %generator%=="Visual Studio 15 2017" (
+::    set /a opt=1
+::)
+::if %generator%=="Visual Studio 14 2015" (
+::    set /a opt=1
+::)
 if %set_generator%==0 (
    set /a opt=1
    set generator="Visual Studio 15 2017 Win64"
+   set vs=15
    )
 if %opt%==0 (
-    echo Please enter a correct configuration ("Visual Studio 15 2017 Win64", "Visual Studio 15 2017", "Visual Studio 14 2015 Win64" or "Visual Studio 14 2015"^)
+    echo Please enter a correct configuration ("Visual Studio 15 2017 Win64" or "Visual Studio 14 2015 Win64"^)
     EXIT /B %ERRORLEVEL%
 )
 echo Setup will continue with the generator: %generator%
@@ -169,7 +172,7 @@ CALL :install_websockets %config_type% %generator%
 ::build the project with the selected options
 set CMAKE_OPTIONS=-DWITH_PYTHON=on -DWITH_OPENCV=on
 pushd %build_dire%
-cmake -G %generator% -DWITH_PYTHON=on -DWITH_OPENCV=on -DOpenCV_DIR="%openCVPath%\build\x64\vc15\lib" -DCMAKE_PREFIX_PATH="%deps_install_dir%\glog;%deps_install_dir%\protobuf;%deps_install_dir%\libwebsockets" -DOPENSSL_INCLUDE_DIRS="%openSSLPath%\include" %source_dir%
+cmake -G %generator% -DWITH_PYTHON=on -DWITH_OPENCV=on -DOpenCV_DIR="%openCVPath%\build\x64\%vs%\lib" -DCMAKE_PREFIX_PATH="%deps_install_dir%\glog;%deps_install_dir%\protobuf;%deps_install_dir%\libwebsockets" -DOPENSSL_INCLUDE_DIRS="%openSSLPath%\include" %source_dir%
 cmake --build . --config %config_type%
 cmake --build . --config %config_type% --target copy-dll-opencv 
 cmake --build . --config %config_type% --target copy-dll-example
@@ -189,8 +192,8 @@ ECHO        Specify the directory where the dependencies will be downloaded.
 ECHO -i^|--depsinstalldir
 ECHO        Specify the directory where the dependencies will be installed.
 ECHO -g^|--generator
-ECHO        Visual Studio 15 2017 [arch] = Generates Visual Studio 2017 project files. Optional [arch] can be "Win64" or empty for Win32.
-ECHO        Visual Studio 14 2015 [arch] = Generates Visual Studio 2015 project files. Optional [arch] can be "Win64" or empty for Win32.
+ECHO        Visual Studio 15 2017 Win64 = Generates Visual Studio 2017 project files.
+ECHO        Visual Studio 14 2015 Win64 = Generates Visual Studio 2015 project files.
 ECHO -c^|--configuration
 ECHO        Release = Configuration for Release build.
 ECHO        Debug   = Configuration for Debug build.
@@ -212,8 +215,8 @@ pushd %deps_dir%
 if not exist "glog" ( git clone --branch v0.3.5 --depth 1 https://github.com/google/glog )
 pushd glog
 git checkout tags/v0.3.5
-if not exist "build_0_3_5%vs_type%" ( mkdir build_0_3_5%vs_type% )
-pushd build_0_3_5%vs_type%
+if not exist "build_0_3_5" ( mkdir build_0_3_5 )
+pushd build_0_3_5
 cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=%deps_install_dir%\glog -G %generator% ..
 cmake --build . --target install --config %configuration%
 popd
@@ -227,8 +230,8 @@ echo "Installing protobuf with config=%configuration% and generator=%generator%"
 pushd %deps_dir%
 if not exist "protobuf" ( git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf )
 pushd protobuf
-if not exist "build_3_9_0%vs_type%" ( mkdir build_3_9_0%vs_type% )
-pushd build_3_9_0%vs_type%
+if not exist "build_3_9_0" ( mkdir build_3_9_0 )
+pushd build_3_9_0
 cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=%deps_install_dir%\protobuf -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -G %generator% ..\cmake\
 cmake --build . --target install --config %configuration%
 popd
@@ -242,8 +245,8 @@ echo "Installing websockets with config=%configuration% and generator=%generator
 pushd %deps_dir%
 if not exist "libwebsockets" ( git clone --branch v3.1-stable --depth 1  https://libwebsockets.org/repo/libwebsockets )
 pushd libwebsockets
-if not exist "build_3_1_stable%vs_type%" ( mkdir build_3_1_stable%vs_type% )
-pushd build_3_1_stable%vs_type%
+if not exist "build_3_1_stable" ( mkdir build_3_1_stable )
+pushd build_3_1_stable
 cmake -DOPENSSL_ROOT_DIR="%openSSLPath%" -DCMAKE_INSTALL_PREFIX=%deps_install_dir%\libwebsockets -G %generator% ..
 cmake --build . --target install --config %configuration%
 popd
