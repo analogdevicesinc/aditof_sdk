@@ -93,19 +93,19 @@ setup() {
                 build_dir=$(pwd)/build
         fi
 
-        echo "The sdk will be built in: ${build_dir}" ${quiet}
+        echo "The sdk will be built in: ${build_dir}"
 
         if [[ -z "${deps_dir}" ]]; then
                 deps_dir=$(pwd)/deps
         fi
 
-        echo "The deps will be downloaded in: ${deps_dir}" ${quiet}
+        echo "The deps will be downloaded in: ${deps_dir}"
 
         if [[ -z "${deps_install_dir}" ]]; then
                 deps_install_dir=${deps_dir}/installed
         fi
 
-        echo "The deps will be installed in: ${deps_install_dir}" ${quiet}
+        echo "The deps will be installed in: ${deps_install_dir}"
 
         if [[ -z "${answer_yes}" ]]; then
              yes_or_exit "Do you want to continue?"
