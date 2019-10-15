@@ -23,8 +23,10 @@ print_help() {
 }
 
 install_required_packages() {
+        sudo apt update -y
+        sudo apt upgrade -y
         sudo apt install -y build-essential cmake python-dev python3-dev \
-        libssl-dev git
+        libssl-dev git v4l-utils
 }
 
 yes_or_exit() {
