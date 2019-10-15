@@ -10,7 +10,7 @@ After creating a build folder and moving into it `mkdir -p build && cd build`, w
 
 `cmake -D<option> <path_to_aditof_sdk>`
 
-which will generate a Makefile in the build directory. Usefull cmake options are:
+which will generate all the necessary recipes for building and installing. Useful cmake options are:
 
 | \<option\> | value | default | description |
 | --------- | ----------- | ----------- | ----------- |
@@ -22,24 +22,28 @@ which will generate a Makefile in the build directory. Usefull cmake options are
 | CMAKE_INSTALL_PREFIX | \<path\> |  /usr/local on UNIX, c:/Program Files on Windows | Installation directory used by `cmake install` |
 | PYTHON_EXECUTABLE | \<path\> | Path to default python executable used | Specify which python executable should be used for building the python bindings |
 
-The next command that we need to run is
 
-`make`
+#### Building and Installing 
 
-which will builder the project. After this command we can also run `make doc` to build the doxygen documentation if the `-DWITH_DOC=on` option was specified.
-After this we can run
+To build the sdk the following command is used:
 
-`sudo make install`
+`cmake --build . [--config <config>] [--target <target>]`
 
-in order to install the SDK in the system.
+Where `<config>` is the build type: `Debug, Release ...` and target is one of the following:
+
+| \<target\> | description |
+| --------- | ----------- |
+| install | Install the SDK in the system |
+| doc | Build the doxygen documentation |
+| copy-dll-bindings | Copy the necessary dll files in the bindings build folder (Only on Windows) |
+| copy-dll-example | Copy the necessary dll files in the examples build folder (Only on Windows) |
 
 Example: Consider a user that has the dependencies for the project installed in specific folders in `/opt`: `/opt/glog`, `/opt/protobuf`, `/opt/websockets`, and that wants to install the SDK in `/opt/aditof`, with examples on and all the possible bindings enabled. The following set of commands will do:
 ```
 cd aditof_sdk
 mkdir build && cd build
 cmake -DWITH_PYTHON=on -DWITH_OPENCV=on -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" -DCMAKE_INSTALL_PREFIX="/opt/aditof" ..
-make
-sudo make install
+sudo cmake --build . --target install
 ```
 
 After installing you should run `ldconfig` to update the links/cache that the dynamic loader uses.
