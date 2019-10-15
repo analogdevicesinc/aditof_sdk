@@ -17,14 +17,14 @@ print_help() {
         echo "        Specify the directory where the dependencies will be downloaded."
         echo "-i|--depsinstalldir"
         echo "        Specify the directory where the dependencies will be installed."
-        echo "-j|--jobs"
-        echo "        Specify the number of jobs to run in parallel when building dependencies and the SDK"
         echo ""
 }
 
 install_required_packages() {
+        sudo apt update -y
+        sudo apt upgrade -y
         sudo apt install -y build-essential cmake python-dev python3-dev \
-        libssl-dev git
+        libssl-dev git v4l-utils
 }
 
 yes_or_exit() {
@@ -40,7 +40,7 @@ yes_or_exit() {
 }
 
 setup() {
-        NUM_JOBS=$(nproc --all)
+        NUM_JOBS=1
 
         while [[ $# -gt 0 ]]
         do
@@ -66,11 +66,6 @@ setup() {
                 ;;
                 -i|--depsinstalldir)
                 deps_install_dir=$2
-                shift # past argument
-                shift # past value
-                ;;
-                -j|--jobs)
-                NUM_JOBS=$2
                 shift # past argument
                 shift # past value
                 ;;
@@ -130,7 +125,7 @@ setup() {
 
         pushd "${build_dir}"
         cmake "${source_dir}" "${CMAKE_OPTIONS}" -DCMAKE_PREFIX_PATH="${deps_install_dir}/glog;${deps_install_dir}/protobuf;${deps_install_dir}/websockets;${deps_install_dir}/opencv-${OPENCV}"
-        make -j ${NUM_JOBS}
+        make
 
 }
 
