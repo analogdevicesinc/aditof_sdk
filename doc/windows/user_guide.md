@@ -35,7 +35,7 @@ You can either build the evaluation application from source following the steps 
 
 Navigate to the location where you chose to install the evaluation application and run aditof-demo.exe. Alternatively, run the shortcut Aditof-Demo from desktop if you enabled the installer to create one.
 
-![aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/windows_aditof_demo.jpg)
+![aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/aditof_demo.png)
 
 A terminal window will open to display status messages (also warning and error messages, in case there are any issues). Shorty the main window will show up.
 

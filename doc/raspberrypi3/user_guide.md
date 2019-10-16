@@ -48,7 +48,7 @@ Take care that the jumper wire connected to RPi header Pin 3 must be split in tw
 
 Once Linux boots you'll see on the HDMI monitor the Linux desktop and on the top left corner a shortcut to the evaluation application. Double clicking on the icon will start the evaluation application.  A console window will open to show the application's status and, after a few seconds, the evaluation application GUI will be displayed.
 
-![aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/db410c_aditof_demo.jpg)
+![aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/aditof_demo.png)
 
 The evaluation application allows to do live streaming of depth and IR data as well as recording the depth and IR data and playing back from a file. The depth data is displayed as a color map ranging from warm to cold colors as the distance from the camera increases. A point in the middle of the depth image shows the distance in mm to the target.
 

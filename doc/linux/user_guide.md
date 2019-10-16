@@ -38,7 +38,7 @@
 
 You can build the evaluation application from source following the steps described in the ***Building the SDK*** section below.
 
-![aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/linux_aditof_demo.jpg)
+![aditof-demo](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/aditof_demo.png)
 
 The evaluation application allows to do live streaming of depth and IR data as well as recording the depth and IR data and playing back from a file. The depth data is displayed as a color map ranging from warm to cold colors as the distance from the camera increases. A point in the middle of the depth image shows the distance in mm to the target.
 
