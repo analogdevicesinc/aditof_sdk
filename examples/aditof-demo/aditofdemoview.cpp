@@ -431,15 +431,20 @@ void AdiTofDemoView::render() {
         cvui::text(frame, 60, 340, value);
         int thresholdClicked = cvui::iarea(50, 330, 100, 30);
 
-        if (cvui::button(frame, 160, 330, 90, 30, "Write")) {
-            // TODO: Write corresponding afe registers
-            // small signal removal threshold value is smallSignalThreshold
-        }
+        if (cvui::button(frame, 160, 330, 90, 30, "Apply")) {
+            const size_t REGS_CNT = 5;
+            uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001,
+                                              0x7c22};
+            uint16_t afeRegsVal[REGS_CNT] = {0x0006, 0x0004, 0, 0x0007, 0x0004};
 
-        if (m_smallSignal) {
-            // TODO: enable small signal
-        } else {
-            // TODO: disable small signal
+            afeRegsVal[2] |= smallSignalThreshold;
+
+            if (m_smallSignal) {
+                afeRegsVal[2] |= 0x8000;
+            }
+            // TO DO: This breaks things over USB. Works well on the target and
+            // over ethernet.
+            m_ctrl->writeAFEregister(afeRegsAddr, afeRegsVal, 5);
         }
 
         if (thresholdClicked == cvui::CLICK) {
