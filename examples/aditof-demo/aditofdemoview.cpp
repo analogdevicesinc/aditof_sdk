@@ -65,7 +65,7 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
                                const std::string &name)
     : m_ctrl(ctrl), m_viewName(name), m_depthFrameAvailable(false),
       m_irFrameAvailable(false), m_stopWorkersFlag(false), m_center(true),
-      m_waitKeyBarrier(0), m_distanceVal(0) {
+      m_waitKeyBarrier(0), m_distanceVal(0), m_smallSignal(false) {
     // cv::setNumThreads(2);
     m_depthImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
@@ -104,7 +104,7 @@ void AdiTofDemoView::render() {
     unsigned int errorColor = 0xff0000;
 
     std::string address = "0x";
-    std::string value = "0x";
+    std::string value = "0";
     std::string fileName = "";
     std::string status = "";
 
@@ -137,6 +137,9 @@ void AdiTofDemoView::render() {
     char afe_temp_str[32] = "AFE TEMP:";
     char laser_temp_str[32] = "LASER TEMP:";
     int temp_cnt = 0;
+
+    int thresholdClicked = 0;
+    int smallSignalThreshold = 0;
 
     while (true) {
         // Fill the frame with a nice color
@@ -419,12 +422,38 @@ void AdiTofDemoView::render() {
         cvui::text("Settings: ", 0.6);
         cvui::space(10);
         cvui::checkbox("Center Point", &m_center);
+        cvui::space(10);
+        cvui::checkbox("Small signal removal (0 - 16383)", &m_smallSignal);
+        cvui::space(10);
         cvui::endColumn();
+
+        cvui::rect(frame, 50, 330, 100, 30, valueColor);
+        cvui::text(frame, 60, 340, value);
+        int thresholdClicked = cvui::iarea(50, 330, 100, 30);
+
+        if (cvui::button(frame, 160, 330, 90, 30, "Write")) {
+            // TODO: Write corresponding afe registers
+            // small signal removal threshold value is smallSignalThreshold
+        }
+
+        if (m_smallSignal) {
+            // TODO: enable small signal
+        } else {
+            // TODO: disable small signal
+        }
+
+        if (thresholdClicked == cvui::CLICK) {
+            valueColor = selectedColor;
+            valueFieldSelected = true;
+        } else if (cvui::mouse(cvui::CLICK) &&
+                   thresholdClicked != cvui::CLICK) {
+            valueColor = normalColor;
+            valueFieldSelected = false;
+        }
 
         cvui::imshow(m_viewName, frame);
 
         if (captureEnabled) {
-
             if (playbackEnabled) {
                 std::this_thread::sleep_for(
                     std::chrono::milliseconds(1000 / displayFps));
@@ -474,9 +503,15 @@ void AdiTofDemoView::render() {
         std::string pressedValidKey = detail::getKeyPressed(key, backspace);
 
         if (valueFieldSelected) {
-            if (!backspace && value.size() < 6) {
+            if (key >= 47 && key <= 57) {
                 value += pressedValidKey;
-            } else if (backspace && value.size() > 2) {
+                int currentValue = stoi(value);
+                if (currentValue > ((1 << 14) - 1)) {
+                    value = value.substr(0, value.size() - 1);
+                } else {
+                    smallSignalThreshold = currentValue;
+                }
+            } else if (backspace) {
                 value = value.substr(0, value.size() - 1);
             }
         }
