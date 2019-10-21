@@ -97,17 +97,21 @@ std::pair<float, float> AdiTofDemoController::getTemperature() {
     return returnValue;
 }
 
-aditof::Status AdiTofDemoController::writeAFEregister(
-    uint16_t * /*address*/, uint16_t * /*data*/, uint16_t /*noOfEntries*/) {
-    // TODO: implement write afe regs
-    return aditof::Status::OK;
+aditof::Status AdiTofDemoController::writeAFEregister(uint16_t *address,
+                                                      uint16_t *data,
+                                                      uint16_t noOfEntries) {
+    auto device =
+        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDevice();
+    return device->writeAfeRegisters(address, data, noOfEntries);
 }
 
-aditof::Status AdiTofDemoController::readAFEregister(uint16_t * /*address*/,
-                                                     uint16_t * /*data*/,
-                                                     uint16_t /*noOfEntries*/) {
-    // TODO: implement read afe regs
-    return aditof::Status::OK;
+aditof::Status AdiTofDemoController::readAFEregister(uint16_t *address,
+                                                     uint16_t *data,
+                                                     uint16_t noOfEntries) {
+
+    auto device =
+        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDevice();
+    return device->readAfeRegisters(address, data, noOfEntries);
 }
 
 void AdiTofDemoController::startRecording(const std::string &fileName,
