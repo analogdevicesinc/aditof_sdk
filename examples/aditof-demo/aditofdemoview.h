@@ -48,6 +48,7 @@ class AdiTofDemoView {
     int m_distanceVal;
 
     bool m_smallSignal;
+    bool m_crtSmallSignalState;
 };
 
 #endif

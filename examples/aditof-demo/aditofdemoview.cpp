@@ -65,7 +65,8 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
                                const std::string &name)
     : m_ctrl(ctrl), m_viewName(name), m_depthFrameAvailable(false),
       m_irFrameAvailable(false), m_stopWorkersFlag(false), m_center(true),
-      m_waitKeyBarrier(0), m_distanceVal(0), m_smallSignal(false) {
+      m_waitKeyBarrier(0), m_distanceVal(0), m_smallSignal(false),
+      m_crtSmallSignalState(false) {
     // cv::setNumThreads(2);
     m_depthImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
@@ -103,8 +104,11 @@ void AdiTofDemoView::render() {
     unsigned int selectedColor = 0xffffff;
     unsigned int errorColor = 0xff0000;
 
+    int thresholdClicked = 0;
+    int smallSignalThreshold = 50;
+
     std::string address = "0x";
-    std::string value = "0";
+    std::string value = std::to_string(smallSignalThreshold);
     std::string fileName = "";
     std::string status = "";
 
@@ -137,9 +141,6 @@ void AdiTofDemoView::render() {
     char afe_temp_str[32] = "AFE TEMP:";
     char laser_temp_str[32] = "LASER TEMP:";
     int temp_cnt = 0;
-
-    int thresholdClicked = 0;
-    int smallSignalThreshold = 0;
 
     while (true) {
         // Fill the frame with a nice color
@@ -417,13 +418,16 @@ void AdiTofDemoView::render() {
             }
         }
 
+        bool smallSignalChanged = false;
+
         cvui::beginColumn(frame, 50, 250);
         cvui::space(10);
         cvui::text("Settings: ", 0.6);
         cvui::space(10);
         cvui::checkbox("Center Point", &m_center);
         cvui::space(10);
-        cvui::checkbox("Small signal removal (0 - 16383)", &m_smallSignal);
+        cvui::checkbox("Small signal removal (0 - 16383)",
+                       &m_crtSmallSignalState);
         cvui::space(10);
         cvui::endColumn();
 
@@ -431,7 +435,14 @@ void AdiTofDemoView::render() {
         cvui::text(frame, 60, 340, value);
         int thresholdClicked = cvui::iarea(50, 330, 100, 30);
 
-        if (cvui::button(frame, 160, 330, 90, 30, "Apply")) {
+        // Check if small signal toggle button has changed
+        smallSignalChanged = m_crtSmallSignalState != m_smallSignal;
+        // Update the last set value of the small signal checkbox
+        m_smallSignal = m_crtSmallSignalState;
+
+        if (cvui::button(frame, 160, 330, 90, 30, "Write") ||
+            smallSignalChanged) {
+
             const size_t REGS_CNT = 5;
             uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001,
                                               0x7c22};
