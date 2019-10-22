@@ -95,6 +95,7 @@ target_link_libraries( ${PROJECT_NAME}
 
 if ( RASPBERRYPI )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon -latomic")
+    include (${CMAKE_SOURCE_DIR}/cmake/raspberrypi-revision-config.cmake})
 endif()
 
 if( APPLE )
