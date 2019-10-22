@@ -49,7 +49,7 @@ int temp_sensor_read(temp_sensor *t, float *temp_val) {
     return 0;
 }
 
-int temp_sensor_open(char *dev_fqn, int addr, temp_sensor *t) {
+int temp_sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
     int funcs, fd, r;
     t->fd = t->addr = 0;
     t->dev = 0;

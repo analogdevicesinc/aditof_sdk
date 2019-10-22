@@ -17,6 +17,7 @@ extern "C" {
 #include <sstream>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <target_definitions.h>
 #include <unordered_map>
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
@@ -25,7 +26,6 @@ extern "C" {
 #define V4L2_CID_AD_DEV_READ_REG 0xA00A01
 #define CTRL_PACKET_SIZE 4096
 
-#define TEMP_SENSOR_DEV_PATH "/dev/i2c-1"
 #define LASER_TEMP_SENSOR_I2C_ADDR 0x49
 #define AFE_TEMP_SENSOR_I2C_ADDR 0x4b
 

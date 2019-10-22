@@ -10,7 +10,7 @@
 /*
  * Open the temperature sensor device
  */
-int temp_sensor_open(char *dev_fqn, int addr, temp_sensor *t);
+int temp_sensor_open(const char *dev_fqn, int addr, temp_sensor *t);
 /*
  * read the temperature sensor data
  */
