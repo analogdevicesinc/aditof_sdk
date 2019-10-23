@@ -24,6 +24,7 @@ class AdiTofDemoView {
   private:
     void _displayDepthImage();
     void _displayIrImage();
+    void _displayBlendedImage();
 
   private:
     std::shared_ptr<AdiTofDemoController> m_ctrl;
@@ -31,6 +32,7 @@ class AdiTofDemoView {
 
     cv::Mat m_depthImage;
     cv::Mat m_irImage;
+    cv::Mat m_blendedImage;
 
     std::thread m_depthImageWorker;
     std::thread m_irImageWorker;
