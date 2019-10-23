@@ -642,14 +642,14 @@ aditof::Status LocalDevice::writeAfeRegisters(const uint16_t *address,
     length *= 2 * sizeof(unsigned short);
     while (length) {
         memset(buf, 0, CTRL_PACKET_SIZE);
-        for (size_t i = 0;
-             i < (length > CTRL_PACKET_SIZE ? CTRL_PACKET_SIZE : length);
-             i += 4) {
+        size_t maxBytesToSend =
+            length > CTRL_PACKET_SIZE ? CTRL_PACKET_SIZE : length;
+        for (size_t i = 0; i < maxBytesToSend; i += 4) {
             *(unsigned short *)(buf + i) = address[sampleCnt];
             *(unsigned short *)(buf + i + 2) = data[sampleCnt];
             sampleCnt++;
         }
-        length -= CTRL_PACKET_SIZE;
+        length -= maxBytesToSend;
 
         extCtrl.size = 2048 * sizeof(unsigned short);
         extCtrl.p_u16 = (unsigned short *)buf;

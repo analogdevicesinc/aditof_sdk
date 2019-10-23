@@ -46,6 +46,9 @@ class AdiTofDemoView {
     int m_waitKeyBarrier;
     std::condition_variable m_barrierCv;
     int m_distanceVal;
+
+    bool m_smallSignal;
+    bool m_crtSmallSignalState;
 };
 
 #endif

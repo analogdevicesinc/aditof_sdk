@@ -65,7 +65,8 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
                                const std::string &name)
     : m_ctrl(ctrl), m_viewName(name), m_depthFrameAvailable(false),
       m_irFrameAvailable(false), m_stopWorkersFlag(false), m_center(true),
-      m_waitKeyBarrier(0), m_distanceVal(0) {
+      m_waitKeyBarrier(0), m_distanceVal(0), m_smallSignal(false),
+      m_crtSmallSignalState(false) {
     // cv::setNumThreads(2);
     m_depthImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
@@ -103,8 +104,11 @@ void AdiTofDemoView::render() {
     unsigned int selectedColor = 0xffffff;
     unsigned int errorColor = 0xff0000;
 
+    int thresholdClicked = 0;
+    int smallSignalThreshold = 50;
+
     std::string address = "0x";
-    std::string value = "0x";
+    std::string value = std::to_string(smallSignalThreshold);
     std::string fileName = "";
     std::string status = "";
 
@@ -414,17 +418,58 @@ void AdiTofDemoView::render() {
             }
         }
 
+        bool smallSignalChanged = false;
+
         cvui::beginColumn(frame, 50, 250);
         cvui::space(10);
         cvui::text("Settings: ", 0.6);
         cvui::space(10);
         cvui::checkbox("Center Point", &m_center);
+        cvui::space(10);
+        cvui::checkbox("Small signal removal (0 - 16383)",
+                       &m_crtSmallSignalState);
+        cvui::space(10);
         cvui::endColumn();
+
+        cvui::rect(frame, 50, 330, 100, 30, valueColor);
+        cvui::text(frame, 60, 340, value);
+        int thresholdClicked = cvui::iarea(50, 330, 100, 30);
+
+        // Check if small signal toggle button has changed
+        smallSignalChanged = m_crtSmallSignalState != m_smallSignal;
+        // Update the last set value of the small signal checkbox
+        m_smallSignal = m_crtSmallSignalState;
+
+        if (cvui::button(frame, 160, 330, 90, 30, "Write") ||
+            smallSignalChanged) {
+
+            const size_t REGS_CNT = 5;
+            uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001,
+                                              0x7c22};
+            uint16_t afeRegsVal[REGS_CNT] = {0x0006, 0x0004, 0, 0x0007, 0x0004};
+
+            afeRegsVal[2] |= smallSignalThreshold;
+
+            if (m_smallSignal) {
+                afeRegsVal[2] |= 0x8000;
+            }
+            // TO DO: This breaks things over USB. Works well on the target and
+            // over ethernet.
+            m_ctrl->writeAFEregister(afeRegsAddr, afeRegsVal, 5);
+        }
+
+        if (thresholdClicked == cvui::CLICK) {
+            valueColor = selectedColor;
+            valueFieldSelected = true;
+        } else if (cvui::mouse(cvui::CLICK) &&
+                   thresholdClicked != cvui::CLICK) {
+            valueColor = normalColor;
+            valueFieldSelected = false;
+        }
 
         cvui::imshow(m_viewName, frame);
 
         if (captureEnabled) {
-
             if (playbackEnabled) {
                 std::this_thread::sleep_for(
                     std::chrono::milliseconds(1000 / displayFps));
@@ -474,9 +519,15 @@ void AdiTofDemoView::render() {
         std::string pressedValidKey = detail::getKeyPressed(key, backspace);
 
         if (valueFieldSelected) {
-            if (!backspace && value.size() < 6) {
+            if (key >= 47 && key <= 57) {
                 value += pressedValidKey;
-            } else if (backspace && value.size() > 2) {
+                int currentValue = stoi(value);
+                if (currentValue > ((1 << 14) - 1)) {
+                    value = value.substr(0, value.size() - 1);
+                } else {
+                    smallSignalThreshold = currentValue;
+                }
+            } else if (backspace) {
                 value = value.substr(0, value.size() - 1);
             }
         }
