@@ -27,6 +27,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIR})
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
 target_link_libraries(${PROJECT_NAME} PRIVATE aditof ${OpenCV_LIBS})
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config_pipe.sh
+               ${CMAKE_CURRENT_BINARY_DIR}/config_pipe.sh
+               COPYONLY)
 
 if (NOT WIN32)
 	find_library(PTHREAD_LIBRARIES pthread)
