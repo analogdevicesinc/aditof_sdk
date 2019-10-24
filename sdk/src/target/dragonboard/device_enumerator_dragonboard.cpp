@@ -117,6 +117,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     using namespace aditof;
     Status status = Status::OK;
 
+    LOG(INFO) << "Looking for devices on the target";
+
     // Find all media device paths
     std::vector<std::string> mediaPaths;
     const std::string mediaDirPath("/dev/");

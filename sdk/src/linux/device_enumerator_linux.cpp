@@ -12,6 +12,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     using namespace aditof;
     Status status = Status::OK;
 
+    LOG(INFO) << "Looking for USB connected devices";
+
     const char *path = "/dev/";
     DIR *d;
 
