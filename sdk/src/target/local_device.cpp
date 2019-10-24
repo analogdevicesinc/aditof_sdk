@@ -115,6 +115,8 @@ aditof::Status LocalDevice::open() {
     using namespace aditof;
     Status status = Status::OK;
 
+    LOG(INFO) << "Opening device";
+
     struct stat st;
     struct v4l2_capability cap;
 

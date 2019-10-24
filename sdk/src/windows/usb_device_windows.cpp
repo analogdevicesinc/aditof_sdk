@@ -293,6 +293,8 @@ aditof::Status UsbDevice::open() {
     using namespace aditof;
     Status status = Status::OK;
 
+    LOG(INFO) << "Opening device";
+
     HRESULT hr;
     GUID CAPTURE_MODE = PIN_CATEGORY_CAPTURE;
 
