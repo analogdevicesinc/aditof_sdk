@@ -138,6 +138,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     // Identify any eligible time of flight cameras
     for (const auto &media : mediaPaths) {
 
+        DLOG(INFO) << "Looking at: " << media << " for an eligible TOF camera";
+
         std::string devPath;
         std::string subdevPath;
 

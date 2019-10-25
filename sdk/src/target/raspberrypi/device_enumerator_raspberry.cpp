@@ -46,5 +46,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     devData.driverPath = "/dev/video0";
     devices.emplace_back(devData);
 
+    DLOG(INFO) << "Looking at: " << devData.driverPath << " for an eligible TOF camera";
+
     return status;
 }
