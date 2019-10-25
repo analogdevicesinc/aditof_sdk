@@ -472,6 +472,8 @@ aditof::Status UsbDevice::stop() {
     using namespace aditof;
     Status status = Status::OK;
 
+    LOG(INFO) << "Stopping device";
+
     HRESULT hr = m_implData->pControl->Stop();
     if (FAILED(hr)) {
         LOG(WARNING) << "ERROR: Could not stop graph";
