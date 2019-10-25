@@ -98,6 +98,10 @@ void AdiTofDemoView::render() {
     bool playbackChecked = false;
     int playCurrentValue = 2;
 
+    bool separatedViewChecked = true;
+    bool blendedViewChecked = false;
+    int viewCurrentValue = 2;
+
     int pulseCount = 2000;
 
     unsigned int normalColor = 0x000032;
@@ -120,7 +124,8 @@ void AdiTofDemoView::render() {
     bool valueFieldSelected = false;
     bool fileNameFieldSelected = false;
 
-    const cv::String windows[] = {m_viewName, "Depth Image", "IR Image"};
+    const cv::String windows[] = {m_viewName, "Depth Image", "IR Image",
+                                  "Blended Image"};
     cvui::init(windows, 1);
 
     int frameCount = 0;
@@ -128,6 +133,7 @@ void AdiTofDemoView::render() {
     auto startTime = std::chrono::system_clock::now();
 
     bool captureEnabled = false;
+    bool captureBlendedEnabled = false;
     bool recordEnabled = false;
     bool playbackEnabled = false;
 
@@ -144,7 +150,7 @@ void AdiTofDemoView::render() {
 
     while (true) {
         // Fill the frame with a nice color
-        cv::Mat frame = cv::Mat(400, 400, CV_8UC3);
+        cv::Mat frame = cv::Mat(500, 400, CV_8UC3);
 
         frame = cv::Scalar(49, 52, 49);
 
@@ -190,6 +196,15 @@ void AdiTofDemoView::render() {
             playbackChecked = xorValue & 1;
         }
 
+        // Creating a group of buttons where only one can be active at a time
+        int btnGroupView = separatedViewChecked << 1 | blendedViewChecked;
+        if (viewCurrentValue != btnGroupView) {
+            int xorValue = viewCurrentValue ^ btnGroupView;
+            viewCurrentValue = xorValue;
+            separatedViewChecked = xorValue & (1 << 1);
+            blendedViewChecked = xorValue & 1;
+        }
+
         // TODO: set camera mode here
         if (checkboxChanged) {
             int selectedMode =
@@ -212,23 +227,41 @@ void AdiTofDemoView::render() {
 
         cvui::text(frame, 50, 100, "Video: ", 0.6);
 
-        if (cvui::button(frame, 50, 125, 90, 30,
-                         (captureEnabled ? "Stop" : "Play"))) {
+        if (cvui::button(
+                frame, 50, 125, 90, 30,
+                (captureEnabled || captureBlendedEnabled ? "Stop" : "Play"))) {
             if (livePlayChecked) {
-                if (m_ctrl->hasCamera()) {
-                    captureEnabled = !captureEnabled;
-                    if (captureEnabled) {
-                        m_ctrl->startCapture();
-                        m_ctrl->requestFrame();
-                        status = "Playing from device!";
+                if (separatedViewChecked) {
+                    if (m_ctrl->hasCamera()) {
+                        captureEnabled = !captureEnabled;
+                        if (captureEnabled) {
+                            m_ctrl->startCapture();
+                            m_ctrl->requestFrame();
+                            status = "Playing from device!";
+                        } else {
+                            cv::destroyWindow(windows[1]);
+                            cv::destroyWindow(windows[2]);
+                            m_ctrl->stopCapture();
+                            status = "";
+                        }
                     } else {
-                        cv::destroyWindow(windows[1]);
-                        cv::destroyWindow(windows[2]);
-                        m_ctrl->stopCapture();
-                        status = "";
+                        status = "No cameras connected!";
                     }
                 } else {
-                    status = "No cameras connected!";
+                    if (m_ctrl->hasCamera()) {
+                        captureBlendedEnabled = !captureBlendedEnabled;
+                        if (captureBlendedEnabled) {
+                            m_ctrl->startCapture();
+                            m_ctrl->requestFrame();
+                            status = "Playing from device!";
+                        } else {
+                            cv::destroyWindow(windows[3]);
+                            m_ctrl->stopCapture();
+                            status = "";
+                        }
+                    } else {
+                        status = "No cameras connected!";
+                    }
                 }
             } else {
                 if (fileName.empty()) {
@@ -255,9 +288,7 @@ void AdiTofDemoView::render() {
         if (cvui::button(frame, 150, 125, 90, 30, "Record")) {
             if (fileName.empty()) {
                 status = "Enter a file name!";
-            } else if (!captureEnabled) {
-                status = "Start live playing before recording!";
-            } else {
+            } else if (captureEnabled || captureBlendedEnabled) {
                 recordEnabled = !recordEnabled;
                 static std::string oldStatus = "";
                 if (recordEnabled) {
@@ -270,6 +301,8 @@ void AdiTofDemoView::render() {
                     m_ctrl->stopRecording();
                     status = oldStatus;
                 }
+            } else {
+                status = "Start live playing before recording!";
             }
         }
 
@@ -282,6 +315,30 @@ void AdiTofDemoView::render() {
         cvui::space(10);
         cvui::checkbox("Playback", &playbackChecked);
         cvui::endRow();
+
+        if (!(captureEnabled || captureBlendedEnabled || playbackChecked)) {
+            cvui::beginColumn(frame, 50, 250);
+            cvui::text("View depth and IR: ", 0.6);
+            cvui::space(10);
+            cvui::beginRow(frame, 50, 275);
+            cvui::checkbox("Separated", &separatedViewChecked);
+            cvui::space(10);
+            cvui::checkbox("Blended", &blendedViewChecked);
+            cvui::endRow();
+            cvui::endColumn();
+        } else if (captureBlendedEnabled) {
+            cvui::beginColumn(frame, 50, 250);
+            cvui::text("Blending factor:", 0.6);
+            cvui::space(5);
+            cvui::trackbar(200, &m_blendValue, (double)0.0, (double)1.0);
+            cvui::space(5);
+            cvui::endColumn();
+        } else {
+            cvui::beginColumn(frame, 50, 250);
+            cvui::text("Showing depth and IR", 0.6);
+            ;
+            cvui::endColumn();
+        }
 
         static int currentFrame = 0;
         if (playbackEnabled) {
@@ -392,22 +449,22 @@ void AdiTofDemoView::render() {
             addressFieldSelected = false;
         }
 #endif
-        if (displayFps && captureEnabled) {
-            cvui::text(frame, 350, 380, "FPS:" + std::to_string(displayFps));
+        if (displayFps && (captureEnabled || captureBlendedEnabled)) {
+            cvui::text(frame, 350, 480, "FPS:" + std::to_string(displayFps));
         }
 
-        if (captureEnabled) {
+        if (captureEnabled || captureBlendedEnabled) {
             if (temp_cnt++ == 64) {
                 std::pair<float, float> temp = m_ctrl->getTemperature();
                 temp_cnt = 0;
                 sprintf(afe_temp_str, "AFE TEMP: %.1f", temp.first);
                 sprintf(laser_temp_str, "LASER TEMP: %.1f", temp.second);
             }
-            cvui::text(frame, 20, 380, afe_temp_str);
-            cvui::text(frame, 180, 380, laser_temp_str);
+            cvui::text(frame, 20, 480, afe_temp_str);
+            cvui::text(frame, 180, 480, laser_temp_str);
         }
 
-        if (captureEnabled && !playbackEnabled) {
+        if ((captureEnabled || captureBlendedEnabled) && !playbackEnabled) {
             frameCount++;
             auto endTime = std::chrono::system_clock::now();
             std::chrono::duration<double> elapsed = endTime - startTime;
@@ -420,7 +477,7 @@ void AdiTofDemoView::render() {
 
         bool smallSignalChanged = false;
 
-        cvui::beginColumn(frame, 50, 250);
+        cvui::beginColumn(frame, 50, 300);
         cvui::space(10);
         cvui::text("Settings: ", 0.6);
         cvui::space(10);
@@ -431,16 +488,16 @@ void AdiTofDemoView::render() {
         cvui::space(10);
         cvui::endColumn();
 
-        cvui::rect(frame, 50, 330, 100, 30, valueColor);
-        cvui::text(frame, 60, 340, value);
-        int thresholdClicked = cvui::iarea(50, 330, 100, 30);
+        cvui::rect(frame, 50, 380, 100, 30, valueColor);
+        cvui::text(frame, 60, 390, value);
+        int thresholdClicked = cvui::iarea(50, 380, 100, 30);
 
         // Check if small signal toggle button has changed
         smallSignalChanged = m_crtSmallSignalState != m_smallSignal;
         // Update the last set value of the small signal checkbox
         m_smallSignal = m_crtSmallSignalState;
 
-        if (cvui::button(frame, 160, 330, 90, 30, "Write") ||
+        if (cvui::button(frame, 160, 380, 90, 30, "Write") ||
             smallSignalChanged) {
 
             const size_t REGS_CNT = 5;
@@ -482,7 +539,7 @@ void AdiTofDemoView::render() {
                 m_ctrl->stopPlayback();
                 cv::destroyWindow(windows[1]);
                 cv::destroyWindow(windows[2]);
-            } else {
+            } else if (!captureBlendedEnabled) {
                 m_capturedFrame = m_ctrl->getFrame();
 
                 aditof::FrameDetails frameDetails;
@@ -499,18 +556,32 @@ void AdiTofDemoView::render() {
             }
         }
 
+        if (captureBlendedEnabled) {
+            m_capturedFrame = m_ctrl->getFrame();
+
+            aditof::FrameDetails frameDetails;
+            m_capturedFrame->getDetails(frameDetails);
+            frameWidth = frameDetails.width;
+            frameHeight = frameDetails.height;
+            m_ctrl->requestFrame();
+        }
+
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
-        if (captureEnabled) {
+        if (captureEnabled && !captureBlendedEnabled) {
             m_barrierCv.wait(imshow_lock,
                              [&]() { return m_waitKeyBarrier == 2; });
             m_waitKeyBarrier = 0;
-        }
 
-        if (captureEnabled) {
             cvui::imshow("Depth Image", m_depthImage);
             cvui::imshow("IR Image", m_irImage);
             m_depthImage.release();
             m_irImage.release();
+        }
+
+        if (captureBlendedEnabled) {
+            _displayBlendedImage();
+            cvui::imshow("Blended Image", m_blendedImage);
+            m_blendedImage.release();
         }
 
         int key = cv::waitKey(10);
@@ -657,4 +728,33 @@ void AdiTofDemoView::_displayIrImage() {
             m_barrierCv.notify_one();
         }
     }
+}
+
+void AdiTofDemoView::_displayBlendedImage() {
+    std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
+
+    uint16_t *irData;
+    localFrame->getData(aditof::FrameDataType::IR, &irData);
+
+    uint16_t *data;
+    localFrame->getData(aditof::FrameDataType::DEPTH, &data);
+
+    aditof::FrameDetails frameDetails;
+    localFrame->getDetails(frameDetails);
+
+    int frameHeight = static_cast<int>(frameDetails.height) / 2;
+    int frameWidth = static_cast<int>(frameDetails.width);
+
+    m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
+    m_irImage.convertTo(m_irImage, CV_8U, 255.0 / m_ctrl->getRange());
+    flip(m_irImage, m_irImage, 1);
+    cv::cvtColor(m_irImage, m_irImage, cv::COLOR_GRAY2RGB);
+
+    m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
+    m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / m_ctrl->getRange());
+    flip(m_depthImage, m_depthImage, 1);
+    applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
+
+    cv::addWeighted(m_depthImage, m_blendValue, m_irImage, 1.0F - m_blendValue,
+                    0, m_blendedImage);
 }
