@@ -101,13 +101,11 @@ aditof::Status Calibration::getAfeFirmware(std::string mode,
             for (sub_iterator sub_iter = sub_packet_map.packet.begin();
                  sub_iter != sub_packet_map.packet.end(); ++sub_iter) {
                 if (sub_iter->first == 5) {
-                    LOG(INFO) << "Found firmware for mode " << mode.c_str();
                     for (std::list<float>::iterator itt =
                              sub_iter->second.value.begin();
                          itt != sub_iter->second.value.end(); ++itt) {
                         data.push_back((uint16_t)*itt);
                     }
-                    LOG(INFO) << "Firmware size: " << data.size();
                     return Status::OK;
                 }
             }

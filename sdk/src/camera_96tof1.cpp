@@ -96,6 +96,8 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to read firmware from eeprom";
             return Status::UNREACHABLE;
+        } else {
+            LOG(INFO) << "Found firmware for mode: " << mode;
         }
 
         LOG(INFO) << "Firmware size: " << firmwareData.size();
