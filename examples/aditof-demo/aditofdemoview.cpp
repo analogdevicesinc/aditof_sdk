@@ -196,7 +196,7 @@ void AdiTofDemoView::render() {
             playbackChecked = xorValue & 1;
         }
 
-        // play button group
+        // Creating a group of buttons where only one can be active at a time
         int btnGroupView = separatedViewChecked << 1 | blendedViewChecked;
         if (viewCurrentValue != btnGroupView) {
             int xorValue = viewCurrentValue ^ btnGroupView;
