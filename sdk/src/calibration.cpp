@@ -148,11 +148,9 @@ aditof::Status Calibration::getGainOffset(std::string mode, float &gain,
                  sub_iter != sub_packet_map.packet.end(); ++sub_iter) {
                 if (sub_iter->first == 26) {
                     gain = sub_iter->second.value.front();
-                    LOG(INFO) << "Calibration gain: " << gain;
                 }
                 if (sub_iter->first == 27) {
                     offset = sub_iter->second.value.front();
-                    LOG(INFO) << "Calibration offset: " << offset;
                 }
             }
             return Status::OK;

@@ -112,6 +112,11 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to read gain and offset from eeprom";
             return Status::UNREACHABLE;
+        } else {
+            LOG(INFO) << "Camera calibration parameters for mode: " << mode
+                      << " are gain: " << m_details.frameType.cal_data.gain
+                      << " "
+                      << "offset: " << m_details.frameType.cal_data.offset;
         }
     }
 
