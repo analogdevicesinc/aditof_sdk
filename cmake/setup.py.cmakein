@@ -1,17 +1,19 @@
 #!/usr/bin/python
 from distutils.core import setup, Extension
 
-aditof_module = Extension('aditofpython',
-                    define_macros = [('MAJOR_VERSION', '${ADITOF_VERSION_MAJOR}'),
-                                     ('MINOR_VERSION', '${ADITOF_VERSION_MINOR}'),
-                                     ('PATCH_VERSION', '${ADITOF_VERSION_PATCH}')],
-                    include_dirs = ['${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}'],
-                    libraries = ['aditof'],
-                    library_dirs = ['${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}'],
-                    sources = ['${CMAKE_CURRENT_SOURCE_DIR}/aditofpython.cpp'])
+import sys
+if sys.version_info < (3,0):
+  sys.exit('Minimum Python is 3.0')
 
 setup (name = 'aditofpython',
        version = '${VERSION}',
        author = "Analog Devices, Inc",
        description = "Python bindings for the 3D ToF SDK",
-       ext_modules = [aditof_module])
+       packages = [ '' ],
+       package_dir = {
+              '': '${CMAKE_CURRENT_BINARY_DIR}'
+       },
+       package_data = {
+              '': ['${TARGET_OUTPUT_NAME}']
+       }
+)

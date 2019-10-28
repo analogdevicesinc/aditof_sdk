@@ -8,6 +8,10 @@ pybind11_add_module(aditofpython aditofpython.cpp)
 
 target_link_libraries(aditofpython PRIVATE aditof)
 
+get_target_property(target_prefix aditofpython PREFIX)
+get_target_property(target_suffix aditofpython SUFFIX)
+set(TARGET_OUTPUT_NAME "${target_prefix}aditofpython${target_suffix}")
+
 add_subdirectory(examples/dnn)
 
 configure_file(
