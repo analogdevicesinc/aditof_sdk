@@ -81,6 +81,8 @@ aditof::Status UsbDevice::open() {
     using namespace aditof;
     Status status = Status::OK;
 
+    LOG(INFO) << "Opening device";
+
     m_implData->fd =
         ::open(m_devData.driverPath.c_str(), O_RDWR | O_NONBLOCK, 0);
     if (-1 == m_implData->fd) {

@@ -117,6 +117,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     using namespace aditof;
     Status status = Status::OK;
 
+    LOG(INFO) << "Looking for devices on the target";
+
     // Find all media device paths
     std::vector<std::string> mediaPaths;
     const std::string mediaDirPath("/dev/");
@@ -135,6 +137,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
 
     // Identify any eligible time of flight cameras
     for (const auto &media : mediaPaths) {
+
+        DLOG(INFO) << "Looking at: " << media << " for an eligible TOF camera";
 
         std::string devPath;
         std::string subdevPath;

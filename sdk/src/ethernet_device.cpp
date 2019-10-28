@@ -165,6 +165,8 @@ aditof::Status EthernetDevice::stop() {
     Network *net = m_implData->net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
 
+    LOG(INFO) << "Stopping device";
+
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
         return Status::UNREACHABLE;

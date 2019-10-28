@@ -13,6 +13,8 @@ aditof::Status DeviceEnumeratorEthernet::findDevices(
     using namespace aditof;
     Status status = Status::OK;
 
+    LOG(INFO) << "Looking for devices over ethernet";
+
     std::unique_ptr<Network> net(new Network());
 
     if (net->ServerConnect(m_ip) != 0) {

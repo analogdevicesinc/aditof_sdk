@@ -1,12 +1,16 @@
 #include "device_enumerator_impl.h"
 #include "windows_utils.h"
 
+#include <glog/logging.h>
+
 #include <atlstr.h>
 
 aditof::Status DeviceEnumeratorImpl::findDevices(
     std::vector<aditof::DeviceConstructionData> &devices) {
     using namespace aditof;
     Status status = Status::OK;
+
+    LOG(INFO) << "Looking for USB connected devices";
 
     HRESULT hr;
 

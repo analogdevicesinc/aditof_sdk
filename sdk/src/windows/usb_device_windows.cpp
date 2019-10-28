@@ -293,6 +293,8 @@ aditof::Status UsbDevice::open() {
     using namespace aditof;
     Status status = Status::OK;
 
+    LOG(INFO) << "Opening device";
+
     HRESULT hr;
     GUID CAPTURE_MODE = PIN_CATEGORY_CAPTURE;
 
@@ -469,6 +471,8 @@ aditof::Status UsbDevice::start() {
 aditof::Status UsbDevice::stop() {
     using namespace aditof;
     Status status = Status::OK;
+
+    LOG(INFO) << "Stopping device";
 
     HRESULT hr = m_implData->pControl->Stop();
     if (FAILED(hr)) {

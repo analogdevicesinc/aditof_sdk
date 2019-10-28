@@ -12,6 +12,9 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     std::vector<aditof::DeviceConstructionData> &devices) {
     using namespace aditof;
     Status status = Status::OK;
+
+    LOG(INFO) << "Looking for devices on the target";
+
     // TO DO: Do we still need to do this?
     // Find all video device paths
     std::vector<std::string> videoPaths;
@@ -42,6 +45,9 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     devData.deviceType = DeviceType::LOCAL;
     devData.driverPath = "/dev/video0";
     devices.emplace_back(devData);
+
+    DLOG(INFO) << "Looking at: " << devData.driverPath
+               << " for an eligible TOF camera";
 
     return status;
 }
