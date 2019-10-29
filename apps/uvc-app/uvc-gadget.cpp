@@ -52,14 +52,6 @@
 
 #define MAX_PACKET_SIZE 60
 
-#define RUNTIME_FPGA_PROGRAM
-
-#define TEMP_SENSOR_DEV_PATH "/dev/i2c-1"
-#define LASER_TEMP_SENSOR_I2C_ADDR 0x49
-#define AFE_TEMP_SENSOR_I2C_ADDR 0x4b
-
-char *eeprom_device = (char *)"/sys/bus/i2c/devices/0-0056/eeprom";
-
 /* Enable debug prints. */
 //#define ENABLE_BUFFER_DEBUG
 //#define ENABLE_USB_REQUEST_DEBUG
@@ -265,12 +257,7 @@ struct uvc_device {
 
 bool DeviceStartedStreaming = false;
 
-/* V4l2 Sub Device Handle */
-#define V4L2_CID_AD_DEV_SET_CHIP_CONFIG 0xA00A00
-#define V4L2_CID_AD_DEV_READ_REG 0xA00A01
-
 int ad903x_hw = 0;
-int v4l2_subdev_fd;
 char v4l2_subdev_prog_file[255] = "afe_firmware.bin";
 
 /* TODO: Make this declaration local or part of dev stucture */
