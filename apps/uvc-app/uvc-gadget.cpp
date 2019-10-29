@@ -276,7 +276,7 @@ char v4l2_subdev_prog_file[255] = "afe_firmware.bin";
 /* TODO: Make this declaration local or part of dev stucture */
 struct v4l2_plane gPlanes[8] = {{0}};
 int firmware_size = 0, flen = 0;
-char firmware[4200] = {0};
+char firmware[16384] = {0};
 unsigned short reg_addr;
 
 /* EEPROM data */
