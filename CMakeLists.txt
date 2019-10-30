@@ -21,6 +21,7 @@ option(WITH_EXAMPLES "Build examples?" ON)
 option(WITH_DOC "Build documentation?" OFF)
 option(WITH_PYTHON "Build python bindings?" OFF)
 option(WITH_OPENCV "Build opencv bindings?" OFF)
+option(WITH_MATLAB "Build matlab bindings?" OFF)
 
 add_subdirectory(sdk)
 add_subdirectory(apps)
@@ -36,6 +37,9 @@ if (WITH_PYTHON)
 endif()
 if (WITH_OPENCV)
         add_subdirectory(bindings/opencv)
+endif()
+if (WITH_MATLAB)
+        add_subdirectory(bindings/matlab)
 endif()
 
 ############################### Installer #######################################
