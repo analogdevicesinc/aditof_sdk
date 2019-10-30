@@ -4,6 +4,7 @@ project(examples)
 add_subdirectory(aditof-demo)
 add_subdirectory(first-frame)
 add_subdirectory(first-frame-ethernet)
+add_subdirectory(imgproc-example)
 
 include(GNUInstallDirs)
 

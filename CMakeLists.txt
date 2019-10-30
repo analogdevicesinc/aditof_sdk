@@ -19,7 +19,7 @@ set(VERSION "${ADITOF_VERSION_MAJOR}.${ADITOF_VERSION_MINOR}.${ADITOF_VERSION_PA
 ############################### Options #######################################
 option(WITH_EXAMPLES "Build examples?" ON)
 option(WITH_DOC "Build documentation?" OFF)
-option(WITH_PYTHON "Build python bindings?" OFF)
+option(WITH_PYTHON "Build python bindings?" ON)
 option(WITH_OPENCV "Build opencv bindings?" OFF)
 
 add_subdirectory(sdk)
