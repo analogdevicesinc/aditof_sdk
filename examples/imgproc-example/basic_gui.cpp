@@ -63,6 +63,8 @@ void Basic_GUI::detectEdgesfromDepth() {
     localFrame->getData(aditof::FrameDataType::DEPTH, &depthData);
     cv::Mat depth_map;
     depth_map = cv::Mat(frameHeight, frameWidth, CV_16UC1, depthData);
+    cv::imwrite("pic/depth_raw.png", depth_map);
+
     depth_map.convertTo(depth_map, CV_8U, 255.0 / m_distanceVal);
     flip(depth_map, depth_map, 1);
     applyColorMap(depth_map, depth_map, cv::COLORMAP_RAINBOW);
@@ -132,10 +134,16 @@ void Basic_GUI::detectEdgesfromDepth() {
 
 void Basic_GUI::detectEdgesfromDepthImage() {
 
-    std::fstream fout;
+    cv::Mat raw_depthImage = cv::imread("pic/depth_raw.png");
 
-    // opens an existing csv file or creates a new file.
+    std::fstream fout;
     fout.open("points.csv", std::ios::out);
+
+    std::fstream fout_d_lines;
+    fout_d_lines.open("Depth_lines.csv", std::ios::out);
+
+    std::fstream fout_d;
+    fout_d.open("ALLdepthpoints.csv", std::ios::out);
 
     cv::Mat depth_map = cv::imread("pic/depth.png");
 
@@ -171,11 +179,18 @@ void Basic_GUI::detectEdgesfromDepthImage() {
         });
 
     std::vector<cv::Point> merged(contours.at(0));
-    merged.insert(merged.end(), contours.at(1).begin(), contours.at(1).end());
+    if (contours.size() > 1) {
+        merged.insert(merged.end(), contours.at(1).begin(),
+                      contours.at(1).end());
+    }
 
     std::sort(merged.begin(), merged.end(),
               [](const cv::Point &a, const cv::Point &b) { return a.y < b.y; });
 
+    for (auto i : merged) {
+        fout << i << '\n';
+        fout_d << static_cast<int>(raw_depthImage.at<ushort>(i)) << '\n';
+    }
     std::vector<cv::Point> x_sorted(merged);
     std::sort(x_sorted.begin(), x_sorted.end(),
               [](const cv::Point &a, const cv::Point &b) { return a.x < b.x; });
@@ -235,6 +250,16 @@ void Basic_GUI::detectEdgesfromDepthImage() {
     cv::line(drawing, centerp, rightp, cv::Scalar(255, 255, 255));
     cv::line(drawing, centerp, bottomp, cv::Scalar(255, 255, 255));
 
+    int distLeft = static_cast<int>(raw_depthImage.at<ushort>(leftp));
+    int distRight = static_cast<int>(raw_depthImage.at<ushort>(rightp));
+    int distCenter = static_cast<int>(raw_depthImage.at<ushort>(centerp));
+    int distBottom = static_cast<int>(raw_depthImage.at<ushort>(bottomp));
+
+    std::cout << "Distances: " << distLeft << '\n';
+    std::cout << "Distances: " << distRight << '\n';
+    std::cout << "Distances: " << distCenter << '\n';
+    std::cout << "Distances: " << distBottom << '\n';
+
     double AB = sqrt((leftp.x - centerp.x) * (leftp.x - centerp.x) +
                      (leftp.y - centerp.y) * (leftp.y - centerp.y));
     double AC = sqrt((leftp.x - rightp.x) * (leftp.x - rightp.x) +
@@ -250,20 +275,27 @@ void Basic_GUI::detectEdgesfromDepthImage() {
 
     std::cout << "theta: " << theta << '\n';
 
-    //    for (int i = 0; i < contours.size(); i++) {
-    //        std::sort(
-    //        contours.at(i).begin(), contours.at(i).end(),
-    //        [](const cv::Point &a, const cv::Point &b) { return
-    //        a.x >
-    //        b.x; });
-    //        cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0,
-    //        255),
-    //                                      rng.uniform(0, 255));
-    //        if (contours.at(i).size() < 50)
-    //            continue;
-    //        cv::drawContours(drawing, contours, i, color, 2, 8, hierarchy, 0,
-    //                         cv::Point());
-    //    }
+    fout_d_lines << "left: " << '\n';
+    cv::LineIterator it(drawing, leftp, centerp, 8);
+    for (int i = 0; i < it.count; i++, ++it) {
+        cv::Point pt = it.pos();
+        fout_d_lines << static_cast<int>(raw_depthImage.at<ushort>(pt)) << '\n';
+    }
+
+    fout_d_lines << "right: " << '\n';
+    cv::LineIterator it1(drawing, leftp, rightp, 8);
+    for (int i = 0; i < it1.count; i++, ++it1) {
+        cv::Point pt = it1.pos();
+        fout_d_lines << static_cast<int>(raw_depthImage.at<ushort>(pt)) << '\n';
+    }
+
+    fout_d_lines << "center: " << '\n';
+    cv::LineIterator it2(drawing, centerp, rightp, 8);
+    for (int i = 0; i < it2.count; i++, ++it2) {
+        cv::Point pt = it2.pos();
+        fout_d_lines << static_cast<int>(raw_depthImage.at<ushort>(pt)) << '\n';
+    }
+
     cvui::imshow("contours", drawing);
     cv::imwrite("pic/contours_merged.png", drawing);
 }
