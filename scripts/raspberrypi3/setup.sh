@@ -124,7 +124,7 @@ setup() {
         get_deps_source_code ${deps_dir}
 
         build_and_install_glog ${deps_dir}/glog ${deps_install_dir}/glog
-        build_and_install_protobuf ${deps_dir}/protobuf ${deps_install_dir}/protobuf
+        build_and_install_protobuf ${deps_dir}/protobuf ${deps_install_dir}/protobuf -DCMAKE_CXX_FLAGS=\"-latomic\"
         build_and_install_websockets ${deps_dir}/libwebsockets ${deps_install_dir}/websockets
         build_and_install_opencv ${deps_dir}/"opencv-${OPENCV}" ${deps_install_dir}/"opencv-${OPENCV}"
 
