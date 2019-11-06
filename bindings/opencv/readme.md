@@ -3,6 +3,9 @@
 ### Overview
 The SDK provides bindings for OpenCV through the helper methods defined in aditof_opencv.h, which provide a way to convert from the `aditof::Frame` data structure to `cv::Mat`.
 
+### OpenCV supported version
+For the dnn example, the minimum opencv version required is `3.4.1`. Other examples will work with older versions.
+
 #### Directory Structure
 
 | Directory/File | Description |
