@@ -114,17 +114,17 @@ setup() {
         deps_install_dir=$(pwd)
         popd
 
-        CMAKE_OPTIONS="-DDRAGONBOARD=1 -DWITH_PYTHON=on -DWITH_OPENCV=on"
-
         get_deps_source_code ${deps_dir}
 
         build_and_install_glog ${deps_dir}/glog ${deps_install_dir}/glog
         build_and_install_protobuf ${deps_dir}/protobuf ${deps_install_dir}/protobuf
         build_and_install_websockets ${deps_dir}/libwebsockets ${deps_install_dir}/websockets
-        build_and_install_opencv ${deps_dir}/"opencv-${OPENCV}" ${deps_install_dir}/"opencv-${OPENCV}"
+        # build_and_install_opencv ${deps_dir}/"opencv-${OPENCV}" ${deps_install_dir}/"opencv-${OPENCV}"
+
+        CMAKE_OPTIONS="-DDRAGONBOARD=1 -DWITH_PYTHON=on -DWITH_OPENCV=on"
 
         pushd "${build_dir}"
-        cmake "${source_dir}" "${CMAKE_OPTIONS}" -DCMAKE_PREFIX_PATH="${deps_install_dir}/glog;${deps_install_dir}/protobuf;${deps_install_dir}/websockets;${deps_install_dir}/opencv-${OPENCV}"
+        cmake "${source_dir}" "${CMAKE_OPTIONS}" -DCMAKE_PREFIX_PATH="${deps_install_dir}/glog;${deps_install_dir}/protobuf;${deps_install_dir}/websockets"
         make
 
 }
