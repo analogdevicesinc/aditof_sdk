@@ -17,6 +17,8 @@ print_help() {
         echo "        Specify the directory where the dependencies will be downloaded."
         echo "-i|--depsinstalldir"
         echo "        Specify the directory where the dependencies will be installed."
+        echo "-bo|--buildopencv"
+        echo "        Build and install the minimum required version of opencv for the dnn example (3.4.1)"
         echo ""
 }
 

@@ -19,6 +19,8 @@ print_help() {
         echo "        Specify the directory where the dependencies will be installed."
         echo "-j|--jobs"
         echo "        Specify the number of jobs to run in parallel when building dependencies and the SDK"
+        echo "-bo|--buildopencv"
+        echo "        Build and install the minimum required version of opencv for the dnn example (3.4.1)"
         echo ""
 }
 
