@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 source_dir=$(cd "$(dirname "$0")/../.."; pwd)
 
 . "${source_dir}"/ci/travis/lib.sh
@@ -25,6 +26,20 @@ print_help() {
 install_required_packages() {
         sudo apt install -y build-essential cmake python-dev python3-dev \
         libssl-dev git
+}
+
+get_opencv_source_code() {
+        pushd "$1"
+
+        [ -d "opencv" ] || {
+                git clone --branch 3.4.1 --depth 1 https://github.com/opencv/opencv.git
+                pushd opencv
+                git apply "${source_dir}"/scripts/raspberrypi3/opencv.patch
+                git status
+                popd
+        }
+
+        popd
 }
 
 yes_or_exit() {
@@ -74,6 +89,10 @@ setup() {
                 shift # past argument
                 shift # past value
                 ;;
+                -bo|--buildopencv)
+                build_opencv="True"
+                shift # next argument
+                ;;
                 *)    # unknown option
                 POSITIONAL+=("$1") # save it in an array for later
                 shift # past argument
@@ -121,17 +140,29 @@ setup() {
 
         get_deps_source_code ${deps_dir}
 
+        if [[ "${build_opencv}" == "True" ]]; then
+                get_opencv_source_code "${deps_dir}"
+                OPENCV=3.4.1
+        fi
+
         build_and_install_glog ${deps_dir}/glog ${deps_install_dir}/glog
         build_and_install_protobuf ${deps_dir}/protobuf ${deps_install_dir}/protobuf -DCMAKE_CXX_FLAGS=\"-latomic\"
         build_and_install_websockets ${deps_dir}/libwebsockets ${deps_install_dir}/websockets
-        # build_and_install_opencv ${deps_dir}/"opencv-${OPENCV}" ${deps_install_dir}/"opencv-${OPENCV}"
+
+        if [[ "${build_opencv}" == "True" ]]; then
+                build_and_install_opencv ${deps_dir}/opencv ${deps_install_dir}/"opencv-${OPENCV}"
+        fi
 
         CMAKE_OPTIONS="-DRASPBERRYPI=1 -DWITH_PYTHON=on -DWITH_OPENCV=on"
+        PREFIX_PATH="${deps_install_dir}/glog;${deps_install_dir}/protobuf;${deps_install_dir}/websockets;"
+
+        if [[ "${build_opencv}" == "True" ]]; then
+                PREFIX_PATH="${PREFIX_PATH}${deps_install_dir}/opencv-${OPENCV};"
+        fi
 
         pushd "${build_dir}"
-        cmake "${source_dir}" "${CMAKE_OPTIONS}" -DCMAKE_PREFIX_PATH="${deps_install_dir}/glog;${deps_install_dir}/protobuf;${deps_install_dir}/websockets"
+        cmake "${source_dir}" "${CMAKE_OPTIONS}" -DCMAKE_PREFIX_PATH="${PREFIX_PATH}"
         make -j ${NUM_JOBS}
-
 }
 
 setup $@
