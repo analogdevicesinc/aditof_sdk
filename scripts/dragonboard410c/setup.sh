@@ -154,7 +154,7 @@ setup() {
         fi
 
         pushd "${build_dir}"
-        cmake "${source_dir}" "${CMAKE_OPTIONS}" -DCMAKE_PREFIX_PATH="${PREFIX_PATH}"
+        cmake "${source_dir}" ${CMAKE_OPTIONS} -DCMAKE_PREFIX_PATH="${PREFIX_PATH}"
         make
 
 }
