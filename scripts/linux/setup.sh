@@ -19,12 +19,26 @@ print_help() {
         echo "        Specify the directory where the dependencies will be installed."
         echo "-j|--jobs"
         echo "        Specify the number of jobs to run in parallel when building dependencies and the SDK"
+        echo "-bo|--buildopencv"
+        echo "        Build and install the minimum required version of opencv for the dnn example (3.4.1)"
+        echo "-op|--opencvpath"
+        echo "        Path to opencv installation "
         echo ""
 }
 
 install_required_packages() {
         sudo apt install -y build-essential cmake python-dev python3-dev \
         libssl-dev git
+}
+
+get_opencv_source_code() {
+        pushd "$1"
+
+        [ -d "opencv" ] || {
+                git clone --branch 3.4.1 --depth 1 https://github.com/opencv/opencv.git
+        }
+
+        popd
 }
 
 yes_or_exit() {
@@ -69,10 +83,19 @@ setup() {
                 shift # past argument
                 shift # past value
                 ;;
+                -bo|--buildopencv)
+                build_opencv="True"
+                shift # next argument
+                ;;
                 -j|--jobs)
                 NUM_JOBS=$2
                 shift # past argument
                 shift # past value
+                ;;
+                -op|--opencvpath)
+                opencv_path=$2
+                shift # next argument
+                shift # next value
                 ;;
                 *)    # unknown option
                 POSITIONAL+=("$1") # save it in an array for later
@@ -121,17 +144,34 @@ setup() {
         deps_install_dir=$(pwd)
         popd
 
-        CMAKE_OPTIONS="-DWITH_PYTHON=on -DWITH_OPENCV=on"
-
         get_deps_source_code ${deps_dir}
+
+        if [[ "${build_opencv}" == "True" ]]; then
+                get_opencv_source_code "${deps_dir}"
+                OPENCV=3.4.1
+        fi
 
         build_and_install_glog ${deps_dir}/glog ${deps_install_dir}/glog
         build_and_install_protobuf ${deps_dir}/protobuf ${deps_install_dir}/protobuf
         build_and_install_websockets ${deps_dir}/libwebsockets ${deps_install_dir}/websockets
-        build_and_install_opencv ${deps_dir}/"opencv-${OPENCV}" ${deps_install_dir}/"opencv-${OPENCV}"
+
+        if [[ "${build_opencv}" == "True" ]]; then
+                build_and_install_opencv ${deps_dir}/opencv ${deps_install_dir}/"opencv-${OPENCV}"
+        fi
+
+        CMAKE_OPTIONS="-DWITH_PYTHON=on -DWITH_OPENCV=on"
+        PREFIX_PATH="${deps_install_dir}/glog;${deps_install_dir}/protobuf;${deps_install_dir}/websockets;"
+
+        if [[ "${build_opencv}" == "True" ]]; then
+                PREFIX_PATH="${PREFIX_PATH}${deps_install_dir}/opencv-${OPENCV};"
+        else
+             if [[ ! -z "${opencv_path}" ]]; then
+                PREFIX_PATH="${PREFIX_PATH}${opencv_path};"
+             fi
+        fi
 
         pushd "${build_dir}"
-        cmake "${source_dir}" "${CMAKE_OPTIONS}" -DCMAKE_PREFIX_PATH="${deps_install_dir}/glog;${deps_install_dir}/protobuf;${deps_install_dir}/websockets;${deps_install_dir}/opencv-${OPENCV}"
+        cmake "${source_dir}" ${CMAKE_OPTIONS} -DCMAKE_PREFIX_PATH="${PREFIX_PATH}"
         make -j ${NUM_JOBS}
 }
 
