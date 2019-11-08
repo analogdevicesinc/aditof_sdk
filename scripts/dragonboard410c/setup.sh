@@ -19,6 +19,8 @@ print_help() {
         echo "        Specify the directory where the dependencies will be installed."
         echo "-bo|--buildopencv"
         echo "        Build and install the minimum required version of opencv for the dnn example (3.4.1)"
+        echo "-op|--opencvpath"
+        echo "        Path to opencv installation "
         echo ""
 }
 
@@ -85,6 +87,11 @@ setup() {
                 build_opencv="True"
                 shift # next argument
                 ;;
+                -op|--opencvpath)
+                opencv_path=$2
+                shift # next argument
+                shift # next value
+                ;;
                 *)    # unknown option
                 POSITIONAL+=("$1") # save it in an array for later
                 shift # past argument
@@ -148,9 +155,12 @@ setup() {
         CMAKE_OPTIONS="-DDRAGONBOARD=1 -DWITH_PYTHON=on -DWITH_OPENCV=on"
         PREFIX_PATH="${deps_install_dir}/glog;${deps_install_dir}/protobuf;${deps_install_dir}/websockets;"
 
-
         if [[ "${build_opencv}" == "True" ]]; then
                 PREFIX_PATH="${PREFIX_PATH}${deps_install_dir}/opencv-${OPENCV};"
+        else
+             if [[ ! -z "${opencv_path}" ]]; then
+                PREFIX_PATH="${PREFIX_PATH}${opencv_path};"
+             fi
         fi
 
         pushd "${build_dir}"
