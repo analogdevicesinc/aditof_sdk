@@ -639,9 +639,6 @@ EthernetDevice::applyCalibrationToFrame(uint16_t *frame,
     // have more computing power than the target and also avoids the overhead of
     // transporting the frame back and forth.
 
-    float gain = m_implData->calibration_cache[mode].gain;
-    float offset = m_implData->calibration_cache[mode].offset;
-
     if (m_implData->frameDetails_cache.type.empty()) {
         LOG(WARNING) << "Frame type has not been set for this device";
         return aditof::Status::GENERIC_ERROR;
