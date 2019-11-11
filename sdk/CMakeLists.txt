@@ -93,6 +93,10 @@ target_link_libraries( ${PROJECT_NAME}
         ${LIBWEBSOCKETS_LIBRARIES}
 )
 
+if (CMAKE_COMPILER_IS_GNUCC)
+    target_compile_options(${PROJECT_NAME} PUBLIC -Wall)
+endif()
+
 if ( RASPBERRYPI )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon -latomic")
     include (${CMAKE_SOURCE_DIR}/cmake/raspberrypi-revision-config.cmake)
