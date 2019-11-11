@@ -48,9 +48,9 @@ class SDK_API Camera {
     /**
      * @brief Puts the camera into the given mode.
      * @param mode - The mode of the camera
-     * @param modeFilename - The configuration file which should be specific to
-     * the given mode. If no file is specified, the default one for the given
-     * mode will be used.
+     * @param modeFilename - When there is a need to use a custom mode
+     * then mode parameter needs to be set to 'custom' and a firmware
+     * file needs to be provided.
      * @return Status
      */
     virtual Status setMode(const std::string &mode,
