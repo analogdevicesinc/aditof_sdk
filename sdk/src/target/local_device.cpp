@@ -54,8 +54,8 @@ struct LocalDevice::ImplData {
     eeprom edev;
 
     ImplData()
-        : fd(-1), sfd(-1), nVideoBuffers(0),
-          videoBuffers(nullptr), frameDetails{0, 0, "", {0.0f, 1.0f}},
+        : fd(-1), sfd(-1), videoBuffers(nullptr),
+          nVideoBuffers(0), frameDetails{0, 0, "", {0.0f, 1.0f}},
           started(false) {}
 };
 
