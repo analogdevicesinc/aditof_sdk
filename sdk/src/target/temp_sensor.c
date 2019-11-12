@@ -52,7 +52,7 @@ int temp_sensor_read(temp_sensor *t, float *temp_val) {
 int temp_sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
     int funcs, fd, r;
     t->fd = t->addr = 0;
-    t->dev = 0;
+    t->dev = NULL;
 
     fd = open(dev_fqn, O_RDWR);
     if (fd <= 0) {
@@ -83,7 +83,7 @@ int temp_sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
 int temp_sensor_close(temp_sensor *t) {
     close(t->fd);
     t->fd = -1;
-    t->dev = 0;
+    t->dev = NULL;
 
     return 0;
 }
@@ -97,7 +97,7 @@ int temp_read_byte_data(temp_sensor *t, __u16 addr_reg) {
 
 int temp_write_byte(temp_sensor *t, __u16 mem_addr, __u8 data) {
     int r;
-    __u8 buf[2] = {mem_addr & 0x00ff, data};
+    __u8 buf[2] = {(__u8)(mem_addr & 0x00ff), data};
     r = i2c_smbus_write_byte_data(t->fd, buf[0], buf[1]);
     if (r < 0) {
         fprintf(stderr, "Error i2c_smbus_write_byte_data: %s\n",
