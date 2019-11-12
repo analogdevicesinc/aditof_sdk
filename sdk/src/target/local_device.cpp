@@ -815,6 +815,8 @@ aditof::Status LocalDevice::enqueueInternalBuffer(struct v4l2_buffer &buf) {
                      << "errno: " << errno << " error: " << strerror(errno);
         return aditof::Status::GENERIC_ERROR;
     }
+
+    return aditof::Status::OK;
 }
 
 aditof::Status LocalDevice::getDeviceFileDescriptor(int &fileDescriptor) {

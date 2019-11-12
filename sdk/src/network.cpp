@@ -179,6 +179,8 @@ int Network::ServerConnect(const std::string &ip) {
         Server_Connected = false;
         return -1;
     }
+
+    return -1;
 }
 
 /*
