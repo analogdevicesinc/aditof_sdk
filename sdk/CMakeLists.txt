@@ -94,7 +94,13 @@ target_link_libraries( ${PROJECT_NAME}
 )
 
 if (CMAKE_COMPILER_IS_GNUCC)
-    target_compile_options(${PROJECT_NAME} PUBLIC -Wall)
+    target_compile_options(${PROJECT_NAME} PUBLIC
+            -Wall
+            -Wno-unknown-pragmas
+            -Werror=return-type
+            -Werror=uninitialized
+            -Werror=init-self
+    )
 endif()
 
 if ( RASPBERRYPI )
