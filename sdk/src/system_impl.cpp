@@ -14,6 +14,7 @@ SystemImpl::SystemImpl()
 SystemImpl::~SystemImpl() {
     for (auto &cam : m_cameras) {
         delete cam;
+        cam = nullptr;
     }
 }
 
