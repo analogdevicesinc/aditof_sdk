@@ -40,6 +40,8 @@ For more details about the SDK check the links below:
 
 [API Doxygen documentation](https://analogdevicesinc.github.io/aditof_sdk/)
 
+[Building and installing the SDK](https://github.com/analogdevicesinc/aditof_sdk/tree/master/cmake/)
+
 ## SDK examples
 <table>
   <tr>
