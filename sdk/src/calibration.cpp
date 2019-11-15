@@ -251,7 +251,7 @@ aditof::Status Calibration::readCalMap(aditof::DeviceInterface *device) {
 
 // Calculate and return the total size of calibration map
 float Calibration::getMapSize(
-    std::unordered_map<float, packet_struct> calibration_map) {
+    const std::unordered_map<float, packet_struct> &calibration_map) const {
     float total_size = 0;
     // Calculate total size of calibration map
     for (const auto &mapElement : calibration_map) {
@@ -262,7 +262,7 @@ float Calibration::getMapSize(
 
 // Calculate and return the size of a packet
 float Calibration::getPacketSize(
-    std::unordered_map<float, param_struct> packet) {
+    const std::unordered_map<float, param_struct> &packet) const {
     float packet_size = 0;
     for (const auto &mapElement : packet) {
         packet_size +=

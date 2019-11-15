@@ -64,8 +64,10 @@ class Calibration {
     aditof::Status getGainOffset(std::string mode, float &gain, float &offset);
 
   private:
-    float getMapSize(std::unordered_map<float, packet_struct> calibration_map);
-    float getPacketSize(std::unordered_map<float, param_struct> packet);
+    float getMapSize(
+        const std::unordered_map<float, packet_struct> &calibration_map) const;
+    float
+    getPacketSize(const std::unordered_map<float, param_struct> &packet) const;
 
   private:
     std::unordered_map<float, packet_struct> m_calibration_map;
