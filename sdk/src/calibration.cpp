@@ -44,7 +44,7 @@ Calibration::~Calibration() = default;
     Calibratin map is nested hash map consiting of primary key( packet type key)
     and secondary key( parameter type key)
 */
-aditof::Status Calibration::displayCalMap() {
+aditof::Status Calibration::displayCalMap() const {
     using namespace aditof;
 
     for (const auto &mapElement : m_calibration_map) {
@@ -66,8 +66,8 @@ aditof::Status Calibration::displayCalMap() {
     return Status::OK;
 }
 
-aditof::Status Calibration::getAfeFirmware(std::string mode,
-                                           std::vector<uint16_t> &data) {
+aditof::Status Calibration::getAfeFirmware(const std::string &mode,
+                                           std::vector<uint16_t> &data) const {
     using namespace aditof;
 
     uint8_t cal_mode;
@@ -102,8 +102,8 @@ aditof::Status Calibration::getAfeFirmware(std::string mode,
     return Status::GENERIC_ERROR;
 }
 
-aditof::Status Calibration::getGainOffset(std::string mode, float &gain,
-                                          float &offset) {
+aditof::Status Calibration::getGainOffset(const std::string &mode, float &gain,
+                                          float &offset) const {
     using namespace aditof;
 
     uint8_t cal_mode;
