@@ -190,7 +190,7 @@ aditof::Status Calibration::readCalMap(aditof::DeviceInterface *device) {
     device->writeEeprom(EEPROM_SIZE - 5, (uint8_t *)&read_size, 4);
 
     device->readEeprom(0, (uint8_t *)&read_size, 4);
-    LOG(INFO) << "EEPROM calibration data size " << read_size;
+    LOG(INFO) << "EEPROM calibration data size " << read_size << " bytes";
 
     if (read_size > EEPROM_SIZE) {
         LOG(WARNING) << "Invalid calibration data size";

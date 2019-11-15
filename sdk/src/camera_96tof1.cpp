@@ -100,7 +100,8 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
             LOG(INFO) << "Found firmware for mode: " << mode;
         }
 
-        LOG(INFO) << "Firmware size: " << firmwareData.size();
+        LOG(INFO) << "Firmware size: " << firmwareData.size() * sizeof(uint16_t)
+                  << " bytes";
         status = m_device->program((uint8_t *)firmwareData.data(),
                                    2 * firmwareData.size());
         if (status != Status::OK) {
