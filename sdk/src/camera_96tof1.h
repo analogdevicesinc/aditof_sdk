@@ -1,5 +1,5 @@
-#ifndef CAMERA_96OTF1_H
-#define CAMERA_96OTF1_H
+#ifndef CAMERA_96TOF1_H
+#define CAMERA_96TOF1_H
 
 #include "calibration.h"
 
@@ -33,4 +33,4 @@ class Camera96Tof1 : public aditof::Camera {
     Calibration m_calibration;
 };
 
-#endif // CAMERA_96OTF1_H
+#endif // CAMERA_96TOF1_H

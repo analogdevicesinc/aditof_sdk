@@ -54,8 +54,8 @@ struct LocalDevice::ImplData {
     eeprom edev;
 
     ImplData()
-        : fd(-1), sfd(-1), nVideoBuffers(0),
-          videoBuffers(nullptr), frameDetails{0, 0, "", {0.0f, 1.0f}},
+        : fd(-1), sfd(-1), videoBuffers(nullptr),
+          nVideoBuffers(0), frameDetails{0, 0, "", {0.0f, 1.0f}},
           started(false) {}
 };
 
@@ -471,8 +471,6 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
 
     unsigned int width;
     unsigned int height;
-    unsigned int offset[2];
-    unsigned int offset_idx;
     unsigned int buf_data_len;
     uint8_t *pdata;
 
@@ -484,8 +482,6 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
         return status;
     }
 
-    offset[0] = 0;
-    offset[1] = height * width / 2;
     if ((width == 668)) {
         unsigned int j = 0;
         for (unsigned int i = 0; i < (buf_data_len); i += 3) {
@@ -733,9 +729,6 @@ aditof::Status LocalDevice::setCalibrationParams(const std::string &mode,
 aditof::Status LocalDevice::applyCalibrationToFrame(uint16_t *frame,
                                                     const std::string &mode) {
 
-    float gain = m_implData->calibration_cache[mode].gain;
-    float offset = m_implData->calibration_cache[mode].offset;
-
     unsigned int width = m_implData->frameDetails.width;
     unsigned int height = m_implData->frameDetails.height;
 
@@ -822,6 +815,8 @@ aditof::Status LocalDevice::enqueueInternalBuffer(struct v4l2_buffer &buf) {
                      << "errno: " << errno << " error: " << strerror(errno);
         return aditof::Status::GENERIC_ERROR;
     }
+
+    return aditof::Status::OK;
 }
 
 aditof::Status LocalDevice::getDeviceFileDescriptor(int &fileDescriptor) {

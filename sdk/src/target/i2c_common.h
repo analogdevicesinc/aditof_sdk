@@ -40,9 +40,9 @@ union i2c_smbus_data {
 #define I2C_SMBUS 0x0720 /* SMBus-level access */
 
 typedef struct i2c_dev {
-    char *dev; // device file i.e. /dev/i2c-N
-    int addr;  // i2c address
-    int fd;    // file descriptor
+    const char *dev; // device file i.e. /dev/i2c-N
+    int addr;        // i2c address
+    int fd;          // file descriptor
 } temp_sensor;
 
 typedef struct eeprom {

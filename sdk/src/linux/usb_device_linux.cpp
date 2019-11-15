@@ -353,7 +353,6 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     // cycle defined in 'Device::program'
     tv.tv_sec = 2;
     tv.tv_usec = 0;
-    int i, j;
 
     r = select(m_implData->fd + 1, &fds, nullptr, nullptr, &tv);
 
@@ -654,9 +653,6 @@ aditof::Status UsbDevice::setCalibrationParams(const std::string &mode,
 
 aditof::Status UsbDevice::applyCalibrationToFrame(uint16_t *frame,
                                                   const std::string &mode) {
-
-    float gain = m_implData->calibration_cache[mode].gain;
-    float offset = m_implData->calibration_cache[mode].offset;
 
     unsigned int width = m_implData->fmt.fmt.pix.width;
     unsigned int height = m_implData->fmt.fmt.pix.height;

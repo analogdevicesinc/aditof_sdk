@@ -420,7 +420,6 @@ static int uvc_video_stream(struct uvc_device *dev, int enable) {
 
 static int uvc_uninit_device(struct uvc_device *dev) {
     struct v4l2_buffer ubuf;
-    struct v4l2_buffer vbuf;
     unsigned int i, count;
     int ret;
 
@@ -555,7 +554,6 @@ static void uvc_video_fill_buffer(struct uvc_device *dev,
 static int uvc_video_process(struct uvc_device *dev, LocalDevice *device) {
     struct v4l2_buffer ubuf;
     struct v4l2_buffer vbuf;
-    unsigned int i = 0;
 
     int ret;
     /*
@@ -814,7 +812,6 @@ err:
 
 static int uvc_video_reqbufs_userptr(struct uvc_device *dev, int nbufs) {
     struct v4l2_requestbuffers rb;
-    unsigned int i, j, bpl, payload_size;
     int ret;
 
     CLEAR(rb);
@@ -1568,13 +1565,11 @@ static int uvc_events_process_data(struct uvc_device *dev,
                                    LocalDevice *device) {
     struct uvc_streaming_control *target;
     struct uvc_streaming_control *ctrl;
-    struct v4l2_format fmt;
     const struct uvc_format_info *format;
     const struct uvc_frame_info *frame;
     const unsigned int *interval;
     unsigned int iformat, iframe;
     unsigned int nframes;
-    unsigned int *val = (unsigned int *)data->data;
     int ret;
 
     switch (dev->control) {
@@ -1652,7 +1647,7 @@ static int uvc_events_process_data(struct uvc_device *dev,
              */
             return -EINVAL;
 #if 0
-          if (*val > PU_BRIGHTNESS_MAX_VAL) {
+          if (*(unsigned int *)data->data > PU_BRIGHTNESS_MAX_VAL) {
               printf ("Returning EINVAL for Brightness control\n");
               return -EINVAL;
           } else {
@@ -1830,31 +1825,6 @@ static void uvc_events_init(struct uvc_device *dev) {
 /* ---------------------------------------------------------------------------
  * main
  */
-
-static void image_load(struct uvc_device *dev, const char *img) {
-    int fd = -1;
-
-    if (img == NULL)
-        return;
-
-    fd = open(img, O_RDONLY);
-    if (fd == -1) {
-        printf("Unable to open MJPEG image '%s'\n", img);
-        return;
-    }
-
-    dev->imgsize = lseek(fd, 0, SEEK_END);
-    lseek(fd, 0, SEEK_SET);
-    dev->imgdata = malloc(dev->imgsize);
-    if (dev->imgdata == NULL) {
-        printf("Unable to allocate memory for MJPEG image\n");
-        dev->imgsize = 0;
-        return;
-    }
-
-    read(fd, dev->imgdata, dev->imgsize);
-    close(fd);
-}
 
 static void usage(const char *argv0) {
     fprintf(stderr, "Usage: %s [options]\n", argv0);
