@@ -47,23 +47,18 @@ Calibration::~Calibration() = default;
 aditof::Status Calibration::displayCalMap() {
     using namespace aditof;
 
-    typedef std::unordered_map<float, packet_struct>::iterator
-        calibration_map_iterator;
-    for (calibration_map_iterator iter = m_calibration_map.begin();
-         iter != m_calibration_map.end(); ++iter) {
-        std::cout << "Key: " << iter->first;
-        packet_struct sub_packet_map = iter->second;
+    for (const auto &mapElement : m_calibration_map) {
+        std::cout << "Key: " << mapElement.first;
+        const packet_struct &sub_packet_map = mapElement.second;
         std::cout << "\t Size: " << sub_packet_map.size << std::endl;
-        typedef std::unordered_map<float, param_struct>::iterator sub_iterator;
-        for (sub_iterator sub_iter = sub_packet_map.packet.begin();
-             sub_iter != sub_packet_map.packet.end(); ++sub_iter) {
-            std::cout << "\tSub Key: " << sub_iter->first;
-            std::cout << "\tSub Size: " << sub_iter->second.size;
+
+        for (const auto &packet : sub_packet_map.packet) {
+            std::cout << "\tSub Key: " << packet.first;
+            std::cout << "\tSub Size: " << packet.second.size;
             std::cout << "\tSub Value: ";
-            for (std::list<float>::iterator itt =
-                     sub_iter->second.value.begin();
-                 itt != sub_iter->second.value.end(); ++itt)
-                std::cout << *itt << " ";
+
+            for (const auto &value : packet.second.value)
+                std::cout << value << " ";
             std::cout << std::endl;
         }
     }
@@ -88,23 +83,15 @@ aditof::Status Calibration::getAfeFirmware(std::string mode,
         return Status::INVALID_ARGUMENT;
     }
 
-    typedef std::unordered_map<float, packet_struct>::iterator
-        calibration_map_iterator;
-    for (calibration_map_iterator iter = m_calibration_map.begin();
-         iter != m_calibration_map.end(); ++iter) {
-        float key = iter->first;
-        packet_struct sub_packet_map = iter->second;
+    for (const auto &mapElement : m_calibration_map) {
+        float key = mapElement.first;
+        const packet_struct &sub_packet_map = mapElement.second;
 
         if (cal_mode == key) {
-            typedef std::unordered_map<float, param_struct>::iterator
-                sub_iterator;
-            for (sub_iterator sub_iter = sub_packet_map.packet.begin();
-                 sub_iter != sub_packet_map.packet.end(); ++sub_iter) {
-                if (sub_iter->first == 5) {
-                    for (std::list<float>::iterator itt =
-                             sub_iter->second.value.begin();
-                         itt != sub_iter->second.value.end(); ++itt) {
-                        data.push_back((uint16_t)*itt);
+            for (const auto &packet : sub_packet_map.packet) {
+                if (packet.first == 5) {
+                    for (const auto &value : packet.second.value) {
+                        data.push_back(static_cast<uint16_t>(value));
                     }
                     return Status::OK;
                 }
@@ -132,23 +119,17 @@ aditof::Status Calibration::getGainOffset(std::string mode, float &gain,
         return Status::INVALID_ARGUMENT;
     }
 
-    typedef std::unordered_map<float, packet_struct>::iterator
-        calibration_map_iterator;
-    for (calibration_map_iterator iter = m_calibration_map.begin();
-         iter != m_calibration_map.end(); ++iter) {
-        float key = iter->first;
-        packet_struct sub_packet_map = iter->second;
+    for (const auto &mapElement : m_calibration_map) {
+        float key = mapElement.first;
+        const packet_struct &sub_packet_map = mapElement.second;
 
         if (cal_mode == key) {
-            typedef std::unordered_map<float, param_struct>::iterator
-                sub_iterator;
-            for (sub_iterator sub_iter = sub_packet_map.packet.begin();
-                 sub_iter != sub_packet_map.packet.end(); ++sub_iter) {
-                if (sub_iter->first == 26) {
-                    gain = sub_iter->second.value.front();
+            for (const auto &packet : sub_packet_map.packet) {
+                if (packet.first == 26) {
+                    gain = packet.second.value.front();
                 }
-                if (sub_iter->first == 27) {
-                    offset = sub_iter->second.value.front();
+                if (packet.first == 27) {
+                    offset = packet.second.value.front();
                 }
             }
             return Status::OK;
@@ -168,26 +149,18 @@ aditof::Status Calibration::saveCalMap(aditof::DeviceInterface *device) {
     using namespace aditof;
 
     std::vector<float> data;
-    typedef std::unordered_map<float, packet_struct>::iterator
-        calibration_map_iterator;
-
-    for (calibration_map_iterator iter = m_calibration_map.begin();
-         iter != m_calibration_map.end(); ++iter) {
-        data.push_back(iter->first);
-        packet_struct sub_packet_map = iter->second;
+    for (const auto &mapElement : m_calibration_map) {
+        data.push_back(mapElement.first);
+        const packet_struct &sub_packet_map = mapElement.second;
         data.push_back(sub_packet_map.size);
 
-        typedef std::unordered_map<float, param_struct>::iterator sub_iterator;
-        for (sub_iterator sub_iter = sub_packet_map.packet.begin();
-             sub_iter != sub_packet_map.packet.end(); ++sub_iter) {
-            data.push_back(sub_iter->first);       // write parameter key
-            data.push_back(sub_iter->second.size); // write size of parameter
+        for (const auto &packet : sub_packet_map.packet) {
+            data.push_back(packet.first);       // write parameter key
+            data.push_back(packet.second.size); // write size of parameter
 
-            for (std::list<float>::iterator itt =
-                     sub_iter->second.value.begin();
-                 itt != sub_iter->second.value.end(); ++itt) {
-                float value = *itt;
-                data.push_back(value); // write parameter values
+            for (const auto &value : packet.second.value) {
+                data.push_back(
+                    static_cast<float>(value)); // write parameter values
             }
         }
     }
@@ -281,12 +254,8 @@ float Calibration::getMapSize(
     std::unordered_map<float, packet_struct> calibration_map) {
     float total_size = 0;
     // Calculate total size of calibration map
-    typedef std::unordered_map<float, packet_struct>::iterator
-        calibration_map_iterator;
-    for (calibration_map_iterator iter = calibration_map.begin();
-         iter != calibration_map.end(); ++iter) {
-        total_size =
-            total_size + iter->second.size; // Add size of all the sub packets
+    for (const auto &mapElement : calibration_map) {
+        total_size += mapElement.second.size; // Add size of all the sub packets
     }
     return total_size;
 }
@@ -294,12 +263,10 @@ float Calibration::getMapSize(
 // Calculate and return the size of a packet
 float Calibration::getPacketSize(
     std::unordered_map<float, param_struct> packet) {
-    typedef std::unordered_map<float, param_struct>::iterator sub_iterator;
     float packet_size = 0;
-    for (sub_iterator sub_iter = packet.begin(); sub_iter != packet.end();
-         ++sub_iter) {
-        packet_size = packet_size + sub_iter->second.size +
-                      8; // Added 8 for size of key and size
+    for (const auto &mapElement : packet) {
+        packet_size +=
+            mapElement.second.size + 8; // Added 8 for size of key and size
     }
     return packet_size;
 }
