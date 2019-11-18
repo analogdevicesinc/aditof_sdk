@@ -17,6 +17,7 @@ which will generate all the necessary recipes for building and installing. Usefu
 | WITH_EXAMPLES | on/off | on | Build the examples |
 | WITH_PYTHON | on/off | off | Build the python bindings |
 | WITH_OPENCV | on/off | off | Build the opencv bindings |
+| WITH_MATLAB | on/off | off | Build the matlab bindings |
 | WITH_DOC | on/off | off | Build the doxygen documentation |
 | CMAKE_PREFIX_PATH | \<path\> | Empty | Specifies a path which will be used by the FIND_XXX() commands |
 | CMAKE_INSTALL_PREFIX | \<path\> |  /usr/local on UNIX, c:/Program Files on Windows | Installation directory used by `cmake install` |
