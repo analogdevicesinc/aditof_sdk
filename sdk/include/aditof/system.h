@@ -4,6 +4,7 @@
 #include "sdk_exports.h"
 #include "status_definitions.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -55,7 +56,8 @@ class SDK_API System {
      * @param[out] cameraList - A container to be set with the available cameras
      * @return Status
      */
-    Status getCameraList(std::vector<Camera *> &cameraList) const;
+    Status
+    getCameraList(std::vector<std::shared_ptr<Camera>> &cameraList) const;
 
     /**
      * @brief Populates the given list with Camera objects that correspond to
@@ -64,11 +66,11 @@ class SDK_API System {
      * @param ip - The IP of the remote target
      * @return Status
      */
-    Status getCameraListAtIp(std::vector<Camera *> &cameraList,
+    Status getCameraListAtIp(std::vector<std::shared_ptr<Camera>> &cameraList,
                              const std::string &ip) const;
 
   private:
-    SystemImpl *m_impl;
+    std::unique_ptr<SystemImpl> m_impl;
 };
 
 } // namespace aditof

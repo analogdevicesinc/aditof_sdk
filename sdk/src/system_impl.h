@@ -18,14 +18,15 @@ class SystemImpl {
 
   public: // from System
     aditof::Status initialize();
+    aditof::Status getCameraList(
+        std::vector<std::shared_ptr<aditof::Camera>> &cameraList) const;
     aditof::Status
-    getCameraList(std::vector<aditof::Camera *> &cameraList) const;
-    aditof::Status getCameraListAtIp(std::vector<aditof::Camera *> &cameraList,
-                                     const std::string &ip) const;
+    getCameraListAtIp(std::vector<std::shared_ptr<aditof::Camera>> &cameraList,
+                      const std::string &ip) const;
 
   private:
     std::unique_ptr<aditof::DeviceEnumeratorInterface> m_enumerator;
-    std::vector<aditof::Camera *> m_cameras;
+    std::vector<std::shared_ptr<aditof::Camera>> m_cameras;
 };
 
 #endif // SYSTEM_IMPL_H
