@@ -58,14 +58,17 @@ class Calibration {
   public:
     aditof::Status saveCalMap(aditof::DeviceInterface *device);
     aditof::Status readCalMap(aditof::DeviceInterface *device);
-    aditof::Status displayCalMap();
-    aditof::Status getAfeFirmware(std::string mode,
-                                  std::vector<uint16_t> &data);
-    aditof::Status getGainOffset(std::string mode, float &gain, float &offset);
+    aditof::Status displayCalMap() const;
+    aditof::Status getAfeFirmware(const std::string &mode,
+                                  std::vector<uint16_t> &data) const;
+    aditof::Status getGainOffset(const std::string &mode, float &gain,
+                                 float &offset) const;
 
   private:
-    float getMapSize(std::unordered_map<float, packet_struct> calibration_map);
-    float getPacketSize(std::unordered_map<float, param_struct> packet);
+    float getMapSize(
+        const std::unordered_map<float, packet_struct> &calibration_map) const;
+    float
+    getPacketSize(const std::unordered_map<float, param_struct> &packet) const;
 
   private:
     std::unordered_map<float, packet_struct> m_calibration_map;
