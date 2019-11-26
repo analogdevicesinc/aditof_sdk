@@ -10,20 +10,33 @@
 - [RPi camera cable](https://www.adafruit.com/product/2087) for connection between RPi and AD-96TOF1-EBZ
 - jumper wires for connection of secondary I2C lines
 
-### Modifying the AD-96TOF1-EBZ rev.B to work with the RPi
+### Modifying the AD-96TOF1-EBZ to work with the RPi
+<details>
+  <summary>AD-96TOF1-EBZ rev.B</summary>
+ 
 For the AD-96TOF1-EBZ rev.B to work with the RPi the following changes must be made on the camera board:
  - short pins 2 and 3 on JP1. JP1 is located underneath the laser board so the laser board must be first detached from the camera board to have acces to this solder jumper
  - short R98 and R109
  - move the S1 switch to position 1 - to the dot on the switch
+ </details>
+ 
+ <details>
+  <summary>AD-96TOF1-EBZ rev.C</summary>
+ 
+For the AD-96TOF1-EBZ rev.C to work with the RPi the following changes must be made on the camera board:
+ - move the S1 switch to position 1 - to the dot on the switch
+ - set the S5 switch 1 to OFF and all the other S5 swithces to ON
+ </details>
 
 ### Power on sequence
 - plug the SD card into the Raspberry Pi SD card slot. To benefit from the most recent software updates it is higly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
 - connect the HDMI cable from the monitor to the Raspberry Pi HDMI connector
-- connect the I2C1 of the Raspberry Pi to AD-96TOF1-EBZ development kit. Please use jumper wires and the table below.
+- connect the RPi camera cable between the RPi and the P1 connector of the ToF board
 - connect a USB mouse and keyboard to the Raspberry Pi. It's possible to use either a mouse & keyboard combo or a separate mouse and keyboard
-- connect the 5V power supply to the camera board and set the camera power switch S2 to on. Once the camera board is powered up the DS1 LED will turn on
-- connect the 5V power supply to the Raspberry Pi. Once power is connected to the Raspberry Pi the system will boot the Linux OS from the SD card.
-
+<details>
+  <summary>AD-96TOF1-EBZ rev.B</summary>
+  
+- connect the I2C1 of the Raspberry Pi to AD-96TOF1-EBZ development kit. Please use jumper wires and the table below.
 ![RPi connections](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/rpi_standalone.jpg)
 
 | Raspberry Pi GPIO Header (J8) | AD-96TOF1-EBZ pin header (P4) |
@@ -33,7 +46,19 @@ For the AD-96TOF1-EBZ rev.B to work with the RPi the following changes must be m
 |  Pin 5 (SCL)  |     Pin 15    |
 |               |     Pin 19    |
 
-Take care that the jumper wire connected to RPi header Pin 3 must be split in two and routed to both Pin 17 and Pin 21 on camera PCB. The same for SCL wire
+- take care that the jumper wire connected to RPi header Pin 3 must be split in two and routed to both Pin 17 and Pin 21 on camera PCB. The same for SCL wire
+</details>
+
+<details>
+  <summary>AD-96TOF1-EBZ rev.C</summary>
+ 
+ ![RPi connections](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/rpi_standalone_revc.jpg)
+</details>
+
+- connect the 5V power supply to the camera board and set the camera power switch S2 to on. Once the camera board is powered up the DS1 LED will turn on
+- connect the 5V power supply to the Raspberry Pi. Once power is connected to the Raspberry Pi the system will boot the Linux OS from the SD card.
+
+
 
 ### Power off sequence
 - under Linux open a terminal and type ***sudo poweroff***. This will safely power off the Raspberry Pi and ensure that the SD card is properly umounted
