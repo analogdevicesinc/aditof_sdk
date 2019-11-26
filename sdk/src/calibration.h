@@ -56,8 +56,8 @@ class Calibration {
     ~Calibration();
 
   public:
-    aditof::Status saveCalMap(aditof::DeviceInterface *device);
-    aditof::Status readCalMap(aditof::DeviceInterface *device);
+    aditof::Status saveCalMap(std::shared_ptr<aditof::DeviceInterface> device);
+    aditof::Status readCalMap(std::shared_ptr<aditof::DeviceInterface> device);
     aditof::Status displayCalMap() const;
     aditof::Status getAfeFirmware(const std::string &mode,
                                   std::vector<uint16_t> &data) const;

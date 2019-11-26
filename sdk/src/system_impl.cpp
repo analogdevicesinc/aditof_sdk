@@ -21,9 +21,11 @@ aditof::Status SystemImpl::initialize() {
     m_enumerator->findDevices(devsData);
 
     for (const auto &data : devsData) {
-        DeviceInterface *device = DeviceFactory::buildDevice(data);
-        aditof::Camera *camera = CameraFactory::buildCamera(device);
-	m_cameras.push_back(std::shared_ptr<aditof::Camera>(camera));
+        std::unique_ptr<DeviceInterface> device =
+            DeviceFactory::buildDevice(data);
+        std::shared_ptr<Camera> camera =
+            CameraFactory::buildCamera(std::move(device));
+        m_cameras.emplace_back(camera);
     }
 
     LOG(INFO) << "System initialized";
@@ -59,9 +61,11 @@ aditof::Status SystemImpl::getCameraListAtIp(
     }
 
     for (const auto &data : devsData) {
-        DeviceInterface *device = DeviceFactory::buildDevice(data);
-        aditof::Camera *camera = CameraFactory::buildCamera(device);
-	cameraList.push_back(std::shared_ptr<aditof::Camera>(camera));
+        std::unique_ptr<DeviceInterface> device =
+            DeviceFactory::buildDevice(data);
+        std::shared_ptr<Camera> camera =
+            CameraFactory::buildCamera(std::move(device));
+        cameraList.emplace_back(camera);
     }
 
     return Status::OK;

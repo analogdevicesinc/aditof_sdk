@@ -3,11 +3,13 @@
 
 #include "calibration.h"
 
+#include <memory>
+
 #include <aditof/camera.h>
 
 class Camera96Tof1 : public aditof::Camera {
   public:
-    Camera96Tof1(aditof::DeviceInterface *device);
+    Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device);
     ~Camera96Tof1();
 
   public: // implements Camera
@@ -24,11 +26,11 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
-    aditof::DeviceInterface *getDevice();
+    std::shared_ptr<aditof::DeviceInterface> getDevice();
 
   private:
     aditof::CameraDetails m_details;
-    aditof::DeviceInterface *m_device;
+    std::shared_ptr<aditof::DeviceInterface> m_device;
     bool m_devStarted;
     Calibration m_calibration;
 };

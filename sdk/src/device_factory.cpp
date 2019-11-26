@@ -6,19 +6,19 @@
 
 using namespace aditof;
 
-DeviceInterface *
+std::unique_ptr<DeviceInterface>
 DeviceFactory::buildDevice(const aditof::DeviceConstructionData &data) {
     using namespace aditof;
 
     switch (data.deviceType) {
     case DeviceType::USB: {
-        return new UsbDevice(data);
+        return std::unique_ptr<DeviceInterface>(new UsbDevice(data));
     }
     case DeviceType::ETHERNET: {
-        return new EthernetDevice(data);
+        return std::unique_ptr<DeviceInterface>(new EthernetDevice(data));
     }
     case DeviceType::LOCAL: {
-        return new LocalDevice(data);
+        return std::unique_ptr<DeviceInterface>(new LocalDevice(data));
     }
     }
 

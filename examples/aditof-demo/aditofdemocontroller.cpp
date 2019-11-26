@@ -89,7 +89,7 @@ std::pair<float, float> AdiTofDemoController::getTemperature() {
 
     auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
 
-    aditof::DeviceInterface *device = camera->getDevice();
+    std::shared_ptr<aditof::DeviceInterface> device = camera->getDevice();
 
     device->readAfeTemp(returnValue.first);
     device->readLaserTemp(returnValue.second);

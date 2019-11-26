@@ -105,7 +105,7 @@ class SDK_API Camera {
      * not be valid anymore.
      * @return DeviceInterface
      */
-    virtual DeviceInterface *getDevice() = 0;
+    virtual std::shared_ptr<DeviceInterface> getDevice() = 0;
 };
 
 } // namespace aditof
