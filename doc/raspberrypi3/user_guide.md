@@ -4,7 +4,7 @@
 
 ### Required hardware
 - [AD-96TOF1-EBZ development kit](https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/ad-96tof1-ebz.html)
-- [Raspberry Pi](https://www.raspberrypi.org/products/) The system was tested on Raspberry Pi3 Model B V1.2. It can work on other models that have a CSI camera interface input.
+- [Raspberry Pi](https://www.raspberrypi.org/products/) The system was tested on Raspberry Pi3 Model B V1.2 and Raspberry Pi 4. It can work on other models that have a CSI camera interface input.
 - Raspberry Pi 5V power supply
 - To run the system in standalone mode, besides the accesories that are provided in the AD-96TOF1-EBZ box you'll need an additional HDMI cable to connect to a monitor and a USB keyboard and mouse
 - [RPi camera cable](https://www.adafruit.com/product/2087) for connection between RPi and AD-96TOF1-EBZ
