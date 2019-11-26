@@ -18,7 +18,7 @@ using namespace std;
 
 static int interrupted = 0;
 
-static LocalDevice *device = nullptr;
+static std::shared_ptr<LocalDevice> device = nullptr;
 static payload::ClientRequest buff_recv;
 static payload::ServerResponse buff_send;
 static std::map<string, api_Values> s_map_api_Values;
@@ -158,8 +158,7 @@ int Network::callback_function(struct lws *wsi,
             /*CONN_CLOSED event is for first and only client connected*/
             cout << "Connection Closed" << endl;
             if (device) {
-                delete device;
-                device = nullptr;
+                device.reset();
             }
             Client_Connected = false;
             break;
@@ -255,9 +254,9 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
         devData.deviceType = aditof::DeviceType::LOCAL;
         devData.driverPath = buff_recv.device_data().driver_path();
-        aditof::DeviceInterface *deviceI =
+        std::shared_ptr<aditof::DeviceInterface> deviceI =
             aditof::DeviceFactory::buildDevice(devData);
-        device = dynamic_cast<LocalDevice *>(deviceI);
+        device = std::dynamic_pointer_cast<LocalDevice>(deviceI);
         if (!device) {
             errMsg = "Failed to create local device";
             status = aditof::Status::INVALID_ARGUMENT;
@@ -273,8 +272,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         cout << "DestroyDevice function\n";
 #endif
         if (device) {
-            delete device;
-            device = nullptr;
+            device.reset();
         }
         break;
     }
