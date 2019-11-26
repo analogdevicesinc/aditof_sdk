@@ -25,7 +25,7 @@ For the AD-96TOF1-EBZ rev.B to work with the RPi the following changes must be m
  
 For the AD-96TOF1-EBZ rev.C to work with the RPi the following changes must be made on the camera board:
  - move the S1 switch to position 1 - to the dot on the switch
- - set the S5 switch 1 to OFF and all the other S5 swithces to ON
+ - set the S5 switch 1 to OFF and all the other S5 switches to ON
  </details>
 
 ### Power on sequence
@@ -78,8 +78,8 @@ Once Linux boots you'll see on the HDMI monitor the Linux desktop and on the top
 The evaluation application allows to do live streaming of depth and IR data as well as recording the depth and IR data and playing back from a file. The depth data is displayed as a color map ranging from warm to cold colors as the distance from the camera increases. A point in the middle of the depth image shows the distance in mm to the target.
 
 There are 3 operating modes that determine the range of the system:
- - Near - 20cm to 80cm
- - Medium - 80cm to 300cm
+ - Near - 25cm to 80cm
+ - Medium - 30cm to 4.5m (Rev.B: 80cm to 3m)
  - Far - 300cm to 600cm
 
 When in a certain operating mode the system will measure distances outside of the mode's range but those will not be accurate.
