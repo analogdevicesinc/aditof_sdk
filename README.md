@@ -21,12 +21,12 @@ For more details on building the SDK on a host platform please check the **User 
 
 Designed using a modular approach, the 3D ToF hardware prototyping platform enables connectivity to the 96Boards development boards suite as well RaspberryPI or any other hardware platforms that have the RaspberryPI camera connector. 
 
-For more details on building the SDK on an embedded platform please check the **User Guide** specified below for either DragonBoard 410c or Raspberry PI 3.
+For more details on building the SDK on an embedded platform please check the **User Guide** specified below for either DragonBoard 410c or Raspberry Pi.
 
 | Platform | Documentation | GitHub master status | Downloads |
 | --------- | ----------- | ----------- | ----------- |
 | DragonBoard 410c | [User Guide](doc/dragonboard410c/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/dragonboard410c-latest-image.tar.xz) |
-| Raspberry PI 3,4 | [User Guide](doc/raspberrypi3/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-SD_card_image_v0.1-blue.svg)](http://swdownloads.analog.com/cse/aditof/aditof-v0.1-raspberrypi3-sdimage.tar.xz) |
+| Raspberry Pi 3,4 | [User Guide](doc/raspberrypi3/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-SD_card_image_v0.1-blue.svg)](http://swdownloads.analog.com/cse/aditof/aditof-v0.1-raspberrypi3-sdimage.tar.xz) |
 
 [How to write the SD card image onto the SD card?](doc/sdcard_burn.md)
 
