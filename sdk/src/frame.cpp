@@ -5,27 +5,17 @@ namespace aditof {
 
 Frame::Frame() : m_impl(new FrameImpl) {}
 
-Frame::~Frame() {
-    if (m_impl)
-        delete m_impl;
-}
+Frame::~Frame() = default;
 
-Frame::Frame(Frame &&other) noexcept {
-    this->m_impl = other.m_impl;
-    other.m_impl = nullptr;
-};
+Frame::Frame(Frame &&) noexcept = default;
 
-Frame &Frame::operator=(Frame &&other) noexcept {
-    std::swap(m_impl, other.m_impl);
-    return *this;
-}
+Frame &Frame::operator=(Frame &&) noexcept = default;
 
 Frame::Frame(const Frame &op) : m_impl(new FrameImpl(*op.m_impl)) {}
 
 Frame &Frame::operator=(const Frame &op) {
     if (this != &op) {
-        delete m_impl;
-        m_impl = (new FrameImpl(*op.m_impl));
+        m_impl.reset(new FrameImpl(*op.m_impl));
     }
 
     return *this;
