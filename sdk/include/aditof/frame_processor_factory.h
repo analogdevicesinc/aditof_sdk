@@ -1,6 +1,8 @@
 #ifndef FRAME_PROCESSOR_FACTORY_H
 #define FRAME_PROCESSOR_FACTORY_H
 
+#include <memory>
+
 namespace aditof {
 
 class FrameProcessor;
@@ -14,7 +16,7 @@ class FrameProcessorFactory {
     virtual ~FrameProcessorFactory() = default;
 
   public:
-    virtual FrameProcessor *
+    virtual std::unique_ptr<FrameProcessor>
     createFrameProcessor(FrameProcessorType type) const = 0;
 };
 
