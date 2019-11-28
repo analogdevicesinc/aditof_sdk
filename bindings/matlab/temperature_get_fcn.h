@@ -1,31 +1,31 @@
 #ifndef __DEMO_TIMESTAMP_GET_FCN_HEADER__
 #define __DEMO_TIMESTAMP_GET_FCN_HEADER__
 
-#include "AditofAdaptor.h"
 #include "mwadaptorimaq.h"
+#include "source_adaptor.h"
 
 /**
- * Class AditofTemperatureGetFcn
+ * Class TemperatureGetFcn
  *
  * @brief:  Provides a custom get function for the timestamp properties.
  *
  */
-class AditofTemperatureGetFcn : public imaqkit::IPropCustomGetFcn {
+class TemperatureGetFcn : public imaqkit::IPropCustomGetFcn {
 
   public:
     //**************************************
     //* CONSTRUCTOR/DESTRUCTOR
     //**************************************
     /**
-     * Constructor for AditofTemperatureGetFcn class.
+     * Constructor for TemperatureGetFcn class.
      *
      * @param parent: Handle to the instance of the IAdaptor class
      *                that is the parent of this object.
      */
-    AditofTemperatureGetFcn(AditofAdaptor *parent) : m_parent(parent){};
+    TemperatureGetFcn(SourceAdaptor *parent) : m_parent(parent){};
 
     // Destructor
-    virtual ~AditofTemperatureGetFcn(void){};
+    virtual ~TemperatureGetFcn(void){};
 
     // *******************************************************************
     // METHODS FOR CONFIGURING AND UPDATING DEMO SOURCE INPUTS.
@@ -51,7 +51,7 @@ class AditofTemperatureGetFcn : public imaqkit::IPropCustomGetFcn {
 
   private:
     /// The instance of the parent class that created this listener.
-    AditofAdaptor *m_parent;
+    SourceAdaptor *m_parent;
 };
 
 #endif

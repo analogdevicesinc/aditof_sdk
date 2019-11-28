@@ -1,11 +1,11 @@
-#include "AditofTemperatureGetFcn.h"
+#include "temperature_get_fcn.h"
 #include "aditofimaq.h"
 #include <assert.h>
 #include <cstring>
 #include <ctime>
 
-void AditofTemperatureGetFcn::getValue(imaqkit::IPropInfo *propertyInfo,
-                                       void *value) {
+void TemperatureGetFcn::getValue(imaqkit::IPropInfo *propertyInfo,
+                                 void *value) {
 
     switch (propertyInfo->getPropertyIdentifier()) {
     case aditof::ADITOF_PROPERTY_AFE_TEMP:

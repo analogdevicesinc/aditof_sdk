@@ -1,6 +1,6 @@
 #ifndef __DEMO_ADAPTOR_HEADER__
 #define __DEMO_ADAPTOR_HEADER__
-#include "AditofDeviceFormat.h"
+#include "device_format.h"
 #include <mwadaptorimaq.h>
 
 #ifdef _WIN32
@@ -20,12 +20,12 @@ typedef pthread_t Thread;
 #include <aditof/system.h>
 
 /**
- * Class AditofAdaptor
+ * Class SourceAdaptor
  *
  * @brief:  Defines adaptor methods expected by engine.
  *
  */
-class AditofAdaptor : public imaqkit::IAdaptor {
+class SourceAdaptor : public imaqkit::IAdaptor {
 
   public:
     // *******************************************************************
@@ -40,10 +40,10 @@ class AditofAdaptor : public imaqkit::IAdaptor {
     //
     //  The engine passes these arguments to the adaptor in the
     //  createInstance() routine.
-    AditofAdaptor(imaqkit::IEngine *engine,
+    SourceAdaptor(imaqkit::IEngine *engine,
                   const imaqkit::IDeviceInfo *deviceInfo,
                   const char *formatName, aditof::Camera *camera);
-    virtual ~AditofAdaptor();
+    virtual ~SourceAdaptor();
 
     // *******************************************************************
     // IMAGE ACQUISITION/CAPTURE METHODS
@@ -207,32 +207,32 @@ class AditofAdaptor : public imaqkit::IAdaptor {
      * the device. This could include selecting the device, performing any
      * necessary initialization of the selected camera, and setting up property
      * listeners.
-     * initDevice() is invoked in the AditofAdaptor constructor.
+     * initDevice() is invoked in the SourceAdaptor constructor.
      *
      * @return void:
      */
     void initDevice();
 
     /**
-     * getFormatInfo: Return the image acquisition device's AditofDeviceFormat
-     * object. The AditofDeviceFormat object contains image width, image height,
+     * getFormatInfo: Return the image acquisition device's DeviceFormat
+     * object. The DeviceFormat object contains image width, image height,
      * number of color bands, and colorspace information.
      *
-     * @return AditofDeviceFormat: The device format information object.
+     * @return DeviceFormat: The device format information object.
      */
-    AditofDeviceFormat *getFormatInfo() const;
+    DeviceFormat *getFormatInfo() const;
 
     /**
      * sendThread: The ThreadProc responsible for acquiring frames from the
      * device and sending those frames back to the engine.
      *
-     * @param param: Parameter value to be cast to AditofDeviceFormat.
+     * @param param: Parameter value to be cast to DeviceFormat.
      *
      * @return ThreadReturnType:
      */
     static ThreadReturnType CALLING_CONVENTION sendThread(void *param);
 
-    static void sendFrame(AditofAdaptor *adaptor);
+    static void sendFrame(SourceAdaptor *adaptor);
 
     // ************************************************************************
     // CLASS DATA MEMBERS

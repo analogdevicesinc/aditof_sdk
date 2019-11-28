@@ -1,9 +1,8 @@
 #include "assert.h"
 
-#include "AditofPropListener.h"
+#include "prop_listener.h"
 
-void AditofPropListener::notify(imaqkit::IPropInfo *propertyInfo,
-                                void *newValue) {
+void PropListener::notify(imaqkit::IPropInfo *propertyInfo, void *newValue) {
 
     if (newValue) {
         // Store a handle to the imaqkit::IPropInfo object passed in.
@@ -54,7 +53,7 @@ void AditofPropListener::notify(imaqkit::IPropInfo *propertyInfo,
     }
 }
 
-void AditofPropListener::applyValue() {
+void PropListener::applyValue() {
 
     // If device cannot be configured while acquiring data, stop the device,
     // configure the feature, then restart the device.

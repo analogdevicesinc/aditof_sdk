@@ -1,9 +1,9 @@
-#include "AditofAdaptor.h"
-#include "AditofDeviceFormat.h"
-#include "AditofPropListener.h"
-#include "AditofSourceListener.h"
-#include "AditofTemperatureGetFcn.h"
+#include "source_adaptor.h"
 #include "aditofimaq.h"
+#include "device_format.h"
+#include "prop_listener.h"
+#include "source_listener.h"
+#include "temperature_get_fcn.h"
 #include <string>
 
 #include <aditof/device_interface.h>
@@ -20,7 +20,7 @@ static const uint8_t colormap[3 * 256] = {
 //******************************************
 //  CONSTRUCTOR/DESTRUCTOR
 //******************************************
-AditofAdaptor::AditofAdaptor(imaqkit::IEngine *engine,
+SourceAdaptor::SourceAdaptor(imaqkit::IEngine *engine,
                              const imaqkit::IDeviceInfo *deviceInfo,
                              const char *formatName, aditof::Camera *camera)
     : imaqkit::IAdaptor(engine), m_di(deviceInfo),
@@ -40,7 +40,7 @@ AditofAdaptor::AditofAdaptor(imaqkit::IEngine *engine,
 
 // The destructor calls the imaqkit::IAdaptor::close() method, not the
 // closeDevice() method. The close() method calls the closeDevice() method.
-AditofAdaptor::~AditofAdaptor() {
+SourceAdaptor::~SourceAdaptor() {
 
     // Stop the device.
     stop();
@@ -54,13 +54,13 @@ AditofAdaptor::~AditofAdaptor() {
 
 //  Device Initialization Method
 //  Setup property listeners to get notification of changes to their values.
-void AditofAdaptor::initDevice() {
+void SourceAdaptor::initDevice() {
 
     // Get the engine property container.
     m_enginePropContainer = getEngine()->getEnginePropContainer();
 
     m_enginePropContainer->addListener("SelectedSourceName",
-                                       new AditofSourceListener(this));
+                                       new SourceListener(this));
 
     // Get a handle to the property container for device-specific properties
     // associated with the imaqkit::IEngine object.
@@ -85,8 +85,8 @@ void AditofAdaptor::initDevice() {
         if ((std::string(aditof::AFE_TEMPERATURE_STR) == devicePropNames[i]) ||
             (std::string(aditof::LASER_TEMPERATURE_STR) ==
              devicePropNames[i])) {
-            adaptorPropContainer->setCustomGetFcn(
-                devicePropNames[i], new AditofTemperatureGetFcn(this));
+            adaptorPropContainer->setCustomGetFcn(devicePropNames[i],
+                                                  new TemperatureGetFcn(this));
         } else {
             // Get the property information object.
             imaqkit::IPropInfo *propInfo =
@@ -97,7 +97,7 @@ void AditofAdaptor::initDevice() {
             // properties such as 'Parent' and 'Tag'.
             if (propInfo->isPropertyDeviceSpecific()) {
                 adaptorPropContainer->addListener(devicePropNames[i],
-                                                  new AditofPropListener(this));
+                                                  new PropListener(this));
             }
         }
     }
@@ -142,24 +142,24 @@ void AditofAdaptor::initDevice() {
 }
 
 // Return a string identifying the name of the vendor's device driver.
-const char *AditofAdaptor::getDriverDescription() const {
+const char *SourceAdaptor::getDriverDescription() const {
     return aditof::DRIVER_DESCRIPTION_STR;
 }
 
 // Return a string identifying the version of the vendor's device driver.
-const char *AditofAdaptor::getDriverVersion() const {
+const char *SourceAdaptor::getDriverVersion() const {
     return aditof::DRIVER_VERSION_STR;
 }
 
 // Return the width of the frame, in pixels, as defined by the video format
 // specified.
-int AditofAdaptor::getMaxWidth() const {
+int SourceAdaptor::getMaxWidth() const {
 
     // Get the format information object.
-    AditofDeviceFormat *formatInfo = getFormatInfo();
+    DeviceFormat *formatInfo = getFormatInfo();
 
     if (formatInfo) {
-        // Return the image width information stored in the AditofDeviceFormat
+        // Return the image width information stored in the DeviceFormat
         // object.
         return formatInfo->getFormatWidth();
     } else {
@@ -173,13 +173,13 @@ int AditofAdaptor::getMaxWidth() const {
 
 // Return the height of the frame, in pixels, as defined by the video format
 // specified.
-int AditofAdaptor::getMaxHeight() const {
+int SourceAdaptor::getMaxHeight() const {
 
     // Get the format information object.
-    AditofDeviceFormat *formatInfo = getFormatInfo();
+    DeviceFormat *formatInfo = getFormatInfo();
 
     if (formatInfo) {
-        // Return the image height information stored in the AditofDeviceFormat
+        // Return the image height information stored in the DeviceFormat
         // object.
         return formatInfo->getFormatHeight();
     } else {
@@ -191,13 +191,13 @@ int AditofAdaptor::getMaxHeight() const {
     }
 }
 
-imaqkit::frametypes::FRAMETYPE AditofAdaptor::getFrameType() const {
+imaqkit::frametypes::FRAMETYPE SourceAdaptor::getFrameType() const {
 
     /*    // Get the format information object.
-        AditofDeviceFormat *formatInfo = getFormatInfo();
+        DeviceFormat *formatInfo = getFormatInfo();
 
         if (formatInfo) {
-            // Return the frame type stored in the AditofDeviceFormat object.
+            // Return the frame type stored in the DeviceFormat object.
             return formatInfo->getFormatFrameType();
         } else {If*/
     // no format information is found because the device is configured to
@@ -208,13 +208,13 @@ imaqkit::frametypes::FRAMETYPE AditofAdaptor::getFrameType() const {
     //    }
 }
 
-bool AditofAdaptor::isAcquisitionActive(void) const {
+bool SourceAdaptor::isAcquisitionActive(void) const {
     std::unique_ptr<imaqkit::IAutoCriticalSection> acquisitionActiveSection(
         imaqkit::createAutoCriticalSection(m_acquisitionActiveGuard, true));
     return m_acquisitionActive;
 }
 
-void AditofAdaptor::setMode(int16_t mode) {
+void SourceAdaptor::setMode(int16_t mode) {
 
     if (m_currentMode == mode) {
         return;
@@ -239,7 +239,7 @@ void AditofAdaptor::setMode(int16_t mode) {
     m_currentMode = mode;
 }
 
-void AditofAdaptor::setDisplayedFrameType(int16_t type) {
+void SourceAdaptor::setDisplayedFrameType(int16_t type) {
     if (m_currentDisplayedType == type) {
         return;
     }
@@ -254,7 +254,7 @@ void AditofAdaptor::setDisplayedFrameType(int16_t type) {
     m_currentDisplayedType = type;
 }
 
-void AditofAdaptor::setSmallSignalValue(int16_t value) {
+void SourceAdaptor::setSmallSignalValue(int16_t value) {
     const size_t REGS_CNT = 5;
     uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001, 0x7c22};
     uint16_t afeRegsVal[REGS_CNT] = {0x0006, 0x0004, 0, 0x0007, 0x0004};
@@ -271,7 +271,7 @@ void AditofAdaptor::setSmallSignalValue(int16_t value) {
     }
 }
 
-int AditofAdaptor::getCurrentHwRange() {
+int SourceAdaptor::getCurrentHwRange() {
     aditof::CameraDetails cameraDetails;
 
     if (!m_camera) {
@@ -283,7 +283,7 @@ int AditofAdaptor::getCurrentHwRange() {
     return cameraDetails.range;
 }
 
-std::shared_ptr<aditof::Frame> AditofAdaptor::getFrameFromHwDevice() {
+std::shared_ptr<aditof::Frame> SourceAdaptor::getFrameFromHwDevice() {
     if (!m_camera) {
         return nullptr;
     }
@@ -294,7 +294,7 @@ std::shared_ptr<aditof::Frame> AditofAdaptor::getFrameFromHwDevice() {
     return frame;
 }
 
-float AditofAdaptor::readAfeTemp() {
+float SourceAdaptor::readAfeTemp() {
     float afeTemp = 0.0;
 
     if (!m_camera) {
@@ -305,7 +305,7 @@ float AditofAdaptor::readAfeTemp() {
     return afeTemp;
 }
 
-float AditofAdaptor::readLaserTemp() {
+float SourceAdaptor::readLaserTemp() {
     float laserTemp = 0.0;
 
     if (!m_camera) {
@@ -316,20 +316,20 @@ float AditofAdaptor::readLaserTemp() {
     return laserTemp;
 }
 
-void AditofAdaptor::setAcquisitionActive(bool state) {
+void SourceAdaptor::setAcquisitionActive(bool state) {
     std::unique_ptr<imaqkit::IAutoCriticalSection> acquisitionActiveSection(
         imaqkit::createAutoCriticalSection(m_acquisitionActiveGuard, true));
     m_acquisitionActive = state;
 }
 
 // Return the number of bands of data returned: RGB is 3, monochrome is 1.
-int AditofAdaptor::getNumberOfBands() const {
+int SourceAdaptor::getNumberOfBands() const {
 
     // Get the format information object.
-    AditofDeviceFormat *formatInfo = getFormatInfo();
+    DeviceFormat *formatInfo = getFormatInfo();
 
     if (formatInfo) {
-        // Return the number of color bands stored in the AditofDeviceFormat
+        // Return the number of color bands stored in the DeviceFormat
         // object.
         return formatInfo->getFormatNumBands();
     } else {
@@ -342,7 +342,7 @@ int AditofAdaptor::getNumberOfBands() const {
 }
 
 // Set up the device for acquisition.
-bool AditofAdaptor::openDevice() {
+bool SourceAdaptor::openDevice() {
     // Check if the device is already opened.
     // If it is, then nothing else needs to be done.
     if (isOpen())
@@ -371,7 +371,7 @@ bool AditofAdaptor::openDevice() {
 }
 
 //  Engine calls this method to start an acquisition.
-bool AditofAdaptor::startCapture() {
+bool SourceAdaptor::startCapture() {
 
     // Check if the device is opened.
     // Acquisition is not possible if the device is not already opened.
@@ -417,9 +417,9 @@ bool AditofAdaptor::startCapture() {
 // the acquisition is complete. This method calls the
 // imaqkit::IAdaptor::isAcquisitionNotComplete method to see if the requested
 // number of frames have been acquired.
-ThreadReturnType CALLING_CONVENTION AditofAdaptor::sendThread(void *param) {
+ThreadReturnType CALLING_CONVENTION SourceAdaptor::sendThread(void *param) {
 
-    AditofAdaptor *adaptor = reinterpret_cast<AditofAdaptor *>(param);
+    SourceAdaptor *adaptor = reinterpret_cast<SourceAdaptor *>(param);
 
 #ifdef _WIN32
     // Set the thread priority.
@@ -447,7 +447,7 @@ ThreadReturnType CALLING_CONVENTION AditofAdaptor::sendThread(void *param) {
 #endif
 }
 
-void AditofAdaptor::sendFrame(AditofAdaptor *adaptor) {
+void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
 
     std::unique_ptr<imaqkit::IAutoCriticalSection> driverSection(
         imaqkit::createAutoCriticalSection(adaptor->m_driverGuard, false));
@@ -597,7 +597,7 @@ void AditofAdaptor::sendFrame(AditofAdaptor *adaptor) {
 }
 
 //  Engine calls this method to stop an acquisition.
-bool AditofAdaptor::stopCapture() {
+bool SourceAdaptor::stopCapture() {
 
     // Check if the device is acquiring data.
     // If the device is not acquiring data then nothing else needs to be done.
@@ -635,7 +635,7 @@ bool AditofAdaptor::stopCapture() {
 }
 
 // Terminate the threads used for acquisition
-bool AditofAdaptor::closeDevice() {
+bool SourceAdaptor::closeDevice() {
 
     // Check if the device is opened.
     // If it is not opened, then nothing more needs to be done.
@@ -662,20 +662,19 @@ bool AditofAdaptor::closeDevice() {
 }
 
 // Utility function used to get the device format object.
-AditofDeviceFormat *AditofAdaptor::getFormatInfo() const {
+DeviceFormat *SourceAdaptor::getFormatInfo() const {
 
     // First get the specified format's imaqkit::IDeviceFormat object from the
     // imaqkit::IDeviceInfo object, using the getDeviceFormat() method.
     imaqkit::IDeviceFormat *selectedFormat =
         m_di->getDeviceFormat(m_formatName);
 
-    // Return the specified format's AditofDeviceFormat object. This object
+    // Return the specified format's DeviceFormat object. This object
     // is stored in the imaqkit::IDeviceFormat object. Use the getAdaptorData()
     // method of the imaqkit::IDeviceFormat object.
     // If the user specified a camera file,  no format has been saved.
     if (selectedFormat) {
-        return dynamic_cast<AditofDeviceFormat *>(
-            selectedFormat->getAdaptorData());
+        return dynamic_cast<DeviceFormat *>(selectedFormat->getAdaptorData());
     } else {
         return NULL;
     }

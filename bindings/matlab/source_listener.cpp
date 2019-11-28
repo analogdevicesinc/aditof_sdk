@@ -1,10 +1,10 @@
-#include "AditofSourceListener.h"
+#include "source_listener.h"
 
 // TODO: delete:
 #include <iostream>
 
-void AditofSourceListener::notify(imaqkit::IEnginePropInfo *propertyInfo,
-                                  void *newValue) {
+void SourceListener::notify(imaqkit::IEnginePropInfo *propertyInfo,
+                            void *newValue) {
 
     if (newValue) {
         // Get the ID of the new source requested by the user.
@@ -19,7 +19,7 @@ void AditofSourceListener::notify(imaqkit::IEnginePropInfo *propertyInfo,
     }
 }
 
-void AditofSourceListener::applyValue(void) {
+void SourceListener::applyValue(void) {
 
     // If device cannot be configured while acquiring stop the device,
     // configure the source input, then restart the device.

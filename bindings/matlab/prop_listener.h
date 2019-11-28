@@ -1,32 +1,31 @@
 #ifndef __DEMO_PROP_LISTENER_HEADER__
 #define __DEMO_PROP_LISTENER_HEADER__
 
-#include "AditofAdaptor.h"
 #include "aditofimaq.h"
 #include "mwadaptorimaq.h"
+#include "source_adaptor.h"
 #include <string>
 
 /**
- * Class AditofPropListener
+ * Class PropListener
  *
  * @brief:  Listens for changes in device-specific properties.
  *
  */
-class AditofPropListener : public imaqkit::IPropPostSetListener {
+class PropListener : public imaqkit::IPropPostSetListener {
 
   public:
     // **************************************
     // CONSTRUCTOR/DESTRUCTOR
     // **************************************
     /**
-     * Constructor for AditofPropListener class.
+     * Constructor for PropListener class.
      *
      * @param parent: Handle to the instance of the IAdaptor class
      *                that is the parent of this object.
      */
-    AditofPropListener(AditofAdaptor *parent)
-        : m_parent(parent), m_lastIntValue(0) {}
-    virtual ~AditofPropListener(){};
+    PropListener(SourceAdaptor *parent) : m_parent(parent), m_lastIntValue(0) {}
+    virtual ~PropListener(){};
 
     // *******************************************************************
     // METHODS FOR CONFIGURING AND UPDATING DEMO FEATURE PROPERTY VALUES.
@@ -34,7 +33,7 @@ class AditofPropListener : public imaqkit::IPropPostSetListener {
     /**
      * This is the method the engine calls when a property value
      * changes. notify() casts the new property value to the appropriate
-     * type and then calls the AditofPropListener::applyValue() method to
+     * type and then calls the PropListener::applyValue() method to
      * configure the property.
      *
      * @param propertyInfo: The property information object.
@@ -53,7 +52,7 @@ class AditofPropListener : public imaqkit::IPropPostSetListener {
     virtual void applyValue(void);
 
     /// The instance of the parent class that created this listener.
-    AditofAdaptor *m_parent;
+    SourceAdaptor *m_parent;
 
     /// Property Information object.
     imaqkit::IPropInfo *m_propInfo;

@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 project(aditofadapter)
 
-# TODO: copy tof.imdf
-
 include(../../cmake/FindMatlabWithImageAcquisitionToolbox.cmake)
 
 file(GLOB SOURCES

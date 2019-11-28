@@ -1,6 +1,6 @@
-#include "AditofAdaptor.h"
-#include "AditofDeviceFormat.h"
 #include "aditofimaq.h"
+#include "device_format.h"
+#include "source_adaptor.h"
 #include <mwadaptorimaq.h>
 
 // *******************************************************************
@@ -67,7 +67,7 @@ void getAvailHW(imaqkit::IHardwareInfo *hardwareContainer) {
         imaqkit::IDeviceFormat *deviceFormat = deviceInfo->createDeviceFormat(
             aditof::BGR_FORMAT_ID, aditof::BGR_FORMAT_STR);
 
-        AditofDeviceFormat *bgrFormatInfo = new AditofDeviceFormat();
+        DeviceFormat *bgrFormatInfo = new DeviceFormat();
 
         bgrFormatInfo->setFormatWidth(aditof::BGR_FORMAT_WIDTH);
         bgrFormatInfo->setFormatHeight(aditof::BGR_FORMAT_HEIGHT);
@@ -81,7 +81,7 @@ void getAvailHW(imaqkit::IHardwareInfo *hardwareContainer) {
         deviceFormat = deviceInfo->createDeviceFormat(aditof::MONO_FORMAT_ID,
                                                       aditof::MONO_FORMAT_STR);
 
-        AditofDeviceFormat *monoFormatInfo = new AditofDeviceFormat();
+        DeviceFormat *monoFormatInfo = new DeviceFormat();
 
         monoFormatInfo->setFormatWidth(aditof::MONO_FORMAT_WIDTH);
         monoFormatInfo->setFormatHeight(aditof::MONO_FORMAT_WIDTH);
@@ -272,7 +272,7 @@ imaqkit::IAdaptor *createInstance(imaqkit::IEngine *engine,
     }
 
     imaqkit::IAdaptor *adaptor =
-        new AditofAdaptor(engine, deviceInfo, formatName, camera);
+        new SourceAdaptor(engine, deviceInfo, formatName, camera);
 
     if (!camera) {
         // Throw an error in MATLAB.

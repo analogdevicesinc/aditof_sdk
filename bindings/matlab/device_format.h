@@ -4,7 +4,7 @@
 #include <mwadaptorimaq.h>
 
 /**
- * Class AditofDeviceFormat
+ * Class DeviceFormat
  *
  * @brief: Keeps all format-related data together, including format name,
  *         frame type, height, width, and number of bands.
@@ -13,14 +13,14 @@
  *         getAvailHW() call.
  */
 
-class AditofDeviceFormat : public imaqkit::IMAQInterface {
+class DeviceFormat : public imaqkit::IMAQInterface {
 
   public:
     // *******************************************************************
     // CONSTRUCTOR/DESTRUCTOR
     // *******************************************************************
-    AditofDeviceFormat(void);
-    virtual ~AditofDeviceFormat(void);
+    DeviceFormat(void);
+    virtual ~DeviceFormat(void);
 
     // *******************************************************************
     // METHODS FOR ACCESSING VIDEO FORMAT INFORMATION.

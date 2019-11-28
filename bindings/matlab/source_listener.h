@@ -1,31 +1,31 @@
 #ifndef __DEMO_SOURCE_LISTENER_HEADER__
 #define __DEMO_SOURCE_LISTENER_HEADER__
 
-#include "AditofAdaptor.h"
 #include "mwadaptorimaq.h"
+#include "source_adaptor.h"
 
 /**
- * Class AditofSourceListener
+ * Class SourceListener
  *
  * @brief:  Listens for changes in SelectedSource.
  *
  */
-class AditofSourceListener : public imaqkit::IEnginePropPostSetListener {
+class SourceListener : public imaqkit::IEnginePropPostSetListener {
 
   public:
     //**************************************
     //* CONSTRUCTOR/DESTRUCTOR
     //**************************************
     /**
-     * Constructor for AditofSourceListener class.
+     * Constructor for SourceListener class.
      *
      * @param parent: Handle to the instance of the IAdaptor class
      *                that is the parent of this object.
      */
-    AditofSourceListener(AditofAdaptor *parent) : m_parent(parent){};
+    SourceListener(SourceAdaptor *parent) : m_parent(parent){};
 
     // Destructor
-    virtual ~AditofSourceListener(void){};
+    virtual ~SourceListener(void){};
 
     // *******************************************************************
     // METHODS FOR CONFIGURING AND UPDATING DEMO SOURCE INPUTS.
@@ -33,7 +33,7 @@ class AditofSourceListener : public imaqkit::IEnginePropPostSetListener {
     /**
      * This is the method the engine calls when the value of the SelectedSource
      * property changes. notify() casts the new source value to the appropriate
-     * type and then calls the AditofSourceListener::applyValue() method to
+     * type and then calls the SourceListener::applyValue() method to
      * configure the new source. To set up a listener for other properties, use
      * the DemoPropListener object.
      *
@@ -53,7 +53,7 @@ class AditofSourceListener : public imaqkit::IEnginePropPostSetListener {
     virtual void applyValue(void);
 
     /// The instance of the parent class that created this listener.
-    AditofAdaptor *m_parent;
+    SourceAdaptor *m_parent;
 
     /// The new source id requested by the user.
     int m_source;
