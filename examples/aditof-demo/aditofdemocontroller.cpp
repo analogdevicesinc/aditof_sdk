@@ -175,6 +175,10 @@ std::pair<float, float> AdiTofDemoController::getTemperature() {
 aditof::Status AdiTofDemoController::writeAFEregister(uint16_t *address,
                                                       uint16_t *data,
                                                       uint16_t noOfEntries) {
+    if (m_cameraInUse == -1) {
+        return aditof::Status::GENERIC_ERROR;
+    }
+
     auto device =
         m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDevice();
     return device->writeAfeRegisters(address, data, noOfEntries);

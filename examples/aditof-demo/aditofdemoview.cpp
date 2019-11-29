@@ -277,22 +277,31 @@ void AdiTofDemoView::render() {
                 if (!ipvalue.empty()) {
                     bool connectionResult =
                         m_ctrl->setEthernetConnection(ipvalue);
-                    if (connectionResult == true)
-                        m_ctrl->setMode(modes[0]);
+                    if (connectionResult == true) {
+                        int selectedMode =
+                            (2 - static_cast<int>(std::log2(modeCurrentValue)));
+                        m_ctrl->setMode(modes[selectedMode]);
+                    }
                 }
                 ipConnectionEnabled = !ipConnectionEnabled;
             }
 
             if (USBModeChecked) {
                 bool connectionResult = m_ctrl->setRegularConnection();
-                if (connectionResult == true)
-                    m_ctrl->setMode(modes[0]);
+                if (connectionResult == true) {
+                    int selectedMode =
+                        (2 - static_cast<int>(std::log2(modeCurrentValue)));
+                    m_ctrl->setMode(modes[selectedMode]);
+                }
             }
 
             if (localModeChecked) {
                 bool connectionResult = m_ctrl->setRegularConnection();
-                if (connectionResult == true)
-                    m_ctrl->setMode(modes[0]);
+                if (connectionResult == true) {
+                    int selectedMode =
+                        (2 - static_cast<int>(std::log2(modeCurrentValue)));
+                    m_ctrl->setMode(modes[selectedMode]);
+                }
             }
         }
 
@@ -390,11 +399,11 @@ void AdiTofDemoView::render() {
             }
         }
 
-        cvui::rect(frame, 50, 225, 190, 30, fieldColor);
-        cvui::text(frame, 60, 232, fileName);
+        cvui::rect(frame, 50, 220, 190, 30, fieldColor);
+        cvui::text(frame, 60, 230, fileName);
 
-        cvui::text(frame, 50, 262, status);
-        cvui::beginRow(frame, 50, 270);
+        cvui::text(frame, 50, 255, status);
+        cvui::beginRow(frame, 50, 273);
         cvui::checkbox("Live", &livePlayChecked);
         cvui::space(10);
         cvui::checkbox("Playback", &playbackChecked);
@@ -452,7 +461,7 @@ void AdiTofDemoView::render() {
             currentFrame = 0;
         }
 
-        int fileNameField = cvui::iarea(50, 225, 190, 30);
+        int fileNameField = cvui::iarea(50, 220, 190, 30);
 
         if (fileNameField == cvui::CLICK) {
             fieldColor = selectedColor;
@@ -616,7 +625,13 @@ void AdiTofDemoView::render() {
             }
             // TO DO: This breaks things over USB. Works well on the target and
             // over ethernet.
-            m_ctrl->writeAFEregister(afeRegsAddr, afeRegsVal, 5);
+            aditof::Status registerAFEwriting =
+                m_ctrl->writeAFEregister(afeRegsAddr, afeRegsVal, 5);
+            if (registerAFEwriting == aditof::Status::GENERIC_ERROR) {
+                status = "No cameras connected!";
+                m_crtSmallSignalState = !m_crtSmallSignalState;
+                m_smallSignal = m_crtSmallSignalState;
+            }
         }
 
         if (thresholdClicked == cvui::CLICK) {
