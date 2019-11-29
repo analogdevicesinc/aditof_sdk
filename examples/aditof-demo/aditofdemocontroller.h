@@ -48,12 +48,16 @@ class AdiTofDemoController {
 
     int getRange() const;
 
+    bool setEthernetConnection(const std::string &ip);
+    bool setRegularConnection();
+
   private:
     void captureFrames();
 
   private:
-    aditof::System m_system;
+    aditof::System *m_system;
     std::vector<std::shared_ptr<aditof::Camera>> m_cameras;
+
     int m_cameraInUse;
     std::thread m_workerThread;
     std::atomic<bool> m_stopFlag;
@@ -64,6 +68,8 @@ class AdiTofDemoController {
     bool m_frameRequested;
 
     std::unique_ptr<AditofDemoRecorder> m_recorder;
+
+    bool m_IsEthernetConnection = false;
 };
 
 #endif
