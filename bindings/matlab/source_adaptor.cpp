@@ -351,10 +351,10 @@ bool SourceAdaptor::openDevice() {
 #ifdef _WIN32
     // Create a thread for capturing images from the image acquisition
     // device and sending those images back to the IMAQ engine.
-    _sendThread = CreateThread(NULL, 0, sendThread, this, 0, &_sendThreadID);
+    m_sendThread = CreateThread(NULL, 0, sendThread, this, 0, &_sendThreadID);
 
     // Check that the thread was successfully created.
-    if (_sendThread == NULL) {
+    if (m_sendThread == NULL) {
         return false;
     }
 
@@ -644,16 +644,16 @@ bool SourceAdaptor::closeDevice() {
 
 #ifdef _WIN32
     // Terminate and close image the send thread.
-    if (_sendThread) {
+    if (m_sendThread) {
         // Post an WM_QUIT message to sendThread() thread.
         PostThreadMessage(_sendThreadID, WM_QUIT, 0, 0);
 
         // Give the thread a chance to finish.
-        WaitForSingleObject(_sendThread, demo::SINGLE_OBJECT_WAIT_TIME);
+        WaitForSingleObject(m_sendThread, aditof::SINGLE_OBJECT_WAIT_TIME);
 
         // Close sendThread() thread handle.
-        CloseHandle(_sendThread);
-        _sendThread = NULL;
+        CloseHandle(m_sendThread);
+        m_sendThread = NULL;
     }
 #else
 #endif

@@ -22,6 +22,15 @@ if (CMAKE_COMPILER_IS_GNUCC)
 	)
 endif()
 
+if (MSVC)
+        target_compile_options(${PROJECT_NAME} PUBLIC
+                /EHs # enable c++ exceptions, yes with extern C functions
+                /MD # multi-threaded DLL
+                /GS # disable security checks
+                /GR # enable run-time type information
+        )
+endif()
+
 # Make sure we have no prefix for our output name
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
@@ -34,6 +43,6 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         aditof
-        ${Matlab_MX_LIBRARY}
+        $<$<NOT:$<PLATFORM_ID:Windows>>:${Matlab_MX_LIBRARY}> # MX lib only needed on Linux/MacOS
         ${Matlab_MWIMAQMEX_LIBRARY}
 )
