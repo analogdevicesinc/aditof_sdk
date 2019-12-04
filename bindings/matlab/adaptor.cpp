@@ -49,7 +49,7 @@ void uninitializeAdaptor() { delete m_system; }
  */
 
 void getAvailHW(imaqkit::IHardwareInfo *hardwareContainer) {
-    std::vector<aditof::Camera *> foundCameras;
+    std::vector<std::shared_ptr<aditof::Camera>> foundCameras;
 
     if (m_system) {
         m_system->getCameraList(foundCameras);
@@ -254,17 +254,17 @@ imaqkit::IAdaptor *createInstance(imaqkit::IEngine *engine,
     // Call your adaptor's constructor to create an instance, passing the
     // the same three arguments to the constructor.
 
-    std::vector<aditof::Camera *> cameraList;
+    std::vector<std::shared_ptr<aditof::Camera >> cameraList;
     m_system->getCameraList(cameraList);
 
-    aditof::Camera *camera = nullptr;
+    std::shared_ptr<aditof::Camera> camera = nullptr;
 
     int nrCameras = cameraList.size();
 
     if (deviceInfo->getDeviceID() - 1 < nrCameras) {
         camera = cameraList.at(deviceInfo->getDeviceID() - 1);
     } else if (deviceInfo->getDeviceID() - 1 == nrCameras) {
-        std::vector<aditof::Camera *> cameraListAtIp;
+        std::vector<std::shared_ptr<aditof::Camera >> cameraListAtIp;
         m_system->getCameraListAtIp(cameraListAtIp, formatName);
         if (cameraListAtIp.size() > 0) {
             camera = cameraListAtIp.at(0);

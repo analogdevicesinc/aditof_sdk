@@ -42,7 +42,7 @@ class SourceAdaptor : public imaqkit::IAdaptor {
     //  createInstance() routine.
     SourceAdaptor(imaqkit::IEngine *engine,
                   const imaqkit::IDeviceInfo *deviceInfo,
-                  const char *formatName, aditof::Camera *camera);
+                  const char *formatName, std::shared_ptr<aditof::Camera> camera);
     virtual ~SourceAdaptor();
 
     // *******************************************************************
@@ -265,7 +265,7 @@ class SourceAdaptor : public imaqkit::IAdaptor {
     /// from the device.
     bool m_acquisitionActive;
 
-    aditof::Camera *m_camera;
+    std::shared_ptr<aditof::Camera> m_camera;
 
     int16_t m_currentMode;
     int16_t m_currentDisplayedType;
