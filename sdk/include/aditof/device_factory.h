@@ -4,6 +4,8 @@
 #include <aditof/device_construction_data.h>
 #include <aditof/device_interface.h>
 
+#include <memory>
+
 namespace aditof {
 
 /**
@@ -16,7 +18,7 @@ class DeviceFactory {
      * @brief Factory method to create a device.
      * @return DeviceInterface*
      */
-    static DeviceInterface *
+    static std::unique_ptr<DeviceInterface>
     buildDevice(const aditof::DeviceConstructionData &data);
 };
 

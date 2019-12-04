@@ -53,7 +53,7 @@ class AdiTofDemoController {
 
   private:
     aditof::System m_system;
-    std::vector<aditof::Camera *> m_cameras;
+    std::vector<std::shared_ptr<aditof::Camera>> m_cameras;
     int m_cameraInUse;
     std::thread m_workerThread;
     std::atomic<bool> m_stopFlag;

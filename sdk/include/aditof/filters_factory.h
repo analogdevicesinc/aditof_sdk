@@ -7,7 +7,7 @@ namespace aditof {
 
 class FiltersFactory : public FrameProcessorFactory {
   public:
-    virtual FrameProcessor *
+    virtual std::unique_ptr<FrameProcessor>
     createFrameProcessor(FrameProcessorType type) const override;
 };
 

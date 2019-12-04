@@ -6,29 +6,22 @@ namespace aditof {
 
 System::System() : m_impl(new SystemImpl) {}
 
-System::~System() {
-    if (m_impl)
-        delete m_impl;
-}
+System::~System() = default;
 
-System::System(System &&other) noexcept {
-    this->m_impl = other.m_impl;
-    other.m_impl = nullptr;
-};
+System::System(System &&) noexcept = default;
 
-System &System::operator=(System &&other) noexcept {
-    std::swap(m_impl, other.m_impl);
-    return *this;
-}
+System &System::operator=(System &&) noexcept = default;
 
 Status System::initialize() { return m_impl->initialize(); }
 
-Status System::getCameraList(std::vector<Camera *> &cameraList) const {
+Status
+System::getCameraList(std::vector<std::shared_ptr<Camera>> &cameraList) const {
     return m_impl->getCameraList(cameraList);
 }
 
-Status System::getCameraListAtIp(std::vector<Camera *> &cameraList,
-                                 const std::string &ip) const {
+Status
+System::getCameraListAtIp(std::vector<std::shared_ptr<Camera>> &cameraList,
+                          const std::string &ip) const {
     return m_impl->getCameraListAtIp(cameraList, ip);
 }
 

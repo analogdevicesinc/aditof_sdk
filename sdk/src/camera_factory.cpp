@@ -5,14 +5,15 @@
 
 namespace aditof {
 
-Camera *CameraFactory::buildCamera(DeviceInterface *device) {
+std::unique_ptr<Camera>
+CameraFactory::buildCamera(std::unique_ptr<DeviceInterface> device) {
     using namespace aditof;
 
     DeviceDetails devDetails;
     device->getDetails(devDetails);
     switch (devDetails.sensorType) {
     case SensorType::SENSOR_96TOF1:
-        return new Camera96Tof1(device);
+        return std::unique_ptr<Camera>(new Camera96Tof1(std::move(device)));
     }
 
     return nullptr;

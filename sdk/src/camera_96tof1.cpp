@@ -9,10 +9,10 @@
 #include <glog/logging.h>
 #include <iterator>
 
-Camera96Tof1::Camera96Tof1(aditof::DeviceInterface *device)
-    : m_device(device), m_devStarted(false) {}
+Camera96Tof1::Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device)
+    : m_device(std::move(device)), m_devStarted(false) {}
 
-Camera96Tof1::~Camera96Tof1() { delete m_device; }
+Camera96Tof1::~Camera96Tof1() = default;
 
 aditof::Status Camera96Tof1::initialize() {
     using namespace aditof;
@@ -257,4 +257,6 @@ aditof::Status Camera96Tof1::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-aditof::DeviceInterface *Camera96Tof1::getDevice() { return m_device; }
+std::shared_ptr<aditof::DeviceInterface> Camera96Tof1::getDevice() {
+    return m_device;
+}

@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    std::vector<Camera *> cameras;
+    std::vector<std::shared_ptr<Camera>> cameras;
     system.getCameraListAtIp(cameras, ip);
     if (cameras.empty()) {
         LOG(WARNING) << "No cameras found";
