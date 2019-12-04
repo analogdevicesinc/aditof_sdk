@@ -254,7 +254,7 @@ imaqkit::IAdaptor *createInstance(imaqkit::IEngine *engine,
     // Call your adaptor's constructor to create an instance, passing the
     // the same three arguments to the constructor.
 
-    std::vector<std::shared_ptr<aditof::Camera >> cameraList;
+    std::vector<std::shared_ptr<aditof::Camera>> cameraList;
     m_system->getCameraList(cameraList);
 
     std::shared_ptr<aditof::Camera> camera = nullptr;
@@ -264,7 +264,7 @@ imaqkit::IAdaptor *createInstance(imaqkit::IEngine *engine,
     if (deviceInfo->getDeviceID() - 1 < nrCameras) {
         camera = cameraList.at(deviceInfo->getDeviceID() - 1);
     } else if (deviceInfo->getDeviceID() - 1 == nrCameras) {
-        std::vector<std::shared_ptr<aditof::Camera >> cameraListAtIp;
+        std::vector<std::shared_ptr<aditof::Camera>> cameraListAtIp;
         m_system->getCameraListAtIp(cameraListAtIp, formatName);
         if (cameraListAtIp.size() > 0) {
             camera = cameraListAtIp.at(0);

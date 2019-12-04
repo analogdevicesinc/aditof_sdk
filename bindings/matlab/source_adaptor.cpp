@@ -22,7 +22,8 @@ static const uint8_t colormap[3 * 256] = {
 //******************************************
 SourceAdaptor::SourceAdaptor(imaqkit::IEngine *engine,
                              const imaqkit::IDeviceInfo *deviceInfo,
-                             const char *formatName, std::shared_ptr<aditof::Camera> camera)
+                             const char *formatName,
+                             std::shared_ptr<aditof::Camera> camera)
     : imaqkit::IAdaptor(engine), m_di(deviceInfo),
       m_sendThread(static_cast<Thread>(NULL)), m_formatName(formatName),
       m_acquisitionActive(false), m_camera(camera),

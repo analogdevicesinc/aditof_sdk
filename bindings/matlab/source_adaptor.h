@@ -42,7 +42,8 @@ class SourceAdaptor : public imaqkit::IAdaptor {
     //  createInstance() routine.
     SourceAdaptor(imaqkit::IEngine *engine,
                   const imaqkit::IDeviceInfo *deviceInfo,
-                  const char *formatName, std::shared_ptr<aditof::Camera> camera);
+                  const char *formatName,
+                  std::shared_ptr<aditof::Camera> camera);
     virtual ~SourceAdaptor();
 
     // *******************************************************************
