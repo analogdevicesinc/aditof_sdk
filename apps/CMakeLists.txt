@@ -5,3 +5,7 @@ if (DRAGONBOARD)
         add_subdirectory(server)
         add_subdirectory(uvc-app)
 endif()
+
+if (RASPBERRYPI)
+        add_subdirectory(server)
+endif()
