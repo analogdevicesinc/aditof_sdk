@@ -1,20 +1,9 @@
-#import tof_device.tof_device as tofdev
 import aditofpython as tof
-import cal_eeprom.firmware_gen as fgen
 from natsort import natsorted, ns
 import logging
 import os
 import numpy as np
 import struct
-
-def mode_stop(dev):
-    dev.writeAFEReg(0x4001, 0x0006)
-    dev.writeAFEReg(0x7c22, 0x0004)
-
-
-def mode_start(dev):
-    dev.writeAFEReg(0x4001, 0x0007)
-    dev.writeAFEReg(0x7c22, 0x0004)
     
 def write_AFE_reg(cam_handle, addr, data):
     logger = logging.getLogger(__name__)
@@ -117,18 +106,6 @@ def open_device2(sys_handle):
     
     return cam_handle
  
- 
-def open_device():
-    logger = logging.getLogger(__name__)
-    dev_handle = tofdev.tof_device()
-    ret = dev_handle.openDevice(2,-1)
-    if ret == 0:
-        logger.info("Device Opened")
-    else:
-        logger.error("Can't open device")
-        raise SystemExit
-    return dev_handle
- 
 def program_firmware2(cam_handle, firmware_path):
     logger = logging.getLogger(__name__)
     logger.info("Firmware Path %s", firmware_path)
@@ -197,31 +174,5 @@ def get_depth_ir_image(cam_handle):
     ir_image = np.array(frame.getData(tof.FrameDataType.IR), copy=True)
 
     return depth_image, ir_image
-    
-
-def program_firmware(dev_handle, firmware_path):
-    logger = logging.getLogger(__name__)
-    logger.info("Firmware Path %s", firmware_path)
-    file_list = natsorted(os.listdir("./"+firmware_path+"/"), alg=ns.IGNORECASE)
-    lf_file_list = []
-    for file_name in file_list:
-        if file_name.endswith(".lf"):
-            lf_file_list.append(file_name)
-
-    if len(lf_file_list) > 13:
-        logger.error("More than 13 Lf files found at %s", firmware_path)
-        print(lf_file_list)
-        raise SystemExit
-
-    for file_name in lf_file_list:
-        #print('Parsing:' + file_name)
-        dev_handle.parseCode("./"+firmware_path+"/"+file_name)
-
-    mode_stop(dev_handle)
-    dev_handle.program()
-    logger.info("Device Programmed")
-    # TURN on ISA Mode
-    dev_handle.writeAFEReg(int('0xC0A9', 16), 2)
-    mode_start(dev_handle)
 
 

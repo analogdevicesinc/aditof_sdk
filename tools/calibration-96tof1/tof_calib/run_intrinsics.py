@@ -1,4 +1,5 @@
-import tof_device.tof_device as tofdev
+import aditofpython as tof
+import device
 import intrinsic_calibration as ic
 import sys
 import numpy as np
@@ -12,21 +13,18 @@ import logging
 import logging.config
 from datetime import datetime
 import time
+import cv2
 
 def setup_logging():
     with open('../logger.json', 'r') as f:
        config = json.load(f)
        logging.config.dictConfig(config)
 
-def get_ir_image(dev):
+def get_ir_image(cam_handle):
     
-    image = dev.getImage()
-    image = np.resize(image, (960,640))
-    irImage = image[1::2, :]
-    imax = np.amax(irImage)
-    irImage = np.uint8(255*(irImage/imax))
-    irImage.resize((480,640))
-    return irImage
+    image = device.get_depth_image(cam_handle)
+    ir_image = image[480:, :]
+    return ir_image
     
 
 def run_intrinsic_calibration(intrinsic_config_json, **kwargs):
@@ -40,38 +38,34 @@ def run_intrinsic_calibration(intrinsic_config_json, **kwargs):
     file_list = natsorted(os.listdir("./"+firmware_path+"/"), alg=ns.IGNORECASE)[:14]
     print(file_list)
     
-    dev_handle = tofdev.tof_device()
-    ret = dev_handle.openDevice(2,-1)
-    if ret != -1:
-        logger.info("Device Opened")
-    else:
-        logger.error("Can't open device")
-        raise SystemExit
-        
-    for file_name in file_list:
-        if file_name.endswith(".lf"):
-            dev_handle.parseCode("./"+firmware_path+"/"+file_name)
-            
-    dev_handle.program()
-    dev_handle.writeAFEReg(0xC0A9, 2) # Set to ISA mode
+    #Initialize tof class
+    system = tof.System()
+    status = system.initialize()
+    logger.info("System Initialize: " + str(status))
 
-    dev_handle.writeAFEReg(0x4001, 0x0006)
-    dev_handle.writeAFEReg(0x7c22, 0x0004)
-    dev_handle.writeAFEReg(0x4001, 0x0007)
-    dev_handle.writeAFEReg(0x7c22, 0x0004)# Mode stop and start sequence 
+    # Get Camera and program firmware
+    cam_handle = device.open_device2(system)
+    firmware_path = intrinsic_config_dict['firmware_path']
+    device.program_firmware2(cam_handle, firmware_path)
+     
+    device.write_AFE_reg(cam_handle, [0xC0A9], [0x0002])
+    device.write_AFE_reg(cam_handle, [0x4001], [0x0006])
+    device.write_AFE_reg(cam_handle, [0x7c22], [0x0004])
+    device.write_AFE_reg(cam_handle, [0x4001], [0x0007])
+    device.write_AFE_reg(cam_handle, [0x7c22], [0x0004])
     
     config_path = intrinsic_config_dict['config_path']
     output_path = intrinsic_config_dict['output_path']
     
     ic_c = ic.intrinsic_calibration()
     if intrinsic_config_dict['get_coordinates']:
-        ic_c.get_coordinates(get_ir_image(dev_handle))
+        ic_c.get_coordinates(get_ir_image(cam_handle))
         ic_c.output_coordinates(config_path)
     else:
         ic_c.load_coordinates(config_path)
         
     if intrinsic_config_dict['calibrate_intrinsic']:
-        num, _ , _  = ic_c.calibrate_intrinsic(get_ir_image(dev_handle))
+        num, _ , roi  = ic_c.calibrate_intrinsic(get_ir_image(cam_handle))
     
     if num >= (intrinsic_config_dict['min_checkerboards']):
         ic_c.output_intrinsic(output_path, intrinsic_config_dict['serial_number'])
