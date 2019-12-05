@@ -10,6 +10,8 @@
 namespace detail {
 std::string getKeyPressed(int key, bool &backspace) {
     switch (key & 0xff) {
+    case 46:
+        return ".";
     case 48:
         return "0";
     case 49:
@@ -102,6 +104,26 @@ void AdiTofDemoView::render() {
     bool blendedViewChecked = false;
     int viewCurrentValue = 2;
 
+    std::string typeOfDevice = DEVICETYPE;
+    std::string typeUSBDevice = "USB";
+    std::string typeLocalDevice = "Local";
+    std::string typeEthDevice = "ETH";
+
+    bool USBModeChecked = false;
+    bool localModeChecked = false;
+    bool ethModeChecked = false;
+    int connectionCurrentValue = 4;
+
+    if (typeOfDevice.find(typeUSBDevice) != std::string::npos) {
+        USBModeChecked = true;
+    } else {
+        if (typeOfDevice.find(typeLocalDevice) != std::string::npos) {
+            localModeChecked = true;
+        } else {
+            ethModeChecked = true;
+        }
+    }
+
     int pulseCount = 2000;
 
     unsigned int normalColor = 0x000032;
@@ -110,6 +132,11 @@ void AdiTofDemoView::render() {
 
     int thresholdClicked = 0;
     int smallSignalThreshold = 50;
+
+    std::string ipvalue = "";
+    bool ipFieldSelected = false;
+    unsigned int ipColor = normalColor;
+    bool ipConnectionEnabled = false;
 
     std::string address = "0x";
     std::string value = std::to_string(smallSignalThreshold);
@@ -150,7 +177,7 @@ void AdiTofDemoView::render() {
 
     while (true) {
         // Fill the frame with a nice color
-        cv::Mat frame = cv::Mat(500, 400, CV_8UC3);
+        cv::Mat frame = cv::Mat(530, 400, CV_8UC3);
 
         frame = cv::Scalar(49, 52, 49);
 
@@ -212,11 +239,77 @@ void AdiTofDemoView::render() {
             m_ctrl->setMode(modes[selectedMode]);
         }
 
-        cvui::beginColumn(frame, 50, 20);
+        // Connection mode checkbox group
+        bool connectionCheckboxChanged = false;
+        if (USBModeChecked == true) {
+            int btnGroupConnection =
+                USBModeChecked << 2 | localModeChecked << 1 | ethModeChecked;
+            if (connectionCurrentValue != btnGroupConnection) {
+                int xorValue = connectionCurrentValue ^ btnGroupConnection;
+                connectionCurrentValue = xorValue;
+                USBModeChecked = xorValue & (1 << 2);
+                localModeChecked = xorValue & (1 << 1);
+                ethModeChecked = xorValue & 1;
+                connectionCheckboxChanged = true;
+            }
+        }
+
+        // IP connection GUI //470, 50
+        if (ethModeChecked) {
+            cvui::rect(frame, 50, 80, 170, 30, ipColor);
+            cvui::text(frame, 60, 90, ipvalue);
+            int ipField = cvui::iarea(50, 80, 170, 30);
+            if (ipField == cvui::CLICK) {
+                ipColor = selectedColor;
+                ipFieldSelected = true;
+            } else if (cvui::mouse(cvui::CLICK) && ipField != cvui::CLICK) {
+                ipColor = normalColor;
+                ipFieldSelected = false;
+            }
+            if (cvui::button(frame, 230, 80, 90, 30, "Connect")) {
+                ipConnectionEnabled = !ipConnectionEnabled;
+            }
+        }
+
+        // set connection mode
+        if (connectionCheckboxChanged || ipConnectionEnabled) {
+            if (ipConnectionEnabled) {
+                if (!ipvalue.empty()) {
+                    bool connectionResult =
+                        m_ctrl->setEthernetConnection(ipvalue);
+                    if (connectionResult == true) {
+                        int selectedMode =
+                            (2 - static_cast<int>(std::log2(modeCurrentValue)));
+                        m_ctrl->setMode(modes[selectedMode]);
+                    }
+                }
+                ipConnectionEnabled = !ipConnectionEnabled;
+            }
+
+            if (USBModeChecked) {
+                bool connectionResult = m_ctrl->setRegularConnection();
+                if (connectionResult == true) {
+                    int selectedMode =
+                        (2 - static_cast<int>(std::log2(modeCurrentValue)));
+                    m_ctrl->setMode(modes[selectedMode]);
+                }
+            }
+
+            if (localModeChecked) {
+                bool connectionResult = m_ctrl->setRegularConnection();
+                if (connectionResult == true) {
+                    int selectedMode =
+                        (2 - static_cast<int>(std::log2(modeCurrentValue)));
+                    m_ctrl->setMode(modes[selectedMode]);
+                }
+            }
+        }
+
+        cvui::beginColumn(frame, 50, 105);
         cvui::space(10);
         cvui::text("Mode: ", 0.6);
         cvui::space(10);
-        cvui::beginRow(frame, 50, 60);
+        cvui::beginRow(frame, 50, 140);
         cvui::checkbox("Near", &nearModeChecked);
         cvui::space(10);
         cvui::checkbox("Medium", &mediumModeChecked);
@@ -225,10 +318,10 @@ void AdiTofDemoView::render() {
         cvui::endRow();
         cvui::endColumn();
 
-        cvui::text(frame, 50, 100, "Video: ", 0.6);
+        cvui::text(frame, 50, 160, "Video: ", 0.6);
 
         if (cvui::button(
-                frame, 50, 125, 90, 30,
+                frame, 50, 185, 90, 30,
                 (captureEnabled || captureBlendedEnabled ? "Stop" : "Play"))) {
             if (livePlayChecked) {
                 if (separatedViewChecked) {
@@ -285,7 +378,7 @@ void AdiTofDemoView::render() {
                 }
             }
         }
-        if (cvui::button(frame, 150, 125, 90, 30, "Record")) {
+        if (cvui::button(frame, 150, 185, 90, 30, "Record")) {
             if (fileName.empty()) {
                 status = "Enter a file name!";
             } else if (captureEnabled || captureBlendedEnabled) {
@@ -306,49 +399,69 @@ void AdiTofDemoView::render() {
             }
         }
 
-        cvui::rect(frame, 50, 165, 190, 30, fieldColor);
-        cvui::text(frame, 60, 172, fileName);
+        cvui::rect(frame, 50, 220, 190, 30, fieldColor);
+        cvui::text(frame, 60, 230, fileName);
 
-        cvui::text(frame, 50, 202, status);
-        cvui::beginRow(frame, 50, 220);
+        cvui::text(frame, 50, 255, status);
+        cvui::beginRow(frame, 50, 273);
         cvui::checkbox("Live", &livePlayChecked);
         cvui::space(10);
         cvui::checkbox("Playback", &playbackChecked);
         cvui::endRow();
 
         if (!(captureEnabled || captureBlendedEnabled || playbackChecked)) {
-            cvui::beginColumn(frame, 50, 250);
+            cvui::beginColumn(frame, 50, 300);
             cvui::text("View depth and IR: ", 0.6);
             cvui::space(10);
-            cvui::beginRow(frame, 50, 275);
+            cvui::beginRow(frame, 50, 325);
             cvui::checkbox("Separated", &separatedViewChecked);
             cvui::space(10);
             cvui::checkbox("Blended", &blendedViewChecked);
             cvui::endRow();
             cvui::endColumn();
         } else if (captureBlendedEnabled) {
-            cvui::beginColumn(frame, 50, 250);
+            cvui::beginColumn(frame, 50, 300);
             cvui::text("Blending factor:", 0.6);
             cvui::space(5);
             cvui::trackbar(200, &m_blendValue, (double)0.0, (double)1.0);
             cvui::space(5);
             cvui::endColumn();
         } else {
-            cvui::beginColumn(frame, 50, 250);
+            cvui::beginColumn(frame, 50, 300);
             cvui::text("Showing depth and IR", 0.6);
             ;
             cvui::endColumn();
         }
 
+        // Connection mode GUI
+        cvui::beginColumn(frame, 50, 20);
+        cvui::space(10);
+        cvui::text("Connection Mode: ", 0.6);
+        cvui::space(10);
+        cvui::beginRow(frame, 50, 60);
+        if (typeOfDevice.find(typeUSBDevice) != std::string::npos) {
+            cvui::checkbox("USB", &USBModeChecked);
+            cvui::space(10);
+        }
+        if (typeOfDevice.find(typeLocalDevice) != std::string::npos) {
+            cvui::checkbox("Local", &localModeChecked);
+            cvui::space(10);
+        }
+        if (typeOfDevice.find(typeEthDevice) != std::string::npos) {
+            cvui::checkbox("Ethernet", &ethModeChecked);
+        }
+        cvui::endRow();
+        cvui::endColumn();
+
         static int currentFrame = 0;
         if (playbackEnabled) {
             int x = currentFrame++;
-            cvui::trackbar(frame, 250, 160, 120, &x, 0, numberOfFrames + 1, 1);
+            cvui::trackbar(frame, 300, 160, 120, &x, 0, numberOfFrames + 1, 1);
         } else {
             currentFrame = 0;
         }
 
-        int fileNameField = cvui::iarea(50, 165, 190, 30);
+        int fileNameField = cvui::iarea(50, 220, 190, 30);
 
         if (fileNameField == cvui::CLICK) {
             fieldColor = selectedColor;
@@ -450,7 +563,7 @@ void AdiTofDemoView::render() {
         }
 #endif
         if (displayFps && (captureEnabled || captureBlendedEnabled)) {
-            cvui::text(frame, 350, 480, "FPS:" + std::to_string(displayFps));
+            cvui::text(frame, 350, 510, "FPS:" + std::to_string(displayFps));
         }
 
         if (captureEnabled || captureBlendedEnabled) {
@@ -460,8 +573,8 @@ void AdiTofDemoView::render() {
                 sprintf(afe_temp_str, "AFE TEMP: %.1f", temp.first);
                 sprintf(laser_temp_str, "LASER TEMP: %.1f", temp.second);
             }
-            cvui::text(frame, 20, 480, afe_temp_str);
-            cvui::text(frame, 180, 480, laser_temp_str);
+            cvui::text(frame, 20, 510, afe_temp_str);
+            cvui::text(frame, 180, 510, laser_temp_str);
         }
 
         if ((captureEnabled || captureBlendedEnabled) && !playbackEnabled) {
@@ -477,7 +590,7 @@ void AdiTofDemoView::render() {
 
         bool smallSignalChanged = false;
 
-        cvui::beginColumn(frame, 50, 300);
+        cvui::beginColumn(frame, 50, 350);
         cvui::space(10);
         cvui::text("Settings: ", 0.6);
         cvui::space(10);
@@ -488,16 +601,16 @@ void AdiTofDemoView::render() {
         cvui::space(10);
         cvui::endColumn();
 
-        cvui::rect(frame, 50, 380, 100, 30, valueColor);
-        cvui::text(frame, 60, 390, value);
-        int thresholdClicked = cvui::iarea(50, 380, 100, 30);
+        cvui::rect(frame, 50, 430, 100, 30, valueColor);
+        cvui::text(frame, 60, 440, value);
+        int thresholdClicked = cvui::iarea(50, 430, 100, 30);
 
         // Check if small signal toggle button has changed
         smallSignalChanged = m_crtSmallSignalState != m_smallSignal;
         // Update the last set value of the small signal checkbox
         m_smallSignal = m_crtSmallSignalState;
 
-        if (cvui::button(frame, 160, 380, 90, 30, "Write") ||
+        if (cvui::button(frame, 160, 430, 90, 30, "Write") ||
             smallSignalChanged) {
 
             const size_t REGS_CNT = 5;
@@ -512,7 +625,13 @@ void AdiTofDemoView::render() {
             }
             // TO DO: This breaks things over USB. Works well on the target and
             // over ethernet.
-            m_ctrl->writeAFEregister(afeRegsAddr, afeRegsVal, 5);
+            aditof::Status registerAFEwriting =
+                m_ctrl->writeAFEregister(afeRegsAddr, afeRegsVal, 5);
+            if (registerAFEwriting == aditof::Status::GENERIC_ERROR) {
+                status = "No cameras connected!";
+                m_crtSmallSignalState = !m_crtSmallSignalState;
+                m_smallSignal = m_crtSmallSignalState;
+            }
         }
 
         if (thresholdClicked == cvui::CLICK) {
@@ -619,6 +738,13 @@ void AdiTofDemoView::render() {
             }
         }
 
+        if (ipFieldSelected) {
+            if (!backspace) {
+                ipvalue += pressedValidKey;
+            } else if (ipvalue.size() > 0) {
+                ipvalue = ipvalue.substr(0, ipvalue.size() - 1);
+            }
+        }
         // Check if ESC key was pressed
         if (key == 27) {
             break;

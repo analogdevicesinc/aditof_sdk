@@ -16,6 +16,14 @@ else()
 	endif()
 endif()
 
+if( APPLE )
+    add_definitions(-DDEVICETYPE="ETH")
+elseif( DRAGONBOARD OR RASPBERRYPI )
+    add_definitions(-DDEVICETYPE="Local")
+elseif( WIN32 OR UNIX )
+     add_definitions(-DDEVICETYPE="USB ETH")
+endif()
+
 add_executable(${PROJECT_NAME} 
                         aditofdemorecorder.cpp
 			aditofdemoview.cpp
