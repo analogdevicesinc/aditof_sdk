@@ -1,0 +1,41 @@
+/*RepeatNum Addrs & Original Values for all modes/fields/seqs:*/
+/*Addr Ori   chan_modex_seqname*/
+4104  02bc /*vx0_mode00_field00_seq01*/
+4686  02bc /*vx1_mode00_field00_seq01*/
+4110  02bc /*vx0_mode00_field00_seq03*/
+46aa  02bc /*vx1_mode00_field00_seq03*/
+4116  0578 /*vx0_mode00_field00_seq05*/
+46bc  0578 /*vx1_mode00_field00_seq05*/
+4122  02bc /*vx0_mode00_field00_seq07*/
+46e0  02bc /*vx1_mode00_field00_seq07*/
+dummy/*vx0_mode00_field00_seq09*/
+dummy/*vx1_mode00_field00_seq09*/
+4128  0578 /*vx0_mode00_field00_seq11*/
+46f2  0578 /*vx1_mode00_field00_seq11*/
+40b0  02bc /*vxsg_mode00_field00_seq15*/
+dummy/*vxsg_mode00_field00_seq18*/
+40c2  0578 /*vxsg_mode00_field00_seq21*/
+dummy/*vxsg_mode00_field00_seq24*/
+dummy/*vxsg_mode00_field00_seq27*/
+dummy/*vxsg_mode00_field00_seq30*/
+41b6  03e8 /*vx0_mode01_field00_seq01*/
+477c  03e8 /*vx1_mode01_field00_seq01*/
+41c2  07d0 /*vx0_mode01_field00_seq03*/
+47a0  07d0 /*vx1_mode01_field00_seq03*/
+41c8  0fa0 /*vx0_mode01_field00_seq05*/
+47b2  0fa0 /*vx1_mode01_field00_seq05*/
+41d4  03e8 /*vx0_mode01_field00_seq07*/
+47d6  03e8 /*vx1_mode01_field00_seq07*/
+dummy/*vx0_mode01_field00_seq09*/
+dummy/*vx1_mode01_field00_seq09*/
+41da  0fa0 /*vx0_mode01_field00_seq11*/
+47e8  0fa0 /*vx1_mode01_field00_seq11*/
+4162  03e8 /*vxsg_mode01_field00_seq15*/
+4174  07d0 /*vxsg_mode01_field00_seq18*/
+417a  0fa0 /*vxsg_mode01_field00_seq21*/
+dummy/*vxsg_mode01_field00_seq24*/
+dummy/*vxsg_mode01_field00_seq27*/
+dummy/*vxsg_mode01_field00_seq30*/
+4248  32c8 /*vx0_mode02_field00_seq01*/
+485e  32c8 /*vx1_mode02_field00_seq01*/
+420e  32c8 /*vxsg_mode02_field00_seq15*/
