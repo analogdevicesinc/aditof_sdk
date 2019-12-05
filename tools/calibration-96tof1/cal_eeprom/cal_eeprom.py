@@ -15,7 +15,8 @@ import os
 import pandas as pd
 from . import firmware_gen as lf
 import json 
-import tof_device.tof_device as tofdev #For EEPROM Read and Write
+import aditofpython as tof
+import tof_calib.device as device
 import logging
 import logging.config
 import numpy as np
@@ -440,13 +441,13 @@ def test_cal_eeprom():
     #cal2.display_cal_map()
     #cal2.save_cal_map()
 
-    dev_handle = tofdev.tof_device()
-    ret = dev_handle.openDevice(2,-1)
-    if ret != -1:
-        logger.info("Device Opened")
-    else:
-        logger.error("Can't open device")
-        raise SystemExit
+    # Open the ADI TOF Camera
+    system = tof.System()
+    status = system.initialize()
+    print("system.initialize()", status)
+    cam_handle = device.open_device2(system)
+    dev_handle = cam_handle.getDevice()
+    
     print("\n\nWriting to EEPROM")
     cal2.write_eeprom_cal_map(dev_handle)
 
