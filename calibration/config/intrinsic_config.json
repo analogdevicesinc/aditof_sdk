@@ -1,0 +1,26 @@
+{
+        "mode": "intrinsic",
+	"calibrate_intrinsic": true,
+        "get_coordinates" : false,
+        "output_data": false,
+        
+        "serial_number": 1,
+        "min_checkerboards": 3,
+        
+        "firmware_path": "config/BM_Kit/Near",
+        "config_path": "config",
+        "output_path": "intrinsic",
+	"results_path": "saved_results",
+        "data_path": "intrinsic",
+
+        "raw_frame_height": 960,
+        "raw_frame_width": 640,
+        "frame_height": 480,
+        "frame_width": 640,
+        
+        "frame_count": 5
+        
+        
+    }
+
+
