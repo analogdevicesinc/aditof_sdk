@@ -83,6 +83,13 @@ if __name__ == "__main__":
     if not status:
         print("system.getDetails() failed with status: ", status)
 
+    device = cameras[0].getDevice()
+    smallSignalThreshold = 50;
+    REGS_CNT = 5
+    afeRegsAddr = [0x4001, 0x7c22, 0xc34a, 0x4001, 0x7c22]
+    afeRegsVal = [0x0006, 0x0004, 0x803C, 0x0007, 0x0004]
+    device.writeAfeRegisters(afeRegsAddr, afeRegsVal, REGS_CNT)
+
     camera_range = camDetails.range
     frame = tof.Frame()
 
