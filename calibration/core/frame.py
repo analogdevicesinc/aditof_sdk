@@ -33,7 +33,7 @@ def get_ir_image_df(cam_handle, width, height):
     
 def get_depth_ir_images_df(cam_handle, width, height):
     depth_image_n, ir_image_n = device.get_depth_ir_image(cam_handle)
-    depth_image = pd.DataFrame(depthImage_n)
+    depth_image = pd.DataFrame(depth_image_n)
     ir_image = pd.DataFrame(ir_image_n)
     return depth_image, ir_image
 
