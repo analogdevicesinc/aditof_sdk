@@ -57,7 +57,7 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
     LOG(INFO) << "Chosen mode: " << mode.c_str();
 
     std::vector<std::pair<std::string, int>> modeRanges = {
-        {"near", 800}, {"medium", 3000}, {"far", 6000}};
+        {"near", 800}, {"medium", 4500}, {"far", 6000}};
 
     if ((mode != skCustomMode) ^ (modeFilename.empty())) {
         LOG(WARNING) << " mode must be set to: '" << skCustomMode
