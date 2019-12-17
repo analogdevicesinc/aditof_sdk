@@ -6,6 +6,7 @@
 #include <memory>
 
 #include <aditof/camera.h>
+#include <aditof/camera_96tof1_specifics.h>
 
 class Camera96Tof1 : public aditof::Camera {
   public:
@@ -26,13 +27,18 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
+    std::shared_ptr<aditof::CameraSpecifics> getSpecifics();
     std::shared_ptr<aditof::DeviceInterface> getDevice();
 
   private:
     aditof::CameraDetails m_details;
+    std::shared_ptr<aditof::CameraSpecifics> m_specifics;
     std::shared_ptr<aditof::DeviceInterface> m_device;
     bool m_devStarted;
     Calibration m_calibration;
+
+  public:
+    friend class aditof::Camera96Tof1Specifics;
 };
 
 #endif // CAMERA_96TOF1_H
