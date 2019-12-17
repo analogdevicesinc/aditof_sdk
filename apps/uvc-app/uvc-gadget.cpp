@@ -263,7 +263,8 @@ char v4l2_subdev_prog_file[255] = "afe_firmware.bin";
 /* TODO: Make this declaration local or part of dev stucture */
 struct v4l2_plane gPlanes[8] = {{0}};
 int firmware_size = 0, flen = 0;
-char firmware[16384] = {0};
+const static int FIRMWARE_CAPACITY = 16384;
+char firmware[FIRMWARE_CAPACITY] = {0};
 unsigned short reg_addr;
 
 /* EEPROM data */
@@ -1619,6 +1620,7 @@ static int uvc_events_process_data(struct uvc_device *dev,
                         shouldRestartDevice = false;
                     }
                     flen = 0;
+                    memset(&firmware[flen], 0, FIRMWARE_CAPACITY);
                 }
             } else if (dev->set_cur_cs == 2) { /* AFE register address */
                 reg_addr = *((unsigned short *)(data->data));

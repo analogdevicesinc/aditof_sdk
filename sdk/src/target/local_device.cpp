@@ -394,8 +394,10 @@ aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
     size_t readBytes = 0;
 
     if (size <= CTRL_PACKET_SIZE) {
+        memset(buf + size, 0, CTRL_PACKET_SIZE);
+        memcpy(buf, firmware, size);
         extCtrl.size = 2048 * sizeof(unsigned short);
-        extCtrl.p_u16 = (unsigned short *)firmware;
+        extCtrl.p_u16 = (unsigned short *)buf;
         extCtrl.id = V4L2_CID_AD_DEV_SET_CHIP_CONFIG;
         memset(&extCtrls, 0, sizeof(struct v4l2_ext_controls));
         extCtrls.controls = &extCtrl;
