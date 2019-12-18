@@ -80,6 +80,11 @@ For more details about the SDK check the links below:
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/imshow"> C++ with OpenCV </a></td>
     <td>A basic example that displays data provided by the Aditof SDK</td>
   </tr>
+   <tr>
+    <td>matlab examples</td>
+    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/matlab"> Matlab </a></td>
+    <td>Matlab examples on how to load the aditofadapter and how to use it with cameras over USB and Ethernet</td>
+  </tr>
 </table>
 
 ## Directory Structure
