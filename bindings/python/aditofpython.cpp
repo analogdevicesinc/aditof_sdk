@@ -4,6 +4,7 @@
 #include "pybind11/stl.h"
 
 #include <aditof/aditof.h>
+#include <aditof/camera_96tof1_specifics.h>
 
 namespace py = pybind11;
 
@@ -137,6 +138,16 @@ PYBIND11_MODULE(aditofpython, m) {
              py::arg("cb") = nullptr)
         .def("getDetails", &aditof::Camera::getDetails, py::arg("details"))
         .def("getDevice", &aditof::Camera::getDevice,
+             py::return_value_policy::reference_internal)
+        .def("getCamera96Tof1Specifics",
+             [](aditof::Camera &camera) {
+                 using namespace aditof;
+                 std::shared_ptr<CameraSpecifics> specifics =
+                     camera.getSpecifics();
+
+                 return std::dynamic_pointer_cast<Camera96Tof1Specifics>(
+                     specifics);
+             },
              py::return_value_policy::reference_internal);
 
     py::class_<aditof::Frame>(m, "Frame")
@@ -258,4 +269,18 @@ PYBIND11_MODULE(aditofpython, m) {
                  return device.applyCalibrationToFrame(ptr, mode);
              },
              py::arg("frame"), py::arg("mode"));
+
+    py::class_<aditof::Camera96Tof1Specifics,
+               std::shared_ptr<aditof::Camera96Tof1Specifics>>(
+        m, "Camera96Tof1Specifics")
+        .def("enableNoiseReduction",
+             &aditof::Camera96Tof1Specifics::enableNoiseReduction,
+             py::arg("en"))
+        .def("noiseReductionEnabled",
+             &aditof::Camera96Tof1Specifics::noiseReductionEnabled)
+        .def("setNoiseReductionThreshold",
+             &aditof::Camera96Tof1Specifics::setNoiseReductionThreshold,
+             py::arg("threshold"))
+        .def("noiseReductionThreshold",
+             &aditof::Camera96Tof1Specifics::noiseReductionThreshold);
 }
