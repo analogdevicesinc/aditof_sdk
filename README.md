@@ -27,6 +27,7 @@ For more details on building the SDK on an embedded platform please check the **
 | --------- | ----------- | ----------- | ----------- |
 | DragonBoard 410c | [User Guide](doc/dragonboard410c/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/dragonboard410c-latest-image.tar.xz) |
 | Raspberry Pi 3,4 | [User Guide](doc/raspberrypi3/user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-SD_card_image_v0.1-blue.svg)](http://swdownloads.analog.com/cse/aditof/aditof-v0.1-raspberrypi3-sdimage.tar.xz) |
+| Thor96 | [Arrow Electronics Github](https://github.com/ArrowElectronics/aditof_sdk#supported-embedded-platforms) | - | - |
 
 [How to write the SD card image onto the SD card?](doc/sdcard_burn.md)
 
@@ -81,9 +82,9 @@ For more details about the SDK check the links below:
     <td>A basic example that displays data provided by the Aditof SDK</td>
   </tr>
    <tr>
-    <td>matlab examples</td>
-    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/matlab"> Matlab </a></td>
-    <td>Matlab examples on how to load the aditofadapter and how to use it with cameras over USB and Ethernet</td>
+    <td>Image Acquisition Toolbox</td>
+    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/matlab"> MATLAB </a></td>
+    <td>Examples of how to use the AD-96TOF1-EBZ camera in MATALB over USB and Ethernet</td>
   </tr>
 </table>
 
