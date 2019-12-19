@@ -10,6 +10,10 @@ cache:
 services:
   - docker
 
+env:
+  global:
+    secure: "eAP3LhNMcYTo6HICr1lqgXA7VD+Br4U1S/wNBjQ4/kSpv/vV3Dfl9vDTAtQNwf0G9RQ9oUGd9QyPEncFc7DeQTx3Xnsa811tpGG2o9pJa545TzOKv1ZSvzH/kob+aVhi0saLF9KDS7+Xv8Ys4N1xXzPFSGO4ujeEPRvPB28dzNDJomI8Dqpw43TaZ8sMfY9GClrdOOnRafM7dpW+FqkBp+IDvFB6zCywlbV4sNEDVngGUQNlPJpalR15U8HMkCho1ZtEERneHkspjMftHwoytK4V+/TL+YuyEjxDoqDm34ekE9sYmTyaLH9SPm8TqYi/Gp8nt6+wA1r2k83bidyyEOYnTOUgagU5weufQiTClsQcK8VQ1yORwsp/XZSyR0/KuzZRqTONARQGBOuRNG+XmUSkCk600NLfL629bWNaX2AiXzaP0kgLETueynboGSqRgvOKtDEBACGfC2dxp4RJK7RQ3ll8sDjt3W1EF+55rl1mMydQ6cKAMMVf6Kr4GD1aukdtz5WamMdyIljezjgmmKrt81eGW4KJzDtPGW/EXueiH1xo0NAGH0Jd4DTooTpmGJOW1Dj9DvFxVbgxzV2wRaI8XdN5Z+04fSSZd9EzNfb+5slxPaV+bnGljMMbuMdmx4bx8BaM+WjWWsuYR61HuyPDbXPTd+y0LwGBfZSg9gA="
+
 matrix:
   include:
     - stage: Build

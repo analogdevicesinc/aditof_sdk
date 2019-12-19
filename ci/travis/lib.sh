@@ -108,7 +108,7 @@ deploy_doxygen() {
     if [[ "${TRAVIS_PULL_REQUEST}" == "false" && "${TRAVIS_BRANCH}" == "master" ]]
     then
         pushd ${TRAVIS_BUILD_DIR}/doc
-        git clone https://danielguramulta:${GITHUB_TOKEN}@github.com/analogdevicesinc/aditof_sdk --depth 1 --branch=gh-pages doc/html &>/dev/null
+        git clone https://github.com/${TRAVIS_REPO_SLUG} --depth 1 --branch=gh-pages doc/html &>/dev/null
 
         pushd doc/html
         rm -rf *
@@ -122,7 +122,7 @@ deploy_doxygen() {
         then
             git add --all .
             git commit --allow-empty --amend -m "Update documentation to ${TRAVIS_COMMIT:0:7}"
-            git push origin gh-pages -f &>/dev/null
+            git push https://${GITHUB_DOC_TOKEN}@github.com/${TRAVIS_REPO_SLUG} gh-pages -f &>/dev/null
         else
             echo_green "Documentation already up to date!"
         fi
