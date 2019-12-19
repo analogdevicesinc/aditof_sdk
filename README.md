@@ -86,6 +86,14 @@ For more details about the SDK check the links below:
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/matlab"> MATLAB </a></td>
     <td>Examples of how to use the AD-96TOF1-EBZ camera in MATALB over USB and Ethernet</td>
   </tr>
+  <tr>
+    <td rowspan="2">showPointCloud</td>
+    <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/showPointCloud"> Python with Open3D </a></td>
+    <td rowspan="2">A simple object detection example</td>
+  </tr>
+  <tr>
+     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/open3D/showPointCloud"> C++ with Open3D </a></td>
+  </tr>
 </table>
 
 ## Directory Structure
