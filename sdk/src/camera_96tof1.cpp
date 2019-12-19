@@ -1,5 +1,6 @@
 #include "camera_96tof1.h"
 
+#include <aditof/camera_96tof1_specifics.h>
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
@@ -12,7 +13,9 @@
 static const std::string skCustomMode = "custom";
 
 Camera96Tof1::Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device)
-    : m_device(std::move(device)), m_devStarted(false) {}
+    : m_specifics(std::make_shared<aditof::Camera96Tof1Specifics>(
+          aditof::Camera96Tof1Specifics(this))),
+      m_device(std::move(device)), m_devStarted(false) {}
 
 Camera96Tof1::~Camera96Tof1() = default;
 
@@ -272,6 +275,10 @@ aditof::Status Camera96Tof1::getDetails(aditof::CameraDetails &details) const {
     details = m_details;
 
     return status;
+}
+
+std::shared_ptr<aditof::CameraSpecifics> Camera96Tof1::getSpecifics() {
+    return m_specifics;
 }
 
 std::shared_ptr<aditof::DeviceInterface> Camera96Tof1::getDevice() {

@@ -609,28 +609,23 @@ void AdiTofDemoView::render() {
         smallSignalChanged = m_crtSmallSignalState != m_smallSignal;
         // Update the last set value of the small signal checkbox
         m_smallSignal = m_crtSmallSignalState;
+        if (smallSignalChanged) {
+            aditof::Status ret = m_ctrl->enableNoiseReduction(m_smallSignal);
 
-        if (cvui::button(frame, 160, 430, 90, 30, "Write") ||
-            smallSignalChanged) {
-
-            const size_t REGS_CNT = 5;
-            uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001,
-                                              0x7c22};
-            uint16_t afeRegsVal[REGS_CNT] = {0x0006, 0x0004, 0, 0x0007, 0x0004};
-
-            afeRegsVal[2] |= smallSignalThreshold;
-
-            if (m_smallSignal) {
-                afeRegsVal[2] |= 0x8000;
-            }
-            // TO DO: This breaks things over USB. Works well on the target and
-            // over ethernet.
-            aditof::Status registerAFEwriting =
-                m_ctrl->writeAFEregister(afeRegsAddr, afeRegsVal, 5);
-            if (registerAFEwriting == aditof::Status::GENERIC_ERROR) {
+            if (ret == aditof::Status::GENERIC_ERROR) {
                 status = "No cameras connected!";
                 m_crtSmallSignalState = !m_crtSmallSignalState;
                 m_smallSignal = m_crtSmallSignalState;
+            }
+        }
+
+        if (cvui::button(frame, 160, 430, 90, 30, "Write")) {
+            aditof::Status noiseReductionStatus =
+                m_ctrl->setNoiseReductionThreshold(
+                    static_cast<uint16_t>(smallSignalThreshold));
+
+            if (noiseReductionStatus == aditof::Status::GENERIC_ERROR) {
+                status = "No cameras connected!";
             }
         }
 

@@ -12,6 +12,7 @@
 namespace aditof {
 
 class Frame;
+class CameraSpecifics;
 class DeviceInterface;
 
 /**
@@ -100,10 +101,19 @@ class SDK_API Camera {
     virtual Status getDetails(CameraDetails &details) const = 0;
 
     /**
+     * @brief Gets an object which extends the API of this camera with
+     * additional methods that are specific to this camera. The returned
+     * object must be cast to an actual implementation to be able to access
+     * the extended API.
+     * @return std::shared_ptr<CameraSpecifics>
+     */
+    virtual std::shared_ptr<CameraSpecifics> getSpecifics() = 0;
+
+    /**
      * @brief Gets the device of the camera. The device is ownen by the camera,
      * therefore when the camera gets destroy the reference to the device will
      * not be valid anymore.
-     * @return DeviceInterface
+     * @return std::shared_ptr<DeviceInterface>
      */
     virtual std::shared_ptr<DeviceInterface> getDevice() = 0;
 };

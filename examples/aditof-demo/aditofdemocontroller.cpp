@@ -1,5 +1,6 @@
 #include "aditofdemocontroller.h"
 
+#include <aditof/camera_96tof1_specifics.h>
 #include <glog/logging.h>
 #include <iostream>
 
@@ -263,4 +264,39 @@ int AdiTofDemoController::getRange() const {
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
         cameraDetails);
     return cameraDetails.range;
+}
+
+aditof::Status AdiTofDemoController::enableNoiseReduction(bool en) {
+    using namespace aditof;
+
+    if (m_cameraInUse < 0)
+        return Status::GENERIC_ERROR;
+
+    auto specifics =
+        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSpecifics();
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+    if (cam96tof1Specifics) {
+        return cam96tof1Specifics->enableNoiseReduction(en);
+    }
+
+    return Status::GENERIC_ERROR;
+}
+
+aditof::Status
+AdiTofDemoController::setNoiseReductionThreshold(uint16_t threshold) {
+    using namespace aditof;
+
+    if (m_cameraInUse < 0)
+        return Status::GENERIC_ERROR;
+
+    auto specifics =
+        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSpecifics();
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+    if (cam96tof1Specifics) {
+        return cam96tof1Specifics->setNoiseReductionThreshold(threshold);
+    }
+
+    return Status::GENERIC_ERROR;
 }
