@@ -80,7 +80,7 @@ For more details about the SDK check the links below:
     <td>imshow</td>
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/imshow"> C++ with OpenCV </a></td>
     <td>A basic example that displays data provided by the Aditof SDK</td>
-  </tr>
+  </tr> 
    <tr>
     <td>Image Acquisition Toolbox</td>
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/matlab"> MATLAB </a></td>
@@ -89,7 +89,7 @@ For more details about the SDK check the links below:
   <tr>
     <td rowspan="2">showPointCloud</td>
     <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/showPointCloud"> Python with Open3D </a></td>
-    <td rowspan="2">A simple object detection example</td>
+    <td rowspan="2">A basic example that displays a pointcloud built using the Open3D library and the data provided by the Aditof SDK </td>
   </tr>
   <tr>
      <td><a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/open3D/showPointCloud"> C++ with Open3D </a></td>
