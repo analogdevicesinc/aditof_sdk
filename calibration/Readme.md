@@ -1,11 +1,9 @@
 The python based calibration software is supported on the DragonBoard 410c Broad Market Kit as well as Windows 10. It is highly recommended to run the calibration software on the Dragonboard platform.
 
 # Dragonboard Install
-The basic setup of the Broad Market Kit is described [here](https://github.com/analogdevicesinc/aditof_sdk).
+The basic setup of the Broad Market Kit is described [here](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/dragonboard410c/user_guide.md).
 
-Clone this SDCARD image to a 16GB SDCARD and put the SD Card slot of the Dragonboard and power on the board.
-
-## Run Sweep Calibtation For A Given Mode
+## Run Sweep Calibration For A Given Mode
 
 Enable the python environment
 
@@ -45,7 +43,7 @@ The logger.json allows you configure the logger output.You can set the appropria
 
 ## Saved Results
 ```
-The scripts generate a unique_id by default. The generated unique_id is displayed on the console output when running the calibration. The results are saved in saved_results/unique_id/latest and also archived in saved_results/unique_id/archive/<timestamped_dir>. The following data is saved
+The scripts generate a unique_id by default. The generated unique_id is displayed on the console output when running the calibration. The results are saved in saved_results/unique_id/latest and also archived in saved_results/unique_id/archive/<timestamped_dir>. The following data is saved:
 
  * csv's: The linear_offset table and the pre and post calibrated data statistics are saved as csv's
  * input_config.json: All the configurations/parameters used for the experiment
@@ -85,7 +83,7 @@ https://github.com/adi-sdg/tof_sdk/tree/master/IO_Library/python
 * Make sure the ADI camera is recognized by the host
 * Set a target - a plain white board within 20cm to 200 cm in front of the camera - the distance between the target and the edge of camera lens is the target_distance 
 
-## Run Sweep Calibtation For A Given Rang or Mode
+## Run Sweep Calibration For A Given Range or Mode
 
 The parameters are defaulted in the calibrate_single_mode.py file
 
