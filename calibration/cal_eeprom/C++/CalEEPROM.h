@@ -3,7 +3,7 @@
 /* @file	CalEEPROM.h								                            */
 /*										                                        */
 /* @brief	Defines structure of calibration map to be stored in EEPROM,        */
-/*          provides functionality to read/write/display yhe calibration map    */
+/*          provides functionality to read/write/display the calibration map    */
 /*										                                        */
 /* @author	Dhruvesh Gajaria	    				                            */
 /*  										                                    */
@@ -15,8 +15,9 @@
 
 #pragma once
 
-#include<iostream>
+#include <iostream>
 #include <unordered_map>
+#include <list>
 
 //Hashmap key for Packet type
 #define HEADER 0
