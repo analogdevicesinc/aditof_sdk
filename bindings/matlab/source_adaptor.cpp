@@ -284,6 +284,18 @@ int SourceAdaptor::getCurrentHwRange() {
     return cameraDetails.range;
 }
 
+int SourceAdaptor::getCurrentBitCount() {
+    aditof::CameraDetails cameraDetails;
+
+    if (!m_camera) {
+        return 0;
+    }
+
+    m_camera->getDetails(cameraDetails);
+
+    return cameraDetails.bitCount;
+}
+
 std::shared_ptr<aditof::Frame> SourceAdaptor::getFrameFromHwDevice() {
     if (!m_camera) {
         return nullptr;
@@ -509,6 +521,7 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
 
         auto frame = adaptor->getFrameFromHwDevice();
         int currentRange = adaptor->getCurrentHwRange();
+        int currentMaxPixelValue = (1 << adaptor->getCurrentBitCount()) - 1;
 
         imaqkit::frametypes::FRAMETYPE frameType;
 
@@ -517,9 +530,8 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::IR, &data);
                 for (int i = 0; i < imageHeight * imageWidth; ++i) {
-                    uint16_t value = (data[i] * (255.0 / currentRange));
-                    imBuffer[i] =
-                        static_cast<uint8_t>(value <= 255 ? value : 255);
+                    uint16_t value = (data[i] * (255.0 / currentMaxPixelValue));
+                    imBuffer[i] = static_cast<uint8_t>(value);
                 }
 
                 frameType = imaqkit::frametypes::MONO8;

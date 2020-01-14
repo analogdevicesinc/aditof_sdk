@@ -35,13 +35,13 @@ Status fromFrameToDepthImg(Frame &frame, int camera_range,
     return Status::OK;
 }
 
-Status fromFrameToIRImg(Frame &frame, int camera_range,
-                        geometry::Image &image) {
+Status fromFrameToIRImg(Frame &frame, int bitCount, geometry::Image &image) {
     FrameDetails frameDetails;
     frame.getDetails(frameDetails);
 
     const int frameHeight = static_cast<int>(frameDetails.height) / 2;
     const int frameWidth = static_cast<int>(frameDetails.width);
+    int max_value_of_IR_pixel = (1 << bitCount) - 1;
 
     uint16_t *irData;
     frame.getData(FrameDataType::IR, &irData);
@@ -54,7 +54,7 @@ Status fromFrameToIRImg(Frame &frame, int camera_range,
     for (int i = 0; i < frameHeight * frameWidth; i++) {
         uint8_t *p =
             static_cast<uint8_t *>(image.data_.data() + i * sizeof(uint8_t));
-        uint16_t value = *(irData + i) * 255.0 / camera_range;
+        uint16_t value = *(irData + i) * 255.0 / max_value_of_IR_pixel;
         *p = static_cast<uint8_t>(value <= 255 ? value : 255);
         p++;
     }

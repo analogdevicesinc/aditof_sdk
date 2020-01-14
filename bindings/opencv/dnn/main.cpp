@@ -90,6 +90,7 @@ int main(int argc, char *argv[]) {
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
     int cameraRange = cameraDetails.range;
+    int bitCount = cameraDetails.bitCount;
 
     aditof::Frame frame;
     status = camera->requestFrame(&frame);
@@ -173,11 +174,16 @@ int main(int argc, char *argv[]) {
         /* Distance factor */
         double distance_scale = 255.0 / cameraRange;
 
+        int max_value_of_IR_pixel = (1 << bitCount) - 1;
+
+        /* Distance factor IR */
+        double distance_scale_ir = 255.0 / max_value_of_IR_pixel;
+
         /* Convert from raw values to values that opencv can understand */
         frameMat.convertTo(frameMat, CV_8U, distance_scale);
         applyColorMap(frameMat, frameMat, cv::COLORMAP_RAINBOW);
 
-        irMat.convertTo(irMat, CV_8U, distance_scale);
+        irMat.convertTo(irMat, CV_8U, distance_scale_ir);
         cv::cvtColor(irMat, irMat, cv::COLOR_GRAY2RGB);
 
         /* Use a combination between ir mat & depth mat as input for the Net as

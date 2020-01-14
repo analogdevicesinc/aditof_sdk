@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
     int camera_range = cameraDetails.range;
+    int bitCount = cameraDetails.bitCount;
 
     const size_t REGS_CNT = 5;
     uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001, 0x7c22};
@@ -130,7 +131,7 @@ int main(int argc, char *argv[]) {
         }
 
         geometry::Image ir_image;
-        status = fromFrameToIRImg(frame, camera_range, ir_image);
+        status = fromFrameToIRImg(frame, bitCount, ir_image);
         if (status != Status::OK) {
             LOG(ERROR) << "Could not convert from frame to Image!";
         }

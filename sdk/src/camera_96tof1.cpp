@@ -37,6 +37,8 @@ aditof::Status Camera96Tof1::initialize() {
         return status;
     }
 
+    m_details.bitCount = 12;
+
     LOG(INFO) << "Camera initialized";
 
     return Status::OK;

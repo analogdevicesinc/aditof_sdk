@@ -53,7 +53,8 @@ PYBIND11_MODULE(aditofpython, m) {
         .def_readwrite("mode", &aditof::CameraDetails::mode)
         .def_readwrite("frameType", &aditof::CameraDetails::frameType)
         .def_readwrite("connection", &aditof::CameraDetails::connection)
-        .def_readwrite("range", &aditof::CameraDetails::range);
+        .def_readwrite("range", &aditof::CameraDetails::range)
+        .def_readwrite("bitCount", &aditof::CameraDetails::bitCount);
 
     // Helpers
 

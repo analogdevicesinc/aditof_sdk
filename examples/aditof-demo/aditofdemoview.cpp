@@ -1,5 +1,6 @@
 #include "aditofdemoview.h"
 
+#include <glog/logging.h>
 #include <sstream>
 
 #define CVUI_IMPLEMENTATION
@@ -837,9 +838,10 @@ void AdiTofDemoView::_displayIrImage() {
 
         int frameHeight = static_cast<int>(frameDetails.height) / 2;
         int frameWidth = static_cast<int>(frameDetails.width);
+        int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
 
         m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
-        m_irImage.convertTo(m_irImage, CV_8U, 255.0 / m_ctrl->getRange());
+        m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
         flip(m_irImage, m_irImage, 1);
 
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
@@ -865,9 +867,10 @@ void AdiTofDemoView::_displayBlendedImage() {
 
     int frameHeight = static_cast<int>(frameDetails.height) / 2;
     int frameWidth = static_cast<int>(frameDetails.width);
+    int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
 
     m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
-    m_irImage.convertTo(m_irImage, CV_8U, 255.0 / m_ctrl->getRange());
+    m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
     flip(m_irImage, m_irImage, 1);
     cv::cvtColor(m_irImage, m_irImage, cv::COLOR_GRAY2RGB);
 
