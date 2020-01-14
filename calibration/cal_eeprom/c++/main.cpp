@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #endif
 
-#include "CalEEPROM.h"
+#include "cal_eeprom.h"
 
 int main()
 {

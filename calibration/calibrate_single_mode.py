@@ -102,7 +102,7 @@ def parse_cal_mode_folder(cal_folder_path, calmap):
                     logger.error("Can't find the calibration result %s folder", path)
         intrinsic_path = os.path.join(cal_folder_path,'intrinsic')
         if(os.path.isdir(intrinsic_path)):
-            intrinsic_file = os.path.join(intrinsic_path, 'Camera_Intrinsic.json')
+            intrinsic_file = os.path.join(intrinsic_path, 'camera_intrinsic.json')
             if(os.path.exists(intrinsic_file)):
                 calmap.add_json_to_map(1, intrinsic_file)
             else:

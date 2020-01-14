@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(CalEEPROM VERSION 0.0.1 LANGUAGES C CXX)
+project(cal_eeprom VERSION 0.0.1 LANGUAGES C CXX)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -17,9 +17,9 @@ endif (WIN32)
 
 # add the executable
 add_executable(
-	CalEEPROM
+	cal_eeprom
 	main.cpp
-	CalEEPROM.cpp)
+	cal_eeprom.cpp)
 
 	
 

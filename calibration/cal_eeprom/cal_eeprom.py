@@ -424,8 +424,8 @@ def test_cal_eeprom():
     cal2.display_cal_map()
     input("Press Enter to continue...")
 
-    cal2.add_json_to_map(NEAR_CAL, "./Linear_Cal.json")
-    print("\n\nCalibration map after adding Linear_Cal.json to map")
+    cal2.add_json_to_map(NEAR_CAL, "./linear_cal.json")
+    print("\n\nCalibration map after adding linear_cal.json to map")
     cal2.display_cal_map()
     input("Press Enter to continue...")
 

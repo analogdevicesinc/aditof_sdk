@@ -160,7 +160,7 @@ class intrinsic_calibration:
 
         os.makedirs(path, exist_ok=True)
 
-        with open(os.path.join(path, 'Camera_Intrinsic.json'), 'w') as fp:
+        with open(os.path.join(path, 'camera_intrinsic.json'), 'w') as fp:
             json.dump(dict, fp)
     
     # Must be called right after calibrate_intrinsic for accurate info
