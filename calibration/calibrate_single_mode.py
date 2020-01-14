@@ -1,4 +1,3 @@
-import tof_device.tof_device as tofdev
 import aditofpython as tof
 import pandas as pd
 import os
