@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*  									                                        */
-/* @file	CalEEPROM.h								                            */
+/* @file	cal_eeprom.h								                            */
 /*										                                        */
 /* @brief	Defines structure of calibration map to be stored in EEPROM,        */
 /*          provides functionality to read/write/display the calibration map    */

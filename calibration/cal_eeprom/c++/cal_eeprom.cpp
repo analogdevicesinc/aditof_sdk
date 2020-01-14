@@ -1,10 +1,10 @@
-// CalEEPROM.cpp : Defines the functions used to store/read/display calibration map.
+// cal_eeprom.cpp : Defines the functions used to store/read/display calibration map.
 
 #ifdef _MSC_VER
 #include "stdafx.h"
 #endif
 
-#include "CalEEPROM.h"
+#include "cal_eeprom.h"
 
 
 //Display entire calibration map
