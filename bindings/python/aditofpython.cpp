@@ -138,18 +138,13 @@ PYBIND11_MODULE(aditofpython, m) {
         .def("requestFrame", &aditof::Camera::requestFrame, py::arg("frame"),
              py::arg("cb") = nullptr)
         .def("getDetails", &aditof::Camera::getDetails, py::arg("details"))
-        .def("getDevice", &aditof::Camera::getDevice,
-             py::return_value_policy::reference_internal)
-        .def("getCamera96Tof1Specifics",
-             [](aditof::Camera &camera) {
-                 using namespace aditof;
-                 std::shared_ptr<CameraSpecifics> specifics =
-                     camera.getSpecifics();
+        .def("getDevice", &aditof::Camera::getDevice)
+        .def("getCamera96Tof1Specifics", [](aditof::Camera &camera) {
+            using namespace aditof;
+            std::shared_ptr<CameraSpecifics> specifics = camera.getSpecifics();
 
-                 return std::dynamic_pointer_cast<Camera96Tof1Specifics>(
-                     specifics);
-             },
-             py::return_value_policy::reference_internal);
+            return std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+        });
 
     py::class_<aditof::Frame>(m, "Frame")
         .def(py::init<>())
@@ -167,7 +162,8 @@ PYBIND11_MODULE(aditofpython, m) {
              },
              py::arg("dataType"));
 
-    py::class_<aditof::DeviceInterface>(m, "DeviceInterface")
+    py::class_<aditof::DeviceInterface,
+               std::shared_ptr<aditof::DeviceInterface>>(m, "DeviceInterface")
         .def("open", &aditof::DeviceInterface::open)
         .def("start", &aditof::DeviceInterface::start)
         .def("stop", &aditof::DeviceInterface::stop)
