@@ -215,7 +215,7 @@ build_and_install_opencv() {
 # Install the latest version of doxygen in the /deps folder
 ############################################################################
 install_doxygen() {
-    DOXYGEN_URL="wget doxygen.nl/files/doxygen-1.8.15.src.tar.gz"
+    DOXYGEN_URL="wget https://sourceforge.net/projects/doxygen/files/rel-1.8.15/doxygen-1.8.15.src.tar.gz"
     pushd ${DEPS_DIR}
     [ -d "doxygen" ] || {
         mkdir doxygen && wget --quiet -O - ${DOXYGEN_URL} | tar --strip-components=1 -xz -C doxygen
