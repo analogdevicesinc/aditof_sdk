@@ -53,15 +53,10 @@ if __name__ == "__main__":
     if not status:
         print("system.getDetails() failed with status: ", status)
 
-    #TO DO replace the code with the new methods from the extended API.
-    device = cameras[0].getDevice()
-
-    smallSignalThreshold = 50;
-    REGS_CNT = 5
-    afeRegsAddr = [0x4001, 0x7c22, 0xc34a, 0x4001,
-                   0x7c22]
-    afeRegsVal = [0x0006, 0x0004, 0x8032, 0x0007, 0x0004]
-    device.writeAfeRegisters(afeRegsAddr, afeRegsVal, REGS_CNT)
+    smallSignalThreshold = 50
+    specifics = cameras[0].getCamera96Tof1Specifics()
+    specifics.setNoiseReductionThreshold(smallSignalThreshold)
+    specifics.enableNoiseReduction(True)
 
     camera_range = camDetails.range
     bitCount = camDetails.bitCount
