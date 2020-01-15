@@ -59,6 +59,11 @@ struct CameraDetails {
      * @brief The range of the camera in mm for the operating mode
      */
     int range;
+
+    /**
+     * @brief The number of bits used for representing one pixel data.
+     */
+    int bitCount;
 };
 
 } // namespace aditof

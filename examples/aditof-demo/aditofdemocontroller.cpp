@@ -266,6 +266,13 @@ int AdiTofDemoController::getRange() const {
     return cameraDetails.range;
 }
 
+int AdiTofDemoController::getbitCount() const {
+    aditof::CameraDetails cameraDetails;
+    m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
+        cameraDetails);
+    return cameraDetails.bitCount;
+}
+
 aditof::Status AdiTofDemoController::enableNoiseReduction(bool en) {
     using namespace aditof;
 

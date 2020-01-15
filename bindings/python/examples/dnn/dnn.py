@@ -91,7 +91,12 @@ if __name__ == "__main__":
     device.writeAfeRegisters(afeRegsAddr, afeRegsVal, REGS_CNT)
 
     camera_range = camDetails.range
+    bitCount = camDetails.bitCount
     frame = tof.Frame()
+
+    max_value_of_IR_pixel = 2 ** bitCount - 1
+    distance_scale_ir = 255.0 / max_value_of_IR_pixel
+    distance_scale = 255.0 / camera_range
 
     while True:
         # Capture frame-by-frame
@@ -104,18 +109,16 @@ if __name__ == "__main__":
 
         # Creation of the IR image
         ir_map = ir_map[0: int(ir_map.shape[0] / 2), :]
-        ir_map = np.float32(ir_map)
-        distance_scale_ir = 255.0 / camera_range
         ir_map = distance_scale_ir * ir_map
         ir_map = np.uint8(ir_map)
+        ir_map = cv.flip(ir_map, 1)
         ir_map = cv.cvtColor(ir_map, cv.COLOR_GRAY2RGB)
 
         # Creation of the Depth image
         new_shape = (int(depth_map.shape[0] / 2), depth_map.shape[1])
         depth_map = np.resize(depth_map, new_shape)
+        depth_map = cv.flip(depth_map, 1)
         distance_map = depth_map
-        depth_map = np.float32(depth_map)
-        distance_scale = 255.0 / camera_range
         depth_map = distance_scale * depth_map
         depth_map = np.uint8(depth_map)
         depth_map = cv.applyColorMap(depth_map, cv.COLORMAP_RAINBOW)

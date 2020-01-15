@@ -178,6 +178,8 @@ class SourceAdaptor : public imaqkit::IAdaptor {
 
     int getCurrentHwRange();
 
+    int getCurrentBitCount();
+
     void setDisplayedFrameType(int16_t type);
 
     void setSmallSignalValue(int16_t value);

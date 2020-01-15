@@ -48,6 +48,8 @@ class AdiTofDemoController {
 
     int getRange() const;
 
+    int getbitCount() const;
+
     bool setEthernetConnection(const std::string &ip);
     bool setRegularConnection();
 
