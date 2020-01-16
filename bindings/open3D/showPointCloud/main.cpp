@@ -1,4 +1,5 @@
 #include <aditof/camera.h>
+#include <aditof/camera_96tof1_specifics.h>
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
@@ -72,13 +73,12 @@ int main(int argc, char *argv[]) {
     int camera_range = cameraDetails.range;
     int bitCount = cameraDetails.bitCount;
 
-    const size_t REGS_CNT = 5;
-    uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001, 0x7c22};
-    uint16_t afeRegsVal[REGS_CNT] = {0x0006, 0x0004, 0x803C, 0x0007, 0x0004};
-
-    auto device = camera->getDevice();
-    aditof::Status registerAFEwriting =
-        device->writeAfeRegisters(afeRegsAddr, afeRegsVal, REGS_CNT);
+    const int smallSignalThreshold = 50;
+    auto specifics = camera->getSpecifics();
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+    cam96tof1Specifics->setNoiseReductionThreshold(smallSignalThreshold);
+    cam96tof1Specifics->enableNoiseReduction(true);
 
     /* Request frame from camera */
     status = camera->requestFrame(&frame);
