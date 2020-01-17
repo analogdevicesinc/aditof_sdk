@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
-    int cameraRange = cameraDetails.range;
+    int cameraRange = cameraDetails.maxDepth;
     int bitCount = cameraDetails.bitCount;
 
     aditof::Frame frame;

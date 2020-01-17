@@ -46,7 +46,9 @@ class AdiTofDemoController {
 
     bool hasCamera() const;
 
-    int getRange() const;
+    int getRangeMax() const;
+
+    int getRangeMin() const;
 
     int getbitCount() const;
 

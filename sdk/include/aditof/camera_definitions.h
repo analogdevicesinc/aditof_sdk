@@ -56,9 +56,16 @@ struct CameraDetails {
     ConnectionType connection;
 
     /**
-     * @brief The range of the camera in mm for the operating mode
+     * @brief The maximum distance (in millimeters) the camera can measure in
+     * the current operating mode.
      */
-    int range;
+    int maxDepth;
+
+    /**
+     * @brief The minimum distance (in millimeters) the camera can measure in
+     * the current operating mode.
+     */
+    int minDepth;
 
     /**
      * @brief The number of bits used for representing one pixel data.
