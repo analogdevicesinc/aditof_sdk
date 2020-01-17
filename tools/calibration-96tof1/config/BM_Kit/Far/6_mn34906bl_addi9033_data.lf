@@ -1,12 +1,12 @@
 4000  0000 //mode_flag
 4001  0000 //op_mode
 4002  000b //opcodejump
-4003  054a //pcorestartaddr
-4004  0572 //api_mode0
-4005  059e //api_mode1
-4006  05a4 //api_mode2
-4007  05d0 //api_mode3
-4008  05eb //api_mode4
+4003  0544 //pcorestartaddr
+4004  056c //api_mode0
+4005  0598 //api_mode1
+4006  059e //api_mode2
+4007  05ca //api_mode3
+4008  05e5 //api_mode4
 4009  0000 //api_mode6
 400a  0000 //api_mode7
 400b  0000 //api_mode8
@@ -184,7 +184,7 @@
 4139  1717 
 413a  0020 
 413b  0000 
-413c  0658 //vx0_mode00_field00_seq38
+413c  0648 //vx0_mode00_field00_seq38
 413d  01b5 
 413e  01c0 
 413f  1615 
@@ -965,65 +965,64 @@
 4446  0060 
 4447  00ff 
 4448  0847 
-4449  0458 //mode00_table_ptr
-444a  0461 //mode01_table_ptr
-444b  046a //mode02_table_ptr
-444c  0486 //mode00_seq_isr
-444d  049c 
-444e  04ac 
-444f  04bc 
-4450  04c0 
-4451  04d0 //mode01_seq_isr
-4452  04e6 
-4453  04f6 
-4454  0506 
-4455  0516 //mode02_seq_isr
-4456  052c 
-4457  053c 
-4458  0437 //mode00_table
-4459  014d 
-445a  00a1 
-445b  03a8 
-445c  0074 
+4449  0457 //mode00_table_ptr
+444a  0460 //mode01_table_ptr
+444b  0469 //mode02_table_ptr
+444c  0484 //mode00_seq_isr
+444d  049a 
+444e  04aa 
+444f  04ba 
+4450  04ca //mode01_seq_isr
+4451  04e0 
+4452  04f0 
+4453  0500 
+4454  0510 //mode02_seq_isr
+4455  0526 
+4456  0536 
+4457  0437 //mode00_table
+4458  014d 
+4459  00a1 
+445a  03a8 
+445b  0074 
+445c  ffff 
 445d  ffff 
-445e  ffff 
-445f  044c 
-4460  ff67 
-4461  043d //mode01_table
-4462  014e 
-4463  00f7 
-4464  0419 
-4465  00cd 
+445e  044c 
+445f  ff67 
+4460  043d //mode01_table
+4461  014e 
+4462  00f7 
+4463  0419 
+4464  00cd 
+4465  ffff 
 4466  ffff 
-4467  ffff 
-4468  0451 
-4469  ff67 
-446a  0443 //mode02_table
-446b  014f 
-446c  0137 
-446d  0478 
-446e  0114 
+4467  0450 
+4468  ff67 
+4469  0443 //mode02_table
+446a  014f 
+446b  0137 
+446c  0478 
+446d  0114 
+446e  ffff 
 446f  ffff 
-4470  ffff 
-4471  0455 
-4472  ff67 
-4473  0000 //mode00_roi
+4470  0454 
+4471  ff67 
+4472  0000 //mode00_roi
+4473  0000 
 4474  0000 
 4475  0000 
 4476  0000 
 4477  0000 
-4478  0000 
-4479  0000 //mode01_roi
+4478  0000 //mode01_roi
+4479  0000 
 447a  0000 
 447b  0000 
 447c  0000 
 447d  0000 
-447e  0000 
-447f  0000 //mode02_roi
+447e  0000 //mode02_roi
+447f  0000 
 4480  0000 
 4481  0000 
 4482  0000 
 4483  0000 
-4484  0000 
 
 
