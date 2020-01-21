@@ -171,6 +171,7 @@ void AdiTofDemoView::render() {
     int numberOfFrames = 0;
 
     std::string modes[3] = {"near", "medium", "far"};
+    int range_minValues[3] = {0, 390, 2000};
 
     char afe_temp_str[32] = "AFE TEMP:";
     char laser_temp_str[32] = "LASER TEMP:";
@@ -774,12 +775,18 @@ void AdiTofDemoView::_displayDepthImage() {
         int frameWidth = static_cast<int>(frameDetails.width);
 
         m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
+        cv::Mat m_distanceImage =
+            cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
         cv::Point2d pointxy(320, 240);
         m_distanceVal = static_cast<int>(
-            m_distanceVal * 0.7 + m_depthImage.at<ushort>(pointxy) * 0.3);
+            m_distanceVal * 0.7 + m_distanceImage.at<ushort>(pointxy) * 0.3);
         char text[20];
         sprintf(text, "%dmm", m_distanceVal);
-        m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / m_ctrl->getRange());
+        m_depthImage.convertTo(
+            m_depthImage, CV_8U,
+            (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
+            (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
+             m_ctrl->getRangeMin()));
         applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
         flip(m_depthImage, m_depthImage, 1);
         int color;
@@ -875,7 +882,11 @@ void AdiTofDemoView::_displayBlendedImage() {
     cv::cvtColor(m_irImage, m_irImage, cv::COLOR_GRAY2RGB);
 
     m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
-    m_depthImage.convertTo(m_depthImage, CV_8U, 255.0 / m_ctrl->getRange());
+    m_depthImage.convertTo(
+        m_depthImage, CV_8U,
+        (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
+        (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
+         m_ctrl->getRangeMin()));
     flip(m_depthImage, m_depthImage, 1);
     applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
 

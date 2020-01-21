@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
-    int camera_range = cameraDetails.range;
+    int camera_range = cameraDetails.rangeMax;
     int bitCount = cameraDetails.bitCount;
 
     const int smallSignalThreshold = 50;

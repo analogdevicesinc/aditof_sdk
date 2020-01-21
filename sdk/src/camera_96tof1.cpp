@@ -61,8 +61,8 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
 
     LOG(INFO) << "Chosen mode: " << mode.c_str();
 
-    std::vector<std::pair<std::string, int>> modeRanges = {
-        {"near", 800}, {"medium", 4500}, {"far", 6000}};
+    std::vector<struct rangeStruct> rangeValues = {
+        {"near", 250, 800}, {"medium", 300, 4500}, {"far", 3000, 6000}};
 
     if ((mode != skCustomMode) ^ (modeFilename.empty())) {
         LOG(WARNING) << " mode must be set to: '" << skCustomMode
@@ -90,20 +90,23 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
                   std::back_inserter(firmwareData));
         status = m_device->program(firmwareData.data(), firmwareData.size());
         firmwareFile.close();
-        m_details.range = 4095;
+        m_details.maxDepth = 4095;
+        m_details.minDepth = 0;
     } else {
-        auto iter = std::find_if(modeRanges.begin(), modeRanges.end(),
-                                 [&mode](std::pair<std::string, int> mp) {
-                                     return mp.first == mode;
+        auto iter = std::find_if(rangeValues.begin(), rangeValues.end(),
+                                 [&mode](struct rangeStruct rangeMode) {
+                                     return rangeMode.mode == mode;
                                  });
-        if (iter != modeRanges.end()) {
-            m_details.range = (*iter).second;
+        if (iter != rangeValues.end()) {
+            m_details.maxDepth = (*iter).maxDepth;
+            m_details.minDepth = (*iter).minDepth;
         } else {
-            m_details.range = 1;
+            m_details.maxDepth = 1;
         }
 
         LOG(INFO) << "Camera range for mode: " << mode
-                  << " is: " << m_details.range << " mm";
+                  << " is: " << m_details.minDepth << " mm and "
+                  << m_details.maxDepth << " mm";
 
         std::vector<uint16_t> firmwareData;
         status = m_calibration.getAfeFirmware(mode, firmwareData);
@@ -148,12 +151,14 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         Status status = m_calibration.getGainOffset(mode, gain, offset);
         if (status == Status::OK) {
             int range = 1;
-            auto iter = std::find_if(modeRanges.begin(), modeRanges.end(),
-                                     [&mode](std::pair<std::string, int> mp) {
-                                         return mp.first == mode;
+
+            auto iter = std::find_if(rangeValues.begin(), rangeValues.end(),
+                                     [&mode](struct rangeStruct rangeMode) {
+                                         return rangeMode.mode == mode;
                                      });
-            if (iter != modeRanges.end()) {
-                range = (*iter).second;
+
+            if (iter != rangeValues.end()) {
+                range = (*iter).maxDepth;
             }
             m_device->setCalibrationParams(mode, gain, offset, range);
         }

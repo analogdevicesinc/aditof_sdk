@@ -58,7 +58,7 @@ if __name__ == "__main__":
     specifics.setNoiseReductionThreshold(smallSignalThreshold)
     specifics.enableNoiseReduction(True)
 
-    camera_range = camDetails.range
+    camera_range = camDetails.maxDepth
     bitCount = camDetails.bitCount
     frame = tof.Frame()
 

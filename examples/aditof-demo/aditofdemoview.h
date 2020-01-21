@@ -47,6 +47,7 @@ class AdiTofDemoView {
 
     std::mutex m_imshowMutex;
     int m_waitKeyBarrier;
+
     std::condition_variable m_barrierCv;
     int m_distanceVal;
 

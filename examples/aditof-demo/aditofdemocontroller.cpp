@@ -14,9 +14,7 @@ AdiTofDemoController::AdiTofDemoController()
         // Use the first camera that is found
         m_cameraInUse = 0;
         auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
-
         camera->initialize();
-
         std::vector<std::string> frameTypes;
         camera->getAvailableFrameTypes(frameTypes);
         if (frameTypes.empty()) {
@@ -259,11 +257,18 @@ void AdiTofDemoController::captureFrames() {
     }
 }
 
-int AdiTofDemoController::getRange() const {
+int AdiTofDemoController::getRangeMax() const {
     aditof::CameraDetails cameraDetails;
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
         cameraDetails);
-    return cameraDetails.range;
+    return cameraDetails.maxDepth;
+}
+
+int AdiTofDemoController::getRangeMin() const {
+    aditof::CameraDetails cameraDetails;
+    m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
+        cameraDetails);
+    return cameraDetails.minDepth;
 }
 
 int AdiTofDemoController::getbitCount() const {
