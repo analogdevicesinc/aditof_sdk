@@ -7,6 +7,8 @@
 #include <linux/videodev2.h>
 #include <sys/stat.h>
 
+#define CLEAR(x) memset(&(x), 0, sizeof(x))
+
 aditof::Status DeviceEnumeratorImpl::findDevices(
     std::vector<aditof::DeviceConstructionData> &devices) {
     using namespace aditof;
@@ -62,6 +64,15 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
             } else {
                 LOG(WARNING) << "VIDIOC_QUERYCAP";
             }
+        }
+
+        // Skip device which does not support VIDIOC_G_FMT
+        struct v4l2_format fmt;
+        CLEAR(fmt);
+        fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        if (-1 == xioctl(fd, VIDIOC_G_FMT, &fmt)) {
+            close(fd);
+            continue;
         }
 
         if (strncmp(reinterpret_cast<const char *>(cap.card),
