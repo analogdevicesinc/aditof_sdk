@@ -8,9 +8,9 @@ Writing the image on the SD card will take about 15 to 20 minutes for a 16GB ima
     ~~~sh
     sudo apt-get install xz-utils
     ~~~
-* Unpack the .xz archive
+* Unpack the .tar.xz archive
     ~~~sh
-    unxz name-of-the-image.xz
+    tar -xf name-of-the-image.tar.xz
     ~~~
 * Write the image on the SD card
     ~~~sh
@@ -29,6 +29,6 @@ Note 2: It is very likely that the **dd** command will have to be executed with 
 
 
 ## Windows
-* Unpack the .xz archive using [7-Zip](https://www.7-zip.org/)
+* Unpack the .tar.xz archive using [7-Zip](https://www.7-zip.org/)
 * Install the [balenaEtcher](https://www.balena.io/etcher/) app
 * Write the .img file to the SD card using the balenaEtcher app
