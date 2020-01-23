@@ -47,6 +47,10 @@ PYBIND11_MODULE(aditofpython, m) {
         .value("Ethernet", aditof::ConnectionType::ETHERNET)
         .value("local", aditof::ConnectionType::LOCAL);
 
+    py::enum_<aditof::Revision>(m, "Revision")
+        .value("RevB", aditof::Revision::RevB)
+        .value("RevC", aditof::Revision::RevC);
+
     py::class_<aditof::CameraDetails>(m, "CameraDetails")
         .def(py::init<>())
         .def_readwrite("cameraId", &aditof::CameraDetails::cameraId)
@@ -280,5 +284,9 @@ PYBIND11_MODULE(aditofpython, m) {
              &aditof::Camera96Tof1Specifics::setNoiseReductionThreshold,
              py::arg("threshold"))
         .def("noiseReductionThreshold",
-             &aditof::Camera96Tof1Specifics::noiseReductionThreshold);
+             &aditof::Camera96Tof1Specifics::noiseReductionThreshold)
+        .def("setCameraRevision",
+             &aditof::Camera96Tof1Specifics::setCameraRevision,
+             py::arg("revision"))
+        .def("getRevision", &aditof::Camera96Tof1Specifics::getRevision);
 }

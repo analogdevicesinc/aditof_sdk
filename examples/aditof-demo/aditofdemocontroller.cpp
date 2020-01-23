@@ -312,3 +312,27 @@ AdiTofDemoController::setNoiseReductionThreshold(uint16_t threshold) {
 
     return Status::GENERIC_ERROR;
 }
+
+aditof::Status
+AdiTofDemoController::setCameraRevision(const std::string &revision) {
+    using namespace aditof;
+
+    aditof::Status status;
+    if (m_cameraInUse < 0)
+        return Status::GENERIC_ERROR;
+
+    auto specifics =
+        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSpecifics();
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+
+    if (revision.compare("RevB") == 0) {
+        status = cam96tof1Specifics->setCameraRevision(Revision::RevB);
+    } else if (revision.compare("RevC") == 0) {
+        status = cam96tof1Specifics->setCameraRevision(Revision::RevC);
+    } else {
+        status = Status::INVALID_ARGUMENT;
+    }
+
+    return status;
+}

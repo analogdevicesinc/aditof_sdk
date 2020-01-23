@@ -8,7 +8,6 @@ using namespace aditof;
 Camera96Tof1Specifics::Camera96Tof1Specifics(Camera *camera)
     : m_camera(dynamic_cast<Camera96Tof1 *>(camera)), m_noiseReductionOn(false),
       m_noiseReductionThreshold(0) {
-
     if (!m_camera) {
         LOG(ERROR) << "Cannot cast camera to a Camera96Tof1";
     }
@@ -38,6 +37,13 @@ Status Camera96Tof1Specifics::setNoiseReductionThreshold(uint16_t threshold) {
 
     return status;
 }
+
+Status Camera96Tof1Specifics::setCameraRevision(Revision revision) {
+    m_revision = revision;
+    return Status::OK;
+}
+
+Revision Camera96Tof1Specifics::getRevision() const { return m_revision; }
 
 uint16_t Camera96Tof1Specifics::noiseReductionThreshold() const {
     return m_noiseReductionThreshold;

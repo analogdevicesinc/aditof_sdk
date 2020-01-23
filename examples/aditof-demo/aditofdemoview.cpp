@@ -115,6 +115,11 @@ void AdiTofDemoView::render() {
     bool ethModeChecked = false;
     int connectionCurrentValue = 4;
 
+    bool revBChecked = false;
+    bool revCChecked = true;
+    int revCurrentValue = 1; // 2 = RevB; 1 = RevC(default)
+    std::string revisions[2] = {"RevB", "RevC"};
+
     if (typeOfDevice.find(typeUSBDevice) != std::string::npos) {
         USBModeChecked = true;
     } else {
@@ -171,15 +176,15 @@ void AdiTofDemoView::render() {
     int numberOfFrames = 0;
 
     std::string modes[3] = {"near", "medium", "far"};
-    int range_minValues[3] = {0, 390, 2000};
 
     char afe_temp_str[32] = "AFE TEMP:";
     char laser_temp_str[32] = "LASER TEMP:";
     int temp_cnt = 0;
 
     while (true) {
+
         // Fill the frame with a nice color
-        cv::Mat frame = cv::Mat(530, 400, CV_8UC3);
+        cv::Mat frame = cv::Mat(550, 400, CV_8UC3);
 
         frame = cv::Scalar(49, 52, 49);
 
@@ -214,6 +219,32 @@ void AdiTofDemoView::render() {
             mediumLevelChecked = xorValue & (1 << 1);
             highLevelChecked = xorValue & 1;
             checkboxChanged = true;
+        }
+
+        cvui::beginColumn(frame, 50, 460);
+        cvui::space(10);
+        cvui::text("Revision: ", 0.6);
+        cvui::space(10);
+        cvui::beginRow(frame, 50, 495);
+        cvui::checkbox("RevB", &revBChecked);
+        cvui::space(10);
+        cvui::checkbox("RevC", &revCChecked);
+        cvui::endRow();
+        cvui::endColumn();
+
+        // Rev checkbox group
+        int btnGroupRev = revBChecked << 1 | revCChecked;
+        if (revCurrentValue != btnGroupRev) {
+            int xorValue = revCurrentValue ^ btnGroupRev;
+            revCurrentValue = xorValue;
+            revBChecked = xorValue & (1 << 1);
+            revCChecked = xorValue & 1;
+        }
+
+        if (revBChecked) {
+            m_ctrl->setCameraRevision(revisions[0]);
+        } else {
+            m_ctrl->setCameraRevision(revisions[1]);
         }
 
         // play button group
@@ -565,7 +596,7 @@ void AdiTofDemoView::render() {
         }
 #endif
         if (displayFps && (captureEnabled || captureBlendedEnabled)) {
-            cvui::text(frame, 350, 510, "FPS:" + std::to_string(displayFps));
+            cvui::text(frame, 350, 520, "FPS:" + std::to_string(displayFps));
         }
 
         if (captureEnabled || captureBlendedEnabled) {
@@ -575,8 +606,8 @@ void AdiTofDemoView::render() {
                 sprintf(afe_temp_str, "AFE TEMP: %.1f", temp.first);
                 sprintf(laser_temp_str, "LASER TEMP: %.1f", temp.second);
             }
-            cvui::text(frame, 20, 510, afe_temp_str);
-            cvui::text(frame, 180, 510, laser_temp_str);
+            cvui::text(frame, 20, 520, afe_temp_str);
+            cvui::text(frame, 180, 520, laser_temp_str);
         }
 
         if ((captureEnabled || captureBlendedEnabled) && !playbackEnabled) {

@@ -7,7 +7,6 @@
 
 #include <aditof/camera.h>
 #include <aditof/camera_96tof1_specifics.h>
-
 class Camera96Tof1 : public aditof::Camera {
   public:
     Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device);
@@ -36,11 +35,6 @@ class Camera96Tof1 : public aditof::Camera {
     std::shared_ptr<aditof::DeviceInterface> m_device;
     bool m_devStarted;
     Calibration m_calibration;
-    struct rangeStruct {
-        std::string mode;
-        int minDepth;
-        int maxDepth;
-    };
 
   public:
     friend class aditof::Camera96Tof1Specifics;
