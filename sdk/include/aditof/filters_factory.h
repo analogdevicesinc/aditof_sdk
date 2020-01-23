@@ -5,6 +5,10 @@
 
 namespace aditof {
 
+/**
+ * @class FiltersFactory
+ * @brief A factory for creating filters
+ */
 class FiltersFactory : public FrameProcessorFactory {
   public:
     virtual std::unique_ptr<FrameProcessor>
