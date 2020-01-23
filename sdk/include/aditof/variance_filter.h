@@ -5,6 +5,10 @@
 
 namespace aditof {
 
+/**
+ * @class VarianceFilter
+ * @brief Detects edges
+ */
 class VarianceFilter : public FrameProcessor {
   public:
     Status processFrame(const Frame &inFrame, Frame &outFrame) override;
