@@ -14,16 +14,24 @@ set(DOXY_WORKING_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen_doc)
 set(PROJECT_NAME "Time-of-Flight-SDK")
 set(DOCUMENTED_FILES "${SOURCES_DIR}/frame.h \\
                       ${SOURCES_DIR}/frame_definitions.h \\
+                      ${SOURCES_DIR}/frame_operations.h \\
+                      ${SOURCES_DIR}/frame_processor.h \\
+                      ${SOURCES_DIR}/frame_processor_factory.h \\
                       ${SOURCES_DIR}/camera.h \\
                       ${SOURCES_DIR}/camera_definitions.h \\
+                      ${SOURCES_DIR}/camera_specifics.h \\
+                      ${SOURCES_DIR}/camera_96tof1_specifics.h \\
                       ${SOURCES_DIR}/system.h \\
                       ${SOURCES_DIR}/status_definitions.h \\
+                      ${SOURCES_DIR}/frame_processor.h \\
                       ${SOURCES_DIR}/device_interface.h \\
                       ${SOURCES_DIR}/device_definitions.h \\
                       ${SOURCES_DIR}/device_construction_data.h \\
                       ${SOURCES_DIR}/device_factory.h \\
                       ${SOURCES_DIR}/device_enumerator_interface.h \\
                       ${SOURCES_DIR}/device_enumerator_factory.h \\
+                      ${SOURCES_DIR}/filters_factory.h \\
+                      ${SOURCES_DIR}/variance_filter.h \\
                       ${CMAKE_CURRENT_SOURCE_DIR}/mainpage.dox
                       "
 )
