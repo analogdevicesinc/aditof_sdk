@@ -70,7 +70,8 @@ int main(int argc, char *argv[]) {
 
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
-    int camera_range = cameraDetails.rangeMax;
+    int camera_rangeMax = cameraDetails.maxDepth;
+    int camera_rangeMin = cameraDetails.minDepth;
     int bitCount = cameraDetails.bitCount;
 
     const int smallSignalThreshold = 50;
@@ -125,7 +126,8 @@ int main(int argc, char *argv[]) {
             return 0;
         }
         geometry::Image depth_image;
-        status = fromFrameToDepthImg(frame, camera_range, depth_image);
+        status = fromFrameToDepthImg(frame, camera_rangeMin, camera_rangeMax,
+                                     depth_image);
         if (status != Status::OK) {
             LOG(ERROR) << "Could not convert from frame to Image!";
         }
@@ -182,7 +184,7 @@ int main(int argc, char *argv[]) {
         depth_vis.UpdateRender();
 
         auto rgbd_ptr = geometry::RGBDImage::CreateFromColorAndDepth(
-            color_image, depth_image, 1.0, 3.0, false);
+            color_image, depth_image, 1000.0, 3.0, false);
         if (!pointcloud_ptr) {
             pointcloud_ptr =
                 geometry::PointCloud::CreateFromRGBDImage(*rgbd_ptr, intrinsic);

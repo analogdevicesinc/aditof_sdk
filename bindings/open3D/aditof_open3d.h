@@ -8,8 +8,8 @@
 using namespace open3d;
 
 namespace aditof {
-Status fromFrameToDepthImg(Frame &frame, int camera_range,
-                           geometry::Image &image) {
+Status fromFrameToDepthImg(Frame &frame, int camera_rangeMin,
+                           int camera_rangeMax, geometry::Image &image) {
     FrameDetails frameDetails;
     frame.getDetails(frameDetails);
 
@@ -27,8 +27,10 @@ Status fromFrameToDepthImg(Frame &frame, int camera_range,
     for (int i = 0; i < frameHeight * frameWidth; i++) {
         uint8_t *p =
             static_cast<uint8_t *>(image.data_.data() + i * sizeof(uint8_t));
-        uint16_t value = *(depthData + i) * 255.0 / camera_range;
-        *p = static_cast<uint8_t>(value <= 255 ? value : 255);
+        uint16_t value =
+            *(depthData + i) * 255.0 / (camera_rangeMax - camera_rangeMin) -
+            ((255.0 / (camera_rangeMax - camera_rangeMin)) * camera_rangeMin);
+        *p = static_cast<uint8_t>(value <= 255 ? value : 0);
         p++;
     }
 
