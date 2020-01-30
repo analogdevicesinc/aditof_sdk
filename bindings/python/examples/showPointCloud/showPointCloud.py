@@ -44,6 +44,9 @@ if __name__ == "__main__":
     if not status:
         print("cameras[0].setFrameType() failed with status:", status)
 
+    specifics = cameras[0].getCamera96Tof1Specifics()
+    specifics.setCameraRevision(tof.Revision.RevC)
+
     status = cameras[0].setMode(modes[ModesEnum.MODE_MEDIUM.value])
     if not status:
         print("cameras[0].setMode() failed with status: ", status)
@@ -54,7 +57,7 @@ if __name__ == "__main__":
         print("system.getDetails() failed with status: ", status)
 
     smallSignalThreshold = 50
-    specifics = cameras[0].getCamera96Tof1Specifics()
+
     specifics.setNoiseReductionThreshold(smallSignalThreshold)
     specifics.enableNoiseReduction(True)
 

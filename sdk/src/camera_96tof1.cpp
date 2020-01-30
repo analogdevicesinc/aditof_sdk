@@ -6,16 +6,38 @@
 #include <aditof/frame_operations.h>
 
 #include <algorithm>
+#include <array>
 #include <fstream>
 #include <glog/logging.h>
 #include <iterator>
+#include <map>
+
+struct rangeStruct {
+    std::string mode;
+    int minDepth;
+    int maxDepth;
+};
+
+// A map that contains the specific values for each revision
+static const std::map<aditof::Revision, std::array<rangeStruct, 3>>
+    RangeValuesForRevision = {
+        {aditof::Revision::RevB,
+         {{{"near", 250, 800}, {"medium", 300, 3000}, {"far", 3000, 6000}}}},
+        {aditof::Revision::RevC,
+         {{{"near", 250, 800}, {"medium", 300, 4500}, {"far", 3000, 6000}}}}};
 
 static const std::string skCustomMode = "custom";
 
 Camera96Tof1::Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device)
     : m_specifics(std::make_shared<aditof::Camera96Tof1Specifics>(
           aditof::Camera96Tof1Specifics(this))),
-      m_device(std::move(device)), m_devStarted(false) {}
+      m_device(std::move(device)), m_devStarted(false) {
+
+    // initialize range values with the default data for revision C
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<aditof::Camera96Tof1Specifics>(m_specifics);
+    cam96tof1Specifics->setCameraRevision(aditof::Revision::RevC);
+}
 
 Camera96Tof1::~Camera96Tof1() = default;
 
@@ -59,11 +81,14 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
     using namespace aditof;
     Status status = Status::OK;
 
+    // Set the values specific to the Revision requested
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<Camera96Tof1Specifics>(m_specifics);
+    Revision revision = cam96tof1Specifics->getRevision();
+    std::array<rangeStruct, 3> rangeValues =
+        RangeValuesForRevision.at(revision);
+
     LOG(INFO) << "Chosen mode: " << mode.c_str();
-
-    std::vector<struct rangeStruct> rangeValues = {
-        {"near", 250, 800}, {"medium", 300, 4500}, {"far", 3000, 6000}};
-
     if ((mode != skCustomMode) ^ (modeFilename.empty())) {
         LOG(WARNING) << " mode must be set to: '" << skCustomMode
                      << "' and a firmware must be provided";

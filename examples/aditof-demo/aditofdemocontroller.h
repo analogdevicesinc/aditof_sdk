@@ -58,6 +58,8 @@ class AdiTofDemoController {
     aditof::Status enableNoiseReduction(bool en);
     aditof::Status setNoiseReductionThreshold(uint16_t threshold);
 
+    aditof::Status setCameraRevision(const std::string &revision);
+
   private:
     void captureFrames();
 
