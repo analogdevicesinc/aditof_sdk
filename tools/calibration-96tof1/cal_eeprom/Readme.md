@@ -1,12 +1,5 @@
 ## This project builds the hash map from Calibration data and/or AFE firmware. The Hash map is for storing calibration data in EEPROM.
 
-### Run Python
-1. Activate the Python environment as [Calibration Environment Setup](../Readme.md)
-2. Run the python example as 
-``` 
-python run CalEEPROM.py 
-```
-
 ### Run C++
 1. Requires C/C++ Compiler
     * Linux - Compiler included in environment [Calibration Environment Setup](../Readme.md)
