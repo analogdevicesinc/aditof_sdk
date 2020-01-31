@@ -80,12 +80,15 @@ def generate_bin(addr_data_tuple, bin_file_name):
            f.write(bin_addr)
            f.write(bin_data)
 
-def open_device2(sys_handle):
+def open_device2(sys_handle, ip):
     logger = logging.getLogger(__name__)
-    
+
     #Find cameras
     cameras = []
-    status = sys_handle.getCameraList(cameras)
+    if (ip):
+      status = sys_handle.getCameraListAtIp(cameras, ip)
+    else:
+      status = sys_handle.getCameraList(cameras)
     
     logger.info("Get Cameras: " + str(status))
     if len(cameras) > 0:
