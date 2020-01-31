@@ -5,6 +5,7 @@ import json
 import logging
 import logging.config
 import uuid
+import ipaddress
 
 import cal_eeprom.cal_eeprom as ce
 
@@ -18,6 +19,7 @@ def setup_logging():
 
 @click.command()
 @click.argument('config-json', type=click.STRING)
+@click.option('--remote', type=click.STRING, help="To connect to a camera over ethernet, specify the ip (e.g. '192.168.1.101')")
 def run_eeprom_replace_cal(config_json, **kwargs):
     '''
     Replace the calibration data for a single mode in an ADI TOF module
@@ -38,6 +40,12 @@ def run_eeprom_replace_cal(config_json, **kwargs):
             if config_dict[key] is None:
                 print('Need to specify %s either as a command line option or in the sweep config json file')
                 raise SystemExit
+
+    ipString = ''
+    if 'remote' in config_dict:
+            ip = ipaddress.ip_address(config_dict['remote'])
+            print('Running script for a camera connected over Ethernet at ip:', ip)
+            ipString = config_dict['remote']
     
     # Retrieve parameters
     cal_map_path = config_dict['cal_map_path']
@@ -48,7 +56,7 @@ def run_eeprom_replace_cal(config_json, **kwargs):
     system = tof.System()
     status = system.initialize()
     print("system.initialize()", status)
-    cam_handle = device.open_device2(system)
+    cam_handle = device.open_device2(system, ipString)
     dev_handle = cam_handle.getDevice()
 
     # Read the cal map from the camera and store it locally
