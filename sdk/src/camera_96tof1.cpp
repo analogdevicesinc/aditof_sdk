@@ -63,6 +63,13 @@ aditof::Status Camera96Tof1::initialize() {
 
     LOG(INFO) << "Camera initialized";
 
+    m_calibration.getIntrinsic(INTRINSIC, m_details.intrinsics.cameraMatrix);
+    m_calibration.getIntrinsic(DISTORTION_COEFFICIENTS,
+                               m_details.intrinsics.distCoeffs);
+
+    // For now we use the unit cell size values specified in the datasheet
+    m_details.intrinsics.pixelWidth = 0.0056;
+    m_details.intrinsics.pixelHeight = 0.0056;
     return Status::OK;
 }
 

@@ -139,6 +139,41 @@ aditof::Status Calibration::getGainOffset(const std::string &mode, float &gain,
     return Status::GENERIC_ERROR;
 }
 
+aditof::Status Calibration::getIntrinsic(float key,
+                                         std::vector<float> &data) const {
+    using namespace aditof;
+
+    bool validParam = (INTRINSIC == key) || (DISTORTION_COEFFICIENTS == key);
+
+    if (!validParam) {
+        LOG(WARNING) << "Invalid intrinsic " << std::to_string(key).c_str();
+        return Status::INVALID_ARGUMENT;
+    }
+
+    for (const auto &mapElement : m_calibration_map) {
+        float mapKey = mapElement.first;
+        const packet_struct &sub_packet_map = mapElement.second;
+
+        if (mapKey == CAMERA_INTRINSIC) {
+            for (const auto &packet : sub_packet_map.packet) {
+                float packetKey = packet.first;
+
+                if (packetKey == key) {
+                    const param_struct &param_map = packet.second;
+                    const std::list<float> &valList = param_map.value;
+
+                    data.insert(data.begin(), valList.begin(), valList.end());
+                    return Status::OK;
+                }
+            }
+            LOG(WARNING) << "No intrinsics found in the device memory for key "
+                         << std::to_string(key).c_str();
+        }
+    }
+
+    return Status::GENERIC_ERROR;
+}
+
 //! SaveCalMap - Save the entire calibration map
 /*!
     SaveCalMap - Saves the entire calibration map as binary to a file.

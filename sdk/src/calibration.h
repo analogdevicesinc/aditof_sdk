@@ -63,6 +63,7 @@ class Calibration {
                                   std::vector<uint16_t> &data) const;
     aditof::Status getGainOffset(const std::string &mode, float &gain,
                                  float &offset) const;
+    aditof::Status getIntrinsic(float key, std::vector<float> &data) const;
 
   private:
     float getMapSize(
