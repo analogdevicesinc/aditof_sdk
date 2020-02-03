@@ -6,6 +6,8 @@ import time
 from natsort import natsorted, ns
 import logging
 import json
+import click
+import ipaddress
 
 import aditofpython as tof
 import tof_calib.gen_delays as gd
@@ -27,11 +29,16 @@ def setup_logging():
        config = json.load(f)
        logging.config.dictConfig(config)   
 
-if __name__ == "__main__":
 
-    setup_logging()
-    logger = logging.getLogger(__name__)
-       
+@click.command()
+@click.option('--remote', type=click.STRING, help="To connect to a camera over ethernet, specify the ip (e.g. '192.168.1.101')")
+def run_example(remote):
+    cam_ip = ''
+    if remote is not None:
+        ip = ipaddress.ip_address(remote)
+        print('Running script for a camera connected over Ethernet at ip:', ip)
+        cam_ip = remote
+
     system = tof.System()
     status = system.initialize()
     
@@ -43,7 +50,7 @@ if __name__ == "__main__":
         firmware_path = "config/BM_Kit/Near/"
         
         logger.info("Programming firmware from : " + firmware_path)
-        cam_handle = device.open_device2(system)
+        cam_handle = device.open_device2(system, cam_ip)
         device.program_firmware2(cam_handle, firmware_path)
         
         # The following parameters must be specified if firmware is loaded from software
@@ -139,4 +146,8 @@ if __name__ == "__main__":
             
         print(get_TAL_values(cam_handle))
 
-        
+if __name__ == "__main__":
+    setup_logging()
+    logger = logging.getLogger(__name__)
+    run_example()
+
