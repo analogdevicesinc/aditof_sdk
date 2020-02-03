@@ -44,7 +44,7 @@ def run_example(remote):
     
     #Specify if you want to load firmware from lf files, or from EEPROM
     from_software = True
-    
+
     if (from_software):
         #Choose firmware path from here
         firmware_path = "config/BM_Kit/Near/"
@@ -62,8 +62,12 @@ def run_example(remote):
         mode = 'near'
         
         cameras = []
-        status = system.getCameraList(cameras)
-        logger.info("system.getCameraList()" + str(status))
+        if not cam_ip:
+            status = system.getCameraList(cameras)
+            logger.info("system.getCameraList()" + str(status))
+        else:
+            status = system.getCameraListAtIp(cameras, cam_ip)
+            logger.info("system.getCameraListAtIp()" + str(status))
 
         cam_handle = cameras[0]
 
@@ -106,12 +110,13 @@ def run_example(remote):
             depth_image = (depth_image*sw_gain)+sw_offset
         else:
             status = cam_handle.requestFrame(frame)
-            depth_image = np.array(frame.getData(tof.FrameDataType.Depth), copy=True)
-            ir_image = np.array(frame.getData(tof.FrameDataType.IR), copy=True)
-            
-        max = np.amax(depth_image)
-        depth_image_2 = np.uint8(255*(depth_image/4095))
-        depth_image_2.resize((480,640))
+            depth_image = np.array(frame.getData(tof.FrameDataType.Depth),dtype="uint16", copy=False)
+            ir_image = np.array(frame.getData(tof.FrameDataType.IR), dtype="uint16", copy=False)
+
+        depth_image_size = (int(depth_image.shape[0] / 2), depth_image.shape[1])
+        depth_image_2 = np.resize(depth_image, depth_image_size)
+        depth_image_2 = cv2.flip(depth_image_2, 1)
+        depth_image_2 = np.uint8(depth_image_2)
         color_depth = cv2.applyColorMap(depth_image_2, cv2.COLORMAP_RAINBOW)
         
         #Draw rectangle at the center of depth image
@@ -119,6 +124,7 @@ def run_example(remote):
 
         ir_image_2 = np.uint8(255*(ir_image/4095))
         ir_image_2.resize((480,640))
+        ir_image_2 = cv2.flip(ir_image_2, 1)
         ir_image_2 = cv2.applyColorMap(ir_image_2, cv2.COLORMAP_BONE)
         
         #Output images as .png 
@@ -126,9 +132,13 @@ def run_example(remote):
         cv2.imwrite('depth.png', color_depth)
         
         #Uncomment if running example on 96/Arrow board with HDMI to show stream data on monitor
+        #cv2.namedWindow("Depth", cv2.WINDOW_AUTOSIZE)
         #cv2.imshow( "Depth", color_depth)
-        #cv2.imshow( "IR", ir_image_2)  
+        #cv2.imshow( "IR", ir_image_2)
         
+        #if cv2.waitKey(1) >= 0:
+        #        break
+
         # values_depth[i] = depth_image[240,320]
         # values_ir[i] = ir_image[240,320]
         # i = i + 1
