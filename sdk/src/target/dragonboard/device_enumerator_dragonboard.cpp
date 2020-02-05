@@ -36,9 +36,11 @@ aditof::Status findDevicePathsAtMedia(const std::string &media,
         size++;
     }
     pclose(fp);
+    buf[size] = '\0';
 
     /* Get the list of entities from output buffer */
     string str(buf);
+    free(buf);
     vector<string> entities;
     size_t pos = str.find("entity");
     while (pos != string::npos) {
