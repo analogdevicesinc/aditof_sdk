@@ -27,11 +27,36 @@ Status fromFrameToDepthImg(Frame &frame, int camera_rangeMin,
     for (int i = 0; i < frameHeight * frameWidth; i++) {
         uint8_t *p =
             static_cast<uint8_t *>(image.data_.data() + i * sizeof(uint8_t));
-        uint16_t value =
-            *(depthData + i) * 255.0 / (camera_rangeMax - camera_rangeMin) -
+        int16_t value =
+            (*(depthData + i)) * 255.0 / (camera_rangeMax - camera_rangeMin) -
             ((255.0 / (camera_rangeMax - camera_rangeMin)) * camera_rangeMin);
-        *p = static_cast<uint8_t>(value <= 255 ? value : 0);
+        if (value < 0)
+            value = 0;
+        *p = static_cast<uint8_t>(value <= 255 ? value : 255);
         p++;
+    }
+
+    return Status::OK;
+}
+
+Status fromFrameTo16bitsDepth(Frame &frame, geometry::Image &image) {
+    FrameDetails frameDetails;
+    frame.getDetails(frameDetails);
+
+    const int frameHeight = static_cast<int>(frameDetails.height) / 2;
+    const int frameWidth = static_cast<int>(frameDetails.width);
+
+    uint16_t *depthData;
+    frame.getData(FrameDataType::DEPTH, &depthData);
+
+    if (depthData == nullptr) {
+        return Status::GENERIC_ERROR;
+    }
+
+    image.Prepare(frameWidth, frameHeight, 1, 2);
+    for (int i = 0; i < frameHeight * frameWidth; i++) {
+        image.data_[i * 2] = *(depthData + i) & 0xFF;
+        image.data_[i * 2 + 1] = *(depthData + i) >> 8;
     }
 
     return Status::OK;

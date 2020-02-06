@@ -47,7 +47,7 @@ if __name__ == "__main__":
     specifics = cameras[0].getCamera96Tof1Specifics()
     specifics.setCameraRevision(tof.Revision.RevC)
 
-    status = cameras[0].setMode(modes[ModesEnum.MODE_MEDIUM.value])
+    status = cameras[0].setMode(modes[ModesEnum.MODE_NEAR.value])
     if not status:
         print("cameras[0].setMode() failed with status: ", status)
 
@@ -56,10 +56,20 @@ if __name__ == "__main__":
     if not status:
         print("system.getDetails() failed with status: ", status)
 
-    smallSignalThreshold = 50
-
+    # Enable noise reduction for better results
+    smallSignalThreshold = 100
     specifics.setNoiseReductionThreshold(smallSignalThreshold)
     specifics.enableNoiseReduction(True)
+
+    # Get intrinsic parameters from camera
+    intrinsicParameters = camDetails.intrinsics
+    fx = intrinsicParameters.cameraMatrix[0]
+    fy = intrinsicParameters.cameraMatrix[4]
+    cx = intrinsicParameters.cameraMatrix[2]
+    cy = intrinsicParameters.cameraMatrix[5]
+    width = 640
+    height = 480
+    cameraIntrinsics = o3d.camera.PinholeCameraIntrinsic(width, height, fx, fy, cx, cy)
 
     camera_range = camDetails.maxDepth
     bitCount = camDetails.bitCount
@@ -82,18 +92,16 @@ if __name__ == "__main__":
         ir_map = ir_map[0: int(ir_map.shape[0] / 2), :]
         ir_map = distance_scale_ir * ir_map
         ir_map = np.uint8(ir_map)
-        ir_map = cv.flip(ir_map, 1)
         ir_map = cv.cvtColor(ir_map, cv.COLOR_GRAY2RGB)
 
         # Creation of the Depth image
         new_shape = (int(depth_map.shape[0] / 2), depth_map.shape[1])
-        depth_map = np.resize(depth_map, new_shape)
+        depth16bits_map = depth_map = np.resize(depth_map, new_shape)
         depth_map = distance_scale * depth_map
         depth_map = np.uint8(depth_map)
-        img_depth = depth_map = cv.flip(depth_map, 1)
         depth_map = cv.applyColorMap(depth_map, cv.COLORMAP_RAINBOW)
 
-        # Show Depth map
+        # Show Depth map :
         cv.namedWindow(WINDOW_NAME_DEPTH, cv.WINDOW_AUTOSIZE)
         cv.imshow(WINDOW_NAME_DEPTH, depth_map)
 
@@ -104,17 +112,13 @@ if __name__ == "__main__":
         cv.imshow(WINDOW_NAME_COLOR, img_color)
 
         color_raw = o3d.geometry.Image(img_color)
-        depth_raw = o3d.geometry.Image(img_depth)
-        rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
-            color_raw, depth_raw, 1000.0, 3.0, False)
+        depth16bits_raw = o3d.geometry.Image(depth16bits_map)
 
-        pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
-            rgbd_image,
-            o3d.camera.PinholeCameraIntrinsic(
-                o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault))
+        rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(color_raw, depth16bits_raw, 1000.0, 3.0, False)
+        pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd_image, cameraIntrinsics)
+
         # Flip it, otherwise the pointcloud will be upside down
         pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
-        o3d.io.write_point_cloud("plot.ply", pcd)
         o3d.visualization.draw_geometries([pcd])
 
         if cv.waitKey(1) >= 0:
