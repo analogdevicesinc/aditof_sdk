@@ -51,12 +51,22 @@ PYBIND11_MODULE(aditofpython, m) {
         .value("RevB", aditof::Revision::RevB)
         .value("RevC", aditof::Revision::RevC);
 
+    py::class_<aditof::IntrinsicParameters>(m, "IntrinsicParameters")
+        .def(py::init<>())
+        .def_readwrite("cameraMatrix",
+                       &aditof::IntrinsicParameters::cameraMatrix)
+        .def_readwrite("distCoeffs", &aditof::IntrinsicParameters::distCoeffs)
+        .def_readwrite("pixelWidth", &aditof::IntrinsicParameters::pixelWidth)
+        .def_readwrite("pixelHeight",
+                       &aditof::IntrinsicParameters::pixelHeight);
+
     py::class_<aditof::CameraDetails>(m, "CameraDetails")
         .def(py::init<>())
         .def_readwrite("cameraId", &aditof::CameraDetails::cameraId)
         .def_readwrite("mode", &aditof::CameraDetails::mode)
         .def_readwrite("frameType", &aditof::CameraDetails::frameType)
         .def_readwrite("connection", &aditof::CameraDetails::connection)
+        .def_readwrite("intrinsics", &aditof::CameraDetails::intrinsics)
         .def_readwrite("minDepth", &aditof::CameraDetails::minDepth)
         .def_readwrite("maxDepth", &aditof::CameraDetails::maxDepth)
         .def_readwrite("bitCount", &aditof::CameraDetails::bitCount);
