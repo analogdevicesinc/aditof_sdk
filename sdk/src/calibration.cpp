@@ -201,7 +201,7 @@ Calibration::saveCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
         }
     }
 
-    size_t size = data.size() * sizeof(uint32_t);
+    float size = static_cast<float>(data.size() * sizeof(uint32_t));
     device->writeEeprom((uint32_t)0, (uint8_t *)&size, (size_t)4);
     device->writeEeprom((uint32_t)4, (uint8_t *)data.data(), size);
 
