@@ -4,6 +4,7 @@
 #include <aditof/status_definitions.h>
 
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace aditof {
