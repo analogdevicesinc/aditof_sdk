@@ -74,7 +74,7 @@ if __name__ == "__main__":
     if not status:
         print("cameras[0].setFrameType() failed with status:", status)
 
-    status = cameras[0].setMode(modes[ModesEnum.MODE_MEDIUM.value])
+    status = cameras[0].setMode(modes[ModesEnum.MODE_NEAR.value])
     if not status:
         print("cameras[0].setMode() failed with status: ", status)
 
@@ -166,7 +166,7 @@ if __name__ == "__main__":
                     value_x = int(center[0])
                     value_y = int(center[1])
                     label = classNames[class_id] + ": " + \
-                            "{0:.3f}".format(distance_map[value_x, value_y] / 1000.0 * 0.3) + " " + "meters"
+                            "{0:.3f}".format(distance_map[value_x, value_y] / 1000.0 * 0.3) + " " + "m. Confidence: " + str(confidence)
                     labelSize, baseLine = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
                     yLeftBottom = max(yLeftBottom, labelSize[1])
