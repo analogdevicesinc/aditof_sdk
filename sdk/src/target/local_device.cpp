@@ -2,6 +2,7 @@
 #include "target_definitions.h"
 #include "utils.h"
 #include <aditof/frame_operations.h>
+#include <fstream>
 
 extern "C" {
 #include "eeprom.h"
@@ -75,7 +76,15 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new LocalDevice::ImplData) {
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
+
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
+
+    // For now, we assume we have a Chicony if there is a replacemet file
+    FILE *fd = fopen(EEPROM_DEV_PATH, "r");
+    if (fd) {
+        m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
+        fclose(fd);
+    }
 }
 
 LocalDevice::~LocalDevice() {
@@ -565,6 +574,30 @@ aditof::Status LocalDevice::readEeprom(uint32_t address, uint8_t *data,
                                        size_t length) {
     using namespace aditof;
     Status status = Status::OK;
+
+    if (m_deviceDetails.sensorType == aditof::SensorType::SENSOR_CHICONY) {
+        switch (address) {
+        case (0xFFFFFFFE): {
+            std::ifstream file(EEPROM_REPLACEMENT_PATH,
+                               std::ios::binary | std::ios::ate);
+            uint32_t *size = reinterpret_cast<uint32_t *>(data);
+            *size = static_cast<uint32_t>(file.tellg());
+            file.close();
+            return Status::OK;
+        }
+        case (0xFFFFFFFF): {
+            std::ifstream firmware_file(EEPROM_REPLACEMENT_PATH,
+                                        std::ios::binary);
+            firmware_file.read(reinterpret_cast<char *>(data), length);
+            firmware_file.close();
+            return Status::OK;
+        }
+        default: {
+            LOG(WARNING) << "Unsupported address";
+            return Status::INVALID_ARGUMENT;
+        }
+        } // switch (address)
+    }
 
     if (!m_implData->edev.valid) {
         LOG(WARNING) << "EEPROM not available!";
