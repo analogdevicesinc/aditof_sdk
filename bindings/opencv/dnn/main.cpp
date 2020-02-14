@@ -233,7 +233,8 @@ int main(int argc, char *argv[]) {
                 std::ostringstream ss;
                 ss.str("");
                 ss << std::setprecision(3)
-                   << depthMat.at<ushort>(center) / 1000.0 * 0.3 << " meters";
+                   << depthMat.at<ushort>(center) / 1000.0 * 0.3
+                   << "m. Confidence: " << confidence;
                 cv::String conf(ss.str());
 
                 cv::rectangle(frameMat, object, cv::Scalar(0, 255, 0));
