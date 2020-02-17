@@ -233,36 +233,56 @@ int main(int argc, char *argv[]) {
                 std::ostringstream ss;
                 ss.str("");
                 ss << std::setprecision(3)
-                   << depthMat.at<ushort>(center) / 1000.0 * 0.3
-                   << "m. Confidence: " << confidence;
-                cv::String conf(ss.str());
+                   << depthMat.at<ushort>(center) / 1000.0 * 0.3 << " meters";
+                cv::String depth_string(ss.str());
+
+                std::ostringstream ss_conf;
+                ss_conf.str("");
+                ss_conf << "Confidence: " << std::setprecision(4) << confidence;
+                cv::String conf_string(ss_conf.str());
 
                 cv::rectangle(frameMat, object, cv::Scalar(0, 255, 0));
                 cv::rectangle(resultMat, object, cv::Scalar(0, 255, 0));
-                cv::String label =
-                    cv::String(classNames[objectClass]) + ": " + conf;
+                cv::String label_depth =
+                    cv::String(classNames[objectClass]) + ": " + depth_string;
+
+                cv::String label_conf = conf_string;
                 int baseLine = 0;
-                cv::Size labelSize = getTextSize(
-                    label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+                cv::Size labelSize_depth = getTextSize(
+                    label_depth, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+                cv::Size labelSize_conf = getTextSize(
+                    label_conf, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+                cv::Size labelSize =
+                    labelSize_depth.width > labelSize_conf.width
+                        ? labelSize_depth
+                        : labelSize_conf;
 
                 center.x = center.x - labelSize.width / 2;
+                auto conf_position = center;
+                conf_position.y = conf_position.y + labelSize.height + baseLine;
 
                 cv::rectangle(
                     frameMat,
-                    cv::Rect(
-                        cv::Point(center.x, center.y - labelSize.height),
-                        cv::Size(labelSize.width, labelSize.height + baseLine)),
+                    cv::Rect(cv::Point(center.x, center.y - labelSize.height),
+                             cv::Size(labelSize.width,
+                                      2 * labelSize.height + baseLine * 2)),
                     cv::Scalar(255, 255, 255), cv::FILLED);
-                cv::putText(frameMat, label, center, cv::FONT_HERSHEY_SIMPLEX,
-                            0.5, cv::Scalar(0, 0, 0));
+                cv::putText(frameMat, label_depth, center,
+                            cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+
+                cv::putText(frameMat, label_conf, conf_position,
+                            cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+
                 cv::rectangle(
                     resultMat,
-                    cv::Rect(
-                        cv::Point(center.x, center.y - labelSize.height),
-                        cv::Size(labelSize.width, labelSize.height + baseLine)),
+                    cv::Rect(cv::Point(center.x, center.y - labelSize.height),
+                             cv::Size(labelSize.width,
+                                      2 * labelSize.height + baseLine * 2)),
                     cv::Scalar(255, 255, 255), cv::FILLED);
-                cv::putText(resultMat, label, center, cv::FONT_HERSHEY_SIMPLEX,
-                            0.5, cv::Scalar(0, 0, 0));
+                cv::putText(resultMat, label_depth, center,
+                            cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+                cv::putText(resultMat, label_conf, conf_position,
+                            cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
             }
         }
 

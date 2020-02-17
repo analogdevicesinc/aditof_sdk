@@ -165,21 +165,31 @@ if __name__ == "__main__":
                 if class_id in classNames:
                     value_x = int(center[0])
                     value_y = int(center[1])
-                    label = classNames[class_id] + ": " + \
-                            "{0:.3f}".format(distance_map[value_x, value_y] / 1000.0 * 0.3) + " " + "m. Confidence: " + str(confidence)
-                    labelSize, baseLine = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+                    label_depth = classNames[class_id] + ": " + \
+                            "{0:.3f}".format(distance_map[value_x, value_y] / 1000.0 * 0.3) + " meters"
+                    label_conf = "Confidence: " + "{0:.4f}".format(confidence)
+                    labelSize_depth, baseLine = cv.getTextSize(label_depth, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+                    labelSize_conf = cv.getTextSize(label_conf, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
 
+                    if labelSize_depth[1] > labelSize_conf[1]:
+                        labelSize = labelSize_depth
+                    else:
+                        labelSize = labelSize_conf
                     yLeftBottom = max(yLeftBottom, labelSize[1])
                     cv.rectangle(result, (value_x - int(labelSize[0] * 0.5), value_y - labelSize[1]),
-                                 (value_x + int(labelSize[0] * 0.5), value_y + baseLine),
+                                 (value_x + int(labelSize[0] * 0.5), value_y + labelSize[1] + 2 * baseLine),
                                  (255, 255, 255), cv.FILLED)
-                    cv.putText(result, label, (value_x - int(labelSize[0] * 0.5), value_y),
+                    cv.putText(result, label_depth, (value_x - int(labelSize[0] * 0.5), value_y),
+                               cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+                    cv.putText(result, label_conf, (value_x - int(labelSize[0] * 0.5), value_y + labelSize[1] + baseLine),
                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
                     cv.rectangle(depth_map, (value_x - int(labelSize[0] * 0.5), value_y - labelSize[1]),
-                                 (value_x + int(labelSize[0] * 0.5), value_y + baseLine),
+                                 (value_x + int(labelSize[0] * 0.5), value_y + labelSize[1] + 2 * baseLine),
                                  (255, 255, 255), cv.FILLED)
-                    cv.putText(depth_map, label, (value_x - int(labelSize[0] * 0.5), value_y),
+                    cv.putText(depth_map, label_depth, (value_x - int(labelSize[0] * 0.5), value_y),
+                               cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+                    cv.putText(depth_map, label_conf, (value_x - int(labelSize[0] * 0.5), value_y + labelSize[1] + baseLine),
                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
 
         # Show image with object detection
