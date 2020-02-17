@@ -644,6 +644,10 @@ void AdiTofDemoView::render() {
         m_smallSignal = m_crtSmallSignalState;
         if (smallSignalChanged) {
             aditof::Status ret = m_ctrl->enableNoiseReduction(m_smallSignal);
+            if (ret == aditof::Status::OK) {
+                m_ctrl->setNoiseReductionThreshold(
+                    static_cast<uint16_t>(smallSignalThreshold));
+            }
 
             if (ret == aditof::Status::GENERIC_ERROR) {
                 status = "No cameras connected!";
