@@ -411,10 +411,12 @@ aditof::Status EthernetDevice::readEeprom(uint32_t address, uint8_t *data,
         return Status::GENERIC_ERROR;
     }
 
-    memcpy(data, net->recv_buff.bytes_payload(0).c_str(),
-           net->recv_buff.bytes_payload(0).length());
-
     Status status = static_cast<Status>(net->recv_buff.status());
+
+    if (status == Status::OK) {
+        memcpy(data, net->recv_buff.bytes_payload(0).c_str(),
+               net->recv_buff.bytes_payload(0).length());
+    }
 
     return status;
 }
@@ -492,10 +494,12 @@ aditof::Status EthernetDevice::readAfeRegisters(const uint16_t *address,
         return Status::GENERIC_ERROR;
     }
 
-    memcpy(data, net->recv_buff.bytes_payload(0).c_str(),
-           net->recv_buff.bytes_payload(0).length());
-
     Status status = static_cast<Status>(net->recv_buff.status());
+
+    if (status == Status::OK) {
+        memcpy(data, net->recv_buff.bytes_payload(0).c_str(),
+               net->recv_buff.bytes_payload(0).length());
+    }
 
     return status;
 }
@@ -570,9 +574,11 @@ aditof::Status EthernetDevice::readAfeTemp(float &temperature) {
         return Status::GENERIC_ERROR;
     }
 
-    temperature = net->recv_buff.float_payload(0);
-
     Status status = static_cast<Status>(net->recv_buff.status());
+
+    if (status == Status::OK) {
+        temperature = net->recv_buff.float_payload(0);
+    }
 
     return status;
 }
@@ -607,9 +613,11 @@ aditof::Status EthernetDevice::readLaserTemp(float &temperature) {
         return Status::GENERIC_ERROR;
     }
 
-    temperature = net->recv_buff.float_payload(0);
-
     Status status = static_cast<Status>(net->recv_buff.status());
+
+    if (status == Status::OK) {
+        temperature = net->recv_buff.float_payload(0);
+    }
 
     return status;
 }
