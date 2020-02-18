@@ -1,5 +1,6 @@
 #include "camera_factory.h"
 #include "camera_96tof1.h"
+#include "camera_chicony.h"
 
 #include <aditof/device_definitions.h>
 
@@ -12,8 +13,12 @@ CameraFactory::buildCamera(std::unique_ptr<DeviceInterface> device) {
     DeviceDetails devDetails;
     device->getDetails(devDetails);
     switch (devDetails.sensorType) {
+
     case SensorType::SENSOR_96TOF1:
         return std::unique_ptr<Camera>(new Camera96Tof1(std::move(device)));
+
+    case SensorType::SENSOR_CHICONY:
+        return std::unique_ptr<Camera>(new CameraChicony(std::move(device)));
     }
 
     return nullptr;
