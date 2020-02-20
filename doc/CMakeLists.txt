@@ -21,6 +21,7 @@ set(DOCUMENTED_FILES "${SOURCES_DIR}/frame.h \\
                       ${SOURCES_DIR}/camera_definitions.h \\
                       ${SOURCES_DIR}/camera_specifics.h \\
                       ${SOURCES_DIR}/camera_96tof1_specifics.h \\
+                      ${SOURCES_DIR}/camera_chicony_specifics.h \\
                       ${SOURCES_DIR}/system.h \\
                       ${SOURCES_DIR}/status_definitions.h \\
                       ${SOURCES_DIR}/frame_processor.h \\

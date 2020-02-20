@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <aditof/camera.h>
+#include <aditof/camera_chicony_specifics.h>
 
 class CameraChicony : public aditof::Camera {
   public:
@@ -29,8 +30,12 @@ class CameraChicony : public aditof::Camera {
 
   private:
     aditof::CameraDetails m_details;
+    std::shared_ptr<aditof::CameraSpecifics> m_specifics;
     std::shared_ptr<aditof::DeviceInterface> m_device;
     bool m_devStarted;
+
+  public:
+    friend class aditof::CameraChiconySpecifics;
 };
 
 #endif // CAMERA_CHICONY_H

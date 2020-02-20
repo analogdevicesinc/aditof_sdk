@@ -7,6 +7,7 @@
 
 #include <aditof/camera.h>
 #include <aditof/camera_96tof1_specifics.h>
+
 class Camera96Tof1 : public aditof::Camera {
   public:
     Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device);

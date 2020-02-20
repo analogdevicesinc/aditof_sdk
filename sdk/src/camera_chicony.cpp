@@ -15,7 +15,9 @@ using namespace std;
 static const std::string skCustomMode = "custom";
 
 CameraChicony::CameraChicony(std::unique_ptr<aditof::DeviceInterface> device)
-    : m_device(std::move(device)), m_devStarted(false) {}
+    : m_specifics(std::make_shared<aditof::CameraChiconySpecifics>(
+          aditof::CameraChiconySpecifics(this))),
+      m_device(std::move(device)), m_devStarted(false) {}
 
 CameraChicony::~CameraChicony() = default;
 
@@ -241,7 +243,7 @@ aditof::Status CameraChicony::getDetails(aditof::CameraDetails &details) const {
 }
 
 std::shared_ptr<aditof::CameraSpecifics> CameraChicony::getSpecifics() {
-    return nullptr;
+    return m_specifics;
 }
 
 std::shared_ptr<aditof::DeviceInterface> CameraChicony::getDevice() {
