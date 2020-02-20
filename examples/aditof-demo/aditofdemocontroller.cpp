@@ -326,6 +326,12 @@ AdiTofDemoController::setCameraRevision(const std::string &revision) {
     auto cam96tof1Specifics =
         std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
 
+    if (!cam96tof1Specifics) {
+        LOG(INFO)
+            << "Setting camera revision is not supported for current camera";
+        return Status::OK;
+    }
+
     if (revision.compare("RevB") == 0) {
         status = cam96tof1Specifics->setCameraRevision(Revision::RevB);
     } else if (revision.compare("RevC") == 0) {
