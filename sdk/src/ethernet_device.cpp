@@ -28,8 +28,6 @@ EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
     m_implData->net = net;
     m_implData->ip = data.ip;
 
-    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
-
     std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
 
     /* Make connection with LWS server running on Dragonboard */
@@ -58,6 +56,9 @@ EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
     if (status != aditof::Status::OK) {
         LOG(WARNING) << "API execution on Target Failed with error: "
                      << static_cast<int>(status);
+    } else {
+        m_deviceDetails.sensorType =
+            static_cast<aditof::SensorType>(net->recv_buff.sensor_type());
     }
 }
 

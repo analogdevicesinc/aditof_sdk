@@ -24,6 +24,12 @@ enum DeviceType
   ETHERNET = 2;
 }
 
+enum SensorType
+{
+    SENSOR_96TOF1 = 0;
+    SENSOR_CHICONY = 1;
+}
+
 message DeviceConstructionData
 {
   DeviceType device_type = 10;  // The type of a device
@@ -65,5 +71,6 @@ message ServerResponse
   ServerStatus server_status = 60;                   // Status reported by server regarding the client request
   repeated FrameDetails available_frame_types = 70;  // List of supported frame types
   repeated DeviceConstructionData device_info = 80;  // List of information about existing devices on the same platform as the server
-  string message = 90;                               // Additional message (if any)
+  SensorType sensor_type = 90;                       // The sensor type
+  string message = 100;                              // Additional message (if any)
 }
