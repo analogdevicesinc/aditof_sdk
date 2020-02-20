@@ -1,6 +1,7 @@
 #include "aditofdemocontroller.h"
 
 #include <aditof/camera_96tof1_specifics.h>
+#include <aditof/camera_chicony_specifics.h>
 #include <glog/logging.h>
 #include <iostream>
 
@@ -290,6 +291,12 @@ aditof::Status AdiTofDemoController::enableNoiseReduction(bool en) {
         std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
     if (cam96tof1Specifics) {
         return cam96tof1Specifics->enableNoiseReduction(en);
+    } else {
+        auto chiconySpecifics =
+            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
+        if (chiconySpecifics) {
+            return chiconySpecifics->enableNoiseReduction(en);
+        }
     }
 
     return Status::GENERIC_ERROR;
@@ -308,6 +315,12 @@ AdiTofDemoController::setNoiseReductionThreshold(uint16_t threshold) {
         std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
     if (cam96tof1Specifics) {
         return cam96tof1Specifics->setNoiseReductionThreshold(threshold);
+    } else {
+        auto chiconySpecifics =
+            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
+        if (chiconySpecifics) {
+            return chiconySpecifics->setNoiseReductionThreshold(threshold);
+        }
     }
 
     return Status::GENERIC_ERROR;
