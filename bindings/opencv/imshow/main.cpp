@@ -5,8 +5,11 @@
 #include <aditof/system.h>
 #include <glog/logging.h>
 
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#ifdef OPENCV2
+#include <opencv2/contrib/contrib.hpp>
+#endif
 
 #include "../aditof_opencv.h"
 
