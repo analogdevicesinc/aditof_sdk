@@ -13,7 +13,8 @@ namespace aditof {
  * @brief Provides the types of sensor assosiated with the device
  */
 enum class SensorType {
-    SENSOR_96TOF1, //!< 96Tof 1 sensor
+    SENSOR_96TOF1,  //!< 96Tof 1 sensor
+    SENSOR_CHICONY, //!< Chicony sensor
 };
 
 /**

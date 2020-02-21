@@ -239,12 +239,12 @@ void AdiTofDemoView::render() {
             revCurrentValue = xorValue;
             revBChecked = xorValue & (1 << 1);
             revCChecked = xorValue & 1;
-        }
 
-        if (revBChecked) {
-            m_ctrl->setCameraRevision(revisions[0]);
-        } else {
-            m_ctrl->setCameraRevision(revisions[1]);
+            if (revBChecked) {
+                m_ctrl->setCameraRevision(revisions[0]);
+            } else {
+                m_ctrl->setCameraRevision(revisions[1]);
+            }
         }
 
         // play button group

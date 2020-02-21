@@ -1,17 +1,15 @@
-#ifndef CAMERA_96TOF1_H
-#define CAMERA_96TOF1_H
-
-#include "calibration.h"
+#ifndef CAMERA_CHICONY_H
+#define CAMERA_CHICONY_H
 
 #include <memory>
 
 #include <aditof/camera.h>
-#include <aditof/camera_96tof1_specifics.h>
+#include <aditof/camera_chicony_specifics.h>
 
-class Camera96Tof1 : public aditof::Camera {
+class CameraChicony : public aditof::Camera {
   public:
-    Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device);
-    ~Camera96Tof1();
+    CameraChicony(std::unique_ptr<aditof::DeviceInterface> device);
+    ~CameraChicony();
 
   public: // implements Camera
     aditof::Status initialize();
@@ -35,10 +33,9 @@ class Camera96Tof1 : public aditof::Camera {
     std::shared_ptr<aditof::CameraSpecifics> m_specifics;
     std::shared_ptr<aditof::DeviceInterface> m_device;
     bool m_devStarted;
-    Calibration m_calibration;
 
   public:
-    friend class aditof::Camera96Tof1Specifics;
+    friend class aditof::CameraChiconySpecifics;
 };
 
-#endif // CAMERA_96TOF1_H
+#endif // CAMERA_CHICONY_H

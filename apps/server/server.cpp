@@ -260,6 +260,11 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         if (!device) {
             errMsg = "Failed to create local device";
             status = aditof::Status::INVALID_ARGUMENT;
+        } else {
+            aditof::DeviceDetails devDetails;
+            deviceI->getDetails(devDetails);
+            buff_send.set_sensor_type(
+                static_cast<::payload::SensorType>(devDetails.sensorType));
         }
         buff_send.set_status(static_cast<::payload::Status>(status));
         if (!errMsg.empty())

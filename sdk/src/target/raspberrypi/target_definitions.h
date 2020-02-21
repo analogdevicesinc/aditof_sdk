@@ -9,6 +9,9 @@ static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-0";
 static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
 #endif // REVB
 
+static const char *EEPROM_REPLACEMENT_PATH =
+    "/home/pi/workspace/github/aditof_sdk/firmware.bin";
+
 static const char *CAPTURE_DEVICE_NAME = "unicam";
 
 #endif // TARGET_DEFINITIONS_H

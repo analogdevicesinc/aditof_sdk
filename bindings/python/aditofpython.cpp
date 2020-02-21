@@ -5,6 +5,7 @@
 
 #include <aditof/aditof.h>
 #include <aditof/camera_96tof1_specifics.h>
+#include <aditof/camera_chicony_specifics.h>
 
 namespace py = pybind11;
 
@@ -154,11 +155,20 @@ PYBIND11_MODULE(aditofpython, m) {
              py::arg("cb") = nullptr)
         .def("getDetails", &aditof::Camera::getDetails, py::arg("details"))
         .def("getDevice", &aditof::Camera::getDevice)
-        .def("getCamera96Tof1Specifics", [](aditof::Camera &camera) {
+        .def("getCamera96Tof1Specifics",
+             [](aditof::Camera &camera) {
+                 using namespace aditof;
+                 std::shared_ptr<CameraSpecifics> specifics =
+                     camera.getSpecifics();
+
+                 return std::dynamic_pointer_cast<Camera96Tof1Specifics>(
+                     specifics);
+             })
+        .def("getCameraChiconySpecifics", [](aditof::Camera &camera) {
             using namespace aditof;
             std::shared_ptr<CameraSpecifics> specifics = camera.getSpecifics();
 
-            return std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+            return std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
         });
 
     py::class_<aditof::Frame>(m, "Frame")
@@ -299,4 +309,18 @@ PYBIND11_MODULE(aditofpython, m) {
              &aditof::Camera96Tof1Specifics::setCameraRevision,
              py::arg("revision"))
         .def("getRevision", &aditof::Camera96Tof1Specifics::getRevision);
+
+    py::class_<aditof::CameraChiconySpecifics,
+               std::shared_ptr<aditof::CameraChiconySpecifics>>(
+        m, "CameraChiconySpecifics")
+        .def("enableNoiseReduction",
+             &aditof::CameraChiconySpecifics::enableNoiseReduction,
+             py::arg("en"))
+        .def("noiseReductionEnabled",
+             &aditof::CameraChiconySpecifics::noiseReductionEnabled)
+        .def("setNoiseReductionThreshold",
+             &aditof::CameraChiconySpecifics::setNoiseReductionThreshold,
+             py::arg("threshold"))
+        .def("noiseReductionThreshold",
+             &aditof::CameraChiconySpecifics::noiseReductionThreshold);
 }
