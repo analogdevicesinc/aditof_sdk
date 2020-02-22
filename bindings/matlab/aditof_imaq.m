@@ -18,7 +18,7 @@ vid = videoinput('aditofadapter');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 src = getselectedsource(vid); 
 src.FrameType = ‘Depth’;
-src. CameraMode = ‘Near’;
+src.CameraMode = ‘Near’;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Play the depth video stream for a number of frames
@@ -36,7 +36,7 @@ stop(vid);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 src = getselectedsource(vid); 
 src.FrameType = ‘Ir’;
-src. CameraMode = ‘Medium’;
+src.CameraMode = ‘Medium’;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Play the IR video stream for number of frames
