@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 
 find_package(OpenCV REQUIRED)
 
-add_subdirectory(imshow)
-
 # Install the helper header for opencv in include/aditof
 include(GNUInstallDirs)
 install(FILES
@@ -39,3 +37,5 @@ if(OPENCV_FOUND OR
         endif()
     endif()
 endif()
+
+add_subdirectory(imshow)
