@@ -2,6 +2,6 @@
   <arg name="ip"/>
   <arg name="threshold" default="70"/>
   <node pkg="aditof_roscpp" type="aditof_rviz_pcl" name="pclRviz" args="$(arg ip) $(arg threshold)" output="screen"/>
-  <node pkg="tf" type="static_transform_publisher" name="transform" args="0 0 0 0.0 0.0 1.57 map base_link 20"/>
+  <node pkg="tf" type="static_transform_publisher" name="transform" args="0 0 0 0 1.57 1.57 base_link pointcloud 20"/>
   <node type="rviz" name="rviz" pkg="rviz" args="-d $(find aditof_roscpp)/rviz/pointcloud.rviz"/>
 </launch>

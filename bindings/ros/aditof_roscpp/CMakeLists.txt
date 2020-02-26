@@ -19,7 +19,6 @@ include_directories(include/${PROJECT_NAME} ${catkin_INCLUDE_DIRS})
 
 if (WITH_EXAMPLES)
     find_package(catkin REQUIRED COMPONENTS
-      tf
       rviz
     )
 
