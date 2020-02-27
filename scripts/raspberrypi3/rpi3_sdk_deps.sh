@@ -45,5 +45,5 @@ git clone https://github.com/analogdevicesinc/aditof_sdk
 cd aditof_sdk
 mkdir build
 cd build
-cmake -DRASPBERRYPI=1 -DCMAKE_PREFIX_PATH="opt/glog;opt/protobuf;/opt/websockets" ..
+cmake -DRASPBERRYPI=1 -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
 make -j4
