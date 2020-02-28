@@ -10,7 +10,7 @@ static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
 #endif // REVB
 
 static const char *EEPROM_REPLACEMENT_PATH =
-    "/home/pi/workspace/github/aditof_sdk/firmware.bin";
+    "/home/pi/workspace/github/aditof_sdk/chicony_firmware.bin";
 
 static const char *CAPTURE_DEVICE_NAME = "unicam";
 
