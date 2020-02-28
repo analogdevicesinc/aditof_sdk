@@ -60,6 +60,7 @@ The SDK, the included applications and the example code depend on the following:
  - glog v0.3.5
  - libwebsockets v3.1
  - protocol buffers v3.9.0
+ - chicony_firmware.bin
 
 The SD card image already contains all the SDK dependencies and there's no need to install them again. To update and build the SDK just follow the steps below.
 
@@ -69,6 +70,13 @@ pi@raspberry:~/workspace/github/aditof_sdk$ git pull
 pi@raspberry:~/workspace/github/aditof_sdk$ cd build
 pi@raspberry:~/workspace/github/aditof_sdk/build$ cmake -DRASPBERRYPI=1 ..
 pi@raspberry:~/workspace/github/aditof_sdk/build$ make -j4
+```
+
+### Note
+ - chicony_firmware.bin needs to be copied from aditof_sdk/misc to aditof_sdk/
+ ```console
+
+pi@raspberry:~/workspace/github/aditof_sdk$ cp misc/chicony_firmware.bin .
 ```
 
 ## Linux Kernel
