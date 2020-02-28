@@ -6,7 +6,7 @@
 - [AD-96TOF1-EBZ development kit](https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/ad-96tof1-ebz.html)
 - [Raspberry Pi](https://www.raspberrypi.org/products/) The system was tested on Raspberry Pi3 Model B V1.2 and Raspberry Pi 4. It can work on other models that have a CSI camera interface input.
 - Raspberry Pi 5V power supply
-- To run the system in standalone mode, besides the accesories that are provided in the AD-96TOF1-EBZ box you'll need an additional HDMI cable to connect to a monitor and a USB keyboard and mouse
+- To run the system in standalone mode, besides the accessories that are provided in the AD-96TOF1-EBZ box you'll need an additional HDMI cable to connect to a monitor and a USB keyboard and mouse
 - [RPi camera cable](https://www.adafruit.com/product/2087) for connection between RPi and AD-96TOF1-EBZ
 - jumper wires for connection of secondary I2C lines
 
@@ -15,7 +15,7 @@
   <summary>AD-96TOF1-EBZ rev.B</summary>
  
 For the AD-96TOF1-EBZ rev.B to work with the RPi the following changes must be made on the camera board:
- - short pins 2 and 3 on JP1. JP1 is located underneath the laser board so the laser board must be first detached from the camera board to have acces to this solder jumper
+ - short pins 2 and 3 on JP1. JP1 is located underneath the laser board so the laser board must be first detached from the camera board to have access to this solder jumper
  - short R98 and R109
  - move the S1 switch to position 1 - to the dot on the switch
  </details>
@@ -29,7 +29,7 @@ For the AD-96TOF1-EBZ rev.C to work with the RPi the following changes must be m
  </details>
 
 ### Power on sequence
-- plug the SD card into the Raspberry Pi SD card slot. To benefit from the most recent software updates it is higly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
+- plug the SD card into the Raspberry Pi SD card slot. To benefit from the most recent software updates it is highly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
 - connect the HDMI cable from the monitor to the Raspberry Pi HDMI connector
 - connect the RPi camera cable between the RPi and the P1 connector of the ToF board
 - connect a USB mouse and keyboard to the Raspberry Pi. It's possible to use either a mouse & keyboard combo or a separate mouse and keyboard

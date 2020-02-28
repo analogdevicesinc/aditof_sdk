@@ -6,10 +6,10 @@
 - [AD-96TOF1-EBZ development kit](https://www.analog.com/en/design-center/evaluation-hardware-and-software/evaluation-boards-kits/ad-96tof1-ebz.html)
 - [DragonBoard410c](https://www.96boards.org/product/dragonboard410c/)
 - DragonBoard410c 12V power supply (e.g. AK-ND-49)
-- To run the system in standalone mode, besides the accesories that are provided in the AD-96TOF1-EBZ box you'll need an additional HDMI cable to connect to a monitor and a USB keyboard and mouse
+- To run the system in standalone mode, besides the accessories that are provided in the AD-96TOF1-EBZ box you'll need an additional HDMI cable to connect to a monitor and a USB keyboard and mouse
 
 ### Power on sequence
-- plug the SD card that came in the AD-96TOF1-EBZ box into the DragonBoard410c SD card slot. To benefit from the most recent software updates it is higly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
+- plug the SD card that came in the AD-96TOF1-EBZ box into the DragonBoard410c SD card slot. To benefit from the most recent software updates it is highly recommended to update the SD card with the [latest SD card image](https://github.com/analogdevicesinc/aditof_sdk#supported-embedded-platforms)
 - Make sure that switch S6 on the DragonBoard410C is set to SD BOOT (position 2 ON, all others OFF)
 - connect the HDMI cable from the monitor to the DragonBoard410c HDMI connector
 - connect a USB mouse and keyboard to the DragonBoard410c. It's possible to use either a mouse & keyboard combo or a separate mouse and keyboard
@@ -28,7 +28,7 @@
   - Sometimes the SD card is not read correctly and this prevents the system to boot. Reset the system by removing and reapplying power to the DragonBoard410c
   - The SD card is corrupted and this prevents the system from booting. Reflash the SD card with the SD card image.
 - The DragonBoard410c restarts after running the ***sudo poweroff*** command
-  - This is a frequent issue that prevents the DragonBoard410c to be safely powered off and can lead to the corruption of the SD card. The simplest workaround to avoid SD card corruption is to remove the SD card while the system is running and then remove power from the DragonBoard410c. The other option is to watch carefully the system power state after runnig the poweroff command and immediately after seing that all the LEDs on the DragonBoard410c have turned off remove the power from the DragonBoard.
+  - This is a frequent issue that prevents the DragonBoard410c to be safely powered off and can lead to the corruption of the SD card. The simplest workaround to avoid SD card corruption is to remove the SD card while the system is running and then remove power from the DragonBoard410c. The other option is to watch carefully the system power state after running the poweroff command and immediately after seeing that all the LEDs on the DragonBoard410c have turned off remove the power from the DragonBoard.
 
 ## Running the evaluation application
 
