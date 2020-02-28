@@ -80,7 +80,7 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 
     // For now, we assume we have a Chicony if there is a replacemet file
-    FILE *fd = fopen(EEPROM_DEV_PATH, "r");
+    FILE *fd = fopen(EEPROM_REPLACEMENT_PATH, "r");
     if (fd) {
         m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
         fclose(fd);
