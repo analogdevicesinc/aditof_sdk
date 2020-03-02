@@ -1,6 +1,8 @@
 @ECHO off
 SETLOCAL
 
+::this script downloads and installs the dependencies (glog, protobuf and websockets) and builds the sdk.
+
 ::global variables
 for %%F in (cd %0 ..) do set source_dir=%%~dpF
 set /a display_help=0

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script downloads and installs the dependencies (glog, protobuf and websockets) and builds the sdk.
+
 source_dir=$(cd "$(dirname "$0")/../.."; pwd)
 
 . "${source_dir}"/ci/travis/lib.sh
