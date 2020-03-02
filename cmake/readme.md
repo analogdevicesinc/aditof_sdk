@@ -1,7 +1,7 @@
 # 3D Time of Flight : cmake
 
 #### Overview
-This folder contains helper cmake in files for the project and also config files for other cmake projects to use in order to find the SDK.
+This folder contains helper cmake.in files for the project and also config files for other cmake projects to use in order to find the SDK.
 
 #### Using the CMake build system
 In order to build the SDK with cmake, we first need to have all the dependencies installed: glog, protobuf, libwebsockets ( [Check instructions for your system](https://github.com/analogdevicesinc/aditof_sdk/tree/master/doc) ).
@@ -17,6 +17,7 @@ which will generate all the necessary recipes for building and installing. Usefu
 | WITH_EXAMPLES | on/off | on | Build the examples |
 | WITH_PYTHON | on/off | off | Build the python bindings |
 | WITH_OPENCV | on/off | off | Build the opencv bindings |
+| WITH_OPEN3D | on/off | off | Build the open3D bindings |
 | WITH_MATLAB | on/off | off | Build the matlab bindings |
 | WITH_DOC | on/off | off | Build the doxygen documentation |
 | CMAKE_PREFIX_PATH | \<path\> | Empty | Specifies a path which will be used by the FIND_XXX() commands |
