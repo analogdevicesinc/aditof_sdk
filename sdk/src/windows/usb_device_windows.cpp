@@ -1011,6 +1011,7 @@ aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
     GUID guidNodeType;
     BYTE buf[MAX_BUF_SIZE];
     BYTE sampleCnt = 0;
+    BYTE b = sizeof(uint16_t); // Size (in bytes) of an AFE register
 
     IKsTopologyInfo *pKsTopologyInfo = nullptr;
 
@@ -1048,6 +1049,14 @@ aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
                     // trying to read first control of the extension unit
                     if (hr == S_OK) {
                         length *= 2 * sizeof(uint16_t);
+
+                        const BYTE *pAddr =
+                            reinterpret_cast<const BYTE *>(address);
+                        const BYTE *pData =
+                            reinterpret_cast<const BYTE *>(data);
+                        const BYTE *ptr = pAddr;
+                        bool pointingAtAddr = true;
+
                         while (length) {
                             KSP_NODE s;
                             ULONG ulBytesReturned;
@@ -1057,10 +1066,19 @@ aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
                             buf[1] = length > MAX_PACKET_SIZE
                                          ? MAX_PACKET_SIZE
                                          : static_cast<BYTE>(length);
-                            for (int i = 0; i < buf[1]; i += 4) {
-                                *(uint16_t *)(buf + 2 + i) = address[sampleCnt];
-                                *(uint16_t *)(buf + 4 + i) = data[sampleCnt];
-                                sampleCnt++;
+                            for (int n = 0; n < buf[1]; ++n) {
+                                if ((sampleCnt / b) && (sampleCnt % b == 0)) {
+                                    if (pointingAtAddr) {
+                                        pAddr = ptr;
+                                        ptr = pData;
+                                    } else {
+                                        pData = ptr;
+                                        ptr = pAddr;
+                                    }
+                                    pointingAtAddr = !pointingAtAddr;
+                                }
+                                buf[2 + n] = *ptr++;
+                                ++sampleCnt;
                             }
                             length -= buf[1];
 
