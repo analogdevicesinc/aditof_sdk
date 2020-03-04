@@ -68,8 +68,7 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
                                const std::string &name)
     : m_ctrl(ctrl), m_viewName(name), m_depthFrameAvailable(false),
       m_irFrameAvailable(false), m_stopWorkersFlag(false), m_center(true),
-      m_waitKeyBarrier(0), m_distanceVal(0), m_smallSignal(false),
-      m_crtSmallSignalState(false) {
+      m_waitKeyBarrier(0), m_distanceVal(0), m_crtSmallSignalState(false) {
     // cv::setNumThreads(2);
     m_depthImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
@@ -270,6 +269,7 @@ void AdiTofDemoView::render() {
             int selectedMode =
                 (2 - static_cast<int>(std::log2(modeCurrentValue)));
             m_ctrl->setMode(modes[selectedMode]);
+            m_crtSmallSignalState = false;
         }
 
         // Connection mode checkbox group
@@ -621,7 +621,7 @@ void AdiTofDemoView::render() {
             }
         }
 
-        bool smallSignalChanged = false;
+        static bool lastSmallSignalState = false;
 
         cvui::beginColumn(frame, 50, 350);
         cvui::space(10);
@@ -639,21 +639,18 @@ void AdiTofDemoView::render() {
         int thresholdClicked = cvui::iarea(50, 430, 100, 30);
 
         // Check if small signal toggle button has changed
-        smallSignalChanged = m_crtSmallSignalState != m_smallSignal;
-        // Update the last set value of the small signal checkbox
-        m_smallSignal = m_crtSmallSignalState;
-        if (smallSignalChanged) {
-            aditof::Status ret = m_ctrl->enableNoiseReduction(m_smallSignal);
+        if (m_crtSmallSignalState != lastSmallSignalState) {
+            aditof::Status ret =
+                m_ctrl->enableNoiseReduction(m_crtSmallSignalState);
             if (ret == aditof::Status::OK) {
                 m_ctrl->setNoiseReductionThreshold(
                     static_cast<uint16_t>(smallSignalThreshold));
             }
-
             if (ret == aditof::Status::GENERIC_ERROR) {
                 status = "No cameras connected!";
-                m_crtSmallSignalState = !m_crtSmallSignalState;
-                m_smallSignal = m_crtSmallSignalState;
+                m_crtSmallSignalState = false;
             }
+            lastSmallSignalState = m_crtSmallSignalState;
         }
 
         if (cvui::button(frame, 160, 430, 90, 30, "Write")) {
