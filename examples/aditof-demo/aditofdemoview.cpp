@@ -748,6 +748,9 @@ void AdiTofDemoView::render() {
                 }
             } else if (backspace) {
                 value = value.substr(0, value.size() - 1);
+                if (value.compare("") != 0) {
+                    smallSignalThreshold = stoi(value);
+                }
             }
         }
 
