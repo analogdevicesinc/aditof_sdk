@@ -50,6 +50,13 @@ uint16_t Camera96Tof1Specifics::noiseReductionThreshold() const {
 }
 
 Status Camera96Tof1Specifics::setTresholdAndEnable(uint16_t treshold, bool en) {
+    aditof::CameraDetails cameraDetails;
+    m_camera->getDetails(cameraDetails);
+    if (cameraDetails.mode.compare("far") == 0) {
+        LOG(WARNING) << "Far mode does not support noise reduction!";
+        return Status::UNAVAILABLE;
+    }
+
     const size_t REGS_CNT = 5;
     uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001, 0x7c22};
     uint16_t afeRegsVal[REGS_CNT] = {0x0006, 0x0004, 0, 0x0007, 0x0004};

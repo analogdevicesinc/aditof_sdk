@@ -269,6 +269,7 @@ void AdiTofDemoView::render() {
             int selectedMode =
                 (2 - static_cast<int>(std::log2(modeCurrentValue)));
             m_ctrl->setMode(modes[selectedMode]);
+            status = "Mode set: " + modes[selectedMode];
             m_crtSmallSignalState = false;
         }
 
@@ -645,9 +646,11 @@ void AdiTofDemoView::render() {
             if (ret == aditof::Status::OK) {
                 m_ctrl->setNoiseReductionThreshold(
                     static_cast<uint16_t>(smallSignalThreshold));
-            }
-            if (ret == aditof::Status::GENERIC_ERROR) {
+            } else if (ret == aditof::Status::GENERIC_ERROR) {
                 status = "No cameras connected!";
+                m_crtSmallSignalState = false;
+            } else if (ret == aditof::Status::UNAVAILABLE) {
+                status = "Far mode does not support noise reduction";
                 m_crtSmallSignalState = false;
             }
             lastSmallSignalState = m_crtSmallSignalState;
@@ -660,6 +663,8 @@ void AdiTofDemoView::render() {
 
             if (noiseReductionStatus == aditof::Status::GENERIC_ERROR) {
                 status = "No cameras connected!";
+            } else if (noiseReductionStatus == aditof::Status::UNAVAILABLE) {
+                status = "Far mode does not support noise reduction";
             }
         }
 
