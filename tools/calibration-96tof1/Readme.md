@@ -1,1 +1,1 @@
-Please refer to Calibration_Guide v2.pdf document for calibration instructions.
+Please refer to [Wiki documentation](https://wiki.analog.com/resources/eval/user-guides/ad-96tof1-ebz/calibration)  web page for calibration instructions.
