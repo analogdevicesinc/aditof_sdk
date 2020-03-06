@@ -13,7 +13,10 @@
 
 #include <stdio.h>
 
-#define BUTTON1_GPIO 28
+#define GPIOCHIP2_BASE 504   /* Check file /sys/kernerl/debug/gpio */
+#define GPIOCHIP2_PIN_MPP4 3 /* The 4th multipurpose pin of pm8916 */
+
+#define BUTTON1_GPIO (GPIOCHIP2_BASE + GPIOCHIP2_PIN_MPP4)
 #define BUTTON2_GPIO 24
 #define LED1_GPIO 17
 #define LED2_GPIO 19
@@ -39,8 +42,8 @@ static void set_handler(int signal, void (*handler)(int)) {
 }
 
 static void sig_handler(int sig) {
-   syslog(LOG_INFO, "%s terminated with signal: %i", program_name, sig);
-   closelog();
+    syslog(LOG_INFO, "%s terminated with signal: %i", program_name, sig);
+    closelog();
 
     gpio_destroy(&gpio1);
     gpio_destroy(&gpio2);
