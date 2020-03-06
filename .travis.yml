@@ -17,7 +17,7 @@ env:
 matrix:
   include:
     - stage: Build
-      
+
       # Dragonboard
       dist: xenial
       name: Dragonboard
@@ -39,13 +39,20 @@ matrix:
       addons: { apt: { packages: ["clang-8", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-8"] } }
 
       #GCC 7
-    - env: COMPILER=g++-7 
+    - env: COMPILER=g++-7
       addons: { apt: { packages: ["g++-7", "cmake"], sources: ["ubuntu-toolchain-r-test"] } }
 
       #GCC 8
     - env: COMPILER=g++-8
            CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on -DWITH_OPENCV=on"
       addons: { apt: { packages: ["g++-8", "cmake"], sources: ["ubuntu-toolchain-r-test"] } }
+
+      #ROS
+    - dist: bionic
+      name: "Bionic Melodic"
+      env: BUILD_TYPE=ros
+           CMAKE_OPTIONS="-DWITH_EXAMPLES=off -DWITH_ROS=on"
+           ROS_DISTRO=melodic
 
     # TODO: enable MacOS builds again when the sdk will support MacOS
     #   #MacOS Mojave
@@ -78,7 +85,10 @@ matrix:
       dist: xenial
       env: BUILD_TYPE=deploy_doxygen
       addons: { apt: { packages: ["cmake", "graphviz"] } }
-      
+
+before_install:
+  - if [[ "${ROS_DISTRO}" != "" ]]; then ./ci/travis/ros_install.sh ; fi
+
 install:
   ############################################################################
   # Setup used compiler and make sure to override CXX env variable.
@@ -129,6 +139,13 @@ before_script:
     if [[ "$BUILD_TYPE" == "" ]]; then
       pushd "${TRAVIS_BUILD_DIR}"
       mkdir build && cd build && cmake .. ${CMAKE_OPTIONS} -DPYTHON_EXECUTABLE=${PYTHON} -DCMAKE_PREFIX_PATH="${DEPS_DIR}/installed/glog;${DEPS_DIR}/installed/protobuf;${DEPS_DIR}/installed/websockets;${DEPS_DIR}/installed/opencv;";
+      popd
+    fi
+
+  - |
+    if [[ "$BUILD_TYPE" == "ros" ]]; then
+      pushd "${TRAVIS_BUILD_DIR}"
+      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS} -DCMAKE_PREFIX_PATH="${DEPS_DIR}/installed/glog;${DEPS_DIR}/installed/protobuf;${DEPS_DIR}/installed/websockets;";
       popd
     fi
 
