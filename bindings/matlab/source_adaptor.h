@@ -176,7 +176,7 @@ class SourceAdaptor : public imaqkit::IAdaptor {
 
     void setMode(int16_t mode);
 
-    int getCurrentHwRange();
+    std::pair<int, int> getCurrentHwRange() const;
 
     int getCurrentBitCount();
 
