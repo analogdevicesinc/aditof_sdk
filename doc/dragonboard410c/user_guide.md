@@ -19,7 +19,7 @@
 ![DB410C connections](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/db410c_standalone.JPG)
 
 ### Power off sequence
-- under Linux open a terminal and type ***sudo poweroff***. This will safely power off the DragonBoard410c and ensure that the SD card is properly umounted
+- under Linux open a terminal and type ***sudo halt***. This will safely turn off the OS on DragonBoard410c and ensure that the SD card is properly umounted
 - remove the 12V supply from the DragonBoard410c
 - set the camera board power switch to off
 
@@ -27,8 +27,6 @@
 - Linux does not boot
   - Sometimes the SD card is not read correctly and this prevents the system to boot. Reset the system by removing and reapplying power to the DragonBoard410c
   - The SD card is corrupted and this prevents the system from booting. Reflash the SD card with the SD card image.
-- The DragonBoard410c restarts after running the ***sudo poweroff*** command
-  - This is a frequent issue that prevents the DragonBoard410c to be safely powered off and can lead to the corruption of the SD card. The simplest workaround to avoid SD card corruption is to remove the SD card while the system is running and then remove power from the DragonBoard410c. The other option is to watch carefully the system power state after running the poweroff command and immediately after seeing that all the LEDs on the DragonBoard410c have turned off remove the power from the DragonBoard.
 
 ## Running the evaluation application
 
