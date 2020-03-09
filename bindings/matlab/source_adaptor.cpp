@@ -272,16 +272,16 @@ void SourceAdaptor::setSmallSignalValue(int16_t value) {
     }
 }
 
-int SourceAdaptor::getCurrentHwRange() {
+std::pair<int, int> SourceAdaptor::getCurrentHwRange() const {
     aditof::CameraDetails cameraDetails;
 
     if (!m_camera) {
-        return 0;
+        return {0, 0};
     }
 
     m_camera->getDetails(cameraDetails);
 
-    return cameraDetails.range;
+    return std::make_pair(cameraDetails.minDepth, cameraDetails.maxDepth);
 }
 
 int SourceAdaptor::getCurrentBitCount() {
@@ -520,7 +520,9 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
         }
 
         auto frame = adaptor->getFrameFromHwDevice();
-        int currentRange = adaptor->getCurrentHwRange();
+        int minDepth = 0;
+        int maxDepth = 0;
+        std::tie(minDepth, maxDepth) = adaptor->getCurrentHwRange();
         int currentMaxPixelValue = (1 << adaptor->getCurrentBitCount()) - 1;
 
         imaqkit::frametypes::FRAMETYPE frameType;
@@ -539,7 +541,8 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::DEPTH, &data);
                 for (int i = 0; i < imageHeight * imageWidth; ++i) {
-                    uint16_t value = (data[i] * (255.0 / currentRange));
+                    uint16_t value =
+                        ((data[i] - minDepth) / (maxDepth - minDepth) * 255);
                     imBuffer[i] =
                         static_cast<uint8_t>(value <= 255 ? value : 255);
                 }
