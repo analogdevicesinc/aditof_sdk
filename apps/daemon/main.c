@@ -1,3 +1,4 @@
+#include "dragonboad_definitions.h"
 #include "gpios.h"
 
 #include <fcntl.h>
@@ -12,22 +13,6 @@
 #include <unistd.h>
 
 #include <stdio.h>
-
-#define GPIOCHIP2_BASE 504   /* Check file /sys/kernerl/debug/gpio */
-#define GPIOCHIP2_PIN_MPP4 3 /* The 4th multipurpose pin of pm8916 */
-
-#define BUTTON1_GPIO (GPIOCHIP2_BASE + GPIOCHIP2_PIN_MPP4)
-#define BUTTON2_GPIO 24
-#define LED1_GPIO 17
-#define LED2_GPIO 19
-
-#define SERVER_APP_START_COMMAND                                               \
-    "/home/linaro/workspace/github/aditof_sdk/build/apps/server/aditof-server"
-
-#define UVC_APP_SCRIPT_NAME "config_pipe.sh"
-#define UVC_APP_START_COMMAND                                                  \
-    "/home/linaro/workspace/github/aditof_sdk/build/apps/uvc-app/"             \
-    "config_pipe.sh"
 
 static const char *program_name = NULL;
 static struct gpio gpio1;
@@ -105,7 +90,7 @@ pid_t start_network_server() {
     }
 
     if (pid == 0) {
-        execl(SERVER_APP_START_COMMAND, "", (char *)NULL);
+        execl(NETWORK_SERVER_START_COMMAND, "", (char *)NULL);
         exit(1); // In case execl fails
     }
 
@@ -128,9 +113,9 @@ pid_t start_uvc_app() {
     return pid;
 }
 
-void kill_network_server() { system("killall -15 aditof-server"); }
+void kill_network_server() { system("killall -15 " NETWORK_SERVER); }
 
-void kill_uvc_app() { system("killall -15 uvc-gadget"); }
+void kill_uvc_app() { system("killall -15 " UVC_APP); }
 
 int main(int argc, char *argv[]) {
     pid_t pid;
