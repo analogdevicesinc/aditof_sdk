@@ -1,0 +1,9 @@
+description=Service for configuring the TOF data pipe
+StartLimitIntervalSec=10
+
+[Service]
+User=root
+ExecStart=/home/linaro/workspace/github/aditof_sdk/utils/dragonboard/config_pipe.sh
+
+[Install]
+WantedBy=multi-user.target

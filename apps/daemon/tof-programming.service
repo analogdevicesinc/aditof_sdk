@@ -1,6 +1,9 @@
 description=Time of flight board programming service
 StartLimitIntervalSec=10
 
+[Unit]
+After=config-pipe.service
+
 [Service]
 Type=forking
 Restart=always
