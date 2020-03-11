@@ -11,13 +11,14 @@ std::shared_ptr<Camera> initCameraEthernet(int argc, char **argv) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
     Status status = Status::OK;
+    std::string ip;
 
     if (argc < 2) {
-        LOG(ERROR) << "No ip provided!";
-        return nullptr;
+        LOG(INFO) << "No ip provided, attempting to connect to the camera "
+                     "through USB";
+    } else {
+        ip = argv[1];
     }
-
-    std::string ip = argv[1];
 
     System system;
     status = system.initialize();
@@ -27,7 +28,12 @@ std::shared_ptr<Camera> initCameraEthernet(int argc, char **argv) {
     }
 
     std::vector<std::shared_ptr<Camera>> cameras;
-    system.getCameraListAtIp(cameras, ip);
+    if (ip.empty()) {
+        system.getCameraList(cameras);
+    } else {
+        system.getCameraListAtIp(cameras, ip);
+    }
+
     if (cameras.empty()) {
         LOG(WARNING) << "No cameras found";
         return nullptr;
