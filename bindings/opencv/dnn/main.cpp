@@ -230,10 +230,15 @@ int main(int argc, char *argv[]) {
 
                 auto center = (object.br() + object.tl()) * 0.5;
 
+                cv::drawMarker(frameMat, center, cv::Scalar(0, 0, 0),
+                               cv::MARKER_CROSS);
+                cv::drawMarker(resultMat, center, cv::Scalar(0, 0, 0),
+                               cv::MARKER_CROSS);
+
                 std::ostringstream ss;
                 ss.str("");
                 ss << std::setprecision(3)
-                   << depthMat.at<ushort>(center) / 1000.0 * 0.3 << " meters";
+                   << depthMat.at<ushort>(center) / 1000.0 << " meters";
                 cv::String depth_string(ss.str());
 
                 std::ostringstream ss_conf;
@@ -259,15 +264,16 @@ int main(int argc, char *argv[]) {
 
                 center.x = center.x - labelSize.width / 2;
                 auto conf_position = center;
-                conf_position.y = conf_position.y + labelSize.height + baseLine;
+                conf_position.y = yLeftBottom + 2 * labelSize.height + baseLine;
 
                 cv::rectangle(
                     frameMat,
-                    cv::Rect(cv::Point(center.x, center.y - labelSize.height),
+                    cv::Rect(cv::Point(center.x, yLeftBottom),
                              cv::Size(labelSize.width,
                                       2 * labelSize.height + baseLine * 2)),
                     cv::Scalar(255, 255, 255), cv::FILLED);
-                cv::putText(frameMat, label_depth, center,
+                cv::putText(frameMat, label_depth,
+                            cv::Point(center.x, yLeftBottom + labelSize.height),
                             cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
 
                 cv::putText(frameMat, label_conf, conf_position,
@@ -275,11 +281,12 @@ int main(int argc, char *argv[]) {
 
                 cv::rectangle(
                     resultMat,
-                    cv::Rect(cv::Point(center.x, center.y - labelSize.height),
+                    cv::Rect(cv::Point(center.x, yLeftBottom),
                              cv::Size(labelSize.width,
                                       2 * labelSize.height + baseLine * 2)),
                     cv::Scalar(255, 255, 255), cv::FILLED);
-                cv::putText(resultMat, label_depth, center,
+                cv::putText(resultMat, label_depth,
+                            cv::Point(center.x, yLeftBottom + labelSize.height),
                             cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
                 cv::putText(resultMat, label_conf, conf_position,
                             cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
