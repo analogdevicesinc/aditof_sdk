@@ -1,3 +1,4 @@
+#include "dragonboad_definitions.h"
 #include "gpios.h"
 
 #include <fcntl.h>
@@ -12,19 +13,6 @@
 #include <unistd.h>
 
 #include <stdio.h>
-
-#define GPIOCHIP2_BASE 504   /* Check file /sys/kernerl/debug/gpio */
-#define GPIOCHIP2_PIN_MPP4 3 /* The 4th multipurpose pin of pm8916 */
-
-#define BUTTON1_GPIO (GPIOCHIP2_BASE + GPIOCHIP2_PIN_MPP4)
-#define BUTTON2_GPIO 24
-#define LED1_GPIO 17
-#define LED2_GPIO 19
-
-#define UVC_APP_SCRIPT_NAME "config_pipe.sh"
-#define UVC_APP_START_COMMAND                                                  \
-    "/home/linaro/workspace/github/aditof_sdk/build/apps/uvc-app/"             \
-    "config_pipe.sh"
 
 static const char *program_name = NULL;
 static struct gpio gpio1;
@@ -95,6 +83,20 @@ void init_buttons(void) {
     gpio_set_edge(&gpio2, "rising");
 }
 
+pid_t start_network_server() {
+    pid_t pid = fork();
+    if (pid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid == 0) {
+        execl(NETWORK_SERVER_START_COMMAND, "", (char *)NULL);
+        exit(1); // In case execl fails
+    }
+
+    return pid;
+}
+
 pid_t start_uvc_app() {
 
     pid_t pid = fork();
@@ -111,7 +113,9 @@ pid_t start_uvc_app() {
     return pid;
 }
 
-void kill_uvc_app() { system("killall -15 uvc-gadget"); }
+void kill_network_server() { system("killall -15 " NETWORK_SERVER); }
+
+void kill_uvc_app() { system("killall -15 " UVC_APP); }
 
 int main(int argc, char *argv[]) {
     pid_t pid;
@@ -141,6 +145,10 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < count; ++i) {
         fds[i].events = POLLPRI | POLLERR;
     }
+
+    // Network server is started by default
+    pid_t server_pid = start_network_server();
+    bool network_server_started = true;
 
     bool uvc_app_started = false;
     pid_t uvc_pid;
@@ -188,14 +196,24 @@ int main(int argc, char *argv[]) {
                 }
                 case BUTTON2_GPIO: {
                     if (uvc_app_started) {
+                        // Stop UVC app
                         kill(uvc_pid, 15);
                         waitpid(uvc_pid, NULL, 0);
                         kill_uvc_app();
+                        // Start network server
+                        server_pid = start_network_server();
                     } else {
+                        // Stop network server
+                        kill(server_pid, 15);
+                        waitpid(server_pid, NULL, 0);
+                        kill_network_server();
+                        // Start UVC app
                         uvc_pid = start_uvc_app();
                     }
 
                     uvc_app_started = !uvc_app_started;
+                    network_server_started = !network_server_started;
+
                     gpio_set_value(&led2, uvc_app_started ? 1 : 0);
                     break;
                 }
