@@ -23,6 +23,7 @@ option(WITH_PYTHON "Build python bindings?" OFF)
 option(WITH_OPENCV "Build opencv bindings?" OFF)
 option(WITH_MATLAB "Build matlab bindings?" OFF)
 option(WITH_OPEN3D "Build open3d bindings?" OFF)
+option(WITH_ROS "Build ros bindings?" OFF)
 
 add_subdirectory(sdk)
 add_subdirectory(apps)
@@ -44,6 +45,9 @@ if (WITH_MATLAB)
 endif()
 if (WITH_OPEN3D)
         add_subdirectory(bindings/open3D)
+endif()
+if (WITH_ROS)
+        add_subdirectory(bindings/ros)
 endif()
 
 ############################### Installer #######################################

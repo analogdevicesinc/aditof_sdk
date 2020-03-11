@@ -36,4 +36,11 @@ deps_raspberrypi3() {
     pull_docker ${DOCKER}
 }
 
+deps_ros() {
+    get_deps_source_code ${DEPS_DIR}
+    build_and_install_glog "${DEPS_DIR}/glog" "${DEPS_DIR}/installed/glog"
+    build_and_install_protobuf "${DEPS_DIR}/protobuf" "${DEPS_DIR}/installed/protobuf"
+    build_and_install_websockets "${DEPS_DIR}/libwebsockets" "${DEPS_DIR}/installed/websockets"
+}
+
 deps_${BUILD_TYPE:-default}
