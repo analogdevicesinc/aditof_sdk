@@ -7,6 +7,7 @@ This directory contains different utilities that may be needed on the Raspberry 
 | Name | Description |
 | --------- | -------------- |
 | tof-server.service | A 'systemd' startup script that starts the Time of Flight server when raspbian boots |
+| 53-aditofsdkraspberrypi.rules | Allows read/write access to the eeprom and the temperature sensor |
 
 To enable the service:
 
