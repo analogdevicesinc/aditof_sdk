@@ -1,0 +1,12 @@
+description=Service for starting Time of Flight network server
+StartLimitIntervalSec=10
+
+[Unit]
+After=NetworkManager.service
+
+[Service]
+User=root
+ExecStart=/home/pi/workspace/github/aditof_sdk/build/apps/server/aditof-server
+
+[Install]
+WantedBy=multi-user.target
