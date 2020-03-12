@@ -551,8 +551,8 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
         }
 
         auto frame = adaptor->getFrameFromHwDevice();
-        int minDepth = 0;
-        int maxDepth = 0;
+        double minDepth = 0.0;
+        double maxDepth = 0.0;
         std::tie(minDepth, maxDepth) = adaptor->getCurrentHwRange();
         int currentMaxPixelValue = (1 << adaptor->getCurrentBitCount()) - 1;
 
@@ -572,8 +572,9 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::DEPTH, &data);
                 for (int i = 0; i < imageHeight * imageWidth; ++i) {
-                    uint16_t value =
-                        ((data[i] - minDepth) / (maxDepth - minDepth) * 255);
+                    int value =
+                        ((static_cast<double>(data[i]) - minDepth) / (maxDepth - minDepth) * 255.0);
+                    value = value < 0 ? 0 : value;
                     imBuffer[i] =
                         static_cast<uint8_t>(value <= 255 ? value : 255);
                 }
