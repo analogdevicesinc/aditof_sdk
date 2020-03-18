@@ -24,7 +24,7 @@
 
 
 ### Power off sequence
-- under Linux open a terminal and type ***sudo poweroff***. This will safely power off the Raspberry Pi and ensure that the SD card is properly umounted
+- under Linux open a terminal and type ***sudo poweroff***. This will safely power off the Raspberry Pi and ensure that the SD card is properly unmounted
 - remove the 5V supply from the Raspberry Pi
 - remove the 5V supply (micro USB cable) from the interposer
 
