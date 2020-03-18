@@ -51,7 +51,21 @@ if "%1" neq "" (
    shift
    goto :interpret_arg
    )
+   if /I "%1" EQU "--buildir" (
+   set build_dire=%2
+   set /a set_build=1
+   shift
+   shift
+   goto :interpret_arg
+   )
    if /I "%1" EQU "-d" (
+   set deps_dir=%2
+   set /a set_deps=1
+   shift
+   shift
+   goto :interpret_arg
+   )
+   if /I "%1" EQU "--depsdir" (
    set deps_dir=%2
    set /a set_deps=1
    shift
@@ -65,6 +79,13 @@ if "%1" neq "" (
    shift
    goto :interpret_arg
    )
+   if /I "%1" EQU "--depsinstalldir" (
+   set deps_install_dir=%2
+   set /a set_deps_install=1
+   shift
+   shift
+   goto :interpret_arg
+   )
    if /I "%1" EQU "-g" (
    set generator=%2
    set /a set_generator=1
@@ -72,7 +93,21 @@ if "%1" neq "" (
    shift
    goto :interpret_arg
    )
+   if /I "%1" EQU "--generator" (
+   set generator=%2
+   set /a set_generator=1
+   shift
+   shift
+   goto :interpret_arg
+   )
    if /I "%1" EQU "-c" (
+   set config_type=%2
+   set /a set_config=1
+   shift
+   shift
+   goto :interpret_arg
+   )
+   if /I "%1" EQU "--configuration" (
    set config_type=%2
    set /a set_config=1
    shift
@@ -117,12 +152,7 @@ if %generator%=="Visual Studio 14 2015 Win64" (
     set /a opt=1
     set vs=14
 )
-::if %generator%=="Visual Studio 15 2017" (
-::    set /a opt=1
-::)
-::if %generator%=="Visual Studio 14 2015" (
-::    set /a opt=1
-::)
+
 if %set_generator%==0 (
    set /a opt=1
    set generator="Visual Studio 15 2017 Win64"
@@ -161,10 +191,18 @@ echo %openSSLPath%
 set /P openCVPath="Please enter opencv 3.4.1 root absolute path: "
 echo %openCVPath%
 
+::set the OpenCV variables
+set OPENCV_DIR=%openCVPath%\build
+set OPENCV_PATH=%openCVPath%\build\x64\%vs%\bin
+
 ::create the missing folders
 if not exist %build_dire% md %build_dire%
 if not exist %deps_dir% md %deps_dir%
 if not exist %deps_install_dir% md %deps_install_dir%
+
+pushd %deps_install_dir%
+    set deps_install_dir=%CD%
+popd
 
 ::call functions that install the dependencies
 CALL :install_glog %config_type% %generator%
