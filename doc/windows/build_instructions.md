@@ -86,6 +86,41 @@ OPENCV_PATH=C:\opencv\build\x64\vc14\bin
 cd aditof_sdk
 cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1\local_path\websockets" -G "Visual Studio 14 2015 Win64" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=on ..
 ```
-- Open 'adi_tof_project.sln' generated in 'aditof_sdk/build' in MS Visual Studio 2015
+- Open 'adi_tof_project.sln' generated in 'aditof_sdk\build' in MS Visual Studio 2015
 - Select 'Release' build
-- Application binaries are created in 'aditof_sdk/build/example/aditof-demo/Release' directory
+- Application binaries are created in 'aditof_sdk\build\example\aditof-demo\Release' directory
+
+## Building the SDK in Visual Studio using the script
+
+### Pre-requisites
+* OpenSSL
+* OpenCV
+
+### Steps to build the SDK
+- Run the script located in: 'aditof_sdk\scripts\windows' with the suitable configuration parameters. <br>
+The following example runs the script with generator **Visual Studio 14 2015 Win64** and configuration **Release**. The sdk will be built in folder: **current_script_path\build** and the dependencies will be installed in folder: **current_script_path\deps\installed**.
+Use parameter *-h* or *--help* for more information regarding the parameters. 
+```
+.\setup_project.bat -g "Visual Studio 14 2015 Win64" -c Release
+```
+- Open 'adi_tof_project.sln' generated in **current_script_path\build** in MS Visual Studio.
+
+- Select the configuration to match the configuration used in the script. (e.g.,**Release**) for build.
+![Display Image](/doc/img/configuration_VS.PNG)
+
+- The sdk Dynamic-link library (aditof.dll) is created in: **current_script_path\build\sdk\Release**.
+
+- Build the application.
+![Display Image](/doc/img/build_VS.PNG)
+
+### Steps to run aditof-demo application
+
+- All the above steps used to build the sdk remain valid.
+
+- Setup aditof-demo as start-up project.
+![Display Image](/doc/img/startup_VS.PNG)
+
+- Run the application.
+![Display Image](/doc/img/run_VS.PNG) 
+
+- Application executable is created in **current_script_path\build\example\aditof-demo\Release** directory.
