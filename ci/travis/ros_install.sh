@@ -4,10 +4,10 @@ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31
 if [[ "{$ROS_DISTRO}"  = "melodic" ]]
 then
   sudo apt update -qq
-  sudo apt install -y ros-$ROS_DISTRO-ros-base ros-$ROS_DISTRO-rviz
+  sudo apt install -y ros-$ROS_DISTRO-ros-base ros-$ROS_DISTRO-rviz python-rosdep
 else
   sudo apt-get update -qq
-  sudo apt-get install -y ros-$ROS_DISTRO-ros-base ros-$ROS_DISTRO-rviz
+  sudo apt-get install -y ros-$ROS_DISTRO-ros-base ros-$ROS_DISTRO-rviz python-rosdep
 fi
 sudo rosdep init
 rosdep update
