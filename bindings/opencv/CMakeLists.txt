@@ -13,7 +13,11 @@ if(OPENCV_FOUND OR
    OPENCV_CORE_FOUND) # we check for this because the OpenCVConfig.cmake(v2.4.9.1) used on dragonboards fails to set OPENCV_FOUND
     if(OpenCV_VERSION VERSION_LESS "3.4.1")
         message(WARNING "The dnn example is only available for OpenCV version >= 3.4.1! This example won't be built!")
-        add_definitions(-DOPENCV2)
+
+        if(OpenCV_VERSION VERSION_LESS "3.0.0")
+            message(STATUS "USING OPENCV Version 2")
+            add_definitions(-DOPENCV2)
+        endif(OpenCV_VERSION VERSION_LESS "3.0.0")
 
         if(WIN32)
             include(FindOpenSSL)
