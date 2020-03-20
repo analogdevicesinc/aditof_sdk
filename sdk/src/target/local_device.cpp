@@ -316,6 +316,20 @@ LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     details.type = "depth_ir";
     types.push_back(details);
 
+    details.width = 640;
+    details.height = 960;
+    details.cal_data.offset = 0;
+    details.cal_data.gain = 1;
+    details.type = "depth_only";
+    types.push_back(details);
+
+    details.width = 640;
+    details.height = 960;
+    details.cal_data.offset = 0;
+    details.cal_data.gain = 1;
+    details.type = "ir_only";
+    types.push_back(details);
+
     details.width = 668;
     details.height = 750;
     details.cal_data.offset = 0;
@@ -539,12 +553,24 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
                         ((((unsigned short)*(pdata + i + 2)) & 0x00F0) >> 4);
             j++;
         }
+    } else if (buf.bytesused != (width * height * 3 / 2)) {
+        // TODO: investigate optimizations for this (arm neon / 1024 bytes
+        // chunks)
+        if (m_implData->frameDetails.type == "depth_only") {
+            memcpy(buffer, pdata, buf.bytesused);
+        } else if (m_implData->frameDetails.type == "ir_only") {
+            memcpy(buffer + (width * height) / 2, pdata, buf.bytesused);
+        }
     } else {
         // clang-format off
         uint16_t *depthPtr = buffer;
         uint16_t *irPtr = buffer + (width * height) / 2;
         unsigned int j = 0;
 
+	if (m_implData->frameDetails.type == "depth_only" ||
+		m_implData->frameDetails.type == "ir_only") {
+		buf_data_len /= 2;
+	}
         /* The frame is read from the device as an array of uint8_t's where
          * every 3 uint8_t's can produce 2 uint16_t's that have only 12 bits
          * in use.
@@ -578,15 +604,22 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
             toStore.val[0] = aBuffer;
             toStore.val[1] = bBuffer;
 
-            /* Store the 16 frame pixel in the corresponding image */
-            if ((j / width) % 2) {
+            if (m_implData->frameDetails.type == "depth_only") {
+                vst2q_u16(depthPtr, toStore);
+                depthPtr += 16;
+            } else if (m_implData->frameDetails.type == "ir_only") {
                 vst2q_u16(irPtr, toStore);
                 irPtr += 16;
             } else {
-                vst2q_u16(depthPtr, toStore);
-                depthPtr += 16;
+                /* Store the 16 frame pixel in the corresponding image */
+                if ((j / width) % 2) {
+                    vst2q_u16(irPtr, toStore);
+                    irPtr += 16;
+                } else {
+                    vst2q_u16(depthPtr, toStore);
+                    depthPtr += 16;
+                }
             }
-
             j += 16;
             pdata += 24;
         }
