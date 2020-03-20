@@ -5,6 +5,10 @@ add_subdirectory(aditof-demo)
 add_subdirectory(first-frame)
 add_subdirectory(first-frame-ethernet)
 
+if (JETSON)
+    add_subdirectory(imshow-jetson)
+endif()
+
 include(GNUInstallDirs)
 
 install(PROGRAMS
