@@ -162,6 +162,20 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
     float gain = 1.0, offset = 0.0;
     m_device->setCalibrationParams(mode, gain, offset, m_details.maxDepth);
 
+    // register writes for enabling only one video stream (depth/ ir)
+    // must be done here after programming the camera in order for them to
+    // work properly. Setting the mode of the camera, programming it
+    // with a different firmware would reset the value in the oxc3da register
+    if (m_details.frameType.type == "depth_only") {
+        uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
+        uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
+        m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    } else if (m_details.frameType.type == "ir_only") {
+        uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
+        uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x05, 0x0007, 0x0004};
+        m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    }
+
     m_details.mode = mode;
 
     return status;
