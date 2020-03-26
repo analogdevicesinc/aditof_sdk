@@ -90,6 +90,12 @@ cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_pa
 - Select 'Release' build
 - Application binaries are created in 'aditof_sdk\build\example\aditof-demo\Release' directory
 
+
+## SDK with bindings
+
+- Please check the readme files for each type of binding in the [bindings directory](../../bindings).
+
+
 ## Building the SDK in Visual Studio using the script
 
 ### Pre-requisites

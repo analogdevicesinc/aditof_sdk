@@ -73,3 +73,7 @@ mkdir build && cd build
 cmake -DWITH_EXAMPLES=on -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
 make
 ```
+
+## SDK with bindings
+
+- Please check the readme files for each type of binding in the [bindings directory](../../bindings).
