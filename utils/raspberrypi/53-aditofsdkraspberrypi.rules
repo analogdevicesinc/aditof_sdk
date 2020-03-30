@@ -1,0 +1,9 @@
+# allow read/write access to the eeprom and the temperature sensor RaspberryPi
+
+SUBSYSTEM=="i2c", 
+RUN+="/bin/chown root:plugdev /sys/bus/i2c/devices/0-0056/eeprom", 
+RUN+="/bin/chmod 0060 /sys/bus/i2c/devices/0-0056/eeprom", 
+RUN+="/bin/chown root:plugdev /sys/bus/i2c/devices/1-0056/eeprom", 
+RUN+="/bin/chmod 0060 /sys/bus/i2c/devices/1-0056/eeprom",
+RUN+="/bin/chmod 666 /dev/i2c-0",
+RUN+="/bin/chmod 666 /dev/i2c-1"

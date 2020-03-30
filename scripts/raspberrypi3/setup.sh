@@ -24,6 +24,8 @@ print_help() {
         echo "        Build and install the minimum required version of opencv for the dnn example (3.4.1)"
         echo "-op|--opencvpath"
         echo "        Path to opencv installation "
+        echo "-ur|--udevrules"
+        echo "        Install udev rules for devices permissions"
         echo ""
 }
 
@@ -102,6 +104,10 @@ setup() {
                 shift # next argument
                 shift # next value
                 ;;
+                -ur|--udevrules)
+                udev_rules="True"
+                shift # next argument
+                ;;
                 *)    # unknown option
                 POSITIONAL+=("$1") # save it in an array for later
                 shift # past argument
@@ -176,6 +182,10 @@ setup() {
         pushd "${build_dir}"
         cmake "${source_dir}" ${CMAKE_OPTIONS} -DCMAKE_PREFIX_PATH="${PREFIX_PATH}"
         make -j ${NUM_JOBS}
+		
+        if [[ "${udev_rules}" == "True" ]]; then
+             sudo make install-udev-rules
+        fi
 }
 
 setup $@

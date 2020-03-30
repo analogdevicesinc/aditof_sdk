@@ -8,6 +8,7 @@ This directory contains different utilities may be needed on the Dragonbard.
 | --------- | -------------- |
 | config_pipe.sh | Configures the video data pipeline coming from the camera |
 | config_pipe.service | A 'systemd' startup script that executes config-pipe.sh when linaro boots |
+| 53-aditofsdkdragonboard.rules | Allows read/write access to the eeprom and the temperature sensor |
 
 To configure config-pipe.sh to be executed automatically on boot:
 
