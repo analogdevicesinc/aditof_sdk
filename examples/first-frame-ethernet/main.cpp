@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     Status status = Status::OK;
 
     if (argc < 2) {
-        LOG(ERROR) << "No ip provided! ./fist-frame-ethernet ip!";
+        LOG(ERROR) << "No ip provided! ./first-frame-ethernet ip!";
         return 0;
     }
 
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> frameTypes;
     camera->getAvailableFrameTypes(frameTypes);
     if (frameTypes.empty()) {
-        std::cout << "no frame type avaialble!";
+        std::cout << "no frame type available!";
         return 0;
     }
     status = camera->setFrameType(frameTypes.front());
