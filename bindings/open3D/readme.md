@@ -12,6 +12,9 @@ cmake -DGLIBCXX_USE_CXX11_ABI=ON
 
 To install open3D go to: [Open3D](http://www.open3d.org/docs/release/tutorial/C++/cplusplus_interface.html)
 
+When building the aditof project specify the cmake option -DWITH_OPEN3D=ON. 
+Add the path to the Open3D installation folder in the cmake variable -DCMAKE_PREFIX_PATH=<path_to_open3d_installation>.
+
 #### Directory Structure
 
 | Directory/File | Description |
