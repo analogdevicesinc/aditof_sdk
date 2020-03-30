@@ -3,7 +3,7 @@
 ### Overview
 The SDK provides bindings for Open3D through the helper methods defined in aditof_open3d.h, which provide a way to convert from the `aditof::Frame` data structure to `open3d::geometry::Image`.
 
-###Instalation
+### Instalation
 To install open3D go to: [Open3D](http://www.open3d.org/docs/release/tutorial/C++/cplusplus_interface.html)
 
 #### Directory Structure
