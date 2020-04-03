@@ -46,7 +46,6 @@ class ModesEnum(Enum):
 
 
 if __name__ == "__main__":
-
     system = tof.System()
     status = system.initialize()
     if not status:
@@ -92,23 +91,34 @@ if __name__ == "__main__":
     specifics.setNoiseReductionThreshold(smallSignalThreshold)
     specifics.enableNoiseReduction(True)
 
+    # Get the first frame for details
+    frame = tof.Frame()
+    status = cameras[0].requestFrame(frame)
+    frameDetails = tof.FrameDetails()
+    status = frame.getDetails(frameDetails)
+    width = frameDetails.width
+    height = frameDetails.height
+
     # Get intrinsic parameters from camera
     intrinsicParameters = camDetails.intrinsics
     fx = intrinsicParameters.cameraMatrix[0]
     fy = intrinsicParameters.cameraMatrix[4]
     cx = intrinsicParameters.cameraMatrix[2]
     cy = intrinsicParameters.cameraMatrix[5]
-    width = 640
-    height = 480
     cameraIntrinsics = o3d.camera.PinholeCameraIntrinsic(width, height, fx, fy, cx, cy)
 
+    # Get camera details for frame correction
     camera_range = camDetails.maxDepth
     bitCount = camDetails.bitCount
-    frame = tof.Frame()
-
     max_value_of_IR_pixel = 2 ** bitCount - 1
     distance_scale_ir = 255.0 / max_value_of_IR_pixel
     distance_scale = 255.0 / camera_range
+
+    # Create visualizer
+    vis = o3d.visualization.Visualizer()
+    vis.create_window("PointCloud", 1600, 1600)
+    first_time_render_pc = 1
+    point_cloud = o3d.geometry.PointCloud()
 
     while True:
         # Capture frame-by-frame
@@ -119,38 +129,40 @@ if __name__ == "__main__":
         depth_map = np.array(frame.getData(tof.FrameDataType.Depth), dtype="uint16", copy=False)
         ir_map = np.array(frame.getData(tof.FrameDataType.IR), dtype="uint16", copy=False)
 
-        # Creation of the IR image
+        # Create the IR image
         ir_map = ir_map[0: int(ir_map.shape[0] / 2), :]
         ir_map = distance_scale_ir * ir_map
         ir_map = np.uint8(ir_map)
         ir_map = cv.cvtColor(ir_map, cv.COLOR_GRAY2RGB)
 
-        # Creation of the Depth image
+        # Create the Depth image
         new_shape = (int(depth_map.shape[0] / 2), depth_map.shape[1])
         depth16bits_map = depth_map = np.resize(depth_map, new_shape)
         depth_map = distance_scale * depth_map
         depth_map = np.uint8(depth_map)
         depth_map = cv.applyColorMap(depth_map, cv.COLORMAP_RAINBOW)
 
-        # Show Depth map :
-        cv.namedWindow(WINDOW_NAME_DEPTH, cv.WINDOW_AUTOSIZE)
-        cv.imshow(WINDOW_NAME_DEPTH, depth_map)
-
+        # Create color image
         img_color = cv.addWeighted(ir_map, 0.4, depth_map, 0.6, 0)
 
-        # Show Depth+IR combined map
-        cv.namedWindow(WINDOW_NAME_COLOR, cv.WINDOW_AUTOSIZE)
-        cv.imshow(WINDOW_NAME_COLOR, img_color)
+        color_image = o3d.geometry.Image(img_color)
+        depth16bits_image = o3d.geometry.Image(depth16bits_map)
 
-        color_raw = o3d.geometry.Image(img_color)
-        depth16bits_raw = o3d.geometry.Image(depth16bits_map)
-
-        rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(color_raw, depth16bits_raw, 1000.0, 3.0, False)
+        rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(color_image, depth16bits_image, 1000.0, 3.0, False)
         pcd = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd_image, cameraIntrinsics)
 
-        # Flip it, otherwise the pointcloud will be upside down
+        # Flip it, otherwise the point cloud will be upside down
         pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
-        o3d.visualization.draw_geometries([pcd])
+
+        # Show the point cloud
+        point_cloud.points = pcd.points
+        point_cloud.colors = pcd.colors
+        if first_time_render_pc:
+            vis.add_geometry(point_cloud)
+            first_time_render_pc = 0
+        vis.update_geometry()
+        vis.poll_events()
+        vis.update_renderer()
 
         if cv.waitKey(1) >= 0:
             break
