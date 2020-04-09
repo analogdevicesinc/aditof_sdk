@@ -84,6 +84,8 @@ OPENCV_PATH=C:\opencv\build\x64\vc14\bin
 - Generate the VisualStudio solution
 ```console
 cd aditof_sdk
+mkdir build
+cd build
 cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1\local_path\websockets" -G "Visual Studio 14 2015 Win64" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=on ..
 ```
 - Open 'adi_tof_project.sln' generated in 'aditof_sdk\build' in MS Visual Studio 2015
