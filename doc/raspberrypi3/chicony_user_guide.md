@@ -3,7 +3,7 @@
 ## Setting up the system
 
 ### Required hardware
-- Chicony ToF
+- [Chicony ToF module](https://www.chicony.com.tw/chicony/jp/product/ToF)
 - The Analog Devices RPI to Chicony ToF interposer
 - 5V power supply (micro USB cable) to power up the Chicony ToF
 - [Raspberry Pi](https://www.raspberrypi.org/products/) The system was tested on Raspberry Pi3 Model B V1.2 and Raspberry Pi 4. It can work on other models that have a CSI camera interface input.
