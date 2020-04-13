@@ -24,3 +24,4 @@ pi@raspberry:~/workspace/github/aditof_sdk/build$ make -j4
 ## Linux Kernel
 A customized [kernel](https://github.com/analogdevicesinc/linux/tree/adi-4.19.0) is provided for the Raspberry Pi including the [V4L2 driver for the ADDI9036](https://github.com/analogdevicesinc/linux/blob/adi-4.19.0/drivers/media/i2c/addi9036.c) and other improvements to support all the ADI depth camera features.
 
+The devicetree for RPi can be found here: [rpi-addi9036-overlay.dts](https://github.com/analogdevicesinc/linux/blob/rpi-4.19.y/arch/arm/boot/dts/overlays/rpi-addi9036-overlay.dts)
