@@ -27,9 +27,12 @@ if(OPENCV_FOUND OR
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
         endif()
     else()
-        message(STATUS "The dnn example will be built (OpenCV version >= 3.4.1)")
         add_subdirectory(dnn)
-
+        if(OpenCV_VERSION VERSION_LESS "3.4.3")
+            message(WARNING "The maskR-CNN example is only available for OpenCV version >= 3.4.3! This example won't be built!")
+        else()
+            add_subdirectory(maskrcnn)
+        endif()
         if(WIN32)
             include(FindOpenSSL)
             add_custom_target(copy-dll-opencv
