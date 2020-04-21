@@ -54,20 +54,12 @@ struct buffer {
     size_t length;
 };
 
-struct CalibrationData {
-    std::string mode;
-    float gain;
-    float offset;
-    uint16_t *cache;
-};
-
 struct UsbDevice::ImplData {
     int fd;
     struct buffer *buffers;
     unsigned int buffersCount;
     struct v4l2_format fmt;
     bool started;
-    std::unordered_map<std::string, CalibrationData> calibration_cache;
 };
 
 UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
@@ -82,12 +74,6 @@ UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
 UsbDevice::~UsbDevice() {
     if (m_implData->started) {
         stop();
-    }
-
-    for (auto it = m_implData->calibration_cache.begin();
-         it != m_implData->calibration_cache.begin(); ++it) {
-        delete[] it->second.cache;
-        it->second.cache = nullptr;
     }
 
     for (unsigned int i = 0; i < m_implData->buffersCount; ++i) {
@@ -166,25 +152,6 @@ aditof::Status
 UsbDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     using namespace aditof;
     Status status = Status::OK;
-
-    // Hardcored for now
-    FrameDetails details;
-
-    details.width = 640;
-    details.height = 960;
-    details.cal_data.offset = 0;
-    details.cal_data.gain = 1;
-    details.type = "depth_ir";
-    types.push_back(details);
-
-    details.width = 668;
-    details.height = 750;
-    details.cal_data.offset = 0;
-    details.cal_data.gain = 1;
-    details.type = "raw";
-    types.push_back(details);
-
-    // TO DO: Should get these details from the hardware/firmware
 
     return status;
 }
@@ -301,147 +268,12 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
 aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
 
-    if (!firmware) {
-        LOG(WARNING) << "No firmware provided";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    struct uvc_xu_control_query cq;
-    unsigned char buf[MAX_BUF_SIZE];
-    size_t written_bytes = 0;
-    __useconds_t sleepDuration =
-        100000; /* Keep 100 ms delay between 'program' calls */
-
-    while (written_bytes < size) {
-
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.unit = 0x03;         // wIndex of Extension Unit
-        cq.selector = 1;        // WValue for AFE Programming
-        cq.data = buf;
-        cq.size = MAX_BUF_SIZE;
-
-        usleep(5000);
-        if ((size - written_bytes) > MAX_PACKET_SIZE) {
-            buf[0] = 0x01;
-            buf[1] = MAX_PACKET_SIZE;
-            memcpy(&buf[2], firmware + written_bytes, MAX_PACKET_SIZE);
-
-            if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-                LOG(WARNING)
-                    << "Programming AFE error "
-                    << "errno: " << errno << " error: " << strerror(errno);
-            }
-            written_bytes += MAX_PACKET_SIZE;
-        } else {
-            CLEAR(buf);
-            buf[0] = 0x02;
-            buf[1] = static_cast<unsigned char>(size - written_bytes);
-            memcpy(&buf[2], firmware + written_bytes, buf[1]);
-
-            cq.data = buf;
-            if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-                LOG(WARNING)
-                    << "Programming AFE error "
-                    << "errno: " << errno << " error: " << strerror(errno);
-            }
-            written_bytes = size;
-        }
-    }
-
-    // TO DO: Check if it is really neccessary or if the delay is not to much
-    usleep(sleepDuration);
-
-    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (-1 == xioctl(m_implData->fd, VIDIOC_STREAMON, &type)) {
-        LOG(WARNING) << "VIDIOC_STREAMON, error:" << errno << "("
-                     << strerror(errno) << ")";
-        return Status::GENERIC_ERROR;
-    }
-
-    m_implData->started = true;
-
     return Status::OK;
 }
 
 aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
-
-    if (!buffer) {
-        LOG(WARNING) << "Invalid adddress to buffer provided";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    fd_set fds;
-    struct timeval tv;
-    int r;
-
-    FD_ZERO(&fds);
-    FD_SET(m_implData->fd, &fds);
-
-    // Timeout : Ensure this compensates for max delays added for programming
-    // cycle defined in 'Device::program'
-    tv.tv_sec = 2;
-    tv.tv_usec = 0;
-
-    r = select(m_implData->fd + 1, &fds, nullptr, nullptr, &tv);
-
-    if (-1 == r) {
-        if (EINTR == errno) {
-            LOG(WARNING) << "select, error: " << errno << "(" << strerror(errno)
-                         << ")";
-            return Status::GENERIC_ERROR;
-        }
-    }
-
-    if (0 == r) {
-        LOG(WARNING) << "select timeout: ";
-        return Status::BUSY;
-    }
-
-    struct v4l2_buffer buf;
-
-    CLEAR(buf);
-
-    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    buf.memory = V4L2_MEMORY_MMAP;
-
-    if (-1 == xioctl(m_implData->fd, VIDIOC_DQBUF, &buf)) {
-        LOG(WARNING) << "Stream Error";
-        switch (errno) {
-        case EAGAIN:
-            break;
-
-        case EIO:
-            // Could ignore EIO, see spec.
-            // fall through
-
-        default: {
-            LOG(WARNING) << "VIDIOC_DQBUF, error: " << errno << "("
-                         << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-        }
-    }
-
-    if (buf.index >= m_implData->buffersCount) {
-        LOG(WARNING) << "buffer index out of range";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    unsigned int width = m_implData->fmt.fmt.pix.width;
-    unsigned int height = m_implData->fmt.fmt.pix.height;
-    const char *pdata =
-        static_cast<const char *>(m_implData->buffers[buf.index].start);
-
-    aditof::deinterleave(pdata, buffer, height * width * 3 / 2, width, height);
-
-    if (-1 == xioctl(m_implData->fd, VIDIOC_QBUF, &buf)) {
-        LOG(WARNING) << "VIDIOC_QBUF, error: " << errno << "("
-                     << strerror(errno) << ")";
-        return Status::GENERIC_ERROR;
-    }
 
     return status;
 }
@@ -540,84 +372,6 @@ aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
     return Status::OK;
 }
 
-aditof::Status UsbDevice::readAfeRegisters(const uint16_t *address,
-                                           uint16_t *data, size_t length) {
-    using namespace aditof;
-
-    struct uvc_xu_control_query cq;
-
-    for (size_t i = 0; i < length; ++i) {
-        // This set property will send the address of AFE register to be read
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.data = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char *>(&address[i]));
-        cq.size = 2;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 2; // WValue for AFE register reads
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in sending address to device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-
-        // This get property will get the value read from AFE register
-        CLEAR(cq);
-        cq.query = UVC_GET_CUR; // bRequest
-        cq.data = reinterpret_cast<unsigned char *>(&data[i]);
-        cq.size = 2;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 2; // WValue for AFE register reads
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in reading data from device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-    }
-
-    return Status::OK;
-}
-
-aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
-                                            const uint16_t *data,
-                                            size_t length) {
-    using namespace aditof;
-    Status status = Status::OK;
-
-    struct uvc_xu_control_query cq;
-    unsigned char buf[MAX_BUF_SIZE];
-
-    CLEAR(cq);
-    cq.query = UVC_SET_CUR; // bRequest
-    cq.unit = 0x03;         // wIndex of Extension Unit
-    cq.selector = 1;        // WValue for AFE Programming
-    cq.data = buf;
-    cq.size = MAX_BUF_SIZE;
-
-    size_t sampleCnt = 0;
-
-    length *= 2 * sizeof(uint16_t);
-    while (length) {
-        memset(buf, 0, MAX_BUF_SIZE);
-        buf[0] = length > MAX_PACKET_SIZE ? 0x01 : 0x02;
-        buf[1] = length > MAX_PACKET_SIZE ? MAX_PACKET_SIZE : length;
-        for (int i = 0; i < buf[1]; i += 4) {
-            *(uint16_t *)(buf + 2 + i) = address[sampleCnt];
-            *(uint16_t *)(buf + 4 + i) = data[sampleCnt];
-            sampleCnt++;
-        }
-        length -= buf[1];
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Programming AFE error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-        }
-    }
-
-    return status;
-}
-
 aditof::Status UsbDevice::readAfeTemp(float &temperature) {
     using namespace aditof;
 
@@ -664,34 +418,6 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
     temperature = buffer[1];
 
     return Status::OK;
-}
-
-aditof::Status UsbDevice::setCalibrationParams(const std::string &mode,
-                                               float gain, float offset,
-                                               int range) {
-
-    const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
-    CalibrationData calib_data;
-    calib_data.mode = mode;
-    calib_data.gain = gain;
-    calib_data.offset = offset;
-    calib_data.cache = aditof::Utils::buildCalibrationCache(
-        gain, offset, pixelMaxValue, range);
-    m_implData->calibration_cache[mode] = calib_data;
-
-    return aditof::Status::OK;
-}
-
-aditof::Status UsbDevice::applyCalibrationToFrame(uint16_t *frame,
-                                                  const std::string &mode) {
-
-    unsigned int width = m_implData->fmt.fmt.pix.width;
-    unsigned int height = m_implData->fmt.fmt.pix.height;
-
-    aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
-                                  frame, width, height);
-
-    return aditof::Status::OK;
 }
 
 aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
