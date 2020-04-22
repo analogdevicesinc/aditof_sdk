@@ -34,8 +34,18 @@ using namespace aditof;
 
 PointCloud2Msg::PointCloud2Msg() {}
 
-PointCloud2Msg::PointCloud2Msg(const std::shared_ptr<aditof::Camera> &camera) {
-    FrameDataToMsg(camera);
+PointCloud2Msg::PointCloud2Msg(const std::shared_ptr<aditof::Camera> &camera,
+                               aditof::Frame *frame) {
+    FrameDataToMsg(camera, frame);
+}
+
+void PointCloud2Msg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
+                                    aditof::Frame *frame) {
+    FrameDetails fDetails;
+    frame->getDetails(fDetails);
+
+    setMetadataMembers(fDetails.width, fDetails.height / 2);
+    setDataMembers(camera, frame);
 }
 
 void PointCloud2Msg::setMetadataMembers(int width, int height) {
@@ -59,7 +69,7 @@ void PointCloud2Msg::setMetadataMembers(int width, int height) {
 }
 
 void PointCloud2Msg::setDataMembers(const std::shared_ptr<Camera> &camera,
-                                    uint16_t *frameData) {
+                                    aditof::Frame *frame) {
     IntrinsicParameters intr = getIntrinsics(camera);
 
     float fx = intr.cameraMatrix[0];
@@ -74,6 +84,8 @@ void PointCloud2Msg::setDataMembers(const std::shared_ptr<Camera> &camera,
 
     const int frameHeight = static_cast<int>(msg.height);
     const int frameWidth = static_cast<int>(msg.width);
+
+    uint16_t *frameData = getFrameData(frame, aditof::FrameDataType::DEPTH);
 
     for (int i = 0; i < frameHeight; i++) {
         for (int j = 0; j < frameWidth;
@@ -99,23 +111,6 @@ void PointCloud2Msg::setDataMembers(const std::shared_ptr<Camera> &camera,
             *iter_rgb = frameData[index];
         }
     }
-}
-
-void PointCloud2Msg::FrameDataToMsg(const std::shared_ptr<Camera> &camera) {
-    Frame frame;
-    uint16_t *frameData = getNewFrame(camera, &frame);
-
-    if (!frameData) {
-        LOG(ERROR) << "getNewFrame call failed";
-        return;
-    }
-
-    FrameDetails fDetails;
-    frame.getDetails(fDetails);
-
-    setMetadataMembers(fDetails.width, fDetails.height / 2);
-
-    setDataMembers(camera, frameData);
 }
 
 void PointCloud2Msg::publishMsg(const ros::Publisher &pub) { pub.publish(msg); }

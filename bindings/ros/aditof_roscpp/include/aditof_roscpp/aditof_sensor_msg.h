@@ -38,8 +38,8 @@
 class AditofSensorMsg {
   public:
     virtual ~AditofSensorMsg() = default;
-    virtual void
-    FrameDataToMsg(const std::shared_ptr<aditof::Camera> &camera) = 0;
+    virtual void FrameDataToMsg(const std::shared_ptr<aditof::Camera> &camera,
+                                aditof::Frame *frame) = 0;
     virtual void publishMsg(const ros::Publisher &pub) = 0;
 };
 

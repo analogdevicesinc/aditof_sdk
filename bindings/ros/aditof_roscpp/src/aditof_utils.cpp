@@ -38,7 +38,7 @@
 #include <ros/ros.h>
 
 using namespace aditof;
-std::shared_ptr<Camera> initCameraEthernet(int argc, char **argv) {
+std::shared_ptr<Camera> initCamera(int argc, char **argv) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
     Status status = Status::OK;
@@ -76,34 +76,55 @@ std::shared_ptr<Camera> initCameraEthernet(int argc, char **argv) {
         LOG(ERROR) << "Could not initialize camera!";
         return nullptr;
     }
+    return camera;
+}
 
+void setFrameType(const std::shared_ptr<aditof::Camera> &camera,
+                  const std::string &type) {
     std::vector<std::string> frameTypes;
     camera->getAvailableFrameTypes(frameTypes);
     if (frameTypes.empty()) {
-        LOG(ERROR) << "No frame type avaialble!";
-        return nullptr;
+        LOG(ERROR) << "No frame type available!";
+        return;
     }
 
-    status = camera->setFrameType(frameTypes.front());
+    std::vector<std::string>::iterator it =
+        std::find(frameTypes.begin(), frameTypes.end(), type);
+    if (it == frameTypes.end()) {
+        LOG(ERROR) << "Requested frame type is not available";
+        return;
+    }
+
+    Status status = Status::OK;
+    status = camera->setFrameType(type);
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set camera frame type!";
-        return nullptr;
+        return;
     }
+}
 
+void setMode(const std::shared_ptr<aditof::Camera> &camera,
+             const std::string &mode) {
     std::vector<std::string> modes;
     camera->getAvailableModes(modes);
     if (modes.empty()) {
         LOG(ERROR) << "No camera modes available!";
-        return nullptr;
+        return;
     }
 
-    status = camera->setMode(modes[1]);
+    std::vector<std::string>::iterator it =
+        std::find(modes.begin(), modes.end(), mode);
+    if (it == modes.end()) {
+        LOG(ERROR) << "Requested mode is not available";
+        return;
+    }
+
+    Status status = Status::OK;
+    status = camera->setMode(mode);
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set camera mode!";
-        return nullptr;
+        return;
     }
-
-    return camera;
 }
 
 void applyNoiseReduction(const std::shared_ptr<Camera> &camera, int argc,
@@ -125,17 +146,18 @@ void applyNoiseReduction(const std::shared_ptr<Camera> &camera, int argc,
     }
 }
 
-uint16_t *getNewFrame(const std::shared_ptr<Camera> &camera,
-                      aditof::Frame *frame) {
+void getNewFrame(const std::shared_ptr<Camera> &camera, aditof::Frame *frame) {
     Status status = Status::OK;
     status = camera->requestFrame(frame);
     if (status != Status::OK) {
         LOG(ERROR) << "Could not request frame!";
-        return nullptr;
     }
+}
 
+uint16_t *getFrameData(aditof::Frame *frame, FrameDataType dataType) {
     uint16_t *frameData;
-    status = frame->getData(FrameDataType::RAW, &frameData);
+    Status status = Status::OK;
+    status = frame->getData(dataType, &frameData);
 
     if (status != Status::OK) {
         LOG(ERROR) << "Could not get frame data!";
