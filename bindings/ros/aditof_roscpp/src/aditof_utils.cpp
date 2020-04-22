@@ -188,3 +188,19 @@ int getRangeMin(const std::shared_ptr<Camera> &camera) {
     camera->getDetails(cameraDetails);
     return cameraDetails.minDepth;
 }
+
+void irTo16bitGrayscale(uint16_t *frameData, int width, int height) {
+    std::vector<uint16_t> data(frameData, frameData + width * height);
+
+    auto min_val = std::min_element(data.begin(), data.end());
+    auto max_val = std::max_element(data.begin(), data.end());
+    uint16_t delta = *max_val - *min_val;
+
+    for (int i = 0; i < width * height; i++) {
+        float norm_val = static_cast<float>(data[i] - *min_val) / delta;
+        float grayscale_val =
+            norm_val * std::numeric_limits<unsigned short int>::max() +
+            (1.0f - norm_val) * 0;
+        data[i] = static_cast<uint16_t>(grayscale_val);
+    }
+}

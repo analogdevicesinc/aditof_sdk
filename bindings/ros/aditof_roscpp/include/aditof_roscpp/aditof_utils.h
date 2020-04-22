@@ -49,5 +49,6 @@ aditof::IntrinsicParameters
 getIntrinsics(const std::shared_ptr<aditof::Camera> &camera);
 int getRangeMax(const std::shared_ptr<aditof::Camera> &camera);
 int getRangeMin(const std::shared_ptr<aditof::Camera> &camera);
+void irTo16bitGrayscale(uint16_t *frameData, int width, int height);
 
 #endif // ADITOF_UTILS_H
