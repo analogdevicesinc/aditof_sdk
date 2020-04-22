@@ -34,18 +34,23 @@
 
 #include "i2c_common.h"
 
-class Eeprom {
-  public:
-	Eeprom(const char *dev_fqn);
-	~Eeprom();
-	aditof::Status open();
-	aditof::Status close();
-	aditof::Status read(uint32_t address, uint8_t *data,size_t length);
-	aditof::Status write(uint32_t address, const uint8_t *data, size_t length);
-	
-  private:
-	eeprom m_edev;
-	std::string m_path;
-}
+/*
+ * opens the eeprom device with filesystem access
+ */
+int eeprom_open(const char *dev_fqn, eeprom *e);
+/*
+ * closes the eeprom device
+ */
+int eeprom_close(eeprom *e);
+/*
+ * write the data stored in buff to eeprom
+ */
+int eeprom_write_buf(eeprom *e, unsigned int addr, unsigned char *buf,
+                     size_t size);
+/*
+ * read the data from eeprom and store it in buff
+ */
+int eeprom_read_buf(eeprom *e, unsigned int addr, unsigned char *buf,
+                    size_t size);
 
 #endif /* EEPROM_H */
