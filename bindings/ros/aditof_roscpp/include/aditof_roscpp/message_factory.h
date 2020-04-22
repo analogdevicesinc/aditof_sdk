@@ -43,7 +43,8 @@ enum class MessageType {
 class MessageFactory {
   public:
     static AditofSensorMsg *
-    create(const std::shared_ptr<aditof::Camera> &camera, MessageType type);
+    create(const std::shared_ptr<aditof::Camera> &camera, aditof::Frame *frame,
+           MessageType type);
 };
 
 #endif // MESSAGE_FACTORY_H

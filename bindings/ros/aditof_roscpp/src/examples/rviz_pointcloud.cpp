@@ -37,11 +37,14 @@ using namespace aditof;
 
 int main(int argc, char **argv) {
 
-    std::shared_ptr<Camera> camera = initCameraEthernet(argc, argv);
+    std::shared_ptr<Camera> camera = initCamera(argc, argv);
     if (camera.get() == nullptr) {
         ROS_ERROR("initCamera call failed");
         return 0;
     }
+
+    setFrameType(camera, "depth_ir");
+    setMode(camera, "medium");
 
     ros::init(argc, argv, "aditof_rviz_node");
 
@@ -51,15 +54,19 @@ int main(int argc, char **argv) {
 
     applyNoiseReduction(camera, argc, argv);
 
-    AditofSensorMsg *pclMsg =
-        MessageFactory::create(camera, MessageType::sensor_msgs_PointCloud2);
+    Frame frame;
+    getNewFrame(camera, &frame);
+
+    AditofSensorMsg *pclMsg = MessageFactory::create(
+        camera, &frame, MessageType::sensor_msgs_PointCloud2);
 
     if (!pclMsg) {
         ROS_ERROR("pointcloud message creation failed");
     }
 
     while (ros::ok()) {
-        dynamic_cast<PointCloud2Msg *>(pclMsg)->FrameDataToMsg(camera);
+        getNewFrame(camera, &frame);
+        dynamic_cast<PointCloud2Msg *>(pclMsg)->FrameDataToMsg(camera, &frame);
         pclMsg->publishMsg(frame_pubisher);
     }
 

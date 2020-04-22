@@ -34,12 +34,16 @@
 
 #include <aditof/camera.h>
 
-std::shared_ptr<aditof::Camera> initCameraEthernet(int argc, char **argv);
-
+std::shared_ptr<aditof::Camera> initCamera(int argc, char **argv);
+void setFrameType(const std::shared_ptr<aditof::Camera> &camera,
+                  const std::string &type);
+void setMode(const std::shared_ptr<aditof::Camera> &camera,
+             const std::string &mode);
 void applyNoiseReduction(const std::shared_ptr<aditof::Camera> &camera,
                          int argc, char **argv);
-uint16_t *getNewFrame(const std::shared_ptr<aditof::Camera> &camera,
-                      aditof::Frame *frame);
+void getNewFrame(const std::shared_ptr<aditof::Camera> &camera,
+                 aditof::Frame *frame);
+uint16_t *getFrameData(aditof::Frame *frame, aditof::FrameDataType dataType);
 
 aditof::IntrinsicParameters
 getIntrinsics(const std::shared_ptr<aditof::Camera> &camera);
