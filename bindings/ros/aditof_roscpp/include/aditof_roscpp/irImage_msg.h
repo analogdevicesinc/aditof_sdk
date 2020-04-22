@@ -29,24 +29,58 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef MESSAGE_FACTORY_H
-#define MESSAGE_FACTORY_H
+#ifndef IRIMAGE_MSG_H
+#define IRIMAGE_MSG_H
 
-#include "depthImage_msg.h"
-#include "irImage_msg.h"
-#include "pointcloud2_msg.h"
+#include <string>
 
-enum class MessageType {
-    sensor_msgs_PointCloud2,
-    sensor_msgs_DepthImage,
-    sensor_msgs_IRImage
-};
+#include <aditof/camera.h>
+#include <aditof/frame.h>
+#include <glog/logging.h>
 
-class MessageFactory {
+#include "aditof_sensor_msg.h"
+#include "aditof_utils.h"
+
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
+
+class IRImageMsg : public AditofSensorMsg {
   public:
-    static AditofSensorMsg *
-    create(const std::shared_ptr<aditof::Camera> &camera, aditof::Frame *frame,
-           MessageType type);
+    IRImageMsg(const std::shared_ptr<aditof::Camera> &camera,
+               aditof::Frame *frame, std::string encoding);
+    /**
+     * @brief Each message corresponds to one frame
+     */
+    sensor_msgs::Image msg;
+
+    /**
+     * @brief Will be assigned a value from the list of strings in include/sensor_msgs/image_encodings.h
+     */
+    std::string imgEncoding;
+
+    /**
+     * @brief Converts the frame data to a message
+     */
+    void FrameDataToMsg(const std::shared_ptr<aditof::Camera> &camera,
+                        aditof::Frame *frame);
+    /**
+     * @brief Assigns values to the message fields concerning metadata
+     */
+    void setMetadataMembers(int width, int height);
+
+    /**
+     * @brief Assigns values to the message fields concerning the point data
+     */
+    void setDataMembers(const std::shared_ptr<aditof::Camera> &camera,
+                        uint16_t *frameData);
+
+    /**
+     * @brief Publishes a message
+     */
+    void publishMsg(const ros::Publisher &pub);
+
+  private:
+    IRImageMsg();
 };
 
-#endif // MESSAGE_FACTORY_H
+#endif // IRIMAGE_MSG_H
