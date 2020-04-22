@@ -18,7 +18,7 @@ export KERNEL_MODULES_PATH=kernel_modules_location
 make bcm2709_defconfig
 make -j4 dtbs zImage modules
 make -j4 modules_install INSTALL_MOD_PATH=${KERNEL_MODULES_PATH}
-cp ./arch/arm/zImage <sd card boot partition>/kernel7.img
+cp ./arch/arm/boot/zImage <sd card boot partition>/kernel7.img
 ```
 
 #### Building the Rootfs
