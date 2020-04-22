@@ -37,11 +37,14 @@ using namespace aditof;
 
 int main(int argc, char **argv) {
 
-    std::shared_ptr<Camera> camera = initCameraEthernet(argc, argv);
-    if (camera.get() == nullptr) {
+    std::shared_ptr<Camera> camera = initCamera(argc, argv);
+    if (!camera) {
         ROS_ERROR("initCamera call failed");
-        return 0;
+        return -1;
     }
+
+    setFrameType(camera, "depth_ir");
+    setMode(camera, "medium");
 
     ros::init(argc, argv, "aditof_rviz_node");
 
@@ -51,19 +54,29 @@ int main(int argc, char **argv) {
 
     applyNoiseReduction(camera, argc, argv);
 
-    AditofSensorMsg *pclMsg =
-        MessageFactory::create(camera, MessageType::sensor_msgs_PointCloud2);
+    Frame frame;
+    getNewFrame(camera, &frame);
 
-    if (!pclMsg) {
+    AditofSensorMsg *msg = MessageFactory::create(
+        camera, &frame, MessageType::sensor_msgs_PointCloud2);
+
+    if (!msg) {
         ROS_ERROR("pointcloud message creation failed");
+        return -1;
     }
 
     while (ros::ok()) {
-        dynamic_cast<PointCloud2Msg *>(pclMsg)->FrameDataToMsg(camera);
+        getNewFrame(camera, &frame);
+        PointCloud2Msg *pclMsg = dynamic_cast<PointCloud2Msg *>(msg);
+
+        if (!pclMsg) {
+            ROS_ERROR("downcast from AditofSensorMsg to PointCloud2Msg failed");
+            return -1;
+        }
+        pclMsg->FrameDataToMsg(camera, &frame);
         pclMsg->publishMsg(frame_pubisher);
     }
 
-    delete pclMsg;
-
+    delete msg;
     return 0;
 }
