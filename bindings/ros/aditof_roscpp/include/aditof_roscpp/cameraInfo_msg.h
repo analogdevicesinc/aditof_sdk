@@ -29,24 +29,47 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef MESSAGE_FACTORY_H
-#define MESSAGE_FACTORY_H
+#ifndef CAMERAINFO_MSG_H
+#define CAMERAINFO_MSG_H
 
-#include "depthImage_msg.h"
-#include "irImage_msg.h"
-#include "pointcloud2_msg.h"
+#include <boost/array.hpp>
+#include <string>
 
-enum class MessageType {
-    sensor_msgs_PointCloud2,
-    sensor_msgs_DepthImage,
-    sensor_msgs_IRImage
-};
+#include <aditof/frame.h>
+#include <glog/logging.h>
 
-class MessageFactory {
+#include "aditof_sensor_msg.h"
+#include "aditof_utils.h"
+
+#include <sensor_msgs/CameraInfo.h>
+
+class CameraInfoMsg : public AditofSensorMsg {
   public:
-    static AditofSensorMsg *
-    create(const std::shared_ptr<aditof::Camera> &camera, aditof::Frame *frame,
-           MessageType type);
+    CameraInfoMsg(const std::shared_ptr<aditof::Camera> &camera,
+                  aditof::Frame *frame);
+    /**
+     * @brief Each message corresponds to one frame
+     */
+    sensor_msgs::CameraInfo msg;
+
+    /**
+     * @brief Converts the frame data to a message
+     */
+    void FrameDataToMsg(const std::shared_ptr<aditof::Camera> &camera,
+                        aditof::Frame *frame);
+    /**
+     * @brief Assigns values to the message fields
+     */
+    void setMembers(const std::shared_ptr<aditof::Camera> &camera, int width,
+                    int height);
+
+    /**
+     * @brief Publishes a message
+     */
+    void publishMsg(const ros::Publisher &pub);
+
+  private:
+    CameraInfoMsg();
 };
 
-#endif // MESSAGE_FACTORY_H
+#endif // CAMERAINFO_MSG_H
