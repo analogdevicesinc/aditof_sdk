@@ -31,6 +31,7 @@
  */
 #include <aditof/camera_96tof1_specifics.h>
 #include <glog/logging.h>
+#include <math.h>
 
 #include "camera_96tof1.h"
 
