@@ -62,11 +62,6 @@ class EthernetDevice : public aditof::DeviceInterface {
                                              size_t length);
     virtual aditof::Status readAfeTemp(float &temperature);
     virtual aditof::Status readLaserTemp(float &temperature);
-    virtual aditof::Status setCalibrationParams(const std::string &mode,
-                                                float gain, float offset,
-                                                int range);
-    virtual aditof::Status applyCalibrationToFrame(uint16_t *frame,
-                                                   const std::string &mode);
     virtual aditof::Status getDetails(aditof::DeviceDetails &details) const;
 
   private:

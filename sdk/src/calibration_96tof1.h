@@ -29,8 +29,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CALIBRATION_H
-#define CALIBRATION_H
+#ifndef CALIBRATION_96TOF1_H
+#define CALIBRATION_96TOF1_H
 
 #include <aditof/device_interface.h>
 #include <aditof/status_definitions.h>
@@ -66,7 +66,6 @@
 */
 struct param_struct {
     uint32_t size;
-    // float value; Fixed 1 value per key
     std::list<float> value; // list of value per key
 };
 
@@ -81,10 +80,10 @@ struct packet_struct {
     std::unordered_map<float, param_struct> packet;
 };
 
-class Calibration {
+class Calibration96Tof1 {
   public:
-    Calibration();
-    ~Calibration();
+	Calibration96Tof1();
+    ~Calibration96Tof1();
 
   public:
     aditof::Status saveCalMap(std::shared_ptr<aditof::DeviceInterface> device);
@@ -95,15 +94,28 @@ class Calibration {
     aditof::Status getGainOffset(const std::string &mode, float &gain,
                                  float &offset) const;
     aditof::Status getIntrinsic(float key, std::vector<float> &data) const;
+    aditof::Status setMode(const std::string &mode, int range,
+                           unsigned int frameWidth, unsigned int frameheight);
+    aditof::Status calibrateDepth(uint16_t *frame, 
+                                  uint32_t frame_size);
+    aditof::Status calibrateCameraGeometry(uint16_t *frame, 
+                                           uint32_t frame_size);
 
   private:
     float getMapSize(
         const std::unordered_map<float, packet_struct> &calibration_map) const;
-    float
-    getPacketSize(const std::unordered_map<float, param_struct> &packet) const;
+    float getPacketSize(
+        const std::unordered_map<float, param_struct> &packet) const;
+    void buildDepthCalibrationCache(float gain, float offset,
+        int16_t maxPixelValue, int range);
+    void buildGeometryCalibrationCache(std::vector<float>& cameraMatrix,
+        unsigned int width, unsigned int height);
 
   private:
     std::unordered_map<float, packet_struct> m_calibration_map;
+    uint16_t* m_depth_cache;
+    double* m_geometry_cache;
+    int m_range;
 };
 
-#endif /*CALIBRATION_H*/
+#endif /*CALIBRATION_96TOF1_H*/

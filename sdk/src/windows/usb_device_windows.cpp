@@ -30,7 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "usb_device.h"
-#include "utils.h"
 #include "windows_utils.h"
 
 #include "device_utils.h"
@@ -524,15 +523,11 @@ UsbDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
 
     details.width = 640;
     details.height = 960;
-    details.cal_data.offset = 0;
-    details.cal_data.gain = 1;
     details.type = "depth_ir";
     types.push_back(details);
 
     details.width = 668;
     details.height = 750;
-    details.cal_data.offset = 0;
-    details.cal_data.gain = 1;
     details.type = "raw";
     types.push_back(details);
 
@@ -1303,38 +1298,6 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
     }
 
     return status;
-}
-
-aditof::Status UsbDevice::setCalibrationParams(const std::string &mode,
-                                               float gain, float offset,
-                                               int range) {
-    const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
-    CalibrationData calib_data;
-    calib_data.mode = mode;
-    calib_data.gain = gain;
-    calib_data.offset = offset;
-    calib_data.cache = aditof::Utils::buildCalibrationCache(
-        gain, offset, pixelMaxValue, range);
-    m_implData->calibration_cache[mode] = calib_data;
-
-    return aditof::Status::OK;
-}
-
-aditof::Status UsbDevice::applyCalibrationToFrame(uint16_t *frame,
-                                                  const std::string &mode) {
-
-    float gain = m_implData->calibration_cache[mode].gain;
-    float offset = m_implData->calibration_cache[mode].offset;
-
-    VIDEOINFOHEADER *pVi =
-        reinterpret_cast<VIDEOINFOHEADER *>(m_implData->pAmMediaType->pbFormat);
-    unsigned int width = HEADER(pVi)->biWidth;
-    unsigned int height = HEADER(pVi)->biHeight;
-
-    aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
-                                  frame, width, height);
-
-    return aditof::Status::OK;
 }
 
 aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {

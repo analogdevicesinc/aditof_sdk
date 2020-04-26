@@ -97,19 +97,6 @@ aditof::Status LocalDevice::readLaserTemp(float & /*temperature*/) {
     return aditof::Status::GENERIC_ERROR;
 }
 
-aditof::Status LocalDevice::setCalibrationParams(const std::string & /*mode*/,
-                                                 float /*gain*/,
-                                                 float /*offset*/,
-                                                 int /*range*/) {
-    return aditof::Status::GENERIC_ERROR;
-}
-
-aditof::Status
-LocalDevice::applyCalibrationToFrame(uint16_t * /*frame*/,
-                                     const std::string & /*mode*/) {
-    return aditof::Status::GENERIC_ERROR;
-}
-
 aditof::Status
 LocalDevice::getDetails(aditof::DeviceDetails & /*details*/) const {
     return aditof::Status::GENERIC_ERROR;

@@ -36,18 +36,11 @@ message DeviceConstructionData
   string driver_path = 20;      // Information about the driver the device is using
 }
 
-message FrameCalData
-{
-  float offset = 10;  // Offset correction
-  float gain = 20;    // Gain correction
-}
-
 message FrameDetails
 {
   uint32 width = 10;           // The width of the frame
   uint32 height = 20;          // The height of the frame
   string type = 30;            // The type of the frame
-  FrameCalData cal_data = 40;  // Calibration information for the frame data
 }
 
 message ClientRequest
