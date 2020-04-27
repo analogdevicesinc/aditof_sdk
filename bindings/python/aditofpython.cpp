@@ -60,17 +60,11 @@ PYBIND11_MODULE(aditofpython, m) {
         .value("Depth", aditof::FrameDataType::DEPTH)
         .value("IR", aditof::FrameDataType::IR);
 
-    py::class_<aditof::FrameCalData>(m, "FrameCalData")
-        .def(py::init<>())
-        .def_readwrite("offset", &aditof::FrameCalData::offset)
-        .def_readwrite("gain", &aditof::FrameCalData::gain);
-
     py::class_<aditof::FrameDetails>(m, "FrameDetails")
         .def(py::init<>())
         .def_readwrite("width", &aditof::FrameDetails::width)
         .def_readwrite("height", &aditof::FrameDetails::height)
         .def_readwrite("type", &aditof::FrameDetails::type)
-        .def_readwrite("cal_data", &aditof::FrameDetails::cal_data);
 
     // Camera declarations
 
@@ -309,19 +303,7 @@ PYBIND11_MODULE(aditofpython, m) {
                  aditof::Status status = device.readLaserTemp(temp);
                  temperature.append(temp);
                  return status;
-             })
-        .def("setCalibrationParams",
-             &aditof::DeviceInterface::setCalibrationParams, py::arg("mode"),
-             py::arg("gain"), py::arg("offset"), py::arg("range"))
-        .def("applyCalibrationToFrame",
-             [](aditof::DeviceInterface &device, py::array_t<uint16_t> frame,
-                const std::string &mode) {
-                 py::buffer_info buffInfo = frame.request(true);
-                 uint16_t *ptr = static_cast<uint16_t *>(buffInfo.ptr);
-
-                 return device.applyCalibrationToFrame(ptr, mode);
-             },
-             py::arg("frame"), py::arg("mode"));
+             });
 
     py::class_<aditof::Camera96Tof1Specifics,
                std::shared_ptr<aditof::Camera96Tof1Specifics>>(
