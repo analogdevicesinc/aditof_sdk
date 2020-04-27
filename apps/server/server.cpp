@@ -351,8 +351,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             type->set_width(detail.width);
             type->set_height(detail.height);
             type->set_type(detail.type);
-            type->mutable_cal_data()->set_gain(detail.cal_data.gain);
-            type->mutable_cal_data()->set_offset(detail.cal_data.offset);
         }
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
