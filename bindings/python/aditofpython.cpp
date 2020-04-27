@@ -64,7 +64,7 @@ PYBIND11_MODULE(aditofpython, m) {
         .def(py::init<>())
         .def_readwrite("width", &aditof::FrameDetails::width)
         .def_readwrite("height", &aditof::FrameDetails::height)
-        .def_readwrite("type", &aditof::FrameDetails::type)
+        .def_readwrite("type", &aditof::FrameDetails::type);
 
     // Camera declarations
 
