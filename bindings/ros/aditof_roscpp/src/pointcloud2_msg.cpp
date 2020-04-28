@@ -52,8 +52,9 @@ void PointCloud2Msg::setMetadataMembers(int width, int height) {
     sensor_msgs::PointCloud2Modifier modifier(msg);
     modifier.setPointCloud2Fields(4, "x", 1, sensor_msgs::PointField::FLOAT32,
                                   "y", 1, sensor_msgs::PointField::FLOAT32, "z",
-                                  1, sensor_msgs::PointField::FLOAT32, "rgb", 1,
-                                  sensor_msgs::PointField::UINT32);
+                                  1, sensor_msgs::PointField::FLOAT32,
+                                  "intensity", 1,
+                                  sensor_msgs::PointField::UINT16);
     msg.header.stamp = ros::Time::now();
     msg.header.frame_id = "base_link";
 
@@ -61,7 +62,8 @@ void PointCloud2Msg::setMetadataMembers(int width, int height) {
     msg.height = height;
 
     msg.is_bigendian = false;
-    msg.point_step = 4 * sizeOfPointField(sensor_msgs::PointField::FLOAT32);
+    msg.point_step = 3 * sizeOfPointField(sensor_msgs::PointField::FLOAT32) +
+                     sizeOfPointField(sensor_msgs::PointField::UINT16);
     msg.row_step = msg.point_step * msg.width;
     msg.is_dense = false;
 
@@ -80,18 +82,22 @@ void PointCloud2Msg::setDataMembers(const std::shared_ptr<Camera> &camera,
     sensor_msgs::PointCloud2Iterator<float> iter_x(msg, "x");
     sensor_msgs::PointCloud2Iterator<float> iter_y(msg, "y");
     sensor_msgs::PointCloud2Iterator<float> iter_z(msg, "z");
-    sensor_msgs::PointCloud2Iterator<uint32_t> iter_rgb(msg, "rgb");
+    sensor_msgs::PointCloud2Iterator<uint16_t> iter_intensity(msg, "intensity");
 
     const int frameHeight = static_cast<int>(msg.height);
     const int frameWidth = static_cast<int>(msg.width);
 
-    uint16_t *frameData = getFrameData(frame, aditof::FrameDataType::DEPTH);
+    uint16_t *frameDataDepth =
+        getFrameData(frame, aditof::FrameDataType::DEPTH);
+    uint16_t *frameDataIR = getFrameData(frame, aditof::FrameDataType::IR);
+
+    irTo16bitGrayscale(frameDataIR, frameWidth, frameHeight);
 
     for (int i = 0; i < frameHeight; i++) {
         for (int j = 0; j < frameWidth;
-             j++, ++iter_x, ++iter_y, ++iter_z, ++iter_rgb) {
+             j++, ++iter_x, ++iter_y, ++iter_z, ++iter_intensity) {
             int index = i * msg.width + j;
-            uint16_t depth = frameData[index];
+            uint16_t depth = frameDataDepth[index];
 
             //angle between camera's principal axis and the pixel that is being processed
             double tanXAngle = (x0 - j) / fx;
@@ -108,7 +114,7 @@ void PointCloud2Msg::setDataMembers(const std::shared_ptr<Camera> &camera,
             *iter_y = z * (i - y0) / fy;
             *iter_z = z;
 
-            *iter_rgb = frameData[index];
+            *iter_intensity = frameDataIR[index];
         }
     }
 }
