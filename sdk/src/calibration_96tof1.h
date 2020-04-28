@@ -82,7 +82,7 @@ struct packet_struct {
 
 class Calibration96Tof1 {
   public:
-	Calibration96Tof1();
+    Calibration96Tof1();
     ~Calibration96Tof1();
 
   public:
@@ -96,25 +96,24 @@ class Calibration96Tof1 {
     aditof::Status getIntrinsic(float key, std::vector<float> &data) const;
     aditof::Status setMode(const std::string &mode, int range,
                            unsigned int frameWidth, unsigned int frameheight);
-    aditof::Status calibrateDepth(uint16_t *frame, 
-                                  uint32_t frame_size);
-    aditof::Status calibrateCameraGeometry(uint16_t *frame, 
+    aditof::Status calibrateDepth(uint16_t *frame, uint32_t frame_size);
+    aditof::Status calibrateCameraGeometry(uint16_t *frame,
                                            uint32_t frame_size);
 
   private:
     float getMapSize(
         const std::unordered_map<float, packet_struct> &calibration_map) const;
-    float getPacketSize(
-        const std::unordered_map<float, param_struct> &packet) const;
+    float
+    getPacketSize(const std::unordered_map<float, param_struct> &packet) const;
     void buildDepthCalibrationCache(float gain, float offset,
-        int16_t maxPixelValue, int range);
-    void buildGeometryCalibrationCache(std::vector<float>& cameraMatrix,
-        unsigned int width, unsigned int height);
+                                    int16_t maxPixelValue, int range);
+    void buildGeometryCalibrationCache(std::vector<float> &cameraMatrix,
+                                       unsigned int width, unsigned int height);
 
   private:
     std::unordered_map<float, packet_struct> m_calibration_map;
-    uint16_t* m_depth_cache;
-    double* m_geometry_cache;
+    uint16_t *m_depth_cache;
+    double *m_geometry_cache;
     int m_range;
 };
 

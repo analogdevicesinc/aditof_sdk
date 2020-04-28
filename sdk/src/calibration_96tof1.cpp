@@ -36,8 +36,8 @@
 
 #define EEPROM_SIZE 131072
 
-Calibration96Tof1::Calibration96Tof1() :
-  m_depth_cache(NULL), m_geometry_cache(NULL), m_range(16000) {
+Calibration96Tof1::Calibration96Tof1()
+    : m_depth_cache(NULL), m_geometry_cache(NULL), m_range(16000) {
     std::unordered_map<float, param_struct> Header;
     Header[EEPROM_VERSION].value = {0};
     Header[EEPROM_VERSION].size =
@@ -63,7 +63,8 @@ Calibration96Tof1::Calibration96Tof1() :
 
     m_calibration_map[HEADER].size = (uint32_t)getPacketSize(Header);
     m_calibration_map[HEADER].packet = Header;
-    m_calibration_map[CAMERA_INTRINSIC].size = (uint32_t)getPacketSize(CameraIntrinsic);
+    m_calibration_map[CAMERA_INTRINSIC].size =
+        (uint32_t)getPacketSize(CameraIntrinsic);
     m_calibration_map[CAMERA_INTRINSIC].packet = CameraIntrinsic;
     m_calibration_map[HEADER].packet[TOTAL_SIZE].value = {
         getMapSize(m_calibration_map)};
@@ -124,8 +125,9 @@ Calibration96Tof1::saveCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
         data.push_back((float)sub_packet_map.size);
 
         for (const auto &packet : sub_packet_map.packet) {
-            data.push_back(packet.first);       // write parameter key
-            data.push_back((float)packet.second.size); // write size of parameter
+            data.push_back(packet.first); // write parameter key
+            data.push_back(
+                (float)packet.second.size); // write size of parameter
 
             for (const auto &value : packet.second.value) {
                 data.push_back(
@@ -182,12 +184,12 @@ Calibration96Tof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
 
         packet_struct sub_packet_map;
 
-        sub_packet_map.size = (uint32_t)*(float *)(data + j);
+        sub_packet_map.size = (uint32_t) * (float *)(data + j);
         j += 4;
 
         for (unsigned int i = 0;
-            i < sub_packet_map.size /
-            (sizeof(float));) // Parse all the sub-packets
+             i < sub_packet_map.size /
+                     (sizeof(float));) // Parse all the sub-packets
         {
             float parameter_key;
             parameter_key =
@@ -195,7 +197,8 @@ Calibration96Tof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
             j += 4;
             i++;
             sub_packet_map.packet[parameter_key].size =
-                (uint32_t)*(float *)(data + j); // Parse size of parameter from sub packet
+                (uint32_t) *
+                (float *)(data + j); // Parse size of parameter from sub packet
             j += 4;
             i++;
 
@@ -205,7 +208,7 @@ Calibration96Tof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
             for (unsigned int k = 0; k < number_elements; k++) {
                 sub_packet_map.packet[parameter_key].value.push_back(
                     *(float *)(data +
-                        j)); // Parse size of parameter from sub packet
+                               j)); // Parse size of parameter from sub packet
                 j += 4;
                 i++;
             }
@@ -225,8 +228,9 @@ getAfeFirmware - Get the firmware for a mode
 \param mode - Camera mode
 \param data - Buffer where to store the firmware
 */
-aditof::Status Calibration96Tof1::getAfeFirmware(const std::string &mode,
-                                           std::vector<uint16_t> &data) const {
+aditof::Status
+Calibration96Tof1::getAfeFirmware(const std::string &mode,
+                                  std::vector<uint16_t> &data) const {
     using namespace aditof;
 
     uint8_t cal_mode;
@@ -268,7 +272,8 @@ getAfeFirmware - Get the depth gain ad offset values for a mode
 \param gain - Stores the retuned gain value
 \param offset - Stores the retuned offset value
 */
-aditof::Status Calibration96Tof1::getGainOffset(const std::string &mode, float &gain,
+aditof::Status Calibration96Tof1::getGainOffset(const std::string &mode,
+                                                float &gain,
                                                 float &offset) const {
     using namespace aditof;
 
@@ -305,7 +310,7 @@ aditof::Status Calibration96Tof1::getGainOffset(const std::string &mode, float &
     return Status::GENERIC_ERROR;
 }
 
-//! getIntrinsic - Get the geometric camera calibration 
+//! getIntrinsic - Get the geometric camera calibration
 /*!
 getIntrinsic - Get the geometric camera clibration
 \param key - Specifies which calibration values to get: 
@@ -313,7 +318,7 @@ getIntrinsic - Get the geometric camera clibration
 \param data - Buffer to store the returned data
 */
 aditof::Status Calibration96Tof1::getIntrinsic(float key,
-                                         std::vector<float> &data) const {
+                                               std::vector<float> &data) const {
     using namespace aditof;
 
     bool validParam = (INTRINSIC == key) || (DISTORTION_COEFFICIENTS == key);
@@ -347,7 +352,7 @@ aditof::Status Calibration96Tof1::getIntrinsic(float key,
     return Status::GENERIC_ERROR;
 }
 
-//! setMode - Sets the mode to be used for depth calibration 
+//! setMode - Sets the mode to be used for depth calibration
 /*!
 setMode - Sets the mode to be used for depth calibration
 \param mode - Camera depth mode
@@ -364,18 +369,16 @@ aditof::Status Calibration96Tof1::setMode(const std::string &mode, int range,
     std::vector<float> cameraMatrix;
     const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
     float gain = 1.0, offset = 0.0;
-        
+
     status = getGainOffset(mode, gain, offset);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to read gain and offset from eeprom";
         return status;
-    }
-    else {
+    } else {
         LOG(INFO) << "Camera calibration parameters for mode: " << mode
-            << " are gain: " << gain
-            << " "
-            << "offset: " << offset;
-    }        
+                  << " are gain: " << gain << " "
+                  << "offset: " << offset;
+    }
     buildDepthCalibrationCache(gain, offset, pixelMaxValue, range);
     m_range = range;
 
@@ -383,30 +386,28 @@ aditof::Status Calibration96Tof1::setMode(const std::string &mode, int range,
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to read intrinsic from eeprom";
         return status;
-    }
-    else {
+    } else {
         LOG(INFO) << "Camera intrinsic parameters:\n"
-            << "    fx: " << cameraMatrix[0] << "\n"
-            << "    fy: " << cameraMatrix[4] << "\n"
-            << "    cx: " << cameraMatrix[2] << "\n"
-            << "    cy: " << cameraMatrix[5];
+                  << "    fx: " << cameraMatrix[0] << "\n"
+                  << "    fy: " << cameraMatrix[4] << "\n"
+                  << "    cx: " << cameraMatrix[2] << "\n"
+                  << "    cy: " << cameraMatrix[5];
     }
-    buildGeometryCalibrationCache(cameraMatrix, 
-                                  frameWidth, frameheight);
-    
+    buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
+
     return status;
 }
 
-//! calibrateDepth - Calibrate the depth data 
+//! calibrateDepth - Calibrate the depth data
 /*!
 calibrateDepth - Calibrate the depth data using the gain and offset
 \param frame - Buffer with the depth data, used to return the calibrated data
 \param frame_size - Number of samples in the frame data
 */
-aditof::Status Calibration96Tof1::calibrateDepth(uint16_t *frame, 
+aditof::Status Calibration96Tof1::calibrateDepth(uint16_t *frame,
                                                  uint32_t frame_size) {
     using namespace aditof;
-    
+
     uint16_t *cache = m_depth_cache;
 
     uint16_t *end = frame + (frame_size - frame_size % 8);
@@ -432,7 +433,7 @@ aditof::Status Calibration96Tof1::calibrateDepth(uint16_t *frame,
     return Status::OK;
 }
 
-//! calibrateCameraGeometry - Compensate for lens distorsion in the depth data 
+//! calibrateCameraGeometry - Compensate for lens distorsion in the depth data
 /*!
 calibrateCameraGeometry - Compensate for lens distorsion in the depth data
 \param frame - Buffer with the depth data, used to return the calibrated data
@@ -443,7 +444,8 @@ aditof::Status Calibration96Tof1::calibrateCameraGeometry(uint16_t *frame,
     using namespace aditof;
 
     for (uint32_t i = 0; i < frame_size; i++) {
-        frame[i] = static_cast<uint16_t>(static_cast<double>(frame[i] * m_geometry_cache[i]));
+        frame[i] = static_cast<uint16_t>(
+            static_cast<double>(frame[i] * m_geometry_cache[i]));
         if (frame[i] > m_range) {
             frame[i] = m_range;
         }
@@ -454,7 +456,7 @@ aditof::Status Calibration96Tof1::calibrateCameraGeometry(uint16_t *frame,
 
 // Create a cache to speed up depth calibration computation
 void Calibration96Tof1::buildDepthCalibrationCache(float gain, float offset,
-                                                   int16_t maxPixelValue, 
+                                                   int16_t maxPixelValue,
                                                    int range) {
     if (m_depth_cache) {
         delete[] m_depth_cache;
@@ -470,15 +472,13 @@ void Calibration96Tof1::buildDepthCalibrationCache(float gain, float offset,
 
 // Create a cache to speed up depth geometric camera calibration computation
 void Calibration96Tof1::buildGeometryCalibrationCache(
-                            std::vector<float>& cameraMatrix,
-                            unsigned int width,
-                            unsigned int height) {
-    
+    std::vector<float> &cameraMatrix, unsigned int width, unsigned int height) {
+
     float fx = cameraMatrix[0];
     float fy = cameraMatrix[4];
     float x0 = cameraMatrix[2];
     float y0 = cameraMatrix[5];
-    
+
     if (m_geometry_cache) {
         delete[] m_geometry_cache;
     }
@@ -486,7 +486,7 @@ void Calibration96Tof1::buildGeometryCalibrationCache(
     m_geometry_cache = new double[width * height];
     for (uint16_t i = 0; i < height; i++) {
         for (uint16_t j = 0; j < width; j++) {
-            
+
             double tanXAngle = (x0 - j) / fx;
             double tanYAngle = (y0 - i) / fy;
 
@@ -495,7 +495,6 @@ void Calibration96Tof1::buildGeometryCalibrationCache(
         }
     }
 }
-
 
 // Calculate and return the total size of calibration map
 float Calibration96Tof1::getMapSize(

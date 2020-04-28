@@ -86,8 +86,7 @@ struct LocalDevice::ImplData {
 
     ImplData()
         : fd(-1), sfd(-1), videoBuffers(nullptr),
-          nVideoBuffers(0), frameDetails{0, 0, ""},
-          started(false) {}
+          nVideoBuffers(0), frameDetails{0, 0, ""}, started(false) {}
 };
 
 // TO DO: This exists in linux_utils.h which is not included on Dragoboard.
