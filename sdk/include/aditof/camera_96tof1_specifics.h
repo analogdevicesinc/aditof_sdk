@@ -97,6 +97,15 @@ class SDK_API Camera96Tof1Specifics : public CameraSpecifics {
      */
     Revision getRevision() const;
 
+    /**
+     * @brief Sets the value of the IR gamma conversion to change the 
+	 * IR image contrast.
+     * The valid interval is [0, 1], where 0 means maximum contrast 
+	 * and 1 minimum contrast
+     * @return Status
+     */
+    Status setIrGammaConversion(float gamma);
+
   private:
     Status setTresholdAndEnable(uint16_t treshold, bool en);
 
