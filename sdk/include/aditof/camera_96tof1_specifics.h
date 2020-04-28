@@ -98,13 +98,20 @@ class SDK_API Camera96Tof1Specifics : public CameraSpecifics {
     Revision getRevision() const;
 
     /**
-     * @brief Sets the value of the IR gamma conversion to change the 
+     * @brief Sets the value of the IR gamma correction to change the 
 	 * IR image contrast.
      * The valid interval is [0, 1], where 0 means maximum contrast 
 	 * and 1 minimum contrast
      * @return Status
      */
-    Status setIrGammaConversion(float gamma);
+    Status setIrGammaCorrection(float gamma);
+
+    /**
+    * @brief Returns the last value that has been set for the IR gamma
+    * correction.
+    * @return float
+    */
+    float irGammaCorrection() const;
 
   private:
     Status setTresholdAndEnable(uint16_t treshold, bool en);
@@ -113,6 +120,7 @@ class SDK_API Camera96Tof1Specifics : public CameraSpecifics {
     Camera96Tof1 *m_camera;
     bool m_noiseReductionOn;
     uint16_t m_noiseReductionThreshold;
+    float m_irGammaCorrection;
     Revision m_revision;
 };
 

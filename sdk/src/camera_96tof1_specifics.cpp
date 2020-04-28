@@ -39,7 +39,7 @@ using namespace aditof;
 
 Camera96Tof1Specifics::Camera96Tof1Specifics(Camera *camera)
     : m_camera(dynamic_cast<Camera96Tof1 *>(camera)), m_noiseReductionOn(false),
-      m_noiseReductionThreshold(0) {
+      m_noiseReductionThreshold(0), m_irGammaCorrection(1.0f) {
     if (!m_camera) {
         LOG(ERROR) << "Cannot cast camera to a Camera96Tof1";
     }
@@ -101,7 +101,7 @@ Status Camera96Tof1Specifics::setTresholdAndEnable(uint16_t treshold, bool en) {
     return m_camera->m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
 }
 
-Status Camera96Tof1Specifics::setIrGammaConversion(float gamma) {
+Status Camera96Tof1Specifics::setIrGammaCorrection(float gamma) {
     aditof::Status status = Status::OK;
     const float x_val[] = {256, 512, 768, 896, 1024, 1536, 2048, 3072, 4096};
     uint16_t y_val[9];
@@ -124,6 +124,15 @@ Status Camera96Tof1Specifics::setIrGammaConversion(float gamma) {
     }
     status = m_camera->m_device->writeAfeRegisters(afeRegsAddr + 8,
                                                    afeRegsVal + 8, 8);
+    if (status != Status::OK) {
+        return status;
+    }
+
+    m_irGammaCorrection = gamma;
 
     return status;
+}
+
+float Camera96Tof1Specifics::irGammaCorrection() const {
+    return m_irGammaCorrection;
 }
