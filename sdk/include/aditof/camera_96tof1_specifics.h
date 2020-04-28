@@ -96,7 +96,7 @@ class SDK_API Camera96Tof1Specifics : public CameraSpecifics {
      * @return Revision
      */
     Revision getRevision() const;
-	
+
     /**
      * @brief Sets the value of the IR gamma conversion to change the 
 	 * IR image contrast.
@@ -105,7 +105,7 @@ class SDK_API Camera96Tof1Specifics : public CameraSpecifics {
      * @return Status
      */
     Status setIrGammaConversion(float gamma);
-	
+
   private:
     Status setTresholdAndEnable(uint16_t treshold, bool en);
 

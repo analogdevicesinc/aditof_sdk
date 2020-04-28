@@ -113,16 +113,16 @@ Status Camera96Tof1Specifics::setIrGammaConversion(float gamma) {
     uint16_t afeRegsAddr[] = {0x4001, 0x7c22, 0xc372, 0xc373, 0xc374, 0xc375,
                               0xc376, 0xc377, 0xc378, 0xc379, 0xc37a, 0xc37b,
                               0xc37c, 0xc37d, 0x4001, 0x7c22};
-    uint16_t afeRegsVal[]  = {0x0006,   0x0004,   0x7888,   0xa997, 
-                              0x000a,   y_val[0], y_val[1], y_val[2],
-                              y_val[3], y_val[4], y_val[5], y_val[6],
-                              y_val[7], y_val[8], 0x0007,   0x0004};
+    uint16_t afeRegsVal[] = {0x0006,   0x0004,   0x7888,   0xa997,
+                             0x000a,   y_val[0], y_val[1], y_val[2],
+                             y_val[3], y_val[4], y_val[5], y_val[6],
+                             y_val[7], y_val[8], 0x0007,   0x0004};
 
     status = m_camera->m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 8);
     if (status != Status::OK) {
         return status;
     }
-    status = m_camera->m_device->writeAfeRegisters(afeRegsAddr + 8, 
+    status = m_camera->m_device->writeAfeRegisters(afeRegsAddr + 8,
                                                    afeRegsVal + 8, 8);
 
     return status;
