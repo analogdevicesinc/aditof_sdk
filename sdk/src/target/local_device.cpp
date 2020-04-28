@@ -538,6 +538,18 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
         return status;
     }
 
+    auto isBufferPacked = [](const struct v4l2_buffer &buf, unsigned int width,
+                             unsigned int height) {
+        unsigned int bytesused = 0;
+        if (buf.type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+            bytesused = buf.m.planes[0].bytesused;
+        } else {
+            bytesused = buf.bytesused;
+        }
+
+        return bytesused == (width * height * 3 / 2);
+    };
+
     if ((width == 668)) {
         unsigned int j = 0;
         for (unsigned int i = 0; i < (buf_data_len); i += 3) {
@@ -553,7 +565,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
                         ((((unsigned short)*(pdata + i + 2)) & 0x00F0) >> 4);
             j++;
         }
-    } else if (buf.bytesused != (width * height * 3 / 2)) {
+    } else if (!isBufferPacked(buf, width, height)) {
         // TODO: investigate optimizations for this (arm neon / 1024 bytes
         // chunks)
         if (m_implData->frameDetails.type == "depth_only") {
