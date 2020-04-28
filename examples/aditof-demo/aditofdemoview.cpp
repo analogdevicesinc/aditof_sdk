@@ -168,6 +168,7 @@ void AdiTofDemoView::render() {
 
     int thresholdClicked = 0;
     int smallSignalThreshold = 50;
+    float IRGamma = 1.0f;
 
     std::string ipvalue = "";
     bool ipFieldSelected = false;
@@ -175,16 +176,19 @@ void AdiTofDemoView::render() {
     bool ipConnectionEnabled = false;
 
     std::string address = "0x";
-    std::string value = std::to_string(smallSignalThreshold);
+    std::string valueSTh = std::to_string(smallSignalThreshold);
+    std::string valueG = std::to_string(IRGamma);
     std::string fileName = "";
     std::string status = "";
 
     unsigned int addressColor = normalColor;
-    unsigned int valueColor = normalColor;
+    unsigned int valueColorSTh = normalColor;
+    unsigned int valueColorG = normalColor;
     unsigned int fieldColor = normalColor;
 
     bool addressFieldSelected = false;
-    bool valueFieldSelected = false;
+    bool valueFieldSelectedSTh = false;
+    bool valueFieldSelectedG = false;
     bool fileNameFieldSelected = false;
 
     const cv::String windows[] = {m_viewName, "Depth Image", "IR Image",
@@ -214,7 +218,7 @@ void AdiTofDemoView::render() {
     while (true) {
 
         // Fill the frame with a nice color
-        cv::Mat frame = cv::Mat(550, 400, CV_8UC3);
+        cv::Mat frame = cv::Mat(620, 400, CV_8UC3);
 
         frame = cv::Scalar(49, 52, 49);
 
@@ -251,11 +255,11 @@ void AdiTofDemoView::render() {
             checkboxChanged = true;
         }
 
-        cvui::beginColumn(frame, 50, 460);
+        cvui::beginColumn(frame, 50, 520);
         cvui::space(10);
         cvui::text("Revision: ", 0.6);
         cvui::space(10);
-        cvui::beginRow(frame, 50, 495);
+        cvui::beginRow(frame, 50, 555);
         cvui::checkbox("RevB", &revBChecked);
         cvui::space(10);
         cvui::checkbox("RevC", &revCChecked);
@@ -628,7 +632,7 @@ void AdiTofDemoView::render() {
         }
 #endif
         if (displayFps && (captureEnabled || captureBlendedEnabled)) {
-            cvui::text(frame, 350, 520, "FPS:" + std::to_string(displayFps));
+            cvui::text(frame, 350, 580, "FPS:" + std::to_string(displayFps));
         }
 
         if (captureEnabled || captureBlendedEnabled) {
@@ -638,8 +642,8 @@ void AdiTofDemoView::render() {
                 sprintf(afe_temp_str, "AFE TEMP: %.1f", temp.first);
                 sprintf(laser_temp_str, "LASER TEMP: %.1f", temp.second);
             }
-            cvui::text(frame, 20, 520, afe_temp_str);
-            cvui::text(frame, 180, 520, laser_temp_str);
+            cvui::text(frame, 20, 580, afe_temp_str);
+            cvui::text(frame, 180, 580, laser_temp_str);
         }
 
         if ((captureEnabled || captureBlendedEnabled) && !playbackEnabled) {
@@ -666,8 +670,8 @@ void AdiTofDemoView::render() {
         cvui::space(10);
         cvui::endColumn();
 
-        cvui::rect(frame, 50, 430, 100, 30, valueColor);
-        cvui::text(frame, 60, 440, value);
+        cvui::rect(frame, 50, 430, 100, 30, valueColorSTh);
+        cvui::text(frame, 60, 440, valueSTh);
         int thresholdClicked = cvui::iarea(50, 430, 100, 30);
 
         // Check if small signal toggle button has changed
@@ -699,13 +703,58 @@ void AdiTofDemoView::render() {
             }
         }
 
+        static bool lastIRGamma = false;
+
+        cvui::beginColumn(frame, 50, 460);
+        cvui::space(10);
+        cvui::checkbox("IR gamma correction", &m_crtIRGamma);
+        cvui::space(10);
+        cvui::endColumn();
+
+        cvui::rect(frame, 50, 490, 100, 30, valueColorG);
+        cvui::text(frame, 60, 500, valueG);
+        int gammaClicked = cvui::iarea(50, 490, 100, 30);
+
+        if (m_crtIRGamma != lastIRGamma) {
+            if (m_crtIRGamma) {
+                aditof::Status ret =
+                    m_ctrl->setIrGammaCorrection(IRGamma);
+                if (ret == aditof::Status::GENERIC_ERROR) {
+                    status = "No cameras connected!";
+                    m_crtIRGamma = false;
+                }
+            }
+            lastIRGamma = m_crtIRGamma;
+        }
+
+        if (cvui::button(frame, 160, 490, 90, 30, "Write")) {
+            if (m_crtIRGamma) {
+                aditof::Status ret =
+                    m_ctrl->setIrGammaCorrection(IRGamma);
+
+                if (ret == aditof::Status::GENERIC_ERROR) {
+                    status = "No cameras connected!";
+                }
+            }
+        }
+
+        if (gammaClicked == cvui::CLICK) {
+            valueColorG = selectedColor;
+            valueFieldSelectedG = true;
+        }
+        else if (cvui::mouse(cvui::CLICK) &&
+            gammaClicked != cvui::CLICK) {
+            valueColorG = normalColor;
+            valueFieldSelectedG = false;
+        }
+
         if (thresholdClicked == cvui::CLICK) {
-            valueColor = selectedColor;
-            valueFieldSelected = true;
+            valueColorSTh = selectedColor;
+            valueFieldSelectedSTh = true;
         } else if (cvui::mouse(cvui::CLICK) &&
                    thresholdClicked != cvui::CLICK) {
-            valueColor = normalColor;
-            valueFieldSelected = false;
+            valueColorSTh = normalColor;
+            valueFieldSelectedSTh = false;
         }
 
         cvui::imshow(m_viewName, frame);
@@ -773,19 +822,32 @@ void AdiTofDemoView::render() {
         bool backspace = false;
         std::string pressedValidKey = detail::getKeyPressed(key, backspace);
 
-        if (valueFieldSelected) {
+        if (valueFieldSelectedSTh) {
             if (key >= 47 && key <= 57) {
-                value += pressedValidKey;
-                int currentValue = stoi(value);
+                valueSTh += pressedValidKey;
+                int currentValue = stoi(valueSTh);
                 if (currentValue > ((1 << 14) - 1)) {
-                    value = value.substr(0, value.size() - 1);
+                    valueSTh = valueSTh.substr(0, valueSTh.size() - 1);
                 } else {
                     smallSignalThreshold = currentValue;
                 }
             } else if (backspace) {
-                value = value.substr(0, value.size() - 1);
-                if (value.compare("") != 0) {
-                    smallSignalThreshold = stoi(value);
+                valueSTh = valueSTh.substr(0, valueSTh.size() - 1);
+                if (valueSTh.compare("") != 0) {
+                    smallSignalThreshold = stoi(valueSTh);
+               }
+            }
+        }
+
+        if (valueFieldSelectedG) {
+            if ((key >= 48 && key <= 57) || (key == 46)) {
+                valueG += pressedValidKey;
+                IRGamma = stof(valueG);
+            }
+            else if (backspace) {
+                valueG = valueG.substr(0, valueG.size() - 1);
+                if (valueG.compare("") != 0) {
+                    IRGamma = stof(valueG);
                 }
             }
         }

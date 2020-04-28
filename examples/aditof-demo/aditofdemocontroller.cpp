@@ -358,6 +358,25 @@ AdiTofDemoController::setNoiseReductionThreshold(uint16_t threshold) {
 }
 
 aditof::Status
+AdiTofDemoController::setIrGammaCorrection(float gamma) {
+    using namespace aditof;
+
+    if (m_cameraInUse < 0)
+        return Status::GENERIC_ERROR;
+
+    auto specifics =
+        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSpecifics();
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+    if (cam96tof1Specifics) {
+        return cam96tof1Specifics->setIrGammaCorrection(gamma);
+    }
+
+    return Status::GENERIC_ERROR;
+}
+
+
+aditof::Status
 AdiTofDemoController::setCameraRevision(const std::string &revision) {
     using namespace aditof;
 

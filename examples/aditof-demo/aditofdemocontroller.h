@@ -29,8 +29,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef HELLOWORLDCONTROLLER_H
-#define HELLOWORLDCONTROLLER_H
+#ifndef ADITOFDEMOCONTROLLER_H
+#define ADITOFDEMOCONTROLLER_H
 
 #include <aditof/camera.h>
 #include <aditof/device_interface.h>
@@ -88,6 +88,7 @@ class AdiTofDemoController {
 
     aditof::Status enableNoiseReduction(bool en);
     aditof::Status setNoiseReductionThreshold(uint16_t threshold);
+    aditof::Status setIrGammaCorrection(float gamma);
 
     aditof::Status setCameraRevision(const std::string &revision);
 
