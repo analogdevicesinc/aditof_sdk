@@ -43,6 +43,8 @@ MessageFactory::create(const std::shared_ptr<aditof::Camera> &camera,
     case MessageType::sensor_msgs_IRImage:
         return new IRImageMsg(camera, frame,
                               sensor_msgs::image_encodings::MONO16);
+    case MessageType::sensor_msgs_CameraInfo:
+        return new CameraInfoMsg(camera, frame);
     }
     return nullptr;
 }
