@@ -717,8 +717,7 @@ void AdiTofDemoView::render() {
 
         if (m_crtIRGamma != lastIRGamma) {
             if (m_crtIRGamma) {
-                aditof::Status ret =
-                    m_ctrl->setIrGammaCorrection(IRGamma);
+                aditof::Status ret = m_ctrl->setIrGammaCorrection(IRGamma);
                 if (ret == aditof::Status::GENERIC_ERROR) {
                     status = "No cameras connected!";
                     m_crtIRGamma = false;
@@ -729,8 +728,7 @@ void AdiTofDemoView::render() {
 
         if (cvui::button(frame, 160, 490, 90, 30, "Write")) {
             if (m_crtIRGamma) {
-                aditof::Status ret =
-                    m_ctrl->setIrGammaCorrection(IRGamma);
+                aditof::Status ret = m_ctrl->setIrGammaCorrection(IRGamma);
 
                 if (ret == aditof::Status::GENERIC_ERROR) {
                     status = "No cameras connected!";
@@ -741,9 +739,8 @@ void AdiTofDemoView::render() {
         if (gammaClicked == cvui::CLICK) {
             valueColorG = selectedColor;
             valueFieldSelectedG = true;
-        }
-        else if (cvui::mouse(cvui::CLICK) &&
-            gammaClicked != cvui::CLICK) {
+        } else if (cvui::mouse(cvui::CLICK) &&
+                   gammaClicked != cvui::CLICK) {
             valueColorG = normalColor;
             valueFieldSelectedG = false;
         }
@@ -835,7 +832,7 @@ void AdiTofDemoView::render() {
                 valueSTh = valueSTh.substr(0, valueSTh.size() - 1);
                 if (valueSTh.compare("") != 0) {
                     smallSignalThreshold = stoi(valueSTh);
-               }
+                }
             }
         }
 
@@ -843,8 +840,7 @@ void AdiTofDemoView::render() {
             if ((key >= 48 && key <= 57) || (key == 46)) {
                 valueG += pressedValidKey;
                 IRGamma = stof(valueG);
-            }
-            else if (backspace) {
+            } else if (backspace) {
                 valueG = valueG.substr(0, valueG.size() - 1);
                 if (valueG.compare("") != 0) {
                     IRGamma = stof(valueG);

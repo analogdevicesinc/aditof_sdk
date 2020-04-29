@@ -118,8 +118,7 @@ Status Camera96Tof1Specifics::setIrGammaCorrection(float gamma) {
                              y_val[3], y_val[4], y_val[5], y_val[6],
                              y_val[7], y_val[8], 0x0007,   0x0004};
 
-    status = m_camera->m_device->writeAfeRegisters(afeRegsAddr,
-                                                   afeRegsVal, 8);
+    status = m_camera->m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 8);
     if (status != Status::OK) {
         return status;
     }
@@ -128,9 +127,9 @@ Status Camera96Tof1Specifics::setIrGammaCorrection(float gamma) {
     if (status != Status::OK) {
         return status;
     }
-    
+
     m_irGammaCorrection = gamma;
-    
+
     return status;
 }
 

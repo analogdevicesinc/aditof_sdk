@@ -357,8 +357,7 @@ AdiTofDemoController::setNoiseReductionThreshold(uint16_t threshold) {
     return Status::GENERIC_ERROR;
 }
 
-aditof::Status
-AdiTofDemoController::setIrGammaCorrection(float gamma) {
+aditof::Status AdiTofDemoController::setIrGammaCorrection(float gamma) {
     using namespace aditof;
 
     if (m_cameraInUse < 0)
