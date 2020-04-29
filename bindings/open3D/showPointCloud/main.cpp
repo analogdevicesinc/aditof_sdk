@@ -131,19 +131,6 @@ int main(int argc, char *argv[]) {
     int frameHeight = static_cast<int>(frameDetails.height) / 2;
     int frameWidth = static_cast<int>(frameDetails.width);
 
-    /* Create visualizers for depth and for color image (depth + IR) */
-    auto visualized_depth_img = std::make_shared<geometry::Image>();
-    visualized_depth_img->Prepare(frameWidth, frameHeight, 1, 2);
-    visualization::Visualizer depth_vis;
-    depth_vis.CreateVisualizerWindow("Depth Image", frameWidth, frameHeight);
-    bool is_geometry_added_depth = false;
-
-    auto visualized_color_img = std::make_shared<geometry::Image>();
-    visualized_color_img->Prepare(frameWidth, frameHeight, 3, 1);
-    visualization::Visualizer color_vis;
-    color_vis.CreateVisualizerWindow("Color Image", frameWidth, frameHeight);
-    bool is_geometry_added = false;
-
     /* Create visualizer for pointcloud */
     visualization::Visualizer pointcloud_vis;
     pointcloud_vis.CreateVisualizerWindow("Pointcloud", 800, 800);
@@ -210,26 +197,6 @@ int main(int argc, char *argv[]) {
                 ir_color.data_[i + 2] * 0.5 + depth_color.data_[i + 2] * 0.5;
         }
 
-        /* Show deth and color images */
-        visualized_color_img->data_ = color_image.data_;
-        if (!is_geometry_added) {
-            color_vis.AddGeometry(visualized_color_img);
-            is_geometry_added = true;
-        }
-
-        visualized_depth_img->data_ = depth16bits_image.data_;
-        if (!is_geometry_added_depth) {
-            depth_vis.AddGeometry(visualized_depth_img);
-            is_geometry_added_depth = true;
-        }
-        color_vis.UpdateGeometry();
-        color_vis.PollEvents();
-        color_vis.UpdateRender();
-
-        depth_vis.UpdateGeometry();
-        depth_vis.PollEvents();
-        depth_vis.UpdateRender();
-
         /* create and show pointcloud */
         auto rgbd_ptr = geometry::RGBDImage::CreateFromColorAndDepth(
             color_image, depth16bits_image, 1000.0, 3.0, false);
@@ -266,8 +233,6 @@ int main(int argc, char *argv[]) {
 
         if (is_window_closed == false) {
             pointcloud_vis.DestroyVisualizerWindow();
-            color_vis.DestroyVisualizerWindow();
-            depth_vis.DestroyVisualizerWindow();
             break;
         } else {
             pointcloud_vis.UpdateGeometry();
