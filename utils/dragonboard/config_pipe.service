@@ -4,6 +4,8 @@ StartLimitIntervalSec=10
 [Service]
 User=root
 ExecStart=/home/linaro/workspace/github/aditof_sdk/utils/dragonboard/config_pipe.sh
+Restart=on-failure
+RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target
