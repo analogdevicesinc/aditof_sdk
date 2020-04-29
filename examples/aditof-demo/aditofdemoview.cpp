@@ -739,8 +739,7 @@ void AdiTofDemoView::render() {
         if (gammaClicked == cvui::CLICK) {
             valueColorG = selectedColor;
             valueFieldSelectedG = true;
-        } else if (cvui::mouse(cvui::CLICK) &&
-                   gammaClicked != cvui::CLICK) {
+        } else if (cvui::mouse(cvui::CLICK) && gammaClicked != cvui::CLICK) {
             valueColorG = normalColor;
             valueFieldSelectedG = false;
         }
