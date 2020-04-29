@@ -374,7 +374,6 @@ aditof::Status AdiTofDemoController::setIrGammaCorrection(float gamma) {
     return Status::GENERIC_ERROR;
 }
 
-
 aditof::Status
 AdiTofDemoController::setCameraRevision(const std::string &revision) {
     using namespace aditof;
