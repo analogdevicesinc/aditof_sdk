@@ -15,3 +15,5 @@ If NumPy library is not found you should install it using pip:
 ```python
 pip install numpy
 ```
+
+![Display Image](/doc/img/pointcloud_python.png)
