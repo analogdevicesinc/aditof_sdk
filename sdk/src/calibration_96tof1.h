@@ -107,7 +107,7 @@ class Calibration96Tof1 {
     getPacketSize(const std::unordered_map<float, param_struct> &packet) const;
     void buildDepthCalibrationCache(float gain, float offset,
                                     int16_t maxPixelValue, int range);
-    void buildGeometryCalibrationCache(std::vector<float> &cameraMatrix,
+    void buildGeometryCalibrationCache(const std::vector<float> &cameraMatrix,
                                        unsigned int width, unsigned int height);
 
   private:

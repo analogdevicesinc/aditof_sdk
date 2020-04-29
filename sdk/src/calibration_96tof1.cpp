@@ -37,7 +37,7 @@
 #define EEPROM_SIZE 131072
 
 Calibration96Tof1::Calibration96Tof1()
-    : m_depth_cache(NULL), m_geometry_cache(NULL), m_range(16000) {
+    : m_depth_cache(nullptr), m_geometry_cache(nullptr), m_range(16000) {
     std::unordered_map<float, param_struct> Header;
     Header[EEPROM_VERSION].value = {0};
     Header[EEPROM_VERSION].size =
@@ -111,8 +111,7 @@ aditof::Status Calibration96Tof1::displayCalMap() const {
 //! SaveCalMap - Save the entire calibration map
 /*!
 SaveCalMap - Saves the entire calibration map as binary to a file.
-\param calibration_map - Calibarion map to be displayed
-\param file_name - File where the calibration map needs to be stored
+\device - Pointer to a device instance
 */
 aditof::Status
 Calibration96Tof1::saveCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
@@ -146,8 +145,7 @@ Calibration96Tof1::saveCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
 //! ReadCalMap - Read the entire calibration map
 /*!
 ReadCalMap - Read the entire calibration map from a binary file
-\param calibration_map - Calibarion map to be read
-\param file_name - File from where the calibration map needs to be read
+\device - Pointer to a device instance
 */
 aditof::Status
 Calibration96Tof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
@@ -265,9 +263,9 @@ Calibration96Tof1::getAfeFirmware(const std::string &mode,
     return Status::GENERIC_ERROR;
 }
 
-//! getAfeFirmware - Get the depth gain ad offset values for a mode
+//! getGainOffset - Get the depth gain ad offset values for a mode
 /*!
-getAfeFirmware - Get the depth gain ad offset values for a mode
+getGainOffset - Get the depth gain ad offset values for a mode
 \param mode - Camera mode
 \param gain - Stores the retuned gain value
 \param offset - Stores the retuned offset value
@@ -444,8 +442,7 @@ aditof::Status Calibration96Tof1::calibrateCameraGeometry(uint16_t *frame,
     using namespace aditof;
 
     for (uint32_t i = 0; i < frame_size; i++) {
-        frame[i] = static_cast<uint16_t>(
-            static_cast<double>(frame[i] * m_geometry_cache[i]));
+        frame[i] = static_cast<uint16_t>(frame[i] * m_geometry_cache[i]);
         if (frame[i] > m_range) {
             frame[i] = m_range;
         }
@@ -472,7 +469,8 @@ void Calibration96Tof1::buildDepthCalibrationCache(float gain, float offset,
 
 // Create a cache to speed up depth geometric camera calibration computation
 void Calibration96Tof1::buildGeometryCalibrationCache(
-    std::vector<float> &cameraMatrix, unsigned int width, unsigned int height) {
+    const std::vector<float> &cameraMatrix,
+    unsigned int width, unsigned int height) {
 
     float fx = cameraMatrix[0];
     float fy = cameraMatrix[4];
