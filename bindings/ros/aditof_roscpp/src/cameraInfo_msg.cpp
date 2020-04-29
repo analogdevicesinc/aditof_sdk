@@ -29,24 +29,42 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef MESSAGE_FACTORY_H
-#define MESSAGE_FACTORY_H
+#include "cameraInfo_msg.h"
 
-#include "depthImage_msg.h"
-#include "irImage_msg.h"
-#include "pointcloud2_msg.h"
+using namespace aditof;
 
-enum class MessageType {
-    sensor_msgs_PointCloud2,
-    sensor_msgs_DepthImage,
-    sensor_msgs_IRImage
-};
+CameraInfoMsg::CameraInfoMsg() {}
 
-class MessageFactory {
-  public:
-    static AditofSensorMsg *
-    create(const std::shared_ptr<aditof::Camera> &camera, aditof::Frame *frame,
-           MessageType type);
-};
+CameraInfoMsg::CameraInfoMsg(const std::shared_ptr<aditof::Camera> &camera,
+                             aditof::Frame *frame) {
+    FrameDataToMsg(camera, frame);
+}
 
-#endif // MESSAGE_FACTORY_H
+void CameraInfoMsg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
+                                   aditof::Frame *frame) {
+    FrameDetails fDetails;
+    frame->getDetails(fDetails);
+
+    setMembers(camera, fDetails.width, fDetails.height / 2);
+}
+
+void CameraInfoMsg::setMembers(const std::shared_ptr<Camera> &camera, int width,
+                               int height) {
+    msg.header.stamp = ros::Time::now();
+    msg.header.frame_id = "aditof_camera_info";
+
+    msg.width = width;
+    msg.height = height;
+    msg.distortion_model = "plumb_bob";
+
+    IntrinsicParameters intr = getIntrinsics(camera);
+
+    msg.D = std::vector<double>(intr.distCoeffs.begin(), intr.distCoeffs.end());
+    float *ptr = intr.cameraMatrix.data();
+    msg.K = {ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]};
+    msg.R = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+    msg.P = {msg.K[0], msg.K[1], msg.K[2], 0.0f,     msg.K[3], msg.K[4],
+             msg.K[5], 0.0f,     msg.K[6], msg.K[7], msg.K[8], 0.0f};
+}
+
+void CameraInfoMsg::publishMsg(const ros::Publisher &pub) { pub.publish(msg); }
