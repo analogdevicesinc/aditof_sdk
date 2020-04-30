@@ -469,8 +469,8 @@ void Calibration96Tof1::buildDepthCalibrationCache(float gain, float offset,
 
 // Create a cache to speed up depth geometric camera calibration computation
 void Calibration96Tof1::buildGeometryCalibrationCache(
-    const std::vector<float> &cameraMatrix,
-    unsigned int width, unsigned int height) {
+    const std::vector<float> &cameraMatrix, unsigned int width,
+    unsigned int height) {
 
     float fx = cameraMatrix[0];
     float fy = cameraMatrix[4];
