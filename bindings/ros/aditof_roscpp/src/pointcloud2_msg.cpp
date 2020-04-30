@@ -97,7 +97,7 @@ void PointCloud2Msg::setDataMembers(const std::shared_ptr<Camera> &camera,
         for (int j = 0; j < frameWidth;
              j++, ++iter_x, ++iter_y, ++iter_z, ++iter_intensity) {
             int index = i * msg.width + j;
-            float z = static_cast<float>(frameData[index]) / 1000.0f;
+            float z = static_cast<float>(frameDataDepth[index]) / 1000.0f;
 
             *iter_x = z * (j - x0) / fx;
             *iter_y = z * (i - y0) / fy;
