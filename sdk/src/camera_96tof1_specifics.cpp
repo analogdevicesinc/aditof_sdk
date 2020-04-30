@@ -31,6 +31,7 @@
  */
 #include <aditof/camera_96tof1_specifics.h>
 #include <glog/logging.h>
+#include <math.h>
 
 #include "camera_96tof1.h"
 
@@ -38,7 +39,7 @@ using namespace aditof;
 
 Camera96Tof1Specifics::Camera96Tof1Specifics(Camera *camera)
     : m_camera(dynamic_cast<Camera96Tof1 *>(camera)), m_noiseReductionOn(false),
-      m_noiseReductionThreshold(0) {
+      m_noiseReductionThreshold(0), m_irGammaCorrection(1.0f) {
     if (!m_camera) {
         LOG(ERROR) << "Cannot cast camera to a Camera96Tof1";
     }
@@ -98,4 +99,40 @@ Status Camera96Tof1Specifics::setTresholdAndEnable(uint16_t treshold, bool en) {
     }
 
     return m_camera->m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+}
+
+Status Camera96Tof1Specifics::setIrGammaCorrection(float gamma) {
+    aditof::Status status = Status::OK;
+    const float x_val[] = {256, 512, 768, 896, 1024, 1536, 2048, 3072, 4096};
+    uint16_t y_val[9];
+
+    for (int i = 0; i < 9; i++) {
+        y_val[i] = (uint16_t)(pow(x_val[i] / 4096.0f, gamma) * 1024.0f);
+    }
+
+    uint16_t afeRegsAddr[] = {0x4001, 0x7c22, 0xc372, 0xc373, 0xc374, 0xc375,
+                              0xc376, 0xc377, 0xc378, 0xc379, 0xc37a, 0xc37b,
+                              0xc37c, 0xc37d, 0x4001, 0x7c22};
+    uint16_t afeRegsVal[] = {0x0006,   0x0004,   0x7888,   0xa997,
+                             0x000a,   y_val[0], y_val[1], y_val[2],
+                             y_val[3], y_val[4], y_val[5], y_val[6],
+                             y_val[7], y_val[8], 0x0007,   0x0004};
+
+    status = m_camera->m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 8);
+    if (status != Status::OK) {
+        return status;
+    }
+    status = m_camera->m_device->writeAfeRegisters(afeRegsAddr + 8,
+                                                   afeRegsVal + 8, 8);
+    if (status != Status::OK) {
+        return status;
+    }
+
+    m_irGammaCorrection = gamma;
+
+    return status;
+}
+
+float Camera96Tof1Specifics::irGammaCorrection() const {
+    return m_irGammaCorrection;
 }

@@ -32,12 +32,16 @@
 #ifndef MESSAGE_FACTORY_H
 #define MESSAGE_FACTORY_H
 
+#include "cameraInfo_msg.h"
+#include "depthImage_msg.h"
+#include "irImage_msg.h"
 #include "pointcloud2_msg.h"
 
 enum class MessageType {
-    sensor_msgs_PointCloud2
-    // TODO: add support for other types of messages
-    //,sensor_msgs_Image, sensor_msgs_CameraInfo
+    sensor_msgs_PointCloud2,
+    sensor_msgs_DepthImage,
+    sensor_msgs_IRImage,
+    sensor_msgs_CameraInfo
 };
 
 class MessageFactory {

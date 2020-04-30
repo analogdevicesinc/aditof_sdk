@@ -29,8 +29,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef HELLOWORLDVIEW_H
-#define HELLOWORLDVIEW_H
+#ifndef ADITOFDEMOVIEW_H
+#define ADITOFDEMOVIEW_H
 
 #include <aditof/frame.h>
 #include <fstream>
@@ -83,6 +83,7 @@ class AdiTofDemoView {
     int m_distanceVal;
 
     bool m_crtSmallSignalState;
+    bool m_crtIRGamma;
 };
 
 #endif
