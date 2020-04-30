@@ -91,10 +91,7 @@ void PointCloud2Msg::setDataMembers(const std::shared_ptr<Camera> &camera,
         for (int j = 0; j < frameWidth;
              j++, ++iter_x, ++iter_y, ++iter_z, ++iter_rgb) {
             int index = i * msg.width + j;
-            uint16_t depth = frameData[index];
-
-            // rviz expects the data in metres
-            z /= 1000.0f;
+            float z = static_cast<float>(frameData[index]) / 1000.0f;
 
             *iter_x = z * (j - x0) / fx;
             *iter_y = z * (i - y0) / fy;
