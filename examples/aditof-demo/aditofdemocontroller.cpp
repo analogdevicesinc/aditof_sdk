@@ -367,8 +367,15 @@ aditof::Status AdiTofDemoController::setIrGammaCorrection(float gamma) {
         m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSpecifics();
     auto cam96tof1Specifics =
         std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+
     if (cam96tof1Specifics) {
         return cam96tof1Specifics->setIrGammaCorrection(gamma);
+    } else {
+        auto chiconySpecifics =
+            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
+        if (chiconySpecifics) {
+            return chiconySpecifics->setIrGammaCorrection(gamma);
+        }
     }
 
     return Status::GENERIC_ERROR;
