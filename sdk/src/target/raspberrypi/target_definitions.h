@@ -43,6 +43,9 @@ static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
 static const char *EEPROM_REPLACEMENT_PATH =
     "/home/pi/workspace/github/aditof_sdk/chicony_firmware.bin";
 
+static const char *TEMP_SENSOR_REPLACEMENT_DEV_PATH =
+    "/sys/class/hwmon/hwmon2/temp1_input";
+
 static const char *CAPTURE_DEVICE_NAME = "unicam";
 
 #endif // TARGET_DEFINITIONS_H
