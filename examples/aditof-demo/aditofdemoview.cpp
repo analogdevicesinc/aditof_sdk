@@ -99,7 +99,8 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
                                const std::string &name)
     : m_ctrl(ctrl), m_viewName(name), m_depthFrameAvailable(false),
       m_irFrameAvailable(false), m_stopWorkersFlag(false), m_center(true),
-      m_waitKeyBarrier(0), m_distanceVal(0), m_crtSmallSignalState(false) {
+      m_waitKeyBarrier(0), m_distanceVal(0), m_crtSmallSignalState(false),
+      m_crtIRGamma(false) {
     // cv::setNumThreads(2);
     m_depthImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
@@ -718,6 +719,12 @@ void AdiTofDemoView::render() {
         if (m_crtIRGamma != lastIRGamma) {
             if (m_crtIRGamma) {
                 aditof::Status ret = m_ctrl->setIrGammaCorrection(IRGamma);
+                if (ret == aditof::Status::GENERIC_ERROR) {
+                    status = "No cameras connected!";
+                    m_crtIRGamma = false;
+                }
+            } else {
+                aditof::Status ret = m_ctrl->setIrGammaCorrection(1.0f);
                 if (ret == aditof::Status::GENERIC_ERROR) {
                     status = "No cameras connected!";
                     m_crtIRGamma = false;
