@@ -190,30 +190,11 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         }
     }
 
-    std::vector<std::string> modes;
-    getAvailableModes(modes);
-
-    for (const std::string &mode : modes) {
-        if (mode == skCustomMode)
-            continue;
-
-        int range = 1;
-        auto iter = std::find_if(rangeValues.begin(), rangeValues.end(),
-                                 [&mode](struct rangeStruct rangeMode) {
-                                     return rangeMode.mode == mode;
-                                 });
-
-        if (iter != rangeValues.end()) {
-            range = (*iter).maxDepth;
-        }
-
-        float gain = 1.0, offset = 0.0;
-        status = m_calibration.setMode(mode, range, m_details.frameType.width,
-                                       m_details.frameType.height);
-        if (status != Status::OK) {
-            LOG(WARNING) << "Failed to set calibration mode";
-            return status;
-        }
+    status = m_calibration.setMode(mode, m_details.maxDepth, m_details.frameType.width,
+                                   m_details.frameType.height);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to set calibration mode";
+        return status;
     }
 
     // register writes for enabling only one video stream (depth/ ir)
