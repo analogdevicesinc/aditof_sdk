@@ -190,7 +190,8 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         }
     }
 
-    status = m_calibration.setMode(mode, m_details.maxDepth, m_details.frameType.width,
+    status = m_calibration.setMode(mode, m_details.maxDepth,
+                                   m_details.frameType.width,
                                    m_details.frameType.height);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to set calibration mode";
