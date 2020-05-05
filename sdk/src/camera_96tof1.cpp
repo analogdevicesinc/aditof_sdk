@@ -320,10 +320,12 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
     if (m_details.mode != skCustomMode &&
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
-        m_calibration.calibrateDepth(
-            frameDataLocation, frameDetails.width * frameDetails.height / 2);
+        m_calibration.calibrateDepth(frameDataLocation,
+                                     m_details.frameType.width *
+                                         m_details.frameType.height / 2);
         m_calibration.calibrateCameraGeometry(
-            frameDataLocation, frameDetails.width * frameDetails.height / 2);
+            frameDataLocation,
+            m_details.frameType.width * m_details.frameType.height / 2);
     }
 
     return Status::OK;
