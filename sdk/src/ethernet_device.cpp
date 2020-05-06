@@ -32,7 +32,6 @@
 #include "ethernet_device.h"
 #include "device_utils.h"
 #include "network.h"
-#include "utils.h"
 
 #include <glog/logging.h>
 #include <unordered_map>
@@ -271,8 +270,6 @@ aditof::Status EthernetDevice::getAvailableFrameTypes(
         aditofDetails.width = details.width();
         aditofDetails.height = details.height();
         aditofDetails.type = details.type();
-        aditofDetails.cal_data.gain = details.cal_data().gain();
-        aditofDetails.cal_data.offset = details.cal_data().offset();
 
         types.push_back(aditofDetails);
     }
@@ -652,45 +649,6 @@ aditof::Status EthernetDevice::readLaserTemp(float &temperature) {
     }
 
     return status;
-}
-
-aditof::Status EthernetDevice::setCalibrationParams(const std::string &mode,
-                                                    float gain, float offset,
-                                                    int range) {
-
-    const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
-    CalibrationData calib_data;
-    calib_data.mode = mode;
-    calib_data.gain = gain;
-    calib_data.offset = offset;
-    calib_data.cache = aditof::Utils::buildCalibrationCache(
-        gain, offset, pixelMaxValue, range);
-    m_implData->calibration_cache[mode] = calib_data;
-
-    return aditof::Status::OK;
-}
-
-aditof::Status
-EthernetDevice::applyCalibrationToFrame(uint16_t *frame,
-                                        const std::string &mode) {
-    // This should be done on the target by the LocalDevice since the
-    // EthernetDevice is is actually an implementation of the communication
-    // channel. But it is far more efficient to do this on the host which may
-    // have more computing power than the target and also avoids the overhead of
-    // transporting the frame back and forth.
-
-    if (m_implData->frameDetails_cache.type.empty()) {
-        LOG(WARNING) << "Frame type has not been set for this device";
-        return aditof::Status::GENERIC_ERROR;
-    }
-
-    unsigned int width = m_implData->frameDetails_cache.width;
-    unsigned int height = m_implData->frameDetails_cache.height;
-
-    aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
-                                  frame, width, height);
-
-    return aditof::Status::OK;
 }
 
 aditof::Status

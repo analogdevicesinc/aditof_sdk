@@ -188,42 +188,15 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
             LOG(WARNING) << "Failed to program AFE";
             return Status::UNREACHABLE;
         }
-
-        status =
-            m_calibration.getGainOffset(mode, m_details.frameType.cal_data.gain,
-                                        m_details.frameType.cal_data.offset);
-        if (status != Status::OK) {
-            LOG(WARNING) << "Failed to read gain and offset from eeprom";
-            return Status::UNREACHABLE;
-        } else {
-            LOG(INFO) << "Camera calibration parameters for mode: " << mode
-                      << " are gain: " << m_details.frameType.cal_data.gain
-                      << " "
-                      << "offset: " << m_details.frameType.cal_data.offset;
-        }
     }
 
-    std::vector<std::string> modes;
-    getAvailableModes(modes);
-
-    for (const std::string &mode : modes) {
-        if (mode == skCustomMode)
-            continue;
-
-        float gain = 1.0, offset = 0.0;
-        Status status = m_calibration.getGainOffset(mode, gain, offset);
-        if (status == Status::OK) {
-            int range = 1;
-
-            auto iter = std::find_if(rangeValues.begin(), rangeValues.end(),
-                                     [&mode](struct rangeStruct rangeMode) {
-                                         return rangeMode.mode == mode;
-                                     });
-
-            if (iter != rangeValues.end()) {
-                range = (*iter).maxDepth;
-            }
-            m_device->setCalibrationParams(mode, gain, offset, range);
+    if (mode != skCustomMode) {
+        status = m_calibration.setMode(mode, m_details.maxDepth,
+                                       m_details.frameType.width,
+                                       m_details.frameType.height);
+        if (status != Status::OK) {
+            LOG(WARNING) << "Failed to set calibration mode";
+            return status;
         }
     }
 
@@ -347,7 +320,12 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
     if (m_details.mode != skCustomMode &&
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
-        m_device->applyCalibrationToFrame(frameDataLocation, m_details.mode);
+        m_calibration.calibrateDepth(frameDataLocation,
+                                     m_details.frameType.width *
+                                         m_details.frameType.height / 2);
+        m_calibration.calibrateCameraGeometry(
+            frameDataLocation,
+            m_details.frameType.width * m_details.frameType.height / 2);
     }
 
     return Status::OK;

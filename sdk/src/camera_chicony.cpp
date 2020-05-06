@@ -159,9 +159,6 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
         delete[] firmwareData;
     }
 
-    float gain = 1.0, offset = 0.0;
-    m_device->setCalibrationParams(mode, gain, offset, m_details.maxDepth);
-
     // register writes for enabling only one video stream (depth/ ir)
     // must be done here after programming the camera in order for them to
     // work properly. Setting the mode of the camera, programming it

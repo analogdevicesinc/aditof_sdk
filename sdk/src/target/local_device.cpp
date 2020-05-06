@@ -31,7 +31,6 @@
  */
 #include "local_device.h"
 #include "target_definitions.h"
-#include "utils.h"
 #include <aditof/frame_operations.h>
 #include <fstream>
 
@@ -87,8 +86,7 @@ struct LocalDevice::ImplData {
 
     ImplData()
         : fd(-1), sfd(-1), videoBuffers(nullptr),
-          nVideoBuffers(0), frameDetails{0, 0, "", {0.0f, 1.0f}},
-          started(false) {}
+          nVideoBuffers(0), frameDetails{0, 0, ""}, started(false) {}
 };
 
 // TO DO: This exists in linux_utils.h which is not included on Dragoboard.
@@ -311,29 +309,21 @@ LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
 
     details.width = 640;
     details.height = 960;
-    details.cal_data.offset = 0;
-    details.cal_data.gain = 1;
     details.type = "depth_ir";
     types.push_back(details);
 
     details.width = 640;
     details.height = 960;
-    details.cal_data.offset = 0;
-    details.cal_data.gain = 1;
     details.type = "depth_only";
     types.push_back(details);
 
     details.width = 640;
     details.height = 960;
-    details.cal_data.offset = 0;
-    details.cal_data.gain = 1;
     details.type = "ir_only";
     types.push_back(details);
 
     details.width = 668;
     details.height = 750;
-    details.cal_data.offset = 0;
-    details.cal_data.gain = 1;
     details.type = "raw";
     types.push_back(details);
 
@@ -845,34 +835,6 @@ aditof::Status LocalDevice::readLaserTemp(float &temperature) {
     }
 
     return status;
-}
-
-aditof::Status LocalDevice::setCalibrationParams(const std::string &mode,
-                                                 float gain, float offset,
-                                                 int range) {
-    const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
-    CalibrationData calib_data;
-    calib_data.mode = mode;
-    calib_data.gain = gain;
-    calib_data.offset = offset;
-    calib_data.cache = aditof::Utils::buildCalibrationCache(
-        gain, offset, pixelMaxValue, range);
-
-    m_implData->calibration_cache[mode] = calib_data;
-
-    return aditof::Status::OK;
-}
-
-aditof::Status LocalDevice::applyCalibrationToFrame(uint16_t *frame,
-                                                    const std::string &mode) {
-
-    unsigned int width = m_implData->frameDetails.width;
-    unsigned int height = m_implData->frameDetails.height;
-
-    aditof::Utils::calibrateFrame(m_implData->calibration_cache[mode].cache,
-                                  frame, width, height);
-
-    return aditof::Status::OK;
 }
 
 aditof::Status LocalDevice::getDetails(aditof::DeviceDetails &details) const {

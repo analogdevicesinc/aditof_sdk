@@ -167,29 +167,6 @@ class DeviceInterface {
     virtual aditof::Status readLaserTemp(float &temperature) = 0;
 
     /**
-     * @brief Make device cache calibration parameters for a given camera mode
-     * @param mode - a camera specific mode
-     * @param gain - the gain correction
-     * @param offset - the offset correction
-     * @param range - the maximum range, in mm, for the given mode
-     * @return Status
-     */
-    virtual aditof::Status setCalibrationParams(const std::string &mode,
-                                                float gain, float offset,
-                                                int range) = 0;
-
-    /**
-     * @brief Use the cached calibration parameters to apply corrections to the
-     * given frame.
-     * @param frame - the content of a frame to which the
-     * calibration(correction) should be done
-     * @param mode - the camera mode which allows the device (internally) to
-     * figure out the right calibration parameters
-     * @return Status
-     */
-    virtual aditof::Status applyCalibrationToFrame(uint16_t *frame,
-                                                   const std::string &mode) = 0;
-    /**
      * @brief Get a structure that contains information about the instance of
      * the device
      * @param[out] details - the variable where the device details should be

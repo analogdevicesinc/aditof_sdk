@@ -32,7 +32,7 @@
 #ifndef CAMERA_96TOF1_H
 #define CAMERA_96TOF1_H
 
-#include "calibration.h"
+#include "calibration_96tof1.h"
 
 #include <memory>
 
@@ -66,7 +66,7 @@ class Camera96Tof1 : public aditof::Camera {
     std::shared_ptr<aditof::CameraSpecifics> m_specifics;
     std::shared_ptr<aditof::DeviceInterface> m_device;
     bool m_devStarted;
-    Calibration m_calibration;
+    Calibration96Tof1 m_calibration;
 
   public:
     friend class aditof::Camera96Tof1Specifics;

@@ -97,18 +97,7 @@ void PointCloud2Msg::setDataMembers(const std::shared_ptr<Camera> &camera,
         for (int j = 0; j < frameWidth;
              j++, ++iter_x, ++iter_y, ++iter_z, ++iter_intensity) {
             int index = i * msg.width + j;
-            uint16_t depth = frameDataDepth[index];
-
-            //angle between camera's principal axis and the pixel that is being processed
-            double tanXAngle = (x0 - j) / fx;
-            double tanYAngle = (y0 - i) / fy;
-
-            double depth_scale =
-                sqrt(1 + tanXAngle * tanXAngle + tanYAngle * tanYAngle);
-            float z = static_cast<float>(depth / depth_scale);
-
-            // rviz expects the data in metres
-            z /= 1000.0f;
+            float z = static_cast<float>(frameDataDepth[index]) / 1000.0f;
 
             *iter_x = z * (j - x0) / fx;
             *iter_y = z * (i - y0) / fy;

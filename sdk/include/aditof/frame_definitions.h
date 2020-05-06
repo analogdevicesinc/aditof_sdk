@@ -50,15 +50,6 @@ enum class FrameDataType {
 };
 
 /**
- * @struct FrameCalData
- * @brief Stores the calibration data to be applied to the frame.
- */
-struct FrameCalData {
-    float offset; //!< Offset information
-    float gain;   //!< Gain information
-};
-
-/**
  * @struct FrameDetails
  * @brief Describes the properties of a frame.
  */
@@ -78,11 +69,6 @@ struct FrameDetails {
      * camera.
      */
     std::string type;
-
-    /**
-     * @brief Calibration data for the frame
-     */
-    struct FrameCalData cal_data;
 };
 
 } // namespace aditof
