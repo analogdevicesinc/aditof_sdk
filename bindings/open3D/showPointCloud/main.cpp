@@ -131,9 +131,23 @@ int main(int argc, char *argv[]) {
     int frameHeight = static_cast<int>(frameDetails.height) / 2;
     int frameWidth = static_cast<int>(frameDetails.width);
 
+    /* Create visualizer for depth and IR images */
+    auto visualized_ir_img = std::make_shared<geometry::Image>();
+    visualized_ir_img->Prepare(frameWidth, frameHeight, 1, 1);
+    visualization::Visualizer ir_vis;
+    ir_vis.CreateVisualizerWindow("IR Image", 2 * frameWidth, 2 * frameHeight);
+    bool is_geometry_added_ir = false;
+
+    auto visualized_depth_img = std::make_shared<geometry::Image>();
+    visualized_depth_img->Prepare(frameWidth, frameHeight, 3, 1);
+    visualization::Visualizer depth_vis;
+    depth_vis.CreateVisualizerWindow("Depth Image", 2 * frameWidth,
+                                     2 * frameHeight);
+    bool is_geometry_added_depth = false;
+
     /* Create visualizer for pointcloud */
     visualization::Visualizer pointcloud_vis;
-    pointcloud_vis.CreateVisualizerWindow("Pointcloud", 800, 800);
+    pointcloud_vis.CreateVisualizerWindow("Pointcloud", 1200, 1200);
     bool is_geometry_added_pointcloud = false;
 
     const float PI_VALUE = 3.14;
@@ -197,6 +211,25 @@ int main(int argc, char *argv[]) {
                 ir_color.data_[i + 2] * 0.5 + depth_color.data_[i + 2] * 0.5;
         }
 
+        visualized_ir_img->data_ = ir_image.data_;
+        if (!is_geometry_added_ir) {
+            ir_vis.AddGeometry(visualized_ir_img);
+            is_geometry_added_ir = true;
+        }
+
+        visualized_depth_img->data_ = depth_color.data_;
+        if (!is_geometry_added_depth) {
+            depth_vis.AddGeometry(visualized_depth_img);
+            is_geometry_added_depth = true;
+        }
+        ir_vis.UpdateGeometry();
+        ir_vis.PollEvents();
+        ir_vis.UpdateRender();
+
+        depth_vis.UpdateGeometry();
+        depth_vis.PollEvents();
+        depth_vis.UpdateRender();
+
         /* create and show pointcloud */
         auto rgbd_ptr = geometry::RGBDImage::CreateFromColorAndDepth(
             color_image, depth16bits_image, 1000.0, 3.0, false);
@@ -233,6 +266,8 @@ int main(int argc, char *argv[]) {
 
         if (is_window_closed == false) {
             pointcloud_vis.DestroyVisualizerWindow();
+            ir_vis.DestroyVisualizerWindow();
+            depth_vis.DestroyVisualizerWindow();
             break;
         } else {
             pointcloud_vis.UpdateGeometry();
