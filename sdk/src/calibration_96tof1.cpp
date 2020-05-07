@@ -442,7 +442,9 @@ aditof::Status Calibration96Tof1::calibrateCameraGeometry(uint16_t *frame,
     using namespace aditof;
 
     for (uint32_t i = 0; i < frame_size; i++) {
-        frame[i] = static_cast<uint16_t>(frame[i] * m_geometry_cache[i]);
+        if (frame[i] != m_range) {
+            frame[i] = static_cast<uint16_t>(frame[i] * m_geometry_cache[i]);
+        }
         if (frame[i] > m_range) {
             frame[i] = m_range;
         }
