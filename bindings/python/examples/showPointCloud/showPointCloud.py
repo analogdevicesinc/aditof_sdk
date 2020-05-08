@@ -45,6 +45,10 @@ class ModesEnum(Enum):
     MODE_FAR = 2
 
 
+def transform_image(np_image):
+    return o3d.geometry.Image(np_image)
+
+
 if __name__ == "__main__":
     system = tof.System()
     status = system.initialize()
@@ -97,7 +101,7 @@ if __name__ == "__main__":
     frameDetails = tof.FrameDetails()
     status = frame.getDetails(frameDetails)
     width = frameDetails.width
-    height = frameDetails.height
+    height = int(frameDetails.height / 2)
 
     # Get intrinsic parameters from camera
     intrinsicParameters = camDetails.intrinsics
@@ -114,9 +118,16 @@ if __name__ == "__main__":
     distance_scale_ir = 255.0 / max_value_of_IR_pixel
     distance_scale = 255.0 / camera_range
 
+    # Create visualizer for depth and ir
+    vis_depth = o3d.visualization.Visualizer()
+    vis_depth.create_window("Depth", 2 * width, 2 * height)
+
+    vis_ir = o3d.visualization.Visualizer()
+    vis_ir.create_window("IR", 2 * width, 2 * height)
+
     # Create visualizer
     vis = o3d.visualization.Visualizer()
-    vis.create_window("PointCloud", 1600, 1600)
+    vis.create_window("PointCloud", 1200, 1200)
     first_time_render_pc = 1
     point_cloud = o3d.geometry.PointCloud()
 
@@ -135,12 +146,20 @@ if __name__ == "__main__":
         ir_map = np.uint8(ir_map)
         ir_map = cv.cvtColor(ir_map, cv.COLOR_GRAY2RGB)
 
+        # Show IR image
+        vis_ir.add_geometry(transform_image(ir_map))
+        vis_ir.poll_events()
+
         # Create the Depth image
         new_shape = (int(depth_map.shape[0] / 2), depth_map.shape[1])
         depth16bits_map = depth_map = np.resize(depth_map, new_shape)
         depth_map = distance_scale * depth_map
         depth_map = np.uint8(depth_map)
         depth_map = cv.applyColorMap(depth_map, cv.COLORMAP_RAINBOW)
+
+        # Show depth image
+        vis_depth.add_geometry(transform_image(depth_map))
+        vis_depth.poll_events()
 
         # Create color image
         img_color = cv.addWeighted(ir_map, 0.4, depth_map, 0.6, 0)
