@@ -55,6 +55,7 @@ For more details about the SDK check the links below:
 | --------- | ------------- | ----------- |
 | aditof-demo | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/aditof-demo"> C++ </a> | An application that displays the infrared and depth images. |
 | first-frame | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/first-frame"> C++ </a> <br> <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/first_frame"> Python </a> | An example code that shows the steps required to get to the point where camera frames can be captured. |
+| first-frame-ethernet | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/first-frame-ethernet"> C++ </a> | An application that shows how to use the aditof sdk to talk to a remote ToF camera over the network. |
 | device_example | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/device_example"> Python</a> | A simple example of how to get access to the low-level API of the camera. |
 | dnn | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/dnn"> Python with OpenCV</a> <br> <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/dnn"> C++ with OpenCV </a> | A simple object detection example. |
 | imshow | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/imshow"> C++ with OpenCV </a> | A basic example that displays data provided by the Aditof SDK. |
