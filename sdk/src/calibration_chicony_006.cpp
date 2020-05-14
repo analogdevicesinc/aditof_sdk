@@ -1141,7 +1141,7 @@ aditof::Status CalibrationChicony006::setMode(uint16_t unMode)
     unTalFlag = (gunCtrlCmn[CTRL_CMN_TAL_MODE_FLAG] & 0x000F); //TAL is not change each mode.
 
 #if _DEBUG_PRINT_ON
-    LOG(WARNING) << "TAL Flag addr: " << gunCtrlCmn[CTRL_CMN_TAL_MODE_FLAG] << "val: " << unTalFlag;
+    LOG(WARNING) << "TAL Flag addr: " << gunCtrlCmn[CTRL_CMN_TAL_MODE_FLAG] << " val: " << unTalFlag;
 #endif
 
 #if _DEBUG_SETTING_OFF==0
@@ -1168,7 +1168,7 @@ aditof::Status CalibrationChicony006::setMode(uint16_t unMode)
         unLdFlag |= 0x0008;
     }
 #if _DEBUG_PRINT_ON
-    LOG(WARNING) << "LdFlag addr: " << gunCtrlMode[gunRangeMode][CTRL_MODE_LD_FLAG] << "val: " << unLdFlag;
+    LOG(WARNING) << "LdFlag addr: " << gunCtrlMode[gunRangeMode][CTRL_MODE_LD_FLAG] << " val: " << unLdFlag;
 #endif
 
     //////////// set ISP Registers
