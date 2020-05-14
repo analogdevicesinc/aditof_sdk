@@ -33,14 +33,20 @@
 #define ADITOF_UTILS_H
 
 #include <aditof/camera.h>
+#include <aditof/camera_96tof1_specifics.h>
+#include <aditof/camera_chicony_specifics.h>
+#include <glog/logging.h>
 
 std::shared_ptr<aditof::Camera> initCamera(int argc, char **argv);
 void setFrameType(const std::shared_ptr<aditof::Camera> &camera,
                   const std::string &type);
 void setMode(const std::shared_ptr<aditof::Camera> &camera,
              const std::string &mode);
+void setCameraRevision(const std::shared_ptr<aditof::Camera> &camera,
+                       aditof::Revision rev);
 void applyNoiseReduction(const std::shared_ptr<aditof::Camera> &camera,
-                         int argc, char **argv);
+                         int threshold);
+void disableNoiseReduction(const std::shared_ptr<aditof::Camera> &camera);
 void getNewFrame(const std::shared_ptr<aditof::Camera> &camera,
                  aditof::Frame *frame);
 uint16_t *getFrameData(aditof::Frame *frame, aditof::FrameDataType dataType);

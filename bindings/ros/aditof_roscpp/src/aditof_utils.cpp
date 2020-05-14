@@ -31,10 +31,9 @@
  */
 #include "aditof_utils.h"
 
-#include <aditof/camera_96tof1_specifics.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
-#include <glog/logging.h>
+
 #include <ros/ros.h>
 
 using namespace aditof;
@@ -127,22 +126,45 @@ void setMode(const std::shared_ptr<aditof::Camera> &camera,
     }
 }
 
-void applyNoiseReduction(const std::shared_ptr<Camera> &camera, int argc,
-                         char **argv) {
+void setCameraRevision(const std::shared_ptr<aditof::Camera> &camera,
+                       aditof::Revision rev) {
+    auto specifics = camera->getSpecifics();
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+    cam96tof1Specifics->setCameraRevision(rev);
+}
 
-    // TODO add support for parameter dynamic reconfiguration
-    if (argc < 3) {
-        LOG(ERROR) << "No threshold value provided!";
-        return;
-    }
+void applyNoiseReduction(const std::shared_ptr<Camera> &camera, int threshold) {
 
-    int threshold = std::stoi(argv[2]);
     auto specifics = camera->getSpecifics();
     auto cam96tof1Specifics =
         std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
     if (cam96tof1Specifics) {
         cam96tof1Specifics->setNoiseReductionThreshold(threshold);
         cam96tof1Specifics->enableNoiseReduction(true);
+    } else {
+        auto chiconySpecifics =
+            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
+        if (chiconySpecifics) {
+            chiconySpecifics->setNoiseReductionThreshold(threshold);
+            chiconySpecifics->enableNoiseReduction(true);
+        }
+    }
+}
+
+void disableNoiseReduction(const std::shared_ptr<Camera> &camera) {
+
+    auto specifics = camera->getSpecifics();
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+    if (cam96tof1Specifics) {
+        cam96tof1Specifics->enableNoiseReduction(false);
+    } else {
+        auto chiconySpecifics =
+            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
+        if (chiconySpecifics) {
+            chiconySpecifics->enableNoiseReduction(false);
+        }
     }
 }
 

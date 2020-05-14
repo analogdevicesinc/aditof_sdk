@@ -32,11 +32,7 @@
 #ifndef DEPTHIMAGE_MSG_H
 #define DEPTHIMAGE_MSG_H
 
-#include <string>
-
-#include <aditof/camera.h>
 #include <aditof/frame.h>
-#include <glog/logging.h>
 
 #include "aditof_sensor_msg.h"
 #include "aditof_utils.h"
