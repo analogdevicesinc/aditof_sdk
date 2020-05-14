@@ -16,6 +16,7 @@
 
   <depend>sensor_msgs</depend>
   <depend>roscpp</depend>
+  <depend>dynamic_reconfigure</depend>
 
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>

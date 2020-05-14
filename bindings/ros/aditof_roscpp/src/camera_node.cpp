@@ -29,11 +29,75 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "aditof_roscpp/Aditof_roscppConfig.h"
 #include "message_factory.h"
 #include <aditof_utils.h>
+#include <dynamic_reconfigure/server.h>
 #include <ros/ros.h>
 
+#include "../../../../sdk/src/camera_96tof1.h"
+#include "../../../../sdk/src/camera_chicony.h"
+
 using namespace aditof;
+
+void callback(aditof_roscpp::Aditof_roscppConfig &config, uint32_t level,
+              std::shared_ptr<Camera> &camera) {
+    Camera96Tof1 *cam96Tof1 = dynamic_cast<Camera96Tof1 *>(camera.get());
+
+    if (cam96Tof1) {
+        config.groups.camera_96tof1.state = true;
+        //disable the group corresponding to Chicony camera
+        config.groups.camera_chicony.state = false;
+        config.groups.camera_96tof1.noise_reduction.state = true;
+
+        switch (config.mode) {
+        case 0:
+            setMode(camera, "near");
+            applyNoiseReduction(camera, config.threshold);
+            break;
+        case 1:
+            setMode(camera, "medium");
+            applyNoiseReduction(camera, config.threshold);
+            break;
+        case 2:
+            disableNoiseReduction(camera);
+            setMode(camera, "far");
+            config.threshold = 0;
+
+            //disable the noise reduction, as it is not supported for this mode
+            config.groups.camera_96tof1.noise_reduction.state = false;
+            break;
+        }
+
+        switch (config.revision) {
+        case 0:
+            setCameraRevision(camera, Revision::RevB);
+            break;
+        case 1:
+            setCameraRevision(camera, Revision::RevC);
+            break;
+        }
+    } else {
+        CameraChicony *camChicony = dynamic_cast<CameraChicony *>(camera.get());
+        if (camChicony) {
+            config.groups.camera_96tof1.state = false;
+            config.groups.camera_chicony.state = true;
+            switch (config.mode_chicony) {
+            case 0:
+                setMode(camera, "near");
+                applyNoiseReduction(camera, config.threshold);
+                break;
+            }
+        }
+    }
+
+    /*
+  ROS_INFO("Reconfigure Request: %d %f %s %d",
+            config.threshold, config.double_param,
+            config.bool_param?"True":"False",
+            config.camera_mode);
+            */
+}
 
 int main(int argc, char **argv) {
 
@@ -41,12 +105,18 @@ int main(int argc, char **argv) {
     ROS_ASSERT_MSG(camera, "initCamera call failed");
 
     setFrameType(camera, "depth_ir");
-    setMode(camera, "medium");
+    setMode(camera, "near");
 
     ros::init(argc, argv, "aditof_camera_node");
+    dynamic_reconfigure::Server<aditof_roscpp::Aditof_roscppConfig> server;
+    dynamic_reconfigure::Server<
+        aditof_roscpp::Aditof_roscppConfig>::CallbackType f;
+
+    f = boost::bind(&callback, _1, _2, camera);
+    server.setCallback(f);
 
     //create publishers
-    ros::NodeHandle nHandle;
+    ros::NodeHandle nHandle("aditof_roscpp");
     ros::Publisher pcl_pubisher =
         nHandle.advertise<sensor_msgs::PointCloud2>("aditof_pcloud", 5);
     ROS_ASSERT_MSG(pcl_pubisher, "creating pcl_pubisher failed");
@@ -63,8 +133,6 @@ int main(int argc, char **argv) {
         nHandle.advertise<sensor_msgs::CameraInfo>("aditof_camera_info", 5);
     ROS_ASSERT_MSG(camera_info_pubisher,
                    "creating camera_info_pubisher failed");
-
-    applyNoiseReduction(camera, argc, argv);
 
     Frame frame;
     getNewFrame(camera, &frame);
@@ -113,6 +181,8 @@ int main(int argc, char **argv) {
 
         cameraInfoMsg->FrameDataToMsg(camera, &frame);
         cameraInfoMsg->publishMsg(camera_info_pubisher);
+
+        ros::spinOnce();
     }
 
     delete pcl_msg;

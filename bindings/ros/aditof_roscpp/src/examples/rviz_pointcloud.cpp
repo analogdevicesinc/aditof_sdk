@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
     ros::Publisher frame_pubisher =
         nHandle.advertise<sensor_msgs::PointCloud2>("aditof_pcloud", 100);
 
-    applyNoiseReduction(camera, argc, argv);
+    applyNoiseReduction(camera, 0);
 
     Frame frame;
     getNewFrame(camera, &frame);

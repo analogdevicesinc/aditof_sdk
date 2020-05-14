@@ -7,12 +7,16 @@ list(APPEND CMAKE_PREFIX_PATH ${ADITOF_CMAKE_INSTALL_PREFIX}
      ${ADITOF_CMAKE_PREFIX_PATH})
 
 # Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs dynamic_reconfigure)
 find_package(aditof ${VERSION} REQUIRED)
+
+generate_dynamic_reconfigure_options(
+  cfg/Aditof_roscpp.cfg
+)
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp sensor_msgs
+  CATKIN_DEPENDS roscpp sensor_msgs dynamic_reconfigure
   DEPENDS aditof)
 
 include_directories(include/${PROJECT_NAME} ${catkin_INCLUDE_DIRS}
@@ -27,6 +31,7 @@ target_sources(aditof_camera_node
                INTERFACE ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME})
 target_link_libraries(aditof_camera_node aditof::aditof)
 target_link_libraries(aditof_camera_node ${catkin_LIBRARIES})
+add_dependencies(aditof_camera_node ${PROJECT_NAME}_gencfg)
 
 if(WITH_ROS_EXAMPLES)
   find_package(catkin REQUIRED COMPONENTS rviz)
