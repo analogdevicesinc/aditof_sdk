@@ -68,8 +68,12 @@ aditof::Status CameraChicony::initialize() {
 
     LOG(INFO) << "Camera initialized";
 
-    // TO DO: figure out which are the intrisics
-
+    status = m_calibration.initialize(m_device);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to initialize calibration";
+        return status;
+    }
+    
     return Status::OK;
 }
 
@@ -119,44 +123,16 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
         status = m_device->program(firmwareData.data(), firmwareData.size());
         firmwareFile.close();
     } else {
-        if (mode != "near") {
+        if (mode != "near" && mode != "medium") {
             LOG(WARNING) << "Unsupported mode";
             return Status::INVALID_ARGUMENT;
         }
-
+/*
         LOG(INFO) << "Camera range for mode: " << mode
                   << " is: " << m_details.minDepth << " mm and "
                   << m_details.maxDepth << " mm";
-
-        uint32_t firmwareLength = 0;
-        status = m_device->readEeprom(
-            0xFFFFFFFE, reinterpret_cast<uint8_t *>(&firmwareLength),
-            sizeof(firmwareLength));
-        if (status != Status::OK) {
-            LOG(WARNING) << "Failed to read firmware size";
-            return Status::UNREACHABLE;
-        }
-
-        uint8_t *firmwareData = new uint8_t[firmwareLength];
-        status = m_device->readEeprom(0xFFFFFFFF, firmwareData, firmwareLength);
-
-        if (status != Status::OK) {
-            delete[] firmwareData;
-            LOG(WARNING) << "Failed to read firmware";
-            return Status::UNREACHABLE;
-        } else {
-            LOG(INFO) << "Found firmware for mode: " << mode;
-        }
-
-        LOG(INFO) << "Firmware size: " << firmwareLength << " bytes";
-        status = m_device->program(firmwareData, firmwareLength);
-        if (status != Status::OK) {
-            delete[] firmwareData;
-            LOG(WARNING) << "Failed to program AFE";
-            return Status::UNREACHABLE;
-        }
-
-        delete[] firmwareData;
+*/
+        m_calibration.setMode(mode == "near" ? 0 : 1);
     }
 
     // register writes for enabling only one video stream (depth/ ir)
@@ -185,6 +161,7 @@ aditof::Status CameraChicony::getAvailableModes(
 
     // Dummy data. To remove when implementig this method
     availableModes.emplace_back("near");
+    availableModes.emplace_back("medium");
 
     availableModes.emplace_back(skCustomMode);
 

@@ -36,6 +36,7 @@
 
 #include <aditof/camera.h>
 #include <aditof/camera_chicony_specifics.h>
+#include "calibration_chicony_006.h"
 
 class CameraChicony : public aditof::Camera {
   public:
@@ -67,6 +68,7 @@ class CameraChicony : public aditof::Camera {
 
   public:
     friend class aditof::CameraChiconySpecifics;
+    CalibrationChicony006 m_calibration;
 };
 
 #endif // CAMERA_CHICONY_H
