@@ -42,6 +42,30 @@ aditof::Status CalibrationChicony006::unReadTofRamReg(uint16_t *punRegAddr, uint
     return apiRetStatus;
 }
 
+uint16_t CalibrationChicony006::unGetWindowT(uint16_t unWINValue)
+{
+    uint16_t unRet;
+    short unStart;
+    short unEnd;
+
+    if (unWINValue == 0x0000) {
+        unRet = 0x0000;
+    }
+    else {
+        unStart = (unWINValue >> 8);
+        unEnd = (unWINValue & 0x00FF);
+
+        if (unStart > unEnd) {
+            unRet = 0xFFFF;
+        }
+        else {
+            unRet = unEnd - unStart + 1;
+        }
+    }
+
+    return unRet;
+}
+
 uint16_t CalibrationChicony006::unCalcToFPulsePhaseAndWidth(uint16_t unReg, uint16_t unWINinfo, uint16_t *punPulseWidth, uint16_t *punPulsePhase )
 {
 	uint16_t unRet;
@@ -51,7 +75,7 @@ uint16_t CalibrationChicony006::unCalcToFPulsePhaseAndWidth(uint16_t unReg, uint
 	uint16_t unWindowT;
 
 	//check unWininfo
-	//?? unWindowT = unGetWindowT(unWINinfo);
+	unWindowT = unGetWindowT(unWINinfo);
 	if( unWindowT == 0x0000 ){
 		*punPulsePhase = 0;
 
@@ -142,6 +166,161 @@ aditof::Status CalibrationChicony006::GetTofPulse(sTOF_PULSE_PARAM *psParam)
 	return apiRetStatus;
 }
 
+aditof::Status CalibrationChicony006::GetExposureDelay(uint16_t unMode, uint16_t *punVdInitOfst)
+{
+    using namespace aditof;
+
+    uint16_t unVdIniOfstMinus1 = 0, unVdIniOfstAdrNum;
+
+    unVdIniOfstAdrNum = gunIspRamMode[unMode][ISP_RAM_MODE_VD_INI_OFST_ADR_NUM];
+    if (unVdIniOfstAdrNum == 0) {
+        *punVdInitOfst = 0;
+    }
+    else {
+        unReadTofRamReg(&gunIspRamMode[unMode][ISP_RAM_MODE_VD_INIT_OFST_ADR1], &unVdIniOfstMinus1, unVdIniOfstAdrNum);
+        *punVdInitOfst = unVdIniOfstMinus1 + 1;
+    }
+    return Status::OK;
+}
+
+aditof::Status CalibrationChicony006::SetCcdDummy(uint16_t unCcdDummy)
+{
+    using namespace aditof;
+    
+    aditof::Status	apiRetStatus = Status::OK;
+    uint16_t unMode, unAddrNum;
+    uint16_t uni;
+
+    if (gunRangeMode == 0) {
+        unMode = 0;
+    }
+    else if (gunRangeMode == 1) {
+        unMode = 1;
+    }
+    else {
+        unMode = 0;
+    }
+    unAddrNum = gunIspRamMode[unMode][ISP_RAM_MODE_DMMY_TRNS_NUM];
+
+    for (uni = ISP_RAM_MODE_DMMY_TRNS_ADR1; uni<ISP_RAM_MODE_DMMY_TRNS_ADR1 + unAddrNum; uni++) {
+        AfeRegWrite(gunIspRamMode[unMode][uni], unCcdDummy);
+    }
+    return apiRetStatus;
+}
+
+aditof::Status CalibrationChicony006::SetExpValue(uint16_t unExp, uint16_t *unHdExp)
+{
+    using namespace aditof;
+
+    aditof::Status	apiRetStatus = Status::OK;
+    float fClkAn, fHdAlpha;
+    int   iHdAlpha;
+    int   iHdExp;
+    int   iReadSize2;
+    int   iVdDuration, iLdPlsDuty, iTofSeqIniOfst;
+    uint16_t unMode;
+    int i;
+    int iPlsModeValSum;
+    int iNumClkInHd;
+    int iBetaNum;
+    int iNumHdInReatout;
+    int iVdIniOfst;
+    int iTofEmtPeriodOfst;
+    int iNumHdInIdlePeri;
+    uint16_t unLongNum, unShortNum, unLmsNum;
+
+    // [preparation]
+    if (gunRangeMode == 0) {
+        unMode = 0;
+    }
+    else if (gunRangeMode == 1) {
+        unMode = 1;
+    }
+    else {
+        unMode = 0;
+    }
+    gunExpValue = unExp;
+    iVdDuration = gunCtrlMode[unMode][CTRL_MODE_VD_DURATION];
+    iTofSeqIniOfst = gunCtrlMode[unMode][CTRL_MODE_TOF_SEQ_INI_OFST];
+    iLdPlsDuty = gunCtrlMode[unMode][CTRL_MODE_LD_PLS_DUTY];
+    iNumClkInHd = gunCtrlMode[unMode][CTRL_MODE_NUM_CLK_IN_HD];
+    iBetaNum = gunCtrlMode[unMode][CTRL_MODE_BETA_NUM];
+    iNumHdInReatout = gunCtrlMode[unMode][CTRL_MODE_NUM_HD_IN_READ];
+    iVdIniOfst = gunVdInitialOffset;
+    iTofEmtPeriodOfst = gunCtrlMode[unMode][CTRL_MODE_TOF_EMT_PERI_OFST];
+    iNumHdInIdlePeri = gunIdlePeriod;
+
+    // SUM(PLS_MODE_VAL0-9)
+    iPlsModeValSum = 0;
+    for (i = ISP_REG_MODE_PLS_MOD_VAL0; i <= ISP_REG_MODE_PLS_MOD_VAL9; i++) {
+        iPlsModeValSum += gunIspRegMode[unMode][i][1];
+    }
+
+#if _DEBUG_PRINT_ON
+    LOG(WARNING) << "iVdDuration: "     << iVdDuration;
+    LOG(WARNING) << "iTofSeqIniOfst: "  << iTofSeqIniOfst;
+    LOG(WARNING) << "iLdPlsDuty: "      << iLdPlsDuty;
+    LOG(WARNING) << "gunIdlePeriod: "   << gunIdlePeriod;
+    LOG(WARNING) << "iVdIniOfst: "      << iVdIniOfst;
+#endif
+
+    // [a] (number of clocks in a alpha)
+    // fClkAn = TOF_SEQ_INI_OFST+unExp*LD_PLS_DUTY-2+ROUNDSUM(PLS_MODE_VAL0-9)*unExp/40
+    fClkAn = iTofSeqIniOfst + (unExp * iLdPlsDuty) - 2 + ((float)(iPlsModeValSum*unExp) / 40.0f);
+
+#if _DEBUG_PRINT_ON
+    LOG(WARNING) << "fClkAn: " << fClkAn;
+#endif
+    // [b] (number of HDs in a alpha)
+    // fHdAlpha =ROUNDUP([a]/NUM_CLK_IN_HD
+    fHdAlpha = fClkAn / (float)iNumClkInHd;
+    iHdAlpha = (int)fHdAlpha;
+    if (fHdAlpha > iHdAlpha) {
+        iHdAlpha += 1;
+    }
+#if _DEBUG_PRINT_ON
+    LOG(WARNING) << "iHdAlpha: " << iHdAlpha;
+#endif
+
+    // [c] (number of HDs during an exposure period)
+    // HdExp = ([b]+[b]+[b])*BETA_NUM+TOF_EMT_PERIOD_OFST
+    iHdExp = (3 * iHdAlpha) * iBetaNum + iTofEmtPeriodOfst;
+#if _DEBUG_PRINT_ON
+    LOG(WARNING) << "iHdExp: " << iHdExp;
+#endif
+
+    // [*1] (READ_SIZE2 )
+    //READ_SIZE2=VD_INI_OFST+[c]+READ_SIZE2_OFFSET7+ NUM_HD_IN_IDLE_PERIOD
+    iReadSize2 = iVdIniOfst + iHdExp + 7 + iNumHdInIdlePeri;
+
+    // [*2] (dummy transfer size : number of HDs after a read out period)
+    // CCD_DUMMY_HD = VD_DURATION-VD_INI_OFST-[c]-NUM_HD_IN_READOUT - NUM_HD_IN_IDLE_PERIOD
+    gunCcdDummy = iVdDuration - iVdIniOfst - iHdExp - iNumHdInReatout - iNumHdInIdlePeri;
+
+
+    // [Note]
+    // [1]target addresses below are decided depending on CS_INI_CODE
+    //    this function should be committed during a CS read out duration
+    unLongNum = (gunIspRamMode[unMode][ISP_RAM_MODE_EXP_ADR_NUM] >> 8);
+    unShortNum = ((gunIspRamMode[unMode][ISP_RAM_MODE_EXP_ADR_NUM] & 0x00F0) >> 4);
+    unLmsNum = (gunIspRamMode[unMode][ISP_RAM_MODE_EXP_ADR_NUM] & 0x000F);
+    unWriteTofRamReg(&gunIspRamMode[unMode][ISP_RAM_MODE_EXP_ADR_LONG1], unExp, unLongNum);
+    unWriteTofRamReg(&gunIspRamMode[unMode][ISP_RAM_MODE_EXP_ADR_SHORT1], unExp / 4, unShortNum);
+    unWriteTofRamReg(&gunIspRamMode[unMode][ISP_RAM_MODE_EXP_ADR_LMS1], unExp - unExp / 4 - 1, unLmsNum);
+
+    AfeRegWrite(0xC3CC, (unsigned short)iReadSize2);
+
+    (*unHdExp) = iHdExp + 750;	//output for Hounds-tooth(Checker)
+
+#if _DEBUG_PRINT_ON
+   LOG(WARNING) << "iReadSize2: "   << iReadSize2;
+   LOG(WARNING) << "gunCcdDummy: "  << gunCcdDummy;
+   LOG(WARNING) << "HdExp: "        << *unHdExp;
+#endif
+
+    return apiRetStatus;
+}
+
 aditof::Status CalibrationChicony006::SetExposureDelay(uint16_t unMode, uint16_t unVdInitOfst)
 {
     using namespace aditof;
@@ -182,9 +361,6 @@ uint16_t CalibrationChicony006::GetDefExpValue(uint16_t unMode)
 		unExpAe3 = gunCtrlMode[0][CTRL_MODE_AE_EXP3];
 	}
 
-#if 0
-    //?? gunExpMax
-
 	//set max exposure
 	if( unExpMax == 0){
 		if(unExpAe3 == 0){
@@ -195,7 +371,6 @@ uint16_t CalibrationChicony006::GetDefExpValue(uint16_t unMode)
 	}else{
 		gunExpMax = unExpMax;
 	}
-#endif
 
 	//set default exposure
 	if( unExpDef <= 0 || unExpDef > unExpMax){
@@ -926,17 +1101,17 @@ aditof::Status CalibrationChicony006::initialize(std::shared_ptr<aditof::DeviceI
     LOG(WARNING) << "after change Range Mode 0xC76F " << unData;
 #endif
 
-#if 0
-    //??
+
     /******* Set valuables **********/
 	/* Read image position */
-	AfeRegRead(&gunPosX, 1, 0xC3D3);
+    uint16_t gunPosX, gunPosY;
+    AfeRegRead(&gunPosX, 1, 0xC3D3);
 	AfeRegRead(&gunPosY, 1, 0xC3D4);
 
 	/* read Coring value */
+    uint16_t gunCoring;
     AfeRegRead(&gunCoring, 1, 0xC34A);
     gunCoring &= 0x3FFF;
-#endif
 
     /****** Set GPO on CS ************/
     AfeRegWrite(0xC08E, 0x0004);	//GPO3:FET-Driver Enable
@@ -1012,16 +1187,15 @@ aditof::Status CalibrationChicony006::setMode(uint16_t unMode)
     AfeRegWrite(gunIspRamMode[unMode][ISP_RAM_MODE_VD_REG_ADR], unHdNum);
 
     /////////// set VD initial offset
-    uint16_t gunVdInitialOffset = gunCtrlMode[unMode][CTRL_MODE_VD_INI_OFST];
+    gunVdInitialOffset = gunCtrlMode[unMode][CTRL_MODE_VD_INI_OFST];
     SetExposureDelay(unMode, gunVdInitialOffset);
-    //?? GetExposureDelay(unMode, &gunVdInitialOffset);
+    GetExposureDelay(unMode, &gunVdInitialOffset);
 
-#if 0
-    //??
+
     ////////////// update coring value of internal variable
+    uint16_t gunCoring;
     AfeRegRead(&gunCoring, 1, 0xC34A);
     gunCoring &= 0x3FFF;
-#endif
 
     ////////////// update pulse parameters of internal variable
     // Get TOF pulse
@@ -1042,12 +1216,12 @@ aditof::Status CalibrationChicony006::setMode(uint16_t unMode)
 
 #if _DEBUG_SETTING_OFF==0
     ////////////////// set exposure
-    uint16_t gunExpValue = GetDefExpValue(unMode);
-    //?? CyFxTofSetExpValue( gunExpValue , &gunHdExp);
-    //?? AfeRegWrite( 0xC315 , 0);
-    //?? AfeRegWrite( 0xC30E , gunHdExp);	//update Hounds-tooth
-    //?? AfeRegWrite( 0xC315 , 1);
-    //?? CyFxTofSetCcdDummy( gunCcdDummy );
+    gunExpValue = GetDefExpValue(unMode);
+    SetExpValue( gunExpValue , &gunHdExp);
+    AfeRegWrite( 0xC315 , 0);
+    AfeRegWrite( 0xC30E , gunHdExp);	//update Hounds-tooth
+    AfeRegWrite( 0xC315 , 1);
+    SetCcdDummy( gunCcdDummy );
     LOG(WARNING) << "rExposure : " << gunExpValue;
 #endif /* _DEBUG_SETTING_OFF */
 

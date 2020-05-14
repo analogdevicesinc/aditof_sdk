@@ -63,11 +63,15 @@ class CalibrationChicony006 {
       aditof::Status AfeRegRead(uint16_t* punRcvBuf, uint32_t ulWords, uint16_t unRegAdr);
       aditof::Status unWriteTofRamReg(uint16_t *punRegAddr, uint16_t unRegVal, uint16_t unSetNum);
       aditof::Status unReadTofRamReg(uint16_t *punRegAddr, uint16_t *unRegVal, uint16_t unSetNum);
+      uint16_t unGetWindowT(uint16_t unWINValue);
       
       uint16_t unCalcToFPulsePhaseAndWidth(uint16_t unReg, uint16_t unWINinfo, uint16_t *punPulseWidth, uint16_t *punPulsePhase);
       aditof::Status GetTofPulse(sTOF_PULSE_PARAM *psParam);
+      aditof::Status GetExposureDelay(uint16_t unMode, uint16_t *punVdInitOfst);
       aditof::Status SetExposureDelay(uint16_t unMode, uint16_t unVdInitOfst);
       uint16_t GetDefExpValue(uint16_t unMode);
+      aditof::Status SetExpValue(uint16_t unExp, uint16_t *unHdExp);
+      aditof::Status SetCcdDummy(uint16_t unCcdDummy);
       
       aditof::Status EepromRead(uint16_t unAddr, uint16_t *punData);
       aditof::Status ContinuousRead_1Array(uint16_t unAddr, uint16_t unTbl[], uint16_t unStartWriteArrayNum, uint16_t unConinuousNum, uint16_t *punCheckSum);
@@ -83,7 +87,13 @@ class CalibrationChicony006 {
       aditof::Status SendCsTable(uint16_t *punSndTbl, uint32_t ulWords);
 
   private:
-      uint8_t gunRangeMode;
+      uint16_t gunRangeMode;
+      uint16_t gunExpValue;
+      uint16_t gunVdInitialOffset;
+      uint16_t gunIdlePeriod;
+      uint16_t gunCcdDummy;
+      uint16_t gunHdExp;
+      uint16_t gunExpMax;
       std::shared_ptr<aditof::DeviceInterface> m_device;
 };
 
