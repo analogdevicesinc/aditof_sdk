@@ -1116,6 +1116,7 @@ aditof::Status CalibrationChicony006::initialize(std::shared_ptr<aditof::DeviceI
     /****** Set GPO on CS ************/
     AfeRegWrite(0xC08E, 0x0004);	//GPO3:FET-Driver Enable
 
+    //select Depth, IT mode format
     AfeRegWrite(gunIspRegMode[gunRangeMode][ISP_REG_MODE_ALIGN6][0], gunIspRegMode[gunRangeMode][ISP_REG_MODE_ALIGN6][1]);
     AfeRegWrite(gunIspRegMode[gunRangeMode][ISP_REG_MODE_ROI0][0], gunIspRegMode[gunRangeMode][ISP_REG_MODE_ROI0][1]);
     AfeRegWrite(gunIspRegMode[gunRangeMode][ISP_REG_MODE_ROI1][0], gunIspRegMode[gunRangeMode][ISP_REG_MODE_ROI1][1]);   //ROI1(TOF_RAW_ROI_HSTART) 170424
@@ -1127,9 +1128,10 @@ aditof::Status CalibrationChicony006::initialize(std::shared_ptr<aditof::DeviceI
     AfeRegWrite(gunIspRegMode[gunRangeMode][ISP_REG_MODE_READ_SIZE5][0], gunIspRegMode[gunRangeMode][ISP_REG_MODE_READ_SIZE5][1]);   // READSIZE5
     LOG(WARNING) << "probe 640x960";
 
-    uint16_t afeRegsAddr[5] = { 0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22 };
-    uint16_t afeRegsVal[5] = { 0x0006, 0x0004, 0x03, 0x0007, 0x0004 };
-    m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    //set output selection to IR + DEPTH
+    uint16_t afeRegsAddr[3] = { 0xc3da, 0x4001, 0x7c22 };
+    uint16_t afeRegsVal[3] = { 0x07, 0x0007, 0x0004 };
+    m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 3);
 
     return CyStatus;
 }
