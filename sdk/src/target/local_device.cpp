@@ -640,7 +640,7 @@ aditof::Status LocalDevice::readEeprom(uint32_t address, uint8_t *data,
                                        size_t length) {
     using namespace aditof;
     Status status = Status::OK;
-
+#if 0
     if (m_deviceDetails.sensorType == aditof::SensorType::SENSOR_CHICONY) {
         switch (address) {
         case (0xFFFFFFFE): {
@@ -664,7 +664,7 @@ aditof::Status LocalDevice::readEeprom(uint32_t address, uint8_t *data,
         }
         } // switch (address)
     }
-
+#endif
     if (!m_implData->edev.valid) {
         LOG(WARNING) << "EEPROM not available!";
         return Status::GENERIC_ERROR;
