@@ -224,6 +224,6 @@ void irTo16bitGrayscale(uint16_t *frameData, int width, int height) {
         float grayscale_val =
             norm_val * std::numeric_limits<unsigned short int>::max() +
             (1.0f - norm_val) * minColorValue;
-        data[i] = static_cast<uint16_t>(grayscale_val);
+        frameData[i] = static_cast<uint16_t>(grayscale_val);
     }
 }
