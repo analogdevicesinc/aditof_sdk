@@ -77,26 +77,23 @@ void callback(aditof_roscpp::Aditof_roscppConfig &config, uint32_t level,
             setCameraRevision(camera, Revision::RevC);
             break;
         }
+        setIrGammaCorrection(camera, config.ir_gamma);
+
     } else {
         CameraChicony *camChicony = dynamic_cast<CameraChicony *>(camera.get());
         if (camChicony) {
             config.groups.camera_96tof1.state = false;
             config.groups.camera_chicony.state = true;
+
             switch (config.mode_chicony) {
             case 0:
                 setMode(camera, "near");
                 applyNoiseReduction(camera, config.threshold);
                 break;
             }
+            setIrGammaCorrection(camera, config.ir_gamma_chicony);
         }
     }
-
-    /*
-  ROS_INFO("Reconfigure Request: %d %f %s %d",
-            config.threshold, config.double_param,
-            config.bool_param?"True":"False",
-            config.camera_mode);
-            */
 }
 
 int main(int argc, char **argv) {
