@@ -38,6 +38,8 @@ static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/6-0056/eeprom";
 static const char *EEPROM_REPLACEMENT_PATH =
     "/home/analog/workspace/github/aditof_sdk/chicony_firmware.bin";
 
+static const char *TEMP_SENSOR_REPLACEMENT_DEV_PATH = "";
+
 static const char *CAPTURE_DEVICE_NAME = "vi-output, addi9036 6-0064";
 
 #endif // TARGET_DEFINITIONS_H
