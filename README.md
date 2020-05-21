@@ -33,7 +33,7 @@ For more details on building the SDK on an embedded platform please check the **
 ### Chicony ToF
 | Platform | Documentation | GitHub master status | Downloads |
 | --------- | ----------- | ----------- | ----------- |
-| Raspberry Pi 3,4 | [User Guide](doc/raspberrypi3/chicony_user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/raspberrypi-latest-image.tar.xz) |
+| Raspberry Pi 3,4 | [User Guide](doc/raspberrypi3/chicony_user_guide.md) | [![Build Status](https://travis-ci.org/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.org/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/raspberrypi-chicony-latest-image.tar.xz) |
 
 
 [How to write the SD card image onto the SD card?](doc/sdcard_burn.md)
