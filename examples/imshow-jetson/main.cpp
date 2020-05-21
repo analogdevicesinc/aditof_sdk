@@ -32,6 +32,7 @@
  */
 #include <aditof/camera.h>
 #include <aditof/camera_96tof1_specifics.h>
+#include <aditof/camera_chicony_specifics.h>
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
@@ -145,8 +146,26 @@ int main(int argc, char *argv[]) {
     auto specifics = camera->getSpecifics();
     auto cam96tof1Specifics =
         std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-    cam96tof1Specifics->setNoiseReductionThreshold(smallSignalThreshold);
-    cam96tof1Specifics->enableNoiseReduction(true);
+
+    if (cam96tof1Specifics) {
+        cam96tof1Specifics->setNoiseReductionThreshold(smallSignalThreshold);
+    } else {
+        auto chiconySpecifics =
+            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
+        if (chiconySpecifics) {
+            chiconySpecifics->setNoiseReductionThreshold(smallSignalThreshold);
+        }
+    }
+
+    if (cam96tof1Specifics) {
+        cam96tof1Specifics->enableNoiseReduction(true);
+    } else {
+        auto chiconySpecifics =
+            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
+        if (chiconySpecifics) {
+            chiconySpecifics->enableNoiseReduction(true);
+        }
+    }
 
     cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
 
