@@ -37,6 +37,7 @@
 #include <aditof/camera_chicony_specifics.h>
 #include <glog/logging.h>
 
+std::string parseArgs(int argc, char **argv);
 std::shared_ptr<aditof::Camera> initCamera(int argc, char **argv);
 void setFrameType(const std::shared_ptr<aditof::Camera> &camera,
                   const std::string &type);

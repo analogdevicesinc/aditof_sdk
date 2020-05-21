@@ -37,18 +37,26 @@
 #include <ros/ros.h>
 
 using namespace aditof;
-std::shared_ptr<Camera> initCamera(int argc, char **argv) {
+
+std::string parseArgs(int argc, char **argv) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
-    Status status = Status::OK;
-    std::string ip;
 
-    if (argc < 2) {
-        LOG(INFO) << "No ip provided, attempting to connect to the camera "
-                     "through USB";
-    } else {
-        ip = argv[1];
+    if (argc > 1) {
+        std::string ip = argv[1];
+        if (!ip.empty()) {
+            return ip;
+        }
     }
+    LOG(INFO)
+        << "No ip provided, attempting to connect to the camera through USB";
+    return std::string();
+}
+
+std::shared_ptr<Camera> initCamera(int argc, char **argv) {
+
+    Status status = Status::OK;
+    std::string ip = parseArgs(argc, argv);
 
     System system;
     status = system.initialize();
