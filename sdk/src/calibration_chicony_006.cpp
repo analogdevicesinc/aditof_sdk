@@ -7,10 +7,11 @@
 /******************* parameter *******************/
 #define ROM_MAP_VERSION              (0x0082)
 #define _DEBUG_PRINT_ON 1
-#define _DEBUG_SETTING_OFF 1
+#define _DEBUG_SETTING_OFF 0
 
 CalibrationChicony006::CalibrationChicony006()
-    : gunRangeMode(0) {
+    : gunRangeMode(0), gunIdlePeriod(0), gunVdInitialOffset(0),
+      gunInitialized(0) {
 }
 
 CalibrationChicony006::~CalibrationChicony006() {
@@ -1114,6 +1115,7 @@ aditof::Status CalibrationChicony006::initialize(std::shared_ptr<aditof::DeviceI
     gunCoring &= 0x3FFF;
 
     /****** Set GPO on CS ************/
+/*
     AfeRegWrite(0xC08E, 0x0004);	//GPO3:FET-Driver Enable
 
     //select Depth, IT mode format
@@ -1126,7 +1128,10 @@ aditof::Status CalibrationChicony006::initialize(std::shared_ptr<aditof::DeviceI
     AfeRegWrite(0xC08F, 0x0040);
     AfeRegWrite(0xC087, 0x0027);
     AfeRegWrite(gunIspRegMode[gunRangeMode][ISP_REG_MODE_READ_SIZE5][0], gunIspRegMode[gunRangeMode][ISP_REG_MODE_READ_SIZE5][1]);   // READSIZE5
+ */ 
     LOG(WARNING) << "probe 640x960";
+
+    gunInitialized = 1;
 
     return CyStatus;
 }
@@ -1199,9 +1204,9 @@ aditof::Status CalibrationChicony006::setMode(uint16_t unMode)
     AfeRegWrite(gunIspRamMode[unMode][ISP_RAM_MODE_VD_REG_ADR], unHdNum);
 
     /////////// set VD initial offset
-    gunVdInitialOffset = gunCtrlMode[unMode][CTRL_MODE_VD_INI_OFST];
-    SetExposureDelay(unMode, gunVdInitialOffset);
-    GetExposureDelay(unMode, &gunVdInitialOffset);
+    //gunVdInitialOffset = gunCtrlMode[unMode][CTRL_MODE_VD_INI_OFST];
+    //SetExposureDelay(unMode, gunVdInitialOffset);
+    //GetExposureDelay(unMode, &gunVdInitialOffset);
 
 
     ////////////// update coring value of internal variable
@@ -1233,7 +1238,7 @@ aditof::Status CalibrationChicony006::setMode(uint16_t unMode)
     AfeRegWrite( 0xC315 , 0);
     AfeRegWrite( 0xC30E , gunHdExp);	//update Hounds-tooth
     AfeRegWrite( 0xC315 , 1);
-    SetCcdDummy( gunCcdDummy );
+    //SetCcdDummy( gunCcdDummy );
     LOG(WARNING) << "rExposure : " << gunExpValue;
 #endif /* _DEBUG_SETTING_OFF */
 
@@ -1329,9 +1334,13 @@ aditof::Status CalibrationChicony006::setMode(uint16_t unMode)
 #endif /* _DEBUG_SETTING_OFF */
 
     //Sensor powerup
-    uint16_t afeRegsAddr[] = {0xC08E, 0xC08E, 0xC300, 0xC4C0, 0xC4C3, 0xC4D7, 0xC4D5, 0xC4DA, 0xC4F0, 0xC427, 0xC427, 0xC427, 0xC426, 0xC426, 0xC426, 0xC423, 0xC431, 0x4001, 0x7C22};
-    uint16_t afeRegsVal[] =  {0x0044, 0x0046, 0x0001, 0x001C, 0x001C, 0x0000, 0x0002, 0x0001, 0x0000, 0x0003, 0x0001, 0x0000, 0x0030, 0x0010, 0x0000, 0x0080, 0x0080, 0x0007, 0x0004};
-    m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, sizeof(afeRegsAddr)/sizeof(uint16_t));
+    uint16_t afeRegsAddr[] = {0xC08E, 0xC08E, 0xC300, 0xC3DA, 0xC3DC, 0xC4C0, 0xC4C3, 0xC4D7, 0xC4D5, 0xC4DA, 0xC4F0, 0xC427, 0xC427, 0xC427, 0xC426, 0xC426, 0xC426, 0xC423, 0xC431, 0x4001, 0x7C22};
+    uint16_t afeRegsVal[] =  {0x0044, 0x0046, 0x0001, 0x0007, 0x0000, 0x001C, 0x001C, 0x0000, 0x0002, 0x0001, 0x0000, 0x0003, 0x0001, 0x0000, 0x0030, 0x0010, 0x0000, 0x0080, 0x0080, 0x0007, 0x0004};
     
+    if(gunInitialized)
+        m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, sizeof(afeRegsAddr)/sizeof(uint16_t));
+    else
+        m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 3);
+
     return apiRetStatus;
 }
