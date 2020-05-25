@@ -844,8 +844,15 @@ void AdiTofDemoView::render() {
 
         if (valueFieldSelectedG) {
             if ((key >= 48 && key <= 57) || (key == 46)) {
-                valueG += pressedValidKey;
-                IRGamma = stof(valueG);
+                if ((valueG.size() < 11)) {
+                    try {
+                        valueG += pressedValidKey;
+                        IRGamma = stof(valueG);
+                    } catch (const std::invalid_argument &ia) {
+                        status = "Input for IRGamma must be float!";
+                        valueG = valueG.substr(0, valueG.size() - 1);
+                    }
+                }
             } else if (backspace) {
                 valueG = valueG.substr(0, valueG.size() - 1);
                 if (valueG.compare("") != 0) {
