@@ -2640,3 +2640,31 @@
 0xC431 0x80
 0x4001 0x7
 0x7C22 0x4
+
+I0525 22:42:50.068672  3103 camera_chicony.cpp:149] Camera range for mode: medium is: 1000 mm and 4500 mm
+W0525 22:42:50.068715  3103 calibration_chicony_006.cpp:1163] TAL Flag addr: 15 val: 15
+W0525 22:42:50.081524  3103 calibration_chicony_006.cpp:1190] LdFlag addr: 16 val: 2
+W0525 22:42:51.444293  3103 calibration_chicony_006.cpp:1228] LD pulse width : 256
+W0525 22:42:51.444716  3103 calibration_chicony_006.cpp:1229] Sub pulse width : 273
+W0525 22:42:51.444811  3103 calibration_chicony_006.cpp:1230] A0 pulse phase : 105
+W0525 22:42:51.444873  3103 calibration_chicony_006.cpp:1231] A1 pulse phase : 95
+W0525 22:42:51.445303  3103 calibration_chicony_006.cpp:1232] A2 pulse phase : 0
+W0525 22:42:51.445551  3103 calibration_chicony_006.cpp:1233] Sub pulse phase : 110
+W0525 22:42:51.445760  3103 calibration_chicony_006.cpp:261] iVdDuration: 2424
+W0525 22:42:51.445943  3103 calibration_chicony_006.cpp:262] iTofSeqIniOfst: 1004
+W0525 22:42:51.446230  3103 calibration_chicony_006.cpp:263] iLdPlsDuty: 32
+W0525 22:42:51.446316  3103 calibration_chicony_006.cpp:264] gunIdlePeriod: 0
+W0525 22:42:51.446380  3103 calibration_chicony_006.cpp:265] iVdIniOfst: 0
+W0525 22:42:51.446439  3103 calibration_chicony_006.cpp:273] fClkAn: 18922
+W0525 22:42:51.446532  3103 calibration_chicony_006.cpp:283] iHdAlpha: 21
+W0525 22:42:51.446589  3103 calibration_chicony_006.cpp:290] iHdExp: 757
+W0525 22:42:51.564505  3103 calibration_chicony_006.cpp:317] iReadSize2: 764
+W0525 22:42:51.565388  3103 calibration_chicony_006.cpp:318] gunCcdDummy: 913
+W0525 22:42:51.565729  3103 calibration_chicony_006.cpp:319] HdExp: 1507
+W0525 22:42:51.596918  3103 calibration_chicony_006.cpp:1244] rExposure : 560
+W0525 22:42:51.626336  3103 calibration_chicony_006.cpp:1275] ChangeMode LdFlag 18
+W0525 22:42:51.629767  3103 calibration_chicony_006.cpp:1285] 0xC730 4626
+W0525 22:42:51.633744  3103 calibration_chicony_006.cpp:1286] TAL flag 15
+W0525 22:42:51.633905  3103 calibration_chicony_006.cpp:1327] TAL valid-edge : 0xC730 4626
+W0525 22:42:51.658808  3103 calibration_chicony_006.cpp:1333] TChangeMode LdFlag 18
+
