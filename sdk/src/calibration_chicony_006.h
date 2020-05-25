@@ -94,6 +94,7 @@ class CalibrationChicony006 {
       uint16_t gunCcdDummy;
       uint16_t gunHdExp;
       uint16_t gunExpMax;
+      uint16_t gunInitialized;
       std::shared_ptr<aditof::DeviceInterface> m_device;
 };
 
