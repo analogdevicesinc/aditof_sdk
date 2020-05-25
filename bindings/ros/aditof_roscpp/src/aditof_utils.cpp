@@ -139,7 +139,35 @@ void setCameraRevision(const std::shared_ptr<aditof::Camera> &camera,
     auto specifics = camera->getSpecifics();
     auto cam96tof1Specifics =
         std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-    cam96tof1Specifics->setCameraRevision(rev);
+    Status status = Status::OK;
+    status = cam96tof1Specifics->setCameraRevision(rev);
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not set camera revision!";
+        return;
+    }
+}
+
+void setIrGammaCorrection(const std::shared_ptr<aditof::Camera> &camera,
+                          float gamma) {
+    Status status = Status::OK;
+    auto specifics = camera->getSpecifics();
+
+    auto cam96tof1Specifics =
+        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+    if (cam96tof1Specifics) {
+        status = cam96tof1Specifics->setIrGammaCorrection(gamma);
+    } else {
+        auto chiconySpecifics =
+            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
+        if (chiconySpecifics) {
+            status = chiconySpecifics->setIrGammaCorrection(gamma);
+        }
+    }
+
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not set ir gamma correction!";
+        return;
+    }
 }
 
 void applyNoiseReduction(const std::shared_ptr<Camera> &camera, int threshold) {
@@ -226,6 +254,10 @@ void irTo16bitGrayscale(uint16_t *frameData, int width, int height) {
     auto max_val = std::max_element(data.begin(), data.end());
     uint16_t delta = *max_val - *min_val;
     int minColorValue = 0;
+
+    if (delta == 0) {
+        return;
+    }
 
     for (int i = 0; i < width * height; i++) {
         float norm_val = static_cast<float>(data[i] - *min_val) / delta;

@@ -45,6 +45,8 @@ void setMode(const std::shared_ptr<aditof::Camera> &camera,
              const std::string &mode);
 void setCameraRevision(const std::shared_ptr<aditof::Camera> &camera,
                        aditof::Revision rev);
+void setIrGammaCorrection(const std::shared_ptr<aditof::Camera> &camera,
+                          float gamma);
 void applyNoiseReduction(const std::shared_ptr<aditof::Camera> &camera,
                          int threshold);
 void disableNoiseReduction(const std::shared_ptr<aditof::Camera> &camera);
