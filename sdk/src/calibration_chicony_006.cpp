@@ -1128,11 +1128,6 @@ aditof::Status CalibrationChicony006::initialize(std::shared_ptr<aditof::DeviceI
     AfeRegWrite(gunIspRegMode[gunRangeMode][ISP_REG_MODE_READ_SIZE5][0], gunIspRegMode[gunRangeMode][ISP_REG_MODE_READ_SIZE5][1]);   // READSIZE5
     LOG(WARNING) << "probe 640x960";
 
-    //set output selection to IR + DEPTH
-    uint16_t afeRegsAddr[3] = { 0xc3da, 0x4001, 0x7c22 };
-    uint16_t afeRegsVal[3] = { 0x07, 0x0007, 0x0004 };
-    m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 3);
-
     return CyStatus;
 }
 
@@ -1333,5 +1328,10 @@ aditof::Status CalibrationChicony006::setMode(uint16_t unMode)
     }
 #endif /* _DEBUG_SETTING_OFF */
 
+    //Sensor powerup
+    uint16_t afeRegsAddr[] = {0xC08E, 0xC08E, 0xC300, 0xC4C0, 0xC4C3, 0xC4D7, 0xC4D5, 0xC4DA, 0xC4F0, 0xC427, 0xC427, 0xC427, 0xC426, 0xC426, 0xC426, 0xC423, 0xC431, 0x4001, 0x7C22};
+    uint16_t afeRegsVal[] =  {0x0044, 0x0046, 0x0001, 0x001C, 0x001C, 0x0000, 0x0002, 0x0001, 0x0000, 0x0003, 0x0001, 0x0000, 0x0030, 0x0010, 0x0000, 0x0080, 0x0080, 0x0007, 0x0004};
+    m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, sizeof(afeRegsAddr)/sizeof(uint16_t));
+    
     return apiRetStatus;
 }
