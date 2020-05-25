@@ -83,6 +83,7 @@ struct LocalDevice::ImplData {
     enum v4l2_buf_type videoBuffersType;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
     eeprom edev;
+    FILE* fp;
 
     ImplData()
         : fd(-1), sfd(-1), videoBuffers(nullptr),
@@ -114,6 +115,8 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
         m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
         fclose(fd);
     }
+
+    m_implData->fp = fopen("/home/pi/workspace/github/aditof_sdk/build/reg_writes.txt", "wt");
 }
 
 LocalDevice::~LocalDevice() {
@@ -147,6 +150,8 @@ LocalDevice::~LocalDevice() {
     }
 
     eeprom_close(&m_implData->edev);
+
+    fclose(m_implData->fp);
 }
 
 aditof::Status LocalDevice::open() {
@@ -737,6 +742,11 @@ aditof::Status LocalDevice::writeAfeRegisters(const uint16_t *address,
     static struct v4l2_ext_controls extCtrls;
     static unsigned char buf[CTRL_PACKET_SIZE];
     unsigned short sampleCnt = 0;
+
+    for(int i = 0; i < length; i++) {
+        fprintf(m_implData->fp, "0x%X 0x%X\n", address[i], data[i]);
+    }
+    fflush(m_implData->fp);
 
     length *= 2 * sizeof(unsigned short);
     while (length) {

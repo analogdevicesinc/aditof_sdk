@@ -43,6 +43,16 @@
 
 using namespace std;
 
+struct rangeStruct {
+    std::string mode;
+    int minDepth;
+    int maxDepth;
+};
+
+static const std::array<rangeStruct, 3>
+    rangeValues = 
+         {{{"near", 250, 800}, {"medium", 300, 4500}}};
+
 static const std::string skCustomMode = "custom";
 
 CameraChicony::CameraChicony(std::unique_ptr<aditof::DeviceInterface> device)
@@ -100,8 +110,16 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
         return Status::INVALID_ARGUMENT;
     }
 
-    m_details.maxDepth = 4095;
-    m_details.minDepth = 0;
+    auto iter = std::find_if(rangeValues.begin(), rangeValues.end(),
+                                 [&mode](struct rangeStruct rangeMode) {
+                                     return rangeMode.mode == mode;
+                                 });
+    if (iter != rangeValues.end()) {
+        m_details.maxDepth = (*iter).maxDepth;
+	m_details.minDepth = (*iter).minDepth;
+    } else {
+	m_details.maxDepth = 4096;
+    }
 
     if (!modeFilename.empty()) {
         std::ifstream firmwareFile(modeFilename.c_str(), std::ios::binary);
@@ -127,11 +145,11 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
             LOG(WARNING) << "Unsupported mode";
             return Status::INVALID_ARGUMENT;
         }
-/*
+
         LOG(INFO) << "Camera range for mode: " << mode
                   << " is: " << m_details.minDepth << " mm and "
                   << m_details.maxDepth << " mm";
-*/
+
         m_calibration.setMode(mode == "near" ? 0 : 1);
     }
 
