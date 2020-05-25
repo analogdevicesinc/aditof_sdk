@@ -51,7 +51,7 @@ struct rangeStruct {
 
 static const std::array<rangeStruct, 3>
     rangeValues = 
-         {{{"near", 250, 800}, {"medium", 300, 4500}}};
+         {{{"near", 250, 1000}, {"medium", 1000, 4500}}};
 
 static const std::string skCustomMode = "custom";
 
