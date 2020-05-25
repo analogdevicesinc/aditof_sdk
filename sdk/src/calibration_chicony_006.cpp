@@ -1150,7 +1150,7 @@ aditof::Status CalibrationChicony006::setMode(uint16_t unMode)
     sTOF_PULSE_PARAM sTofParam;
     uint16_t unTalFlag, unLdFlag;
     uint16_t unHdNum;
-
+    
     /////////// set target Mode
     gunRangeMode = unMode;
 
