@@ -135,29 +135,30 @@ int main(int argc, char **argv) {
     getNewFrame(camera, &frame);
 
     //create messages
+    ros::Time timeStamp = ros::Time::now();
     AditofSensorMsg *pcl_msg = MessageFactory::create(
-        camera, &frame, MessageType::sensor_msgs_PointCloud2);
+        camera, &frame, MessageType::sensor_msgs_PointCloud2, timeStamp);
     ROS_ASSERT_MSG(pcl_msg, "pointcloud message creation failed");
     PointCloud2Msg *pclMsg = dynamic_cast<PointCloud2Msg *>(pcl_msg);
     ROS_ASSERT_MSG(pclMsg,
                    "downcast from AditofSensorMsg to PointCloud2Msg failed");
 
     AditofSensorMsg *depth_img_msg = MessageFactory::create(
-        camera, &frame, MessageType::sensor_msgs_DepthImage);
+        camera, &frame, MessageType::sensor_msgs_DepthImage, timeStamp);
     ROS_ASSERT_MSG(depth_img_msg, "depth_image message creation failed");
     DepthImageMsg *depthImgMsg = dynamic_cast<DepthImageMsg *>(depth_img_msg);
     ROS_ASSERT_MSG(depthImgMsg,
                    "downcast from AditofSensorMsg to DepthImageMsg failed");
 
     AditofSensorMsg *ir_img_msg = MessageFactory::create(
-        camera, &frame, MessageType::sensor_msgs_IRImage);
+        camera, &frame, MessageType::sensor_msgs_IRImage, timeStamp);
     ROS_ASSERT_MSG(ir_img_msg, "ir_image message creation failed");
     IRImageMsg *irImgMsg = dynamic_cast<IRImageMsg *>(ir_img_msg);
     ROS_ASSERT_MSG(irImgMsg,
                    "downcast from AditofSensorMsg to IRImageMsg failed");
 
     AditofSensorMsg *camera_info_msg = MessageFactory::create(
-        camera, &frame, MessageType::sensor_msgs_CameraInfo);
+        camera, &frame, MessageType::sensor_msgs_CameraInfo, timeStamp);
     ROS_ASSERT_MSG(camera_info_msg, "camera_info_msg message creation failed");
     CameraInfoMsg *cameraInfoMsg =
         dynamic_cast<CameraInfoMsg *>(camera_info_msg);
@@ -165,18 +166,19 @@ int main(int argc, char **argv) {
                    "downcast from AditofSensorMsg to CameraInfoMsg failed");
 
     while (ros::ok()) {
+        ros::Time tStamp = ros::Time::now();
         getNewFrame(camera, &frame);
 
-        pclMsg->FrameDataToMsg(camera, &frame);
+        pclMsg->FrameDataToMsg(camera, &frame, tStamp);
         pclMsg->publishMsg(pcl_pubisher);
 
-        depthImgMsg->FrameDataToMsg(camera, &frame);
+        depthImgMsg->FrameDataToMsg(camera, &frame, tStamp);
         depthImgMsg->publishMsg(depth_img_pubisher);
 
-        irImgMsg->FrameDataToMsg(camera, &frame);
+        irImgMsg->FrameDataToMsg(camera, &frame, tStamp);
         irImgMsg->publishMsg(ir_img_pubisher);
 
-        cameraInfoMsg->FrameDataToMsg(camera, &frame);
+        cameraInfoMsg->FrameDataToMsg(camera, &frame, tStamp);
         cameraInfoMsg->publishMsg(camera_info_pubisher);
 
         ros::spinOnce();

@@ -36,21 +36,21 @@ using namespace aditof;
 CameraInfoMsg::CameraInfoMsg() {}
 
 CameraInfoMsg::CameraInfoMsg(const std::shared_ptr<aditof::Camera> &camera,
-                             aditof::Frame *frame) {
-    FrameDataToMsg(camera, frame);
+                             aditof::Frame *frame, ros::Time tStamp) {
+    FrameDataToMsg(camera, frame, tStamp);
 }
 
 void CameraInfoMsg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
-                                   aditof::Frame *frame) {
+                                   aditof::Frame *frame, ros::Time tStamp) {
     FrameDetails fDetails;
     frame->getDetails(fDetails);
 
-    setMembers(camera, fDetails.width, fDetails.height / 2);
+    setMembers(camera, fDetails.width, fDetails.height / 2, tStamp);
 }
 
 void CameraInfoMsg::setMembers(const std::shared_ptr<Camera> &camera, int width,
-                               int height) {
-    msg.header.stamp = ros::Time::now();
+                               int height, ros::Time tStamp) {
+    msg.header.stamp = tStamp;
     msg.header.frame_id = "aditof_camera_info";
 
     msg.width = width;
