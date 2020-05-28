@@ -1,3 +1,4 @@
+
 # ROS Wrapper for the ADI ToF library
 
 ## Overview
@@ -28,13 +29,46 @@ sudo cmake --build . --target install
   cmake --build . --target aditof_ros_package
   ```
 
+
 ## Usage
-- Camera node\
-TODO
+- Camera node
+    ```console
+    cd catkin_ws
+    source devel/setup.bash
+    roslaunch aditof_roscpp camera_node.launch
+    ```
+    The last command should be run for cameras using an USB connection. For Ethernet\Wi-Fi connections, you should specify the camera's IP address, using the ip parameter, as shown below
+    ```console
+    roslaunch aditof_roscpp camera_node.launch ip:="127.0.0.1"
+    ```
 - Examples
   - Visualize point cloud in rviz
     ```console
     cd catkin_ws
     source devel/setup.bash
-    roslaunch aditof_roscpp rviz_publisher.launch ip:="127.0.0.1"
+    roslaunch aditof_roscpp rviz_publisher.launch
     ```
+
+ ### ***Note:***
+ *In case you wish to launch nodes using the rosrun command instead of roslaunch, you should run each node specified in the launchfile in a different terminal. For example, this line*
+```console
+roslaunch aditof_roscpp camera_node.launch ip:="127.0.0.1"
+```
+*will be replaced with these lines*
+
+```console
+roscore
+rosrun aditof_roscpp aditof_camera_node 127.0.0.1
+rosrun rqt_reconfigure rqt_reconfigure
+```
+## Published Topics
+The aditof_camera_node publishes messages defined by the [sensor_msgs](http://wiki.ros.org/sensor_msgs) package on the following topics
+- /aditof_roscpp/aditof_camera_info
+- /aditof_roscpp/aditof_depth
+- /aditof_roscpp/aditof_ir
+- /aditof_roscpp/aditof_pcloud
+
+## Update parameters at runtime using
+Using the [dynamic_reconfigure](http://wiki.ros.org/dynamic_reconfigure) package, the aditof_ros_package offers the users the possibility to update the camera parameters
+
+<p align="center"><img src="../../doc/img/ros_rqt_reconfigure.png" /></p>
