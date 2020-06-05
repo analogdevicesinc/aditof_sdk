@@ -35,27 +35,28 @@ using namespace aditof;
 PointCloud2Msg::PointCloud2Msg() {}
 
 PointCloud2Msg::PointCloud2Msg(const std::shared_ptr<aditof::Camera> &camera,
-                               aditof::Frame *frame) {
-    FrameDataToMsg(camera, frame);
+                               aditof::Frame *frame, ros::Time tStamp) {
+    FrameDataToMsg(camera, frame, tStamp);
 }
 
 void PointCloud2Msg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
-                                    aditof::Frame *frame) {
+                                    aditof::Frame *frame, ros::Time tStamp) {
     FrameDetails fDetails;
     frame->getDetails(fDetails);
 
-    setMetadataMembers(fDetails.width, fDetails.height / 2);
+    setMetadataMembers(fDetails.width, fDetails.height / 2, tStamp);
     setDataMembers(camera, frame);
 }
 
-void PointCloud2Msg::setMetadataMembers(int width, int height) {
+void PointCloud2Msg::setMetadataMembers(int width, int height,
+                                        ros::Time tStamp) {
     sensor_msgs::PointCloud2Modifier modifier(msg);
     modifier.setPointCloud2Fields(4, "x", 1, sensor_msgs::PointField::FLOAT32,
                                   "y", 1, sensor_msgs::PointField::FLOAT32, "z",
                                   1, sensor_msgs::PointField::FLOAT32,
                                   "intensity", 1,
                                   sensor_msgs::PointField::UINT16);
-    msg.header.stamp = ros::Time::now();
+    msg.header.stamp = tStamp;
     msg.header.frame_id = "base_link";
 
     msg.width = width;

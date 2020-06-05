@@ -33,18 +33,19 @@
 
 AditofSensorMsg *
 MessageFactory::create(const std::shared_ptr<aditof::Camera> &camera,
-                       aditof::Frame *frame, MessageType type) {
+                       aditof::Frame *frame, MessageType type,
+                       ros::Time tStamp) {
     switch (type) {
     case MessageType::sensor_msgs_PointCloud2:
-        return new PointCloud2Msg(camera, frame);
+        return new PointCloud2Msg(camera, frame, tStamp);
     case MessageType::sensor_msgs_DepthImage:
         return new DepthImageMsg(camera, frame,
-                                 sensor_msgs::image_encodings::RGBA8);
+                                 sensor_msgs::image_encodings::RGBA8, tStamp);
     case MessageType::sensor_msgs_IRImage:
         return new IRImageMsg(camera, frame,
-                              sensor_msgs::image_encodings::MONO16);
+                              sensor_msgs::image_encodings::MONO16, tStamp);
     case MessageType::sensor_msgs_CameraInfo:
-        return new CameraInfoMsg(camera, frame);
+        return new CameraInfoMsg(camera, frame, tStamp);
     }
     return nullptr;
 }

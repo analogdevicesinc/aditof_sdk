@@ -35,17 +35,18 @@ using namespace aditof;
 IRImageMsg::IRImageMsg() {}
 
 IRImageMsg::IRImageMsg(const std::shared_ptr<aditof::Camera> &camera,
-                       aditof::Frame *frame, std::string encoding) {
+                       aditof::Frame *frame, std::string encoding,
+                       ros::Time tStamp) {
     imgEncoding = encoding;
-    FrameDataToMsg(camera, frame);
+    FrameDataToMsg(camera, frame, tStamp);
 }
 
 void IRImageMsg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
-                                aditof::Frame *frame) {
+                                aditof::Frame *frame, ros::Time tStamp) {
     FrameDetails fDetails;
     frame->getDetails(fDetails);
 
-    setMetadataMembers(fDetails.width, fDetails.height / 2);
+    setMetadataMembers(fDetails.width, fDetails.height / 2, tStamp);
 
     uint16_t *frameData = getFrameData(frame, aditof::FrameDataType::IR);
     if (!frameData) {
@@ -56,8 +57,8 @@ void IRImageMsg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
     setDataMembers(camera, frameData);
 }
 
-void IRImageMsg::setMetadataMembers(int width, int height) {
-    msg.header.stamp = ros::Time::now();
+void IRImageMsg::setMetadataMembers(int width, int height, ros::Time tStamp) {
+    msg.header.stamp = tStamp;
     msg.header.frame_id = "aditof_ir_img";
 
     msg.width = width;

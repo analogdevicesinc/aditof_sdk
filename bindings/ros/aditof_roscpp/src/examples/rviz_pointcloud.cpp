@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     getNewFrame(camera, &frame);
 
     AditofSensorMsg *msg = MessageFactory::create(
-        camera, &frame, MessageType::sensor_msgs_PointCloud2);
+        camera, &frame, MessageType::sensor_msgs_PointCloud2, ros::Time::now());
 
     if (!msg) {
         ROS_ERROR("pointcloud message creation failed");
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
             ROS_ERROR("downcast from AditofSensorMsg to PointCloud2Msg failed");
             return -1;
         }
-        pclMsg->FrameDataToMsg(camera, &frame);
+        pclMsg->FrameDataToMsg(camera, &frame, ros::Time::now());
         pclMsg->publishMsg(frame_pubisher);
     }
 

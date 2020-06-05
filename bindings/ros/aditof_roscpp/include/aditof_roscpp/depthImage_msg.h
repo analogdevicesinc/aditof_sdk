@@ -64,7 +64,7 @@ typedef struct Rgb32Color {
 class DepthImageMsg : public AditofSensorMsg {
   public:
     DepthImageMsg(const std::shared_ptr<aditof::Camera> &camera,
-                  aditof::Frame *frame, std::string encoding);
+                  aditof::Frame *frame, std::string encoding, ros::Time tStamp);
 
     /**
      * @brief Each message corresponds to one frame
@@ -80,12 +80,12 @@ class DepthImageMsg : public AditofSensorMsg {
      * @brief Converts the frame data to a message
      */
     void FrameDataToMsg(const std::shared_ptr<aditof::Camera> &camera,
-                        aditof::Frame *frame);
+                        aditof::Frame *frame, ros::Time tStamp);
 
     /**
      * @brief Assigns values to the message fields concerning metadata
      */
-    void setMetadataMembers(int width, int height);
+    void setMetadataMembers(int width, int height, ros::Time tStamp);
 
     /**
      * @brief Assigns values to the message fields concerning the point data

@@ -48,7 +48,7 @@ class MessageFactory {
   public:
     static AditofSensorMsg *
     create(const std::shared_ptr<aditof::Camera> &camera, aditof::Frame *frame,
-           MessageType type);
+           MessageType type, ros::Time tStamp);
 };
 
 #endif // MESSAGE_FACTORY_H
