@@ -29,9 +29,13 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ethernet_device.h"
+
 #include "local_device.h"
 #include "usb_device.h"
+
+#ifdef HAS_NETWORK
+#include "ethernet_device.h"
+#endif
 
 #include <aditof/device_factory.h>
 
@@ -46,7 +50,10 @@ DeviceFactory::buildDevice(const aditof::DeviceConstructionData &data) {
         return std::unique_ptr<DeviceInterface>(new UsbDevice(data));
     }
     case DeviceType::ETHERNET: {
+#ifdef HAS_NETWORK
         return std::unique_ptr<DeviceInterface>(new EthernetDevice(data));
+#endif
+        return nullptr;
     }
     case DeviceType::LOCAL: {
         return std::unique_ptr<DeviceInterface>(new LocalDevice(data));

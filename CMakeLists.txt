@@ -24,6 +24,11 @@ option(WITH_OPENCV "Build opencv bindings?" OFF)
 option(WITH_MATLAB "Build matlab bindings?" OFF)
 option(WITH_OPEN3D "Build open3d bindings?" OFF)
 option(WITH_ROS "Build ros bindings?" OFF)
+option(WITH_NETWORK "Build network interface?" ON)
+
+if (WITH_NETWORK)
+        add_definitions(-DHAS_NETWORK)
+endif()
 
 add_subdirectory(sdk)
 add_subdirectory(apps)

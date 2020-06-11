@@ -3,11 +3,14 @@ project(aditof)
 
 add_definitions(-DSDK_EXPORTS)
 find_package(glog 0.3.5 REQUIRED)
-find_package(Protobuf 3.9.0 REQUIRED)
-find_package(Libwebsockets REQUIRED)
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/buffer.proto)
-get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
+if ( WITH_NETWORK )
+    find_package(Protobuf 3.9.0 REQUIRED)
+    find_package(Libwebsockets REQUIRED)
+
+    protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/buffer.proto)
+    get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
+endif()
 
 file(GLOB SOURCES
     ${CMAKE_SOURCE_DIR}/sdk/src/*.cpp
@@ -57,13 +60,22 @@ if ( ${OS_SPECIFIC_DIR} STREQUAL ${TARGET_STRING} )
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
 endif()
 
+if ( NOT WITH_NETWORK )
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/network.cpp)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/network.h)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_device.cpp)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_device.h)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/device_enumerator_ethernet.cpp)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/device_enumerator_ethernet.h)
+endif()
+
 # Create target and set properties
 add_library(${PROJECT_NAME} SHARED
     ${SOURCES}
     ${PLATFORM_SOURCES}
     ${PLATFORM_HEADERS}
-    ${PROTO_SRCS}
-    ${PROTO_HDRS}
+    $<$<BOOL:${WITH_NETWORK}>:${PROTO_SRCS}>
+    $<$<BOOL:${WITH_NETWORK}>:${PROTO_HDRS}>
 )
 
 # Add alias to aditof as aditof::aditof
@@ -88,13 +100,20 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
                        CXX_STANDARD 11
 )
 
-target_link_libraries( ${PROJECT_NAME}
-    PUBLIC
-        glog::glog
-    PRIVATE
-        ${Protobuf_LIBRARIES}
-        ${LIBWEBSOCKETS_LIBRARIES}
-)
+if ( WITH_NETWORK )
+    target_link_libraries( ${PROJECT_NAME}
+        PUBLIC
+            glog::glog
+        PRIVATE
+            ${Protobuf_LIBRARIES}
+            ${LIBWEBSOCKETS_LIBRARIES}
+    )
+else()
+    target_link_libraries( ${PROJECT_NAME}
+        PUBLIC
+            glog::glog
+    )
+endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
     target_compile_options(${PROJECT_NAME} PUBLIC
