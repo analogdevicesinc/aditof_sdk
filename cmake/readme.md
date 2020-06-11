@@ -18,6 +18,7 @@ which will generate all the necessary recipes for building and installing. Usefu
 | WITH_PYTHON | on/off | off | Build the python bindings |
 | WITH_OPENCV | on/off | off | Build the opencv bindings |
 | WITH_OPEN3D | on/off | off | Build the open3D bindings |
+| WITH_NETWORK | on/off | on | Build the network interface |
 | WITH_MATLAB | on/off | off | Build the matlab bindings |
 | WITH_DOC | on/off | off | Build the doxygen documentation |
 | CMAKE_PREFIX_PATH | \<path\> | Empty | Specifies a path which will be used by the FIND_XXX() commands |
@@ -48,6 +49,12 @@ mkdir build && cd build
 cmake -DWITH_PYTHON=on -DWITH_OPENCV=on -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" -DCMAKE_INSTALL_PREFIX="/opt/aditof" ..
 sudo cmake --build . --target install
 ```
+
+The sdk can also be built without the network interface
+```
+cmake -DWITH_NETWORK=off ..
+```
+When building with this option, Protobuf and Websockets are no longer dependencies of the sdk
 
 After installing you should run `ldconfig` to update the links/cache that the dynamic loader uses.
 
