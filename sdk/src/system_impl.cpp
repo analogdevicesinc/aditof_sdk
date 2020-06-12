@@ -85,6 +85,12 @@ aditof::Status SystemImpl::getCameraListAtIp(
     std::vector<aditof::DeviceConstructionData> devsData;
     auto ethernetEnumerator =
         DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(ip);
+    if (!ethernetEnumerator) {
+        LOG(ERROR) << "Network interface is not enabled."
+                      " Please rebuild the SDK "
+                      "with the option WITH_NETWORK=on";
+        return Status::GENERIC_ERROR;
+    }
     status = ethernetEnumerator->findDevices(devsData);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get find devices on target with ip: " << ip;

@@ -30,8 +30,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <aditof/device_enumerator_factory.h>
-
+#ifdef HAS_NETWORK
 #include "device_enumerator_ethernet.h"
+#endif
 #include "device_enumerator_impl.h"
 
 using namespace aditof;
@@ -43,7 +44,9 @@ DeviceEnumeratorFactory::buildDeviceEnumerator() {
 
 std::unique_ptr<DeviceEnumeratorInterface>
 DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(const std::string &ip) {
-
+#ifdef HAS_NETWORK
     return std::unique_ptr<DeviceEnumeratorInterface>(
         new DeviceEnumeratorEthernet(ip));
+#endif
+    return nullptr;
 }
