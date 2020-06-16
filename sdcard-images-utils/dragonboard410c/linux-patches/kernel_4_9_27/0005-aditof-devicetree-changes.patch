@@ -1,0 +1,237 @@
+From 1bd8b3af1ab8e58e5bbf9ccfc52ca709c9403d9d Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Fri, 12 Jun 2020 15:33:25 +0300
+Subject: [PATCH 5/7] aditof devicetree changes
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ arch/arm64/boot/dts/qcom/aditof-db410c.dtsi   | 49 ++++++++++
+ .../boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi  | 12 +--
+ arch/arm64/boot/dts/qcom/apq8016-sbc.dts      |  2 +-
+ arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi     |  8 +-
+ .../boot/dts/qcom/d3-camera-mezzanine.dtsi    | 94 -------------------
+ 5 files changed, 58 insertions(+), 107 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+ delete mode 100644 arch/arm64/boot/dts/qcom/d3-camera-mezzanine.dtsi
+
+diff --git a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+new file mode 100644
+index 0000000000000000000000000000000000000000..3dae0c1c82fda019a1efe7e17cedf7a00b420747
+--- /dev/null
++++ b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+@@ -0,0 +1,49 @@
++&camss {
++	ports {
++		port@1 {
++			reg = <1>;
++			csiphy1_ep: endpoint {
++				status = "ok";
++				clock-lanes = <1>;
++				data-lanes = <0 2>;
++				qcom,settle-cnt = <0xe>;
++				remote-endpoint = <&addi903x_ep>;
++			};
++		};
++	};
++};
++
++&blsp_i2c6 {
++	status = "ok";
++	camera_front@64 {
++		status = "ok";
++		compatible = "adi,addi903x";
++		reg = <0x64>;
++    		qcom,use_cci;
++
++    		reset-gpios = <&msmgpio 36 GPIO_ACTIVE_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&camera_front_default>;
++
++		clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
++		clock-names = "xclk";
++		clock-frequency = <135000000>;
++
++		port {
++			addi903x_ep: endpoint {
++				clock-lanes = <1>;
++				data-lanes = <0 2>;
++				remote-endpoint = <&csiphy1_ep>;
++			};
++		};
++	};
++};
++
++&blsp_i2c2{
++	status = "ok";
++	eeprom@56 {
++    		compatible = "atmel,24c1024";
++    		reg = <0x56>;
++		pagesize = <32>;
++  	};
++};
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi b/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi
+index d9464081219467b4ef224d3ebbeddc2a7792773c..6c5690b58b78586c7ab22e0fdf1a87869a11ac4b 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi
++++ b/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi
+@@ -32,20 +32,10 @@
+ &pm8916_mpps {
+ 
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&ls_exp_gpio_f>;
+-
+-	ls_exp_gpio_f: pm8916_mpp4 {
+-		pinconf {
+-			pins = "mpp4";
+-			function = "digital";
+-			output-low;
+-			power-source = <PM8916_MPP_L5>;	// 1.8V
+-		};
+-	};
+ 
+ 	pm8916_mpps_leds: pm8916_mpps_leds {
+ 		pinconf {
+-			pins = "mpp2", "mpp3";
++			pins = "mpp2", "mpp3", "mpp4";
+ 			function = "digital";
+ 			output-low;
+ 		};
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-sbc.dts b/arch/arm64/boot/dts/qcom/apq8016-sbc.dts
+index 9d6e98d91f75f5f4c4cf24a914446b11b827d275..041da23f590ae7e4b973f479f701860420610d0d 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-sbc.dts
++++ b/arch/arm64/boot/dts/qcom/apq8016-sbc.dts
+@@ -14,7 +14,7 @@
+ /dts-v1/;
+ 
+ #include "apq8016-sbc.dtsi"
+-#include "d3-camera-mezzanine.dtsi"
++#include "aditof-db410c.dtsi"
+ 
+ / {
+ 	model = "Qualcomm Technologies, Inc. APQ 8016 SBC";
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi b/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi
+index 0a8e3bd3db9f17285acf7ef9d0efae89685b6881..5089a298ffc9421838a291cb676231d65c25030f 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi
++++ b/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi
+@@ -177,6 +177,12 @@
+ 				linux,default-trigger = "hci0-power";
+ 				default-state = "off";
+ 			};
++			led@7 {
++				label = "apq8016-sbc:green:user5";
++				gpios = <&pm8916_mpps 4 GPIO_ACTIVE_HIGH>;
++				linux,default-trigger = "none";
++				default-state = "off";
++			};
+ 		};
+ 
+ 		sdhci@07824000 {
+@@ -609,4 +615,4 @@
+ 
+ &venus {
+ 	status = "okay";
+-};
+\ No newline at end of file
++};
+diff --git a/arch/arm64/boot/dts/qcom/d3-camera-mezzanine.dtsi b/arch/arm64/boot/dts/qcom/d3-camera-mezzanine.dtsi
+deleted file mode 100644
+index 09a2d4066be80dd8c878768f9f5a8c6a2cbf8372..0000000000000000000000000000000000000000
+--- a/arch/arm64/boot/dts/qcom/d3-camera-mezzanine.dtsi
++++ /dev/null
+@@ -1,94 +0,0 @@
+-
+-&camss {
+-	ports {
+-		port@0 {
+-			reg = <0>;
+-			csiphy0_ep: endpoint {
+-				status = "ok";
+-				clock-lanes = <1>;
+-				data-lanes = <0 2>;
+-				qcom,settle-cnt = <0xe>;
+-				remote-endpoint = <&ov5640_ep>;
+-			};
+-		};
+-		/* The camera driver requires all listed ports to have attached devices to bind them
+-		   Set status = "ok" in the camera_front and Camss->ports->port@1 to enable the second camera */
+-		port@1 {
+-			reg = <1>;
+-			csiphy1_ep: endpoint {
+-				status = "disabled";
+-				clock-lanes = <1>;
+-				data-lanes = <0 2>;
+-				qcom,settle-cnt = <0xe>;
+-				remote-endpoint = <&ov564_2_ep>;
+-			};
+-		};
+-	};
+-};
+-
+-&blsp_i2c6 {
+-	status = "ok";
+-
+-	camera_rear@78 {
+-		// This port isn't really connected to I2C-6
+-		// This is a hack until CCI driver is a full i2c driver.
+-		// The device connections listed are for port J3 - MIPI CSI0
+-		status = "ok";
+-		compatible = "ovti,ov5640";
+-		reg = <0x78>;
+-
+-		ovti,vflip;
+-		qcom,use_cci;
+-		enable-gpios = <&msmgpio 34 GPIO_ACTIVE_LOW>;
+-		reset-gpios = <&msmgpio 35 GPIO_ACTIVE_LOW>;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&camera_rear_default>;
+-
+-		clocks = <&gcc GCC_CAMSS_MCLK0_CLK>;
+-		clock-names = "xclk";
+-		clock-frequency = <23880000>;
+-
+-		vdddo-supply = <&camera_vdddo_1v8>;
+-		vdda-supply = <&camera_vdda_2v8>;
+-		vddd-supply = <&camera_vddd_1v5>;
+-
+-		port {
+-			ov5640_ep: endpoint {
+-				clock-lanes = <1>;
+-				data-lanes = <0 2>;
+-				remote-endpoint = <&csiphy0_ep>;
+-			};
+-		};
+-	};
+-
+-	/* The camera driver requires all listed ports to have attached devices to bind them
+-		Set status = "ok" in the camera_front and Camss->ports->port@1 to enable the second camera */
+-	camera_front@74 {
+-		// The device connections listed are for port J4 - MIPI CSI1
+-		status = "disabled";
+-		compatible = "ovti,ov5640";
+-		reg = <0x74>;
+-		ovti,hflip;
+-
+-		enable-gpios = <&msmgpio 33 GPIO_ACTIVE_LOW>;
+-		reset-gpios = <&msmgpio 28 GPIO_ACTIVE_LOW>;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&camera_front_default>;
+-
+-		clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
+-		clock-names = "xclk";
+-		clock-frequency = <23880000>;
+-
+-		vdddo-supply = <&camera_vdddo_1v8>;
+-		vdda-supply = <&camera_vdda_2v8>;
+-		vddd-supply = <&camera_vddd_1v5>;
+-
+-		port {
+-			ov564_2_ep: endpoint {
+-				clock-lanes = <1>;
+-				data-lanes = <0 2>;
+-				remote-endpoint = <&csiphy1_ep>;
+-			};
+-		};
+-	};
+-};
+-- 
+2.17.1
+
