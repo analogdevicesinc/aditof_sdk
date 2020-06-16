@@ -29,19 +29,19 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CAMERA_CHICONY_H
-#define CAMERA_CHICONY_H
+#ifndef CAMERA_96TOF1_H
+#define CAMERA_96TOF1_H
+
+#include "calibration_96tof1.h"
 
 #include <memory>
 
 #include <aditof/camera.h>
-#include <aditof/camera_chicony_specifics.h>
-#include "calibration_chicony_006.h"
 
-class CameraChicony : public aditof::Camera {
+class Camera96Tof1 : public aditof::Camera {
   public:
-    CameraChicony(std::unique_ptr<aditof::DeviceInterface> device);
-    ~CameraChicony();
+    Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device);
+    ~Camera96Tof1();
 
   public: // implements Camera
     aditof::Status initialize();
@@ -57,18 +57,24 @@ class CameraChicony : public aditof::Camera {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
-    std::shared_ptr<aditof::CameraSpecifics> getSpecifics();
+    aditof::Status getAvailableControls(std::vector<std::string> &controls) const;
+    aditof::Status setControl(const std::string &control, const std::string &value);
+    aditof::Status getControl(const std::string &control, std::string &value) const;
     std::shared_ptr<aditof::DeviceInterface> getDevice();
 
   private:
-    aditof::CameraDetails m_details;
-    std::shared_ptr<aditof::CameraSpecifics> m_specifics;
-    std::shared_ptr<aditof::DeviceInterface> m_device;
-    bool m_devStarted;
+      aditof::Status setNoiseReductionTreshold(uint16_t treshold);
+      aditof::Status setIrGammaCorrection(float gamma);
 
-  public:
-    friend class aditof::CameraChiconySpecifics;
-    CalibrationChicony006 m_calibration;
+  private:
+    aditof::CameraDetails m_details;
+    std::shared_ptr<aditof::DeviceInterface> m_device;
+    std::vector<std::string> m_availableControls;
+    bool m_devStarted;
+    Calibration96Tof1 m_calibration;
+    uint16_t m_noiseReductionThreshold;
+    float m_irGammaCorrection;
+    std::string m_revision;
 };
 
-#endif // CAMERA_CHICONY_H
+#endif // CAMERA_96TOF1_H

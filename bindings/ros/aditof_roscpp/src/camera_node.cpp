@@ -71,10 +71,10 @@ void callback(aditof_roscpp::Aditof_roscppConfig &config, uint32_t level,
 
         switch (config.revision) {
         case 0:
-            setCameraRevision(camera, Revision::RevB);
+            setCameraRevision(camera, "RevB");
             break;
         case 1:
-            setCameraRevision(camera, Revision::RevC);
+            setCameraRevision(camera, "RevC");
             break;
         }
         setIrGammaCorrection(camera, config.ir_gamma);

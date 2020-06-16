@@ -31,8 +31,6 @@
  */
 #include "aditofdemocontroller.h"
 
-#include <aditof/camera_96tof1_specifics.h>
-#include <aditof/camera_chicony_specifics.h>
 #include <glog/logging.h>
 #include <iostream>
 
@@ -316,21 +314,12 @@ aditof::Status AdiTofDemoController::enableNoiseReduction(bool en) {
     if (m_cameraInUse < 0)
         return Status::GENERIC_ERROR;
 
-    auto specifics =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSpecifics();
-    auto cam96tof1Specifics =
-        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-    if (cam96tof1Specifics) {
-        return cam96tof1Specifics->enableNoiseReduction(en);
-    } else {
-        auto chiconySpecifics =
-            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
-        if (chiconySpecifics) {
-            return chiconySpecifics->enableNoiseReduction(en);
-        }
+    if (!en) {
+        return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->
+            setControl("noise_reduction_threshold", std::to_string(0));
     }
 
-    return Status::GENERIC_ERROR;
+    return Status::OK;
 }
 
 aditof::Status
@@ -340,21 +329,8 @@ AdiTofDemoController::setNoiseReductionThreshold(uint16_t threshold) {
     if (m_cameraInUse < 0)
         return Status::GENERIC_ERROR;
 
-    auto specifics =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSpecifics();
-    auto cam96tof1Specifics =
-        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-    if (cam96tof1Specifics) {
-        return cam96tof1Specifics->setNoiseReductionThreshold(threshold);
-    } else {
-        auto chiconySpecifics =
-            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
-        if (chiconySpecifics) {
-            return chiconySpecifics->setNoiseReductionThreshold(threshold);
-        }
-    }
-
-    return Status::GENERIC_ERROR;
+    return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->
+        setControl("noise_reduction_threshold", std::to_string(threshold));
 }
 
 aditof::Status AdiTofDemoController::setIrGammaCorrection(float gamma) {
@@ -363,50 +339,17 @@ aditof::Status AdiTofDemoController::setIrGammaCorrection(float gamma) {
     if (m_cameraInUse < 0)
         return Status::GENERIC_ERROR;
 
-    auto specifics =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSpecifics();
-    auto cam96tof1Specifics =
-        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-
-    if (cam96tof1Specifics) {
-        return cam96tof1Specifics->setIrGammaCorrection(gamma);
-    } else {
-        auto chiconySpecifics =
-            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
-        if (chiconySpecifics) {
-            return chiconySpecifics->setIrGammaCorrection(gamma);
-        }
-    }
-
-    return Status::GENERIC_ERROR;
+    return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->
+        setControl("ir_gamma_correction", std::to_string(gamma));
 }
 
 aditof::Status
 AdiTofDemoController::setCameraRevision(const std::string &revision) {
     using namespace aditof;
 
-    aditof::Status status;
     if (m_cameraInUse < 0)
         return Status::GENERIC_ERROR;
 
-    auto specifics =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSpecifics();
-    auto cam96tof1Specifics =
-        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-
-    if (!cam96tof1Specifics) {
-        LOG(INFO)
-            << "Setting camera revision is not supported for current camera";
-        return Status::OK;
-    }
-
-    if (revision.compare("RevB") == 0) {
-        status = cam96tof1Specifics->setCameraRevision(Revision::RevB);
-    } else if (revision.compare("RevC") == 0) {
-        status = cam96tof1Specifics->setCameraRevision(Revision::RevC);
-    } else {
-        status = Status::INVALID_ARGUMENT;
-    }
-
-    return status;
+    return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->
+        setControl("revision", revision);
 }

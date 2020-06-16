@@ -135,12 +135,9 @@ void setMode(const std::shared_ptr<aditof::Camera> &camera,
 }
 
 void setCameraRevision(const std::shared_ptr<aditof::Camera> &camera,
-                       aditof::Revision rev) {
-    auto specifics = camera->getSpecifics();
-    auto cam96tof1Specifics =
-        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
+                       std::string rev) {
     Status status = Status::OK;
-    status = cam96tof1Specifics->setCameraRevision(rev);
+    status = camera->setControl("revision", rev);
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set camera revision!";
         return;
@@ -150,20 +147,7 @@ void setCameraRevision(const std::shared_ptr<aditof::Camera> &camera,
 void setIrGammaCorrection(const std::shared_ptr<aditof::Camera> &camera,
                           float gamma) {
     Status status = Status::OK;
-    auto specifics = camera->getSpecifics();
-
-    auto cam96tof1Specifics =
-        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-    if (cam96tof1Specifics) {
-        status = cam96tof1Specifics->setIrGammaCorrection(gamma);
-    } else {
-        auto chiconySpecifics =
-            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
-        if (chiconySpecifics) {
-            status = chiconySpecifics->setIrGammaCorrection(gamma);
-        }
-    }
-
+    status = camera->setControl("ir_gamma_correction", std::to_string(gamma));
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set ir gamma correction!";
         return;
@@ -172,35 +156,21 @@ void setIrGammaCorrection(const std::shared_ptr<aditof::Camera> &camera,
 
 void applyNoiseReduction(const std::shared_ptr<Camera> &camera, int threshold) {
 
-    auto specifics = camera->getSpecifics();
-    auto cam96tof1Specifics =
-        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-    if (cam96tof1Specifics) {
-        cam96tof1Specifics->setNoiseReductionThreshold(threshold);
-        cam96tof1Specifics->enableNoiseReduction(true);
-    } else {
-        auto chiconySpecifics =
-            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
-        if (chiconySpecifics) {
-            chiconySpecifics->setNoiseReductionThreshold(threshold);
-            chiconySpecifics->enableNoiseReduction(true);
-        }
+    Status status = Status::OK;
+    status = setControl("noise_reduction_threshold", std::to_string(threshold));
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not set noise reduction!";
+        return;
     }
 }
 
 void disableNoiseReduction(const std::shared_ptr<Camera> &camera) {
 
-    auto specifics = camera->getSpecifics();
-    auto cam96tof1Specifics =
-        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-    if (cam96tof1Specifics) {
-        cam96tof1Specifics->enableNoiseReduction(false);
-    } else {
-        auto chiconySpecifics =
-            std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
-        if (chiconySpecifics) {
-            chiconySpecifics->enableNoiseReduction(false);
-        }
+    Status status = Status::OK;
+    status = setControl("noise_reduction_threshold", std::to_string(0));
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not set noise reduction!";
+        return;
     }
 }
 

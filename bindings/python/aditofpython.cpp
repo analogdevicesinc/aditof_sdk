@@ -35,8 +35,6 @@
 #include "pybind11/stl.h"
 
 #include <aditof/aditof.h>
-#include <aditof/camera_96tof1_specifics.h>
-#include <aditof/camera_chicony_specifics.h>
 
 namespace py = pybind11;
 
@@ -72,10 +70,6 @@ PYBIND11_MODULE(aditofpython, m) {
         .value("Usb", aditof::ConnectionType::USB)
         .value("Ethernet", aditof::ConnectionType::ETHERNET)
         .value("local", aditof::ConnectionType::LOCAL);
-
-    py::enum_<aditof::Revision>(m, "Revision")
-        .value("RevB", aditof::Revision::RevB)
-        .value("RevC", aditof::Revision::RevC);
 
     py::class_<aditof::IntrinsicParameters>(m, "IntrinsicParameters")
         .def(py::init<>())
@@ -180,21 +174,21 @@ PYBIND11_MODULE(aditofpython, m) {
              py::arg("cb") = nullptr)
         .def("getDetails", &aditof::Camera::getDetails, py::arg("details"))
         .def("getDevice", &aditof::Camera::getDevice)
-        .def("getCamera96Tof1Specifics",
-             [](aditof::Camera &camera) {
-                 using namespace aditof;
-                 std::shared_ptr<CameraSpecifics> specifics =
-                     camera.getSpecifics();
+        .def("getAvailableControls",
+             [](const aditof::Camera &camera, py::list controls) {
+                 std::vector<std::string> controlsList;
+                 aditof::Status status = camera.getAvailableControls(controlsList);
 
-                 return std::dynamic_pointer_cast<Camera96Tof1Specifics>(
-                     specifics);
-             })
-        .def("getCameraChiconySpecifics", [](aditof::Camera &camera) {
-            using namespace aditof;
-            std::shared_ptr<CameraSpecifics> specifics = camera.getSpecifics();
+                 for (const auto &control : controlsList)
+                     controls.append(control);
 
-            return std::dynamic_pointer_cast<CameraChiconySpecifics>(specifics);
-        });
+                 return status;
+             },
+             py::arg("controls"))
+        .def("setControl", &aditof::Camera::setControl,
+             py::arg("control"), py::arg("value"))
+        .def("getControl", &aditof::Camera::getControl,
+             py::arg("control"), py::arg("value"));
 
     py::class_<aditof::Frame>(m, "Frame")
         .def(py::init<>())
@@ -304,36 +298,4 @@ PYBIND11_MODULE(aditofpython, m) {
                  temperature.append(temp);
                  return status;
              });
-
-    py::class_<aditof::Camera96Tof1Specifics,
-               std::shared_ptr<aditof::Camera96Tof1Specifics>>(
-        m, "Camera96Tof1Specifics")
-        .def("enableNoiseReduction",
-             &aditof::Camera96Tof1Specifics::enableNoiseReduction,
-             py::arg("en"))
-        .def("noiseReductionEnabled",
-             &aditof::Camera96Tof1Specifics::noiseReductionEnabled)
-        .def("setNoiseReductionThreshold",
-             &aditof::Camera96Tof1Specifics::setNoiseReductionThreshold,
-             py::arg("threshold"))
-        .def("noiseReductionThreshold",
-             &aditof::Camera96Tof1Specifics::noiseReductionThreshold)
-        .def("setCameraRevision",
-             &aditof::Camera96Tof1Specifics::setCameraRevision,
-             py::arg("revision"))
-        .def("getRevision", &aditof::Camera96Tof1Specifics::getRevision);
-
-    py::class_<aditof::CameraChiconySpecifics,
-               std::shared_ptr<aditof::CameraChiconySpecifics>>(
-        m, "CameraChiconySpecifics")
-        .def("enableNoiseReduction",
-             &aditof::CameraChiconySpecifics::enableNoiseReduction,
-             py::arg("en"))
-        .def("noiseReductionEnabled",
-             &aditof::CameraChiconySpecifics::noiseReductionEnabled)
-        .def("setNoiseReductionThreshold",
-             &aditof::CameraChiconySpecifics::setNoiseReductionThreshold,
-             py::arg("threshold"))
-        .def("noiseReductionThreshold",
-             &aditof::CameraChiconySpecifics::noiseReductionThreshold);
 }
