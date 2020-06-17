@@ -1,0 +1,70 @@
+From 58fc57b01e428789e1de109de79ed4ab54ee3c83 Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Fri, 6 Mar 2020 13:17:25 +0200
+Subject: [PATCH 7/7] arch/arm64/boot/dts/qcom: Enable pin MPP4 as input to be
+ used by adi tof
+
+pin MPP4 is tied to button S4 of the ad-96tof1-ebz board.
+This makes the S4 button usable.
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ arch/arm64/boot/dts/qcom/aditof-db410c.dtsi         | 4 ++++
+ arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi | 2 +-
+ arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi           | 6 ------
+ 3 files changed, 5 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+index 6cb63c2563921baa3686cd57a99769b0a812da15..faab150605db06d308a3c4cecf401acc8c588927 100644
+--- a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
++++ b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+@@ -68,12 +68,16 @@
+ };
+ 
+ &pm8916_mpps {
++	pinctrl-names = "default";
++	pinctrl-0 = <&gpio_button2>;
++
+ 	gpio_button2: gpio_button2 {
+ 		pinconf {
+ 			pins = "mpp4";
+ 			function = "digital";
+ 			input-enabled;
+ 			bias-disabled;
++			power-source = <PM8916_MPP_L5>;	// 1.8V
+ 		};
+ 	};
+ };
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi b/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi
+index 6c5690b58b78586c7ab22e0fdf1a87869a11ac4b..d5cefef1a6744538bfcbe92b494b4eac6f61a7c8 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi
++++ b/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi
+@@ -35,7 +35,7 @@
+ 
+ 	pm8916_mpps_leds: pm8916_mpps_leds {
+ 		pinconf {
+-			pins = "mpp2", "mpp3", "mpp4";
++			pins = "mpp2", "mpp3";
+ 			function = "digital";
+ 			output-low;
+ 		};
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi b/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi
+index 5089a298ffc9421838a291cb676231d65c25030f..e1efedc4329bd4d325390625becad1b07ed541ad 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi
++++ b/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi
+@@ -177,12 +177,6 @@
+ 				linux,default-trigger = "hci0-power";
+ 				default-state = "off";
+ 			};
+-			led@7 {
+-				label = "apq8016-sbc:green:user5";
+-				gpios = <&pm8916_mpps 4 GPIO_ACTIVE_HIGH>;
+-				linux,default-trigger = "none";
+-				default-state = "off";
+-			};
+ 		};
+ 
+ 		sdhci@07824000 {
+-- 
+2.17.1
+

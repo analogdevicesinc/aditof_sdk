@@ -1,0 +1,260 @@
+From cd72c311c0f162ed988158dac94bf8c6967ed488 Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Mon, 15 Jun 2020 16:45:04 +0300
+Subject: [PATCH 2/7] usb gadget changes
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ drivers/usb/gadget/function/f_uvc.c     |  4 +-
+ drivers/usb/gadget/function/uvc_video.c |  2 +-
+ drivers/usb/gadget/legacy/webcam.c      | 87 +++++++++++++++++++++----
+ kernel/configs/distro.config            |  1 +
+ 4 files changed, 79 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/usb/gadget/function/f_uvc.c b/drivers/usb/gadget/function/f_uvc.c
+index c7689d05356c4f57f4c7f37559a0c5d1a7fc2ec6..56b811d332f4478ca22f94bade1653f6745b0a80 100644
+--- a/drivers/usb/gadget/function/f_uvc.c
++++ b/drivers/usb/gadget/function/f_uvc.c
+@@ -45,7 +45,7 @@ unsigned int uvc_gadget_trace_param;
+ #define UVC_STRING_STREAMING_IDX		1
+ 
+ static struct usb_string uvc_en_us_strings[] = {
+-	[UVC_STRING_CONTROL_IDX].s = "UVC Camera",
++	[UVC_STRING_CONTROL_IDX].s = "ADI TOF DEPTH SENSOR",
+ 	[UVC_STRING_STREAMING_IDX].s = "Video Streaming",
+ 	{  }
+ };
+@@ -653,6 +653,7 @@ uvc_function_bind(struct usb_configuration *c, struct usb_function *f)
+ 	uvc_hs_streaming_ep.bEndpointAddress = uvc->video.ep->address;
+ 	uvc_ss_streaming_ep.bEndpointAddress = uvc->video.ep->address;
+ 
++#if 1
+ 	us = usb_gstrings_attach(cdev, uvc_function_strings,
+ 				 ARRAY_SIZE(uvc_en_us_strings));
+ 	if (IS_ERR(us)) {
+@@ -661,6 +662,7 @@ uvc_function_bind(struct usb_configuration *c, struct usb_function *f)
+ 	}
+ 	uvc_iad.iFunction = us[UVC_STRING_CONTROL_IDX].id;
+ 	uvc_control_intf.iInterface = us[UVC_STRING_CONTROL_IDX].id;
++#endif
+ 	ret = us[UVC_STRING_STREAMING_IDX].id;
+ 	uvc_streaming_intf_alt0.iInterface = ret;
+ 	uvc_streaming_intf_alt1.iInterface = ret;
+diff --git a/drivers/usb/gadget/function/uvc_video.c b/drivers/usb/gadget/function/uvc_video.c
+index 0f01c04d7cbd856581da53d6e69cba5f50b2c922..3d0d5d94a62f2fe6927983ba6979784eb20eceeb 100644
+--- a/drivers/usb/gadget/function/uvc_video.c
++++ b/drivers/usb/gadget/function/uvc_video.c
+@@ -243,7 +243,7 @@ uvc_video_alloc_requests(struct uvc_video *video)
+ 
+ 	req_size = video->ep->maxpacket
+ 		 * max_t(unsigned int, video->ep->maxburst, 1)
+-		 * (video->ep->mult);
++		 * (video->ep->mult + 1);
+ 
+ 	for (i = 0; i < UVC_NUM_REQUESTS; ++i) {
+ 		video->req_buffer[i] = kmalloc(req_size, GFP_KERNEL);
+diff --git a/drivers/usb/gadget/legacy/webcam.c b/drivers/usb/gadget/legacy/webcam.c
+index f9661cd627c8e7712c0ca251a1b670eba1528cf5..4f26cfd12c03e2e58dd17713887a9c3ab1347661 100644
+--- a/drivers/usb/gadget/legacy/webcam.c
++++ b/drivers/usb/gadget/legacy/webcam.c
+@@ -46,7 +46,7 @@ MODULE_PARM_DESC(trace, "Trace level bitmask");
+ #define WEBCAM_DEVICE_BCD		0x0010	/* 0.10 */
+ 
+ static char webcam_vendor_label[] = "Linux Foundation";
+-static char webcam_product_label[] = "Webcam gadget";
++static char webcam_product_label[] = "ADI TOF DEPTH SENSOR";
+ static char webcam_config_label[] = "Video";
+ 
+ /* string IDs are assigned dynamically */
+@@ -133,15 +133,31 @@ static const struct uvc_processing_unit_descriptor uvc_processing = {
+ 	.bmControls[1]		= 0,
+ 	.iProcessing		= 0,
+ };
++DECLARE_UVC_EXTENSION_UNIT_DESCRIPTOR(1, 3);
++static const struct UVC_EXTENSION_UNIT_DESCRIPTOR(1, 3) uvc_extension_header = {
++	.bLength		= UVC_DT_EXTENSION_UNIT_SIZE(1,3),
++	.bDescriptorType	= USB_DT_CS_INTERFACE,
++	.bDescriptorSubType	= UVC_VC_EXTENSION_UNIT,
++	.bUnitID		= 3,
++	.guidExtensionCode	= {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
++	.bNumControls		= 2,
++	.bNrInPins		= 1,
++	.baSourceID[0]		= 2,
++	.bControlSize		= 3,
++	.bmControls[0]		= 0x3F,
++	.bmControls[1]		= 0x00,
++	.bmControls[2]		= 0x00,
++	.iExtension		= 0x00,
++};
+ 
+ static const struct uvc_output_terminal_descriptor uvc_output_terminal = {
+ 	.bLength		= UVC_DT_OUTPUT_TERMINAL_SIZE,
+ 	.bDescriptorType	= USB_DT_CS_INTERFACE,
+ 	.bDescriptorSubType	= UVC_VC_OUTPUT_TERMINAL,
+-	.bTerminalID		= 3,
++	.bTerminalID		= 4,
+ 	.wTerminalType		= cpu_to_le16(0x0101),
+ 	.bAssocTerminal		= 0,
+-	.bSourceID		= 2,
++	.bSourceID		= 3,
+ 	.iTerminal		= 0,
+ };
+ 
+@@ -155,7 +171,7 @@ static const struct UVC_INPUT_HEADER_DESCRIPTOR(1, 2) uvc_input_header = {
+ 	.wTotalLength		= 0, /* dynamic */
+ 	.bEndpointAddress	= 0, /* dynamic */
+ 	.bmInfo			= 0,
+-	.bTerminalLink		= 3,
++	.bTerminalLink		= 4,
+ 	.bStillCaptureMethod	= 0,
+ 	.bTriggerSupport	= 0,
+ 	.bTriggerUsage		= 0,
+@@ -169,10 +185,12 @@ static const struct uvc_format_uncompressed uvc_format_yuv = {
+ 	.bDescriptorType	= USB_DT_CS_INTERFACE,
+ 	.bDescriptorSubType	= UVC_VS_FORMAT_UNCOMPRESSED,
+ 	.bFormatIndex		= 1,
+-	.bNumFrameDescriptors	= 2,
+-	.guidFormat		=
+-		{ 'Y',  'U',  'Y',  '2', 0x00, 0x00, 0x10, 0x00,
+-		 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71},
++	.bNumFrameDescriptors	= 3,
++/* All the listed formats are valid, YUY2: Works with standard Windows Apps as well as SDK, YU16: Works with SDK, but not with standard Windows Apps */
++//	.guidFormat		= { 'Y',  'U',  'Y',  '2', 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71},
++//	.guidFormat		= { 'U',  'Y',  'V',  'Y', 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71},
++	.guidFormat		= { 'Y',  '1',  '6',  ' ', 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71},
++//	.guidFormat		= { 'R',  'G',  'B',  '2', 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71},
+ 	.bBitsPerPixel		= 16,
+ 	.bDefaultFrameIndex	= 1,
+ 	.bAspectRatioX		= 0,
+@@ -188,7 +206,7 @@ static const struct UVC_FRAME_UNCOMPRESSED(3) uvc_frame_yuv_360p = {
+ 	.bLength		= UVC_DT_FRAME_UNCOMPRESSED_SIZE(3),
+ 	.bDescriptorType	= USB_DT_CS_INTERFACE,
+ 	.bDescriptorSubType	= UVC_VS_FRAME_UNCOMPRESSED,
+-	.bFrameIndex		= 1,
++	.bFrameIndex		= 3,
+ 	.bmCapabilities		= 0,
+ 	.wWidth			= cpu_to_le16(640),
+ 	.wHeight		= cpu_to_le16(360),
+@@ -202,20 +220,56 @@ static const struct UVC_FRAME_UNCOMPRESSED(3) uvc_frame_yuv_360p = {
+ 	.dwFrameInterval[2]	= cpu_to_le32(5000000),
+ };
+ 
++static const struct UVC_FRAME_UNCOMPRESSED(3) uvc_frame_yuv_960p = {
++        .bLength                = UVC_DT_FRAME_UNCOMPRESSED_SIZE(3),
++        .bDescriptorType        = USB_DT_CS_INTERFACE,
++        .bDescriptorSubType     = UVC_VS_FRAME_UNCOMPRESSED,
++        .bFrameIndex            = 1,
++        .bmCapabilities         = 0,
++        .wWidth                 = cpu_to_le16(640),
++        .wHeight                = cpu_to_le16(960),
++        .dwMinBitRate           = cpu_to_le32(49152000),
++        .dwMaxBitRate           = cpu_to_le32(245760000),
++        .dwMaxVideoFrameBufferSize      = cpu_to_le32(1228800),
++        .dwDefaultFrameInterval = cpu_to_le32(400000),
++        .bFrameIntervalType     = 3,
++        .dwFrameInterval[0]     = cpu_to_le32(400000),
++        .dwFrameInterval[1]     = cpu_to_le32(1000000),
++        .dwFrameInterval[2]     = cpu_to_le32(5000000),
++};
++
++static const struct UVC_FRAME_UNCOMPRESSED(3) uvc_frame_yuv_750p = {
++        .bLength                = UVC_DT_FRAME_UNCOMPRESSED_SIZE(3),
++        .bDescriptorType        = USB_DT_CS_INTERFACE,
++        .bDescriptorSubType     = UVC_VS_FRAME_UNCOMPRESSED,
++        .bFrameIndex            = 2,
++        .bmCapabilities         = 0,
++        .wWidth                 = cpu_to_le16(668),
++        .wHeight                = cpu_to_le16(750),
++        .dwMinBitRate           = cpu_to_le32(40080000),
++        .dwMaxBitRate           = cpu_to_le32(120240000),
++        .dwMaxVideoFrameBufferSize      = cpu_to_le32(1002000),
++        .dwDefaultFrameInterval = cpu_to_le32(666666),
++        .bFrameIntervalType     = 3,
++        .dwFrameInterval[0]     = cpu_to_le32(666666),
++        .dwFrameInterval[1]     = cpu_to_le32(1000000),
++        .dwFrameInterval[2]     = cpu_to_le32(5000000),
++};
++
+ static const struct UVC_FRAME_UNCOMPRESSED(1) uvc_frame_yuv_720p = {
+ 	.bLength		= UVC_DT_FRAME_UNCOMPRESSED_SIZE(1),
+ 	.bDescriptorType	= USB_DT_CS_INTERFACE,
+ 	.bDescriptorSubType	= UVC_VS_FRAME_UNCOMPRESSED,
+-	.bFrameIndex		= 2,
++	.bFrameIndex		= 4,
+ 	.bmCapabilities		= 0,
+ 	.wWidth			= cpu_to_le16(1280),
+ 	.wHeight		= cpu_to_le16(720),
+ 	.dwMinBitRate		= cpu_to_le32(29491200),
+ 	.dwMaxBitRate		= cpu_to_le32(29491200),
+ 	.dwMaxVideoFrameBufferSize	= cpu_to_le32(1843200),
+-	.dwDefaultFrameInterval	= cpu_to_le32(5000000),
++	.dwDefaultFrameInterval	= cpu_to_le32(1000000),
+ 	.bFrameIntervalType	= 1,
+-	.dwFrameInterval[0]	= cpu_to_le32(5000000),
++	.dwFrameInterval[0]	= cpu_to_le32(1000000),
+ };
+ 
+ static const struct uvc_format_mjpeg uvc_format_mjpg = {
+@@ -282,6 +336,7 @@ static const struct uvc_descriptor_header * const uvc_fs_control_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_control_header,
+ 	(const struct uvc_descriptor_header *) &uvc_camera_terminal,
+ 	(const struct uvc_descriptor_header *) &uvc_processing,
++	(const struct uvc_descriptor_header *) &uvc_extension_header,
+ 	(const struct uvc_descriptor_header *) &uvc_output_terminal,
+ 	NULL,
+ };
+@@ -290,6 +345,7 @@ static const struct uvc_descriptor_header * const uvc_ss_control_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_control_header,
+ 	(const struct uvc_descriptor_header *) &uvc_camera_terminal,
+ 	(const struct uvc_descriptor_header *) &uvc_processing,
++	(const struct uvc_descriptor_header *) &uvc_extension_header,
+ 	(const struct uvc_descriptor_header *) &uvc_output_terminal,
+ 	NULL,
+ };
+@@ -297,6 +353,8 @@ static const struct uvc_descriptor_header * const uvc_ss_control_cls[] = {
+ static const struct uvc_descriptor_header * const uvc_fs_streaming_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_input_header,
+ 	(const struct uvc_descriptor_header *) &uvc_format_yuv,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_960p,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_750p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_360p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_720p,
+ 	(const struct uvc_descriptor_header *) &uvc_format_mjpg,
+@@ -309,6 +367,8 @@ static const struct uvc_descriptor_header * const uvc_fs_streaming_cls[] = {
+ static const struct uvc_descriptor_header * const uvc_hs_streaming_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_input_header,
+ 	(const struct uvc_descriptor_header *) &uvc_format_yuv,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_960p,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_750p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_360p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_720p,
+ 	(const struct uvc_descriptor_header *) &uvc_format_mjpg,
+@@ -321,6 +381,8 @@ static const struct uvc_descriptor_header * const uvc_hs_streaming_cls[] = {
+ static const struct uvc_descriptor_header * const uvc_ss_streaming_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_input_header,
+ 	(const struct uvc_descriptor_header *) &uvc_format_yuv,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_960p,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_750p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_360p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_720p,
+ 	(const struct uvc_descriptor_header *) &uvc_format_mjpg,
+@@ -437,4 +499,3 @@ MODULE_AUTHOR("Laurent Pinchart");
+ MODULE_DESCRIPTION("Webcam Video Gadget");
+ MODULE_LICENSE("GPL");
+ MODULE_VERSION("0.1.0");
+-
+diff --git a/kernel/configs/distro.config b/kernel/configs/distro.config
+index cddf0f946ea82a222e3e45987c3ade50577f7e19..c03b32859076b6a8c257664b2b15b7c677228695 100644
+--- a/kernel/configs/distro.config
++++ b/kernel/configs/distro.config
+@@ -119,6 +119,7 @@ CONFIG_USB_ETH=m
+ CONFIG_USB_MASS_STORAGE=m
+ CONFIG_USB_G_SERIAL=m
+ CONFIG_NEW_LEDS=y
++CONFIG_USB_G_WEBCAM=m
+ 
+ # USB Eth
+ CONFIG_USB_CATC=m
+-- 
+2.17.1
+
