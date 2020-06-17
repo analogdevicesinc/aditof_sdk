@@ -1,0 +1,51 @@
+From e182c73a13bbebd93472cd1fa6a08d1caa78f1ee Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Tue, 14 May 2019 18:02:40 +0300
+Subject: [PATCH 6/7] dts: Disable spi0 and disable pull-ups
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ arch/arm64/boot/dts/qcom/aditof-db410c.dtsi | 30 +++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+index 3dae0c1c82fda019a1efe7e17cedf7a00b420747..6cb63c2563921baa3686cd57a99769b0a812da15 100644
+--- a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
++++ b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+@@ -47,3 +47,33 @@
+ 		pagesize = <32>;
+   	};
+ };
++
++&blsp_spi5{
++	status = "disabled";
++};
++
++&msmgpio{
++	gpio_button1: gpio_button1 {
++		pinmux {
++			function = "gpio";
++			pins = "gpio24";
++		};
++		pinconf {
++			pins = "gpio24";
++			drive-strength = <2>;
++			input-enabled;
++			bias-disabled;
++		};
++	};
++};
++
++&pm8916_mpps {
++	gpio_button2: gpio_button2 {
++		pinconf {
++			pins = "mpp4";
++			function = "digital";
++			input-enabled;
++			bias-disabled;
++		};
++	};
++};
+-- 
+2.17.1
+
