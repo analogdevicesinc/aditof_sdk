@@ -45,6 +45,11 @@ if (NOT APPLE AND NOT WIN32)
     option(RUN_LDCONFIG "Run ldconfig after install." ON)
 endif()
 
+if ( USE_CHICONY AND RASPBERRYPI )
+	set(CHICONY_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.cpp)
+	set(CHICONY_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h)
+endif()
+
 # Platform specific sources and headers
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
@@ -53,14 +58,14 @@ file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.cpp
+    ${CHICONY_SRC}
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h
+    ${CHICONY_H}
 )
 
 if ( ${OS_SPECIFIC_DIR} STREQUAL ${TARGET_STRING} )

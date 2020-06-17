@@ -40,15 +40,6 @@
 #include <stdint.h>
 #include <unordered_map>
 
-typedef struct _sTOF_PULSE_PARAM {
-    uint16_t unLdWidth;
-    uint16_t unSubWidth;
-    uint16_t unA0Phase;
-    uint16_t unA1Phase;
-    uint16_t unA2Phase;
-    uint16_t unSubPhase;
-}sTOF_PULSE_PARAM;
-
 class CalibrationChicony006 {
   public:
     CalibrationChicony006();
@@ -56,45 +47,29 @@ class CalibrationChicony006 {
 
   public:
     aditof::Status initialize(std::shared_ptr<aditof::DeviceInterface> device);
-    aditof::Status setMode(uint16_t mode);
+    aditof::Status close();
+    aditof::Status setMode(const std::string mode);
 
   private:
-      aditof::Status AfeRegWrite(uint16_t unAddr, uint16_t unData);
-      aditof::Status AfeRegRead(uint16_t* punRcvBuf, uint32_t ulWords, uint16_t unRegAdr);
-      aditof::Status unWriteTofRamReg(uint16_t *punRegAddr, uint16_t unRegVal, uint16_t unSetNum);
-      aditof::Status unReadTofRamReg(uint16_t *punRegAddr, uint16_t *unRegVal, uint16_t unSetNum);
-      uint16_t unGetWindowT(uint16_t unWINValue);
-      
-      uint16_t unCalcToFPulsePhaseAndWidth(uint16_t unReg, uint16_t unWINinfo, uint16_t *punPulseWidth, uint16_t *punPulsePhase);
-      aditof::Status GetTofPulse(sTOF_PULSE_PARAM *psParam);
-      aditof::Status GetExposureDelay(uint16_t unMode, uint16_t *punVdInitOfst);
+      aditof::Status SetEEPROMData_0(uint16_t Gdata[][2], uint16_t Gdata_size, uint16_t SetData[]);
+      aditof::Status SetEEPROMData_1(uint16_t Gdata[][2], uint16_t Gdata_size, uint16_t SetData[][2]);
+      aditof::Status TofEepromRead(uint16_t unAddr, uint16_t* punData, uint16_t unSlave);
+      aditof::Status TofEepromWrite(uint16_t unAddr, uint16_t punData);
+
+      aditof::Status TofSendCsTable(uint16_t *punSndTbl, uint32_t ulWords);
+      aditof::Status unWriteTofRamReg(uint16_t *punReg, uint16_t unReg, uint16_t unSetNum);
       aditof::Status SetExposureDelay(uint16_t unMode, uint16_t unVdInitOfst);
-      uint16_t GetDefExpValue(uint16_t unMode);
-      aditof::Status SetExpValue(uint16_t unExp, uint16_t *unHdExp);
-      aditof::Status SetCcdDummy(uint16_t unCcdDummy);
-      
-      aditof::Status EepromRead(uint16_t unAddr, uint16_t *punData);
-      aditof::Status ContinuousRead_1Array(uint16_t unAddr, uint16_t unTbl[], uint16_t unStartWriteArrayNum, uint16_t unConinuousNum, uint16_t *punCheckSum);
-      aditof::Status ContinuousRead_2Array(uint16_t unAddr, uint16_t unTbl[][2], uint16_t unStartWriteArrayNum, uint16_t unConinuousNum, uint16_t *punCheckSum);
-      aditof::Status ContinuousRead_Reserved(uint16_t unAddr, uint16_t unConinuousNum, uint16_t *punCheckSum);
-      
-      aditof::Status ReadCalibData(void);
-      aditof::Status ReadCommonfromEEPROM(uint16_t *punCheckSum, uint16_t unCtrlTbl[], uint16_t unIspTbl[][2], uint16_t unBase);
-      aditof::Status ReadModefromEEPROM(uint16_t *punCheckSum, uint16_t unCtrlTbl[], uint16_t unIspTbl[][2], uint16_t unRamTbl[], uint16_t unBase);
-      aditof::Status ReadCsIniCodefromEEPROM(uint16_t _unROMByte, uint16_t *punCheckSum);
-
-      aditof::Status DecompressionAndSendCS(void);
-      aditof::Status SendCsTable(uint16_t *punSndTbl, uint32_t ulWords);
+      aditof::Status unReadTofRamReg(uint16_t *punRegAddr, uint16_t *punReg, uint16_t unRegNum);
+      aditof::Status GetExposureDelay(uint16_t unMode, uint16_t *punVdInitOfst);
+      aditof::Status GetIdlePeriod(uint16_t unMode, uint16_t *punIdlePeriod);
+      aditof::Status TofChangeRangeMode(uint16_t unMode);
+      aditof::Status TofSetCcdDummy(uint16_t unCcdDummy);
+      aditof::Status TofSetExpValue(uint16_t unExp, uint16_t *unHdExp);
+      aditof::Status TofSetEmissionEnable(uint16_t unEnable);
+      aditof::Status sensorPowerUp();
+      aditof::Status sensorPowerDown();
 
   private:
-      uint16_t gunRangeMode;
-      uint16_t gunExpValue;
-      uint16_t gunVdInitialOffset;
-      uint16_t gunIdlePeriod;
-      uint16_t gunCcdDummy;
-      uint16_t gunHdExp;
-      uint16_t gunExpMax;
-      uint16_t gunInitialized;
       std::shared_ptr<aditof::DeviceInterface> m_device;
 };
 

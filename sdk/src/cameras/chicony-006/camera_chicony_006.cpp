@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "camera_chicony.h"
+#include "camera_chicony_006.h"
 
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
@@ -93,8 +93,13 @@ aditof::Status CameraChicony::start() {
 }
 
 aditof::Status CameraChicony::stop() {
+    using namespace aditof;
+    Status status = Status::OK;
+
     // return m_device->stop(); // For now we keep the device open all the time
-    return aditof::Status::OK;
+    status = m_calibration.close();
+
+    return status;
 }
 
 aditof::Status CameraChicony::setMode(const std::string &mode,
@@ -118,7 +123,7 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
         m_details.maxDepth = (*iter).maxDepth;
 	m_details.minDepth = (*iter).minDepth;
     } else {
-	m_details.maxDepth = 4096;
+        m_details.maxDepth = 4096;
     }
 
     if (!modeFilename.empty()) {
@@ -150,7 +155,7 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
                   << " is: " << m_details.minDepth << " mm and "
                   << m_details.maxDepth << " mm";
 
-        m_calibration.setMode(mode == "near" ? 0 : 1);
+        m_calibration.setMode(mode);
     }
 
     // register writes for enabling only one video stream (depth/ ir)

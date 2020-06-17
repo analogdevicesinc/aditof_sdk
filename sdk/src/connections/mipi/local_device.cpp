@@ -83,7 +83,6 @@ struct LocalDevice::ImplData {
     enum v4l2_buf_type videoBuffersType;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
     eeprom edev;
-    FILE* fp;
 
     ImplData()
         : fd(-1), sfd(-1), videoBuffers(nullptr),
@@ -107,16 +106,11 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
 
+#ifdef CHICONY_006
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
+#else
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
-
-    // For now, we assume we have a Chicony if there is a replacemet file
-    FILE *fd = fopen(EEPROM_REPLACEMENT_PATH, "r");
-    if (fd) {
-        m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
-        fclose(fd);
-    }
-
-    m_implData->fp = fopen("/home/pi/workspace/github/aditof_sdk/build/reg_writes.txt", "wt");
+#endif
 }
 
 LocalDevice::~LocalDevice() {
@@ -645,31 +639,7 @@ aditof::Status LocalDevice::readEeprom(uint32_t address, uint8_t *data,
                                        size_t length) {
     using namespace aditof;
     Status status = Status::OK;
-#if 0
-    if (m_deviceDetails.sensorType == aditof::SensorType::SENSOR_CHICONY) {
-        switch (address) {
-        case (0xFFFFFFFE): {
-            std::ifstream file(EEPROM_REPLACEMENT_PATH,
-                               std::ios::binary | std::ios::ate);
-            uint32_t *size = reinterpret_cast<uint32_t *>(data);
-            *size = static_cast<uint32_t>(file.tellg());
-            file.close();
-            return Status::OK;
-        }
-        case (0xFFFFFFFF): {
-            std::ifstream firmware_file(EEPROM_REPLACEMENT_PATH,
-                                        std::ios::binary);
-            firmware_file.read(reinterpret_cast<char *>(data), length);
-            firmware_file.close();
-            return Status::OK;
-        }
-        default: {
-            LOG(WARNING) << "Unsupported address";
-            return Status::INVALID_ARGUMENT;
-        }
-        } // switch (address)
-    }
-#endif
+
     if (!m_implData->edev.valid) {
         LOG(WARNING) << "EEPROM not available!";
         return Status::GENERIC_ERROR;
@@ -743,11 +713,6 @@ aditof::Status LocalDevice::writeAfeRegisters(const uint16_t *address,
     static unsigned char buf[CTRL_PACKET_SIZE];
     unsigned short sampleCnt = 0;
 
-    for(int i = 0; i < length; i++) {
-        fprintf(m_implData->fp, "0x%X 0x%X\n", address[i], data[i]);
-    }
-    fflush(m_implData->fp);
-
     length *= 2 * sizeof(unsigned short);
     while (length) {
         memset(buf, 0, CTRL_PACKET_SIZE);
@@ -798,7 +763,7 @@ aditof::Status LocalDevice::readAfeTemp(float &temperature) {
         temp_sensor_close(&tdev);
     } else if (m_deviceDetails.sensorType ==
                aditof::SensorType::SENSOR_CHICONY) {
-        int fd = ::open(TEMP_SENSOR_REPLACEMENT_DEV_PATH, O_RDONLY);
+        int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
             return Status::GENERIC_ERROR;
@@ -833,7 +798,7 @@ aditof::Status LocalDevice::readLaserTemp(float &temperature) {
         temp_sensor_close(&tdev);
     } else if (m_deviceDetails.sensorType ==
                aditof::SensorType::SENSOR_CHICONY) {
-        int fd = ::open(TEMP_SENSOR_REPLACEMENT_DEV_PATH, O_RDONLY);
+        int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
             return Status::GENERIC_ERROR;

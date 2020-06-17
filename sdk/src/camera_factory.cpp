@@ -31,8 +31,9 @@
  */
 #include "camera_factory.h"
 #include "camera_96tof1.h"
-#include "camera_chicony.h"
-
+#ifdef CHICONY_006
+#include "camera_chicony_006.h"
+#endif
 #include <aditof/device_definitions.h>
 
 namespace aditof {
@@ -47,9 +48,10 @@ CameraFactory::buildCamera(std::unique_ptr<DeviceInterface> device) {
 
     case SensorType::SENSOR_96TOF1:
         return std::unique_ptr<Camera>(new Camera96Tof1(std::move(device)));
-
+#ifdef CHICONY_006
     case SensorType::SENSOR_CHICONY:
         return std::unique_ptr<Camera>(new CameraChicony(std::move(device)));
+#endif
     }
 
     return nullptr;
