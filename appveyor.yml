@@ -1,6 +1,7 @@
 version: '1.0.{build}'
 
-image: 
+image:
+    - Visual Studio 2019
     - Visual Studio 2017
     - Visual Studio 2015
 
@@ -15,6 +16,8 @@ install:
             set generator=Visual Studio 14 2015
         ) else if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (
             set generator=Visual Studio 15 2017
+        ) else if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (
+            set generator=Visual Studio 16 2019
         )
     #- set generator=%generator:"=%
     - if not exist "deps" ( mkdir deps )
@@ -25,68 +28,68 @@ install:
 build_script:
 
     # x64 glog install
-    - C:\projects\aditof-sdk\ci\appveyor\install_glog.bat "Release" "Win64"
-    - C:\projects\aditof-sdk\ci\appveyor\install_glog.bat "Debug" "Win64"
+    - C:\projects\aditof-sdk\ci\appveyor\install_glog.bat "Release" "x64"
+    - C:\projects\aditof-sdk\ci\appveyor\install_glog.bat "Debug" "x64"
     # x64 protobuf install
-    - C:\projects\aditof-sdk\ci\appveyor\install_protobuf.bat "Release" "Win64"
-    - C:\projects\aditof-sdk\ci\appveyor\install_protobuf.bat "Debug" "Win64"
+    - C:\projects\aditof-sdk\ci\appveyor\install_protobuf.bat "Release" "x64"
+    - C:\projects\aditof-sdk\ci\appveyor\install_protobuf.bat "Debug" "x64"
     # x64 websockets install
-    - C:\projects\aditof-sdk\ci\appveyor\install_websockets.bat "Release" "Win64"
-    - C:\projects\aditof-sdk\ci\appveyor\install_websockets.bat "Debug" "Win64"
+    - C:\projects\aditof-sdk\ci\appveyor\install_websockets.bat "Release" "x64"
+    - C:\projects\aditof-sdk\ci\appveyor\install_websockets.bat "Debug" "x64"
     
     # x64
     - set PATH=C:\\Python36-x64;C:\\Python36-x64\\Scripts;%PATH%
     - mkdir build
     - ps: pushd build
-    - cmake -G "%generator% Win64" \
+    - cmake -G "%generator%" -A "x64" \
       -DWITH_PYTHON=on \
       -DWITH_OPENCV=on \
       -DOpenCV_DIR="C:\tools\opencv\build\x64\vc15\lib" \
-      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stableWin64\local_path\websockets" \
+      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0x64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stablex64\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" \
       ..
     - cmake --build . --config "Release"
     - ps: popd
     - mkdir build_debug
     - ps: pushd build_debug
-    - cmake -G "%generator% Win64" \
+    - cmake -G "%generator%" -A "x64" \
       -DWITH_PYTHON=on \
       -DWITH_OPENCV=on \
       -DOpenCV_DIR="C:\tools\opencv\build\x64\vc15\lib" \
-      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stableWin64\local_path\websockets" \
+      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0x64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stablex64\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" \
       ..
     - cmake --build . --config "Debug"
     - ps: popd
 
     # x86 glog install
-    - C:\projects\aditof-sdk\ci\appveyor\install_glog.bat "Release"
-    - C:\projects\aditof-sdk\ci\appveyor\install_glog.bat "Debug"
+    - C:\projects\aditof-sdk\ci\appveyor\install_glog.bat "Release" "Win32"
+    - C:\projects\aditof-sdk\ci\appveyor\install_glog.bat "Debug" "Win32"
     # x86 protobuf install
-    - C:\projects\aditof-sdk\ci\appveyor\install_protobuf.bat "Release"
-    - C:\projects\aditof-sdk\ci\appveyor\install_protobuf.bat "Debug"
+    - C:\projects\aditof-sdk\ci\appveyor\install_protobuf.bat "Release" "Win32"
+    - C:\projects\aditof-sdk\ci\appveyor\install_protobuf.bat "Debug" "Win32"
     # x86 websockets install
-    - C:\projects\aditof-sdk\ci\appveyor\install_websockets.bat "Release"
-    - C:\projects\aditof-sdk\ci\appveyor\install_websockets.bat "Debug"
+    - C:\projects\aditof-sdk\ci\appveyor\install_websockets.bat "Release" "Win32"
+    - C:\projects\aditof-sdk\ci\appveyor\install_websockets.bat "Debug" "Win32"
 
     # x86
     - set PATH=C:\\Python36;C:\\Python36\\Scripts;%PATH%
     - mkdir build_x32
     - ps: pushd build_x32
-    - cmake -G "%generator%" \
+    - cmake -G "%generator%" -A "Win32" \
       -DWITH_EXAMPLES=off \
       -DWITH_PYTHON=on \
-      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stable\local_path\websockets" \
+      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win32\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stableWin32\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win32\include" \
       ..
     - cmake --build . --config "Release"
     - ps: popd
     - mkdir build_debug_x32
     - ps: pushd build_debug_x32
-    - cmake -G "%generator%" \
+    - cmake -G "%generator%" -A "Win32" \
       -DWITH_EXAMPLES=off \
       -DWITH_PYTHON=on \
-      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stable\local_path\websockets" \
+      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win32\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stableWin32\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win32\include" \
       ..
     - cmake --build . --config "Debug"
