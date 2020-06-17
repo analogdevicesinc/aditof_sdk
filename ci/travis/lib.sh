@@ -212,6 +212,25 @@ build_and_install_opencv() {
 }
 
 ############################################################################
+# Build and install open3d from the specified repository
+############################################################################
+build_and_install_open3d() {
+    REPO_DIR=$1
+    INSTALL_DIR=$2
+    EXTRA_CMAKE_OPTIONS=$3
+    BUILD_DIR=${REPO_DIR}/build_3_1_0
+
+    chmod +x ${REPO_DIR}/util/scripts/install-deps-ubuntu.sh
+    bash ${REPO_DIR}/util/scripts/install-deps-ubuntu.sh "assume-yes"
+
+    mkdir -p ${BUILD_DIR}
+    pushd ${BUILD_DIR}
+    cmake -D CMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DBUILD_PYBIND11=off -DBUILD_PYTHON_MODULE=off -DGLIBCXX_USE_CXX11_ABI=on ..
+    make -j${NUM_JOBS}
+    sudo make install
+}
+
+############################################################################
 # Install the latest version of doxygen in the /deps folder
 ############################################################################
 install_doxygen() {
@@ -256,6 +275,12 @@ get_deps_source_code() {
 	        unzip -q opencv.zip
         }
     fi
+    if [[ ${CMAKE_OPTIONS} == *"WITH_OPEN3D=on"* ]]; then
+        [ -d "Open3D" ] || {
+            git clone --recursive --branch v0.9.0 --depth 1 https://github.com/intel-isl/Open3D.git
+        }
+    fi
+
     popd
 }
 

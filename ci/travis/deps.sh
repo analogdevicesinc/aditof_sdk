@@ -12,6 +12,9 @@ deps_default() {
     if [[ ${CMAKE_OPTIONS} == *"WITH_OPENCV=on"* ]]; then
         build_and_install_opencv "${DEPS_DIR}/opencv-${OPENCV}" "${DEPS_DIR}/installed/opencv"
     fi
+    if [[ ${CMAKE_OPTIONS} == *"WITH_OPEN3D=on"* ]]; then
+        build_and_install_open3d "${DEPS_DIR}/Open3D" "${DEPS_DIR}/installed/Open3D"
+    fi
 }
 
 deps_cppcheck() {

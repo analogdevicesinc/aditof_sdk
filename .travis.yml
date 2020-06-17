@@ -35,7 +35,7 @@ matrix:
       addons: { apt: { packages: ["clang-7", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-7"] } }
 
     - env: COMPILER=clang++-8
-           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on -DWITH_OPENCV=on"
+           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on -DWITH_OPENCV=on -DWITH_OPEN3D=on"
       addons: { apt: { packages: ["clang-8", "cmake"], sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-8"] } }
 
       #GCC 7
@@ -44,7 +44,7 @@ matrix:
 
       #GCC 8
     - env: COMPILER=g++-8
-           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on -DWITH_OPENCV=on"
+           CMAKE_OPTIONS="-DWITH_EXAMPLES=on -DWITH_PYTHON=on -DWITH_OPENCV=on -DWITH_OPEN3D=on"
       addons: { apt: { packages: ["g++-8", "cmake"], sources: ["ubuntu-toolchain-r-test"] } }
 
       #ROS
@@ -138,14 +138,14 @@ before_script:
   - |
     if [[ "$BUILD_TYPE" == "" ]]; then
       pushd "${TRAVIS_BUILD_DIR}"
-      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS} -DPYTHON_EXECUTABLE=${PYTHON} -DCMAKE_PREFIX_PATH="${DEPS_DIR}/installed/glog;${DEPS_DIR}/installed/protobuf;${DEPS_DIR}/installed/websockets;${DEPS_DIR}/installed/opencv;";
+      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS} -DPYTHON_EXECUTABLE=${PYTHON} -DCMAKE_PREFIX_PATH="${DEPS_DIR}/installed/glog;${DEPS_DIR}/installed/protobuf;${DEPS_DIR}/installed/websockets;${DEPS_DIR}/installed/opencv;${DEPS_DIR}/installed/Open3D;";
       popd
     fi
 
   - |
     if [[ "$BUILD_TYPE" == "ros" ]]; then
       pushd "${TRAVIS_BUILD_DIR}"
-      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS} -DCMAKE_PREFIX_PATH="${DEPS_DIR}/installed/glog;${DEPS_DIR}/installed/protobuf;${DEPS_DIR}/installed/websockets;";
+      mkdir build && cd build && cmake .. ${CMAKE_OPTIONS} -DCMAKE_PREFIX_PATH="${DEPS_DIR}/installed/glog;${DEPS_DIR}/installed/protobuf;${DEPS_DIR}/installed/websockets;${DEPS_DIR}/installed/Open3D;";
       popd
     fi
 
