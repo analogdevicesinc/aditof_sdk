@@ -42,36 +42,36 @@ using namespace aditof;
 void callback(aditof_roscpp::Aditof_roscppConfig &config, uint32_t level,
               std::shared_ptr<Camera> &camera) {
 
-	config.groups.camera_tof.noise_reduction.state = true;
+    config.groups.camera_tof.noise_reduction.state = true;
 
-	switch (config.mode) {
-	case 0:
-		setMode(camera, "near");
-		applyNoiseReduction(camera, config.threshold);
-		break;
-	case 1:
-		setMode(camera, "medium");
-		applyNoiseReduction(camera, config.threshold);
-		break;
-	case 2:
-		disableNoiseReduction(camera);
-		setMode(camera, "far");
-		config.threshold = 0;
+    switch (config.mode) {
+    case 0:
+        setMode(camera, "near");
+        applyNoiseReduction(camera, config.threshold);
+        break;
+    case 1:
+        setMode(camera, "medium");
+        applyNoiseReduction(camera, config.threshold);
+        break;
+    case 2:
+        disableNoiseReduction(camera);
+        setMode(camera, "far");
+        config.threshold = 0;
 
-		//disable the noise reduction, as it is not supported for this mode
-		config.groups.camera_tof.noise_reduction.state = false;
-		break;
-	}
+        //disable the noise reduction, as it is not supported for this mode
+        config.groups.camera_tof.noise_reduction.state = false;
+        break;
+    }
 
-	switch (config.revision) {
-	case 0:
-		setCameraRevision(camera, "RevB");
-		break;
-	case 1:
-		setCameraRevision(camera, "RevC");
-		break;
-	}
-	setIrGammaCorrection(camera, config.ir_gamma);
+    switch (config.revision) {
+    case 0:
+        setCameraRevision(camera, "RevB");
+        break;
+    case 1:
+        setCameraRevision(camera, "RevC");
+        break;
+    }
+    setIrGammaCorrection(camera, config.ir_gamma);
 }
 
 int main(int argc, char **argv) {

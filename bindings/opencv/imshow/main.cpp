@@ -104,7 +104,8 @@ int main(int argc, char *argv[]) {
     aditof::Frame frame;
 
     const int smallSignalThreshold = 50;
-    camera->setControl("noise_reduction_threshold", std::to_string(smallSignalThreshold));
+    camera->setControl("noise_reduction_threshold",
+                       std::to_string(smallSignalThreshold));
 
     cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
 

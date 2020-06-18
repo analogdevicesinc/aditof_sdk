@@ -144,7 +144,8 @@ class SDK_API Camera {
 	 * @param[in] value - Control value
      * @return Status
      */
-    virtual Status setControl(const std::string &control, const std::string &value) = 0;
+    virtual Status setControl(const std::string &control,
+                              const std::string &value) = 0;
 
     /**
      * @brief Gets the value of a specific camera control
@@ -152,7 +153,8 @@ class SDK_API Camera {
 	 * @param[out] value - Control value
      * @return Status
      */
-    virtual Status getControl(const std::string &control, std::string &value) const = 0;
+    virtual Status getControl(const std::string &control,
+                              std::string &value) const = 0;
 
     /**
      * @brief Gets the device of the camera. The device is ownen by the camera,

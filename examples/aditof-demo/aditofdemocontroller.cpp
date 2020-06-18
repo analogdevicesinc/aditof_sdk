@@ -315,8 +315,8 @@ aditof::Status AdiTofDemoController::enableNoiseReduction(bool en) {
         return Status::GENERIC_ERROR;
 
     if (!en) {
-        return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->
-            setControl("noise_reduction_threshold", std::to_string(0));
+        return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->setControl(
+            "noise_reduction_threshold", std::to_string(0));
     }
 
     return Status::OK;
@@ -329,8 +329,8 @@ AdiTofDemoController::setNoiseReductionThreshold(uint16_t threshold) {
     if (m_cameraInUse < 0)
         return Status::GENERIC_ERROR;
 
-    return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->
-        setControl("noise_reduction_threshold", std::to_string(threshold));
+    return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->setControl(
+        "noise_reduction_threshold", std::to_string(threshold));
 }
 
 aditof::Status AdiTofDemoController::setIrGammaCorrection(float gamma) {
@@ -339,8 +339,8 @@ aditof::Status AdiTofDemoController::setIrGammaCorrection(float gamma) {
     if (m_cameraInUse < 0)
         return Status::GENERIC_ERROR;
 
-    return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->
-        setControl("ir_gamma_correction", std::to_string(gamma));
+    return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->setControl(
+        "ir_gamma_correction", std::to_string(gamma));
 }
 
 aditof::Status
@@ -350,6 +350,6 @@ AdiTofDemoController::setCameraRevision(const std::string &revision) {
     if (m_cameraInUse < 0)
         return Status::GENERIC_ERROR;
 
-    return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->
-        setControl("revision", revision);
+    return m_cameras[static_cast<unsigned int>(m_cameraInUse)]->setControl(
+        "revision", revision);
 }

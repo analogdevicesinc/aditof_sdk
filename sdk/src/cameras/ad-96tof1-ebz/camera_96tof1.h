@@ -57,14 +57,17 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
-    aditof::Status getAvailableControls(std::vector<std::string> &controls) const;
-    aditof::Status setControl(const std::string &control, const std::string &value);
-    aditof::Status getControl(const std::string &control, std::string &value) const;
+    aditof::Status 
+    getAvailableControls(std::vector<std::string> &controls) const;
+    aditof::Status setControl(const std::string &control, 
+                              const std::string &value);
+    aditof::Status getControl(const std::string &control,
+                              std::string &value) const;
     std::shared_ptr<aditof::DeviceInterface> getDevice();
 
   private:
-      aditof::Status setNoiseReductionTreshold(uint16_t treshold);
-      aditof::Status setIrGammaCorrection(float gamma);
+    aditof::Status setNoiseReductionTreshold(uint16_t treshold);
+    aditof::Status setIrGammaCorrection(float gamma);
 
   private:
     aditof::CameraDetails m_details;

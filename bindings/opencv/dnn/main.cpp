@@ -131,7 +131,8 @@ int main(int argc, char *argv[]) {
     }
 
     const int smallSignalThreshold = 50;
-    camera->setControl("noise_reduction_threshold", std::to_string(smallSignalThreshold));
+    camera->setControl("noise_reduction_threshold",
+                       std::to_string(smallSignalThreshold));
 
     aditof::FrameDetails frameDetails;
     frame.getDetails(frameDetails);

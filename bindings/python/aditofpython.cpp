@@ -177,7 +177,8 @@ PYBIND11_MODULE(aditofpython, m) {
         .def("getAvailableControls",
              [](const aditof::Camera &camera, py::list controls) {
                  std::vector<std::string> controlsList;
-                 aditof::Status status = camera.getAvailableControls(controlsList);
+                 aditof::Status status =
+				     camera.getAvailableControls(controlsList);
 
                  for (const auto &control : controlsList)
                      controls.append(control);

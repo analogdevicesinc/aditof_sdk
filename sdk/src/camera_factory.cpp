@@ -53,7 +53,7 @@ CameraFactory::buildCamera(std::unique_ptr<DeviceInterface> device) {
 #ifdef CHICONY_006
         return std::unique_ptr<Camera>(new CameraChicony(std::move(device)));
 #else
-	    return nullptr;
+        return nullptr;
 #endif
     }
 
