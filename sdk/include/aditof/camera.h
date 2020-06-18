@@ -136,7 +136,8 @@ class SDK_API Camera {
      * @param[out] controls
      * @return Status
      */
-    virtual Status getAvailableControls(std::vector<std::string> &controls) const = 0;
+    virtual Status
+    getAvailableControls(std::vector<std::string> &controls) const = 0;
 
     /**
      * @brief Sets a specific camera control

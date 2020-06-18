@@ -353,7 +353,7 @@ aditof::Status Camera96Tof1::setControl(const std::string &control,
     Status status = Status::OK;
 
     auto it = std::find(m_availableControls.begin(), m_availableControls.end(),
-	                    control);
+                        control);
     if (it == m_availableControls.end()) {
         LOG(WARNING) << "Unsupported control";
         return Status::INVALID_ARGUMENT;
@@ -380,7 +380,7 @@ aditof::Status Camera96Tof1::getControl(const std::string &control,
     Status status = Status::OK;
 
     auto it = std::find(m_availableControls.begin(), m_availableControls.end(),
-	                    control);
+                        control);
     if (it == m_availableControls.end()) {
         LOG(WARNING) << "Unsupported control";
         return Status::INVALID_ARGUMENT;

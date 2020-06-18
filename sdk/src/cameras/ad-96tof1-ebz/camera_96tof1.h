@@ -57,9 +57,9 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
-    aditof::Status 
+    aditof::Status
     getAvailableControls(std::vector<std::string> &controls) const;
-    aditof::Status setControl(const std::string &control, 
+    aditof::Status setControl(const std::string &control,
                               const std::string &value);
     aditof::Status getControl(const std::string &control,
                               std::string &value) const;
