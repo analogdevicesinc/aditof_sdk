@@ -144,8 +144,6 @@ LocalDevice::~LocalDevice() {
     }
 
     eeprom_close(&m_implData->edev);
-
-    fclose(m_implData->fp);
 }
 
 aditof::Status LocalDevice::open() {
