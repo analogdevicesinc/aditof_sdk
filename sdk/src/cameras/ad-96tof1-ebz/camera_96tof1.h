@@ -69,8 +69,8 @@ class Camera96Tof1 : public aditof::Camera {
   private:
     aditof::CameraDetails m_details;
     std::shared_ptr<aditof::DeviceInterface> m_device;
-    std::vector<std::string> m_availableControls;
     bool m_devStarted;
+    std::vector<std::string> m_availableControls;
     Calibration96Tof1 m_calibration;
     uint16_t m_noiseReductionThreshold;
     float m_irGammaCorrection;

@@ -135,7 +135,7 @@ void setMode(const std::shared_ptr<aditof::Camera> &camera,
 }
 
 void setCameraRevision(const std::shared_ptr<aditof::Camera> &camera,
-                       std::string rev) {
+                       const std::string rev) {
     Status status = Status::OK;
     status = camera->setControl("revision", rev);
     if (status != Status::OK) {

@@ -201,7 +201,7 @@ aditof::Status CalibrationChicony006::close() {
 setMode - Sets the mode to be used for depth calibration
 \param mode - Camera depth mode
 */
-aditof::Status CalibrationChicony006::setMode(const std::string mode)
+aditof::Status CalibrationChicony006::setMode(const std::string& mode)
 {
     using namespace aditof;
     

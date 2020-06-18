@@ -353,9 +353,8 @@ aditof::Status Camera96Tof1::setControl(const std::string &control, const std::s
     using namespace aditof;
     Status status = Status::OK;
 
-    std::vector<std::string>::iterator it;
-    it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
-    if (it != m_availableControls.end()) {
+    auto it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
+    if (it == m_availableControls.end()) {
         LOG(WARNING) << "Unsupported control";
         return Status::INVALID_ARGUMENT;
     }
@@ -379,9 +378,8 @@ aditof::Status Camera96Tof1::getControl(const std::string &control, std::string 
     using namespace aditof;
     Status status = Status::OK;
 
-    std::vector<std::string>::const_iterator it;
-    it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
-    if (it != m_availableControls.end()) {
+    auto it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
+    if (it == m_availableControls.end()) {
         LOG(WARNING) << "Unsupported control";
         return Status::INVALID_ARGUMENT;
     }

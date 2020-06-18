@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
 
     /* Enable noise reduction for better results */
     const int smallSignalThreshold = 100;
-	camera->setControl("noise_reduction_threshold", std::to_string(smallSignalThreshold))
+	camera->setControl("noise_reduction_threshold", std::to_string(smallSignalThreshold));
 
     /* Request frame from camera */
     status = camera->requestFrame(&frame);

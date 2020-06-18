@@ -48,7 +48,7 @@ class CalibrationChicony006 {
   public:
     aditof::Status initialize(std::shared_ptr<aditof::DeviceInterface> device);
     aditof::Status close();
-    aditof::Status setMode(const std::string mode);
+    aditof::Status setMode(const std::string& mode);
 
   private:
       aditof::Status SetEEPROMData_0(uint16_t Gdata[][2], uint16_t Gdata_size, uint16_t SetData[]);

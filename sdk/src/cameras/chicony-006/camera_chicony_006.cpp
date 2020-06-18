@@ -301,9 +301,8 @@ aditof::Status CameraChicony::setControl(const std::string &control, const std::
     using namespace aditof;
     Status status = Status::OK;
 
-    std::vector<std::string>::iterator it;
-    it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
-    if (it != m_availableControls.end()) {
+    auto it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
+    if (it == m_availableControls.end()) {
         LOG(WARNING) << "Unsupported control";
         return Status::INVALID_ARGUMENT;
     }
@@ -323,9 +322,8 @@ aditof::Status CameraChicony::getControl(const std::string &control, std::string
     using namespace aditof;
     Status status = Status::OK;
 
-    std::vector<std::string>::const_iterator it;
-    it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
-    if (it != m_availableControls.end()) {
+    auto it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
+    if (it == m_availableControls.end()) {
         LOG(WARNING) << "Unsupported control";
         return Status::INVALID_ARGUMENT;
     }

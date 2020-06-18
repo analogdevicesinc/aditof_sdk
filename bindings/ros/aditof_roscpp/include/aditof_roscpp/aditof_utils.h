@@ -42,7 +42,7 @@ void setFrameType(const std::shared_ptr<aditof::Camera> &camera,
 void setMode(const std::shared_ptr<aditof::Camera> &camera,
              const std::string &mode);
 void setCameraRevision(const std::shared_ptr<aditof::Camera> &camera,
-                       std::string rev);
+                       const std::string rev);
 void setIrGammaCorrection(const std::shared_ptr<aditof::Camera> &camera,
                           float gamma);
 void applyNoiseReduction(const std::shared_ptr<aditof::Camera> &camera,
