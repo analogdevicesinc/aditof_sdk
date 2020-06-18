@@ -41,6 +41,7 @@
 #include <glog/logging.h>
 #include <iterator>
 #include <map>
+#include <math.h>
 
 struct rangeStruct {
     std::string mode;
