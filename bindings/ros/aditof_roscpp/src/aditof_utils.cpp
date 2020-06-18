@@ -157,7 +157,7 @@ void setIrGammaCorrection(const std::shared_ptr<aditof::Camera> &camera,
 void applyNoiseReduction(const std::shared_ptr<Camera> &camera, int threshold) {
 
     Status status = Status::OK;
-    status = setControl("noise_reduction_threshold", std::to_string(threshold));
+    status = camera->setControl("noise_reduction_threshold", std::to_string(threshold));
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set noise reduction!";
         return;
@@ -167,7 +167,7 @@ void applyNoiseReduction(const std::shared_ptr<Camera> &camera, int threshold) {
 void disableNoiseReduction(const std::shared_ptr<Camera> &camera) {
 
     Status status = Status::OK;
-    status = setControl("noise_reduction_threshold", std::to_string(0));
+    status = camera->setControl("noise_reduction_threshold", std::to_string(0));
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set noise reduction!";
         return;
