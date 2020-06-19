@@ -30,7 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <aditof/camera.h>
-#include <aditof/camera_96tof1_specifics.h>
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
@@ -114,11 +113,8 @@ int main(int argc, char *argv[]) {
 
     /* Enable noise reduction for better results */
     const int smallSignalThreshold = 100;
-    auto specifics = camera->getSpecifics();
-    auto cam96tof1Specifics =
-        std::dynamic_pointer_cast<Camera96Tof1Specifics>(specifics);
-    cam96tof1Specifics->setNoiseReductionThreshold(smallSignalThreshold);
-    cam96tof1Specifics->enableNoiseReduction(true);
+    camera->setControl("noise_reduction_threshold",
+                       std::to_string(smallSignalThreshold));
 
     /* Request frame from camera */
     status = camera->requestFrame(&frame);

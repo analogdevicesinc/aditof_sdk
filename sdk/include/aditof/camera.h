@@ -132,13 +132,30 @@ class SDK_API Camera {
     virtual Status getDetails(CameraDetails &details) const = 0;
 
     /**
-     * @brief Gets an object which extends the API of this camera with
-     * additional methods that are specific to this camera. The returned
-     * object must be cast to an actual implementation to be able to access
-     * the extended API.
-     * @return std::shared_ptr<CameraSpecifics>
+     * @brief Gets the camera's list of controls
+     * @param[out] controls
+     * @return Status
      */
-    virtual std::shared_ptr<CameraSpecifics> getSpecifics() = 0;
+    virtual Status
+    getAvailableControls(std::vector<std::string> &controls) const = 0;
+
+    /**
+     * @brief Sets a specific camera control
+     * @param[in] control - Control name
+	 * @param[in] value - Control value
+     * @return Status
+     */
+    virtual Status setControl(const std::string &control,
+                              const std::string &value) = 0;
+
+    /**
+     * @brief Gets the value of a specific camera control
+     * @param[in] control - Control name
+	 * @param[out] value - Control value
+     * @return Status
+     */
+    virtual Status getControl(const std::string &control,
+                              std::string &value) const = 0;
 
     /**
      * @brief Gets the device of the camera. The device is ownen by the camera,

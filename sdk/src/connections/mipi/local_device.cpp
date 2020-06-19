@@ -106,14 +106,11 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
 
+#ifdef CHICONY_006
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
+#else
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
-
-    // For now, we assume we have a Chicony if there is a replacemet file
-    FILE *fd = fopen(EEPROM_REPLACEMENT_PATH, "r");
-    if (fd) {
-        m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
-        fclose(fd);
-    }
+#endif
 }
 
 LocalDevice::~LocalDevice() {
@@ -641,30 +638,6 @@ aditof::Status LocalDevice::readEeprom(uint32_t address, uint8_t *data,
     using namespace aditof;
     Status status = Status::OK;
 
-    if (m_deviceDetails.sensorType == aditof::SensorType::SENSOR_CHICONY) {
-        switch (address) {
-        case (0xFFFFFFFE): {
-            std::ifstream file(EEPROM_REPLACEMENT_PATH,
-                               std::ios::binary | std::ios::ate);
-            uint32_t *size = reinterpret_cast<uint32_t *>(data);
-            *size = static_cast<uint32_t>(file.tellg());
-            file.close();
-            return Status::OK;
-        }
-        case (0xFFFFFFFF): {
-            std::ifstream firmware_file(EEPROM_REPLACEMENT_PATH,
-                                        std::ios::binary);
-            firmware_file.read(reinterpret_cast<char *>(data), length);
-            firmware_file.close();
-            return Status::OK;
-        }
-        default: {
-            LOG(WARNING) << "Unsupported address";
-            return Status::INVALID_ARGUMENT;
-        }
-        } // switch (address)
-    }
-
     if (!m_implData->edev.valid) {
         LOG(WARNING) << "EEPROM not available!";
         return Status::GENERIC_ERROR;
@@ -788,7 +761,7 @@ aditof::Status LocalDevice::readAfeTemp(float &temperature) {
         temp_sensor_close(&tdev);
     } else if (m_deviceDetails.sensorType ==
                aditof::SensorType::SENSOR_CHICONY) {
-        int fd = ::open(TEMP_SENSOR_REPLACEMENT_DEV_PATH, O_RDONLY);
+        int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
             return Status::GENERIC_ERROR;
@@ -823,7 +796,7 @@ aditof::Status LocalDevice::readLaserTemp(float &temperature) {
         temp_sensor_close(&tdev);
     } else if (m_deviceDetails.sensorType ==
                aditof::SensorType::SENSOR_CHICONY) {
-        int fd = ::open(TEMP_SENSOR_REPLACEMENT_DEV_PATH, O_RDONLY);
+        int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
             return Status::GENERIC_ERROR;

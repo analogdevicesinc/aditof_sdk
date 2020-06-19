@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "camera_chicony.h"
+#include "camera_chicony_006.h"
 
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
@@ -43,12 +43,22 @@
 
 using namespace std;
 
+struct rangeStruct {
+    std::string mode;
+    int minDepth;
+    int maxDepth;
+};
+
+static const std::array<rangeStruct, 3>
+    rangeValues = 
+         {{{"near", 250, 1000}, {"medium", 1000, 4500}}};
+
 static const std::string skCustomMode = "custom";
 
 CameraChicony::CameraChicony(std::unique_ptr<aditof::DeviceInterface> device)
-    : m_specifics(std::make_shared<aditof::CameraChiconySpecifics>(
-          aditof::CameraChiconySpecifics(this))),
-      m_device(std::move(device)), m_devStarted(false) {}
+    : m_device(std::move(device)), m_devStarted(false),
+      m_availableControls({ "noise_reduction_threshold", "ir_gamma_correction" }) {
+}
 
 CameraChicony::~CameraChicony() = default;
 
@@ -68,8 +78,12 @@ aditof::Status CameraChicony::initialize() {
 
     LOG(INFO) << "Camera initialized";
 
-    // TO DO: figure out which are the intrisics
-
+    status = m_calibration.initialize(m_device);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to initialize calibration";
+        return status;
+    }
+    
     return Status::OK;
 }
 
@@ -79,8 +93,13 @@ aditof::Status CameraChicony::start() {
 }
 
 aditof::Status CameraChicony::stop() {
+    using namespace aditof;
+    Status status = Status::OK;
+
     // return m_device->stop(); // For now we keep the device open all the time
-    return aditof::Status::OK;
+    status = m_calibration.close();
+
+    return status;
 }
 
 aditof::Status CameraChicony::setMode(const std::string &mode,
@@ -96,8 +115,16 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
         return Status::INVALID_ARGUMENT;
     }
 
-    m_details.maxDepth = 4095;
-    m_details.minDepth = 0;
+    auto iter = std::find_if(rangeValues.begin(), rangeValues.end(),
+                                 [&mode](struct rangeStruct rangeMode) {
+                                     return rangeMode.mode == mode;
+                                 });
+    if (iter != rangeValues.end()) {
+        m_details.maxDepth = (*iter).maxDepth;
+	m_details.minDepth = (*iter).minDepth;
+    } else {
+        m_details.maxDepth = 4096;
+    }
 
     if (!modeFilename.empty()) {
         std::ifstream firmwareFile(modeFilename.c_str(), std::ios::binary);
@@ -119,7 +146,7 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
         status = m_device->program(firmwareData.data(), firmwareData.size());
         firmwareFile.close();
     } else {
-        if (mode != "near") {
+        if (mode != "near" && mode != "medium") {
             LOG(WARNING) << "Unsupported mode";
             return Status::INVALID_ARGUMENT;
         }
@@ -128,35 +155,7 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
                   << " is: " << m_details.minDepth << " mm and "
                   << m_details.maxDepth << " mm";
 
-        uint32_t firmwareLength = 0;
-        status = m_device->readEeprom(
-            0xFFFFFFFE, reinterpret_cast<uint8_t *>(&firmwareLength),
-            sizeof(firmwareLength));
-        if (status != Status::OK) {
-            LOG(WARNING) << "Failed to read firmware size";
-            return Status::UNREACHABLE;
-        }
-
-        uint8_t *firmwareData = new uint8_t[firmwareLength];
-        status = m_device->readEeprom(0xFFFFFFFF, firmwareData, firmwareLength);
-
-        if (status != Status::OK) {
-            delete[] firmwareData;
-            LOG(WARNING) << "Failed to read firmware";
-            return Status::UNREACHABLE;
-        } else {
-            LOG(INFO) << "Found firmware for mode: " << mode;
-        }
-
-        LOG(INFO) << "Firmware size: " << firmwareLength << " bytes";
-        status = m_device->program(firmwareData, firmwareLength);
-        if (status != Status::OK) {
-            delete[] firmwareData;
-            LOG(WARNING) << "Failed to program AFE";
-            return Status::UNREACHABLE;
-        }
-
-        delete[] firmwareData;
+        m_calibration.setMode(mode);
     }
 
     // register writes for enabling only one video stream (depth/ ir)
@@ -185,6 +184,7 @@ aditof::Status CameraChicony::getAvailableModes(
 
     // Dummy data. To remove when implementig this method
     availableModes.emplace_back("near");
+    availableModes.emplace_back("medium");
 
     availableModes.emplace_back(skCustomMode);
 
@@ -284,10 +284,108 @@ aditof::Status CameraChicony::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<aditof::CameraSpecifics> CameraChicony::getSpecifics() {
-    return m_specifics;
-}
-
 std::shared_ptr<aditof::DeviceInterface> CameraChicony::getDevice() {
     return m_device;
+}
+
+aditof::Status CameraChicony::getAvailableControls(std::vector<std::string> &controls) const {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    controls = m_availableControls;
+
+    return status;
+}
+
+aditof::Status CameraChicony::setControl(const std::string &control, const std::string &value) {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    auto it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
+    if (it == m_availableControls.end()) {
+        LOG(WARNING) << "Unsupported control";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (control == "noise_reduction_threshold") {
+        return setNoiseReductionTreshold((uint16_t)std::stoi(value));
+    }
+
+    if (control == "ir_gamma_correction") {
+        return setIrGammaCorrection(std::stof(value));
+    }
+
+    return status;
+}
+
+aditof::Status CameraChicony::getControl(const std::string &control, std::string &value) const {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    auto it = std::find(m_availableControls.begin(), m_availableControls.end(), control);
+    if (it == m_availableControls.end()) {
+        LOG(WARNING) << "Unsupported control";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (control == "noise_reduction_threshold") {
+        value = std::to_string(m_noiseReductionThreshold);
+    }
+
+    if (control == "ir_gamma_correction") {
+        value = std::to_string(m_irGammaCorrection);
+    }
+
+    return status;
+}
+
+aditof::Status CameraChicony::setNoiseReductionTreshold(uint16_t treshold) {
+    using namespace aditof;
+
+    if (m_details.mode.compare("far") == 0) {
+        LOG(WARNING) << "Far mode does not support noise reduction!";
+        return Status::UNAVAILABLE;
+    }
+
+    const size_t REGS_CNT = 5;
+    uint16_t afeRegsAddr[REGS_CNT] = { 0x4001, 0x7c22, 0xc34a, 0x4001, 0x7c22 };
+    uint16_t afeRegsVal[REGS_CNT] = { 0x0006, 0x0004, 0x8000, 0x0007, 0x0004 };
+
+    afeRegsVal[2] |= treshold;
+    m_noiseReductionThreshold = treshold;
+
+    return m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+}
+
+aditof::Status CameraChicony::setIrGammaCorrection(float gamma) {
+    using namespace aditof;
+    aditof::Status status = Status::OK;
+    const float x_val[] = { 256, 512, 768, 896, 1024, 1536, 2048, 3072, 4096 };
+    uint16_t y_val[9];
+
+    for (int i = 0; i < 9; i++) {
+        y_val[i] = (uint16_t)(pow(x_val[i] / 4096.0f, gamma) * 1024.0f);
+    }
+
+    uint16_t afeRegsAddr[] = { 0x4001, 0x7c22, 0xc372, 0xc373, 0xc374, 0xc375,
+        0xc376, 0xc377, 0xc378, 0xc379, 0xc37a, 0xc37b,
+        0xc37c, 0xc37d, 0x4001, 0x7c22 };
+    uint16_t afeRegsVal[] = { 0x0006,   0x0004,   0x7888,   0xa997,
+        0x000a,   y_val[0], y_val[1], y_val[2],
+        y_val[3], y_val[4], y_val[5], y_val[6],
+        y_val[7], y_val[8], 0x0007,   0x0004 };
+
+    status = m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 8);
+    if (status != Status::OK) {
+        return status;
+    }
+    status = m_device->writeAfeRegisters(afeRegsAddr + 8,
+        afeRegsVal + 8, 8);
+    if (status != Status::OK) {
+        return status;
+    }
+
+    m_irGammaCorrection = gamma;
+
+    return status;
 }

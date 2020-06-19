@@ -35,7 +35,7 @@
 #include <memory>
 
 #include <aditof/camera.h>
-#include <aditof/camera_chicony_specifics.h>
+#include "calibration_chicony_006.h"
 
 class CameraChicony : public aditof::Camera {
   public:
@@ -56,17 +56,23 @@ class CameraChicony : public aditof::Camera {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
-    std::shared_ptr<aditof::CameraSpecifics> getSpecifics();
+    aditof::Status getAvailableControls(std::vector<std::string> &controls) const;
+    aditof::Status setControl(const std::string &control, const std::string &value);
+    aditof::Status getControl(const std::string &control, std::string &value) const;
     std::shared_ptr<aditof::DeviceInterface> getDevice();
 
   private:
-    aditof::CameraDetails m_details;
-    std::shared_ptr<aditof::CameraSpecifics> m_specifics;
-    std::shared_ptr<aditof::DeviceInterface> m_device;
-    bool m_devStarted;
+    aditof::Status setNoiseReductionTreshold(uint16_t treshold);
+    aditof::Status setIrGammaCorrection(float gamma);
 
-  public:
-    friend class aditof::CameraChiconySpecifics;
+  private:
+    aditof::CameraDetails m_details;
+    std::shared_ptr<aditof::DeviceInterface> m_device;
+    std::vector<std::string> m_availableControls;
+    bool m_devStarted;
+    CalibrationChicony006 m_calibration;
+    uint16_t m_noiseReductionThreshold;
+    float m_irGammaCorrection;
 };
 
 #endif // CAMERA_CHICONY_H

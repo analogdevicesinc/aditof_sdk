@@ -8,7 +8,7 @@ if ( WITH_NETWORK )
     find_package(Protobuf 3.9.0 REQUIRED)
     find_package(Libwebsockets REQUIRED)
 
-    protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/buffer.proto)
+    protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/connections/network/buffer.proto)
     get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
 endif()
 
@@ -20,12 +20,12 @@ file(GLOB HEADERS
     ${CMAKE_SOURCE_DIR}/sdk/include/aditof/*.h
 )
 
-set(TARGET_STRING "target")
+set(TARGET_STRING "connections/mipi")
 
 if( WIN32 )
-        set(OS_SPECIFIC_DIR windows)
+        set(OS_SPECIFIC_DIR "connections/usb/windows")
 elseif( APPLE )
-        set(OS_SPECIFIC_DIR macos)
+        set(OS_SPECIFIC_DIR "connections/usb/macos")
 elseif( DRAGONBOARD )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR dragonboard)
@@ -36,7 +36,7 @@ elseif( JETSON )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR jetson)
 elseif ( UNIX )
-        set(OS_SPECIFIC_DIR linux)
+        set(OS_SPECIFIC_DIR "connections/usb/linux")
 else()
     message(FATAL_ERROR "Platform not supported")
 endif()
@@ -45,15 +45,27 @@ if (NOT APPLE AND NOT WIN32)
     option(RUN_LDCONFIG "Run ldconfig after install." ON)
 endif()
 
+if ( USE_CHICONY AND RASPBERRYPI )
+	set(CHICONY_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.cpp)
+	set(CHICONY_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h)
+endif()
+
 # Platform specific sources and headers
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.cpp
+    ${CHICONY_SRC}
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
+    ${CHICONY_H}
 )
 
 if ( ${OS_SPECIFIC_DIR} STREQUAL ${TARGET_STRING} )
@@ -61,12 +73,12 @@ if ( ${OS_SPECIFIC_DIR} STREQUAL ${TARGET_STRING} )
 endif()
 
 if ( NOT WITH_NETWORK )
-    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/network.cpp)
-    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/network.h)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/network.cpp)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/network.h)
     list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_device.cpp)
     list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_device.h)
-    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/device_enumerator_ethernet.cpp)
-    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/device_enumerator_ethernet.h)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/device_enumerator_ethernet.cpp)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/device_enumerator_ethernet.h)
 endif()
 
 # Create target and set properties
@@ -88,6 +100,9 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         src/
         src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
+        src/cameras/ad-96tof1-ebz/
+        src/cameras/chicony-006/
+        src/connections/network/
         ${Protobuf_INCLUDE_DIRS}
         ${GENERATED_PROTO_FILES_DIR}
         ${LIBWEBSOCKETS_INCLUDE_DIRS}

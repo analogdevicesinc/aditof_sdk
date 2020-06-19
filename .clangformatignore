@@ -1,2 +1,3 @@
 bindings/python/pybind11
 misc/nvidia
+sdk/src/cameras/chicony-006
