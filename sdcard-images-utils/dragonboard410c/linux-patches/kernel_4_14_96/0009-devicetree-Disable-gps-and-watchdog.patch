@@ -1,0 +1,26 @@
+From 9f420773e76135201be260a784c24858fcfc4c19 Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Wed, 13 May 2020 13:17:27 +0300
+Subject: [PATCH 9/9] devicetree: Disable gps and watchdog
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ arch/arm64/boot/dts/qcom/msm8916.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+index 34d4b00e5c61187c75fbfa14d786a402f991911d..ef28485b5f0cfa138a8e067cead657c115f31014 100644
+--- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+@@ -1025,7 +1025,7 @@
+ 
+ 			qcom,halt-regs = <&tcsr 0x18000 0x19000 0x1a000>;
+ 
+-			status = "okay";
++			status = "disabled";
+ 
+ 			mba {
+ 				memory-region = <&mba_mem>;
+-- 
+2.17.1
+

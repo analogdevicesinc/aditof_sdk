@@ -1,0 +1,120 @@
+From a5ef1d45e03bf5577e8de72ec4cfeb26d845853c Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Thu, 30 Apr 2020 15:19:58 +0300
+Subject: [PATCH 5/9] DWC3: enable driver and add fixes
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ arch/arm64/configs/defconfig |  1 +
+ drivers/usb/dwc3/dwc3-qcom.c | 17 +++++++----------
+ drivers/usb/dwc3/gadget.c    |  2 +-
+ 3 files changed, 9 insertions(+), 11 deletions(-)
+
+diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
+index 91591963b4cc5cf3742cf8253ccd6b966d5d2530..0e83b1693cdbd2ab383fee5a899370dd7e32b827 100644
+--- a/arch/arm64/configs/defconfig
++++ b/arch/arm64/configs/defconfig
+@@ -449,6 +449,7 @@ CONFIG_USB_OHCI_HCD_PLATFORM=y
+ CONFIG_USB_RENESAS_USBHS=m
+ CONFIG_USB_STORAGE=y
+ CONFIG_USB_DWC3=y
++CONFIG_USB_DWC3_QCOM=y
+ CONFIG_USB_DWC3_ULPI=y
+ CONFIG_USB_DWC2=y
+ CONFIG_USB_CHIPIDEA=y
+diff --git a/drivers/usb/dwc3/dwc3-qcom.c b/drivers/usb/dwc3/dwc3-qcom.c
+index 8abb6f31389d9ed9147e198a8ecc8ae0d218a482..549238a9c9fb1bc9289d7f43d52b6d1eccd0dfb9 100644
+--- a/drivers/usb/dwc3/dwc3-qcom.c
++++ b/drivers/usb/dwc3/dwc3-qcom.c
+@@ -3,7 +3,6 @@
+  *
+  * Inspired by dwc3-of-simple.c
+  */
+-#define DEBUG
+ 
+ #include <linux/io.h>
+ #include <linux/of.h>
+@@ -491,6 +490,7 @@ static int dwc3_qcom_probe(struct platform_device *pdev)
+ 	qcom->dwc3 = of_find_device_by_node(dwc3_np);
+ 	if (!qcom->dwc3) {
+ 		dev_err(&pdev->dev, "failed to get dwc3 platform device\n");
++		ret = -ENODEV;
+ 		goto depopulate;
+ 	}
+ 
+@@ -548,8 +548,7 @@ static int dwc3_qcom_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_PM_SLEEP
+-static int dwc3_qcom_pm_suspend(struct device *dev)
++static int __maybe_unused dwc3_qcom_pm_suspend(struct device *dev)
+ {
+ 	struct dwc3_qcom *qcom = dev_get_drvdata(dev);
+ 	int ret = 0;
+@@ -561,7 +560,7 @@ static int dwc3_qcom_pm_suspend(struct device *dev)
+ 	return ret;
+ }
+ 
+-static int dwc3_qcom_pm_resume(struct device *dev)
++static int __maybe_unused dwc3_qcom_pm_resume(struct device *dev)
+ {
+ 	struct dwc3_qcom *qcom = dev_get_drvdata(dev);
+ 	int ret;
+@@ -572,23 +571,20 @@ static int dwc3_qcom_pm_resume(struct device *dev)
+ 
+ 	return ret;
+ }
+-#endif
+ 
+-#ifdef CONFIG_PM
+-static int dwc3_qcom_runtime_suspend(struct device *dev)
++static int __maybe_unused dwc3_qcom_runtime_suspend(struct device *dev)
+ {
+ 	struct dwc3_qcom *qcom = dev_get_drvdata(dev);
+ 
+ 	return dwc3_qcom_suspend(qcom);
+ }
+ 
+-static int dwc3_qcom_runtime_resume(struct device *dev)
++static int __maybe_unused dwc3_qcom_runtime_resume(struct device *dev)
+ {
+ 	struct dwc3_qcom *qcom = dev_get_drvdata(dev);
+ 
+ 	return dwc3_qcom_resume(qcom);
+ }
+-#endif
+ 
+ static const struct dev_pm_ops dwc3_qcom_dev_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(dwc3_qcom_pm_suspend, dwc3_qcom_pm_resume)
+@@ -599,6 +595,7 @@ static const struct dev_pm_ops dwc3_qcom_dev_pm_ops = {
+ static const struct of_device_id dwc3_qcom_of_match[] = {
+ 	{ .compatible = "qcom,dwc3" },
+ 	{ .compatible = "qcom,msm8996-dwc3" },
++	{ .compatible = "qcom,msm8998-dwc3" },
+ 	{ .compatible = "qcom,sdm845-dwc3" },
+ 	{ }
+ };
+@@ -617,4 +614,4 @@ static struct platform_driver dwc3_qcom_driver = {
+ module_platform_driver(dwc3_qcom_driver);
+ 
+ MODULE_LICENSE("GPL v2");
+-MODULE_DESCRIPTION("DesignWare DWC3 QCOM Glue Driver");
++MODULE_DESCRIPTION("DesignWare DWC3 QCOM Glue Driver");
+\ No newline at end of file
+diff --git a/drivers/usb/dwc3/gadget.c b/drivers/usb/dwc3/gadget.c
+index b8704c0678f99fab31a66a55913e5f56964b5f64..77a97b2f579785da61e0cc678e12277fc59fc0fc 100644
+--- a/drivers/usb/dwc3/gadget.c
++++ b/drivers/usb/dwc3/gadget.c
+@@ -927,7 +927,7 @@ static void __dwc3_prepare_one_trb(struct dwc3_ep *dep, struct dwc3_trb *trb,
+ 			 */
+ 			if (speed == USB_SPEED_HIGH) {
+ 				struct usb_ep *ep = &dep->endpoint;
+-				unsigned int mult = ep->mult - 1;
++				unsigned int mult = 2; //ep->mult - 1;
+ 				unsigned int maxp = usb_endpoint_maxp(ep->desc);
+ 
+ 				if (length <= (2 * maxp))
+-- 
+2.17.1
+
