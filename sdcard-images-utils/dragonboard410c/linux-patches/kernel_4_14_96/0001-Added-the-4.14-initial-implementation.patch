@@ -1,0 +1,1294 @@
+From 96411f147829c078d584d0db2b45aa0eb997e79b Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Thu, 18 Jun 2020 19:02:58 +0300
+Subject: [PATCH 1/9] Added the 4.14 initial implementation
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ arch/arm64/boot/dts/qcom/aditof-db410c.dtsi   |  57 ++
+ arch/arm64/boot/dts/qcom/apq8016-sbc.dts      |   1 +
+ arch/arm64/configs/defconfig                  |   1 +
+ drivers/media/i2c/Kconfig                     |  11 +
+ drivers/media/i2c/Makefile                    |   1 +
+ drivers/media/i2c/addi903x.c                  | 829 ++++++++++++++++++
+ .../media/platform/qcom/camss/camss-video.c   |  36 +-
+ drivers/usb/gadget/function/f_uvc.c           |   2 +-
+ drivers/usb/gadget/function/uvc_video.c       |   2 +-
+ drivers/usb/gadget/legacy/webcam.c            |  79 +-
+ include/uapi/linux/v4l2-controls.h            |   4 +
+ 11 files changed, 1005 insertions(+), 18 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+ create mode 100644 drivers/media/i2c/addi903x.c
+
+diff --git a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+new file mode 100644
+index 0000000000000000000000000000000000000000..4b16f04fa7a88708ccd2ac9c0ce82a0495649692
+--- /dev/null
++++ b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+@@ -0,0 +1,57 @@
++/ {
++	soc {
++		cci@1b0c000 {
++			status = "ok";
++
++			camera_front@64 {
++				compatible = "adi,addi903x";
++				reg = <0x64>;
++
++				reset-gpios = <&msmgpio 36 GPIO_ACTIVE_LOW>;
++				pinctrl-names = "default";
++				pinctrl-0 = <&camera_front_default>;
++
++				clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
++				clock-names = "xclk";
++				clock-frequency = <135000000>;
++
++				status = "ok";
++
++				port {
++					addi903x_ep: endpoint {
++						clock-lanes = <1>;
++						data-lanes = <0 2>;
++						remote-endpoint = <&csiphy1_ep>;
++					};
++				};
++			};
++		};
++
++		camss@1b00000 {
++			status = "ok";
++			ports {
++				port@1 {
++					reg = <1>;
++					csiphy1_ep: endpoint {
++						clock-lanes = <1>;
++						data-lanes = <0 2>;
++						remote-endpoint = <&addi903x_ep>;
++						status = "ok";
++					};
++				};
++			};
++		};
++		
++		i2c@78b6000 {
++		/* On Low speed expansion */
++			label = "LS-I2C0";
++			status = "okay";
++
++			eeprom: eeprom@56 {
++    				compatible = "atmel,24c1024";
++    				reg = <0x56>;
++				pagesize = <32>;
++  			};
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-sbc.dts b/arch/arm64/boot/dts/qcom/apq8016-sbc.dts
+index 825f489a2af7e61d94b93bb260d4f6a0560f84de..041da23f590ae7e4b973f479f701860420610d0d 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-sbc.dts
++++ b/arch/arm64/boot/dts/qcom/apq8016-sbc.dts
+@@ -14,6 +14,7 @@
+ /dts-v1/;
+ 
+ #include "apq8016-sbc.dtsi"
++#include "aditof-db410c.dtsi"
+ 
+ / {
+ 	model = "Qualcomm Technologies, Inc. APQ 8016 SBC";
+diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
+index bb1abec5cb0afd847f9771345f41718c367e4308..91591963b4cc5cf3742cf8253ccd6b966d5d2530 100644
+--- a/arch/arm64/configs/defconfig
++++ b/arch/arm64/configs/defconfig
+@@ -387,6 +387,7 @@ CONFIG_VIDEO_QCOM_VENUS=m
+ # CONFIG_MEDIA_SUBDRV_AUTOSELECT is not set
+ CONFIG_VIDEO_OV5645=m
+ CONFIG_VIDEO_OV7251=m
++CONFIG_VIDEO_ADDI903X=m
+ CONFIG_DRM=m
+ CONFIG_DRM_NOUVEAU=m
+ CONFIG_DRM_EXYNOS=m
+diff --git a/drivers/media/i2c/Kconfig b/drivers/media/i2c/Kconfig
+index 9a551a11ee09f9e56fa408960e4b8232109f6e58..ff90e4e6ea99bd4918cc582fe5c4b0523f700f7d 100644
+--- a/drivers/media/i2c/Kconfig
++++ b/drivers/media/i2c/Kconfig
+@@ -547,6 +547,17 @@ config VIDEO_APTINA_PLL
+ config VIDEO_SMIAPP_PLL
+ 	tristate
+ 
++config VIDEO_ADDI903X
++	tristate "Analog Devices ADDI903X sensor support"
++  	depends on I2C && VIDEO_V4L2
++	depends on MEDIA_CAMERA_SUPPORT
++	---help---
++	  This is a Video4Linux2 sensor-level driver for the Analog Devices
++	  ADDI903X ToF AFE.
++
++	  To compile this driver as a module, choose M here: the
++	  module will be called addi903x.
++
+ config VIDEO_OV2640
+ 	tristate "OmniVision OV2640 sensor support"
+ 	depends on VIDEO_V4L2 && I2C
+diff --git a/drivers/media/i2c/Makefile b/drivers/media/i2c/Makefile
+index 02fa38f60b34a50299eb035265342a8cad6ccf54..5c1d86a369e001344ab9abd45bcdfb53bfacd11b 100644
+--- a/drivers/media/i2c/Makefile
++++ b/drivers/media/i2c/Makefile
+@@ -34,6 +34,7 @@ obj-$(CONFIG_VIDEO_ADV7604) += adv7604.o
+ obj-$(CONFIG_VIDEO_ADV7842) += adv7842.o
+ obj-$(CONFIG_VIDEO_AD9389B) += ad9389b.o
+ obj-$(CONFIG_VIDEO_ADV7511) += adv7511.o
++obj-$(CONFIG_VIDEO_ADDI903X) += addi903x.o
+ obj-$(CONFIG_VIDEO_VPX3220) += vpx3220.o
+ obj-$(CONFIG_VIDEO_VS6624)  += vs6624.o
+ obj-$(CONFIG_VIDEO_BT819) += bt819.o
+diff --git a/drivers/media/i2c/addi903x.c b/drivers/media/i2c/addi903x.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..ab92466205a7593e4f8a3eac7890c2184922fca4
+--- /dev/null
++++ b/drivers/media/i2c/addi903x.c
+@@ -0,0 +1,829 @@
++/*
++ * Driver for the addi903x camera sensor.
++ *
++ * Copyright (c) 2011-2019, The Linux Foundation. All rights reserved.
++ * Copyright (C) 2018-2019 Analog Devices, All Rights Reserved.
++ *
++ */
++
++ /*
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <linux/bitops.h>
++#include <linux/clk.h>
++#include <linux/delay.h>
++#include <linux/device.h>
++#include <linux/gpio/consumer.h>
++#include <linux/i2c.h>
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/mutex.h>
++#include <linux/of.h>
++#include <linux/of_graph.h>
++#include <linux/regulator/consumer.h>
++#include <linux/signal.h>
++#include <linux/slab.h>
++#include <linux/types.h>
++#include <linux/version.h>
++#include <media/v4l2-ctrls.h>
++#include <media/v4l2-fwnode.h>
++#include <media/v4l2-subdev.h>
++
++static DEFINE_MUTEX(addi903x_lock);
++
++#ifdef dev_dbg
++	#undef dev_dbg
++	#define dev_dbg dev_err
++#endif
++
++struct addi903x_mode_info {
++	u32 width;
++	u32 height;
++	const struct addi903x_reg_value *data;
++	u32 data_size;
++	u32 pixel_clock;
++	u32 link_freq;
++};
++
++struct addi903x {
++	struct i2c_client *i2c_client;
++	struct device *dev;
++	struct v4l2_subdev sd;
++	struct media_pad pad;
++	struct v4l2_fwnode_endpoint ep;
++	struct v4l2_mbus_framefmt fmt;
++	struct v4l2_rect crop;
++	struct clk *xclk;
++
++	const struct addi903x_mode_info *current_mode;
++
++	struct v4l2_ctrl_handler ctrls;
++	struct v4l2_ctrl *pixel_clock;
++	struct v4l2_ctrl *link_freq;
++
++	/* Cached register values */
++	u8 aec_pk_manual;
++	u8 timing_tc_reg20;
++	u8 timing_tc_reg21;
++
++	struct mutex power_lock; /* lock to protect power state */
++	int power_count;
++
++	struct gpio_desc *rst_gpio;
++
++	bool use_cci; /* indicate that CCI driver hack should be used */
++	struct v4l2_subdev *cci;
++
++  /* controls */
++	struct v4l2_ctrl *set_chip_config;
++	struct v4l2_ctrl *reg_read;
++};
++
++static inline struct addi903x *to_addi903x(struct v4l2_subdev *sd)
++{
++	return container_of(sd, struct addi903x, sd);
++}
++
++struct addi903x_reg_value {
++	u16 reg;
++	u16 val;
++};
++
++#define V4L2_CID_AD_DEV_SET_CHIP_CONFIG_QUERY  (V4L2_CID_USER_ADDI903X_BASE + 0)
++#define V4L2_CID_AD_DEV_REG_READ_QUERY  (V4L2_CID_USER_ADDI903X_BASE + 1)
++
++static const struct addi903x_reg_value addi903x_powerup_setting[] = {
++	{0xc4c0, 0x001c},
++	{0xc4c3, 0x001c},
++	{0xc4d7, 0x0000},
++	{0xc4d5, 0x0002},
++	{0xc4da, 0x0001},
++	{0xc4f0, 0x0000},
++	{0xc427, 0x0003},
++	{0xc427, 0x0001},
++	{0xc427, 0x0000},
++	{0xc426, 0x0030},
++	{0xc426, 0x0010},
++	{0xc426, 0x0000},
++	{0xc423, 0x0080},
++	{0xc431, 0x0080},
++	{0x4001, 0x0007},
++	{0x7c22, 0x0004}
++};
++
++static const struct addi903x_reg_value addi903x_powerdown_setting[] = {
++	{0xc022, 0x0001},	
++	{0x4001, 0x0006},
++	{0x7c22, 0x0004},
++	{0xc431, 0x0082},
++	{0xc423, 0x0000},
++	{0xc426, 0x0020},
++	{0xc427, 0x0002},
++	{0xc4c0, 0x003c},
++	{0xc4c3, 0x003c},
++	{0xc4d5, 0x0003},
++	{0xc4da, 0x0000},
++	{0xc4d7, 0x0001},
++	{0xc4f0, 0x0001}
++};
++
++//=====================================================================
++
++static const struct addi903x_reg_value addi903x_setting_vga[] = {
++
++};
++
++static const s64 link_freq[] = {
++	147456000,//36864000,
++	30060000
++};
++
++static const struct addi903x_mode_info addi903x_mode_info_data[] = {
++	{
++		.width = 640,
++		.height = 960,
++		.data = addi903x_setting_vga,
++		.data_size = ARRAY_SIZE(addi903x_setting_vga),
++		.pixel_clock = 73728000,//18432000,
++		.link_freq = 0 /* an index in link_freq[] */
++	},
++	{
++		.width = 668,
++		.height = 750,
++		.data = addi903x_setting_vga,
++		.data_size = ARRAY_SIZE(addi903x_setting_vga),
++		.pixel_clock = 15030000,
++		.link_freq = 1 /* an index in link_freq[] */
++	},
++};
++
++static int addi903x_write_reg(struct addi903x* addi903x, u16 reg, u16* val)
++{
++	int ret;
++	u16 i2c_addr = addi903x->i2c_client->addr;
++
++	struct i2c_msg msg;
++	u8 data[4] =  {(reg & 0xff00) >> 8, reg & 0xff, (*val & 0xff00) >> 8, *val & 0xff};
++	msg.addr = i2c_addr;
++	msg.len = 4;
++	msg.buf = data;
++	msg.flags = 0;
++
++	i2c_transfer(addi903x->i2c_client->adapter, &msg, 1);
++
++	ret = i2c_master_send(addi903x->i2c_client, data, 4);
++	if (ret < 0) {
++		dev_err(addi903x->dev, "%s: i2c_master_send write reg error %d: reg=%x, val=%x\n",
++			__func__, ret, reg, val);
++		return ret;
++	}
++	
++	return ret;
++}
++
++static int addi903x_read_reg(struct addi903x* addi903x, u16 reg, u16* val)
++{
++	int ret;
++	u8 data[2] =  {(reg & 0xff00) >> 8, reg & 0xff};
++	
++	ret = i2c_master_send(addi903x->i2c_client, data, 2);
++	if (ret < 0) {
++		dev_err(addi903x->dev, "%s: write reg error %d: reg=%x\n",
++			__func__, ret, reg);
++		return ret;
++	}
++
++	ret = i2c_master_recv(addi903x->i2c_client, (u8 *)val, 2);
++	if (ret < 0) {
++		dev_err(addi903x->dev, "%s: read reg error %d: reg=%x\n",
++			__func__, ret, reg);
++		return ret;
++	}
++
++	return 0;
++}
++
++static int addi903x_set_register_array(struct addi903x* addi903x,
++				     const struct addi903x_reg_value* settings,
++				     unsigned int num_settings)
++{
++	unsigned int i;
++	int ret;
++	u16 val;
++
++	for (i = 0; i < num_settings; ++i, ++settings) {
++    		val = settings->val;
++		ret = addi903x_write_reg(addi903x, settings->reg, &val);
++		if (ret < 0)
++			return ret;
++	}
++
++	return 0;
++}
++
++static int addi903x_set_power_on(struct addi903x* addi903x)
++{
++	int ret;
++
++	dev_info(addi903x->dev, "addi903x_set_power_on\n");
++
++	ret = clk_prepare_enable(addi903x->xclk);
++	if (ret < 0) {
++		dev_err(addi903x->dev, "clk prepare enable failed\n");
++		return ret;
++	}
++
++	gpiod_set_value_cansleep(addi903x->rst_gpio, 0);
++
++	ret = addi903x_set_register_array(addi903x,
++		addi903x_powerup_setting,
++		ARRAY_SIZE(addi903x_powerup_setting));
++    	if (ret < 0) {
++      		dev_err(addi903x->dev, "could not set power up registers\n");
++	}
++
++	return ret;
++}
++
++static int addi903x_set_power_off(struct addi903x* addi903x)
++{
++	int ret = 0;
++
++	dev_info(addi903x->dev, "addi903x_set_power_off\n");
++  	
++	ret = addi903x_set_register_array(addi903x,
++		addi903x_powerdown_setting,
++		ARRAY_SIZE(addi903x_powerdown_setting));
++    	if (ret < 0) {
++      		dev_err(addi903x->dev, "could not set power down registers\n");
++	}
++
++	gpiod_set_value_cansleep(addi903x->rst_gpio, 1);	
++	clk_disable_unprepare(addi903x->xclk);
++
++	return ret;
++}
++
++static int addi903x_s_power(struct v4l2_subdev* sd, int on)
++{
++	struct addi903x *addi903x = to_addi903x(sd);
++	int ret = 0;
++
++	mutex_lock(&addi903x->power_lock);
++
++	dev_info(addi903x->dev, "s_power %d\n", on);
++	/* If the power count is modified from 0 to != 0 or from != 0 to 0,
++	 * update the power state.
++	 */
++	if (addi903x->power_count == !on) {
++		if (on) {
++			mutex_lock(&addi903x_lock);
++
++			ret = addi903x_set_power_on(addi903x);
++			if (ret < 0) {
++        			mutex_unlock(&addi903x_lock);
++				goto exit;
++			}  
++			
++      			mutex_unlock(&addi903x_lock);
++
++      			dev_info(addi903x->dev, "power on complete\n");
++    		} else {
++			mutex_lock(&addi903x_lock);
++
++			ret = addi903x_set_power_off(addi903x);
++			if (ret < 0) {
++        			mutex_unlock(&addi903x_lock);
++				goto exit;
++			}  
++			
++      			mutex_unlock(&addi903x_lock);
++
++      			dev_info(addi903x->dev, "power off complete\n");
++    		}      
++			
++	}
++
++	/* Update the power count. */
++	addi903x->power_count += on ? 1 : -1;
++	WARN_ON(addi903x->power_count < 0);
++
++exit:
++	mutex_unlock(&addi903x->power_lock);
++
++	return ret;
++}
++
++static int addi903x_set_chip_config(struct addi903x *addi903x, struct v4l2_ctrl *ctrl)
++{
++	int ret, index = 0;
++	unsigned short *reg, *val;
++	int count = 0;   
++
++	reg = (unsigned short *)(ctrl->p_new.p_u16);
++	val = ((unsigned short *)(ctrl->p_new.p_u16 + 1));  
++
++	while (index < ctrl->elems)
++	{
++		if (((*reg >= 0xC000) && (*reg <= 0xC7FF)) ||
++		    ((*reg >= 0x4000) && (*reg <= 0x6FFF)) ||
++		    ((*reg >= 0x7C00) && (*reg <= 0x7FFF))) {
++
++			ret = addi903x_write_reg(addi903x, *reg, val);
++			if (ret < 0) {
++				dev_err(addi903x->dev, "could not write to device register %x\n", *reg);
++				break;
++			} else {
++				count++;
++			}
++		}
++
++		index += 2;
++		reg += 2;
++		val += 2;
++	}
++	dev_info(addi903x->dev, "addi903x_set_chip_config, total successful write count %d\n", count);
++
++	return 0;
++}
++
++static int addi903x_s_ctrl(struct v4l2_ctrl *ctrl)
++{
++	struct addi903x *addi903x = container_of(ctrl->handler,
++					     struct addi903x, ctrls);
++	int ret;
++	u16 val;
++
++	dev_info (addi903x->dev,">> addi903x_s_ctrl\n");
++
++	switch (ctrl->id) {
++	case V4L2_CID_AD_DEV_SET_CHIP_CONFIG_QUERY:
++		dev_info (addi903x->dev,"addi903x_s_ctrl > V4L2_CID_AD_DEV_SET_CHIP_CONFIG_QUERY\n");
++    		ret = addi903x_set_chip_config(addi903x, ctrl);
++		break; 
++
++	case V4L2_CID_AD_DEV_REG_READ_QUERY:
++		dev_info (addi903x->dev,"addi903x_s_ctrl > V4L2_CID_AD_DEV_REG_READ_QUERY\n");
++    		ret = addi903x_read_reg(addi903x, *(u16*)(ctrl->p_new.p_u16), &val);
++		*(u16*)(ctrl->p_new.p_u16) = val;
++		break;	
++
++	case V4L2_CID_PIXEL_RATE:
++	case V4L2_CID_LINK_FREQ:
++		break;
++	default:
++		dev_dbg(addi903x->dev, "addi903x_s_ctrl > Unhandled: %x  param=%x\n", ctrl->id,ctrl->val);
++		ret = -EINVAL;
++		break;
++	}
++
++	dev_info (addi903x->dev,"<< addi903x_s_ctrl\n");
++
++	return ret;
++}
++
++static const struct v4l2_ctrl_ops addi903x_ctrl_ops = {
++	.s_ctrl = addi903x_s_ctrl,
++};
++
++static const struct v4l2_ctrl_config addi903x_ctrl_chip_config = {
++	.ops = &addi903x_ctrl_ops,
++	.id = V4L2_CID_AD_DEV_SET_CHIP_CONFIG_QUERY,
++	.name = "chip_config",
++	.type = V4L2_CTRL_TYPE_U16,
++  	.def = 0xFF,
++	.min = 0x00,
++	.max = 0xFFFF,
++	.step = 1,
++  	.dims = { 2048 },
++  	.elem_size = 2
++};
++
++static const struct v4l2_ctrl_config addi903x_ctrl_reg_read = {
++	.ops = &addi903x_ctrl_ops,
++	.id = V4L2_CID_AD_DEV_REG_READ_QUERY,
++	.name = "reg_read",
++	.type = V4L2_CTRL_TYPE_U16,
++  	.def = 0,
++	.min = 0x00,
++	.max = 0xFFFF,
++	.step = 1
++};
++
++static int addi903x_enum_mbus_code(struct v4l2_subdev *sd,
++				 struct v4l2_subdev_pad_config *cfg,
++				 struct v4l2_subdev_mbus_code_enum *code)
++{
++	struct addi903x *addi903x = to_addi903x(sd);
++	dev_info(addi903x->dev, "Mbus code index %d\n", code->index);
++	if (code->index > 0)
++		return -EINVAL;
++
++	code->code = MEDIA_BUS_FMT_SBGGR12_1X12;
++
++	return 0;
++}
++
++static int addi903x_enum_frame_size(struct v4l2_subdev *subdev,
++				  struct v4l2_subdev_pad_config *cfg,
++				  struct v4l2_subdev_frame_size_enum *fse)
++{
++	struct addi903x *addi903x = to_addi903x(subdev);
++	
++	dev_info(addi903x->dev, "Mbus fs code %d index %d\n", fse->code, fse->index);
++	
++	if (fse->code != MEDIA_BUS_FMT_SBGGR12_1X12)
++		return -EINVAL;
++
++	if (fse->index >= ARRAY_SIZE(addi903x_mode_info_data))
++		return -EINVAL;
++
++	fse->min_width = addi903x_mode_info_data[fse->index].width;
++	fse->max_width = addi903x_mode_info_data[fse->index].width;
++	fse->min_height = addi903x_mode_info_data[fse->index].height;
++	fse->max_height = addi903x_mode_info_data[fse->index].height;
++
++	return 0;
++}
++
++static struct v4l2_mbus_framefmt *
++__addi903x_get_pad_format(struct addi903x *addi903x,
++			struct v4l2_subdev_pad_config *cfg,
++			unsigned int pad,
++			enum v4l2_subdev_format_whence which)
++{
++	switch (which) {
++	case V4L2_SUBDEV_FORMAT_TRY:
++		return v4l2_subdev_get_try_format(&addi903x->sd, cfg, pad);
++	case V4L2_SUBDEV_FORMAT_ACTIVE:
++		return &addi903x->fmt;
++	default:
++		return &addi903x->fmt; /* Returning null causes 0 derefence in addi903x_get_format */
++	}
++}
++
++static int addi903x_get_format(struct v4l2_subdev *sd,
++			     struct v4l2_subdev_pad_config *cfg,
++			     struct v4l2_subdev_format *format)
++{
++	struct addi903x *addi903x = to_addi903x(sd);
++
++	dev_info(addi903x->dev, "get_fmt which %d\n", format->which);
++	format->format = *__addi903x_get_pad_format(addi903x, cfg, format->pad,
++						  format->which);
++	dev_info(addi903x->dev, "get_fmt: %x %dx%d\n",
++		format->format.code, format->format.width,
++		format->format.height);
++	return 0;
++}
++
++static struct v4l2_rect *
++__addi903x_get_pad_crop(struct addi903x *addi903x, struct v4l2_subdev_pad_config *cfg,
++		      unsigned int pad, enum v4l2_subdev_format_whence which)
++{
++	switch (which) {
++	case V4L2_SUBDEV_FORMAT_TRY:
++		return v4l2_subdev_get_try_crop(&addi903x->sd, cfg, pad);
++	case V4L2_SUBDEV_FORMAT_ACTIVE:
++		return &addi903x->crop;
++	default:
++		return NULL;
++	}
++}
++
++static const struct addi903x_mode_info *
++addi903x_find_nearest_mode(unsigned int width, unsigned int height)
++{
++	unsigned int i;
++
++	for (i = ARRAY_SIZE(addi903x_mode_info_data) - 1; i >= 0; i--) {
++		if (addi903x_mode_info_data[i].width <= width &&
++		    addi903x_mode_info_data[i].height <= height)
++			break;
++	}
++
++	if (i < 0)
++		i = 0;
++
++	return &addi903x_mode_info_data[i];
++}
++
++static int addi903x_set_format(struct v4l2_subdev *sd,
++			     struct v4l2_subdev_pad_config *cfg,
++			     struct v4l2_subdev_format *format)
++{
++	struct addi903x *addi903x = to_addi903x(sd);
++	struct v4l2_mbus_framefmt *__format;
++	struct v4l2_rect *__crop;
++	const struct addi903x_mode_info *new_mode;
++	int ret;
++
++	dev_info(addi903x->dev, "set_fmt: %x %dx%d\n",
++		format->format.code, format->format.width,
++		format->format.height);
++
++	__crop = __addi903x_get_pad_crop(addi903x, cfg, format->pad,
++			format->which);
++
++	new_mode = addi903x_find_nearest_mode(format->format.width,
++					    format->format.height);
++	__crop->width = new_mode->width;
++	__crop->height = new_mode->height;
++
++	if (format->which == V4L2_SUBDEV_FORMAT_ACTIVE) {
++		ret = v4l2_ctrl_s_ctrl_int64(addi903x->pixel_clock,
++					     new_mode->pixel_clock);
++		if (ret < 0)
++			return ret;
++
++		ret = v4l2_ctrl_s_ctrl(addi903x->link_freq,
++				       new_mode->link_freq);
++		if (ret < 0)
++			return ret;
++		
++		addi903x->current_mode = new_mode;
++	}
++
++	__format = __addi903x_get_pad_format(addi903x, cfg, format->pad,
++			format->which);
++	__format->width = __crop->width;
++	__format->height = __crop->height;
++	__format->code = MEDIA_BUS_FMT_SBGGR12_1X12;
++	__format->field = V4L2_FIELD_NONE;
++	__format->colorspace = V4L2_COLORSPACE_SRGB;
++
++	format->format = *__format;
++
++	return 0;
++}
++
++static int addi903x_entity_init_cfg(struct v4l2_subdev *subdev,
++				  struct v4l2_subdev_pad_config *cfg)
++{
++	struct v4l2_subdev_format fmt = { 0 };
++	struct addi903x *addi903x = to_addi903x(subdev);
++
++	dev_info(addi903x->dev, "%s: Enter\n", __func__);
++
++	fmt.which = cfg ? V4L2_SUBDEV_FORMAT_TRY : V4L2_SUBDEV_FORMAT_ACTIVE;
++	fmt.format.width = 640;
++	fmt.format.height = 960;
++
++	addi903x_set_format(subdev, cfg, &fmt);
++
++	return 0;
++}
++
++static int addi903x_get_selection(struct v4l2_subdev *sd,
++			   struct v4l2_subdev_pad_config *cfg,
++			   struct v4l2_subdev_selection *sel)
++{
++	struct addi903x *addi903x = to_addi903x(sd);
++
++	dev_info(addi903x->dev, "get_selection %d\n", sel->target);
++	if (sel->target != V4L2_SEL_TGT_CROP)
++		return -EINVAL;
++
++	sel->r = *__addi903x_get_pad_crop(addi903x, cfg, sel->pad,
++					sel->which);
++	return 0;
++}
++
++static int addi903x_s_stream(struct v4l2_subdev *subdev, int enable)
++{
++	struct addi903x *addi903x = to_addi903x(subdev);
++	int ret;
++
++	dev_info(addi903x->dev, "stream %d\n", enable);
++	if (enable) {
++		ret = addi903x_set_register_array(addi903x,
++					addi903x->current_mode->data,
++					addi903x->current_mode->data_size);
++		if (ret < 0) {
++			dev_err(addi903x->dev, "could not set mode %dx%d\n",
++				addi903x->current_mode->width,
++				addi903x->current_mode->height);
++			return ret;
++		}
++	} else {
++		
++	}
++
++	return 0;
++}
++
++static const struct v4l2_subdev_core_ops addi903x_core_ops = {
++	.s_power = addi903x_s_power,
++};
++
++static const struct v4l2_subdev_video_ops addi903x_video_ops = {
++	.s_stream = addi903x_s_stream,
++};
++
++static const struct v4l2_subdev_pad_ops addi903x_subdev_pad_ops = {
++	.init_cfg = addi903x_entity_init_cfg,	
++	.enum_mbus_code = addi903x_enum_mbus_code,
++	.enum_frame_size = addi903x_enum_frame_size,
++	.get_fmt = addi903x_get_format,
++	.set_fmt = addi903x_set_format,
++	.get_selection = addi903x_get_selection,
++};
++
++static const struct v4l2_subdev_ops addi903x_subdev_ops = {
++	.core = &addi903x_core_ops,
++	.video = &addi903x_video_ops,
++	.pad = &addi903x_subdev_pad_ops,
++};
++
++static int addi903x_probe(struct i2c_client *client,
++			const struct i2c_device_id *id)
++{
++	struct device *dev = &client->dev;
++	struct device_node *endpoint;
++	struct addi903x *addi903x;
++	u32 xclk_freq;
++	int ret;
++	
++	dev_dbg(dev, "%s: Enter, i2c addr = 0x%x\n", __func__, client->addr);
++
++	addi903x = devm_kzalloc(dev, sizeof(struct addi903x), GFP_KERNEL);
++	if (!addi903x)
++		return -ENOMEM;
++
++	addi903x->i2c_client = client;
++	addi903x->dev = dev;
++
++	endpoint = of_graph_get_next_endpoint(dev->of_node, NULL);
++	if (!endpoint) {
++		dev_err(dev, "endpoint node not found\n");
++		return -EINVAL;
++	}
++
++	ret = v4l2_fwnode_endpoint_parse(of_fwnode_handle(endpoint),
++					 &addi903x->ep);
++
++	of_node_put(endpoint);
++
++	if (ret < 0) {
++		dev_err(dev, "parsing endpoint node failed\n");
++		return ret;
++	}
++
++	if (addi903x->ep.bus_type != V4L2_MBUS_CSI2) {
++		dev_err(dev, "invalid bus type, must be MIPI CSI2\n");
++		return -EINVAL;
++	}
++
++	/* get system clock (xclk) */
++	addi903x->xclk = devm_clk_get(dev, "xclk");
++	if (IS_ERR(addi903x->xclk)) {
++		dev_err(dev, "could not get xclk");
++		return PTR_ERR(addi903x->xclk);
++	}
++
++	ret = of_property_read_u32(dev->of_node, "clock-frequency", &xclk_freq);
++	if (ret) {
++		dev_err(dev, "could not get xclk frequency\n");
++		return ret;
++	}
++
++	ret = clk_set_rate(addi903x->xclk, xclk_freq);
++	if (ret) {
++		dev_err(dev, "could not set xclk frequency\n");
++		return ret;
++	}
++
++	addi903x->rst_gpio = devm_gpiod_get(dev, "reset", GPIOD_OUT_HIGH);
++	dev_info(dev, "Reset LOW\n");
++	if (IS_ERR(addi903x->rst_gpio)) {
++		dev_err(dev, "cannot get reset gpio\n");
++		return PTR_ERR(addi903x->rst_gpio);
++	}
++
++	mutex_init(&addi903x->power_lock);
++
++	v4l2_ctrl_handler_init(&addi903x->ctrls, 4);
++
++	addi903x->pixel_clock = v4l2_ctrl_new_std(&addi903x->ctrls,
++						&addi903x_ctrl_ops,
++						V4L2_CID_PIXEL_RATE,
++						1, INT_MAX, 1, 1);
++	addi903x->link_freq = v4l2_ctrl_new_int_menu(&addi903x->ctrls,
++						   &addi903x_ctrl_ops,
++						   V4L2_CID_LINK_FREQ,
++						   ARRAY_SIZE(link_freq) - 1,
++						   0, link_freq);
++	if (addi903x->link_freq)
++		addi903x->link_freq->flags |= V4L2_CTRL_FLAG_READ_ONLY;
++
++  
++  	addi903x->set_chip_config = v4l2_ctrl_new_custom(&addi903x->ctrls, &addi903x_ctrl_chip_config, NULL);
++
++	addi903x->reg_read = v4l2_ctrl_new_custom(&addi903x->ctrls, &addi903x_ctrl_reg_read, NULL);
++
++	addi903x->sd.ctrl_handler = &addi903x->ctrls;
++
++	if (addi903x->ctrls.error) {
++		dev_err(dev, "%s: control initialization error %d\n",
++		       __func__, addi903x->ctrls.error);
++		ret = addi903x->ctrls.error;
++		goto free_ctrl;
++	}
++
++	client->flags |= I2C_CLIENT_SCCB;
++	v4l2_i2c_subdev_init(&addi903x->sd, client, &addi903x_subdev_ops);
++	addi903x->sd.flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
++	addi903x->pad.flags = MEDIA_PAD_FL_SOURCE;
++	addi903x->sd.dev = &client->dev;
++	addi903x->sd.entity.function = MEDIA_ENT_F_CAM_SENSOR;
++	
++	ret = media_entity_pads_init(&addi903x->sd.entity, 1, &addi903x->pad);
++
++	if (ret < 0) {
++		dev_err(dev, "could not register media entity\n");
++		goto free_ctrl;
++	}
++
++	ret = addi903x_s_power(&addi903x->sd, true);
++	if (ret < 0) {
++		dev_err(dev, "could not power up addi903x\n");
++		goto free_entity;
++	}
++
++	dev_info(dev, "addi903x detected at address 0x%02x\n", client->addr);
++
++	ret = addi903x_s_power(&addi903x->sd, false);
++	if (ret < 0) {
++		dev_err(dev, "could not power down addi903x\n");
++		goto free_entity;
++	}
++
++	addi903x_entity_init_cfg(&addi903x->sd, NULL);
++
++	ret = v4l2_async_register_subdev(&addi903x->sd);
++	if (ret < 0) {
++		dev_err(dev, "could not register v4l2 device\n");
++	}
++
++	return 0;
++
++free_entity:
++	media_entity_cleanup(&addi903x->sd.entity);
++free_ctrl:
++	v4l2_ctrl_handler_free(&addi903x->ctrls);
++	mutex_destroy(&addi903x->power_lock);
++
++	return ret;
++}
++
++
++static int addi903x_remove(struct i2c_client *client)
++{
++	struct v4l2_subdev *sd = i2c_get_clientdata(client);
++	struct addi903x *addi903x = to_addi903x(sd);
++
++	v4l2_async_unregister_subdev(&addi903x->sd);
++	media_entity_cleanup(&addi903x->sd.entity);
++	v4l2_ctrl_handler_free(&addi903x->ctrls);
++	mutex_destroy(&addi903x->power_lock);
++
++	return 0;
++}
++
++
++static const struct i2c_device_id addi903x_id[] = {
++	{ "addi903x", 0 },
++	{}
++};
++MODULE_DEVICE_TABLE(i2c, addi903x_id);
++
++static const struct of_device_id addi903x_of_match[] = {
++	{ .compatible = "adi,addi903x" },
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(of, addi903x_of_match);
++
++static struct i2c_driver addi903x_i2c_driver = {
++	.driver = {
++		.of_match_table = of_match_ptr(addi903x_of_match),
++		.name  = "addi903x",
++	},
++	.probe  = addi903x_probe,
++	.remove = addi903x_remove,
++	.id_table = addi903x_id,
++};
++
++module_i2c_driver(addi903x_i2c_driver);
++
++MODULE_DESCRIPTION("Analog Devices ADDI903x Camera Driver");
++MODULE_LICENSE("GPL v2");
++
+diff --git a/drivers/media/platform/qcom/camss/camss-video.c b/drivers/media/platform/qcom/camss/camss-video.c
+index c9bb0d023db480d1343b04ec953429996d9606a0..01ac655da14306bfa4d81096f75ce5e4e227a57c 100644
+--- a/drivers/media/platform/qcom/camss/camss-video.c
++++ b/drivers/media/platform/qcom/camss/camss-video.c
+@@ -291,8 +291,10 @@ static int video_get_subdev_format(struct camss_video *video,
+ 	int ret;
+ 
+ 	subdev = video_remote_subdev(video, &pad);
+-	if (subdev == NULL)
++	if (subdev == NULL) {
++		dev_err(video->camss->dev, "subdev == NULL\n");
+ 		return -EPIPE;
++	}
+ 
+ 	fmt.pad = pad;
+ 	fmt.which = V4L2_SUBDEV_FORMAT_ACTIVE;
+@@ -421,8 +423,16 @@ static int video_check_format(struct camss_video *video)
+ 	    pix->height != sd_pix->height ||
+ 	    pix->width != sd_pix->width ||
+ 	    pix->num_planes != sd_pix->num_planes ||
+-	    pix->field != format.fmt.pix_mp.field)
+-		return -EPIPE;
++	    pix->field != format.fmt.pix_mp.field) {
++		
++		dev_err(video->camss->dev, "pix->pixelformat != sd_pix->pixelformat %d, %d\n", pix->pixelformat, sd_pix->pixelformat);
++		dev_err(video->camss->dev, "pix->height != sd_pix->height %d, %d\n", pix->height, sd_pix->height);
++		dev_err(video->camss->dev, "pix->width != sd_pix->width %d, %d\n", pix->width, sd_pix->width);
++		dev_err(video->camss->dev, "pix->num_planes != sd_pix->num_planes %d, %d\n", pix->num_planes, sd_pix->num_planes);
++		dev_err(video->camss->dev, "pix->field != format.fmt.pix_mp.field %d, %d\n", pix->field, format.fmt.pix_mp.field);
++		
++		return 0;//-EPIPE;
++	}
+ 
+ 	return 0;
+ }
+@@ -465,6 +475,8 @@ static int video_start_streaming(struct vb2_queue *q, unsigned int count)
+ 	return 0;
+ 
+ error:
++	dev_err(video->camss->dev, "video_start_streaming error\n");
++
+ 	media_pipeline_stop(&vdev->entity);
+ 
+ 	video->ops->flush_buffers(video, VB2_BUF_STATE_QUEUED);
+@@ -665,15 +677,21 @@ static int video_s_fmt(struct file *file, void *fh, struct v4l2_format *f)
+ 	struct camss_video *video = video_drvdata(file);
+ 	int ret;
+ 
++	dev_err(video->camss->dev, "video_s_fmt enter\n");
++
+ 	if (vb2_is_busy(&video->vb2_q))
+ 		return -EBUSY;
+ 
+ 	ret = __video_try_fmt(video, f);
+-	if (ret < 0)
++	if (ret < 0) {
++		dev_err(video->camss->dev, "video_s_fmt failed\n");
+ 		return ret;
++	}
+ 
+ 	video->active_fmt = *f;
+ 
++	dev_err(video->camss->dev, "video_s_fmt format width %d pixel %d\n", f->fmt.pix_mp.width, f->fmt.pix_mp.pixelformat);
++
+ 	return 0;
+ }
+ 
+@@ -819,9 +837,9 @@ static int msm_video_init_format(struct camss_video *video)
+ 	struct v4l2_format format = {
+ 		.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+ 		.fmt.pix_mp = {
+-			.width = 1920,
+-			.height = 1080,
+-			.pixelformat = video->formats[0].pixelformat,
++			.width = 640,
++			.height = 960,
++			.pixelformat = V4L2_PIX_FMT_SBGGR12P,
+ 		},
+ 	};
+ 
+@@ -886,17 +904,21 @@ int msm_video_register(struct camss_video *video, struct v4l2_device *v4l2_dev,
+ 
+ 	if (video->camss->version == CAMSS_8x16) {
+ 		if (is_pix) {
++			dev_err(v4l2_dev->dev, "is_pix!!!!!\n");
+ 			video->formats = formats_pix_8x16;
+ 			video->nformats = ARRAY_SIZE(formats_pix_8x16);
+ 		} else {
++			dev_err(v4l2_dev->dev, "formats_rdi_8x16\n");
+ 			video->formats = formats_rdi_8x16;
+ 			video->nformats = ARRAY_SIZE(formats_rdi_8x16);
+ 		}
+ 	} else if (video->camss->version == CAMSS_8x96) {
+ 		if (is_pix) {
++			dev_err(v4l2_dev->dev, "is_pix!!!!!\n");
+ 			video->formats = formats_pix_8x96;
+ 			video->nformats = ARRAY_SIZE(formats_pix_8x96);
+ 		} else {
++			dev_err(v4l2_dev->dev, "formats_rdi_8x96\n");
+ 			video->formats = formats_rdi_8x96;
+ 			video->nformats = ARRAY_SIZE(formats_rdi_8x96);
+ 		}
+diff --git a/drivers/usb/gadget/function/f_uvc.c b/drivers/usb/gadget/function/f_uvc.c
+index f8a1881609a2c808f690f6d31ea6bcaf118b8bb4..85c4bec87438a73960896e65b13902caa4d75dcf 100644
+--- a/drivers/usb/gadget/function/f_uvc.c
++++ b/drivers/usb/gadget/function/f_uvc.c
+@@ -45,7 +45,7 @@ unsigned int uvc_gadget_trace_param;
+ #define UVC_STRING_STREAMING_IDX		1
+ 
+ static struct usb_string uvc_en_us_strings[] = {
+-	[UVC_STRING_CONTROL_IDX].s = "UVC Camera",
++	[UVC_STRING_CONTROL_IDX].s = "ADI TOF DEPTH SENSOR",
+ 	[UVC_STRING_STREAMING_IDX].s = "Video Streaming",
+ 	{  }
+ };
+diff --git a/drivers/usb/gadget/function/uvc_video.c b/drivers/usb/gadget/function/uvc_video.c
+index 0f01c04d7cbd856581da53d6e69cba5f50b2c922..3d0d5d94a62f2fe6927983ba6979784eb20eceeb 100644
+--- a/drivers/usb/gadget/function/uvc_video.c
++++ b/drivers/usb/gadget/function/uvc_video.c
+@@ -243,7 +243,7 @@ uvc_video_alloc_requests(struct uvc_video *video)
+ 
+ 	req_size = video->ep->maxpacket
+ 		 * max_t(unsigned int, video->ep->maxburst, 1)
+-		 * (video->ep->mult);
++		 * (video->ep->mult + 1);
+ 
+ 	for (i = 0; i < UVC_NUM_REQUESTS; ++i) {
+ 		video->req_buffer[i] = kmalloc(req_size, GFP_KERNEL);
+diff --git a/drivers/usb/gadget/legacy/webcam.c b/drivers/usb/gadget/legacy/webcam.c
+index 82c13fce9232729978214b69c0617c87a4edbbb3..f8dfa24329ef6add30795f3ec927ae3c4814c717 100644
+--- a/drivers/usb/gadget/legacy/webcam.c
++++ b/drivers/usb/gadget/legacy/webcam.c
+@@ -134,14 +134,31 @@ static const struct uvc_processing_unit_descriptor uvc_processing = {
+ 	.iProcessing		= 0,
+ };
+ 
++DECLARE_UVC_EXTENSION_UNIT_DESCRIPTOR(1, 3);
++static const struct UVC_EXTENSION_UNIT_DESCRIPTOR(1, 3) uvc_extension_header = {
++	.bLength		= UVC_DT_EXTENSION_UNIT_SIZE(1,3),
++	.bDescriptorType	= USB_DT_CS_INTERFACE,
++	.bDescriptorSubType	= UVC_VC_EXTENSION_UNIT,
++	.bUnitID		= 3,
++	.guidExtensionCode	= {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
++	.bNumControls		= 2,
++	.bNrInPins		= 1,
++	.baSourceID[0]		= 2,
++	.bControlSize		= 3,
++	.bmControls[0]		= 0x3F,
++	.bmControls[1]		= 0x00,
++	.bmControls[2]		= 0x00,
++	.iExtension		= 0x00,
++};
++
+ static const struct uvc_output_terminal_descriptor uvc_output_terminal = {
+ 	.bLength		= UVC_DT_OUTPUT_TERMINAL_SIZE,
+ 	.bDescriptorType	= USB_DT_CS_INTERFACE,
+ 	.bDescriptorSubType	= UVC_VC_OUTPUT_TERMINAL,
+-	.bTerminalID		= 3,
++	.bTerminalID		= 4,
+ 	.wTerminalType		= cpu_to_le16(0x0101),
+ 	.bAssocTerminal		= 0,
+-	.bSourceID		= 2,
++	.bSourceID		= 3,
+ 	.iTerminal		= 0,
+ };
+ 
+@@ -155,7 +172,7 @@ static const struct UVC_INPUT_HEADER_DESCRIPTOR(1, 2) uvc_input_header = {
+ 	.wTotalLength		= 0, /* dynamic */
+ 	.bEndpointAddress	= 0, /* dynamic */
+ 	.bmInfo			= 0,
+-	.bTerminalLink		= 3,
++	.bTerminalLink		= 4,
+ 	.bStillCaptureMethod	= 0,
+ 	.bTriggerSupport	= 0,
+ 	.bTriggerUsage		= 0,
+@@ -170,8 +187,8 @@ static const struct uvc_format_uncompressed uvc_format_yuv = {
+ 	.bDescriptorSubType	= UVC_VS_FORMAT_UNCOMPRESSED,
+ 	.bFormatIndex		= 1,
+ 	.bNumFrameDescriptors	= 2,
+-	.guidFormat		=
+-		{ 'Y',  'U',  'Y',  '2', 0x00, 0x00, 0x10, 0x00,
++	.guidFormat		= 
++		{ 'Y',  '1',  '6',  ' ', 0x00, 0x00, 0x10, 0x00, 
+ 		 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71},
+ 	.bBitsPerPixel		= 16,
+ 	.bDefaultFrameIndex	= 1,
+@@ -188,7 +205,7 @@ static const struct UVC_FRAME_UNCOMPRESSED(3) uvc_frame_yuv_360p = {
+ 	.bLength		= UVC_DT_FRAME_UNCOMPRESSED_SIZE(3),
+ 	.bDescriptorType	= USB_DT_CS_INTERFACE,
+ 	.bDescriptorSubType	= UVC_VS_FRAME_UNCOMPRESSED,
+-	.bFrameIndex		= 1,
++	.bFrameIndex		= 3,
+ 	.bmCapabilities		= 0,
+ 	.wWidth			= cpu_to_le16(640),
+ 	.wHeight		= cpu_to_le16(360),
+@@ -202,20 +219,56 @@ static const struct UVC_FRAME_UNCOMPRESSED(3) uvc_frame_yuv_360p = {
+ 	.dwFrameInterval[2]	= cpu_to_le32(5000000),
+ };
+ 
++static const struct UVC_FRAME_UNCOMPRESSED(3) uvc_frame_yuv_960p = {
++        .bLength                = UVC_DT_FRAME_UNCOMPRESSED_SIZE(3),
++        .bDescriptorType        = USB_DT_CS_INTERFACE,
++        .bDescriptorSubType     = UVC_VS_FRAME_UNCOMPRESSED,
++        .bFrameIndex            = 1,
++        .bmCapabilities         = 0,
++        .wWidth                 = cpu_to_le16(640),
++        .wHeight                = cpu_to_le16(960),
++        .dwMinBitRate           = cpu_to_le32(49152000),
++        .dwMaxBitRate           = cpu_to_le32(245760000),
++        .dwMaxVideoFrameBufferSize      = cpu_to_le32(1228800),
++        .dwDefaultFrameInterval = cpu_to_le32(400000),
++        .bFrameIntervalType     = 3,
++        .dwFrameInterval[0]     = cpu_to_le32(400000),
++        .dwFrameInterval[1]     = cpu_to_le32(1000000),
++        .dwFrameInterval[2]     = cpu_to_le32(5000000),
++};
++
++static const struct UVC_FRAME_UNCOMPRESSED(3) uvc_frame_yuv_750p = {
++        .bLength                = UVC_DT_FRAME_UNCOMPRESSED_SIZE(3),
++        .bDescriptorType        = USB_DT_CS_INTERFACE,
++        .bDescriptorSubType     = UVC_VS_FRAME_UNCOMPRESSED,
++        .bFrameIndex            = 2,
++        .bmCapabilities         = 0,
++        .wWidth                 = cpu_to_le16(668),
++        .wHeight                = cpu_to_le16(750),
++        .dwMinBitRate           = cpu_to_le32(40080000),
++        .dwMaxBitRate           = cpu_to_le32(120240000),
++        .dwMaxVideoFrameBufferSize      = cpu_to_le32(1002000),
++        .dwDefaultFrameInterval = cpu_to_le32(666666),
++        .bFrameIntervalType     = 3,
++        .dwFrameInterval[0]     = cpu_to_le32(666666),
++        .dwFrameInterval[1]     = cpu_to_le32(1000000),
++        .dwFrameInterval[2]     = cpu_to_le32(5000000),
++};
++
+ static const struct UVC_FRAME_UNCOMPRESSED(1) uvc_frame_yuv_720p = {
+ 	.bLength		= UVC_DT_FRAME_UNCOMPRESSED_SIZE(1),
+ 	.bDescriptorType	= USB_DT_CS_INTERFACE,
+ 	.bDescriptorSubType	= UVC_VS_FRAME_UNCOMPRESSED,
+-	.bFrameIndex		= 2,
++	.bFrameIndex		= 4,
+ 	.bmCapabilities		= 0,
+ 	.wWidth			= cpu_to_le16(1280),
+ 	.wHeight		= cpu_to_le16(720),
+ 	.dwMinBitRate		= cpu_to_le32(29491200),
+ 	.dwMaxBitRate		= cpu_to_le32(29491200),
+ 	.dwMaxVideoFrameBufferSize	= cpu_to_le32(1843200),
+-	.dwDefaultFrameInterval	= cpu_to_le32(5000000),
++	.dwDefaultFrameInterval	= cpu_to_le32(1000000),
+ 	.bFrameIntervalType	= 1,
+-	.dwFrameInterval[0]	= cpu_to_le32(5000000),
++	.dwFrameInterval[0]	= cpu_to_le32(1000000),
+ };
+ 
+ static const struct uvc_format_mjpeg uvc_format_mjpg = {
+@@ -282,6 +335,7 @@ static const struct uvc_descriptor_header * const uvc_fs_control_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_control_header,
+ 	(const struct uvc_descriptor_header *) &uvc_camera_terminal,
+ 	(const struct uvc_descriptor_header *) &uvc_processing,
++	(const struct uvc_descriptor_header *) &uvc_extension_header,
+ 	(const struct uvc_descriptor_header *) &uvc_output_terminal,
+ 	NULL,
+ };
+@@ -290,6 +344,7 @@ static const struct uvc_descriptor_header * const uvc_ss_control_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_control_header,
+ 	(const struct uvc_descriptor_header *) &uvc_camera_terminal,
+ 	(const struct uvc_descriptor_header *) &uvc_processing,
++	(const struct uvc_descriptor_header *) &uvc_extension_header,
+ 	(const struct uvc_descriptor_header *) &uvc_output_terminal,
+ 	NULL,
+ };
+@@ -297,6 +352,8 @@ static const struct uvc_descriptor_header * const uvc_ss_control_cls[] = {
+ static const struct uvc_descriptor_header * const uvc_fs_streaming_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_input_header,
+ 	(const struct uvc_descriptor_header *) &uvc_format_yuv,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_960p,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_750p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_360p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_720p,
+ 	(const struct uvc_descriptor_header *) &uvc_format_mjpg,
+@@ -309,6 +366,8 @@ static const struct uvc_descriptor_header * const uvc_fs_streaming_cls[] = {
+ static const struct uvc_descriptor_header * const uvc_hs_streaming_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_input_header,
+ 	(const struct uvc_descriptor_header *) &uvc_format_yuv,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_960p,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_750p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_360p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_720p,
+ 	(const struct uvc_descriptor_header *) &uvc_format_mjpg,
+@@ -321,6 +380,8 @@ static const struct uvc_descriptor_header * const uvc_hs_streaming_cls[] = {
+ static const struct uvc_descriptor_header * const uvc_ss_streaming_cls[] = {
+ 	(const struct uvc_descriptor_header *) &uvc_input_header,
+ 	(const struct uvc_descriptor_header *) &uvc_format_yuv,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_960p,
++	(const struct uvc_descriptor_header *) &uvc_frame_yuv_750p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_360p,
+ 	(const struct uvc_descriptor_header *) &uvc_frame_yuv_720p,
+ 	(const struct uvc_descriptor_header *) &uvc_format_mjpg,
+diff --git a/include/uapi/linux/v4l2-controls.h b/include/uapi/linux/v4l2-controls.h
+index 7b01621bc9a6f32246e82ab1716ec73755a6edc3..8374b44c32b7c4bd49bd9de7244c23af7bef08d0 100644
+--- a/include/uapi/linux/v4l2-controls.h
++++ b/include/uapi/linux/v4l2-controls.h
+@@ -190,6 +190,10 @@ enum v4l2_colorfx {
+  * We reserve 16 controls for this driver. */
+ #define V4L2_CID_USER_IMX_BASE			(V4L2_CID_USER_BASE + 0x1090)
+ 
++/* The base for the addi903x driver controls.
++ * We reserve 16 controls for this driver. */
++#define V4L2_CID_USER_ADDI903X_BASE		(V4L2_CID_USER_BASE + 0x10A0)
++
+ /* MPEG-class control IDs */
+ /* The MPEG controls are applicable to all codec controls
+  * and the 'MPEG' part of the define is historical */
+-- 
+2.17.1
+

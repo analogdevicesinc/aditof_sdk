@@ -1,0 +1,25 @@
+From 9537bce400331544de84182bf4ca2497acd4da3c Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Mon, 13 Apr 2020 13:41:44 +0300
+Subject: [PATCH 2/9] enable eeprom driver
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ kernel/configs/distro.config | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/kernel/configs/distro.config b/kernel/configs/distro.config
+index b503edb5b8e8ab1959dfbfdc52644acd7ef77ff9..ae6ddb915f3dd71356e443d4063e1eedffb6afb1 100644
+--- a/kernel/configs/distro.config
++++ b/kernel/configs/distro.config
+@@ -233,6 +233,7 @@ CONFIG_DYNAMIC_DEBUG=y
+ CONFIG_DRM_LOAD_EDID_FIRMWARE=y
+ CONFIG_I2C_CHARDEV=y
+ CONFIG_SPI_SPIDEV=m
++CONFIG_EEPROM_AT24=m
+ CONFIG_ZSMALLOC=m
+ CONFIG_ZRAM=m
+ CONFIG_TCP_CONG_ADVANCED=y
+-- 
+2.17.1
+

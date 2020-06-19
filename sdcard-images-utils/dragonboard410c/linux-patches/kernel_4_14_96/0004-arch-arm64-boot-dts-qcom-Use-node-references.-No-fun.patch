@@ -1,0 +1,116 @@
+From 6a34d5e6501b986802a4c4c87754db60ecd9911f Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Tue, 14 Apr 2020 18:01:55 +0300
+Subject: [PATCH 4/9] arch/arm64/boot/dts/qcom: Use node references. No
+ functional changes.
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ arch/arm64/boot/dts/qcom/aditof-db410c.dtsi | 87 ++++++++++-----------
+ 1 file changed, 40 insertions(+), 47 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+index 4b16f04fa7a88708ccd2ac9c0ce82a0495649692..42eae0366e1a9c17e5055c920f95826ba85420e6 100644
+--- a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
++++ b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+@@ -1,57 +1,50 @@
+-/ {
+-	soc {
+-		cci@1b0c000 {
+-			status = "ok";
++&camss {
++	status = "ok";
++	ports {
++		port@1 {
++			reg = <1>;
++			csiphy1_ep: endpoint {
++				clock-lanes = <1>;
++				data-lanes = <0 2>;
++				remote-endpoint = <&addi903x_ep>;
++				status = "ok";
++			};
++		};
++	};
++};
+ 
+-			camera_front@64 {
+-				compatible = "adi,addi903x";
+-				reg = <0x64>;
++&cci {
++	status = "ok";
+ 
+-				reset-gpios = <&msmgpio 36 GPIO_ACTIVE_LOW>;
+-				pinctrl-names = "default";
+-				pinctrl-0 = <&camera_front_default>;
++	camera_front@64 {
++		compatible = "adi,addi903x";
++		reg = <0x64>;
+ 
+-				clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
+-				clock-names = "xclk";
+-				clock-frequency = <135000000>;
++    		reset-gpios = <&msmgpio 36 GPIO_ACTIVE_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&camera_front_default>;
+ 
+-				status = "ok";
++		clocks = <&gcc GCC_CAMSS_MCLK1_CLK>;
++		clock-names = "xclk";
++		clock-frequency = <135000000>;
+ 
+-				port {
+-					addi903x_ep: endpoint {
+-						clock-lanes = <1>;
+-						data-lanes = <0 2>;
+-						remote-endpoint = <&csiphy1_ep>;
+-					};
+-				};
+-			};
+-		};
++		status = "ok";
+ 
+-		camss@1b00000 {
+-			status = "ok";
+-			ports {
+-				port@1 {
+-					reg = <1>;
+-					csiphy1_ep: endpoint {
+-						clock-lanes = <1>;
+-						data-lanes = <0 2>;
+-						remote-endpoint = <&addi903x_ep>;
+-						status = "ok";
+-					};
+-				};
++		port {
++			addi903x_ep: endpoint {
++				clock-lanes = <1>;
++				data-lanes = <0 2>;
++				remote-endpoint = <&csiphy1_ep>;
+ 			};
+ 		};
+-		
+-		i2c@78b6000 {
+-		/* On Low speed expansion */
+-			label = "LS-I2C0";
+-			status = "okay";
+-
+-			eeprom: eeprom@56 {
+-    				compatible = "atmel,24c1024";
+-    				reg = <0x56>;
+-				pagesize = <32>;
+-  			};
+-		};
+ 	};
+ };
++
++&blsp_i2c2{
++	status = "ok";
++	eeprom@56 {
++    		compatible = "atmel,24c1024";
++    		reg = <0x56>;
++		pagesize = <32>;
++  	};
++};
+-- 
+2.17.1
+

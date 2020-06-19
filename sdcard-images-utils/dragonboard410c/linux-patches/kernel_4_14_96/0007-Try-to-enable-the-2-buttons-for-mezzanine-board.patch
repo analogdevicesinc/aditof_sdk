@@ -1,0 +1,97 @@
+From 8414b72d924ad694374ee5c6767416ea5b6771f6 Mon Sep 17 00:00:00 2001
+From: Dan Nechita <dan.nechita@analog.com>
+Date: Thu, 18 Jun 2020 19:14:58 +0300
+Subject: [PATCH 7/9] Try to enable the 2 buttons for mezzanine board
+
+Signed-off-by: Dan Nechita <dan.nechita@analog.com>
+---
+ arch/arm64/boot/dts/qcom/aditof-db410c.dtsi   | 34 +++++++++++++++++++
+ .../boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi  | 12 -------
+ arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi     |  6 ----
+ 3 files changed, 34 insertions(+), 18 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+index 42eae0366e1a9c17e5055c920f95826ba85420e6..31efb2eb8fc044546ebb243466b61cee4a82d618 100644
+--- a/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
++++ b/arch/arm64/boot/dts/qcom/aditof-db410c.dtsi
+@@ -48,3 +48,37 @@
+ 		pagesize = <32>;
+   	};
+ };
++
++&blsp_spi5{
++	status = "disabled";
++};
++
++&msmgpio{
++	gpio_button1: gpio_button1 {
++		pinmux {
++			function = "gpio";
++			pins = "gpio24";
++		};
++		pinconf {
++			pins = "gpio24";
++			drive-strength = <2>;
++			input-enabled;
++			bias-disabled;
++		};
++	};
++};
++
++&pm8916_mpps {
++	pinctrl-names = "default";
++	pinctrl-0 = <&gpio_button2>;
++
++	gpio_button2: gpio_button2 {
++		pinconf {
++			pins = "mpp4";
++			function = "digital";
++			input-enabled;
++			bias-disabled;
++			power-source = <PM8916_MPP_L5>;	// 1.8V
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi b/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi
+index 7229ad9df3ea9f98267a42cc675418556f9e0148..80f1ec05f5e49ac29ab4bb8b254c2e2132503f1b 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi
++++ b/arch/arm64/boot/dts/qcom/apq8016-sbc-pmic-pins.dtsi
+@@ -52,18 +52,6 @@
+ };
+ 
+ &pm8916_mpps {
+-	ls_exp_gpio_f: pm8916_mpp4 {
+-		pinconf {
+-			pins = "mpp4";
+-			function = "digital";
+-			output-low;
+-			power-source = <PM8916_MPP_L5>;	// 1.8V
+-
+-			/* PWM signal is available on DTEST 1 */
+-			qcom,dtest = <1>;
+-		};
+-	};
+-
+ 	pm8916_mpps_leds: pm8916_mpps_leds {
+ 		pinconf {
+ 			pins = "mpp2", "mpp3";
+diff --git a/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi b/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi
+index aac1da4f1d3c1958305ac2f503c1e1fc75917345..31fb831a267542b53a20a5cc5ea3348640c570f8 100644
+--- a/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi
++++ b/arch/arm64/boot/dts/qcom/apq8016-sbc.dtsi
+@@ -333,12 +333,6 @@
+ 
+ 		spmi@200f000 {
+ 			pm8916@1 {
+-				pwm@bc00 {
+-					status = "okay";
+-
+-					pinctrl-names = "default";
+-					pinctrl-0 = <&ls_exp_gpio_f>;
+-				};
+ 			};
+ 		};
+ 
+-- 
+2.17.1
+
