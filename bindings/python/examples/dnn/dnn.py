@@ -114,10 +114,9 @@ if __name__ == "__main__":
     if not status:
         print("system.getDetails() failed with status: ", status)
 
-    smallSignalThreshold = 50
-    specifics = cameras[0].getCamera96Tof1Specifics()
-    specifics.setNoiseReductionThreshold(smallSignalThreshold)
-    specifics.enableNoiseReduction(True)
+    # Enable noise reduction for better results
+    smallSignalThreshold = 100
+    cameras[0].setControl("noise_reduction_threshold", str(smallSignalThreshold))
 
     camera_range = camDetails.maxDepth
     bitCount = camDetails.bitCount

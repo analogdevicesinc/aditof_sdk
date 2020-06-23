@@ -137,13 +137,6 @@ def apply_maskrcnn_algorithm(distance_map, image, imageH, imageW):
     cv.imshow(WINDOW_MASKRCNN, image)
     cv.waitKey(1)
 
-
-def apply_noise_reduction(camera, smallSignalThreshold):
-    specifics = camera.getCamera96Tof1Specifics()
-    specifics.setNoiseReductionThreshold(smallSignalThreshold)
-    specifics.enableNoiseReduction(True)
-
-
 def get_scaling_values(cameraDetails):
     camera_range = cameraDetails.maxDepth
     bit_count = cameraDetails.bitCount
@@ -214,8 +207,9 @@ if __name__ == "__main__":
     if not status:
         print("system.getDetails() failed with status: ", status)
 
-    # Apply noise reduction
-    apply_noise_reduction(cameras[0], 70)
+    # Enable noise reduction for better results
+    smallSignalThreshold = 100
+    cameras[0].setControl("noise_reduction_threshold", str(smallSignalThreshold))
 
     # Get the scaling values for depth and ir image
     distance_scale_ir, distance_scale_depth = get_scaling_values(camDetails)
