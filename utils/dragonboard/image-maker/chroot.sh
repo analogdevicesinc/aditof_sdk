@@ -11,7 +11,7 @@ sudo apt-get install cmake -yy -qq
 sudo apt-get install wget -yy -qq
 sudo apt-get install xz-utils -qq
 sudo apt-get install -yy -qq python3-pandas python3-natsort python3-matplotlib python3-tk python3-scipy python3-seaborn python3-serial
-sudo apt-get install -yy -qq libssl-dev python-dev python3-dev build-essential libgtk2.0-dev pkg-config
+sudo apt-get install -yy -qq libssl-dev python-dev python3-dev build-essential libgtk2.0-dev pkg-config git
 
 cd /home/linaro/workspace/github
 
@@ -35,6 +35,8 @@ cp -r /home/linaro/workspace/github/deps/chromium /home/linaro/.config/
 
 sudo rm -rf /home/linaro/workspace/github/deps
 sudo rm -rf /home/linaro/workspace/github/deps-dragonboard.tar.xz
+
+git clone --branch $1 https://github.com/analogdevicesinc/aditof_sdk
 
 cd aditof_sdk
 

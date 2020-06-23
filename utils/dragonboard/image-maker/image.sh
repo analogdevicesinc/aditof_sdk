@@ -106,10 +106,16 @@ mkdir -p ${workingdir}
 pushd ${workingdir}
 
 [ -d "aditof_linux" ] || {
-        git clone --branch d3/release/ov5640_4.9.27 --depth 1 https://github.com/analogdevicesinc/aditof_linux.git
+        git clone --branch d3/release/ov5640_4.9.27 --depth 1 https://github.com/D3Engineering/linux_kernel_qcomlt.git aditof_linux
 }
 
 pushd "aditof_linux"
+
+cp ${basedir}/../../../sdcard-images-utils/dragonboard410c/linux-patches/kernel_4_9_27/* .
+
+sudo git config user.email "image script"
+sudo git config user.name "image script"
+git am 0*
 
 [ -d "toolchain" ] || {
         mkdir -p toolchain
@@ -158,7 +164,7 @@ sudo rm -rf /mnt/lib/modules/4.9.56-linaro-lt-qcom
 sudo cp -rf ${KERNEL_MODULES_PATH}/lib/modules/4.9-camera-lt-qcom /mnt/lib/modules/
 
 
-########## build sdk
+# ########## build sdk
 
 [ -d "aditof_sdk" ] || {
         git clone --branch "${branch}" --depth 1 https://github.com/analogdevicesinc/aditof_sdk
@@ -174,7 +180,7 @@ fi
 
 sudo mkdir -p /mnt/home/linaro/workspace
 sudo mkdir -p /mnt/home/linaro/workspace/github
-sudo cp -r aditof_sdk/ /mnt/home/linaro/workspace/github
+# sudo cp -r aditof_sdk/ /mnt/home/linaro/workspace/github
 
 touch /mnt/home/linaro/info.txt
 echo "sdk version: ${branch} (${sha})" >> /mnt/home/linaro/info.txt
@@ -187,9 +193,10 @@ sudo modprobe binfmt_misc
 for d in dev sys run proc; do sudo mount -o bind /$d /mnt/$d ; done
 #sudo chroot /mnt qemu-aarch64-static /bin/bash
 cat << EOF | sudo chroot /mnt
-./chroot.sh
+./chroot.sh "${branch}"
 exit
 EOF
+
 ########## end build sdk
 
 set +e
@@ -209,10 +216,14 @@ unzip -d qcom_bootloaders dragonboard410c_bootloader_sd_linux.zip
         git clone --branch=master https://git.linaro.org/landing-teams/working/qualcomm/db-boot-tools.git
 }
 
+pushd qcom_bootloaders
+bootloader=$(ls)
+popd
+
 pushd db-boot-tools
 git checkout 31972fb
 
-sudo ./mksdcard -o ${image_name} -p dragonboard410c/linux/sdcard.txt -i ../qcom_bootloaders/dragonboard-410c-bootloader-sd-linux-142/ -s 14000M
+sudo ./mksdcard -o ${image_name} -p dragonboard410c/linux/sdcard.txt -i ../qcom_bootloaders/${bootloader}/ -s 14000M
 
 mv ${image_name} ../
 
