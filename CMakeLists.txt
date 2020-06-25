@@ -11,7 +11,7 @@ endif()
 
 ############################### Version #######################################
 set(ADITOF_VERSION_MAJOR 1)
-set(ADITOF_VERSION_MINOR 4)
+set(ADITOF_VERSION_MINOR 5)
 set(ADITOF_VERSION_PATCH 0)
 
 set(VERSION "${ADITOF_VERSION_MAJOR}.${ADITOF_VERSION_MINOR}.${ADITOF_VERSION_PATCH}")
