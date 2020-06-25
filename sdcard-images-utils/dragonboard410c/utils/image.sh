@@ -14,12 +14,51 @@ yes_or_exit() {
         done
 }
 
+print_help() {
+        echo "./setup [OPTIONS]"
+        echo ""
+        echo "-h|--help"
+        echo "        Print a usage message briefly summarizing the command line options available, then exit."
+        echo "-y|--yes"
+        echo "        Automatic yes to prompts."
+        echo "--arch"
+        echo "        Specify the architecture for which the kernel is built."
+        echo "        Default: arm64 "
+        echo "--cross_compile"
+        echo "        Specify the toolchain for the cross compile."
+        echo "        Default: toolchain/bin/aarch64-linux-gnu- "
+        echo "--kernel_version"
+        echo "        Specify the kernel version."
+        echo "        Default: 4.9-camera-lt-qcom "
+        echo "--kernel_modules_path"
+        echo "        Specify the kernel modules path."
+        echo "        Default: db410c-modules "
+        echo "--kernel_repo"
+        echo "        Specify the repo from where the kernel is cloned."
+        echo "        Default: https://github.com/D3Engineering/linux_kernel_qcomlt.git "
+        echo "--kernel_branch"
+        echo "        Specify the branch that will be used from kernel_repo. "
+        echo "        Default: d3/release/ov5640_4.9.27 "
+        echo "--kernel_patches"
+        echo "        Specify the patches that will be applied to kernel_repo. "
+        echo "        Default: kernel_4_9_27 "
+        echo "--branch"
+        echo "        Specify the aditof_sdk branch/tag that will be built. "
+        echo "        Default: master "
+        echo "--image_name"
+        echo "        Specify the name of the resulting image. "
+        echo "        Default: dragonboard410c_latest_<sha of HEAD commit from \"branch\"> "
+}
+
 answer_yes=""
 display_help=""
 arch=arm64
 cross_compile="toolchain/bin/aarch64-linux-gnu-"
 kernel_version="4.9-camera-lt-qcom"
 kernel_modules_path="db410c-modules"
+kernel_repo="https://github.com/D3Engineering/linux_kernel_qcomlt.git"
+kernel_branch="d3/release/ov5640_4.9.27"
+kernel_patches="kernel_4_9_27"
 branch="master"
 image_name=""
 
@@ -67,6 +106,24 @@ case $key in
         shift # past value
         ;;
 
+        --kernel_repo)
+        kernel_repo=$2
+        shift # past argument
+        shift # past value
+        ;;
+
+        --kernel_branch)
+        kernel_branch=$2
+        shift # past argument
+        shift # past value
+        ;;
+
+        --kernel_patches)
+        kernel_patches=$2
+        shift # past argument
+        shift # past value
+        ;;
+
         --image_name)
         image_name=$2
         shift # past argument
@@ -81,11 +138,19 @@ esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
+if [[ "${display_help}" == "True" ]]; then
+        print_help
+        exit
+fi
+
 echo "########################### configuration ###############################"
 echo "arch = ${arch}"
 echo "cross_compile = ${cross_compile}"
 echo "kernel_version = ${kernel_version}"
 echo "kernel_modules-path = ${kernel_modules_path}"
+echo "kernel_repo = ${kernel_repo}"
+echo "kernel_branch = ${kernel_branch}"
+echo "kernel_patches = ${kernel_patches}"
 echo "sdk branch/tag = ${branch}"
 echo "image name = ${image_name} (if empty the image name will be of format)"
 echo "             dragonboard410c_latest_<sha of HEAD commit>"
@@ -106,12 +171,12 @@ mkdir -p ${workingdir}
 pushd ${workingdir}
 
 [ -d "aditof_linux" ] || {
-        git clone --branch d3/release/ov5640_4.9.27 --depth 1 https://github.com/D3Engineering/linux_kernel_qcomlt.git aditof_linux
+        git clone --branch "${kernel_branch}" --depth 1 "${kernel_repo}" aditof_linux
 }
 
 pushd "aditof_linux"
 
-cp ${basedir}/../../../sdcard-images-utils/dragonboard410c/linux-patches/kernel_4_9_27/* .
+cp ${basedir}/../linux-patches/"${kernel_patches}"/* .
 
 sudo git config user.email "image script"
 sudo git config user.name "image script"
