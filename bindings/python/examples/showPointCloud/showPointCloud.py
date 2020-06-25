@@ -78,9 +78,6 @@ if __name__ == "__main__":
     if not status:
         print("cameras[0].setFrameType() failed with status:", status)
 
-    specifics = cameras[0].getCamera96Tof1Specifics()
-    specifics.setCameraRevision(tof.Revision.RevC)
-
     status = cameras[0].setMode(modes[ModesEnum.MODE_NEAR.value])
     if not status:
         print("cameras[0].setMode() failed with status: ", status)
@@ -92,8 +89,7 @@ if __name__ == "__main__":
 
     # Enable noise reduction for better results
     smallSignalThreshold = 100
-    specifics.setNoiseReductionThreshold(smallSignalThreshold)
-    specifics.enableNoiseReduction(True)
+    cameras[0].setControl("noise_reduction_threshold", str(smallSignalThreshold))
 
     # Get the first frame for details
     frame = tof.Frame()
