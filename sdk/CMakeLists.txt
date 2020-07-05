@@ -92,6 +92,14 @@ file(GLOB NETWORK_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.h
 )
 
+file(GLOB NETWORK_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.c
+)
+file(GLOB NETWORK_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.h
+)
+
 if ( ${OS_SPECIFIC_DIR} STREQUAL ${TARGET_STRING} )
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
     list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_eeprom.cpp)
