@@ -3,7 +3,10 @@ project(examples)
 
 add_subdirectory(aditof-demo)
 add_subdirectory(first-frame)
-add_subdirectory(first-frame-ethernet)
+
+if (WITH_NETWORK)
+    add_subdirectory(first-frame-ethernet)
+endif()
 
 if (JETSON)
     add_subdirectory(imshow-jetson)
@@ -16,7 +19,6 @@ install(PROGRAMS
     $<TARGET_FILE:first-frame>
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
 
 if(WIN32)
     include(FindOpenSSL)
