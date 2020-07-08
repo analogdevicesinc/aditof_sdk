@@ -560,7 +560,19 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
             memcpy(buffer, pdata, buf.bytesused);
         } else if (m_implData->frameDetails.type == "ir_only") {
             memcpy(buffer + (width * height) / 2, pdata, buf.bytesused);
-        }
+        } else {
+			uint32_t j = 0, j1 = width*height/2;
+			for(uint32_t i = 0; i < height; i+=2) {
+				memcpy(buffer + j, pdata + i*width*2, width*2);
+				j+= width;
+				memcpy(buffer + j1, pdata + (i+1)*width*2, width*2);
+				j1+= width;
+			}
+			for(uint32_t i = 0; i < width*height; i += 2) {
+				buffer[i] = ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
+				buffer[i+1] = ((buffer[i+1] & 0x00FF) << 4) | ((buffer[i + 1]) & 0xF000) >> 12;
+			}
+		}
     } else {
         // clang-format off
         uint16_t *depthPtr = buffer;
