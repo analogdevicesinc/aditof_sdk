@@ -32,8 +32,8 @@
 #ifndef TARGET_DEFINITIONS_H
 #define TARGET_DEFINITIONS_H
 
-static const char *TEMP_SENSOR_DEV_PATH = "/sys/class/hwmon/hwmon2/temp1_input";
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/i2c-1/1-0056/eeprom";
+static const char *TEMP_SENSOR_DEV_PATH = "/sys/class/hwmon/hwmon0/temp1_input";
+static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/1-0056/eeprom";
 static const char *CAPTURE_DEVICE_NAME = "rkisp10_mainpath";
 
 #endif // TARGET_DEFINITIONS_H
