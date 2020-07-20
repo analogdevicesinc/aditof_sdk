@@ -71,15 +71,23 @@ struct CalibrationData {
     uint16_t *cache;
 };
 
-struct LocalDevice::ImplData {
+struct VideoDev {
     int fd;
     int sfd;
     struct buffer *videoBuffers;
     unsigned int nVideoBuffers;
     struct v4l2_plane planes[8];
-    aditof::FrameDetails frameDetails;
-    bool started;
     enum v4l2_buf_type videoBuffersType;
+    bool started;
+
+    VideoDev()
+        : fd(-1), sfd(-1), videoBuffers(nullptr), nVideoBuffers(0),
+          started(false) {}
+};
+
+struct LocalDevice::ImplData {
+    struct VideoDev *videoDevs;
+    aditof::FrameDetails frameDetails;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
 
     ImplData()
@@ -114,8 +122,13 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
 }
 
 LocalDevice::~LocalDevice() {
-    if (m_implData->started) {
-        stop();
+    struct VideoDev *dev;
+
+    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+        dev = &m_implData->videoDevs[i];
+        if (dev->started) {
+            stop();
+        }
     }
 
     for (auto it = m_implData->calibration_cache.begin();
@@ -124,23 +137,28 @@ LocalDevice::~LocalDevice() {
         it->second.cache = nullptr;
     }
 
-    for (unsigned int i = 0; i < m_implData->nVideoBuffers; i++) {
-        if (munmap(m_implData->videoBuffers[i].start,
-                   m_implData->videoBuffers[i].length) == -1) {
-            LOG(WARNING) << "munmap error "
+    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+        dev = &m_implData->videoDevs[i];
+
+        for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
+            if (munmap(dev->videoBuffers[i].start,
+                       dev->videoBuffers[i].length) == -1) {
+                LOG(WARNING)
+                    << "munmap error "
+                    << "errno: " << errno << " error: " << strerror(errno);
+            }
+        }
+        free(dev->videoBuffers);
+
+        if (close(dev->fd) == -1) {
+            LOG(WARNING) << "close m_implData->fd error "
                          << "errno: " << errno << " error: " << strerror(errno);
         }
-    }
-    free(m_implData->videoBuffers);
 
-    if (close(m_implData->fd) == -1) {
-        LOG(WARNING) << "close m_implData->fd error "
-                     << "errno: " << errno << " error: " << strerror(errno);
-    }
-
-    if (close(m_implData->sfd) == -1) {
-        LOG(WARNING) << "close m_implData->sfd error "
-                     << "errno: " << errno << " error: " << strerror(errno);
+        if (close(dev->sfd) == -1) {
+            LOG(WARNING) << "close m_implData->sfd error "
+                         << "errno: " << errno << " error: " << strerror(errno);
+        }
     }
 }
 
@@ -152,80 +170,101 @@ aditof::Status LocalDevice::open() {
 
     struct stat st;
     struct v4l2_capability cap;
+    struct VideoDev *dev;
+
+    const char *devName, *subDevName, *cardName;
 
     std::vector<std::string> paths;
-    std::stringstream ss(m_devData.driverPath);
+    std::stringstream ss_dev(m_devData.driverPath);
     std::string token;
-    while (std::getline(ss, token, ';')) {
-        paths.push_back(token);
+    while (std::getline(ss_dev, token, '|')) {
+        std::stringstream dev_sub(token);
+        while (std::getline(dev_sub, token, ';')) {
+            paths.push_back(token);
+        }
     }
 
-    const char *devName = paths.front().c_str();
-    const char *subDevName = paths.back().c_str();
-
-    /* Open V4L2 device */
-    if (stat(devName, &st) == -1) {
-        LOG(WARNING) << "Cannot identify " << devName << "errno: " << errno
-                     << "error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
+    std::vector<std::string> cards;
+    std::stringstream ss_card(CAPTURE_DEVICE_NAME);
+    while (std::getline(ss_card, token, '|')) {
+        LOG(INFO) << token;
+        cards.push_back(token);
     }
 
-    if (!S_ISCHR(st.st_mode)) {
-        LOG(WARNING) << devName << " is not a valid device";
-        return Status::GENERIC_ERROR;
-    }
+    m_implData->videoDevs = new VideoDev[NUM_VIDEO_DEVS];
 
-    m_implData->fd = ::open(devName, O_RDWR | O_NONBLOCK, 0);
-    if (m_implData->fd == -1) {
-        LOG(WARNING) << "Cannot open " << devName << "errno: " << errno
-                     << "error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
-    }
+    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+        devName = paths.at(i * 2).c_str();
+        subDevName = paths.at(i * 2 + 1).c_str();
+        cardName = cards.at(i).c_str();
+        dev = &m_implData->videoDevs[i];
 
-    if (xioctl(m_implData->fd, VIDIOC_QUERYCAP, &cap) == -1) {
-        LOG(WARNING) << devName << " VIDIOC_QUERYCAP error";
-        return Status::GENERIC_ERROR;
-    }
+        /* Open V4L2 device */
+        if (stat(devName, &st) == -1) {
+            LOG(WARNING) << "Cannot identify " << devName << "errno: " << errno
+                         << "error: " << strerror(errno);
+            return Status::GENERIC_ERROR;
+        }
 
-    if (strcmp((char *)cap.card, CAPTURE_DEVICE_NAME)) {
-        LOG(WARNING) << "CAPTURE Device " << cap.card;
-        return Status::GENERIC_ERROR;
-    }
+        if (!S_ISCHR(st.st_mode)) {
+            LOG(WARNING) << devName << " is not a valid device";
+            return Status::GENERIC_ERROR;
+        }
 
-    if (!(cap.capabilities &
-          (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_CAPTURE_MPLANE))) {
-        LOG(WARNING) << devName << " is not a video capture device";
-        return Status::GENERIC_ERROR;
-    }
+        dev->fd = ::open(devName, O_RDWR | O_NONBLOCK, 0);
+        if (dev->fd == -1) {
+            LOG(WARNING) << "Cannot open " << devName << "errno: " << errno
+                         << "error: " << strerror(errno);
+            return Status::GENERIC_ERROR;
+        }
 
-    if (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE_MPLANE) {
-        m_implData->videoBuffersType = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-    } else {
-        m_implData->videoBuffersType = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    }
+        if (xioctl(dev->fd, VIDIOC_QUERYCAP, &cap) == -1) {
+            LOG(WARNING) << devName << " VIDIOC_QUERYCAP error";
+            return Status::GENERIC_ERROR;
+        }
 
-    if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
-        LOG(WARNING) << devName << " does not support streaming i/o";
-        return Status::GENERIC_ERROR;
-    }
+        if (strcmp((char *)cap.card, cardName)) {
+            LOG(WARNING) << "CAPTURE Device " << cap.card;
+            LOG(WARNING) << "Read " << cardName;
+            return Status::GENERIC_ERROR;
+        }
 
-    /* Open V4L2 subdevice */
-    if (stat(subDevName, &st) == -1) {
-        LOG(WARNING) << "Cannot identify " << subDevName << " errno: " << errno
-                     << " error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
-    }
+        if (!(cap.capabilities &
+              (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_CAPTURE_MPLANE))) {
+            LOG(WARNING) << devName << " is not a video capture device";
+            return Status::GENERIC_ERROR;
+        }
 
-    if (!S_ISCHR(st.st_mode)) {
-        LOG(WARNING) << subDevName << " is not a valid device";
-        return Status::GENERIC_ERROR;
-    }
+        if (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE_MPLANE) {
+            dev->videoBuffersType = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+        } else {
+            dev->videoBuffersType = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        }
 
-    m_implData->sfd = ::open(subDevName, O_RDWR | O_NONBLOCK, 0);
-    if (m_implData->sfd == -1) {
-        LOG(WARNING) << "Cannot open " << subDevName << " errno: " << errno
-                     << " error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
+        if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
+            LOG(WARNING) << devName << " does not support streaming i/o";
+            return Status::GENERIC_ERROR;
+        }
+
+        /* Open V4L2 subdevice */
+        if (stat(subDevName, &st) == -1) {
+            LOG(WARNING) << "Cannot identify " << subDevName
+                         << " errno: " << errno
+                         << " error: " << strerror(errno);
+            return Status::GENERIC_ERROR;
+        }
+
+        if (!S_ISCHR(st.st_mode)) {
+            LOG(WARNING) << subDevName << " is not a valid device";
+            return Status::GENERIC_ERROR;
+        }
+
+        dev->sfd = ::open(subDevName, O_RDWR | O_NONBLOCK, 0);
+        if (dev->sfd == -1) {
+            LOG(WARNING) << "Cannot open " << subDevName << " errno: " << errno
+                         << " error: " << strerror(errno);
+            return Status::GENERIC_ERROR;
+        }
     }
 
     return status;
@@ -234,37 +273,41 @@ aditof::Status LocalDevice::open() {
 aditof::Status LocalDevice::start() {
     using namespace aditof;
     Status status = Status::OK;
-
-    if (m_implData->started) {
-        LOG(INFO) << "Device already started";
-        return Status::BUSY;
-    }
-    LOG(INFO) << "Starting device";
-
+    struct VideoDev *dev;
     struct v4l2_buffer buf;
-    for (unsigned int i = 0; i < m_implData->nVideoBuffers; i++) {
-        CLEAR(buf);
-        buf.type = m_implData->videoBuffersType;
-        buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = i;
-        buf.m.planes = m_implData->planes;
-        buf.length = 1;
 
-        if (xioctl(m_implData->fd, VIDIOC_QBUF, &buf) == -1) {
-            LOG(WARNING) << "mmap error "
+    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+        dev = &m_implData->videoDevs[i];
+        if (dev->started) {
+            LOG(INFO) << "Device already started";
+            return Status::BUSY;
+        }
+        LOG(INFO) << "Starting device " << i;
+
+        for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
+            CLEAR(buf);
+            buf.type = dev->videoBuffersType;
+            buf.memory = V4L2_MEMORY_MMAP;
+            buf.index = i;
+            buf.m.planes = dev->planes;
+            buf.length = 1;
+
+            if (xioctl(dev->fd, VIDIOC_QBUF, &buf) == -1) {
+                LOG(WARNING)
+                    << "mmap error "
+                    << "errno: " << errno << " error: " << strerror(errno);
+                return Status::GENERIC_ERROR;
+            }
+        }
+
+        if (xioctl(dev->fd, VIDIOC_STREAMON, &dev->videoBuffersType) != 0) {
+            LOG(WARNING) << "VIDIOC_STREAMON error "
                          << "errno: " << errno << " error: " << strerror(errno);
             return Status::GENERIC_ERROR;
         }
-    }
 
-    if (xioctl(m_implData->fd, VIDIOC_STREAMON,
-               &m_implData->videoBuffersType) == -1) {
-        LOG(WARNING) << "VIDIOC_STREAMON error "
-                     << "errno: " << errno << " error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
+        dev->started = true;
     }
-
-    m_implData->started = true;
 
     return status;
 }
@@ -272,21 +315,25 @@ aditof::Status LocalDevice::start() {
 aditof::Status LocalDevice::stop() {
     using namespace aditof;
     Status status = Status::OK;
+    struct VideoDev *dev;
 
-    if (!m_implData->started) {
-        LOG(INFO) << "Device already stopped";
-        return Status::BUSY;
+    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+        dev = &m_implData->videoDevs[i];
+
+        if (!dev->started) {
+            LOG(INFO) << "Device " << i << " already stopped";
+            return Status::BUSY;
+        }
+        LOG(INFO) << "Stopping device";
+
+        if (xioctl(dev->fd, VIDIOC_STREAMOFF, &dev->videoBuffersType) != 0) {
+            LOG(WARNING) << "VIDIOC_STREAMOFF error "
+                         << "errno: " << errno << " error: " << strerror(errno);
+            return Status::GENERIC_ERROR;
+        }
+
+        dev->started = false;
     }
-    LOG(INFO) << "Stopping device";
-
-    if (xioctl(m_implData->fd, VIDIOC_STREAMOFF,
-               &m_implData->videoBuffersType) == -1) {
-        LOG(WARNING) << "VIDIOC_STREAMOFF error "
-                     << "errno: " << errno << " error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
-    }
-
-    m_implData->started = false;
 
     return status;
 }
@@ -330,95 +377,100 @@ LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
 aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
     Status status = Status::OK;
+    struct VideoDev *dev;
 
     struct v4l2_requestbuffers req;
     struct v4l2_format fmt;
     struct v4l2_buffer buf;
     size_t length, offset;
 
-    if (details != m_implData->frameDetails) {
-        for (unsigned int i = 0; i < m_implData->nVideoBuffers; i++) {
-            if (munmap(m_implData->videoBuffers[i].start,
-                       m_implData->videoBuffers[i].length) == -1) {
+    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+        dev = &m_implData->videoDevs[i];
+        if (details != m_implData->frameDetails) {
+            for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
+                if (munmap(dev->videoBuffers[i].start,
+                           dev->videoBuffers[i].length) == -1) {
+                    LOG(WARNING)
+                        << "munmap error "
+                        << "errno: " << errno << " error: " << strerror(errno);
+                    return Status::GENERIC_ERROR;
+                }
+            }
+            free(dev->videoBuffers);
+            dev->nVideoBuffers = 0;
+        } else if (dev->nVideoBuffers) {
+            return status;
+        }
+
+        /* Set the frame format in the driver */
+        CLEAR(fmt);
+        fmt.type = m_implData->videoBuffersType;
+        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
+        fmt.fmt.pix.width = details.width;
+        fmt.fmt.pix.height = details.height;
+
+        if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
+            LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
+                         << " error: " << strerror(errno);
+            return Status::GENERIC_ERROR;
+        }
+
+        /* Allocate the video buffers in the driver */
+        CLEAR(req);
+        req.count = 4;
+        req.type = dev->videoBuffersType;
+        req.memory = V4L2_MEMORY_MMAP;
+
+        if (xioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1) {
+            LOG(WARNING) << "VIDIOC_REQBUFS error "
+                         << "errno: " << errno << " error: " << strerror(errno);
+            return Status::GENERIC_ERROR;
+        }
+
+        dev->videoBuffers =
+            (buffer *)calloc(req.count, sizeof(*dev->videoBuffers));
+        if (!dev->videoBuffers) {
+            LOG(WARNING) << "Failed to allocate video m_implData->videoBuffers";
+            return Status::GENERIC_ERROR;
+        }
+
+        for (dev->nVideoBuffers = 0; dev->nVideoBuffers < req.count;
+             dev->nVideoBuffers++) {
+            CLEAR(buf);
+            buf.type = dev->videoBuffersType;
+            buf.memory = V4L2_MEMORY_MMAP;
+            buf.index = dev->nVideoBuffers;
+            buf.m.planes = dev->planes;
+            buf.length = 1;
+
+            if (xioctl(dev->fd, VIDIOC_QUERYBUF, &buf) == -1) {
                 LOG(WARNING)
-                    << "munmap error "
+                    << "VIDIOC_QUERYBUF error "
                     << "errno: " << errno << " error: " << strerror(errno);
                 return Status::GENERIC_ERROR;
             }
+
+            if (dev->videoBuffersType == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+                length = buf.length;
+                offset = buf.m.offset;
+            } else {
+                length = buf.m.planes[0].length;
+                offset = buf.m.planes[0].m.mem_offset;
+            }
+
+            dev->videoBuffers[dev->nVideoBuffers].start =
+                mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED, dev->fd,
+                     offset);
+
+            if (dev->videoBuffers[dev->nVideoBuffers].start == MAP_FAILED) {
+                LOG(WARNING)
+                    << "mmap error "
+                    << "errno: " << errno << " error: " << strerror(errno);
+                return Status::GENERIC_ERROR;
+            }
+
+            dev->videoBuffers[dev->nVideoBuffers].length = length;
         }
-        free(m_implData->videoBuffers);
-        m_implData->nVideoBuffers = 0;
-    } else if (m_implData->nVideoBuffers) {
-        return status;
-    }
-
-    /* Set the frame format in the driver */
-    CLEAR(fmt);
-    fmt.type = m_implData->videoBuffersType;
-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
-    fmt.fmt.pix.width = details.width;
-    fmt.fmt.pix.height = details.height;
-
-    if (xioctl(m_implData->fd, VIDIOC_S_FMT, &fmt) == -1) {
-        LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
-                     << " error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
-    }
-
-    /* Allocate the video buffers in the driver */
-    CLEAR(req);
-    req.count = 4;
-    req.type = m_implData->videoBuffersType;
-    req.memory = V4L2_MEMORY_MMAP;
-
-    if (xioctl(m_implData->fd, VIDIOC_REQBUFS, &req) == -1) {
-        LOG(WARNING) << "VIDIOC_REQBUFS error "
-                     << "errno: " << errno << " error: " << strerror(errno);
-        return Status::GENERIC_ERROR;
-    }
-
-    m_implData->videoBuffers =
-        (buffer *)calloc(req.count, sizeof(*m_implData->videoBuffers));
-    if (!m_implData->videoBuffers) {
-        LOG(WARNING) << "Failed to allocate video m_implData->videoBuffers";
-        return Status::GENERIC_ERROR;
-    }
-
-    for (m_implData->nVideoBuffers = 0; m_implData->nVideoBuffers < req.count;
-         m_implData->nVideoBuffers++) {
-        CLEAR(buf);
-        buf.type = m_implData->videoBuffersType;
-        buf.memory = V4L2_MEMORY_MMAP;
-        buf.index = m_implData->nVideoBuffers;
-        buf.m.planes = m_implData->planes;
-        buf.length = 1;
-
-        if (xioctl(m_implData->fd, VIDIOC_QUERYBUF, &buf) == -1) {
-            LOG(WARNING) << "VIDIOC_QUERYBUF error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-            return Status::GENERIC_ERROR;
-        }
-
-        if (m_implData->videoBuffersType == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
-            length = buf.length;
-            offset = buf.m.offset;
-        } else {
-            length = buf.m.planes[0].length;
-            offset = buf.m.planes[0].m.mem_offset;
-        }
-
-        m_implData->videoBuffers[m_implData->nVideoBuffers].start =
-            mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED,
-                 m_implData->fd, offset);
-
-        if (m_implData->videoBuffers[m_implData->nVideoBuffers].start ==
-            MAP_FAILED) {
-            LOG(WARNING) << "mmap error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-            return Status::GENERIC_ERROR;
-        }
-
-        m_implData->videoBuffers[m_implData->nVideoBuffers].length = length;
     }
 
     m_implData->frameDetails = details;
@@ -429,6 +481,7 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
 aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
     Status status = Status::OK;
+    struct VideoDev *dev = &m_implData->videoDevs[0];
 
     static struct v4l2_ext_control extCtrl;
     static struct v4l2_ext_controls extCtrls;
@@ -445,7 +498,7 @@ aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
         extCtrls.controls = &extCtrl;
         extCtrls.count = 1;
 
-        if (xioctl(m_implData->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
+        if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
             LOG(WARNING) << "Programming AFE error "
                          << "errno: " << errno << " error: " << strerror(errno);
             return Status::GENERIC_ERROR;
@@ -462,8 +515,7 @@ aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
                 extCtrls.controls = &extCtrl;
                 extCtrls.count = 1;
 
-                if (xioctl(m_implData->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) ==
-                    -1) {
+                if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
                     LOG(WARNING)
                         << "Programming AFE error "
                         << "errno: " << errno << " error: " << strerror(errno);
@@ -482,8 +534,7 @@ aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
                 extCtrls.controls = &extCtrl;
                 extCtrls.count = 1;
 
-                if (xioctl(m_implData->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) ==
-                    -1) {
+                if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
                     LOG(WARNING)
                         << "Programming AFE error "
                         << "errno: " << errno << " error: " << strerror(errno);
@@ -500,17 +551,21 @@ aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
 
 aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
+    struct v4l2_buffer buf[NUM_VIDEO_DEVS];
+    struct VideoDev *dev;
+    Status status;
 
-    Status status = waitForBuffer();
-    if (status != Status::OK) {
-        return status;
-    }
+    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+        dev = &m_implData->videoDevs[i];
+        status = waitForBuffer(dev);
+        if (status != Status::OK) {
+            return status;
+        }
 
-    struct v4l2_buffer buf;
-
-    status = dequeueInternalBuffer(buf);
-    if (status != Status::OK) {
-        return status;
+        status = dequeueInternalBuffer(buf[i], dev);
+        if (status != Status::OK) {
+            return status;
+        }
     }
 
     unsigned int width;
@@ -518,16 +573,19 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
     unsigned int fullDataWidth;
     unsigned int fullDataHeight;
     unsigned int buf_data_len;
-    uint8_t *pdata;
+    uint8_t *pdata[NUM_VIDEO_DEVS];
 
     width = m_implData->frameDetails.width;
     height = m_implData->frameDetails.height;
     fullDataWidth = m_implData->frameDetails.fullDataWidth;
     fullDataHeight = m_implData->frameDetails.fullDataHeight;
 
-    status = getInternalBuffer(&pdata, buf_data_len, buf);
-    if (status != Status::OK) {
-        return status;
+    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+        dev = &m_implData->videoDevs[i];
+        status = getInternalBuffer(&pdata[i], buf_data_len, buf[i], dev);
+        if (status != Status::OK) {
+            return status;
+        }
     }
 
     auto isBufferPacked = [](const struct v4l2_buffer &buf, unsigned int width,
@@ -549,27 +607,28 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
                 j -= 4;
             }
 
-            buffer[j] = (((unsigned short)*(pdata + i)) << 4) |
-                        (((unsigned short)*(pdata + i + 2)) & 0x000F);
+            buffer[j] = (((unsigned short)*(pdata[0] + i)) << 4) |
+                        (((unsigned short)*(pdata[0] + i + 2)) & 0x000F);
             j++;
 
-            buffer[j] = (((unsigned short)*(pdata + i + 1)) << 4) |
-                        ((((unsigned short)*(pdata + i + 2)) & 0x00F0) >> 4);
+            buffer[j] = (((unsigned short)*(pdata[0] + i + 1)) << 4) |
+                        ((((unsigned short)*(pdata[0] + i + 2)) & 0x00F0) >> 4);
             j++;
         }
-    } else if (!isBufferPacked(buf, fullDataWidth, fullDataHeight)) {
+    } else if (!isBufferPacked(buf[0], fullDataWidth, fullDataHeight)) {
         // TODO: investigate optimizations for this (arm neon / 1024 bytes
         // chunks)
         if (m_implData->frameDetails.type == "depth_only") {
-            memcpy(buffer, pdata, buf.bytesused);
+            memcpy(buffer, pdata[0], buf[0].bytesused);
         } else if (m_implData->frameDetails.type == "ir_only") {
             memcpy(buffer + (width * height), pdata, buf.bytesused);
         } else {
+#ifdef TOYBRICK
             uint32_t j = 0, j1 = width * height;
             for (uint32_t i = 0; i < fullDataHeight; i += 2) {
-                memcpy(buffer + j, pdata + i * width * 2, width * 2);
+                memcpy(buffer + j, pdata[0] + i * width * 2, width * 2);
                 j += width;
-                memcpy(buffer + j1, pdata + (i + 1) * width * 2, width * 2);
+                memcpy(buffer + j1, pdata[0] + (i + 1) * width * 2, width * 2);
                 j1 += width;
             }
             for (uint32_t i = 0; i < fullDataWidth * fullDataHeight; i += 2) {
@@ -578,6 +637,12 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
                 buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
                                 ((buffer[i + 1]) & 0xF000) >> 12;
             }
+            memcpy(buffer + (width * height) / 2, pdata[0], buf[0].bytesused);
+#else
+            memcpy(buffer, pdata[0], buf[0].bytesused);
+            memcpy(buffer + (width * height), pdata[1], buf[1].bytesused);
+#endif
+            // Not Packed and type == "depth_ir"
         }
     } else {
         // clang-format off
@@ -585,10 +650,10 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
         uint16_t *irPtr = buffer + (width * height);
         unsigned int j = 0;
 
-	if (m_implData->frameDetails.type == "depth_only" ||
-		m_implData->frameDetails.type == "ir_only") {
-		buf_data_len /= 2;
-	}
+        if (m_implData->frameDetails.type == "depth_only" ||
+                m_implData->frameDetails.type == "ir_only") {
+                buf_data_len /= 2;
+        }
         /* The frame is read from the device as an array of uint8_t's where
          * every 3 uint8_t's can produce 2 uint16_t's that have only 12 bits
          * in use.
@@ -602,9 +667,9 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
              *                                   |-> a1 a2 a3 ... a8
              * a1 b1 c1 a2 b2 c2 ... a8 b8 c8  ->|-> b1 b2 b3 ... b8
              *                                   |-> c1 c2 c3 ... c8
-             * then convert all the values to uint16_t          
+             * then convert all the values to uint16_t
              */
-            uint8x8x3_t data = vld3_u8(pdata);
+            uint8x8x3_t data = vld3_u8(pdata[0]);
             uint16x8_t aData = vmovl_u8(data.val[0]);
             uint16x8_t bData = vmovl_u8(data.val[1]);
             uint16x8_t cData = vmovl_u8(data.val[2]);
@@ -639,14 +704,17 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
                 }
             }
             j += 16;
-            pdata += 24;
+            pdata[0] += 24;
         }
         // clang-format on
     }
 
-    status = enqueueInternalBuffer(buf);
-    if (status != Status::OK) {
-        return status;
+    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+        dev = &m_implData->videoDevs[i];
+        status = enqueueInternalBuffer(buf[i], dev);
+        if (status != Status::OK) {
+            return status;
+        }
     }
 
     return status;
@@ -655,6 +723,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
 aditof::Status LocalDevice::readAfeRegisters(const uint16_t *address,
                                              uint16_t *data, size_t length) {
     using namespace aditof;
+    struct VideoDev *dev = &m_implData->videoDevs[0];
     Status status = Status::OK;
 
     static struct v4l2_ext_control extCtrl;
@@ -669,7 +738,7 @@ aditof::Status LocalDevice::readAfeRegisters(const uint16_t *address,
         extCtrls.controls = &extCtrl;
         extCtrls.count = 1;
 
-        if (xioctl(m_implData->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
+        if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
             LOG(WARNING) << "Programming AFE error "
                          << "errno: " << errno << " error: " << strerror(errno);
             return Status::GENERIC_ERROR;
@@ -688,6 +757,7 @@ aditof::Status LocalDevice::writeAfeRegisters(const uint16_t *address,
 
     static struct v4l2_ext_control extCtrl;
     static struct v4l2_ext_controls extCtrls;
+    struct VideoDev *dev = &m_implData->videoDevs[0];
     static unsigned char buf[CTRL_PACKET_SIZE];
     unsigned short sampleCnt = 0;
 
@@ -710,7 +780,7 @@ aditof::Status LocalDevice::writeAfeRegisters(const uint16_t *address,
         extCtrls.controls = &extCtrl;
         extCtrls.count = 1;
 
-        if (xioctl(m_implData->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
+        if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
             LOG(WARNING) << "Programming AFE error "
                          << "errno: " << errno << " error: " << strerror(errno);
             return Status::GENERIC_ERROR;
@@ -804,18 +874,21 @@ aditof::Status LocalDevice::getHandle(void **handle) {
     return aditof::Status::OK;
 }
 
-aditof::Status LocalDevice::waitForBuffer() {
+aditof::Status LocalDevice::waitForBuffer(struct VideoDev *dev) {
     fd_set fds;
     struct timeval tv;
     int r;
 
+    if (dev == nullptr)
+        struct VideoDev *dev = &m_implData->videoDevs[0];
+
     FD_ZERO(&fds);
-    FD_SET(m_implData->fd, &fds);
+    FD_SET(dev->fd, &fds);
 
     tv.tv_sec = 4;
     tv.tv_usec = 0;
 
-    r = select(m_implData->fd + 1, &fds, NULL, NULL, &tv);
+    r = select(dev->fd + 1, &fds, NULL, NULL, &tv);
 
     if (r == -1) {
         LOG(WARNING) << "select error "
@@ -829,17 +902,21 @@ aditof::Status LocalDevice::waitForBuffer() {
     return aditof ::Status::OK;
 }
 
-aditof::Status LocalDevice::dequeueInternalBuffer(struct v4l2_buffer &buf) {
+aditof::Status LocalDevice::dequeueInternalBuffer(struct v4l2_buffer &buf,
+                                                  struct VideoDev *dev) {
     using namespace aditof;
     Status status = Status::OK;
 
+    if (dev == nullptr)
+        struct VideoDev *dev = &m_implData->videoDevs[0];
+
     CLEAR(buf);
-    buf.type = m_implData->videoBuffersType;
+    buf.type = dev->videoBuffersType;
     buf.memory = V4L2_MEMORY_MMAP;
     buf.length = 1;
-    buf.m.planes = m_implData->planes;
+    buf.m.planes = dev->planes;
 
-    if (xioctl(m_implData->fd, VIDIOC_DQBUF, &buf) == -1) {
+    if (xioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1) {
         LOG(WARNING) << "VIDIOC_DQBUF error "
                      << "errno: " << errno << " error: " << strerror(errno);
         switch (errno) {
@@ -851,7 +928,7 @@ aditof::Status LocalDevice::dequeueInternalBuffer(struct v4l2_buffer &buf) {
         }
     }
 
-    if (buf.index >= m_implData->nVideoBuffers) {
+    if (buf.index >= dev->nVideoBuffers) {
         LOG(WARNING) << "Not enough buffers avaialable";
         return Status::GENERIC_ERROR;
     }
@@ -861,17 +938,24 @@ aditof::Status LocalDevice::dequeueInternalBuffer(struct v4l2_buffer &buf) {
 
 aditof::Status LocalDevice::getInternalBuffer(uint8_t **buffer,
                                               uint32_t &buf_data_len,
-                                              const struct v4l2_buffer &buf) {
+                                              const struct v4l2_buffer &buf,
+                                              struct VideoDev *dev) {
+    if (dev == nullptr)
+        struct VideoDev *dev = &m_implData->videoDevs[0];
 
-    *buffer = static_cast<uint8_t *>(m_implData->videoBuffers[buf.index].start);
+    *buffer = static_cast<uint8_t *>(dev->videoBuffers[buf.index].start);
     buf_data_len =
         m_implData->frameDetails.width * m_implData->frameDetails.height * 3;
 
     return aditof::Status::OK;
 }
 
-aditof::Status LocalDevice::enqueueInternalBuffer(struct v4l2_buffer &buf) {
-    if (xioctl(m_implData->fd, VIDIOC_QBUF, &buf) == -1) {
+aditof::Status LocalDevice::enqueueInternalBuffer(struct v4l2_buffer &buf,
+                                                  struct VideoDev *dev) {
+    if (dev == nullptr)
+        struct VideoDev *dev = &m_implData->videoDevs[0];
+
+    if (xioctl(dev->fd, VIDIOC_QBUF, &buf) == -1) {
         LOG(WARNING) << "VIDIOC_QBUF error "
                      << "errno: " << errno << " error: " << strerror(errno);
         return aditof::Status::GENERIC_ERROR;
@@ -882,9 +966,10 @@ aditof::Status LocalDevice::enqueueInternalBuffer(struct v4l2_buffer &buf) {
 
 aditof::Status LocalDevice::getDeviceFileDescriptor(int &fileDescriptor) {
     using namespace aditof;
+    struct VideoDev *dev = &m_implData->videoDevs[0];
 
-    if (m_implData->fd != -1) {
-        fileDescriptor = m_implData->fd;
+    if (dev->fd != -1) {
+        fileDescriptor = dev->fd;
         return Status::OK;
     }
 
