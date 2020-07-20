@@ -193,6 +193,11 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         }
     }
 
+    // Register set for VC ID. Set Depth on VC=0 and IR on VC=1
+    uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3dc, 0x4001, 0x7c22};
+    uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0xe4, 0x0007, 0x0004};
+    m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+
     // register writes for enabling only one video stream (depth/ ir)
     // must be done here after programming the camera in order for them to
     // work properly. Setting the mode of the camera, programming it
@@ -313,12 +318,12 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
     if (m_details.mode != skCustomMode &&
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
-        m_calibration.calibrateDepth(frameDataLocation,
-                                     m_details.frameType.width *
-                                         m_details.frameType.height / 2);
-        m_calibration.calibrateCameraGeometry(
-            frameDataLocation,
-            m_details.frameType.width * m_details.frameType.height / 2);
+            m_calibration.calibrateDepth(frameDataLocation, 
+                                         m_details.frameType.width *
+                                         m_details.frameType.height);
+            m_calibration.calibrateCameraGeometry(frameDataLocation, 
+                                                  m_details.frameType.width *
+                                                  m_details.frameType.height);
     }
 
     return Status::OK;
