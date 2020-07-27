@@ -40,6 +40,7 @@
 #include <fstream>
 #include <glog/logging.h>
 #include <iterator>
+#include <math.h>
 
 using namespace std;
 
@@ -121,7 +122,7 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
                                  });
     if (iter != rangeValues.end()) {
         m_details.maxDepth = (*iter).maxDepth;
-	m_details.minDepth = (*iter).minDepth;
+		m_details.minDepth = (*iter).minDepth;
     } else {
         m_details.maxDepth = 4096;
     }
