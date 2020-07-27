@@ -43,6 +43,7 @@
 #include <fstream>
 #include <glog/logging.h>
 #include <iterator>
+#include <math.h>
 
 using namespace std;
 
