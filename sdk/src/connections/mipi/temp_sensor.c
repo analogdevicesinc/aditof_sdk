@@ -92,12 +92,15 @@ int temp_sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
         return -1;
     }
 
+//IOCTL not valid for NVIDIA
+#if 0
     // get funcs list
     if ((r = ioctl(fd, I2C_FUNCS, &funcs)) < 0) {
         fprintf(stderr, "Error in temperature sensor open: %s\n",
                 strerror(errno));
         return -1;
     }
+#endif
 
     // set working device
     if ((r = ioctl(fd, I2C_SLAVE, addr)) < 0) {

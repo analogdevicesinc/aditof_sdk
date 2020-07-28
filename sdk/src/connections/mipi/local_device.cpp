@@ -619,8 +619,19 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
             memcpy(buffer + (width * height) / 2, pdata[0], buf[0].bytesused);
         // Not Packed and type == "depth_ir"
         } else {
-            memcpy(buffer, pdata[0], buf[0].bytesused);
-            memcpy(buffer + (width * height), pdata[1], buf[1].bytesused);
+            uint16_t* ptr_depth = (uint16_t*)pdata[0];
+            uint16_t* ptr_ir = (uint16_t*)pdata[1];
+            uint16_t* ptr_buff_depth = buffer;
+            uint16_t* ptr_buff_ir = buffer + (width * height);
+            //discard 4 LSB of depth (due to Nvidia RAW memory storage type)
+            for (unsigned int k = 0; k < buf[0].bytesused / 2; k+=2) {
+		ptr_buff_depth[k] = (*(ptr_depth + k) >> 4);
+		ptr_buff_depth[k + 1] = (*(ptr_depth + k + 1) >> 4);
+	    }
+	    for (unsigned int k = 0; k < buf[0].bytesused / 2; k+=2) {
+		ptr_buff_ir[k] = (*(ptr_ir + k) >> 4);
+		ptr_buff_ir[k + 1] = (*(ptr_ir + k + 1) >> 4);
+	    }
         }
     } else {
         // clang-format off
@@ -893,7 +904,7 @@ aditof::Status LocalDevice::waitForBuffer(struct VideoDev *dev = nullptr) {
     FD_ZERO(&fds);
     FD_SET(dev->fd, &fds);
 
-    tv.tv_sec = 4;
+    tv.tv_sec = 20;
     tv.tv_usec = 0;
 
     r = select(dev->fd + 1, &fds, NULL, NULL, &tv);
