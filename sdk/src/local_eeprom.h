@@ -29,28 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EEPROM_H
-#define EEPROM_H
+#ifndef LOCAL_EEPROM_H
+#define LOCAL_EEPROM_H
 
-#include "i2c_common.h"
+#include <aditof/eeprom_interface.h>
+#include <memory>
 
-/*
- * opens the eeprom device with filesystem access
- */
-int eeprom_open(const char *dev_fqn, eeprom *e);
-/*
- * closes the eeprom device
- */
-int eeprom_close(eeprom *e);
-/*
- * write the data stored in buff to eeprom
- */
-int eeprom_write_buf(eeprom *e, unsigned int addr, unsigned char *buf,
-                     size_t size);
-/*
- * read the data from eeprom and store it in buff
- */
-int eeprom_read_buf(eeprom *e, unsigned int addr, unsigned char *buf,
-                    size_t size);
+namespace aditof {
 
-#endif /* EEPROM_H */
+class LocalEeprom : public EepromInterface {
+  public:
+    LocalEeprom();
+
+    // Implements EepromInterface
+    aditof::Status open(void *handle, const char *name,
+                        const char *driver_path) override;
+    aditof::Status read(const uint32_t address, uint8_t *data,
+                        const size_t bytesCount) override;
+    aditof::Status write(const uint32_t address, const uint8_t *data,
+                         const size_t bytesCount) override;
+    aditof::Status close() override;
+
+  private:
+    struct ImplData;
+    std::unique_ptr<ImplData> m_implData;
+};
+
+} // namespace aditof
+
+#endif /* LOCAL_EEPROM_H */
