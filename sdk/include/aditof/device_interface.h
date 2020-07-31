@@ -105,28 +105,6 @@ class DeviceInterface {
     virtual aditof::Status getFrame(uint16_t *buffer) = 0;
 
     /**
-     * @brief Read the EEPROM memory of the device starting from the given
-     * address.
-     * @param address - the memory location to start reading from
-     * @param data - a valid location to store the content read from EEPROM
-     * @param length - the number of bytes to read
-     * @return Status
-     */
-    virtual aditof::Status readEeprom(uint32_t address, uint8_t *data,
-                                      size_t length) = 0;
-
-    /**
-     * @brief Write to the EEPROM memory of the device starting from the given
-     * address.
-     * @param address - the memory location to start writing to
-     * @param data - the location of the content to be written to EEPROM
-     * @param length - the number of bytes to write
-     * @return Status
-     */
-    virtual aditof::Status writeEeprom(uint32_t address, const uint8_t *data,
-                                       size_t length) = 0;
-
-    /**
      * @brief Read multiple registers from AFE.
      * @param address - memory location pointing to addresses of registers to be
      * read

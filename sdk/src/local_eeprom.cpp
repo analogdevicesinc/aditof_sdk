@@ -29,16 +29,31 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TARGET_DEFINITIONS_H
-#define TARGET_DEFINITIONS_H
+/* This is an empty implementation and it's purpose is to give the LocalEeprom
+ * a default implementation on platforms where it is not used (Windows, Linux,
+ * MacOS).
+ */
 
-static const char *EEPROM_NAME = "24c1024";
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
+#include "local_eeprom.h"
+#include <aditof/eeprom_construction_data.h>
 
-static const char *EEPROM_REPLACEMENT_PATH = "";
+using namespace aditof;
 
-static const char *CAPTURE_DEVICE_NAME = "Qualcomm Camera Subsystem";
+struct LocalEeprom::ImplData {};
 
-static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
+LocalEeprom::LocalEeprom() {}
 
-#endif // TARGET_DEFINITIONS_H
+aditof::Status LocalEeprom::open(void *, const char *, const char *) {
+    return Status::UNAVAILABLE;
+}
+
+aditof::Status LocalEeprom::read(const uint32_t, uint8_t *, const size_t) {
+    return Status::UNAVAILABLE;
+}
+
+aditof::Status LocalEeprom::write(const uint32_t, const uint8_t *,
+                                  const size_t) {
+    return Status::UNAVAILABLE;
+}
+
+aditof::Status LocalEeprom::close() { return Status::UNAVAILABLE; }

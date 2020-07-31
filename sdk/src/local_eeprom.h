@@ -32,6 +32,7 @@
 #ifndef LOCAL_EEPROM_H
 #define LOCAL_EEPROM_H
 
+#include <aditof/eeprom_construction_data.h>
 #include <aditof/eeprom_interface.h>
 #include <memory>
 

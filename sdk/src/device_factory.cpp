@@ -45,17 +45,17 @@ std::unique_ptr<DeviceInterface>
 DeviceFactory::buildDevice(const aditof::DeviceConstructionData &data) {
     using namespace aditof;
 
-    switch (data.deviceType) {
-    case DeviceType::USB: {
+    switch (data.connectionType) {
+    case ConnectionType::USB: {
         return std::unique_ptr<DeviceInterface>(new UsbDevice(data));
     }
-    case DeviceType::ETHERNET: {
+    case ConnectionType::ETHERNET: {
 #ifdef HAS_NETWORK
         return std::unique_ptr<DeviceInterface>(new EthernetDevice(data));
 #endif
         return nullptr;
     }
-    case DeviceType::LOCAL: {
+    case ConnectionType::LOCAL: {
         return std::unique_ptr<DeviceInterface>(new LocalDevice(data));
     }
     }

@@ -32,6 +32,7 @@
 #ifndef CAMERA_DEFINITIONS_H
 #define CAMERA_DEFINITIONS_H
 
+#include "connections.h"
 #include "frame_definitions.h"
 #include "status_definitions.h"
 
@@ -51,16 +52,6 @@ class Frame;
  * @brief Callback for frame updates
  */
 typedef std::function<void(Status, Frame *)> FrameUpdateCallback;
-
-/**
- * @enum ConnectionType
- * @brief Describes the types of connection with a Camera
- */
-enum class ConnectionType {
-    USB,      //!< A USB connnection
-    ETHERNET, //!< An ethernet connection
-    LOCAL     //!< The device is embedded in the system
-};
 
 /**
  * @struct IntrinsicParameters

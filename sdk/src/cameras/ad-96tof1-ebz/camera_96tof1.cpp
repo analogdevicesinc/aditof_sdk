@@ -32,6 +32,7 @@
 #include "camera_96tof1.h"
 
 #include <aditof/device_interface.h>
+#include <aditof/eeprom_factory.h>
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
 
@@ -62,25 +63,35 @@ static const std::string skCustomMode = "custom";
 static const std::vector<std::string> availableControls = {
     "noise_reduction_threshold", "ir_gamma_correction", "revision"};
 
-Camera96Tof1::Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device)
-    : m_device(std::move(device)), m_devStarted(false),
+Camera96Tof1::Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device,
+                           const aditof::DeviceConstructionData &data)
+    : m_device(std::move(device)), m_devData(data), m_devStarted(false),
       m_availableControls(availableControls), m_revision("RevC") {}
 
-Camera96Tof1::~Camera96Tof1() = default;
+Camera96Tof1::~Camera96Tof1() { m_eeprom->close(); }
 
 aditof::Status Camera96Tof1::initialize() {
     using namespace aditof;
+    Status status;
 
     LOG(INFO) << "Initializing camera";
 
-    Status status = m_device->open();
+    // Initialize EEPROM
+    m_eeprom = EepromFactory::buildEeprom(m_devData.connectionType);
+    status = m_eeprom->open(nullptr, m_devData.eeproms[0].driverName.c_str(),
+                            m_devData.eeproms[0].driverPath.c_str());
+    if (status != Status::OK) {
+        LOG(WARNING) << "EEPROM not available!";
+    }
+
+    status = m_device->open();
 
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to open device";
         return status;
     }
 
-    status = m_calibration.readCalMap(m_device);
+    status = m_calibration.readCalMap(*m_eeprom);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to read calibration data from eeprom";
         return status;

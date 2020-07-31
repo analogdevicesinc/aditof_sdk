@@ -127,7 +127,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         close(fd);
 
         DeviceConstructionData devData;
-        devData.deviceType = DeviceType::USB;
+        devData.connectionType = ConnectionType::USB;
         devData.driverPath = driverPath;
         devices.emplace_back(devData);
     }

@@ -29,16 +29,24 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TARGET_DEFINITIONS_H
-#define TARGET_DEFINITIONS_H
+#ifndef CONNECTIONS_H
+#define CONNECTIONS_H
 
-static const char *EEPROM_NAME = "24c1024";
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
+/**
+ * @brief Namespace aditof
+ */
+namespace aditof {
 
-static const char *EEPROM_REPLACEMENT_PATH = "";
+/**
+ * @enum ConnectionType
+ * @brief Types of connections
+ */
+enum class ConnectionType {
+    LOCAL,    //!< on the target, direct sysfs access
+    USB,      //!< connects to target via USB
+    ETHERNET, //!< connects to target via Ethernet
+};
 
-static const char *CAPTURE_DEVICE_NAME = "Qualcomm Camera Subsystem";
+} // namespace aditof
 
-static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
-
-#endif // TARGET_DEFINITIONS_H
+#endif // CONNECTIONS_H

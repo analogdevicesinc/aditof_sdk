@@ -76,8 +76,8 @@ aditof::Status DeviceEnumeratorEthernet::findDevices(
         const payload::DeviceConstructionData &pbData = msg.device_info(i);
         aditof::DeviceConstructionData tofData;
 
-        tofData.deviceType =
-            static_cast<aditof::DeviceType>(pbData.device_type());
+        tofData.connectionType =
+            static_cast<aditof::ConnectionType>(pbData.device_type());
         tofData.driverPath = pbData.driver_path();
         tofData.ip = m_ip;
         devices.push_back(tofData);

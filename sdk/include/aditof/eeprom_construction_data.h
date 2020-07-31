@@ -29,16 +29,33 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TARGET_DEFINITIONS_H
-#define TARGET_DEFINITIONS_H
+#ifndef EEPROM_CONSTRUCTION_DATA
+#define EEPROM_CONSTRUCTION_DATA
 
-static const char *EEPROM_NAME = "24c1024";
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
+#include <string>
 
-static const char *EEPROM_REPLACEMENT_PATH = "";
+/**
+ * @brief Namespace aditof
+ */
+namespace aditof {
 
-static const char *CAPTURE_DEVICE_NAME = "Qualcomm Camera Subsystem";
+/**
+ * @struct EepromConstructionData
+ * @brief Provides data required to construct an EEPROM device
+ */
+struct EepromConstructionData {
+    /**
+     * @brief The driver name used by the device to talk the hardware
+     */
+    std::string driverName;
 
-static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
+    /**
+     * @brief The URL associated with the driver used by the device to talk to
+     * hardware
+     */
+    std::string driverPath;
+};
 
-#endif // TARGET_DEFINITIONS_H
+}; // namespace aditof
+
+#endif // EEPROM_CONSTRUCTION_DATA

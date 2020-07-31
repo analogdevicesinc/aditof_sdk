@@ -29,16 +29,31 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TARGET_DEFINITIONS_H
-#define TARGET_DEFINITIONS_H
+#ifndef EEPROM_FACTORY_H
+#define EEPROM_FACTORY_H
 
-static const char *EEPROM_NAME = "24c1024";
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
+#include <aditof/connections.h>
+#include <aditof/eeprom_construction_data.h>
+#include <aditof/eeprom_interface.h>
 
-static const char *EEPROM_REPLACEMENT_PATH = "";
+#include <memory>
 
-static const char *CAPTURE_DEVICE_NAME = "Qualcomm Camera Subsystem";
+namespace aditof {
 
-static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
+/**
+ * @class EepromFactory
+ * @brief Provides the means to construct different types of EEPROM devices
+ */
+class EepromFactory {
+  public:
+    /**
+     * @brief Factory method to create an EEPPROM device.
+     * @return std::unique_ptr<EepromInterface>
+     */
+    static std::unique_ptr<EepromInterface>
+    buildEeprom(ConnectionType connection);
+};
 
-#endif // TARGET_DEFINITIONS_H
+} // namespace aditof
+
+#endif // EEPROM_FACTORY_H

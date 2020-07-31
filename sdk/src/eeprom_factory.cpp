@@ -29,16 +29,40 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TARGET_DEFINITIONS_H
-#define TARGET_DEFINITIONS_H
 
-static const char *EEPROM_NAME = "24c1024";
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
+#include "local_eeprom.h"
+// TO DO:
+//#include "usb_eeprom.h"
 
-static const char *EEPROM_REPLACEMENT_PATH = "";
+#ifdef HAS_NETWORK
+// TO DO:
+//#include "ethernet_eeprom.h"
+#endif
 
-static const char *CAPTURE_DEVICE_NAME = "Qualcomm Camera Subsystem";
+#include <aditof/eeprom_factory.h>
 
-static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
+using namespace aditof;
 
-#endif // TARGET_DEFINITIONS_H
+std::unique_ptr<EepromInterface>
+EepromFactory::buildEeprom(ConnectionType connection) {
+    switch (connection) {
+    case ConnectionType::USB: {
+        // TO DO:
+        //return std::unique_ptr<EepromInterface>(new UsbEeprom(data));
+        return nullptr;
+    }
+    case ConnectionType::ETHERNET: {
+#ifdef HAS_NETWORK
+        // TO DO:
+        //return std::unique_ptr<EepromInterface>(new EthernetEeprom(data));
+        return nullptr;
+#endif
+        return nullptr;
+    }
+    case ConnectionType::LOCAL: {
+        return std::unique_ptr<EepromInterface>(new LocalEeprom());
+    }
+    }
+
+    return nullptr;
+}

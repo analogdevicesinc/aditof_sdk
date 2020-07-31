@@ -32,13 +32,13 @@
 #ifndef CALIBRATION_96TOF1_H
 #define CALIBRATION_96TOF1_H
 
-#include <aditof/device_interface.h>
 #include <aditof/status_definitions.h>
 #include <iostream>
 #include <list>
 #include <memory>
 #include <stdint.h>
 #include <unordered_map>
+#include <vector>
 
 // Hashmap key for Packet type
 #define HEADER 0
@@ -80,14 +80,18 @@ struct packet_struct {
     std::unordered_map<float, param_struct> packet;
 };
 
+namespace aditof {
+class EepromInterface;
+}
+
 class Calibration96Tof1 {
   public:
     Calibration96Tof1();
     ~Calibration96Tof1();
 
   public:
-    aditof::Status saveCalMap(std::shared_ptr<aditof::DeviceInterface> device);
-    aditof::Status readCalMap(std::shared_ptr<aditof::DeviceInterface> device);
+    aditof::Status saveCalMap(aditof::EepromInterface &eeprom);
+    aditof::Status readCalMap(aditof::EepromInterface &eeprom);
     aditof::Status displayCalMap() const;
     aditof::Status getAfeFirmware(const std::string &mode,
                                   std::vector<uint16_t> &data) const;
