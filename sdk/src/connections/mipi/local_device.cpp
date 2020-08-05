@@ -820,10 +820,19 @@ aditof::Status LocalDevice::readAfeTemp(float &temperature) {
         }
 
         temp_sensor_close(&tdev);
+<<<<<<< HEAD
     } else if ((m_deviceDetails.sensorType ==
                 aditof::SensorType::SENSOR_CHICONY) ||
                (m_deviceDetails.sensorType ==
                 aditof::SensorType::SENSOR_FXTOF1)) {
+||||||| constructed merge base
+    } else if (m_deviceDetails.sensorType ==
+               aditof::SensorType::SENSOR_CHICONY) {
+=======
+    } else if ((m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_CHICONY) ||
+               (m_deviceDetails.sensorType == aditof::SensorType::SENSOR_FX1)) {
+>>>>>>> Include the FX1 camera in the build process
         int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
@@ -857,10 +866,19 @@ aditof::Status LocalDevice::readLaserTemp(float &temperature) {
         }
 
         temp_sensor_close(&tdev);
+<<<<<<< HEAD
     } else if ((m_deviceDetails.sensorType ==
                 aditof::SensorType::SENSOR_CHICONY) ||
                (m_deviceDetails.sensorType ==
                 aditof::SensorType::SENSOR_FXTOF1)) {
+||||||| constructed merge base
+    } else if (m_deviceDetails.sensorType ==
+               aditof::SensorType::SENSOR_CHICONY) {
+=======
+    } else if ((m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_CHICONY) ||
+               (m_deviceDetails.sensorType == aditof::SensorType::SENSOR_FX1)) {
+>>>>>>> Include the FX1 camera in the build process
         int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
