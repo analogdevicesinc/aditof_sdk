@@ -46,7 +46,7 @@ namespace aditof {
 enum class SensorType {
     SENSOR_96TOF1,  //!< 96Tof 1 sensor
     SENSOR_CHICONY, //!< Chicony sensor
-    SENSOR_FX1      //!< FX1 sensor
+    SENSOR_FX1 ,    //!< FX1 sensor
 };
 
 /**

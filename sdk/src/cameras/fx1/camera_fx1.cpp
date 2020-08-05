@@ -40,13 +40,22 @@
 #include <fstream>
 #include <glog/logging.h>
 #include <iterator>
+#include <map>
 #include <math.h>
+
+struct rangeStruct {
+    std::string mode;
+    int minDepth;
+    int maxDepth;
+};
 
 // A map that contains the specific values for each revision
 static const std::map<std::string, std::array<rangeStruct, 3>>
     RangeValuesForRevision = {
         {"RevA", {{{"mode0", 250, 800}, {"mode1", 300, 3000}}}}
-    };
+};
+
+static const std::string skCustomMode = "custom";
 
 static const std::vector<std::string> availableControls = {
     "noise_reduction_threshold", "ir_gamma_correction"};
