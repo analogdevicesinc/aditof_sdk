@@ -106,8 +106,10 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
 
-#ifdef CHICONY_006
+#if defined(CHICONY_006)
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
+#elif defined(FX1)
+    m_deviceDetails.sensorType = aditof::SensorType::FX1;
 #else
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 #endif
@@ -772,8 +774,10 @@ aditof::Status LocalDevice::readAfeTemp(float &temperature) {
         }
 
         temp_sensor_close(&tdev);
-    } else if (m_deviceDetails.sensorType ==
-               aditof::SensorType::SENSOR_CHICONY) {
+    } else if ((m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_CHICONY) ||
+			   (m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_FX1)) {
         int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
@@ -807,8 +811,10 @@ aditof::Status LocalDevice::readLaserTemp(float &temperature) {
         }
 
         temp_sensor_close(&tdev);
-    } else if (m_deviceDetails.sensorType ==
-               aditof::SensorType::SENSOR_CHICONY) {
+    } else if ((m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_CHICONY) ||
+               (m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_FX1)) {
         int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
