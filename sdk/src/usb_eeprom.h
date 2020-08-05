@@ -29,44 +29,33 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef USB_DEVICE_H
-#define USB_DEVICE_H
+#ifndef USB_EEPROM_H
+#define USB_EEPROM_H
 
-#include "aditof/device_construction_data.h"
-#include "aditof/device_interface.h"
-
+#include <aditof/eeprom_construction_data.h>
+#include <aditof/eeprom_interface.h>
 #include <memory>
 
-class UsbDevice : public aditof::DeviceInterface {
-  public:
-    UsbDevice(const aditof::DeviceConstructionData &data);
-    ~UsbDevice();
+namespace aditof {
 
-  public: // implements DeviceInterface
-    virtual aditof::Status open();
-    virtual aditof::Status start();
-    virtual aditof::Status stop();
-    virtual aditof::Status
-    getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types);
-    virtual aditof::Status setFrameType(const aditof::FrameDetails &details);
-    virtual aditof::Status program(const uint8_t *firmware, size_t size);
-    virtual aditof::Status getFrame(uint16_t *buffer);
-    virtual aditof::Status readAfeRegisters(const uint16_t *address,
-                                            uint16_t *data, size_t length);
-    virtual aditof::Status writeAfeRegisters(const uint16_t *address,
-                                             const uint16_t *data,
-                                             size_t length);
-    virtual aditof::Status readAfeTemp(float &temperature);
-    virtual aditof::Status readLaserTemp(float &temperature);
-    virtual aditof::Status getDetails(aditof::DeviceDetails &details) const;
-    virtual aditof::Status getHandle(void **handle) override;
+class UsbEeprom : public aditof::EepromInterface {
+  public:
+    UsbEeprom();
+
+    // Implements EepromInterface
+    aditof::Status open(void *handle, const char *name,
+                        const char *driver_path) override;
+    aditof::Status read(const uint32_t address, uint8_t *data,
+                        const size_t bytesCount) override;
+    aditof::Status write(const uint32_t address, const uint8_t *data,
+                         const size_t bytesCount) override;
+    aditof::Status close() override;
 
   private:
     struct ImplData;
-
-    aditof::DeviceDetails m_deviceDetails;
-    aditof::DeviceConstructionData m_devData;
     std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // USB_DEVICE_H
+} // namespace aditof
+
+#endif // USB_EEPROM_H

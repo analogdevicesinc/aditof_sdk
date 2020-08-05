@@ -101,26 +101,6 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     return status;
 }
 
-aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
-                                     size_t length) {
-    using namespace aditof;
-    Status status = Status::OK;
-
-    // TO DO
-
-    return status;
-}
-
-aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
-                                      size_t length) {
-    using namespace aditof;
-    Status status = Status::OK;
-
-    // TO DO
-
-    return status;
-}
-
 aditof::Status UsbDevice::readAfeRegisters(const uint16_t *address,
                                            uint16_t *data, size_t length) {
     using namespace aditof;
@@ -161,6 +141,15 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
 }
 
 aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    // TO DO
+
+    return status;
+}
+
+aditof::Status UsbDevice::getHandle(void **handle) {
     using namespace aditof;
     Status status = Status::OK;
 

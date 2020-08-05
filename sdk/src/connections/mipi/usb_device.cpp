@@ -65,17 +65,6 @@ aditof::Status UsbDevice::getFrame(uint16_t * /*buffer*/) {
     return aditof::Status::GENERIC_ERROR;
 }
 
-aditof::Status UsbDevice::readEeprom(uint32_t /*address*/, uint8_t * /*data*/,
-                                     size_t /*length*/) {
-    return aditof::Status::GENERIC_ERROR;
-}
-
-aditof::Status UsbDevice::writeEeprom(uint32_t /*address*/,
-                                      const uint8_t * /*data*/,
-                                      size_t /*length*/) {
-    return aditof::Status::GENERIC_ERROR;
-}
-
 aditof::Status UsbDevice::readAfeRegisters(const uint16_t * /*address*/,
                                            uint16_t * /*data*/,
                                            size_t /*length*/) {
@@ -98,5 +87,9 @@ aditof::Status UsbDevice::readLaserTemp(float & /*temperature*/) {
 
 aditof::Status
 UsbDevice::getDetails(aditof::DeviceDetails & /*details*/) const {
+    return aditof::Status::GENERIC_ERROR;
+}
+
+aditof::Status UsbDevice::getHandle(void ** /*handle*/) {
     return aditof::Status::GENERIC_ERROR;
 }

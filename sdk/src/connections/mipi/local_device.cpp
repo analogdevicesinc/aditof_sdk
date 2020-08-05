@@ -768,6 +768,11 @@ aditof::Status LocalDevice::getDetails(aditof::DeviceDetails &details) const {
     return aditof::Status::OK;
 }
 
+aditof::Status LocalDevice::getHandle(void **handle) {
+    *handle = nullptr;
+    return aditof::Status::OK;
+}
+
 aditof::Status LocalDevice::waitForBuffer() {
     fd_set fds;
     struct timeval tv;

@@ -63,6 +63,7 @@ class EthernetDevice : public aditof::DeviceInterface {
     virtual aditof::Status readAfeTemp(float &temperature);
     virtual aditof::Status readLaserTemp(float &temperature);
     virtual aditof::Status getDetails(aditof::DeviceDetails &details) const;
+    virtual aditof::Status getHandle(void **handle) override;
 
   private:
     struct ImplData;

@@ -76,19 +76,25 @@ aditof::Status Camera96Tof1::initialize() {
 
     LOG(INFO) << "Initializing camera";
 
-    // Initialize EEPROM
-    m_eeprom = EepromFactory::buildEeprom(m_devData.connectionType);
-    status = m_eeprom->open(nullptr, m_devData.eeproms[0].driverName.c_str(),
-                            m_devData.eeproms[0].driverPath.c_str());
-    if (status != Status::OK) {
-        LOG(WARNING) << "EEPROM not available!";
-    }
-
     status = m_device->open();
-
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to open device";
         return status;
+    }
+
+    void *handle;
+    status = m_device->getHandle(&handle);
+    if (status != Status::OK) {
+        LOG(ERROR) << "Failed to obtain the handle";
+        return status;
+    }
+
+    // Initialize EEPROM
+    m_eeprom = EepromFactory::buildEeprom(m_devData.connectionType);
+    status = m_eeprom->open(handle, m_devData.eeproms[0].driverName.c_str(),
+                            m_devData.eeproms[0].driverPath.c_str());
+    if (status != Status::OK) {
+        LOG(WARNING) << "EEPROM not available!";
     }
 
     status = m_calibration.readCalMap(*m_eeprom);

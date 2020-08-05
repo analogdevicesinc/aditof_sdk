@@ -152,6 +152,15 @@ class DeviceInterface {
      * @return Status
      */
     virtual aditof::Status getDetails(aditof::DeviceDetails &details) const = 0;
+
+    /**
+     * @brief Gets a handle to be used by other devices such as EEPROM,
+     * Temperature, etc. This handle will allow the other devices to
+     * communicate remotely with the embedded target.
+     * @param[out] handle - the handle which is owned by this instance
+     * @return Status
+     */
+    virtual aditof::Status getHandle(void **handle) = 0;
 };
 
 } // namespace aditof

@@ -43,11 +43,6 @@
 #include <sys/mman.h>
 #include <unordered_map>
 
-#define CLEAR(x) memset(&(x), 0, sizeof(x))
-
-#define MAX_PACKET_SIZE (58)
-#define MAX_BUF_SIZE (MAX_PACKET_SIZE + 2)
-
 struct buffer {
     void *start;
     size_t length;
@@ -65,6 +60,7 @@ struct UsbDevice::ImplData {
     struct buffer *buffers;
     unsigned int buffersCount;
     struct v4l2_format fmt;
+    bool opened;
     bool started;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
 };
@@ -72,6 +68,7 @@ struct UsbDevice::ImplData {
 UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new UsbDevice::ImplData) {
     m_implData->fd = 0;
+    m_implData->opened = false;
     m_implData->started = false;
     m_implData->buffers = nullptr;
     m_implData->buffersCount = 0;
@@ -130,6 +127,8 @@ aditof::Status UsbDevice::open() {
                      << strerror(errno) << ")";
         return Status::GENERIC_ERROR;
     }
+
+    m_implData->opened = true;
 
     return status;
 }
@@ -441,100 +440,6 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     return status;
 }
 
-aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
-                                     size_t length) {
-    using namespace aditof;
-
-    struct uvc_xu_control_query cq;
-    uint8_t packet[MAX_BUF_SIZE];
-    size_t readBytes = 0;
-    size_t readLength = 0;
-    size_t addr = address;
-
-    while (readBytes < length) {
-        readLength = length - readBytes < MAX_BUF_SIZE ? length - readBytes
-                                                       : MAX_BUF_SIZE;
-
-        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
-        packet_ptr[0] = addr;
-        packet[4] = MAX_BUF_SIZE;
-
-        // This set property will send the EEPROM address to be read
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 5;        // WValue for EEPROM register reads
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in sending address to device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-
-        // This get property will get the value read from EEPROM address
-        CLEAR(cq);
-        cq.query = UVC_GET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 5;        // WValue for EEPROM register reads
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in reading data from device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-
-        memcpy(&data[readBytes], packet, readLength);
-        readBytes += readLength;
-        addr += readLength;
-    }
-
-    return Status::OK;
-}
-
-aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
-                                      size_t length) {
-    using namespace aditof;
-
-    struct uvc_xu_control_query cq;
-    uint8_t packet[MAX_BUF_SIZE];
-    size_t writeLen = 0;
-    size_t writtenBytes = 0;
-
-    while (writtenBytes < length) {
-        writeLen = length - writtenBytes > MAX_BUF_SIZE - 5
-                       ? MAX_BUF_SIZE - 5
-                       : length - writtenBytes;
-
-        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
-        packet_ptr[0] = address;
-        packet[4] = writeLen;
-        memcpy(&packet[5], data + writtenBytes, writeLen);
-
-        // This set property will send the EEPROM address and data to be written
-        // at the address
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 6;        // WValue for EEPROM register writes
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in sending address to device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-        writtenBytes += writeLen;
-        address += writeLen;
-    }
-
-    return Status::OK;
-}
-
 aditof::Status UsbDevice::readAfeRegisters(const uint16_t *address,
                                            uint16_t *data, size_t length) {
     using namespace aditof;
@@ -664,4 +569,15 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
 aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
     details = m_deviceDetails;
     return aditof::Status::OK;
+}
+
+aditof::Status UsbDevice::getHandle(void **handle) {
+    if (m_implData->opened) {
+        *handle = &m_implData->fd;
+        return aditof::Status::OK;
+    } else {
+        *handle = nullptr;
+        LOG(ERROR) << "Won't return the handle. Device hasn't been opened yet.";
+        return aditof::Status::UNAVAILABLE;
+    }
 }

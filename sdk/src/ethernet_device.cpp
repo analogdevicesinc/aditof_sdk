@@ -657,3 +657,8 @@ EthernetDevice::getDetails(aditof::DeviceDetails &details) const {
 
     return aditof::Status::OK;
 }
+
+aditof::Status EthernetDevice::getHandle(void **handle) {
+    // TO DO:
+    return aditof::Status::OK;
+}

@@ -1304,3 +1304,8 @@ aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
     details = m_deviceDetails;
     return aditof::Status::OK;
 }
+
+aditof::Status UsbDevice::getHandle(void **handle) {
+    // TO DO
+    return aditof::Status::OK;
+}

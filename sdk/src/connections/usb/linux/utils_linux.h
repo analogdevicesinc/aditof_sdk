@@ -35,6 +35,11 @@
 #include <errno.h>
 #include <sys/ioctl.h>
 
+#define CLEAR(x) memset(&(x), 0, sizeof(x))
+
+#define MAX_PACKET_SIZE (58)
+#define MAX_BUF_SIZE (MAX_PACKET_SIZE + 2)
+
 #ifdef DEBUG_USB
 #include <iostream>
 #include <linux/uvcvideo.h>

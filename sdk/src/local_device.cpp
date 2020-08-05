@@ -90,3 +90,7 @@ aditof::Status
 LocalDevice::getDetails(aditof::DeviceDetails & /*details*/) const {
     return aditof::Status::GENERIC_ERROR;
 }
+
+aditof::Status LocalDevice::getHandle(void ** /*handle*/) {
+    return aditof::Status::GENERIC_ERROR;
+}

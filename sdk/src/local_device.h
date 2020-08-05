@@ -61,6 +61,7 @@ class LocalDevice : public aditof::DeviceInterface {
     virtual aditof::Status readAfeTemp(float &temperature);
     virtual aditof::Status readLaserTemp(float &temperature);
     virtual aditof::Status getDetails(aditof::DeviceDetails &details) const;
+    virtual aditof::Status getHandle(void **handle) override;
 
   public:
     // Methods that give a finer control than getFrame()
