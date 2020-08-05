@@ -81,6 +81,22 @@ struct IntrinsicParameters {
 };
 
 /**
+ * @struct ExtrinsicParameters
+ * @brief Describes the extrinsic parameters of a camera.
+ */
+struct ExtrinsicParameters {
+    /**
+     * @brief Depth gain value.
+     */
+    float depthGain;
+
+    /**
+     * @brief Depth offset value.
+     */
+    float depthOffset;
+};
+
+/**
  * @struct CameraDetails
  * @brief Describes the properties of a camera.
  */
@@ -109,6 +125,11 @@ struct CameraDetails {
      * @brief Details about the intrinsic parameters of the camera
      */
     IntrinsicParameters intrinsics;
+
+    /**
+     * @brief Details about the extrinsic parameters of the camera
+     */
+    ExtrinsicParameters extrinsics;
 
     /**
      * @brief The maximum distance (in millimeters) the camera can measure in

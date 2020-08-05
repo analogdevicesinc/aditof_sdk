@@ -86,6 +86,8 @@ class Camera96Tof1 : public aditof::Camera {
     uint16_t m_noiseReductionThreshold;
     float m_irGammaCorrection;
     std::string m_revision;
+    bool m_depth_apply_intrinsics;
+    bool m_depth_apply_extrinsics;
 };
 
 #endif // CAMERA_96TOF1_H

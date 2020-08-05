@@ -61,7 +61,7 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 static const std::string skCustomMode = "custom";
 
 static const std::vector<std::string> availableControls = {
-    "noise_reduction_threshold", "ir_gamma_correction", "revision"};
+    "noise_reduction_threshold", "ir_gamma_correction", "revision", "depth_apply_intrinsics", "depth_apply_extrinsics"};
 
 // The driver name of the EEPROM that belongs to this camera
 static const std::string skEepromName = "24c1024";
@@ -70,7 +70,8 @@ Camera96Tof1::Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device,
                            const aditof::DeviceConstructionData &data)
     : m_device(std::move(device)), m_devData(data), m_devStarted(false),
       m_eepromInitialized(false), m_availableControls(availableControls),
-      m_revision("RevC") {}
+      m_revision("RevC"),
+      m_depth_apply_intrinsics(true), m_depth_apply_extrinsics(true) {}
 
 Camera96Tof1::~Camera96Tof1() {
     if (m_eepromInitialized) {
@@ -141,6 +142,7 @@ aditof::Status Camera96Tof1::initialize() {
     // For now we use the unit cell size values specified in the datasheet
     m_details.intrinsics.pixelWidth = 0.0056;
     m_details.intrinsics.pixelHeight = 0.0056;
+
     return Status::OK;
 }
 
@@ -192,6 +194,8 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         firmwareFile.close();
         m_details.maxDepth = 4095;
         m_details.minDepth = 0;
+        m_details.extrinsics.depthGain = 1.5f;
+        m_details.extrinsics.depthOffset = 0.0f;
     } else {
         auto iter = std::find_if(rangeValues.begin(), rangeValues.end(),
                                  [&mode](struct rangeStruct rangeMode) {
@@ -233,6 +237,11 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
                                        m_details.frameType.height);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to set calibration mode";
+            return status;
+        }
+        status = m_calibration.getGainOffset(mode, m_details.extrinsics.depthGain, m_details.extrinsics.depthOffset);
+        if (status != Status::OK) {
+            LOG(WARNING) << "Failed to get extrinsic parameters";
             return status;
         }
     }
@@ -357,12 +366,16 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
     if (m_details.mode != skCustomMode &&
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
-        m_calibration.calibrateDepth(frameDataLocation,
-                                     m_details.frameType.width *
-                                         m_details.frameType.height / 2);
-        m_calibration.calibrateCameraGeometry(
-            frameDataLocation,
-            m_details.frameType.width * m_details.frameType.height / 2);
+        if (m_depth_apply_extrinsics) {
+            m_calibration.calibrateDepth(frameDataLocation,
+                                        m_details.frameType.width *
+                                            m_details.frameType.height / 2);
+        }
+        if (m_depth_apply_intrinsics) {
+            m_calibration.calibrateCameraGeometry(
+                frameDataLocation,
+                m_details.frameType.width * m_details.frameType.height / 2);
+        }
     }
 
     return Status::OK;
@@ -419,6 +432,14 @@ aditof::Status Camera96Tof1::setControl(const std::string &control,
         return setIrGammaCorrection(std::stof(value));
     }
 
+    if (control == "depth_apply_intrinsics") {
+        m_depth_apply_intrinsics = std::stoi(value) != 0;
+    }
+
+    if (control == "depth_apply_extrinsics") {
+        m_depth_apply_extrinsics = std::stoi(value) != 0;
+    }
+
     if (control == "revision") {
         m_revision = value;
     }
@@ -444,6 +465,14 @@ aditof::Status Camera96Tof1::getControl(const std::string &control,
 
     if (control == "ir_gamma_correction") {
         value = std::to_string(m_irGammaCorrection);
+    }
+
+    if (control == "depth_apply_intrinsics") {
+        value = m_depth_apply_intrinsics? "1": "0";
+    }
+
+    if (control == "depth_apply_extrinsics") {
+        value = m_depth_apply_extrinsics? "1": "0";
     }
 
     if (control == "revision") {
