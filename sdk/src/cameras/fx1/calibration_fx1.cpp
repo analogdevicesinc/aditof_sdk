@@ -34,6 +34,7 @@
 
 #include <glog/logging.h>
 #include <math.h>
+#include <algorithm>
 
 #define MODE_CFG_SIZE 256
 static const uint16_t ROMADDR_CFG_BASE[] = {0x100, 0x200};
@@ -88,8 +89,8 @@ CalibrationFx1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
     using namespace aditof;
 
     Status status = Status::OK;
-    uint8_t mode_data[MODE_SIZE];
-    float intrinsic_data[COMMON_BASE_SIZE / sizeof(float)];
+    uint8_t mode_data[MODE_CFG_SIZE];
+    float intrinsic_data[COMMON_SIZE / sizeof(float)];
 
     /*Read the mode data*/
     for(int i = 0; i < 2; i++) {
@@ -114,31 +115,37 @@ CalibrationFx1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
         }
 
         m_mode_settings[i].depth3 =
-            (uint16_t)mode_data[MODE_DEPTH_3_OFFSET] |
-            ((uint16_t)mode_data[MODE_DEPTH_3_OFFSET + 1] << 8);
+            (uint16_t)mode_data[DEPTH_3_OFFSET] |
+            ((uint16_t)mode_data[DEPTH_3_OFFSET + 1] << 8);
 
         m_mode_settings[i].depth2 =
-            (uint16_t)mode_data[MODE_DEPTH_2_OFFSET] |
-            ((uint16_t)mode_data[MODE_DEPTH_2_OFFSET + 1] << 8);
+            (uint16_t)mode_data[DEPTH_2_OFFSET] |
+            ((uint16_t)mode_data[DEPTH_2_OFFSET + 1] << 8);
     }
 
     /*Replace the settings in the base code with the eeprom values*/
     for(int i = 0; i < 2; i++) {
-        auto it = m_afe_code.find(MODE_REG_BASE_ADDR[i] + R_MODE_PSPACE);
+        auto it = std::find(m_afe_code.begin(), m_afe_code.end(),
+                            MODE_REG_BASE_ADDR[i] + R_MODE_PSPACE);
         uint16_t pulse_space = *(it++);
         uint16_t pulse_cnt = m_mode_settings[i].pulse_cnt;
         uint16_t pulse_hd = (((pulse_cnt - 1) * pulse_space + 90) / 928 + 3) * 36 - 57;
-        it = m_afe_code.find(MODE_REG_BASE_ADDR[i] + R_PULSECNT);
+        it = std::find(m_afe_code.begin(), m_afe_code.end(),
+                       MODE_REG_BASE_ADDR[i] + R_PULSECNT);
         *(it+1) = pulse_cnt;
-        it = m_afe_code.find(MODE_REG_BASE_ADDR[i] + R_PULSEHD);
+        it = std::find(m_afe_code.begin(), m_afe_code.end(),
+                       MODE_REG_BASE_ADDR[i] + R_PULSEHD);
         *(it+1) = pulse_hd;
 
-        it = m_afe_code.find(MODE_LCORR_BASE_ADDR[i] + R_DEPTH_2);
+        it = std::find(m_afe_code.begin(), m_afe_code.end(),
+                       MODE_LCORR_BASE_ADDR[i] + R_DEPTH_2);
         *(it+1) = m_mode_settings[i].depth2;
-        it = m_afe_code.find(MODE_LCORR_BASE_ADDR[i] + R_DEPTH_3);
+        it = std::find(m_afe_code.begin(), m_afe_code.end(),
+                       MODE_LCORR_BASE_ADDR[i] + R_DEPTH_3);
         *(it+1) = m_mode_settings[i].depth3;
 
-        it = m_afe_code.find(MODE_LCORR_BASE_ADDR[i] + R_DEPTH_OFST) + 1;
+        it = std::find(m_afe_code.begin(), m_afe_code.end(),
+                       MODE_LCORR_BASE_ADDR[i] + R_DEPTH_OFST) + 1;
         for(int j = 0; j < DEPTH_OFST_CNT; j++) {
             *it = m_mode_settings[i].depth_offset[j];
             it += 2;
@@ -148,12 +155,11 @@ CalibrationFx1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
     /*Read the intrinsics and distortion params*/
     device->readEeprom(ROMADDR_COMMOM_BASE + COMMON_BASE_OFFSET,
                        (uint8_t*)intrinsic_data,
-                       MODE_SIZE - COMMON_BASE_OFFSET);
-    m_intrinsics = intrinsic_data;
+                       MODE_CFG_SIZE - COMMON_BASE_OFFSET);
     m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0],
                         &intrinsic_data[ARRAY_SIZE(intrinsic_data) - 1]);
 
-    return Status::OK;
+    return status;
 }
 
 //! getAfeFirmware - Get the firmware for a mode
@@ -163,8 +169,8 @@ getAfeFirmware - Get the firmware for a mode
 \param data - Buffer where to store the firmware
 */
 aditof::Status
-Calibration96Tof1::getAfeFirmware(const std::string &mode,
-                                  std::vector<uint16_t> &data) const {
+CalibrationFx1::getAfeFirmware(const std::string &mode,
+                               std::vector<uint16_t> &data) const {
     using namespace aditof;
 
     data = m_afe_code;
@@ -182,6 +188,8 @@ getGainOffset - Get the depth gain ad offset values for a mode
 aditof::Status CalibrationFx1::getGainOffset(const std::string &mode,
                                                 float &gain,
                                                 float &offset) const {
+    using namespace aditof;
+
     gain = 1.0f;
     offset = 0.0f;
 

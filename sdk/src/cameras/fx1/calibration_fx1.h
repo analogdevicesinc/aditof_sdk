@@ -36,7 +36,11 @@
 #include <aditof/status_definitions.h>
 #include <iostream>
 #include <vector>
+#include <memory>
 #include <stdint.h>
+
+#define INTRINSIC 5
+#define DISTORTION_COEFFICIENTS 6
 
 //! mode_struct - Structure to hold the packet consisting of map of parameters
 /*!
