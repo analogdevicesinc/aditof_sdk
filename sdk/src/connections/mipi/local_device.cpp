@@ -109,7 +109,7 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
 #if defined(CHICONY_006)
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
 #elif defined(FX1)
-    m_deviceDetails.sensorType = aditof::SensorType::FX1;
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_FX1;
 #else
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 #endif
