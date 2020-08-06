@@ -112,7 +112,7 @@ void AditofDemoRecorder::startRecording(const std::string &fileName,
     float p2 = cameraDetails.intrinsics.distCoeffs.at(3);
     m_recordFile.write(reinterpret_cast<const char *>(&p2),
                        sizeof(float));
-    float k3 = cameraDetails.intrinsics.distCoeffs.at(1);
+    float k3 = cameraDetails.intrinsics.distCoeffs.at(4);
     m_recordFile.write(reinterpret_cast<const char *>(&k3),
                        sizeof(float));
 
