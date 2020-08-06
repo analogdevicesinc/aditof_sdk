@@ -64,8 +64,8 @@ class AdiTofDemoController {
     aditof::Status readAFEregister(uint16_t *address, uint16_t *data,
                                    uint16_t noOfEntries = 1);
 
-    void startRecording(const std::string &fileName, unsigned int height,
-                        unsigned int width, unsigned int fps);
+    void startRecording(const std::string &fileName,
+                        const aditof::FrameDetails &frameDetails, unsigned int fps);
     void stopRecording();
     int startPlayback(const std::string &fileName, int &fps);
     void stopPlayback();

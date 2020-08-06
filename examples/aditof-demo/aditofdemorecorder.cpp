@@ -49,18 +49,72 @@ AditofDemoRecorder::~AditofDemoRecorder() {
 }
 
 void AditofDemoRecorder::startRecording(const std::string &fileName,
-                                        unsigned int height, unsigned int width,
-                                        unsigned int fps) {
+                                        const aditof::FrameDetails &frameDetails,
+                                        const aditof::CameraDetails& cameraDetails, unsigned int fps) {
+    m_frameDetails.height = static_cast<int>(frameDetails.height);
+    m_frameDetails.width = static_cast<int>(frameDetails.width);
+    
     m_recordFile.open(fileName, std::ios::binary);
-    m_recordFile.write(reinterpret_cast<const char *>(&height),
+
+    /* Header version */
+    unsigned char version = FILE_HEADER_VERSION;
+    m_recordFile.write(reinterpret_cast<const char *>(&version),
+                       sizeof(unsigned char));
+    /* Frame Height, Width and FPS */
+    int frameHeight = m_frameDetails.height / 2;
+    m_recordFile.write(reinterpret_cast<const char *>(&frameHeight),
                        sizeof(unsigned int));
-    m_recordFile.write(reinterpret_cast<const char *>(&width),
+    m_recordFile.write(reinterpret_cast<const char *>(&m_frameDetails.width),
                        sizeof(unsigned int));
     m_recordFile.write(reinterpret_cast<const char *>(&fps),
                        sizeof(unsigned int));
-
-    m_frameDetails.height = height;
-    m_frameDetails.width = width;
+    /* Depth gain and offset */
+    m_recordFile.write(reinterpret_cast<const char *>(&cameraDetails.extrinsics.depthGain),
+                       sizeof(float));
+    m_recordFile.write(reinterpret_cast<const char *>(&cameraDetails.extrinsics.depthOffset),
+                       sizeof(float));
+    /* bit count */
+    m_recordFile.write(reinterpret_cast<const char *>(&cameraDetails.bitCount),
+                       sizeof(int));
+    /* min and max depth */
+    m_recordFile.write(reinterpret_cast<const char *>(&cameraDetails.minDepth),
+                       sizeof(int));
+    m_recordFile.write(reinterpret_cast<const char *>(&cameraDetails.maxDepth),
+                       sizeof(int));
+    /* intrinsics pixel height and width */
+    m_recordFile.write(reinterpret_cast<const char *>(&cameraDetails.intrinsics.pixelHeight),
+                       sizeof(float));
+    m_recordFile.write(reinterpret_cast<const char *>(&cameraDetails.intrinsics.pixelWidth),
+                       sizeof(float));
+    /* intrinsics fx, fy, cx and cy */
+    float fx = cameraDetails.intrinsics.cameraMatrix.at(0);
+    m_recordFile.write(reinterpret_cast<const char *>(&fx),
+                       sizeof(float));
+    float fy = cameraDetails.intrinsics.cameraMatrix.at(4);
+    m_recordFile.write(reinterpret_cast<const char *>(&fy),
+                       sizeof(float));
+    float cx = cameraDetails.intrinsics.cameraMatrix.at(2);
+    m_recordFile.write(reinterpret_cast<const char *>(&cx),
+                       sizeof(float));
+    float cy = cameraDetails.intrinsics.cameraMatrix.at(5);
+    m_recordFile.write(reinterpret_cast<const char *>(&cy),
+                       sizeof(float));
+    /* intrinsics distorsion coefs k1, k2, p1, p2, k3 */
+    float k1 = cameraDetails.intrinsics.distCoeffs.at(0);
+    m_recordFile.write(reinterpret_cast<const char *>(&k1),
+                       sizeof(float));
+    float k2 = cameraDetails.intrinsics.distCoeffs.at(1);
+    m_recordFile.write(reinterpret_cast<const char *>(&k2),
+                       sizeof(float));
+    float p1 = cameraDetails.intrinsics.distCoeffs.at(2);
+    m_recordFile.write(reinterpret_cast<const char *>(&p1),
+                       sizeof(float));
+    float p2 = cameraDetails.intrinsics.distCoeffs.at(3);
+    m_recordFile.write(reinterpret_cast<const char *>(&p2),
+                       sizeof(float));
+    float k3 = cameraDetails.intrinsics.distCoeffs.at(1);
+    m_recordFile.write(reinterpret_cast<const char *>(&k3),
+                       sizeof(float));
 
     m_recordTreadStop = false;
     m_recordThread =
