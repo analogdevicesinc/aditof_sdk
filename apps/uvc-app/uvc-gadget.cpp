@@ -43,6 +43,8 @@
 #include <aditof/device_enumerator_factory.h>
 #include <aditof/device_factory.h>
 #include <aditof/device_interface.h>
+#include <aditof/eeprom_factory.h>
+#include <aditof/eeprom_interface.h>
 
 #include "../../sdk/src/local_device.h"
 
@@ -971,11 +973,12 @@ static void uvc_events_process_standard(struct uvc_device *dev,
     (void)resp;
 }
 
-static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
-                                       uint8_t cs, uint8_t entity_id,
-                                       uint8_t len,
-                                       struct uvc_request_data *resp,
-                                       std::shared_ptr<LocalDevice> device) {
+static void
+uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
+                           uint8_t entity_id, uint8_t len,
+                           struct uvc_request_data *resp,
+                           std::shared_ptr<LocalDevice> device,
+                           std::shared_ptr<aditof::EepromInterface> eeprom) {
     switch (entity_id) {
     case 0:
         switch (cs) {
@@ -1318,8 +1321,7 @@ static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
                 USB_REQ_DEBUG("Received GET_CUR on %d\n", cs);
 
                 if (cs == 5) {
-                    device->readEeprom(eeprom_read_addr, resp->data,
-                                       eeprom_read_len);
+                    eeprom->read(eeprom_read_addr, resp->data, eeprom_read_len);
                     resp->length = eeprom_read_len;
                 }
                 break;
@@ -1459,10 +1461,11 @@ static void uvc_events_process_streaming(struct uvc_device *dev, uint8_t req,
     }
 }
 
-static void uvc_events_process_class(struct uvc_device *dev,
-                                     struct usb_ctrlrequest *ctrl,
-                                     struct uvc_request_data *resp,
-                                     std::shared_ptr<LocalDevice> device) {
+static void
+uvc_events_process_class(struct uvc_device *dev, struct usb_ctrlrequest *ctrl,
+                         struct uvc_request_data *resp,
+                         std::shared_ptr<LocalDevice> device,
+                         std::shared_ptr<aditof::EepromInterface> eeprom) {
     if ((ctrl->bRequestType & USB_RECIP_MASK) != USB_RECIP_INTERFACE)
         return;
 
@@ -1471,7 +1474,7 @@ static void uvc_events_process_class(struct uvc_device *dev,
         // printf("events_process_controll\n");
         uvc_events_process_control(dev, ctrl->bRequest, ctrl->wValue >> 8,
                                    ctrl->wIndex >> 8, ctrl->wLength, resp,
-                                   device);
+                                   device, eeprom);
         break;
 
     case UVC_INTF_STREAMING:
@@ -1484,10 +1487,11 @@ static void uvc_events_process_class(struct uvc_device *dev,
         break;
     }
 }
-static void uvc_events_process_setup(struct uvc_device *dev,
-                                     struct usb_ctrlrequest *ctrl,
-                                     struct uvc_request_data *resp,
-                                     std::shared_ptr<LocalDevice> device) {
+static void
+uvc_events_process_setup(struct uvc_device *dev, struct usb_ctrlrequest *ctrl,
+                         struct uvc_request_data *resp,
+                         std::shared_ptr<LocalDevice> device,
+                         std::shared_ptr<aditof::EepromInterface> eeprom) {
     dev->control = 0;
 
     USB_REQ_DEBUG("\nbRequestType %02x bRequest %02x wValue %04x wIndex %04x "
@@ -1503,7 +1507,7 @@ static void uvc_events_process_setup(struct uvc_device *dev,
 
     case USB_TYPE_CLASS:
         // printf("process class!\n");
-        uvc_events_process_class(dev, ctrl, resp, device);
+        uvc_events_process_class(dev, ctrl, resp, device, eeprom);
         break;
 
     default:
@@ -1563,9 +1567,10 @@ static int uvc_events_process_control_data(struct uvc_device *dev, uint8_t cs,
     return 0;
 }
 
-static int uvc_events_process_data(struct uvc_device *dev,
-                                   struct uvc_request_data *data,
-                                   std::shared_ptr<LocalDevice> device) {
+static int
+uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
+                        std::shared_ptr<LocalDevice> device,
+                        std::shared_ptr<aditof::EepromInterface> eeprom) {
     struct uvc_streaming_control *target;
     struct uvc_streaming_control *ctrl;
     const struct uvc_format_info *format;
@@ -1633,8 +1638,8 @@ static int uvc_events_process_data(struct uvc_device *dev,
                        data->data[4]);
                 eeprom_write_len += data->data[4];
                 if (data->data[4] < MAX_PACKET_SIZE - 5) {
-                    device->writeEeprom(eeprom_write_addr, eeprom_data,
-                                        eeprom_write_len);
+                    eeprom->write(eeprom_write_addr, eeprom_data,
+                                  eeprom_write_len);
                     eeprom_write_len = 0;
                 }
             }
@@ -1713,8 +1718,9 @@ err:
     return ret;
 }
 
-static void uvc_events_process(struct uvc_device *dev,
-                               std::shared_ptr<LocalDevice> device) {
+static void
+uvc_events_process(struct uvc_device *dev, std::shared_ptr<LocalDevice> device,
+                   std::shared_ptr<aditof::EepromInterface> eeprom) {
     struct v4l2_event v4l2_event;
     struct uvc_event *uvc_event =
         reinterpret_cast<struct uvc_event *>(&v4l2_event.u.data);
@@ -1744,12 +1750,12 @@ static void uvc_events_process(struct uvc_device *dev,
 
     case UVC_EVENT_SETUP:
         // printf("UVC_EVENT_SETUP received\n");
-        uvc_events_process_setup(dev, &uvc_event->req, &resp, device);
+        uvc_events_process_setup(dev, &uvc_event->req, &resp, device, eeprom);
         break;
 
     case UVC_EVENT_DATA:
         // printf("UVC_EVENT_DATA received\n");
-        ret = uvc_events_process_data(dev, &uvc_event->data, device);
+        ret = uvc_events_process_data(dev, &uvc_event->data, device, eeprom);
         if (ret < 0)
             break;
         return;
@@ -1915,6 +1921,15 @@ int main(int argc, char *argv[]) {
         printf("Error when building LocalDevice!\n");
         return 1;
     }
+
+    std::shared_ptr<aditof::EepromInterface> eeprom =
+        std::shared_ptr<aditof::EepromInterface>(
+            aditof::EepromFactory::buildEeprom(aditof::ConnectionType::LOCAL));
+    if (!eeprom) {
+        return 1;
+    }
+    eeprom->open(nullptr, devsData[0].eeproms[0].driverName.c_str(),
+                 devsData[0].eeproms[0].driverPath.c_str());
 
     while ((opt = getopt(argc, argv, "abdf:hi:m:n:o:r:s:t:u:v:p:")) != -1) {
         switch (opt) {
@@ -2194,7 +2209,7 @@ int main(int argc, char *argv[]) {
 
         if (FD_ISSET(udev->uvc_fd, &efds)) {
             // printf("uvc_event_process");
-            uvc_events_process(udev, device);
+            uvc_events_process(udev, device, eeprom);
         }
 
         if (FD_ISSET(udev->uvc_fd, &dfds)) {
@@ -2220,6 +2235,8 @@ int main(int argc, char *argv[]) {
     }
 
     uvc_close(udev);
+
+    eeprom->close();
 
     return 0;
 }
