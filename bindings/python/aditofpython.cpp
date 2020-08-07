@@ -202,6 +202,9 @@ PYBIND11_MODULE(aditofpython, m) {
 
                  frame.getData(dataType, &f.pData);
                  frame.getDetails(f.details);
+                 if (dataType != aditof::FrameDataType::RAW) {
+                     f.details.height /= 2;
+                 }
 
                  return f;
              },
