@@ -7,10 +7,17 @@ if [ $? -ne 0 ]; then
 fi
 
 wget -q "http://swdownloads.analog.com/cse/aditof/xavier_prepare/dtb_enc_sig.img";
-
 if [ $? -ne 0 ]; then
 	echo "Could not get DTB file. Please check internet connection"
 fi
+
+echo "Cloning Linux modules and writing them locally. This may take a while depending on network connection"
+wget "http://swdownloads.analog.com/cse/aditof/xavier_prepare/modules.tar.gz";
+if [ $? -ne 0 ]; then
+	echo "Could not get modules archive file. Please check internet connection"
+fi
+sudo tar -xf modules.tar.gz -C /
+rm modules.tar.gz
 
 # Backup original kernel Image
 sudo cp /boot/Image /boot/Image.backup
