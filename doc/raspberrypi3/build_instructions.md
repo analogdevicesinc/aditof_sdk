@@ -20,6 +20,7 @@ pi@raspberry:~/workspace/github/aditof_sdk$ cd build
 pi@raspberry:~/workspace/github/aditof_sdk/build$ cmake -DRASPBERRYPI=1 ..
 pi@raspberry:~/workspace/github/aditof_sdk/build$ make -j4
 ```
+Note that if you have a Rev B module, you also need to run cmake with '-DWITH_REVB=1'
 
 ## Linux Kernel
 A customized [kernel](https://github.com/analogdevicesinc/linux/tree/adi-4.19.0) is provided for the Raspberry Pi including the [V4L2 driver for the ADDI9036](https://github.com/analogdevicesinc/linux/blob/adi-4.19.0/drivers/media/i2c/addi9036.c) and other improvements to support all the ADI depth camera features.
