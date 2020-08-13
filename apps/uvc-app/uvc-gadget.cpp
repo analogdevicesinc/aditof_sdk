@@ -262,6 +262,11 @@ bool DeviceStartedStreaming = false;
 int ad903x_hw = 0;
 char v4l2_subdev_prog_file[255] = "afe_firmware.bin";
 
+std::vector<aditof::DeviceConstructionData> availableSensors;
+int sensorIndex = 0; // If multiple camera sensors, work only with the first one
+char *sensorsInfoBuffer =
+    nullptr; // Points to data holding information about available sensors. First two bytes contain the size of the data in the rest of the buffer
+
 /* TODO: Make this declaration local or part of dev stucture */
 struct v4l2_plane gPlanes[8] = {{0}};
 int firmware_size = 0, flen = 0;
@@ -275,6 +280,8 @@ unsigned int eeprom_read_len = 0;
 unsigned int eeprom_write_addr = 0;
 unsigned int eeprom_write_len = 0;
 unsigned char eeprom_data[128 * 1024];
+unsigned int sensors_read_pos = 0;
+unsigned int sensors_read_len = 0;
 
 /* forward declarations */
 static int uvc_video_stream(struct uvc_device *dev, int enable);
@@ -1306,6 +1313,53 @@ uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
             }
             break;
 
+        case 4: /* Get advertised sensors */
+            switch (req) {
+            case UVC_SET_CUR:
+                dev->set_cur_cs = cs;
+                resp->data[0] = 0x0;
+                resp->length = len;
+                break;
+
+            case UVC_GET_CUR:
+                memcpy(resp->data, sensorsInfoBuffer + sensors_read_pos,
+                       sensors_read_len);
+                resp->length = sensors_read_len;
+                break;
+
+            case UVC_GET_INFO:
+                /*
+                 * We support Set and Get requests and don't
+                 * support async updates on an interrupt endpt
+                 */
+                resp->data[0] = 0x03;
+                resp->length = 1;
+                break;
+
+            case UVC_GET_LEN:
+                resp->data[0] = MAX_PACKET_SIZE;
+                resp->data[1] = 0x0;
+                resp->length = 2;
+                break;
+
+            default:
+                printf("Unsupported bRequest: Received bRequest %x on cs %d\n",
+                       req, cs);
+                /*
+                 * We don't support this control, so STALL the
+                 * default control ep.
+                 */
+                resp->length = -EL2HLT;
+                /*
+                 * For every unsupported control request
+                 * set the request error code to appropriate
+                 * code.
+                 */
+                SET_REQ_ERROR_CODE(0x07, 1);
+                break;
+            } //switch (req)
+            break;
+
         case 5: /* EEPROM Read */
         case 6: /* EEPROM Write */
             switch (req) {
@@ -1629,6 +1683,9 @@ uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
                 }
             } else if (dev->set_cur_cs == 2) { /* AFE register address */
                 reg_addr = *((unsigned short *)(data->data));
+            } else if (dev->set_cur_cs == 4) {
+                sensors_read_pos = *((unsigned int *)(data->data));
+                sensors_read_len = data->data[4];
             } else if (dev->set_cur_cs == 5) { /* EEPROM Read Address */
                 eeprom_read_addr = *((unsigned int *)&(data->data[0]));
                 eeprom_read_len = data->data[4];
@@ -1902,20 +1959,32 @@ int main(int argc, char *argv[]) {
     enum usb_device_speed speed = USB_SPEED_HIGH; /* High-Speed */
     enum io_method uvc_io_method = IO_METHOD_USERPTR;
 
-    std::vector<aditof::DeviceConstructionData> devsData;
     auto enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
+    enumerator->findDevices(availableSensors);
 
-    enumerator->findDevices(devsData);
-
-    if (devsData.size() < 1) {
-        printf("No device was found!\n");
+    if (availableSensors.size() < 1) {
+        printf("No camera sensor is available!\n");
         return 1;
     }
+    const aditof::DeviceConstructionData &camSensorData =
+        availableSensors[sensorIndex];
+    std::string availableSensorsBlob;
+    // Serialize information about sensors to be send to the UVC client
+    for (const auto &eeprom : camSensorData.eeproms) {
+        availableSensorsBlob += "EEPROM_NAME=" + eeprom.driverName + ";";
+        availableSensorsBlob += "EEPROM_PATH=" + eeprom.driverPath + ";";
+    }
+    uint32_t buffLen = availableSensorsBlob.length();
+    sensorsInfoBuffer = new char[buffLen + sizeof(uint16_t)];
+    uint16_t *buffSize = reinterpret_cast<uint16_t *>(sensorsInfoBuffer);
+    *buffSize = buffLen;
+    memcpy(sensorsInfoBuffer + sizeof(uint16_t), availableSensorsBlob.c_str(),
+           buffLen);
 
     std::shared_ptr<LocalDevice> device =
         std::dynamic_pointer_cast<LocalDevice>(
             std::shared_ptr<aditof::DeviceInterface>(
-                aditof::DeviceFactory::buildDevice(devsData[0])));
+                aditof::DeviceFactory::buildDevice(camSensorData)));
 
     if (!device) {
         printf("Error when building LocalDevice!\n");
@@ -1928,8 +1997,8 @@ int main(int argc, char *argv[]) {
     if (!eeprom) {
         return 1;
     }
-    eeprom->open(nullptr, devsData[0].eeproms[0].driverName.c_str(),
-                 devsData[0].eeproms[0].driverPath.c_str());
+    eeprom->open(nullptr, camSensorData.eeproms[0].driverName.c_str(),
+                 camSensorData.eeproms[0].driverPath.c_str());
 
     while ((opt = getopt(argc, argv, "abdf:hi:m:n:o:r:s:t:u:v:p:")) != -1) {
         switch (opt) {
@@ -2237,6 +2306,11 @@ int main(int argc, char *argv[]) {
     uvc_close(udev);
 
     eeprom->close();
+
+    if (sensorsInfoBuffer) {
+        delete[] sensorsInfoBuffer;
+        sensorsInfoBuffer = nullptr;
+    }
 
     return 0;
 }

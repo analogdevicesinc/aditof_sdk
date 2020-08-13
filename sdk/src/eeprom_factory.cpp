@@ -31,8 +31,7 @@
  */
 
 #include "local_eeprom.h"
-// TO DO:
-//#include "usb_eeprom.h"
+#include "usb_eeprom.h"
 
 #ifdef HAS_NETWORK
 // TO DO:
@@ -47,8 +46,7 @@ std::unique_ptr<EepromInterface>
 EepromFactory::buildEeprom(ConnectionType connection) {
     switch (connection) {
     case ConnectionType::USB: {
-        // TO DO:
-        //return std::unique_ptr<EepromInterface>(new UsbEeprom(data));
+        return std::unique_ptr<EepromInterface>(new UsbEeprom());
         return nullptr;
     }
     case ConnectionType::ETHERNET: {

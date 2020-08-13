@@ -78,6 +78,7 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::DeviceConstructionData m_devData;
     std::unique_ptr<aditof::EepromInterface> m_eeprom;
     bool m_devStarted;
+    bool m_eepromInitialized;
     std::vector<std::string> m_availableControls;
     Calibration96Tof1 m_calibration;
     uint16_t m_noiseReductionThreshold;

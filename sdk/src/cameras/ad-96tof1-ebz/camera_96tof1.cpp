@@ -66,9 +66,14 @@ static const std::vector<std::string> availableControls = {
 Camera96Tof1::Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device,
                            const aditof::DeviceConstructionData &data)
     : m_device(std::move(device)), m_devData(data), m_devStarted(false),
-      m_availableControls(availableControls), m_revision("RevC") {}
+      m_eepromInitialized(false), m_availableControls(availableControls),
+      m_revision("RevC") {}
 
-Camera96Tof1::~Camera96Tof1() { m_eeprom->close(); }
+Camera96Tof1::~Camera96Tof1() {
+    if (m_eepromInitialized) {
+        m_eeprom->close();
+    }
+}
 
 aditof::Status Camera96Tof1::initialize() {
     using namespace aditof;
@@ -90,12 +95,30 @@ aditof::Status Camera96Tof1::initialize() {
     }
 
     // Initialize EEPROM
-    m_eeprom = EepromFactory::buildEeprom(m_devData.connectionType);
-    status = m_eeprom->open(handle, m_devData.eeproms[0].driverName.c_str(),
-                            m_devData.eeproms[0].driverPath.c_str());
-    if (status != Status::OK) {
-        LOG(WARNING) << "EEPROM not available!";
+    auto iter = std::find_if(m_devData.eeproms.begin(), m_devData.eeproms.end(),
+                             [](const EepromConstructionData &eData) {
+                                 return eData.driverName == "24c1024";
+                             });
+    if (iter == m_devData.eeproms.end()) {
+        LOG(ERROR) << "No info about the EERPOM required by the camera";
+        return status;
     }
+
+    m_eeprom = EepromFactory::buildEeprom(m_devData.connectionType);
+    if (!m_eeprom) {
+        LOG(ERROR) << "Failed to create an Eeprom object";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    const EepromConstructionData &eeprom24c1024Info = *iter;
+    status = m_eeprom->open(handle, eeprom24c1024Info.driverName.c_str(),
+                            eeprom24c1024Info.driverPath.c_str());
+    if (status != Status::OK) {
+        LOG(ERROR) << "Failed to open EEPROM with name "
+                   << m_devData.eeproms.back().driverName << " is available";
+        return status;
+    }
+    m_eepromInitialized = true;
 
     status = m_calibration.readCalMap(*m_eeprom);
     if (status != Status::OK) {
