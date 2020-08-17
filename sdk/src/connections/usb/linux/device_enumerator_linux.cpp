@@ -30,19 +30,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "device_enumerator_impl.h"
-#include "utils_linux.h"
+#include "utils.h"
 
 #include <dirent.h>
 #include <fcntl.h>
 #include <glog/logging.h>
-#include <linux/usb/video.h>
-#include <linux/uvcvideo.h>
 #include <linux/videodev2.h>
 #include <sys/stat.h>
 
 using namespace std;
-
-#define CLEAR(x) memset(&(x), 0, sizeof(x))
 
 static void split_into_tokens(const string &s, const char delimiter,
                               vector<string> &tokens) {
@@ -57,76 +53,33 @@ static void split_into_tokens(const string &s, const char delimiter,
 
 static aditof::Status getAvailableSensors(int fd,
                                           string &advertisedSensorData) {
-    struct uvc_xu_control_query cq;
-    uint8_t packet[MAX_BUF_SIZE];
-    size_t bytesCount = MAX_BUF_SIZE;
-    size_t readBytes = 0;
-    size_t readLength = 0;
-    size_t addr = 0;
+    int ret;
+    uint16_t bufferLength;
 
-    while (readBytes < bytesCount) {
-        readLength = bytesCount - readBytes < MAX_BUF_SIZE
-                         ? bytesCount - readBytes
-                         : MAX_BUF_SIZE;
-
-        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
-        packet_ptr[0] = addr;
-        packet[4] = MAX_BUF_SIZE;
-
-        // This set property will send the address of sensors information buffer to be read
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 4;        // Value for information about available sensors
-
-        if (-1 == xioctl(fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in sending address to device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return aditof::Status::GENERIC_ERROR;
-        }
-
-        // This get property will read from the sensors information buffer
-        CLEAR(cq);
-        cq.query = UVC_GET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 4;        // Value for information about available sensors
-
-        if (-1 == xioctl(fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in reading data from device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return aditof::Status::GENERIC_ERROR;
-        }
-
-        int nbSizeBytes = sizeof(uint16_t);
-        if (addr == 0) {
-            // Read the length of the entire sensors information buffer
-            int nbSizeBytes = sizeof(uint16_t);
-            uint16_t *sizePtr = reinterpret_cast<uint16_t *>(packet);
-            advertisedSensorData.resize(*sizePtr + 1);
-            bytesCount = *sizePtr + nbSizeBytes;
-
-            // Re-evaluate the number of bytes to read
-            readLength = bytesCount - readBytes < MAX_BUF_SIZE
-                             ? bytesCount - readBytes
-                             : MAX_BUF_SIZE;
-
-            advertisedSensorData.insert(
-                addr, reinterpret_cast<const char *>(packet + nbSizeBytes),
-                readLength - nbSizeBytes);
-        } else {
-            advertisedSensorData.insert(addr - nbSizeBytes,
-                                        reinterpret_cast<const char *>(packet),
-                                        readLength);
-        }
-
-        readBytes += readLength;
-        addr += readLength;
+    ret = Utils::uvcExUnitReadBuffer(fd, 4, 0,
+                                     reinterpret_cast<uint8_t *>(&bufferLength),
+                                     sizeof(bufferLength));
+    if (ret < 0) {
+        LOG(WARNING)
+            << "Failed to read size of buffer holding sensors info. Error: "
+            << ret;
+        return aditof::Status::GENERIC_ERROR;
     }
 
+    uint8_t *data = new uint8_t[bufferLength + 1];
+    ret = Utils::uvcExUnitReadBuffer(fd, 4, sizeof(bufferLength), data,
+                                     bufferLength);
+    if (ret < 0) {
+        LOG(WARNING) << "Failed to read the content of buffer holding sensors "
+                        "info. Error: "
+                     << ret;
+        delete[] data;
+        return aditof::Status::GENERIC_ERROR;
+    }
+
+    data[bufferLength] = '\0';
+    advertisedSensorData = reinterpret_cast<char *>(data);
+    delete[] data;
     return aditof::Status::OK;
 }
 
@@ -177,7 +130,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         }
 
         struct v4l2_capability cap;
-        if (-1 == xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
+        if (-1 == Utils::xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
             if (EINVAL == errno) {
                 LOG(WARNING) << driverPath << " is not V4L2 device";
                 close(fd);
@@ -191,7 +144,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         struct v4l2_format fmt;
         CLEAR(fmt);
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        if (-1 == xioctl(fd, VIDIOC_G_FMT, &fmt)) {
+        if (-1 == Utils::xioctl(fd, VIDIOC_G_FMT, &fmt)) {
             close(fd);
             continue;
         }

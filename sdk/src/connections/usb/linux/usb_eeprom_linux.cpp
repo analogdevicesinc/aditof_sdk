@@ -30,11 +30,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "usb_eeprom.h"
-#include "utils_linux.h"
+#include "utils.h"
 
 #include <glog/logging.h>
-#include <linux/usb/video.h>
-#include <linux/uvcvideo.h>
 
 using namespace aditof;
 
@@ -62,91 +60,26 @@ Status UsbEeprom::open(void *handle, const char *name,
 
 Status UsbEeprom::read(const uint32_t address, uint8_t *data,
                        const size_t bytesCount) {
-    struct uvc_xu_control_query cq;
-    uint8_t packet[MAX_BUF_SIZE];
-    size_t readBytes = 0;
-    size_t readLength = 0;
-    size_t addr = address;
-
-    while (readBytes < bytesCount) {
-        readLength = bytesCount - readBytes < MAX_BUF_SIZE
-                         ? bytesCount - readBytes
-                         : MAX_BUF_SIZE;
-
-        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
-        packet_ptr[0] = addr;
-        packet[4] = MAX_BUF_SIZE;
-
-        // This set property will send the EEPROM address to be read
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 5;        // WValue for EEPROM register reads
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in sending address to device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-
-        // This get property will get the value read from EEPROM address
-        CLEAR(cq);
-        cq.query = UVC_GET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 5;        // WValue for EEPROM register reads
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in reading data from device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-
-        memcpy(&data[readBytes], packet, readLength);
-        readBytes += readLength;
-        addr += readLength;
+    int ret = Utils::uvcExUnitReadBuffer(m_implData->fd, 5, address, data,
+                                         bytesCount);
+    if (ret < 0) {
+        LOG(WARNING)
+            << "Failed to read buffer through UVC extension unit. Error: "
+            << ret;
+        return Status::GENERIC_ERROR;
     }
-
     return Status::OK;
 }
 
 Status UsbEeprom::write(const uint32_t address, const uint8_t *data,
                         const size_t bytesCount) {
-    struct uvc_xu_control_query cq;
-    uint8_t packet[MAX_BUF_SIZE];
-    size_t writeLen = 0;
-    size_t writtenBytes = 0;
-    uint32_t crtAddress = address;
-
-    while (writtenBytes < bytesCount) {
-        writeLen = bytesCount - writtenBytes > MAX_BUF_SIZE - 5
-                       ? MAX_BUF_SIZE - 5
-                       : bytesCount - writtenBytes;
-
-        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
-        packet_ptr[0] = crtAddress;
-        packet[4] = writeLen;
-        memcpy(&packet[5], data + writtenBytes, writeLen);
-
-        // This set property will send the EEPROM address and data to be written
-        // at the address
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 6;        // WValue for EEPROM register writes
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in sending address to device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-        writtenBytes += writeLen;
-        crtAddress += writeLen;
+    int ret = Utils::uvcExUnitWriteBuffer(m_implData->fd, 6, address, data,
+                                          bytesCount);
+    if (ret < 0) {
+        LOG(WARNING)
+            << "Failed to write buffer through UVC extension unit. Error: "
+            << ret;
+        return Status::GENERIC_ERROR;
     }
 
     return Status::OK;
