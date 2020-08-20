@@ -52,7 +52,7 @@ struct rangeStruct {
 // A map that contains the specific values for each revision
 static const std::map<std::string, std::array<rangeStruct, 3>>
     RangeValuesForRevision = {
-        {"RevA", {{{"mode0", 250, 800}, {"mode1", 300, 3000}}}}
+        {"RevA", {{{"near", 250, 800}, {"medium", 300, 3000}}}}
 };
 
 static const std::string skCustomMode = "custom";
@@ -191,8 +191,8 @@ aditof::Status CameraFx1::getAvailableModes(
     Status status = Status::OK;
 
     // Dummy data. To remove when implementig this method
-    availableModes.emplace_back("mode0");
-    availableModes.emplace_back("mode1");
+    availableModes.emplace_back("near");
+    availableModes.emplace_back("medium");
 
     return status;
 }
@@ -281,9 +281,7 @@ aditof::Status CameraFx1::requestFrame(aditof::Frame *frame,
     if (m_details.mode != skCustomMode &&
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
-        m_calibration.calibrateDepth(frameDataLocation,
-                                     m_details.frameType.width *
-                                     m_details.frameType.height / 2);
+
         m_calibration.calibrateCameraGeometry(
             frameDataLocation,
             m_details.frameType.width * m_details.frameType.height / 2);
