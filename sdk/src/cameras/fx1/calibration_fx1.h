@@ -64,19 +64,14 @@ class CalibrationFx1 {
     aditof::Status readCalMap(std::shared_ptr<aditof::DeviceInterface> device);
     aditof::Status getAfeFirmware(const std::string &mode,
                                   std::vector<uint16_t> &data) const;
-    aditof::Status getGainOffset(const std::string &mode, float &gain,
-                                 float &offset) const;
     aditof::Status getIntrinsic(float key, std::vector<float> &data) const;
     aditof::Status setMode(std::shared_ptr<aditof::DeviceInterface> device,
                            const std::string &mode, int range,
                            unsigned int frameWidth, unsigned int frameheight);
-    aditof::Status calibrateDepth(uint16_t *frame, uint32_t frame_size);
     aditof::Status calibrateCameraGeometry(uint16_t *frame,
                                            uint32_t frame_size);
 
   private:
-    void buildDepthCalibrationCache(float gain, float offset,
-                                    int16_t maxPixelValue, int range);
     void buildGeometryCalibrationCache(const std::vector<float> &cameraMatrix,
                                        unsigned int width, unsigned int height);
 
@@ -87,6 +82,7 @@ class CalibrationFx1 {
     mode_struct m_mode_settings[2];
     std::vector<float> m_intrinsics;
     std::vector<uint16_t> m_afe_code;
+    bool m_cal_valid;
 };
 
 #endif /*CALIBRATION_FX1_H*/
