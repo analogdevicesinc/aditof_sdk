@@ -29,7 +29,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "connections/usb/usb_utils.h"
 #include "device_enumerator_impl.h"
+#include "usb_utils.h"
 #include "utils.h"
 
 #include <dirent.h>
@@ -40,25 +42,14 @@
 
 using namespace std;
 
-static void split_into_tokens(const string &s, const char delimiter,
-                              vector<string> &tokens) {
-    string::size_type start = 0;
-    for (string::size_type end = 0;
-         (end = s.find(delimiter, end)) != string::npos; ++end) {
-        tokens.push_back(s.substr(start, end - start));
-        start = end + 1;
-    }
-    tokens.push_back(s.substr(start));
-}
-
 static aditof::Status getAvailableSensors(int fd,
                                           string &advertisedSensorData) {
     int ret;
     uint16_t bufferLength;
 
-    ret = Utils::uvcExUnitReadBuffer(fd, 4, 0,
-                                     reinterpret_cast<uint8_t *>(&bufferLength),
-                                     sizeof(bufferLength));
+    ret = UsbUtils::uvcExUnitReadBuffer(
+        fd, 4, 0, reinterpret_cast<uint8_t *>(&bufferLength),
+        sizeof(bufferLength));
     if (ret < 0) {
         LOG(WARNING)
             << "Failed to read size of buffer holding sensors info. Error: "
@@ -67,8 +58,8 @@ static aditof::Status getAvailableSensors(int fd,
     }
 
     uint8_t *data = new uint8_t[bufferLength + 1];
-    ret = Utils::uvcExUnitReadBuffer(fd, 4, sizeof(bufferLength), data,
-                                     bufferLength);
+    ret = UsbUtils::uvcExUnitReadBuffer(fd, 4, sizeof(bufferLength), data,
+                                        bufferLength);
     if (ret < 0) {
         LOG(WARNING) << "Failed to read the content of buffer holding sensors "
                         "info. Error: "
@@ -175,20 +166,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         devData.driverPath = driverPath;
 
         vector<string> sensorsPaths;
-        split_into_tokens(advertisedSensorData, ';', sensorsPaths);
-
-        for (const auto &path : sensorsPaths) {
-            vector<string> keyValueStr;
-            split_into_tokens(path, '=', keyValueStr);
-            if (keyValueStr[0] == "EEPROM_NAME") {
-                EepromConstructionData ecd;
-                ecd.driverName = keyValueStr[1];
-                devData.eeproms.push_back(ecd);
-            } else if (keyValueStr[0] == "EEPROM_PATH") {
-                auto &ecd = devData.eeproms.back();
-                ecd.driverPath = keyValueStr[1];
-            }
-        }
+        Utils::SplitIntoTokens(advertisedSensorData, ';', sensorsPaths);
+        UsbUtils::parseSensorTokens(sensorPaths, devData);
 
         devices.emplace_back(devData);
     }

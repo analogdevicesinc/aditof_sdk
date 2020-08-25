@@ -43,6 +43,9 @@
 #include <vidcap.h>
 // end of RDK_extension unit
 
+#define MAX_PACKET_SIZE 58
+#define MAX_BUF_SIZE (MAX_PACKET_SIZE + 2)
+
 DEFINE_GUID(CLSID_SampleGrabber, 0xc1f400a0, 0x3f08, 0x11d3, 0x9f, 0x0b, 0x00,
             0x60, 0x08, 0x03, 0x9e, 0x37);
 DEFINE_GUID(IID_ISampleGrabber, 0x6b652fff, 0x11fe, 0x4fce, 0x92, 0xad, 0x02,
@@ -59,6 +62,9 @@ DEFINE_GUID(MEDIASUBTYPE_Y8, 0x20203859, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa,
             0x00, 0x38, 0x9b, 0x71);
 DEFINE_GUID(MEDIASUBTYPE_Y800, 0x30303859, 0x0000, 0x0010, 0x80, 0x00, 0x00,
             0xaa, 0x00, 0x38, 0x9b, 0x71);
+
+static const GUID EXT_UNIT_GUID = {0xFFFFFFFF, 0xFFFF, 0xFFFF, 0xFF, 0xFF, 0xFF,
+                                   0xFF,       0xFF,   0xFF,   0xFF, 0xFF};
 
 #pragma comment(lib, "strmiids")
 
@@ -137,4 +143,54 @@ class SampleGrabberCallback : public ISampleGrabberCB {
 
     bool newFrame;
     CRITICAL_SECTION critSection;
+};
+
+struct UsbHandle {
+    ICaptureGraphBuilder2 *pCaptureGraph; // Capture graph builder object
+    IGraphBuilder *pGraph;                // Graph builder object
+    IMediaControl *pControl;              // Media control object
+    IBaseFilter *pVideoInputFilter;       // Video Capture filter
+    IBaseFilter *pGrabberF;
+    IBaseFilter *pDestFilter;
+    IAMStreamConfig *streamConf;
+    ISampleGrabber *pGrabber; // Grabs frame
+    AM_MEDIA_TYPE *pAmMediaType;
+    IMediaEventEx *pMediaEvent;
+    SampleGrabberCallback *pCB;
+    GUID videoType;
+};
+
+struct ExUnitHandle {
+    IKsTopologyInfo *pKsTopologyInfo;
+    IKsControl *pKsUnk;
+    ULONG node;
+
+    ExUnitHandle() : pKsTopologyInfo(nullptr), pKsUnk(nullptr), node(0) {}
+    ~ExUnitHandle() {
+        if (pKsTopologyInfo) {
+            pKsTopologyInfo->Release();
+            pKsTopologyInfo = nullptr;
+        }
+    }
+};
+
+class UsbWindowsUtils {
+  public:
+    static HRESULT UvcFindNodeAndGetControl(ExUnitHandle *handle,
+                                            IBaseFilter **pVideoInputFilter);
+
+    static HRESULT UvcExUnitSetProperty(ExUnitHandle *handle, ULONG selector,
+                                        const uint8_t *buffer, ULONG nbBytes);
+
+    static HRESULT UvcExUnitGetProperty(ExUnitHandle *handle, ULONG selector,
+                                        uint8_t *buffer, ULONG nbBytes);
+
+    static HRESULT UvcExUnitReadBuffer(IBaseFilter *pVideoInputFilter,
+                                       ULONG selector, uint32_t address,
+                                       uint8_t *data, uint32_t bufferLength);
+
+    static HRESULT UvcExUnitWriteBuffer(IBaseFilter *pVideoInputFilter,
+                                        ULONG selector, uint32_t address,
+                                        const uint8_t *data,
+                                        uint32_t bufferLength);
 };
