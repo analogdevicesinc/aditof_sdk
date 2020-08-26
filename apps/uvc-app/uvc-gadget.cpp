@@ -1341,7 +1341,15 @@ uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
                 resp->data[1] = 0x0;
                 resp->length = 2;
                 break;
+            case UVC_GET_MIN:
+            case UVC_GET_MAX:
+            case UVC_GET_DEF:
+            case UVC_GET_RES:
+                USB_REQ_DEBUG("Received %x on %d\n", req, cs);
 
+                resp->data[0] = 0xff;
+                resp->length = 1;
+                break;
             default:
                 printf("Unsupported bRequest: Received bRequest %x on cs %d\n",
                        req, cs);
