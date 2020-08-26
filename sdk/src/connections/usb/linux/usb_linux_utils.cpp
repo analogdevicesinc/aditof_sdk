@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "utils.h"
+#include "usb_linux_utils.h"
 
 #include <errno.h>
 #include <glog/logging.h>
@@ -43,7 +43,7 @@
 #include <string.h>
 #endif
 
-int Utils::xioctl(int fh, unsigned long request, void *arg) {
+int UsbLinuxUtils::xioctl(int fh, unsigned long request, void *arg) {
     int r;
 
     do {
@@ -69,9 +69,10 @@ int Utils::xioctl(int fh, unsigned long request, void *arg) {
     return r;
 }
 
-int Utils::uvcExUnitReadOnePacket(int fd, uint8_t selector, uint32_t address,
-                                  uint8_t *data, uint8_t nbPacketBytes,
-                                  uint8_t nbBytesToRead, bool getOnly) {
+int UsbLinuxUtils::uvcExUnitReadOnePacket(int fd, uint8_t selector,
+                                          uint32_t address, uint8_t *data,
+                                          uint8_t nbPacketBytes,
+                                          uint8_t nbBytesToRead, bool getOnly) {
     int ret = 0;
 
     if (nbPacketBytes > MAX_BUF_SIZE) {
@@ -99,7 +100,7 @@ int Utils::uvcExUnitReadOnePacket(int fd, uint8_t selector, uint32_t address,
         cq.unit = 0x03;
         cq.selector = selector;
 
-        ret = Utils::xioctl(fd, UVCIOC_CTRL_QUERY, &cq);
+        ret = UsbLinuxUtils::xioctl(fd, UVCIOC_CTRL_QUERY, &cq);
         if (ret == -1) {
             LOG(WARNING) << "Error in sending address to device, error: "
                          << errno << "(" << strerror(errno) << ")";
@@ -115,7 +116,7 @@ int Utils::uvcExUnitReadOnePacket(int fd, uint8_t selector, uint32_t address,
     cq.unit = 0x03;
     cq.selector = selector;
 
-    ret = Utils::xioctl(fd, UVCIOC_CTRL_QUERY, &cq);
+    ret = UsbLinuxUtils::xioctl(fd, UVCIOC_CTRL_QUERY, &cq);
     if (ret == -1) {
         LOG(WARNING) << "Error in reading data from device, error: " << errno
                      << "(" << strerror(errno) << ")";
@@ -127,8 +128,9 @@ int Utils::uvcExUnitReadOnePacket(int fd, uint8_t selector, uint32_t address,
     return ret;
 }
 
-int Utils::uvcExUnitReadBuffer(int fd, uint8_t selector, uint32_t address,
-                               uint8_t *data, uint32_t bufferLength) {
+int UsbLinuxUtils::uvcExUnitReadBuffer(int fd, uint8_t selector,
+                                       uint32_t address, uint8_t *data,
+                                       uint32_t bufferLength) {
     int ret;
     uint32_t readBytes = 0;
     uint32_t readLength = 0;
@@ -151,8 +153,9 @@ int Utils::uvcExUnitReadBuffer(int fd, uint8_t selector, uint32_t address,
     return ret;
 }
 
-int Utils::uvcExUnitWriteBuffer(int fd, uint8_t selector, uint32_t address,
-                                const uint8_t *data, uint32_t bufferLength) {
+int UsbLinuxUtils::uvcExUnitWriteBuffer(int fd, uint8_t selector,
+                                        uint32_t address, const uint8_t *data,
+                                        uint32_t bufferLength) {
     struct uvc_xu_control_query cq;
     uint8_t packet[MAX_BUF_SIZE];
     uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
@@ -177,7 +180,7 @@ int Utils::uvcExUnitWriteBuffer(int fd, uint8_t selector, uint32_t address,
         packet[4] = writeLen;
         memcpy(&packet[5], data + writtenBytes, writeLen);
 
-        ret = Utils::xioctl(fd, UVCIOC_CTRL_QUERY, &cq);
+        ret = UsbLinuxUtils::xioctl(fd, UVCIOC_CTRL_QUERY, &cq);
         if (ret == -1) {
             LOG(WARNING) << "Failed to write a packet via UVC extension unit";
             return ret;

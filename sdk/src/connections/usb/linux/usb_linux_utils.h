@@ -29,8 +29,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef USB_LINUX_UTILS_H
+#define USB_LINUX_UTILS_H
 
 #include <cstdint>
 
@@ -39,7 +39,7 @@
 #define MAX_PACKET_SIZE (58)
 #define MAX_BUF_SIZE (MAX_PACKET_SIZE + 2)
 
-class Utils {
+class UsbLinuxUtils {
   public:
     static int xioctl(int fh, unsigned long request, void *arg);
 
@@ -85,4 +85,4 @@ class Utils {
                                     const uint8_t *data, uint32_t bufferLength);
 };
 
-#endif // UTILS_H
+#endif // USB_LINUX_UTILS_H

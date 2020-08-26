@@ -31,7 +31,7 @@
  */
 #include "connections/usb/usb_utils.h"
 #include "device_enumerator_impl.h"
-#include "usb_utils.h"
+#include "usb_linux_utils.h"
 #include "utils.h"
 
 #include <dirent.h>
@@ -47,7 +47,7 @@ static aditof::Status getAvailableSensors(int fd,
     int ret;
     uint16_t bufferLength;
 
-    ret = UsbUtils::uvcExUnitReadBuffer(
+    ret = UsbLinuxUtils::uvcExUnitReadBuffer(
         fd, 4, 0, reinterpret_cast<uint8_t *>(&bufferLength),
         sizeof(bufferLength));
     if (ret < 0) {
@@ -58,8 +58,8 @@ static aditof::Status getAvailableSensors(int fd,
     }
 
     uint8_t *data = new uint8_t[bufferLength + 1];
-    ret = UsbUtils::uvcExUnitReadBuffer(fd, 4, sizeof(bufferLength), data,
-                                        bufferLength);
+    ret = UsbLinuxUtils::uvcExUnitReadBuffer(fd, 4, sizeof(bufferLength), data,
+                                             bufferLength);
     if (ret < 0) {
         LOG(WARNING) << "Failed to read the content of buffer holding sensors "
                         "info. Error: "
@@ -121,7 +121,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         }
 
         struct v4l2_capability cap;
-        if (-1 == Utils::xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
+        if (-1 == UsbLinuxUtils::xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
             if (EINVAL == errno) {
                 LOG(WARNING) << driverPath << " is not V4L2 device";
                 close(fd);
@@ -135,7 +135,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         struct v4l2_format fmt;
         CLEAR(fmt);
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        if (-1 == Utils::xioctl(fd, VIDIOC_G_FMT, &fmt)) {
+        if (-1 == UsbLinuxUtils::xioctl(fd, VIDIOC_G_FMT, &fmt)) {
             close(fd);
             continue;
         }
@@ -166,8 +166,8 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         devData.driverPath = driverPath;
 
         vector<string> sensorsPaths;
-        Utils::SplitIntoTokens(advertisedSensorData, ';', sensorsPaths);
-        UsbUtils::parseSensorTokens(sensorPaths, devData);
+        Utils::splitIntoTokens(advertisedSensorData, ';', sensorsPaths);
+        UsbUtils::parseSensorTokens(sensorsPaths, devData);
 
         devices.emplace_back(devData);
     }

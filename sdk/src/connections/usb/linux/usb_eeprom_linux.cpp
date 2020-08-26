@@ -30,6 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "usb_eeprom.h"
+#include "usb_linux_utils.h"
 #include "utils.h"
 
 #include <glog/logging.h>
@@ -60,8 +61,8 @@ Status UsbEeprom::open(void *handle, const char *name,
 
 Status UsbEeprom::read(const uint32_t address, uint8_t *data,
                        const size_t bytesCount) {
-    int ret = Utils::uvcExUnitReadBuffer(m_implData->fd, 5, address, data,
-                                         bytesCount);
+    int ret = UsbLinuxUtils::uvcExUnitReadBuffer(m_implData->fd, 5, address,
+                                                 data, bytesCount);
     if (ret < 0) {
         LOG(WARNING)
             << "Failed to read buffer through UVC extension unit. Error: "
@@ -73,8 +74,8 @@ Status UsbEeprom::read(const uint32_t address, uint8_t *data,
 
 Status UsbEeprom::write(const uint32_t address, const uint8_t *data,
                         const size_t bytesCount) {
-    int ret = Utils::uvcExUnitWriteBuffer(m_implData->fd, 6, address, data,
-                                          bytesCount);
+    int ret = UsbLinuxUtils::uvcExUnitWriteBuffer(m_implData->fd, 6, address,
+                                                  data, bytesCount);
     if (ret < 0) {
         LOG(WARNING)
             << "Failed to write buffer through UVC extension unit. Error: "
