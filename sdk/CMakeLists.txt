@@ -84,6 +84,8 @@ endif()
 if ( NOT WITH_NETWORK )
     list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_device.cpp)
     list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_device.h)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_eeprom.cpp)
+    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_eeprom.h)
 endif()
 
 # Create target and set properties

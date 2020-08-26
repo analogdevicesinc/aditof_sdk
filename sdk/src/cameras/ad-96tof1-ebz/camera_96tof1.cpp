@@ -100,7 +100,8 @@ aditof::Status Camera96Tof1::initialize() {
                                  return eData.driverName == "24c1024";
                              });
     if (iter == m_devData.eeproms.end()) {
-        LOG(ERROR) << "No info about the EERPOM required by the camera";
+        LOG(ERROR)
+            << "No available info about the EEPROM required by the camera";
         return status;
     }
 

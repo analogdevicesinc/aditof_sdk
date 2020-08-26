@@ -45,8 +45,8 @@ struct UsbEeprom::ImplData {
 
 UsbEeprom::UsbEeprom() : m_implData(new ImplData) { m_implData->fd = -1; }
 
-Status UsbEeprom::open(void *handle, const char *name,
-                       const char *driver_path) {
+Status UsbEeprom::open(void *handle, const std::string &name,
+                       const std::string &driver_path) {
     if (!handle) {
         LOG(ERROR) << "Invalid handle";
         return Status::INVALID_ARGUMENT;
@@ -91,5 +91,10 @@ Status UsbEeprom::close() {
     m_implData->name.clear();
     m_implData->driverPath.clear();
 
+    return Status::OK;
+}
+
+Status UsbEeprom::getName(std::string &name) {
+    name = m_implData->name;
     return Status::OK;
 }

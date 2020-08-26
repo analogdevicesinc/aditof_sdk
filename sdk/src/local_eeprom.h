@@ -43,13 +43,14 @@ class LocalEeprom : public EepromInterface {
     LocalEeprom();
 
     // Implements EepromInterface
-    aditof::Status open(void *handle, const char *name,
-                        const char *driver_path) override;
-    aditof::Status read(const uint32_t address, uint8_t *data,
-                        const size_t bytesCount) override;
-    aditof::Status write(const uint32_t address, const uint8_t *data,
-                         const size_t bytesCount) override;
-    aditof::Status close() override;
+    virtual aditof::Status open(void *handle, const std::string &name,
+                                const std::string &driver_path) override;
+    virtual aditof::Status read(const uint32_t address, uint8_t *data,
+                                const size_t bytesCount) override;
+    virtual aditof::Status write(const uint32_t address, const uint8_t *data,
+                                 const size_t bytesCount) override;
+    virtual aditof::Status close() override;
+    virtual aditof::Status getName(std::string &name) override;
 
   private:
     struct ImplData;

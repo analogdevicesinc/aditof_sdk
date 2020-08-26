@@ -35,6 +35,7 @@
 #include <aditof/status_definitions.h>
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 namespace aditof {
 
@@ -56,8 +57,8 @@ class EepromInterface {
      * @param driver_path - The EEPROM driver path on sysfs
      * @return Status
      */
-    virtual aditof::Status open(void *handle, const char *name,
-                                const char *driver_path) = 0;
+    virtual aditof::Status open(void *handle, const std::string &name,
+                                const std::string &driver_path) = 0;
 
     /**
      * @brief Read data from EEPROM
@@ -84,6 +85,13 @@ class EepromInterface {
      * @return Status
      */
     virtual aditof::Status close() = 0;
+
+    /**
+     * @brief Retrieves the name of the eeprom
+     * @param[out] name - This gets set with the name of the eeprom
+     * @return Status
+     */
+    virtual aditof::Status getName(std::string &name) = 0;
 };
 
 } // namespace aditof

@@ -8,7 +8,8 @@ enum Status
   BUSY = 1;
   UNREACHABLE = 2;
   INVALID_ARGUMENT = 3;
-  GENERIC_ERROR = 4;
+  UNAVAILABLE = 4;
+  GENERIC_ERROR = 5;
 }
 
 enum ServerStatus
@@ -30,10 +31,17 @@ enum SensorType
     SENSOR_CHICONY = 1;
 }
 
+message EepromConstructionData
+{
+  string driver_name = 10;
+  string driver_path = 20;
+}
+
 message DeviceConstructionData
 {
-  DeviceType device_type = 10;  // The type of a device
-  string driver_path = 20;      // Information about the driver the device is using
+  DeviceType device_type = 10;                  // The type of a device
+  string driver_path = 20;                      // Information about the driver the device is using
+  repeated EepromConstructionData eeproms = 30; // Information about available eeproms
 }
 
 message FrameDetails

@@ -41,8 +41,8 @@ struct UsbEeprom::ImplData {};
 
 UsbEeprom::UsbEeprom() {}
 
-Status UsbEeprom::open(void * /*handle*/, const char * /*name*/,
-                       const char * /*driver_path*/) {
+Status UsbEeprom::open(void * /*handle*/, const std::string & /*name*/,
+                       const std::string & /*driver_path*/) {
     return Status::UNAVAILABLE;
 }
 
@@ -53,6 +53,10 @@ Status UsbEeprom::read(const uint32_t /*address*/, uint8_t * /*data*/,
 
 Status UsbEeprom::write(const uint32_t /*address*/, const uint8_t * /*data*/,
                         const size_t /*bytesCount*/) {
+    return Status::UNAVAILABLE;
+}
+
+Status UsbEeprom::getName(std::string & /*name*/) {
     return Status::UNAVAILABLE;
 }
 

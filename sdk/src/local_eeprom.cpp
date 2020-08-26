@@ -43,7 +43,8 @@ struct LocalEeprom::ImplData {};
 
 LocalEeprom::LocalEeprom() {}
 
-aditof::Status LocalEeprom::open(void *, const char *, const char *) {
+aditof::Status LocalEeprom::open(void *, const std::string &,
+                                 const std::string &) {
     return Status::UNAVAILABLE;
 }
 
@@ -57,3 +58,7 @@ aditof::Status LocalEeprom::write(const uint32_t, const uint8_t *,
 }
 
 aditof::Status LocalEeprom::close() { return Status::UNAVAILABLE; }
+
+aditof::Status LocalEeprom::getName(std::string &name) {
+    return Status::UNAVAILABLE;
+}

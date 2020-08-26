@@ -44,15 +44,18 @@ using namespace aditof;
 
 struct LocalEeprom::ImplData {
     eeprom eepromDev;
+    std::string name;
+    std::string driverPath;
 };
 
 LocalEeprom::LocalEeprom() : m_implData(new ImplData) {}
 
-Status LocalEeprom::open(void *, const char *name, const char *driver_path) {
+Status LocalEeprom::open(void *, const std::string &name,
+                         const std::string &driver_path) {
     eeprom *e = &m_implData->eepromDev;
 
     e->valid = 0;
-    e->fd = fopen(driver_path, "w+");
+    e->fd = fopen(driver_path.c_str(), "w+");
     if (!e->fd) {
         LOG(ERROR) << "fopen() failed. Error: " << strerror(errno);
         return Status::GENERIC_ERROR;
@@ -67,6 +70,9 @@ Status LocalEeprom::open(void *, const char *name, const char *driver_path) {
     e->length = static_cast<unsigned int>(len);
     fseek(e->fd, 0x0, SEEK_SET);
     e->valid = 1;
+
+    m_implData->name = name;
+    m_implData->driverPath = driver_path;
 
     return Status::OK;
 }
@@ -102,5 +108,10 @@ Status LocalEeprom::close() {
     m_implData->eepromDev.fd = NULL;
     m_implData->eepromDev.valid = 0;
 
+    return Status::OK;
+}
+
+Status LocalEeprom::getName(std::string &name) {
+    name = m_implData->name;
     return Status::OK;
 }

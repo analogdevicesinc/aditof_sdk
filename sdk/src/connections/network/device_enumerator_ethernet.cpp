@@ -80,6 +80,16 @@ aditof::Status DeviceEnumeratorEthernet::findDevices(
             static_cast<aditof::ConnectionType>(pbData.device_type());
         tofData.driverPath = pbData.driver_path();
         tofData.ip = m_ip;
+
+        for (int j = 0; j < pbData.eeproms().size(); ++j) {
+            const payload::EepromConstructionData &pbEepromData =
+                pbData.eeproms(j);
+            aditof::EepromConstructionData tofEepromData;
+            tofEepromData.driverName = pbEepromData.driver_name();
+            tofEepromData.driverPath = pbEepromData.driver_path();
+            tofData.eeproms.push_back(tofEepromData);
+        }
+
         devices.push_back(tofData);
     }
     status = static_cast<Status>(net->recv_buff.status());

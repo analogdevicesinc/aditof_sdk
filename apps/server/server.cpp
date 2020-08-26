@@ -34,6 +34,8 @@
 #include "aditof/device_construction_data.h"
 #include "aditof/device_enumerator_factory.h"
 #include "aditof/device_factory.h"
+#include "aditof/eeprom_factory.h"
+#include "aditof/eeprom_interface.h"
 #include "buffer.pb.h"
 
 #include "../../sdk/src/local_device.h"
@@ -50,6 +52,7 @@ using namespace std;
 static int interrupted = 0;
 
 static std::shared_ptr<LocalDevice> device = nullptr;
+static vector<shared_ptr<aditof::EepromInterface>> eeproms;
 static payload::ClientRequest buff_recv;
 static payload::ServerResponse buff_send;
 static std::map<string, api_Values> s_map_api_Values;
@@ -213,6 +216,21 @@ int Network::callback_function(struct lws *wsi,
 
 void sigint_handler(int) { interrupted = 1; }
 
+shared_ptr<aditof::EepromInterface> findEepromByName(const string &name) {
+    shared_ptr<aditof::EepromInterface> eeprom;
+
+    for (const auto &e : eeproms) {
+        std::string eName;
+        e->getName(eName);
+        if (eName == name) {
+            eeprom = e;
+            break;
+        }
+    }
+
+    return eeprom;
+}
+
 int main(int argc, char *argv[]) {
 
     signal(SIGINT, sigint_handler);
@@ -268,8 +286,13 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         for (const auto &devInfo : devicesInfo) {
             auto pbDevInfo = buff_send.add_device_info();
             pbDevInfo->set_device_type(static_cast<::payload::DeviceType>(
-                aditof::DeviceType::ETHERNET));
+                aditof::ConnectionType::ETHERNET));
             pbDevInfo->set_driver_path(devInfo.driverPath);
+            for (const auto &eepromInfo : devInfo.eeproms) {
+                auto pbEepromInfo = pbDevInfo->add_eeproms();
+                pbEepromInfo->set_driver_name(eepromInfo.driverName);
+                pbEepromInfo->set_driver_path(eepromInfo.driverPath);
+            }
         }
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
@@ -283,7 +306,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         std::string errMsg;
         aditof::DeviceConstructionData devData;
 
-        devData.deviceType = aditof::DeviceType::LOCAL;
+        devData.connectionType = aditof::ConnectionType::LOCAL;
         devData.driverPath = buff_recv.device_data().driver_path();
         std::shared_ptr<aditof::DeviceInterface> deviceI =
             aditof::DeviceFactory::buildDevice(devData);
@@ -297,6 +320,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             buff_send.set_sensor_type(
                 static_cast<::payload::SensorType>(devDetails.sensorType));
         }
+
         buff_send.set_status(static_cast<::payload::Status>(status));
         if (!errMsg.empty())
             buff_send.set_message(errMsg);
@@ -423,36 +447,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         break;
     }
 
-    case READ_EEPROM: {
-#ifdef DEBUG
-        cout << "ReadEeprom function\n";
-#endif
-        uint32_t address = static_cast<uint32_t>(buff_recv.func_int32_param(0));
-        size_t length = static_cast<size_t>(buff_recv.func_int32_param(1));
-        uint8_t *buffer = new uint8_t[length];
-        aditof::Status status = device->readEeprom(address, buffer, length);
-        if (status == aditof::Status::OK) {
-            buff_send.add_bytes_payload(buffer, length);
-        }
-        delete[] buffer;
-        buff_send.set_status(static_cast<::payload::Status>(status));
-        break;
-    }
-
-    case WRITE_EEPROM: {
-#ifdef DEBUG
-        cout << "WriteEeprom function\n";
-#endif
-        uint32_t address = static_cast<uint32_t>(buff_recv.func_int32_param(0));
-        size_t length = static_cast<size_t>(buff_recv.func_int32_param(1));
-        const uint8_t *buffer = reinterpret_cast<const uint8_t *>(
-            buff_recv.func_bytes_param(0).c_str());
-
-        aditof::Status status = device->writeEeprom(address, buffer, length);
-        buff_send.set_status(static_cast<::payload::Status>(status));
-        break;
-    }
-
     case READ_AFE_REGISTERS: {
 #ifdef DEBUG
         cout << "ReadAfeRegisters function\n";
@@ -511,6 +505,155 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         break;
     }
 
+    case EEPROM_OPEN: {
+#ifdef DEBUG
+        cout << "EepromOpen function\n";
+#endif
+        // Check if client has sent exactly one name to identify the EEPROM
+        if (buff_recv.device_data().eeproms_size() != 1) {
+            buff_send.set_message(
+                "Failed to idenify EEPROM. Exactly one name for the eeprom is "
+                "accepted. Number of names provided: " +
+                std::to_string(buff_recv.device_data().eeproms_size()));
+            buff_send.set_status(static_cast<::payload::Status>(
+                aditof::Status::INVALID_ARGUMENT));
+            break;
+        }
+        std::string eName = buff_recv.device_data().eeproms(0).driver_name();
+
+        // If EEPROM hasn't been instantiated yet, we do it here
+        auto eeprom = findEepromByName(eName);
+        if (!eeprom) {
+            eeprom = std::shared_ptr<aditof::EepromInterface>(
+                aditof::EepromFactory::buildEeprom(
+                    aditof::ConnectionType::LOCAL));
+            if (!eeprom) {
+                buff_send.set_message("Failed to instantiate an EEPROM object");
+                buff_send.set_status(static_cast<::payload::Status>(
+                    aditof::Status::GENERIC_ERROR));
+                break;
+            }
+        }
+
+        aditof::Status status = eeprom->open(
+            nullptr, eName, buff_recv.device_data().eeproms(0).driver_path());
+
+        if (status == aditof::Status::OK) {
+            eeproms.push_back(eeprom);
+        }
+
+        buff_send.set_status(static_cast<::payload::Status>(status));
+        break;
+    }
+
+    case EEPROM_READ: {
+#ifdef DEBUG
+        cout << "EepromRead function\n";
+#endif
+        // Check if client has sent exactly one name to identify the EEPROM
+        if (buff_recv.device_data().eeproms_size() != 1) {
+            buff_send.set_message(
+                "Failed to idenify EEPROM. Exactly one name for the eeprom is "
+                "accepted. Number of names provided: " +
+                std::to_string(buff_recv.device_data().eeproms_size()));
+            buff_send.set_status(static_cast<::payload::Status>(
+                aditof::Status::INVALID_ARGUMENT));
+            break;
+        }
+        std::string eName = buff_recv.device_data().eeproms(0).driver_name();
+
+        // We lookup the EEPROM instance by name
+        auto eeprom = findEepromByName(eName);
+        if (!eeprom) {
+            buff_send.set_message("Failed to idenify EEPROM with name: " +
+                                  eName);
+            buff_send.set_status(static_cast<::payload::Status>(
+                aditof::Status::INVALID_ARGUMENT));
+        }
+
+        uint32_t address = static_cast<uint32_t>(buff_recv.func_int32_param(0));
+        size_t length = static_cast<size_t>(buff_recv.func_int32_param(1));
+        uint8_t *buffer = new uint8_t[length];
+        aditof::Status status = eeprom->read(address, buffer, length);
+        if (status == aditof::Status::OK) {
+            buff_send.add_bytes_payload(buffer, length);
+        }
+        delete[] buffer;
+        buff_send.set_status(static_cast<::payload::Status>(status));
+        break;
+    }
+
+    case EEPROM_WRITE: {
+#ifdef DEBUG
+        cout << "Eepromrite function\n";
+#endif
+        // Check if client has sent exactly one name to identify the EEPROM
+        if (buff_recv.device_data().eeproms_size() != 1) {
+            buff_send.set_message(
+                "Failed to idenify EEPROM. Exactly one name for the eeprom is "
+                "accepted. Number of names provided: " +
+                std::to_string(buff_recv.device_data().eeproms_size()));
+            buff_send.set_status(static_cast<::payload::Status>(
+                aditof::Status::INVALID_ARGUMENT));
+            break;
+        }
+        std::string eName = buff_recv.device_data().eeproms(0).driver_name();
+
+        // We lookup the EEPROM instance by name
+        auto eeprom = findEepromByName(eName);
+        if (!eeprom) {
+            buff_send.set_message("Failed to idenify EEPROM with name: " +
+                                  eName);
+            buff_send.set_status(static_cast<::payload::Status>(
+                aditof::Status::INVALID_ARGUMENT));
+        }
+
+        uint32_t address = static_cast<uint32_t>(buff_recv.func_int32_param(0));
+        size_t length = static_cast<size_t>(buff_recv.func_int32_param(1));
+        const uint8_t *buffer = reinterpret_cast<const uint8_t *>(
+            buff_recv.func_bytes_param(0).c_str());
+
+        aditof::Status status = eeprom->write(address, buffer, length);
+        buff_send.set_status(static_cast<::payload::Status>(status));
+        break;
+    }
+
+    case EEPROM_CLOSE: {
+#ifdef DEBUG
+        cout << "EepromClose function\n";
+#endif
+        // Check if client has sent exactly one name to identify the EEPROM
+        if (buff_recv.device_data().eeproms_size() != 1) {
+            buff_send.set_message(
+                "Failed to idenify EEPROM. Exactly one name for the eeprom is "
+                "accepted. Number of names provided: " +
+                std::to_string(buff_recv.device_data().eeproms_size()));
+            buff_send.set_status(static_cast<::payload::Status>(
+                aditof::Status::INVALID_ARGUMENT));
+            break;
+        }
+        std::string eName = buff_recv.device_data().eeproms(0).driver_name();
+
+        // We lookup the EEPROM instance by name
+        auto eeprom = findEepromByName(eName);
+        if (!eeprom) {
+            buff_send.set_message("Failed to idenify EEPROM with name: " +
+                                  eName);
+            buff_send.set_status(static_cast<::payload::Status>(
+                aditof::Status::INVALID_ARGUMENT));
+        }
+        break;
+
+        aditof::Status status = eeprom->close();
+
+        if (status == aditof::Status::OK) {
+            eeproms.erase(std::remove(eeproms.begin(), eeproms.end(), eeprom),
+                          eeproms.end());
+        }
+
+        buff_send.set_status(static_cast<::payload::Status>(status));
+    }
+
     default: {
         std::string msgErr = "Function not found";
         cout << msgErr << "\n";
@@ -535,10 +678,12 @@ void Initialize() {
     s_map_api_Values["SetFrameType"] = SET_FRAME_TYPE;
     s_map_api_Values["Program"] = PROGRAM;
     s_map_api_Values["GetFrame"] = GET_FRAME;
-    s_map_api_Values["ReadEeprom"] = READ_EEPROM;
-    s_map_api_Values["WriteEeprom"] = WRITE_EEPROM;
     s_map_api_Values["ReadAfeRegisters"] = READ_AFE_REGISTERS;
     s_map_api_Values["WriteAfeRegisters"] = WRITE_AFE_REGISTERS;
     s_map_api_Values["ReadAfeTemp"] = READ_AFE_TEMP;
     s_map_api_Values["ReadLaserTemp"] = READ_LASER_TEMP;
+    s_map_api_Values["EepromOpen"] = EEPROM_OPEN;
+    s_map_api_Values["EepromRead"] = EEPROM_READ;
+    s_map_api_Values["EepromWrite"] = EEPROM_WRITE;
+    s_map_api_Values["EepromClose"] = EEPROM_CLOSE;
 }
