@@ -1,15 +1,18 @@
 get_filename_component(aditof_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 set(aditof_INCLUDE_DIRS "@CONFIG_INCLUDE_DIRS@")
+set(WITH_NETWORK "@WITH_NETWORK@")
 
 if (NOT glog_FOUND)
         find_package(glog 0.3.5 REQUIRED)
 endif()
-if (NOT Protobuf_FOUND)
+if (WITH_NETWORK)
+  if (NOT Protobuf_FOUND)
         find_package(Protobuf 3.9.0 REQUIRED)
-endif()
-if (NOT Libwebsockets_FOUND)
+  endif()
+  if (NOT Libwebsockets_FOUND)
         find_package(Libwebsockets REQUIRED)
+  endif()
 endif()
 
 if (NOT TARGET aditof::aditof)
