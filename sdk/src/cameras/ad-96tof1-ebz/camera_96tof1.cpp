@@ -378,6 +378,14 @@ std::shared_ptr<aditof::DeviceInterface> Camera96Tof1::getDevice() {
     return m_device;
 }
 
+aditof::Status Camera96Tof1::getEeproms(
+    std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms) {
+    eeproms.clear();
+    eeproms.push_back(m_eeprom);
+
+    return aditof::Status::OK;
+}
+
 aditof::Status
 Camera96Tof1::getAvailableControls(std::vector<std::string> &controls) const {
     using namespace aditof;

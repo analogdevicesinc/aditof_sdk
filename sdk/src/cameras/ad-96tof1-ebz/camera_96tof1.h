@@ -67,6 +67,8 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::Status getControl(const std::string &control,
                               std::string &value) const;
     std::shared_ptr<aditof::DeviceInterface> getDevice();
+    aditof::Status
+    getEeproms(std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms);
 
   private:
     aditof::Status setNoiseReductionTreshold(uint16_t treshold);
@@ -76,7 +78,7 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::CameraDetails m_details;
     std::shared_ptr<aditof::DeviceInterface> m_device;
     aditof::DeviceConstructionData m_devData;
-    std::unique_ptr<aditof::EepromInterface> m_eeprom;
+    std::shared_ptr<aditof::EepromInterface> m_eeprom;
     bool m_devStarted;
     bool m_eepromInitialized;
     std::vector<std::string> m_availableControls;

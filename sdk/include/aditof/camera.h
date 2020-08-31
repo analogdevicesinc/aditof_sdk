@@ -45,6 +45,7 @@ namespace aditof {
 class Frame;
 class CameraSpecifics;
 class DeviceInterface;
+class EepromInterface;
 
 /**
  * @class Camera
@@ -164,6 +165,15 @@ class SDK_API Camera {
      * @return std::shared_ptr<DeviceInterface>
      */
     virtual std::shared_ptr<DeviceInterface> getDevice() = 0;
+
+    /**
+     * @brief Gets the eeprom(s) used internally by the camera. This gives
+     * direct access to the eeprom(s) of the camera.
+     * @param[out] eeproms - List of internal eeproms
+     * @return Status
+     */
+    virtual Status
+    getEeproms(std::vector<std::shared_ptr<EepromInterface>> &eeproms) = 0;
 };
 
 } // namespace aditof
