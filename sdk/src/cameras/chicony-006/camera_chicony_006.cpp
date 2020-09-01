@@ -32,12 +32,14 @@
 #include "camera_chicony_006.h"
 
 #include <aditof/device_interface.h>
+#include <aditof/eeprom_factory.h>
 #include <aditof/eeprom_interface.h>
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <fstream>
 #include <glog/logging.h>
 #include <iterator>
@@ -55,12 +57,17 @@ static const std::array<rangeStruct, 3> rangeValues = {
 
 static const std::string skCustomMode = "custom";
 
-CameraChicony::CameraChicony(std::unique_ptr<aditof::DeviceInterface> device)
-    : m_device(std::move(device)), m_devStarted(false),
-      m_availableControls(
-          {"noise_reduction_threshold", "ir_gamma_correction"}) {}
+CameraChicony::CameraChicony(std::unique_ptr<aditof::DeviceInterface> device,
+                             const aditof::DeviceConstructionData &data)
+    : m_devData(data), m_device(std::move(device)),
+      m_availableControls({"noise_reduction_threshold", "ir_gamma_correction"}),
+      m_devStarted(false), m_eepromInitialized(false) {}
 
-CameraChicony::~CameraChicony() = default;
+CameraChicony::~CameraChicony() {
+    if (m_eepromInitialized) {
+        m_eeprom->close();
+    }
+}
 
 aditof::Status CameraChicony::initialize() {
     using namespace aditof;
@@ -74,11 +81,45 @@ aditof::Status CameraChicony::initialize() {
         return status;
     }
 
+    void *handle;
+    status = m_device->getHandle(&handle);
+    if (status != Status::OK) {
+        LOG(ERROR) << "Failed to obtain the handle";
+        return status;
+    }
+
+    // Initialize EEPROM
+    auto iter = std::find_if(m_devData.eeproms.begin(), m_devData.eeproms.end(),
+                             [](const EepromConstructionData &eData) {
+                                 return eData.driverName == "24c1024";
+                             });
+    if (iter == m_devData.eeproms.end()) {
+        LOG(ERROR)
+            << "No available info about the EEPROM required by the camera";
+        return status;
+    }
+
+    m_eeprom = EepromFactory::buildEeprom(m_devData.connectionType);
+    if (!m_eeprom) {
+        LOG(ERROR) << "Failed to create an Eeprom object";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    const EepromConstructionData &eeprom24c1024Info = *iter;
+    status = m_eeprom->open(handle, eeprom24c1024Info.driverName.c_str(),
+                            eeprom24c1024Info.driverPath.c_str());
+    if (status != Status::OK) {
+        LOG(ERROR) << "Failed to open EEPROM with name "
+                   << m_devData.eeproms.back().driverName << " is available";
+        return status;
+    }
+    m_eepromInitialized = true;
+
     m_details.bitCount = 12;
 
     LOG(INFO) << "Camera initialized";
 
-    status = m_calibration.initialize(m_device);
+    status = m_calibration.initialize(m_device, m_eeprom);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to initialize calibration";
         return status;

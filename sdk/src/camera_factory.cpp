@@ -55,7 +55,8 @@ CameraFactory::buildCamera(const DeviceConstructionData &data) {
 
     case SensorType::SENSOR_CHICONY:
 #ifdef CHICONY_006
-        return std::unique_ptr<Camera>(new CameraChicony(std::move(device)));
+        return std::unique_ptr<Camera>(
+            new CameraChicony(std::move(device), data));
 #else
         return nullptr;
 #endif
