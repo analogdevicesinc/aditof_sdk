@@ -49,6 +49,7 @@ PYBIND11_MODULE(aditofpython, m) {
         .value("Busy", aditof::Status::BUSY)
         .value("Unreachable", aditof::Status::UNREACHABLE)
         .value("InvalidArgument", aditof::Status::INVALID_ARGUMENT)
+        .value("Unavailable", aditof::Status::UNAVAILABLE)
         .value("GenericError", aditof::Status::GENERIC_ERROR);
 
     // Frame declarations
@@ -110,6 +111,7 @@ PYBIND11_MODULE(aditofpython, m) {
 
     // ADI Time of Flight API
 
+    // System
     py::class_<aditof::System>(m, "System")
         .def(py::init<>())
         .def("initialize", &aditof::System::initialize)
@@ -139,6 +141,7 @@ PYBIND11_MODULE(aditofpython, m) {
              },
              py::arg("cameras"), py::arg("ip"));
 
+    // Camera
     py::class_<aditof::Camera, std::shared_ptr<aditof::Camera>>(m, "Camera")
         .def("initialize", &aditof::Camera::initialize)
         .def("start", &aditof::Camera::start)
@@ -174,6 +177,17 @@ PYBIND11_MODULE(aditofpython, m) {
              py::arg("cb") = nullptr)
         .def("getDetails", &aditof::Camera::getDetails, py::arg("details"))
         .def("getDevice", &aditof::Camera::getDevice)
+        .def("getEeproms",
+             [](aditof::Camera &camera, py::list eeproms) {
+                 std::vector<std::shared_ptr<aditof::EepromInterface>>
+                     eepromList;
+                 aditof::Status status = camera.getEeproms(eepromList);
+
+                 for (const auto &e : eepromList)
+                     eeproms.append(e);
+
+                 return status;
+             })
         .def("getAvailableControls",
              [](const aditof::Camera &camera, py::list controls) {
                  std::vector<std::string> controlsList;
@@ -191,6 +205,7 @@ PYBIND11_MODULE(aditofpython, m) {
         .def("getControl", &aditof::Camera::getControl, py::arg("control"),
              py::arg("value"));
 
+    // Frame
     py::class_<aditof::Frame>(m, "Frame")
         .def(py::init<>())
         .def("setDetails", &aditof::Frame::setDetails, py::arg("details"))
@@ -207,6 +222,7 @@ PYBIND11_MODULE(aditofpython, m) {
              },
              py::arg("dataType"));
 
+    // DeviceInterface
     py::class_<aditof::DeviceInterface,
                std::shared_ptr<aditof::DeviceInterface>>(m, "DeviceInterface")
         .def("open", &aditof::DeviceInterface::open)
@@ -243,24 +259,6 @@ PYBIND11_MODULE(aditofpython, m) {
                  return device.getFrame(ptr);
              },
              py::arg("buffer"))
-        .def("readEeprom",
-             [](aditof::DeviceInterface &device, uint32_t address,
-                py::array_t<uint8_t> data, size_t length) {
-                 py::buffer_info buffInfo = data.request(true);
-                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
-
-                 return device.readEeprom(address, ptr, length);
-             },
-             py::arg("address"), py::arg("data"), py::arg("length"))
-        .def("writeEeprom",
-             [](aditof::DeviceInterface &device, uint32_t address,
-                py::array_t<uint8_t> data, size_t length) {
-                 py::buffer_info buffInfo = data.request();
-                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
-
-                 return device.writeEeprom(address, ptr, length);
-             },
-             py::arg("address"), py::arg("data"), py::arg("length"))
         .def("readAfeRegisters",
              [](aditof::DeviceInterface &device, py::array_t<uint16_t> address,
                 py::array_t<uint16_t> data, size_t length) {
@@ -299,4 +297,34 @@ PYBIND11_MODULE(aditofpython, m) {
                  temperature.append(temp);
                  return status;
              });
+
+    // EepromInterface
+    py::class_<aditof::EepromInterface,
+               std::shared_ptr<aditof::EepromInterface>>(m, "EepromInterface")
+        .def("open", &aditof::EepromInterface::open)
+        .def("read",
+             [](aditof::EepromInterface &eeprom, uint32_t address,
+                py::array_t<uint8_t> data, size_t length) {
+                 py::buffer_info buffInfo = data.request(true);
+                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
+
+                 return eeprom.read(address, ptr, length);
+             },
+             py::arg("address"), py::arg("data"), py::arg("length"))
+        .def("write",
+             [](aditof::EepromInterface &eeprom, uint32_t address,
+                py::array_t<uint8_t> data, size_t length) {
+                 py::buffer_info buffInfo = data.request();
+                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
+
+                 return eeprom.write(address, ptr, length);
+             },
+             py::arg("address"), py::arg("data"), py::arg("length"))
+        .def("close", &aditof::EepromInterface::close)
+        .def("getName", [](aditof::EepromInterface &eeprom) {
+            std::string n;
+            eeprom.getName(n);
+
+            return n;
+        });
 }
