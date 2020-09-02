@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+project(eeprom-tool)
+find_package(aditof)
+add_executable(${PROJECT_NAME} main.cpp eepromtoolcontroller.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${aditof_LIBRARIES})

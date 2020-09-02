@@ -1,0 +1,21 @@
+eeprom-tool specs
+
+specify target:
+
+-u, --usb -> try to perform operation on a camera connected via usb
+-e, --ethernet <ip> -> try to perform operations on a camera connected via ethernet at the specified ip
+-m, --mipi -> try to perform operation on a camera connected locally
+
+if nothing is specified the operations will be performed on the first camera returned by the enumerator
+
+
+operations on target:
+-r, --read <path_to_binary>  -> read the eeprom and dumps the contents in a file at the specified path
+
+-w, --write <path_to_new_binary> -> validates the file
+                                 -> write the new file
+
+misc:
+-v, --validate <path_to_binary> -> validates a given binary
+                                -> prints the version
+
