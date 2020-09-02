@@ -550,7 +550,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         status = eeprom->open(nullptr,
                               buff_recv.device_data().eeproms(0).driver_name(),
                               buff_recv.device_data().eeproms(0).driver_path());
-
         if (status == aditof::Status::OK) {
             eeproms.push_back(eeprom);
         }
@@ -625,6 +624,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         }
 
         buff_send.set_status(static_cast<::payload::Status>(status));
+        break;
     }
 
     default: {
