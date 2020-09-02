@@ -47,15 +47,14 @@
 #include <sys/time.h>
 
 using namespace google::protobuf::io;
-using namespace std;
 
 static int interrupted = 0;
 
 static std::shared_ptr<LocalDevice> device = nullptr;
-static vector<shared_ptr<aditof::EepromInterface>> eeproms;
+static std::vector<std::shared_ptr<aditof::EepromInterface>> eeproms;
 static payload::ClientRequest buff_recv;
 static payload::ServerResponse buff_send;
-static std::map<string, api_Values> s_map_api_Values;
+static std::map<std::string, api_Values> s_map_api_Values;
 static void Initialize();
 void invoke_sdk_api(payload::ClientRequest buff_recv);
 static bool Client_Connected = false;
@@ -91,13 +90,13 @@ int Network::callback_function(struct lws *wsi,
         /*Check if another client is connected or not*/
         buff_send.Clear();
         if (Client_Connected == false) {
-            cout << "Conn Established" << endl;
+            std::cout << "Conn Established" << std::endl;
             Client_Connected = true;
             buff_send.set_message("Connection Allowed");
             lws_callback_on_writable(wsi);
             break;
         } else {
-            cout << "Another client connected" << endl;
+            std::cout << "Another client connected" << std::endl;
             no_of_client_connected = true;
             buff_send.set_message("Only 1 client connection allowed");
             lws_callback_on_writable(wsi);
@@ -174,9 +173,9 @@ int Network::callback_function(struct lws *wsi,
         cout << "server is sending " << n << endl;
 #endif
         if (n < 0)
-            cout << "Error Sending" << endl;
+            std::cout << "Error Sending" << std::endl;
         else if (n < siz)
-            cout << "Partial write" << endl;
+            std::cout << "Partial write" << std::endl;
         else if (n == siz) {
 #ifdef NW_DEBUG
             cout << "Write successful" << endl;
@@ -190,7 +189,7 @@ int Network::callback_function(struct lws *wsi,
     case LWS_CALLBACK_CLOSED: {
         if (Client_Connected == true && no_of_client_connected == false) {
             /*CONN_CLOSED event is for first and only client connected*/
-            cout << "Connection Closed" << endl;
+            std::cout << "Connection Closed" << std::endl;
             if (device) {
                 device.reset();
             }
@@ -198,7 +197,7 @@ int Network::callback_function(struct lws *wsi,
             break;
         } else {
             /*CONN_CLOSED event for more than 1 client connected */
-            cout << "Another Client Connection Closed" << endl;
+            std::cout << "Another Client Connection Closed" << std::endl;
             no_of_client_connected = false;
             break;
         }
@@ -216,8 +215,9 @@ int Network::callback_function(struct lws *wsi,
 
 void sigint_handler(int) { interrupted = 1; }
 
-shared_ptr<aditof::EepromInterface> findEepromByName(const string &name) {
-    shared_ptr<aditof::EepromInterface> eeprom;
+std::shared_ptr<aditof::EepromInterface>
+findEepromByName(const std::string &name) {
+    std::shared_ptr<aditof::EepromInterface> eeprom;
 
     for (const auto &e : eeproms) {
         std::string eName;
@@ -656,7 +656,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
     default: {
         std::string msgErr = "Function not found";
-        cout << msgErr << "\n";
+        std::cout << msgErr << "\n";
 
         buff_send.set_message(msgErr);
         buff_send.set_server_status(::payload::ServerStatus::REQUEST_UNKNOWN);
