@@ -40,6 +40,7 @@
 
 #include "../../sdk/src/local_device.h"
 
+#include <glog/logging.h>
 #include <iostream>
 #include <linux/videodev2.h>
 #include <map>
@@ -275,9 +276,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     switch (s_map_api_Values[buff_recv.func_name()]) {
 
     case FIND_DEVICES: {
-#ifdef DEBUG
-        cout << "FindDevices function\n";
-#endif
+        DLOG(INFO) << "FindDevices function\n";
+
         std::vector<aditof::DeviceConstructionData> devicesInfo;
         auto localDevEnumerator =
             aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
@@ -299,9 +299,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case INSTANTIATE_DEVICE: {
-#ifdef DEBUG
-        cout << "InstantiateDevice function\n";
-#endif
+        DLOG(INFO) << "InstantiateDevice function\n";
+
         aditof::Status status = aditof::Status::OK;
         std::string errMsg;
         aditof::DeviceConstructionData devData;
@@ -328,9 +327,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case DESTROY_DEVICE: {
-#ifdef DEBUG
-        cout << "DestroyDevice function\n";
-#endif
+        DLOG(INFO) << "DestroyDevice function\n";
+
         if (device) {
             device.reset();
         }
@@ -338,36 +336,32 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case OPEN: {
-#ifdef DEBUG
-        cout << "Open function\n";
-#endif
+        DLOG(INFO) << "Open function\n";
+
         aditof::Status status = device->open();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case START: {
-#ifdef DEBUG
-        cout << "Start function\n";
-#endif
+        DLOG(INFO) << "Start function\n";
+
         aditof::Status status = device->start();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case STOP: {
-#ifdef DEBUG
-        cout << "Stop function\n";
-#endif
+        DLOG(INFO) << "Stop function\n";
+
         aditof::Status status = device->stop();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case GET_AVAILABLE_FRAME_TYPES: {
-#ifdef DEBUG
-        cout << "GetAvailableFrameTypes function" << endl;
-#endif
+        DLOG(INFO) << "GetAvailableFrameTypes function";
+
         std::vector<aditof::FrameDetails> frameDetails;
         aditof::Status status = device->getAvailableFrameTypes(frameDetails);
         for (auto detail : frameDetails) {
@@ -381,9 +375,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case SET_FRAME_TYPE: {
-#ifdef DEBUG
-        cout << "SetFrameType function\n";
-#endif
+        DLOG(INFO) << "SetFrameType function\n";
+
         aditof::FrameDetails details;
         details.width = buff_recv.frame_type().width();
         details.height = buff_recv.frame_type().height();
@@ -397,9 +390,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case PROGRAM: {
-#ifdef DEBUG
-        cout << "Program function\n";
-#endif
+        DLOG(INFO) << "Program function\n";
+
         size_t programSize = static_cast<size_t>(buff_recv.func_int32_param(0));
         const uint8_t *pdata = reinterpret_cast<const uint8_t *>(
             buff_recv.func_bytes_param(0).c_str());
@@ -409,9 +401,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case GET_FRAME: {
-#ifdef DEBUG
-        cout << "GetFrame function\n";
-#endif
+        DLOG(INFO) << "GetFrame function\n";
+
         aditof::Status status = device->waitForBuffer();
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
@@ -448,9 +439,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case READ_AFE_REGISTERS: {
-#ifdef DEBUG
-        cout << "ReadAfeRegisters function\n";
-#endif
+        DLOG(INFO) << "ReadAfeRegisters function\n";
+
         size_t length = static_cast<size_t>(buff_recv.func_int32_param(0));
         const uint16_t *address = reinterpret_cast<const uint16_t *>(
             buff_recv.func_bytes_param(0).c_str());
@@ -465,9 +455,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case WRITE_AFE_REGISTERS: {
-#ifdef DEBUG
-        cout << "WriteAfeRegisters function\n";
-#endif
+        DLOG(INFO) << "WriteAfeRegisters function\n";
+
         size_t length = static_cast<size_t>(buff_recv.func_int32_param(0));
         const uint16_t *address = reinterpret_cast<const uint16_t *>(
             buff_recv.func_bytes_param(0).c_str());
@@ -480,9 +469,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case READ_AFE_TEMP: {
-#ifdef DEBUG
-        cout << "ReadAfeTemp function\n";
-#endif
+        DLOG(INFO) << "ReadAfeTemp function\n";
+
         float temperature;
         aditof::Status status = device->readAfeTemp(temperature);
         if (status == aditof::Status::OK) {
@@ -493,9 +481,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case READ_LASER_TEMP: {
-#ifdef DEBUG
-        cout << "ReadLaserTemp function\n";
-#endif
+        DLOG(INFO) << "ReadLaserTemp function\n";
+
         float temperature;
         aditof::Status status = device->readLaserTemp(temperature);
         if (status == aditof::Status::OK) {
@@ -506,9 +493,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case EEPROM_OPEN: {
-#ifdef DEBUG
-        cout << "EepromOpen function\n";
-#endif
+        DLOG(INFO) << "EepromOpen function\n";
+
         // Check if client has sent exactly one name to identify the EEPROM
         if (buff_recv.device_data().eeproms_size() != 1) {
             buff_send.set_message(
@@ -547,9 +533,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case EEPROM_READ: {
-#ifdef DEBUG
-        cout << "EepromRead function\n";
-#endif
+        DLOG(INFO) << "EepromRead function\n";
+
         // Check if client has sent exactly one name to identify the EEPROM
         if (buff_recv.device_data().eeproms_size() != 1) {
             buff_send.set_message(
@@ -584,9 +569,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case EEPROM_WRITE: {
-#ifdef DEBUG
-        cout << "Eepromrite function\n";
-#endif
+        DLOG(INFO) << "Eepromrite function\n";
+
         // Check if client has sent exactly one name to identify the EEPROM
         if (buff_recv.device_data().eeproms_size() != 1) {
             buff_send.set_message(
@@ -619,9 +603,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case EEPROM_CLOSE: {
-#ifdef DEBUG
-        cout << "EepromClose function\n";
-#endif
+        DLOG(INFO) << "EepromClose function\n";
+
         // Check if client has sent exactly one name to identify the EEPROM
         if (buff_recv.device_data().eeproms_size() != 1) {
             buff_send.set_message(
