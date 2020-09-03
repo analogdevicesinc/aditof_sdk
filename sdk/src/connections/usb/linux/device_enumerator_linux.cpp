@@ -38,16 +38,16 @@
 #include <fcntl.h>
 #include <glog/logging.h>
 #include <linux/videodev2.h>
+#include <memory>
 #include <sys/stat.h>
 
 using namespace std;
 
 static aditof::Status getAvailableSensors(int fd,
                                           string &advertisedSensorData) {
-    int ret;
     uint16_t bufferLength;
 
-    ret = UsbLinuxUtils::uvcExUnitReadBuffer(
+    int ret = UsbLinuxUtils::uvcExUnitReadBuffer(
         fd, 4, 0, reinterpret_cast<uint8_t *>(&bufferLength),
         sizeof(bufferLength));
     if (ret < 0) {
@@ -57,20 +57,19 @@ static aditof::Status getAvailableSensors(int fd,
         return aditof::Status::GENERIC_ERROR;
     }
 
-    uint8_t *data = new uint8_t[bufferLength + 1];
-    ret = UsbLinuxUtils::uvcExUnitReadBuffer(fd, 4, sizeof(bufferLength), data,
-                                             bufferLength);
+    unique_ptr<uint8_t[]> data(new uint8_t[bufferLength + 1]);
+    ret = UsbLinuxUtils::uvcExUnitReadBuffer(fd, 4, sizeof(bufferLength),
+                                             data.get(), bufferLength);
     if (ret < 0) {
         LOG(WARNING) << "Failed to read the content of buffer holding sensors "
                         "info. Error: "
                      << ret;
-        delete[] data;
         return aditof::Status::GENERIC_ERROR;
     }
 
     data[bufferLength] = '\0';
-    advertisedSensorData = reinterpret_cast<char *>(data);
-    delete[] data;
+    advertisedSensorData = reinterpret_cast<char *>(data.get());
+
     return aditof::Status::OK;
 }
 

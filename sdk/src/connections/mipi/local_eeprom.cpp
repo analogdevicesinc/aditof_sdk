@@ -54,7 +54,6 @@ Status LocalEeprom::open(void *, const std::string &name,
                          const std::string &driver_path) {
     eeprom *e = &m_implData->eepromDev;
 
-    e->valid = 0;
     e->fd = fopen(driver_path.c_str(), "w+");
     if (!e->fd) {
         LOG(ERROR) << "fopen() failed. Error: " << strerror(errno);
@@ -69,7 +68,6 @@ Status LocalEeprom::open(void *, const std::string &name,
     }
     e->length = static_cast<unsigned int>(len);
     fseek(e->fd, 0x0, SEEK_SET);
-    e->valid = 1;
 
     m_implData->name = name;
     m_implData->driverPath = driver_path;
@@ -80,6 +78,15 @@ Status LocalEeprom::open(void *, const std::string &name,
 Status LocalEeprom::read(const uint32_t address, uint8_t *data,
                          const size_t bytesCount) {
     auto fd = m_implData->eepromDev.fd;
+
+    if (!fd) {
+        LOG(ERROR) << "Cannot read! EEPROM is not opened.";
+        return Status::GENERIC_ERROR;
+    }
+    if (!data) {
+        LOG(ERROR) << "Cannot read! data pointer is invaid.";
+        return Status::INVALID_ARGUMENT;
+    }
 
     fseek(fd, address, SEEK_SET);
     size_t ret = fread(data, 1, bytesCount, fd);
@@ -94,6 +101,15 @@ Status LocalEeprom::write(const uint32_t address, const uint8_t *data,
                           const size_t bytesCount) {
     auto fd = m_implData->eepromDev.fd;
 
+    if (!fd) {
+        LOG(ERROR) << "Cannot write! EEPROM is not opened.";
+        return Status::GENERIC_ERROR;
+    }
+    if (!data) {
+        LOG(ERROR) << "Cannot write! data pointer is invaid.";
+        return Status::INVALID_ARGUMENT;
+    }
+
     fseek(fd, address, SEEK_SET);
     size_t ret = fwrite(data, 1, bytesCount, fd);
     if (ret < bytesCount) {
@@ -104,9 +120,10 @@ Status LocalEeprom::write(const uint32_t address, const uint8_t *data,
 }
 
 Status LocalEeprom::close() {
-    fclose(m_implData->eepromDev.fd);
-    m_implData->eepromDev.fd = NULL;
-    m_implData->eepromDev.valid = 0;
+    if (m_implData->eepromDev.fd) {
+        fclose(m_implData->eepromDev.fd);
+        m_implData->eepromDev.fd = nullptr;
+    }
 
     return Status::OK;
 }

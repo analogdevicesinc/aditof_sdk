@@ -63,6 +63,9 @@ static const std::string skCustomMode = "custom";
 static const std::vector<std::string> availableControls = {
     "noise_reduction_threshold", "ir_gamma_correction", "revision"};
 
+// The driver name of the EEPROM that belongs to this camera
+static const std::string skEepromName = "24c1024";
+
 Camera96Tof1::Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device,
                            const aditof::DeviceConstructionData &data)
     : m_device(std::move(device)), m_devData(data), m_devStarted(false),
@@ -97,7 +100,7 @@ aditof::Status Camera96Tof1::initialize() {
     // Initialize EEPROM
     auto iter = std::find_if(m_devData.eeproms.begin(), m_devData.eeproms.end(),
                              [](const EepromConstructionData &eData) {
-                                 return eData.driverName == "24c1024";
+                                 return eData.driverName == skEepromName;
                              });
     if (iter == m_devData.eeproms.end()) {
         LOG(ERROR)

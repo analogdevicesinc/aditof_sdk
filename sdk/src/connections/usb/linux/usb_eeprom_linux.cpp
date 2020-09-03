@@ -61,6 +61,15 @@ Status UsbEeprom::open(void *handle, const std::string &name,
 
 Status UsbEeprom::read(const uint32_t address, uint8_t *data,
                        const size_t bytesCount) {
+    if (!m_implData->fd) {
+        LOG(ERROR) << "Cannot read! EEPROM is not opened.";
+        return Status::GENERIC_ERROR;
+    }
+    if (!data) {
+        LOG(ERROR) << "Cannot read! data pointer is invaid.";
+        return Status::INVALID_ARGUMENT;
+    }
+
     int ret = UsbLinuxUtils::uvcExUnitReadBuffer(m_implData->fd, 5, address,
                                                  data, bytesCount);
     if (ret < 0) {
@@ -74,6 +83,16 @@ Status UsbEeprom::read(const uint32_t address, uint8_t *data,
 
 Status UsbEeprom::write(const uint32_t address, const uint8_t *data,
                         const size_t bytesCount) {
+
+    if (!m_implData->fd) {
+        LOG(ERROR) << "Cannot write! EEPROM is not opened.";
+        return Status::GENERIC_ERROR;
+    }
+    if (!data) {
+        LOG(ERROR) << "Cannot write! data pointer is invaid.";
+        return Status::INVALID_ARGUMENT;
+    }
+
     int ret = UsbLinuxUtils::uvcExUnitWriteBuffer(m_implData->fd, 6, address,
                                                   data, bytesCount);
     if (ret < 0) {

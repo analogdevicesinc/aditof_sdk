@@ -37,6 +37,7 @@
 #include <glog/logging.h>
 
 #include <atlstr.h>
+#include <memory>
 #include <strmif.h>
 
 static aditof::Status getAvailableSensors(IMoniker *Moniker,
@@ -64,11 +65,10 @@ static aditof::Status getAvailableSensors(IMoniker *Moniker,
         return Status::GENERIC_ERROR;
     }
 
-    uint8_t *data = new uint8_t[bufferLength + 1];
+    std::unique_ptr<uint8_t[]> data(new uint8_t[bufferLength + 1]);
     hr = UsbWindowsUtils::UvcExUnitReadBuffer(
-        pVideoInputFilter, 4, sizeof(bufferLength), data, bufferLength);
+        pVideoInputFilter, 4, sizeof(bufferLength), data.get(), bufferLength);
     if (FAILED(hr)) {
-        delete[] data;
         pVideoInputFilter->Release();
         LOG(WARNING) << "Failed to read the content of buffer holding sensors "
                         "info. Error: "
@@ -79,8 +79,7 @@ static aditof::Status getAvailableSensors(IMoniker *Moniker,
     pVideoInputFilter->Release();
 
     data[bufferLength] = '\0';
-    advertisedSensorData = reinterpret_cast<char *>(data);
-    delete[] data;
+    advertisedSensorData = reinterpret_cast<char *>(data.get());
 
     return Status::OK;
 }

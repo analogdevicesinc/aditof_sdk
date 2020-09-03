@@ -62,6 +62,15 @@ Status UsbEeprom::open(void *handle, const std::string &name,
 
 Status UsbEeprom::read(const uint32_t address, uint8_t *data,
                        const size_t bytesCount) {
+    if (!m_implData->handle) {
+        LOG(ERROR) << "Cannot read! EEPROM is not opened.";
+        return Status::GENERIC_ERROR;
+    }
+    if (!data) {
+        LOG(ERROR) << "Cannot read! data pointer is invaid.";
+        return Status::INVALID_ARGUMENT;
+    }
+
     HRESULT hr = UsbWindowsUtils::UvcExUnitReadBuffer(
         m_implData->handle->pVideoInputFilter, 5, address, data, bytesCount);
     if (FAILED(hr)) {
@@ -75,6 +84,15 @@ Status UsbEeprom::read(const uint32_t address, uint8_t *data,
 
 Status UsbEeprom::write(const uint32_t address, const uint8_t *data,
                         const size_t bytesCount) {
+    if (!m_implData->handle) {
+        LOG(ERROR) << "Cannot write! EEPROM is not opened.";
+        return Status::GENERIC_ERROR;
+    }
+    if (!data) {
+        LOG(ERROR) << "Cannot write! data pointer is invaid.";
+        return Status::INVALID_ARGUMENT;
+    }
+
     HRESULT hr = UsbWindowsUtils::UvcExUnitWriteBuffer(
         m_implData->handle->pVideoInputFilter, 6, address, data, bytesCount);
     if (FAILED(hr)) {

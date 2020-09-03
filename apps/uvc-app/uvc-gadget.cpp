@@ -1982,7 +1982,7 @@ int main(int argc, char *argv[]) {
         availableSensorsBlob += "EEPROM_NAME=" + eeprom.driverName + ";";
         availableSensorsBlob += "EEPROM_PATH=" + eeprom.driverPath + ";";
     }
-    uint32_t buffLen = availableSensorsBlob.length();
+    const uint32_t buffLen = availableSensorsBlob.length();
     sensorsInfoBuffer = new char[buffLen + sizeof(uint16_t)];
     uint16_t *buffSize = reinterpret_cast<uint16_t *>(sensorsInfoBuffer);
     *buffSize = buffLen;

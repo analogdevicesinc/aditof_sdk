@@ -112,7 +112,7 @@ aditof::Status Calibration96Tof1::displayCalMap() const {
 //! SaveCalMap - Save the entire calibration map
 /*!
 SaveCalMap - Saves the entire calibration map as binary to a file.
-\device - Pointer to a device instance
+\eeprom - Reference to an eeprom instance
 */
 aditof::Status Calibration96Tof1::saveCalMap(aditof::EepromInterface &eeprom) {
     using namespace aditof;
@@ -145,7 +145,7 @@ aditof::Status Calibration96Tof1::saveCalMap(aditof::EepromInterface &eeprom) {
 //! ReadCalMap - Read the entire calibration map
 /*!
 ReadCalMap - Read the entire calibration map from a binary file
-\eeprom - Pointer to an eeprom instance
+\eeprom - Reference to an eeprom instance
 */
 aditof::Status Calibration96Tof1::readCalMap(aditof::EepromInterface &eeprom) {
     using namespace aditof;
