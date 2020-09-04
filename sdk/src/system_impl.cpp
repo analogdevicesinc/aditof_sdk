@@ -35,29 +35,17 @@
 #include <aditof/camera.h>
 #include <aditof/device_construction_data.h>
 #include <aditof/device_enumerator_factory.h>
-#include <aditof/device_factory.h>
+#include <device_enumerator_ethernet.h>
 
 #include <glog/logging.h>
 
-SystemImpl::SystemImpl()
-    : m_enumerator(aditof::DeviceEnumeratorFactory::buildDeviceEnumerator()) {}
+SystemImpl::SystemImpl() {}
 
 SystemImpl::~SystemImpl() = default;
 
 aditof::Status SystemImpl::initialize() {
     using namespace aditof;
     Status status = Status::OK;
-
-    std::vector<aditof::DeviceConstructionData> devsData;
-    m_enumerator->findDevices(devsData);
-
-    for (const auto &data : devsData) {
-        std::unique_ptr<DeviceInterface> device =
-            DeviceFactory::buildDevice(data);
-        std::shared_ptr<Camera> camera =
-            CameraFactory::buildCamera(std::move(device));
-        m_cameras.emplace_back(camera);
-    }
 
     LOG(INFO) << "System initialized";
 
@@ -69,7 +57,14 @@ aditof::Status SystemImpl::getCameraList(
     using namespace aditof;
     Status status = Status::OK;
 
-    cameraList = m_cameras;
+    auto enumerator = DeviceEnumeratorFactory::buildDeviceEnumerator();
+    std::vector<aditof::DeviceConstructionData> devsData;
+    enumerator->findDevices(devsData);
+
+    for (const auto &data : devsData) {
+        std::shared_ptr<Camera> camera = CameraFactory::buildCamera(data);
+        cameraList.emplace_back(camera);
+    }
 
     return status;
 }
@@ -98,10 +93,7 @@ aditof::Status SystemImpl::getCameraListAtIp(
     }
 
     for (const auto &data : devsData) {
-        std::unique_ptr<DeviceInterface> device =
-            DeviceFactory::buildDevice(data);
-        std::shared_ptr<Camera> camera =
-            CameraFactory::buildCamera(std::move(device));
+        std::shared_ptr<Camera> camera = CameraFactory::buildCamera(data);
         cameraList.emplace_back(camera);
     }
 

@@ -29,19 +29,52 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "connections/usb/usb_utils.h"
 #include "device_enumerator_impl.h"
-#include "utils_linux.h"
+#include "usb_linux_utils.h"
+#include "utils.h"
 
 #include <dirent.h>
 #include <fcntl.h>
 #include <glog/logging.h>
 #include <linux/videodev2.h>
+#include <memory>
 #include <sys/stat.h>
 
-#define CLEAR(x) memset(&(x), 0, sizeof(x))
+using namespace std;
+
+static aditof::Status getAvailableSensors(int fd,
+                                          string &advertisedSensorData) {
+    uint16_t bufferLength;
+
+    int ret = UsbLinuxUtils::uvcExUnitReadBuffer(
+        fd, 4, 0, reinterpret_cast<uint8_t *>(&bufferLength),
+        sizeof(bufferLength));
+    if (ret < 0) {
+        LOG(WARNING)
+            << "Failed to read size of buffer holding sensors info. Error: "
+            << ret;
+        return aditof::Status::GENERIC_ERROR;
+    }
+
+    unique_ptr<uint8_t[]> data(new uint8_t[bufferLength + 1]);
+    ret = UsbLinuxUtils::uvcExUnitReadBuffer(fd, 4, sizeof(bufferLength),
+                                             data.get(), bufferLength);
+    if (ret < 0) {
+        LOG(WARNING) << "Failed to read the content of buffer holding sensors "
+                        "info. Error: "
+                     << ret;
+        return aditof::Status::GENERIC_ERROR;
+    }
+
+    data[bufferLength] = '\0';
+    advertisedSensorData = reinterpret_cast<char *>(data.get());
+
+    return aditof::Status::OK;
+}
 
 aditof::Status DeviceEnumeratorImpl::findDevices(
-    std::vector<aditof::DeviceConstructionData> &devices) {
+    vector<aditof::DeviceConstructionData> &devices) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -62,7 +95,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         if (strspn(sset, (dir->d_name)) != 5) {
             continue;
         }
-        std::string driverPath(path);
+        string driverPath(path);
         driverPath += dir->d_name;
 
         struct stat st;
@@ -87,7 +120,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         }
 
         struct v4l2_capability cap;
-        if (-1 == xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
+        if (-1 == UsbLinuxUtils::xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
             if (EINVAL == errno) {
                 LOG(WARNING) << driverPath << " is not V4L2 device";
                 close(fd);
@@ -101,7 +134,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
         struct v4l2_format fmt;
         CLEAR(fmt);
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        if (-1 == xioctl(fd, VIDIOC_G_FMT, &fmt)) {
+        if (-1 == UsbLinuxUtils::xioctl(fd, VIDIOC_G_FMT, &fmt)) {
             close(fd);
             continue;
         }
@@ -123,12 +156,18 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
             close(fd);
             continue;
         }
-
+        string advertisedSensorData;
+        getAvailableSensors(fd, advertisedSensorData);
         close(fd);
 
         DeviceConstructionData devData;
-        devData.deviceType = DeviceType::USB;
+        devData.connectionType = ConnectionType::USB;
         devData.driverPath = driverPath;
+
+        vector<string> sensorsPaths;
+        Utils::splitIntoTokens(advertisedSensorData, ';', sensorsPaths);
+        UsbUtils::parseSensorTokens(sensorsPaths, devData);
+
         devices.emplace_back(devData);
     }
 

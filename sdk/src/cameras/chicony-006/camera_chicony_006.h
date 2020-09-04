@@ -34,12 +34,14 @@
 
 #include <memory>
 
-#include <aditof/camera.h>
 #include "calibration_chicony_006.h"
+#include <aditof/camera.h>
+#include <aditof/device_construction_data.h>
 
 class CameraChicony : public aditof::Camera {
   public:
-    CameraChicony(std::unique_ptr<aditof::DeviceInterface> device);
+    CameraChicony(std::unique_ptr<aditof::DeviceInterface> device,
+                  const aditof::DeviceConstructionData &data);
     ~CameraChicony();
 
   public: // implements Camera
@@ -56,10 +58,15 @@ class CameraChicony : public aditof::Camera {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb);
     aditof::Status getDetails(aditof::CameraDetails &details) const;
-    aditof::Status getAvailableControls(std::vector<std::string> &controls) const;
-    aditof::Status setControl(const std::string &control, const std::string &value);
-    aditof::Status getControl(const std::string &control, std::string &value) const;
+    aditof::Status
+    getAvailableControls(std::vector<std::string> &controls) const;
+    aditof::Status setControl(const std::string &control,
+                              const std::string &value);
+    aditof::Status getControl(const std::string &control,
+                              std::string &value) const;
     std::shared_ptr<aditof::DeviceInterface> getDevice();
+    aditof::Status
+    getEeproms(std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms);
 
   private:
     aditof::Status setNoiseReductionTreshold(uint16_t treshold);
@@ -67,9 +74,12 @@ class CameraChicony : public aditof::Camera {
 
   private:
     aditof::CameraDetails m_details;
+    aditof::DeviceConstructionData m_devData;
     std::shared_ptr<aditof::DeviceInterface> m_device;
+    std::shared_ptr<aditof::EepromInterface> m_eeprom;
     std::vector<std::string> m_availableControls;
     bool m_devStarted;
+    bool m_eepromInitialized;
     CalibrationChicony006 m_calibration;
     uint16_t m_noiseReductionThreshold;
     float m_irGammaCorrection;

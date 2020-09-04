@@ -29,65 +29,26 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "eeprom.h"
+#ifndef UTILS_H
+#define UTILS_H
 
-#include <errno.h>
-#include <fcntl.h>
-#include <linux/fs.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
+#include <string>
+#include <vector>
 
-int eeprom_open(const char *dev_fqn, eeprom *e) {
-    e->valid = 0;
-    e->fd = fopen(dev_fqn, "w+");
-    if (e->fd == NULL) {
-        fprintf(stderr, "Error eeprom_open: %s\n", strerror(errno));
-        return -1;
-    }
+namespace aditof {
 
-    fseek(e->fd, 0x0, SEEK_END);
-    long len = ftell(e->fd);
-    if (len < 0) {
-        fprintf(stderr, "Error eeprom_open: %s\n", strerror(errno));
-        return -1;
-    }
-    e->length = (unsigned int)len;
-    fseek(e->fd, 0x0, SEEK_SET);
-    e->valid = 1;
+class Utils {
+  public:
+    /**
+     * @brief Splits a string into smaller strings based on a single character delimiter.
+     * The sub-strings are placed in a vector and will not contain the delimiter.
+     * @param s - The string to split.
+     * @param delimiter - The character used for delimiting the sub-strings.
+     * @param[out] tokens - A vector holding the sub-strings.
+     */
+    static void splitIntoTokens(const std::string &s, const char delimiter,
+                                std::vector<std::string> &tokens);
+};
+} // namespace aditof
 
-    return 0;
-}
-
-int eeprom_read_buf(eeprom *e, unsigned int addr, unsigned char *buf,
-                    size_t size) {
-    fseek(e->fd, addr, SEEK_SET);
-    size_t ret = fread(buf, 1, size, e->fd);
-    if (ret < size) {
-        fprintf(stderr, "eeprom_read_buf failed with %d: %s\n", errno,
-                strerror(errno));
-        return -1;
-    }
-    return 0;
-}
-
-int eeprom_write_buf(eeprom *e, unsigned int addr, unsigned char *buf,
-                     size_t size) {
-    fseek(e->fd, addr, SEEK_SET);
-    size_t ret = fwrite(buf, 1, size, e->fd);
-    if (ret < size) {
-        fprintf(stderr, "eeprom_write_buf failed with %d: %s\n", errno,
-                strerror(errno));
-        return -1;
-    }
-    return 0;
-}
-
-int eeprom_close(eeprom *e) {
-    if (e) {
-        fclose(e->fd);
-        e->fd = NULL;
-        e->valid = 0;
-    }
-    return 0;
-}
+#endif // UTILS_H

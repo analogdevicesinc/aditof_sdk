@@ -324,7 +324,7 @@ class cal_map(object):
         self.add_json_to_map((mode_dict[mode]*2+2), linear_cal_json_file)
         self.add_load_files_to_map((mode_dict[mode]*2+3), load_file_path)
     
-    def write_eeprom_cal_map(self, dev):
+    def write_eeprom_cal_map(self, eeprom):
         #print("\n\nWriting EEPROM")
         eeprom_write_bytearray = bytes()
         for key, list_params in self.calibration_map.items():
@@ -352,18 +352,18 @@ class cal_map(object):
         size_byte = struct.pack('<f', size)
         for index in range(0, 4):
             size_list.append(size_byte[index])
-        dev.writeEeprom(int(0), np.array(size_list, dtype='uint8'), 4)
-        dev.writeEeprom(int(4), np.array(eeprom_write_list, dtype='uint8'), eeprom_write_list.__len__())
+        eeprom.write(int(0), np.array(size_list, dtype='uint8'), 4)
+        eeprom.write(int(4), np.array(eeprom_write_list, dtype='uint8'), eeprom_write_list.__len__())
   
-    def read_eeprom_cal_map(self, dev):
+    def read_eeprom_cal_map(self, eeprom):
         #print("Reading EEPROM")
         data_array = np.zeros(4, dtype='uint8')
-        dev.readEeprom(int(0), data_array, 4)
+        eeprom.read(int(0), data_array, 4)
         read_size = struct.unpack('<f', data_array)
         #print("Read Size",read_size)
 
         data_array = np.zeros(int(read_size[0]), dtype='uint8')
-        dev.readEeprom(int(4), data_array, int(read_size[0]))
+        eeprom.read(int(4), data_array, int(read_size[0]))
         r_b = data_array.tobytes()
         
         j = 0
@@ -477,14 +477,16 @@ def test_cal_eeprom():
     status = system.initialize()
     print("system.initialize()", status)
     cam_handle = device.open_device2(system)
-    dev_handle = cam_handle.getDevice()
+    eeproms = []
+    cam_handle.getEeproms(eeproms)
+    eeprom = eeproms[0]
     
     print("\n\nWriting to EEPROM")
-    cal2.write_eeprom_cal_map(dev_handle)
+    cal2.write_eeprom_cal_map(eeprom)
 
     print("\n\nReading from EEPROM")
     cal3 = cal_map()
-    cal3.read_eeprom_cal_map(dev_handle)
+    cal3.read_eeprom_cal_map(eeprom)
     cal3.save_cal_map("eeprom_read_map.bin")
     with open ("eeprom_read_map.json", 'w') as f:
         f.write(str(cal3.calibration_map))

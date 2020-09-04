@@ -37,10 +37,13 @@
 #include <memory>
 
 #include <aditof/camera.h>
+#include <aditof/device_construction_data.h>
+#include <aditof/eeprom_interface.h>
 
 class Camera96Tof1 : public aditof::Camera {
   public:
-    Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device);
+    Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device,
+                 const aditof::DeviceConstructionData &data);
     ~Camera96Tof1();
 
   public: // implements Camera
@@ -64,6 +67,8 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::Status getControl(const std::string &control,
                               std::string &value) const;
     std::shared_ptr<aditof::DeviceInterface> getDevice();
+    aditof::Status
+    getEeproms(std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms);
 
   private:
     aditof::Status setNoiseReductionTreshold(uint16_t treshold);
@@ -72,7 +77,10 @@ class Camera96Tof1 : public aditof::Camera {
   private:
     aditof::CameraDetails m_details;
     std::shared_ptr<aditof::DeviceInterface> m_device;
+    aditof::DeviceConstructionData m_devData;
+    std::shared_ptr<aditof::EepromInterface> m_eeprom;
     bool m_devStarted;
+    bool m_eepromInitialized;
     std::vector<std::string> m_availableControls;
     Calibration96Tof1 m_calibration;
     uint16_t m_noiseReductionThreshold;

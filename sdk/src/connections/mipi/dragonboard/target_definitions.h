@@ -32,6 +32,7 @@
 #ifndef TARGET_DEFINITIONS_H
 #define TARGET_DEFINITIONS_H
 
+static const char *EEPROM_NAME = "24c1024";
 static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
 
 static const char *EEPROM_REPLACEMENT_PATH = "";

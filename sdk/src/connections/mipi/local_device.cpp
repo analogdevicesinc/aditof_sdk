@@ -35,7 +35,6 @@
 #include <fstream>
 
 extern "C" {
-#include "eeprom.h"
 #include "temp_sensor.h"
 }
 
@@ -82,7 +81,6 @@ struct LocalDevice::ImplData {
     bool started;
     enum v4l2_buf_type videoBuffersType;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
-    eeprom edev;
 
     ImplData()
         : fd(-1), sfd(-1), videoBuffers(nullptr),
@@ -142,8 +140,6 @@ LocalDevice::~LocalDevice() {
         LOG(WARNING) << "close m_implData->sfd error "
                      << "errno: " << errno << " error: " << strerror(errno);
     }
-
-    eeprom_close(&m_implData->edev);
 }
 
 aditof::Status LocalDevice::open() {
@@ -228,10 +224,6 @@ aditof::Status LocalDevice::open() {
         LOG(WARNING) << "Cannot open " << subDevName << " errno: " << errno
                      << " error: " << strerror(errno);
         return Status::GENERIC_ERROR;
-    }
-
-    if (eeprom_open(EEPROM_DEV_PATH, &m_implData->edev) < 0) {
-        LOG(WARNING) << "EEPROM not available!";
     }
 
     return status;
@@ -633,45 +625,6 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
     return status;
 }
 
-aditof::Status LocalDevice::readEeprom(uint32_t address, uint8_t *data,
-                                       size_t length) {
-    using namespace aditof;
-    Status status = Status::OK;
-
-    if (!m_implData->edev.valid) {
-        LOG(WARNING) << "EEPROM not available!";
-        return Status::GENERIC_ERROR;
-    }
-
-    int ret = eeprom_read_buf(&m_implData->edev, address, data, length);
-    if (ret == -1) {
-        LOG(WARNING) << "EEPROM read error";
-        return Status::GENERIC_ERROR;
-    }
-
-    return status;
-}
-
-aditof::Status LocalDevice::writeEeprom(uint32_t address, const uint8_t *data,
-                                        size_t length) {
-    using namespace aditof;
-    Status status = Status::OK;
-
-    if (!m_implData->edev.valid) {
-        LOG(WARNING) << "EEPROM not available!";
-        return Status::GENERIC_ERROR;
-    }
-
-    int ret = eeprom_write_buf(&m_implData->edev, address,
-                               const_cast<uint8_t *>(data), length);
-    if (ret == -1) {
-        LOG(WARNING) << "EEPROM write error";
-        return Status::GENERIC_ERROR;
-    }
-
-    return status;
-}
-
 aditof::Status LocalDevice::readAfeRegisters(const uint16_t *address,
                                              uint16_t *data, size_t length) {
     using namespace aditof;
@@ -812,6 +765,11 @@ aditof::Status LocalDevice::readLaserTemp(float &temperature) {
 
 aditof::Status LocalDevice::getDetails(aditof::DeviceDetails &details) const {
     details = m_deviceDetails;
+    return aditof::Status::OK;
+}
+
+aditof::Status LocalDevice::getHandle(void **handle) {
+    *handle = nullptr;
     return aditof::Status::OK;
 }
 

@@ -29,28 +29,34 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EEPROM_H
-#define EEPROM_H
 
-#include "i2c_common.h"
+#include "local_eeprom.h"
+#include "usb_eeprom.h"
 
-/*
- * opens the eeprom device with filesystem access
- */
-int eeprom_open(const char *dev_fqn, eeprom *e);
-/*
- * closes the eeprom device
- */
-int eeprom_close(eeprom *e);
-/*
- * write the data stored in buff to eeprom
- */
-int eeprom_write_buf(eeprom *e, unsigned int addr, unsigned char *buf,
-                     size_t size);
-/*
- * read the data from eeprom and store it in buff
- */
-int eeprom_read_buf(eeprom *e, unsigned int addr, unsigned char *buf,
-                    size_t size);
+#ifdef HAS_NETWORK
+#include "ethernet_eeprom.h"
+#endif
 
-#endif /* EEPROM_H */
+#include <aditof/eeprom_factory.h>
+
+using namespace aditof;
+
+std::unique_ptr<EepromInterface>
+EepromFactory::buildEeprom(ConnectionType connection) {
+    switch (connection) {
+    case ConnectionType::USB: {
+        return std::unique_ptr<EepromInterface>(new UsbEeprom());
+    }
+    case ConnectionType::ETHERNET: {
+#ifdef HAS_NETWORK
+        return std::unique_ptr<EepromInterface>(new EthernetEeprom());
+#endif
+        return nullptr;
+    }
+    case ConnectionType::LOCAL: {
+        return std::unique_ptr<EepromInterface>(new LocalEeprom());
+    }
+    }
+
+    return nullptr;
+}

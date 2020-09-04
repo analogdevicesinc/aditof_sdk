@@ -29,41 +29,33 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef UTILS_LINUX_H
-#define UTILS_LINUX_H
+#ifndef EEPROM_CONSTRUCTION_DATA
+#define EEPROM_CONSTRUCTION_DATA
 
-#include <errno.h>
-#include <sys/ioctl.h>
+#include <string>
 
-#ifdef DEBUG_USB
-#include <iostream>
-#include <linux/uvcvideo.h>
-#include <string.h>
-#endif
+/**
+ * @brief Namespace aditof
+ */
+namespace aditof {
 
-static int xioctl(int fh, unsigned long request, void *arg) {
-    int r;
+/**
+ * @struct EepromConstructionData
+ * @brief Provides data required to construct an EEPROM device
+ */
+struct EepromConstructionData {
+    /**
+     * @brief The driver name used by the device to talk the hardware
+     */
+    std::string driverName;
 
-    do {
-        r = ioctl(fh, request, arg);
-        // printf("Error=%d\n",errno);
-    } while (-1 == r && (EINTR == errno || EIO == errno) && errno != 0);
+    /**
+     * @brief The URL associated with the driver used by the device to talk to
+     * hardware
+     */
+    std::string driverPath;
+};
 
-#ifdef DEBUG_USB
-    if (request == (int)UVCIOC_CTRL_QUERY) {
-        static int count = 0;
-        struct uvc_xu_control_query *cq = (struct uvc_xu_control_query *)arg;
-        count++;
-        printf("%d Calling IOCTL with bRequest %02x, wValue %04x, wIndex %04x, "
-               "wLength %04x\n",
-               count, cq->query, cq->selector, cq->unit, cq->size);
-        if (r != 0) {
-            printf("Return values: %d \n", r);
-            printf("IOCTL failed, error num: %d, %s\n", errno, strerror(errno));
-        }
-    }
-#endif
-    return r;
-}
+}; // namespace aditof
 
-#endif // UTILS_LINUX_H
+#endif // EEPROM_CONSTRUCTION_DATA

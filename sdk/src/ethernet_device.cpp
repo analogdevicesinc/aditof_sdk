@@ -42,23 +42,23 @@ struct CalibrationData {
     float offset;
     uint16_t *cache;
 };
-
 struct EthernetDevice::ImplData {
-    Network *net;
+    EthernetHandle handle;
     std::string ip;
     aditof::FrameDetails frameDetails_cache;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
-    std::mutex net_mutex;
+    bool opened;
 };
 
 EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
     : m_implData(new EthernetDevice::ImplData) {
 
     Network *net = new Network();
-    m_implData->net = net;
+    m_implData->handle.net = net;
     m_implData->ip = data.ip;
+    m_implData->opened = false;
 
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     /* Make connection with LWS server running on Dragonboard */
     if (net->ServerConnect(m_implData->ip) != 0) {
@@ -67,6 +67,11 @@ EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
 
     net->send_buff.set_func_name("InstantiateDevice");
     net->send_buff.mutable_device_data()->set_driver_path(data.driverPath);
+    for (const auto &eeprom : data.eeproms) {
+        auto pbEeprom = net->send_buff.mutable_device_data()->add_eeproms();
+        pbEeprom->set_driver_name(eeprom.driverName);
+        pbEeprom->set_driver_path(eeprom.driverPath);
+    }
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -93,8 +98,8 @@ EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
 }
 
 EthernetDevice::~EthernetDevice() {
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -111,7 +116,7 @@ EthernetDevice::~EthernetDevice() {
         LOG(WARNING) << "Receive Data Failed";
     }
 
-    delete m_implData->net;
+    delete m_implData->handle.net;
 
     for (auto it = m_implData->calibration_cache.begin();
          it != m_implData->calibration_cache.begin(); ++it) {
@@ -123,8 +128,8 @@ EthernetDevice::~EthernetDevice() {
 aditof::Status EthernetDevice::open() {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -152,14 +157,18 @@ aditof::Status EthernetDevice::open() {
 
     Status status = static_cast<Status>(net->recv_buff.status());
 
+    if (status == Status::OK) {
+        m_implData->opened = true;
+    }
+
     return status;
 }
 
 aditof::Status EthernetDevice::start() {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -193,8 +202,8 @@ aditof::Status EthernetDevice::start() {
 aditof::Status EthernetDevice::stop() {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     LOG(INFO) << "Stopping device";
 
@@ -231,8 +240,8 @@ aditof::Status EthernetDevice::getAvailableFrameTypes(
     std::vector<aditof::FrameDetails> &types) {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -283,8 +292,8 @@ aditof::Status
 EthernetDevice::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -325,8 +334,8 @@ EthernetDevice::setFrameType(const aditof::FrameDetails &details) {
 aditof::Status EthernetDevice::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -362,8 +371,8 @@ aditof::Status EthernetDevice::program(const uint8_t *firmware, size_t size) {
 aditof::Status EthernetDevice::getFrame(uint16_t *buffer) {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -407,94 +416,12 @@ aditof::Status EthernetDevice::getFrame(uint16_t *buffer) {
     return status;
 }
 
-aditof::Status EthernetDevice::readEeprom(uint32_t address, uint8_t *data,
-                                          size_t length) {
-    using namespace aditof;
-
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
-
-    if (!net->isServer_Connected()) {
-        LOG(WARNING) << "Not connected to server";
-        return Status::UNREACHABLE;
-    }
-
-    net->send_buff.set_func_name("ReadEeprom");
-    net->send_buff.add_func_int32_param(static_cast<::google::int32>(address));
-    net->send_buff.add_func_int32_param(static_cast<::google::int32>(length));
-    net->send_buff.set_expect_reply(true);
-
-    if (net->SendCommand() != 0) {
-        LOG(WARNING) << "Send Command Failed";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    if (net->recv_server_data() != 0) {
-        LOG(WARNING) << "Receive Data Failed";
-        return Status::GENERIC_ERROR;
-    }
-
-    if (net->recv_buff.server_status() !=
-        payload::ServerStatus::REQUEST_ACCEPTED) {
-        LOG(WARNING) << "API execution on Target Failed";
-        return Status::GENERIC_ERROR;
-    }
-
-    Status status = static_cast<Status>(net->recv_buff.status());
-
-    if (status == Status::OK) {
-        memcpy(data, net->recv_buff.bytes_payload(0).c_str(),
-               net->recv_buff.bytes_payload(0).length());
-    }
-
-    return status;
-}
-
-aditof::Status EthernetDevice::writeEeprom(uint32_t address,
-                                           const uint8_t *data, size_t length) {
-    using namespace aditof;
-
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
-
-    if (!net->isServer_Connected()) {
-        LOG(WARNING) << "Not connected to server";
-        return Status::UNREACHABLE;
-    }
-
-    net->send_buff.set_func_name("WriteEeprom");
-    net->send_buff.add_func_int32_param(static_cast<::google::int32>(address));
-    net->send_buff.add_func_int32_param(static_cast<::google::int32>(length));
-    net->send_buff.add_func_bytes_param(data, length);
-    net->send_buff.set_expect_reply(true);
-
-    if (net->SendCommand() != 0) {
-        LOG(WARNING) << "Send Command Failed";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    if (net->recv_server_data() != 0) {
-        LOG(WARNING) << "Receive Data Failed";
-        return Status::GENERIC_ERROR;
-    }
-
-    if (net->recv_buff.server_status() !=
-        payload::ServerStatus::REQUEST_ACCEPTED) {
-        LOG(WARNING) << "API execution on Target Failed";
-        return Status::GENERIC_ERROR;
-    }
-
-    Status status = static_cast<Status>(net->recv_buff.status());
-
-    return status;
-}
-
 aditof::Status EthernetDevice::readAfeRegisters(const uint16_t *address,
                                                 uint16_t *data, size_t length) {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -538,8 +465,8 @@ aditof::Status EthernetDevice::writeAfeRegisters(const uint16_t *address,
                                                  size_t length) {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -576,8 +503,8 @@ aditof::Status EthernetDevice::writeAfeRegisters(const uint16_t *address,
 aditof::Status EthernetDevice::readAfeTemp(float &temperature) {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -615,8 +542,8 @@ aditof::Status EthernetDevice::readAfeTemp(float &temperature) {
 aditof::Status EthernetDevice::readLaserTemp(float &temperature) {
     using namespace aditof;
 
-    Network *net = m_implData->net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->net_mutex);
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -655,5 +582,17 @@ aditof::Status
 EthernetDevice::getDetails(aditof::DeviceDetails &details) const {
     details = m_deviceDetails;
 
+    return aditof::Status::OK;
+}
+
+aditof::Status EthernetDevice::getHandle(void **handle) {
+    if (m_implData->opened) {
+        *handle = &m_implData->handle;
+        return aditof::Status::OK;
+    } else {
+        *handle = nullptr;
+        LOG(ERROR) << "Won't return the handle. Device hasn't been opened yet.";
+        return aditof::Status::UNAVAILABLE;
+    }
     return aditof::Status::OK;
 }

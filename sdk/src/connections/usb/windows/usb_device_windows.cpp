@@ -30,19 +30,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "usb_device.h"
-#include "windows_utils.h"
+#include "usb_windows_utils.h"
 
 #include "device_utils.h"
 
 #include <atlstr.h>
 #include <glog/logging.h>
 #include <unordered_map>
-
-#define MAX_PACKET_SIZE 58
-#define MAX_BUF_SIZE (MAX_PACKET_SIZE + 2)
-
-static const GUID EXT_UNIT_GUID = {0xFFFFFFFF, 0xFFFF, 0xFFFF, 0xFF, 0xFF, 0xFF,
-                                   0xFF,       0xFF,   0xFF,   0xFF, 0xFF};
 
 struct CalibrationData {
     std::string mode;
@@ -52,18 +46,8 @@ struct CalibrationData {
 };
 
 struct UsbDevice::ImplData {
-    ICaptureGraphBuilder2 *pCaptureGraph; // Capture graph builder object
-    IGraphBuilder *pGraph;                // Graph builder object
-    IMediaControl *pControl;              // Media control object
-    IBaseFilter *pVideoInputFilter;       // Video Capture filter
-    IBaseFilter *pGrabberF;
-    IBaseFilter *pDestFilter;
-    IAMStreamConfig *streamConf;
-    ISampleGrabber *pGrabber; // Grabs frame
-    AM_MEDIA_TYPE *pAmMediaType;
-    IMediaEventEx *pMediaEvent;
-    SampleGrabberCallback *pCB;
-    GUID videoType;
+    UsbHandle handle;
+    bool opened;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
 };
 
@@ -237,7 +221,8 @@ static void destroyGraph(IGraphBuilder *pGraph) {
 
 UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new UsbDevice::ImplData) {
-    m_implData->pMediaEvent = nullptr;
+    m_implData->handle.pMediaEvent = nullptr;
+    m_implData->opened = false;
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 }
 
@@ -245,10 +230,10 @@ UsbDevice::~UsbDevice() {
     HRESULT HR = NOERROR;
 
     // Check to see if the graph is running, if so stop it.
-    if (m_implData->pControl) {
-        HR = m_implData->pControl->Pause();
+    if (m_implData->handle.pControl) {
+        HR = m_implData->handle.pControl->Pause();
 
-        HR = m_implData->pControl->Stop();
+        HR = m_implData->handle.pControl->Stop();
     }
 
     for (auto it = m_implData->calibration_cache.begin();
@@ -258,64 +243,65 @@ UsbDevice::~UsbDevice() {
     }
 
     // Disconnect filters from capture device
-    if (m_implData->pVideoInputFilter) {
-        NukeDownstream(m_implData->pVideoInputFilter, m_implData->pGraph);
+    if (m_implData->handle.pVideoInputFilter) {
+        NukeDownstream(m_implData->handle.pVideoInputFilter,
+                       m_implData->handle.pGraph);
     }
 
     // Release and zero pointers to our filters etc
-    if (m_implData->pDestFilter) {
-        m_implData->pDestFilter->Release();
+    if (m_implData->handle.pDestFilter) {
+        m_implData->handle.pDestFilter->Release();
     }
 
-    if (m_implData->pVideoInputFilter) {
-        m_implData->pVideoInputFilter->Release();
+    if (m_implData->handle.pVideoInputFilter) {
+        m_implData->handle.pVideoInputFilter->Release();
     }
 
-    if (m_implData->pGrabberF) {
-        m_implData->pGrabberF->Release();
+    if (m_implData->handle.pGrabberF) {
+        m_implData->handle.pGrabberF->Release();
     }
 
-    if (m_implData->pGrabber) {
-        m_implData->pGrabber->Release();
+    if (m_implData->handle.pGrabber) {
+        m_implData->handle.pGrabber->Release();
     }
 
-    if (m_implData->pControl) {
-        m_implData->pControl->Release();
+    if (m_implData->handle.pControl) {
+        m_implData->handle.pControl->Release();
     }
 
-    if (m_implData->pMediaEvent) {
-        m_implData->pMediaEvent->Release();
+    if (m_implData->handle.pMediaEvent) {
+        m_implData->handle.pMediaEvent->Release();
     }
 
-    if (m_implData->streamConf) {
-        m_implData->streamConf->Release();
+    if (m_implData->handle.streamConf) {
+        m_implData->handle.streamConf->Release();
     }
 
-    if (m_implData->pAmMediaType) {
-        if (m_implData->pAmMediaType->cbFormat != 0) {
-            CoTaskMemFree((PVOID)m_implData->pAmMediaType->pbFormat);
-            m_implData->pAmMediaType->cbFormat = 0;
-            m_implData->pAmMediaType->pbFormat = nullptr;
+    if (m_implData->handle.pAmMediaType) {
+        if (m_implData->handle.pAmMediaType->cbFormat != 0) {
+            CoTaskMemFree((PVOID)m_implData->handle.pAmMediaType->pbFormat);
+            m_implData->handle.pAmMediaType->cbFormat = 0;
+            m_implData->handle.pAmMediaType->pbFormat = nullptr;
         }
-        if (m_implData->pAmMediaType->pUnk != nullptr) {
+        if (m_implData->handle.pAmMediaType->pUnk != nullptr) {
             // Unecessary because pUnk should not be used, but safest.
-            m_implData->pAmMediaType->pUnk->Release();
-            m_implData->pAmMediaType->pUnk = nullptr;
+            m_implData->handle.pAmMediaType->pUnk->Release();
+            m_implData->handle.pAmMediaType->pUnk = nullptr;
         }
-        CoTaskMemFree(m_implData->pAmMediaType);
+        CoTaskMemFree(m_implData->handle.pAmMediaType);
     }
 
     // Destroy the graph
-    if (m_implData->pGraph) {
-        destroyGraph(m_implData->pGraph);
+    if (m_implData->handle.pGraph) {
+        destroyGraph(m_implData->handle.pGraph);
     }
 
     // Release and zero our capture graph and our main graph
-    if (m_implData->pCaptureGraph) {
-        m_implData->pCaptureGraph->Release();
+    if (m_implData->handle.pCaptureGraph) {
+        m_implData->handle.pCaptureGraph->Release();
     }
-    if (m_implData->pGraph) {
-        m_implData->pGraph->Release();
+    if (m_implData->handle.pGraph) {
+        m_implData->handle.pGraph->Release();
     }
 }
 
@@ -332,49 +318,53 @@ aditof::Status UsbDevice::open() {
 
     hr = CoCreateInstance(CLSID_CaptureGraphBuilder2, nullptr,
                           CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2,
-                          (void **)&(m_implData->pCaptureGraph));
+                          (void **)&(m_implData->handle.pCaptureGraph));
     if (FAILED(hr)) {
         LOG(WARNING) << "Failed CoCreateInstance(CLSID_CaptureGraphBuilder2)";
         return Status::GENERIC_ERROR;
     }
 
     hr = CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_INPROC_SERVER,
-                          IID_IGraphBuilder, (void **)&(m_implData->pGraph));
+                          IID_IGraphBuilder,
+                          (void **)&(m_implData->handle.pGraph));
     if (FAILED(hr)) {
         LOG(WARNING) << "Failed CoCreateInstance(CLSID_FilterGraph)";
         return Status::GENERIC_ERROR;
     }
 
-    hr = m_implData->pCaptureGraph->SetFiltergraph(m_implData->pGraph);
+    hr = m_implData->handle.pCaptureGraph->SetFiltergraph(
+        m_implData->handle.pGraph);
     if (FAILED(hr)) {
         LOG(WARNING) << "Failed SetFiltergraph";
         return Status::GENERIC_ERROR;
     }
 
-    hr = m_implData->pGraph->QueryInterface(IID_IMediaControl,
-                                            (void **)&(m_implData->pControl));
+    hr = m_implData->handle.pGraph->QueryInterface(
+        IID_IMediaControl, (void **)&(m_implData->handle.pControl));
     if (FAILED(hr)) {
         LOG(WARNING) << "Failed QueryInterface(IID_IMediaControl)";
         return Status::GENERIC_ERROR;
     }
 
-    status = getDevice(&m_implData->pVideoInputFilter, m_devData.driverPath);
+    status =
+        getDevice(&m_implData->handle.pVideoInputFilter, m_devData.driverPath);
     if (status != Status::OK) {
         return status;
     }
 
     std::wstring stemp = s2ws(m_devData.driverPath);
-    hr = m_implData->pGraph->AddFilter(m_implData->pVideoInputFilter,
-                                       stemp.c_str());
+    hr = m_implData->handle.pGraph->AddFilter(
+        m_implData->handle.pVideoInputFilter, stemp.c_str());
     if (FAILED(hr)) {
         LOG(WARNING) << "ADI TOF Camera cannot be opened";
         return Status::GENERIC_ERROR;
     }
 
     IAMStreamConfig *streamConfTest = nullptr;
-    hr = m_implData->pCaptureGraph->FindInterface(
-        &PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video, m_implData->pVideoInputFilter,
-        IID_IAMStreamConfig, (void **)&streamConfTest);
+    hr = m_implData->handle.pCaptureGraph->FindInterface(
+        &PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video,
+        m_implData->handle.pVideoInputFilter, IID_IAMStreamConfig,
+        (void **)&streamConfTest);
     if (FAILED(hr)) {
         // TO DO: old IO library allowed this to fail. Investigate why.
         LOG(WARNING) << "Failed FindInterface(PIN_CATEGORY_PREVIEW)";
@@ -384,43 +374,45 @@ aditof::Status UsbDevice::open() {
         streamConfTest = nullptr;
     }
 
-    hr = m_implData->pCaptureGraph->FindInterface(
-        &CAPTURE_MODE, &MEDIATYPE_Video, m_implData->pVideoInputFilter,
-        IID_IAMStreamConfig, (void **)&(m_implData->streamConf));
+    hr = m_implData->handle.pCaptureGraph->FindInterface(
+        &CAPTURE_MODE, &MEDIATYPE_Video, m_implData->handle.pVideoInputFilter,
+        IID_IAMStreamConfig, (void **)&(m_implData->handle.streamConf));
     if (FAILED(hr)) {
         LOG(WARNING) << "Failed FindInterface(CAPTURE_MODE)";
         return Status::GENERIC_ERROR;
     }
 
-    hr = m_implData->streamConf->GetFormat(&(m_implData->pAmMediaType));
+    hr = m_implData->handle.streamConf->GetFormat(
+        &(m_implData->handle.pAmMediaType));
     if (FAILED(hr)) {
         LOG(WARNING) << "Failed to get format from streamConf";
         return Status::GENERIC_ERROR;
     }
 
     hr = CoCreateInstance(CLSID_SampleGrabber, nullptr, CLSCTX_INPROC_SERVER,
-                          IID_IBaseFilter, (void **)&(m_implData->pGrabberF));
+                          IID_IBaseFilter,
+                          (void **)&(m_implData->handle.pGrabberF));
     if (FAILED(hr)) {
         LOG(WARNING) << "Could not Create Sample Grabber - CoCreateInstance()";
         return Status::GENERIC_ERROR;
     }
 
-    hr =
-        m_implData->pGraph->AddFilter(m_implData->pGrabberF, L"Sample Grabber");
+    hr = m_implData->handle.pGraph->AddFilter(m_implData->handle.pGrabberF,
+                                              L"Sample Grabber");
     if (FAILED(hr)) {
         LOG(WARNING) << "Could not add Sample Grabber - AddFilter()";
         return Status::GENERIC_ERROR;
     }
 
-    hr = m_implData->pGrabberF->QueryInterface(
-        IID_ISampleGrabber, (void **)&(m_implData->pGrabber));
+    hr = m_implData->handle.pGrabberF->QueryInterface(
+        IID_ISampleGrabber, (void **)&(m_implData->handle.pGrabber));
     if (FAILED(hr)) {
         LOG(WARNING) << "ERROR: Could not query SampleGrabber";
         return Status::GENERIC_ERROR;
     }
 
-    hr = m_implData->pGrabber->SetOneShot(FALSE);
-    hr = m_implData->pGrabber->SetBufferSamples(TRUE);
+    hr = m_implData->handle.pGrabber->SetOneShot(FALSE);
+    hr = m_implData->handle.pGrabber->SetBufferSamples(TRUE);
     if (FAILED(hr)) {
         LOG(WARNING) << "Fail SetBuffer";
         return Status::GENERIC_ERROR;
@@ -431,9 +423,9 @@ aditof::Status UsbDevice::open() {
 
     mt.majortype = MEDIATYPE_Video;
     // Included conditional based format for Y16
-    if (checkSingleByteFormat(m_implData->pAmMediaType->subtype) ||
-        (m_implData->pAmMediaType->subtype == MEDIASUBTYPE_Y16)) {
-        mt.subtype = m_implData->pAmMediaType->subtype;
+    if (checkSingleByteFormat(m_implData->handle.pAmMediaType->subtype) ||
+        (m_implData->handle.pAmMediaType->subtype == MEDIASUBTYPE_Y16)) {
+        mt.subtype = m_implData->handle.pAmMediaType->subtype;
     } else
         mt.subtype = MEDIASUBTYPE_RGB24; // Making it RGB24, does conversion
                                          // from YUV to RGB Included conditional
@@ -441,20 +433,20 @@ aditof::Status UsbDevice::open() {
 
     mt.formattype = FORMAT_VideoInfo;
 
-    hr = m_implData->pGrabber->SetMediaType(&mt);
+    hr = m_implData->handle.pGrabber->SetMediaType(&mt);
 
     // NULL RENDERER//
     // used to give the video stream somewhere to go to.
     hr = CoCreateInstance(CLSID_NullRenderer, nullptr, CLSCTX_INPROC_SERVER,
                           IID_IBaseFilter,
-                          (void **)(&(m_implData->pDestFilter)));
+                          (void **)(&(m_implData->handle.pDestFilter)));
     if (FAILED(hr)) {
         LOG(WARNING) << "ERROR: Could not create filter - NullRenderer";
         return Status::GENERIC_ERROR;
     }
 
-    hr =
-        m_implData->pGraph->AddFilter(m_implData->pDestFilter, L"NullRenderer");
+    hr = m_implData->handle.pGraph->AddFilter(m_implData->handle.pDestFilter,
+                                              L"NullRenderer");
     if (FAILED(hr)) {
         LOG(WARNING) << "ERROR: Could not add filter - NullRenderer";
         return Status::GENERIC_ERROR;
@@ -462,9 +454,10 @@ aditof::Status UsbDevice::open() {
 
     // RENDER STREAM//
     // This is where the stream gets put together.
-    hr = m_implData->pCaptureGraph->RenderStream(
-        &PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video, m_implData->pVideoInputFilter,
-        m_implData->pGrabberF, m_implData->pDestFilter);
+    hr = m_implData->handle.pCaptureGraph->RenderStream(
+        &PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video,
+        m_implData->handle.pVideoInputFilter, m_implData->handle.pGrabberF,
+        m_implData->handle.pDestFilter);
 
     if (FAILED(hr)) {
         LOG(WARNING) << "ERROR: Could not connect pins - RenderStream()";
@@ -473,8 +466,8 @@ aditof::Status UsbDevice::open() {
 
     // Try setting the sync source to null - and make it run as fast as possible
     IMediaFilter *pMediaFilter = nullptr;
-    hr = m_implData->pGraph->QueryInterface(IID_IMediaFilter,
-                                            (void **)&pMediaFilter);
+    hr = m_implData->handle.pGraph->QueryInterface(IID_IMediaFilter,
+                                                   (void **)&pMediaFilter);
     if (FAILED(hr)) {
         LOG(WARNING) << "ERROR: Could not get IID_IMediaFilter interface";
         return Status::GENERIC_ERROR;
@@ -483,8 +476,10 @@ aditof::Status UsbDevice::open() {
         pMediaFilter->Release();
     }
 
-    m_implData->pCB = new SampleGrabberCallback();
-    hr = m_implData->pGrabber->SetCallback(m_implData->pCB, 1);
+    m_implData->handle.pCB = new SampleGrabberCallback();
+    hr = m_implData->handle.pGrabber->SetCallback(m_implData->handle.pCB, 1);
+
+    m_implData->opened = true;
 
     return status;
 }
@@ -504,7 +499,7 @@ aditof::Status UsbDevice::stop() {
 
     LOG(INFO) << "Stopping device";
 
-    HRESULT hr = m_implData->pControl->Stop();
+    HRESULT hr = m_implData->handle.pControl->Stop();
     if (FAILED(hr)) {
         LOG(WARNING) << "ERROR: Could not stop graph";
         return Status::GENERIC_ERROR;
@@ -540,17 +535,19 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
     Status status = Status::OK;
 
-    HRESULT hr = m_implData->streamConf->GetFormat(&(m_implData->pAmMediaType));
+    HRESULT hr = m_implData->handle.streamConf->GetFormat(
+        &(m_implData->handle.pAmMediaType));
     if (FAILED(hr)) {
         LOG(WARNING) << "failed 7";
         return Status::GENERIC_ERROR;
     }
-    VIDEOINFOHEADER *pVih =
-        reinterpret_cast<VIDEOINFOHEADER *>(m_implData->pAmMediaType->pbFormat);
+    VIDEOINFOHEADER *pVih = reinterpret_cast<VIDEOINFOHEADER *>(
+        m_implData->handle.pAmMediaType->pbFormat);
     HEADER(pVih)->biWidth = details.width;
     HEADER(pVih)->biHeight = details.height;
 
-    hr = m_implData->streamConf->SetFormat(m_implData->pAmMediaType);
+    hr = m_implData->handle.streamConf->SetFormat(
+        m_implData->handle.pAmMediaType);
 
     if (FAILED(hr)) {
         LOG(WARNING) << "Could not set requested resolution (Frame Index)\n";
@@ -562,123 +559,55 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
 
 aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
-    Status status = Status::OK;
 
-    HRESULT hr;
-    DWORD uiNumNodes;
-    size_t written_bytes = 0;
-    IKsControl *pKsUnk;
-    IKsNodeControl *pUnk;
-    GUID guidNodeType;
-    BYTE buf[MAX_BUF_SIZE];
-    IKsTopologyInfo *pKsTopologyInfo = nullptr;
+    ExUnitHandle handle;
 
-    if (m_implData->pVideoInputFilter != nullptr) {
-        hr = m_implData->pVideoInputFilter->QueryInterface(
-            __uuidof(IKsTopologyInfo), (VOID **)&pKsTopologyInfo);
-
-        if (!SUCCEEDED(hr)) {
-            LOG(WARNING) << "setVideoSetting - QueryInterface Error";
-            m_implData->pVideoInputFilter->Release();
-            m_implData->pVideoInputFilter = nullptr;
-
-            return Status::GENERIC_ERROR;
-        }
-    } else {
+    HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
+        &handle, &m_implData->handle.pVideoInputFilter);
+    if (hr != S_OK) {
+        LOG(WARNING) << "Failed to find node and get control. Error: "
+                     << std::hex << hr;
         return Status::GENERIC_ERROR;
     }
 
-    // get nodes number in usb video device capture filter
-    if (pKsTopologyInfo->get_NumNodes(&uiNumNodes) == S_OK) {
-        // go thru all nodes searching for the node of the
-        // KSNODETYPE_DEV_SPECIFIC type, node of this type - represents
-        // extension unit of the USB device
-        for (UINT i = 0; i < uiNumNodes + 1; i++) {
-            if (pKsTopologyInfo->get_NodeType(i, &guidNodeType) == S_OK) {
-                if (guidNodeType == KSNODETYPE_DEV_SPECIFIC) {
-                    // create node instance
-                    hr = pKsTopologyInfo->CreateNodeInstance(
-                        i, __uuidof(IKsNodeControl), (void **)&pUnk);
+    OAFilterState state;
+    m_implData->handle.pControl->GetState(1, &state);
+    if (state == _FilterState::State_Running) {
+        hr = m_implData->handle.pControl->Pause();
+    }
 
-                    // get IKsControl interface from node
-                    hr = pUnk->QueryInterface(__uuidof(IKsControl),
-                                              (VOID **)&pKsUnk);
+    size_t written_bytes = 0;
+    BYTE buf[MAX_BUF_SIZE];
 
-                    // trying to read first control of the extension unit
-                    if (hr == S_OK) {
-                        KSP_NODE s;
-                        ULONG ulBytesReturned;
-
-                        OAFilterState state;
-                        m_implData->pControl->GetState(1, &state);
-                        if (state == _FilterState::State_Running) {
-                            hr = m_implData->pControl->Pause();
-                        }
-
-                        s.Property.Set = EXT_UNIT_GUID;
-                        s.Property.Id = 1;
-                        s.Property.Flags =
-                            KSPROPERTY_TYPE_SET | KSPROPERTY_TYPE_TOPOLOGY;
-                        s.NodeId = i;
-
-                        while (written_bytes < size) {
-                            if ((size - written_bytes) > MAX_PACKET_SIZE) {
-                                memcpy(&buf[2], &firmware[written_bytes],
-                                       MAX_PACKET_SIZE);
-                                buf[0] = 0x01;
-                                buf[1] = MAX_PACKET_SIZE;
-
-                                hr = pKsUnk->KsProperty(
-                                    (PKSPROPERTY)&s, sizeof(s), (LPVOID)&buf[0],
-                                    MAX_BUF_SIZE, &ulBytesReturned);
-
-                                if (FAILED(hr)) {
-                                    LOG(WARNING) << " Error in Programming AFE";
-                                    return Status::GENERIC_ERROR;
-                                }
-                                written_bytes += MAX_PACKET_SIZE;
-                            } else {
-                                memset(buf, 0, MAX_BUF_SIZE);
-                                buf[0] = 0x02;
-                                buf[1] =
-                                    static_cast<BYTE>(size - written_bytes);
-                                memcpy(&buf[2], &firmware[written_bytes],
-                                       size - written_bytes);
-
-                                s.Property.Set = EXT_UNIT_GUID;
-                                s.Property.Id = 1;
-                                s.Property.Flags = KSPROPERTY_TYPE_SET |
-                                                   KSPROPERTY_TYPE_TOPOLOGY;
-                                s.NodeId = i;
-                                hr = pKsUnk->KsProperty(
-                                    (PKSPROPERTY)&s, sizeof(s), (LPVOID)&buf[0],
-                                    MAX_BUF_SIZE, &ulBytesReturned);
-
-                                if (FAILED(hr)) {
-                                    LOG(WARNING) << " Error in Programming AFE";
-                                    return Status::GENERIC_ERROR;
-                                }
-                                written_bytes = size;
-                            }
-                        }
-                    }
-
-                    // RUN THE STREAM
-                    hr = m_implData->pControl->Run();
-                    if (FAILED(hr)) {
-                        LOG(WARNING) << "ERROR: Could not start graph";
-                        return Status::GENERIC_ERROR;
-                    }
-                }
-            }
+    while (written_bytes < size) {
+        if ((size - written_bytes) > MAX_PACKET_SIZE) {
+            memcpy(&buf[2], &firmware[written_bytes], MAX_PACKET_SIZE);
+            buf[0] = 0x01;
+            buf[1] = MAX_PACKET_SIZE;
+            written_bytes += MAX_PACKET_SIZE;
+        } else {
+            memset(buf, 0, MAX_BUF_SIZE);
+            buf[0] = 0x02;
+            buf[1] = static_cast<BYTE>(size - written_bytes);
+            memcpy(&buf[2], &firmware[written_bytes], size - written_bytes);
+            written_bytes = size;
+        }
+        hr = UsbWindowsUtils::UvcExUnitSetProperty(&handle, 1, &buf[0],
+                                                   MAX_BUF_SIZE);
+        if (FAILED(hr)) {
+            LOG(WARNING) << " Error in Programming AFE";
+            return Status::GENERIC_ERROR;
         }
     }
 
-    if (pKsTopologyInfo) {
-        pKsTopologyInfo->Release();
+    // RUN THE STREAM
+    hr = m_implData->handle.pControl->Run();
+    if (FAILED(hr)) {
+        LOG(WARNING) << "ERROR: Could not start graph";
+        return Status::GENERIC_ERROR;
     }
 
-    return status;
+    return Status::OK;
 }
 
 aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
@@ -693,8 +622,8 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
 
     unsigned short *tmpbuffer = nullptr;
 
-    VIDEOINFOHEADER *pVi =
-        reinterpret_cast<VIDEOINFOHEADER *>(m_implData->pAmMediaType->pbFormat);
+    VIDEOINFOHEADER *pVi = reinterpret_cast<VIDEOINFOHEADER *>(
+        m_implData->handle.pAmMediaType->pbFormat);
     int currentWidth = HEADER(pVi)->biWidth;
     int currentHeight = HEADER(pVi)->biHeight;
 
@@ -702,18 +631,18 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
                                          sizeof(unsigned short));
 
     while (retryCount < 1000) {
-        if (m_implData->pCB->newFrame == 1) {
+        if (m_implData->handle.pCB->newFrame == 1) {
             long bufferSize = currentWidth * currentHeight * 2;
-            hr = m_implData->pGrabber->GetCurrentBuffer((long *)&bufferSize,
-                                                        (long *)tmpbuffer);
+            hr = m_implData->handle.pGrabber->GetCurrentBuffer(
+                (long *)&bufferSize, (long *)tmpbuffer);
             if (hr != S_OK) {
                 LOG(WARNING) << "Incorrect Buffer Size allocated, Allocate "
                                 "bigger buffer";
                 continue;
             } else {
-                EnterCriticalSection(&m_implData->pCB->critSection);
-                m_implData->pCB->newFrame = false;
-                LeaveCriticalSection(&m_implData->pCB->critSection);
+                EnterCriticalSection(&m_implData->handle.pCB->critSection);
+                m_implData->handle.pCB->newFrame = false;
+                LeaveCriticalSection(&m_implData->handle.pCB->critSection);
                 break;
             }
         } else {
@@ -731,576 +660,171 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     return retryCount >= 1000 ? Status::GENERIC_ERROR : status;
 }
 
-aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
-                                     size_t length) {
-    using namespace aditof;
-    Status status = Status::OK;
-
-    HRESULT hr;
-    DWORD uiNumNodes;
-    IKsControl *pKsUnk = nullptr;
-    IKsNodeControl *pUnk = nullptr;
-    GUID guidNodeType;
-    uint8_t packet[MAX_BUF_SIZE];
-
-    IKsTopologyInfo *pKsTopologyInfo = nullptr;
-    if (m_implData->pVideoInputFilter != nullptr) {
-        hr = m_implData->pVideoInputFilter->QueryInterface(
-            __uuidof(IKsTopologyInfo), (VOID **)&pKsTopologyInfo);
-
-        if (!SUCCEEDED(hr)) {
-            LOG(WARNING) << "setVideoSetting - QueryInterface Error";
-            m_implData->pVideoInputFilter->Release();
-            m_implData->pVideoInputFilter = nullptr;
-
-            return Status::GENERIC_ERROR;
-        }
-    }
-
-    // get nodes number in usb video device capture filter
-    if (pKsTopologyInfo->get_NumNodes(&uiNumNodes) == S_OK) {
-        // go thru all nodes searching for the node of the
-        // KSNODETYPE_DEV_SPECIFIC type, node of this type - represents
-        // extension unit of the USB device
-        for (UINT i = 0; i < uiNumNodes + 1; i++) {
-            if (pKsTopologyInfo->get_NodeType(i, &guidNodeType) == S_OK) {
-                if (guidNodeType == KSNODETYPE_DEV_SPECIFIC) {
-                    // create node instance
-                    hr = pKsTopologyInfo->CreateNodeInstance(
-                        i, __uuidof(IKsNodeControl), (void **)&pUnk);
-
-                    // get IKsControl interface from node
-                    if (hr == S_OK) {
-                        hr = pUnk->QueryInterface(__uuidof(IKsControl),
-                                                  (VOID **)&pKsUnk);
-                    }
-
-                    // trying to read first control of the extension unit
-                    if (hr == S_OK) {
-                        KSP_NODE s;
-                        ULONG ulBytesReturned;
-                        size_t readBytes = 0;
-                        size_t readlength = 0;
-                        size_t addr = address;
-
-                        while (readBytes < length) {
-                            *((uint32_t *)&packet[0]) = addr;
-                            readlength = length - readBytes < MAX_BUF_SIZE
-                                             ? length - readBytes
-                                             : MAX_BUF_SIZE;
-                            packet[4] = static_cast<uint8_t>(readlength);
-
-                            // This set property will send the address of the
-                            // EEPROM
-                            s.Property.Set = EXT_UNIT_GUID;
-                            s.Property.Id = 5;
-                            s.Property.Flags =
-                                KSPROPERTY_TYPE_SET | KSPROPERTY_TYPE_TOPOLOGY;
-                            s.NodeId = i;
-                            hr = pKsUnk->KsProperty(
-                                (PKSPROPERTY)&s, sizeof(s), (LPVOID)&packet[0],
-                                (long)MAX_BUF_SIZE, &ulBytesReturned);
-                            if (FAILED(hr)) {
-                                LOG(WARNING) << "Error in updating eeprom "
-                                                "address and read size";
-                                return Status::GENERIC_ERROR;
-                            }
-
-                            // This get property will get the value at address
-                            // in EEPROM
-                            s.Property.Set = EXT_UNIT_GUID;
-                            s.Property.Id = 5;
-                            s.Property.Flags =
-                                KSPROPERTY_TYPE_GET | KSPROPERTY_TYPE_TOPOLOGY;
-                            s.NodeId = i;
-                            hr = pKsUnk->KsProperty(
-                                (PKSPROPERTY)&s, sizeof(s), (LPVOID)packet,
-                                (long)MAX_BUF_SIZE, &ulBytesReturned);
-                            if (FAILED(hr)) {
-                                LOG(WARNING) << "Error in reading eeprom "
-                                                "address and read size";
-                                return Status::GENERIC_ERROR;
-                            }
-                            memcpy(&data[readBytes], packet, readlength);
-                            readBytes += readlength;
-                            addr += readlength;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (pKsTopologyInfo) {
-        pKsTopologyInfo->Release();
-    }
-
-    return status;
-}
-
-aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
-                                      size_t length) {
-    using namespace aditof;
-    Status status = Status::OK;
-
-    HRESULT hr;
-    DWORD uiNumNodes;
-    IKsControl *pKsUnk = nullptr;
-    IKsNodeControl *pUnk = nullptr;
-    GUID guidNodeType;
-    uint8_t packet[MAX_BUF_SIZE];
-    uint16_t writelength = 3;
-
-    IKsTopologyInfo *pKsTopologyInfo = nullptr;
-    if (m_implData->pVideoInputFilter != nullptr) {
-        hr = m_implData->pVideoInputFilter->QueryInterface(
-            __uuidof(IKsTopologyInfo), (VOID **)&pKsTopologyInfo);
-
-        if (!SUCCEEDED(hr)) {
-            LOG(WARNING) << "setVideoSetting - QueryInterface Error";
-            m_implData->pVideoInputFilter->Release();
-            m_implData->pVideoInputFilter = nullptr;
-
-            return Status::GENERIC_ERROR;
-        }
-    }
-
-    // get nodes number in usb video device capture filter
-    if (pKsTopologyInfo->get_NumNodes(&uiNumNodes) == S_OK) {
-        // go thru all nodes searching for the node of the
-        // KSNODETYPE_DEV_SPECIFIC type, node of this type - represents
-        // extension unit of the USB device
-        for (UINT i = 0; i < uiNumNodes + 1; i++) {
-            if (pKsTopologyInfo->get_NodeType(i, &guidNodeType) == S_OK) {
-                if (guidNodeType == KSNODETYPE_DEV_SPECIFIC) {
-                    // create node instance
-                    hr = pKsTopologyInfo->CreateNodeInstance(
-                        i, __uuidof(IKsNodeControl), (void **)&pUnk);
-
-                    // get IKsControl interface from node
-                    if (hr == S_OK) {
-                        hr = pUnk->QueryInterface(__uuidof(IKsControl),
-                                                  (VOID **)&pKsUnk);
-                    }
-
-                    // trying to read first control of the extension unit
-                    if (hr == S_OK) {
-                        KSP_NODE s;
-                        ULONG ulBytesReturned;
-                        size_t writeLen = 0;
-                        size_t writtenBytes = 0;
-
-                        while (writtenBytes < length) {
-                            *((uint32_t *)&packet[0]) = address;
-                            writeLen = length - writtenBytes > MAX_BUF_SIZE - 5
-                                           ? MAX_BUF_SIZE - 5
-                                           : length - writtenBytes;
-                            packet[4] = static_cast<uint8_t>(writeLen);
-                            memcpy(&packet[5], data + writtenBytes, writeLen);
-
-                            // This set property will send the address and data
-                            // to EEPROM
-                            s.Property.Set = EXT_UNIT_GUID;
-                            s.Property.Id = 6;
-                            s.Property.Flags =
-                                KSPROPERTY_TYPE_SET | KSPROPERTY_TYPE_TOPOLOGY;
-                            s.NodeId = i;
-                            hr = pKsUnk->KsProperty(
-                                (PKSPROPERTY)&s, sizeof(s), (LPVOID)packet,
-                                (long)MAX_BUF_SIZE, &ulBytesReturned);
-                            if (FAILED(hr)) {
-                                LOG(WARNING) << "Error in updating eeprom "
-                                                "address and read size";
-                                return Status::GENERIC_ERROR;
-                            }
-                            writtenBytes += writeLen;
-                            address += writeLen;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (pKsTopologyInfo) {
-        pKsTopologyInfo->Release();
-    }
-
-    return status;
-}
-
 aditof::Status UsbDevice::readAfeRegisters(const uint16_t *address,
                                            uint16_t *data, size_t length) {
     using namespace aditof;
-    Status status = Status::OK;
 
-    HRESULT hr;
-    DWORD uiNumNodes;
-    IKsControl *pKsUnk = nullptr;
-    IKsNodeControl *pUnk = nullptr;
-    GUID guidNodeType;
-    uint16_t pageSize = 60;
+    ExUnitHandle handle;
+    ULONG pageSize = 60;
 
-    IKsTopologyInfo *pKsTopologyInfo = nullptr;
+    HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
+        &handle, &m_implData->handle.pVideoInputFilter);
+    if (hr != S_OK) {
+        LOG(WARNING) << "Failed to find node and get control. Error: "
+                     << std::hex << hr;
+        return Status::GENERIC_ERROR;
+    }
 
-    if (m_implData->pVideoInputFilter != nullptr) {
-        hr = m_implData->pVideoInputFilter->QueryInterface(
-            __uuidof(IKsTopologyInfo), (VOID **)&pKsTopologyInfo);
+    for (size_t j = 0; j < length; j++) {
+        hr = UsbWindowsUtils::UvcExUnitSetProperty(
+            &handle, 2, reinterpret_cast<const uint8_t *>(&address[j]),
+            pageSize);
+        if (FAILED(hr)) {
+            LOG(WARNING)
+                << "Failed to set property via UVC extension unit. Error: "
+                << std::hex << hr;
+            return Status::GENERIC_ERROR;
+        }
 
-        if (!SUCCEEDED(hr)) {
-            m_implData->pVideoInputFilter->Release();
-            m_implData->pVideoInputFilter = nullptr;
-
+        hr = UsbWindowsUtils::UvcExUnitGetProperty(
+            &handle, 2, reinterpret_cast<uint8_t *>(&data[j]), pageSize);
+        if (FAILED(hr)) {
+            LOG(WARNING)
+                << "Failed to get property via UVC extension unit. Error: "
+                << std::hex << hr;
             return Status::GENERIC_ERROR;
         }
     }
 
-    // get nodes number in usb video device capture filter
-    if (pKsTopologyInfo->get_NumNodes(&uiNumNodes) == S_OK) {
-        // go thru all nodes searching for the node of the
-        // KSNODETYPE_DEV_SPECIFIC type, node of this type - represents
-        // extension unit of the USB device
-        for (UINT i = 0; i < uiNumNodes + 1; i++) {
-            if (pKsTopologyInfo->get_NodeType(i, &guidNodeType) == S_OK) {
-                if (guidNodeType == KSNODETYPE_DEV_SPECIFIC) {
-                    // create node instance
-                    hr = pKsTopologyInfo->CreateNodeInstance(
-                        i, __uuidof(IKsNodeControl), (void **)&pUnk);
-
-                    // get IKsControl interface from node
-                    if (hr == S_OK) {
-                        hr = pUnk->QueryInterface(__uuidof(IKsControl),
-                                                  (VOID **)&pKsUnk);
-                    }
-
-                    // trying to read first control of the extension unit
-                    if (hr == S_OK) {
-                        KSP_NODE s;
-                        ULONG ulBytesReturned;
-
-                        for (size_t j = 0; j < length; j++) {
-                            // This set property will send the address of the
-                            // AFE register
-                            s.Property.Set = EXT_UNIT_GUID;
-                            s.Property.Id = 2;
-                            s.Property.Flags =
-                                KSPROPERTY_TYPE_SET | KSPROPERTY_TYPE_TOPOLOGY;
-                            s.NodeId = i;
-                            hr = pKsUnk->KsProperty(
-                                (PKSPROPERTY)&s, sizeof(s), (LPVOID)&address[j],
-                                (long)pageSize, &ulBytesReturned);
-                            if (FAILED(hr)) {
-                                LOG(WARNING) << "Error in updating afe address "
-                                                "and read size";
-                                return Status::GENERIC_ERROR;
-                            }
-
-                            // This get property will get the value of AFE
-                            // register from cypress CX3
-                            s.Property.Set = EXT_UNIT_GUID;
-                            s.Property.Id = 2;
-                            s.Property.Flags =
-                                KSPROPERTY_TYPE_GET | KSPROPERTY_TYPE_TOPOLOGY;
-                            s.NodeId = i;
-                            hr = pKsUnk->KsProperty(
-                                (PKSPROPERTY)&s, sizeof(s), (LPVOID)&data[j],
-                                (long)pageSize, &ulBytesReturned);
-                            if (FAILED(hr)) {
-                                LOG(WARNING) << "Error in reading afe address "
-                                                "and read size";
-                                return Status::GENERIC_ERROR;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (pKsTopologyInfo) {
-        pKsTopologyInfo->Release();
-    }
-
-    return status;
+    return Status::OK;
 }
 
 aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
                                             const uint16_t *data,
                                             size_t length) {
     using namespace aditof;
-    Status status = Status::OK;
 
-    HRESULT hr;
-    DWORD uiNumNodes;
-    IKsControl *pKsUnk = nullptr;
-    IKsNodeControl *pUnk = nullptr;
-    GUID guidNodeType;
+    ExUnitHandle handle;
+
+    HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
+        &handle, &m_implData->handle.pVideoInputFilter);
+    if (hr != S_OK) {
+        LOG(WARNING) << "Failed to find node and get control. Error: "
+                     << std::hex << hr;
+        return Status::GENERIC_ERROR;
+    }
+
     BYTE buf[MAX_BUF_SIZE];
     BYTE sampleCnt = 0;
     BYTE b = sizeof(uint16_t); // Size (in bytes) of an AFE register
 
-    IKsTopologyInfo *pKsTopologyInfo = nullptr;
+    length *= 2 * sizeof(uint16_t);
 
-    if (m_implData->pVideoInputFilter != nullptr) {
-        hr = m_implData->pVideoInputFilter->QueryInterface(
-            __uuidof(IKsTopologyInfo), (VOID **)&pKsTopologyInfo);
+    const BYTE *pAddr = reinterpret_cast<const BYTE *>(address);
+    const BYTE *pData = reinterpret_cast<const BYTE *>(data);
+    const BYTE *ptr = pAddr;
+    bool pointingAtAddr = true;
 
-        if (!SUCCEEDED(hr)) {
-            LOG(WARNING) << "setVideoSetting - QueryInterface Error";
-            m_implData->pVideoInputFilter->Release();
-            m_implData->pVideoInputFilter = nullptr;
+    while (length) {
+        memset(buf, 0, MAX_BUF_SIZE);
+        buf[0] = length > MAX_PACKET_SIZE ? 0x01 : 0x02;
+        buf[1] = length > MAX_PACKET_SIZE ? MAX_PACKET_SIZE
+                                          : static_cast<BYTE>(length);
+        for (int n = 0; n < buf[1]; ++n) {
+            if ((sampleCnt / b) && (sampleCnt % b == 0)) {
+                if (pointingAtAddr) {
+                    pAddr = ptr;
+                    ptr = pData;
+                } else {
+                    pData = ptr;
+                    ptr = pAddr;
+                }
+                pointingAtAddr = !pointingAtAddr;
+            }
+            buf[2 + n] = *ptr++;
+            ++sampleCnt;
+        }
+        length -= buf[1];
 
+        hr = UsbWindowsUtils::UvcExUnitSetProperty(&handle, 1, &buf[0],
+                                                   MAX_BUF_SIZE);
+        if (FAILED(hr)) {
+            LOG(WARNING)
+                << "Failed to set property via UVC extension unit. Error: "
+                << std::hex << hr;
             return Status::GENERIC_ERROR;
         }
     }
 
-    // get nodes number in usb video device capture filter
-    if (pKsTopologyInfo->get_NumNodes(&uiNumNodes) == S_OK) {
-        // go thru all nodes searching for the node of the
-        // KSNODETYPE_DEV_SPECIFIC type, node of this type - represents
-        // extension unit of the USB device
-        for (UINT i = 0; i < uiNumNodes + 1; i++) {
-            if (pKsTopologyInfo->get_NodeType(i, &guidNodeType) == S_OK) {
-                if (guidNodeType == KSNODETYPE_DEV_SPECIFIC) {
-                    // create node instance
-                    hr = pKsTopologyInfo->CreateNodeInstance(
-                        i, __uuidof(IKsNodeControl), (void **)&pUnk);
-
-                    // get IKsControl interface from node
-                    if (hr == S_OK) {
-                        hr = pUnk->QueryInterface(__uuidof(IKsControl),
-                                                  (VOID **)&pKsUnk);
-                    }
-
-                    // trying to read first control of the extension unit
-                    if (hr == S_OK) {
-                        length *= 2 * sizeof(uint16_t);
-
-                        const BYTE *pAddr =
-                            reinterpret_cast<const BYTE *>(address);
-                        const BYTE *pData =
-                            reinterpret_cast<const BYTE *>(data);
-                        const BYTE *ptr = pAddr;
-                        bool pointingAtAddr = true;
-
-                        while (length) {
-                            KSP_NODE s;
-                            ULONG ulBytesReturned;
-
-                            memset(buf, 0, MAX_BUF_SIZE);
-                            buf[0] = length > MAX_PACKET_SIZE ? 0x01 : 0x02;
-                            buf[1] = length > MAX_PACKET_SIZE
-                                         ? MAX_PACKET_SIZE
-                                         : static_cast<BYTE>(length);
-                            for (int n = 0; n < buf[1]; ++n) {
-                                if ((sampleCnt / b) && (sampleCnt % b == 0)) {
-                                    if (pointingAtAddr) {
-                                        pAddr = ptr;
-                                        ptr = pData;
-                                    } else {
-                                        pData = ptr;
-                                        ptr = pAddr;
-                                    }
-                                    pointingAtAddr = !pointingAtAddr;
-                                }
-                                buf[2 + n] = *ptr++;
-                                ++sampleCnt;
-                            }
-                            length -= buf[1];
-
-                            s.Property.Set = EXT_UNIT_GUID;
-                            s.Property.Id = 1;
-                            s.Property.Flags =
-                                KSPROPERTY_TYPE_SET | KSPROPERTY_TYPE_TOPOLOGY;
-                            s.NodeId = i;
-                            hr = pKsUnk->KsProperty(
-                                (PKSPROPERTY)&s, sizeof(s), (LPVOID)&buf[0],
-                                MAX_BUF_SIZE, &ulBytesReturned);
-
-                            if (FAILED(hr)) {
-                                LOG(WARNING)
-                                    << "Error in Programming AFE register";
-                                return Status::GENERIC_ERROR;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (pKsTopologyInfo) {
-        pKsTopologyInfo->Release();
-    }
-
-    return status;
+    return Status::OK;
 }
 
 aditof::Status UsbDevice::readAfeTemp(float &temperature) {
     using namespace aditof;
-    Status status = Status::OK;
 
-    HRESULT hr;
-    DWORD uiNumNodes;
-    IKsControl *pKsUnk = nullptr;
-    IKsNodeControl *pUnk = nullptr;
-    GUID guidNodeType;
+    ExUnitHandle handle;
 
-    IKsTopologyInfo *pKsTopologyInfo = nullptr;
-
-    if (m_implData->pVideoInputFilter != nullptr) {
-        hr = m_implData->pVideoInputFilter->QueryInterface(
-            __uuidof(IKsTopologyInfo), (VOID **)&pKsTopologyInfo);
-
-        if (!SUCCEEDED(hr)) {
-            LOG(WARNING) << "setVideoSetting - QueryInterface Error";
-            m_implData->pVideoInputFilter->Release();
-            m_implData->pVideoInputFilter = nullptr;
-
-            return Status::GENERIC_ERROR;
-        }
-    } else {
+    HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
+        &handle, &m_implData->handle.pVideoInputFilter);
+    if (hr != S_OK) {
+        LOG(WARNING) << "Failed to find node and get control. Error: "
+                     << std::hex << hr;
         return Status::GENERIC_ERROR;
     }
 
-    // get nodes number in usb video device capture filter
-    if (pKsTopologyInfo->get_NumNodes(&uiNumNodes) == S_OK) {
-        // go thru all nodes searching for the node of the
-        // KSNODETYPE_DEV_SPECIFIC type, node of this type - represents
-        // extension unit of the USB device
-        for (UINT i = 0; i < uiNumNodes + 1; i++) {
-            if (pKsTopologyInfo->get_NodeType(i, &guidNodeType) == S_OK) {
-                if (guidNodeType == KSNODETYPE_DEV_SPECIFIC) {
-                    // create node instance
-                    hr = pKsTopologyInfo->CreateNodeInstance(
-                        i, __uuidof(IKsNodeControl), (void **)&pUnk);
-
-                    // get IKsControl interface from node
-                    if (hr == S_OK) {
-                        hr = pUnk->QueryInterface(__uuidof(IKsControl),
-                                                  (VOID **)&pKsUnk);
-                    }
-
-                    // trying to read first control of the extension unit
-                    if (hr == S_OK) {
-                        KSP_NODE s;
-                        ULONG ulBytesReturned;
-
-                        uint16_t readlength =
-                            8; // length is length of array, multiply by 2 as
-                               // each alement in array is 2 bytes
-
-                        s.Property.Set = EXT_UNIT_GUID;
-                        s.Property.Id = 3;
-                        s.Property.Flags =
-                            KSPROPERTY_TYPE_GET | KSPROPERTY_TYPE_TOPOLOGY;
-                        s.NodeId = i;
-                        float integerTemperature[2];
-                        hr = pKsUnk->KsProperty((PKSPROPERTY)&s, sizeof(s),
-                                                (LPVOID)&integerTemperature,
-                                                (long)readlength,
-                                                &ulBytesReturned);
-                        if (FAILED(hr)) {
-                            LOG(WARNING) << "Error in reading temperature";
-                            return Status::GENERIC_ERROR;
-                        }
-                        temperature = integerTemperature[0];
-                    }
-                }
-            }
-        }
+    float integerTemperature[2];
+    hr = UsbWindowsUtils::UvcExUnitGetProperty(
+        &handle, 3, reinterpret_cast<uint8_t *>(&integerTemperature),
+        8 /* two floats, each having 4 bytes */);
+    if (FAILED(hr)) {
+        LOG(WARNING) << "Failed to get property via UVC extension unit. Error: "
+                     << std::hex << hr;
+        return Status::GENERIC_ERROR;
     }
+    temperature = integerTemperature[0];
 
-    if (pKsTopologyInfo) {
-        pKsTopologyInfo->Release();
-    }
-
-    return status;
+    return Status::OK;
 }
 
 aditof::Status UsbDevice::readLaserTemp(float &temperature) {
     using namespace aditof;
-    Status status = Status::OK;
 
-    HRESULT hr;
-    DWORD uiNumNodes;
-    IKsControl *pKsUnk = nullptr;
-    IKsNodeControl *pUnk = nullptr;
-    GUID guidNodeType;
+    ExUnitHandle handle;
 
-    IKsTopologyInfo *pKsTopologyInfo = nullptr;
-
-    if (m_implData->pVideoInputFilter != nullptr) {
-        hr = m_implData->pVideoInputFilter->QueryInterface(
-            __uuidof(IKsTopologyInfo), (VOID **)&pKsTopologyInfo);
-
-        if (!SUCCEEDED(hr)) {
-            LOG(WARNING) << "setVideoSetting - QueryInterface Error";
-            m_implData->pVideoInputFilter->Release();
-            m_implData->pVideoInputFilter = nullptr;
-
-            return Status::GENERIC_ERROR;
-        }
-    } else {
+    HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
+        &handle, &m_implData->handle.pVideoInputFilter);
+    if (hr != S_OK) {
+        LOG(WARNING) << "Failed to find node and get control. Error: "
+                     << std::hex << hr;
         return Status::GENERIC_ERROR;
     }
 
-    // get nodes number in usb video device capture filter
-    if (pKsTopologyInfo->get_NumNodes(&uiNumNodes) == S_OK) {
-        // go thru all nodes searching for the node of the
-        // KSNODETYPE_DEV_SPECIFIC type, node of this type - represents
-        // extension unit of the USB device
-        for (UINT i = 0; i < uiNumNodes + 1; i++) {
-            if (pKsTopologyInfo->get_NodeType(i, &guidNodeType) == S_OK) {
-                if (guidNodeType == KSNODETYPE_DEV_SPECIFIC) {
-                    // create node instance
-                    hr = pKsTopologyInfo->CreateNodeInstance(
-                        i, __uuidof(IKsNodeControl), (void **)&pUnk);
-
-                    // get IKsControl interface from node
-                    if (hr == S_OK) {
-                        hr = pUnk->QueryInterface(__uuidof(IKsControl),
-                                                  (VOID **)&pKsUnk);
-                    }
-
-                    // trying to read first control of the extension unit
-                    if (hr == S_OK) {
-                        KSP_NODE s;
-                        ULONG ulBytesReturned;
-
-                        uint16_t readlength =
-                            8; // length is length of array, multiply by 2 as
-                               // each alement in array is 2 bytes
-
-                        s.Property.Set = EXT_UNIT_GUID;
-                        s.Property.Id = 3;
-                        s.Property.Flags =
-                            KSPROPERTY_TYPE_GET | KSPROPERTY_TYPE_TOPOLOGY;
-                        s.NodeId = i;
-                        float integerTemperature[2];
-                        hr = pKsUnk->KsProperty((PKSPROPERTY)&s, sizeof(s),
-                                                (LPVOID)integerTemperature,
-                                                (long)readlength,
-                                                &ulBytesReturned);
-                        if (FAILED(hr)) {
-                            LOG(WARNING) << "Error in reading temperature";
-                            return Status::GENERIC_ERROR;
-                        }
-                        temperature = integerTemperature[1];
-                    }
-                }
-            }
-        }
+    float integerTemperature[2];
+    hr = UsbWindowsUtils::UvcExUnitGetProperty(
+        &handle, 3, reinterpret_cast<uint8_t *>(&integerTemperature),
+        8 /* two floats, each having 4 bytes */);
+    if (FAILED(hr)) {
+        LOG(WARNING) << "Failed to get property via UVC extension unit. Error: "
+                     << std::hex << hr;
+        return Status::GENERIC_ERROR;
     }
+    temperature = integerTemperature[1];
 
-    if (pKsTopologyInfo) {
-        pKsTopologyInfo->Release();
-    }
-
-    return status;
+    return Status::OK;
 }
 
 aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
     details = m_deviceDetails;
     return aditof::Status::OK;
+}
+
+aditof::Status UsbDevice::getHandle(void **handle) {
+    if (m_implData->opened) {
+        *handle = &m_implData->handle;
+        return aditof::Status::OK;
+    } else {
+        *handle = nullptr;
+        LOG(ERROR) << "Won't return the handle. Device hasn't been opened yet.";
+        return aditof::Status::UNAVAILABLE;
+    }
 }

@@ -35,6 +35,13 @@
 #include <libwebsockets.h>
 #include <thread>
 
+class Network;
+
+struct EthernetHandle {
+    Network *net;
+    std::mutex net_mutex;
+};
+
 class Network {
 
     static struct lws *web_socket;

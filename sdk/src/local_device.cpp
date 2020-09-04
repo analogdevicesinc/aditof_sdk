@@ -66,17 +66,6 @@ aditof::Status LocalDevice::getFrame(uint16_t * /*buffer*/) {
     return aditof::Status::GENERIC_ERROR;
 }
 
-aditof::Status LocalDevice::readEeprom(uint32_t /*address*/, uint8_t * /*data*/,
-                                       size_t /*length*/) {
-    return aditof::Status::GENERIC_ERROR;
-}
-
-aditof::Status LocalDevice::writeEeprom(uint32_t /*address*/,
-                                        const uint8_t * /*data*/,
-                                        size_t /*length*/) {
-    return aditof::Status::GENERIC_ERROR;
-}
-
 aditof::Status LocalDevice::readAfeRegisters(const uint16_t * /*address*/,
                                              uint16_t * /*regValue*/,
                                              size_t /*length*/) {
@@ -99,5 +88,9 @@ aditof::Status LocalDevice::readLaserTemp(float & /*temperature*/) {
 
 aditof::Status
 LocalDevice::getDetails(aditof::DeviceDetails & /*details*/) const {
+    return aditof::Status::GENERIC_ERROR;
+}
+
+aditof::Status LocalDevice::getHandle(void ** /*handle*/) {
     return aditof::Status::GENERIC_ERROR;
 }

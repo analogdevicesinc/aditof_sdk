@@ -31,6 +31,7 @@
  */
 #include "calibration_96tof1.h"
 
+#include <aditof/eeprom_interface.h>
 #include <glog/logging.h>
 #include <math.h>
 
@@ -111,10 +112,9 @@ aditof::Status Calibration96Tof1::displayCalMap() const {
 //! SaveCalMap - Save the entire calibration map
 /*!
 SaveCalMap - Saves the entire calibration map as binary to a file.
-\device - Pointer to a device instance
+\eeprom - Reference to an eeprom instance
 */
-aditof::Status
-Calibration96Tof1::saveCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
+aditof::Status Calibration96Tof1::saveCalMap(aditof::EepromInterface &eeprom) {
     using namespace aditof;
 
     std::vector<float> data;
@@ -136,8 +136,8 @@ Calibration96Tof1::saveCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
     }
 
     float size = static_cast<float>(data.size() * sizeof(uint32_t));
-    device->writeEeprom((uint32_t)0, (uint8_t *)&size, (size_t)4);
-    device->writeEeprom((uint32_t)4, (uint8_t *)data.data(), (size_t)size);
+    eeprom.write((uint32_t)0, (uint8_t *)&size, (size_t)4);
+    eeprom.write((uint32_t)4, (uint8_t *)data.data(), (size_t)size);
 
     return Status::OK;
 }
@@ -145,10 +145,9 @@ Calibration96Tof1::saveCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
 //! ReadCalMap - Read the entire calibration map
 /*!
 ReadCalMap - Read the entire calibration map from a binary file
-\device - Pointer to a device instance
+\eeprom - Reference to an eeprom instance
 */
-aditof::Status
-Calibration96Tof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
+aditof::Status Calibration96Tof1::readCalMap(aditof::EepromInterface &eeprom) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -157,9 +156,9 @@ Calibration96Tof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
     uint32_t j = 0;
     float key;
 
-    device->writeEeprom(EEPROM_SIZE - 5, (uint8_t *)&read_size, 4);
+    eeprom.write(EEPROM_SIZE - 5, (uint8_t *)&read_size, 4);
 
-    device->readEeprom(0, (uint8_t *)&read_size, 4);
+    eeprom.read(0, (uint8_t *)&read_size, 4);
     LOG(INFO) << "EEPROM calibration data size " << read_size << " bytes";
 
     if (read_size > EEPROM_SIZE) {
@@ -169,7 +168,7 @@ Calibration96Tof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
 
     data = (uint8_t *)malloc((size_t)read_size);
 
-    status = device->readEeprom(4, data, (size_t)read_size);
+    status = eeprom.read(4, data, (size_t)read_size);
     if (status != Status::OK) {
         free(data);
         LOG(WARNING) << "Failed to read from eeprom";

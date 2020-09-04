@@ -30,7 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "usb_device.h"
-#include "utils_linux.h"
+#include "usb_linux_utils.h"
+#include "utils.h"
 
 #include "device_utils.h"
 
@@ -42,11 +43,6 @@
 #include <linux/videodev2.h>
 #include <sys/mman.h>
 #include <unordered_map>
-
-#define CLEAR(x) memset(&(x), 0, sizeof(x))
-
-#define MAX_PACKET_SIZE (58)
-#define MAX_BUF_SIZE (MAX_PACKET_SIZE + 2)
 
 struct buffer {
     void *start;
@@ -65,6 +61,7 @@ struct UsbDevice::ImplData {
     struct buffer *buffers;
     unsigned int buffersCount;
     struct v4l2_format fmt;
+    bool opened;
     bool started;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
 };
@@ -72,6 +69,7 @@ struct UsbDevice::ImplData {
 UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
     : m_devData(data), m_implData(new UsbDevice::ImplData) {
     m_implData->fd = 0;
+    m_implData->opened = false;
     m_implData->started = false;
     m_implData->buffers = nullptr;
     m_implData->buffersCount = 0;
@@ -125,11 +123,14 @@ aditof::Status UsbDevice::open() {
 
     m_implData->fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     // Preserve original settings as set by v4l2-ctl for example
-    if (-1 == xioctl(m_implData->fd, VIDIOC_G_FMT, &m_implData->fmt)) {
+    if (-1 ==
+        UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_G_FMT, &m_implData->fmt)) {
         LOG(WARNING) << "VIDIOC_G_FMT, error:" << errno << "("
                      << strerror(errno) << ")";
         return Status::GENERIC_ERROR;
     }
+
+    m_implData->opened = true;
 
     return status;
 }
@@ -150,7 +151,7 @@ aditof::Status UsbDevice::stop() {
     LOG(INFO) << "Stopping device";
 
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (-1 == xioctl(m_implData->fd, VIDIOC_STREAMOFF, &type)) {
+    if (-1 == UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_STREAMOFF, &type)) {
         LOG(WARNING) << "VIDIOC_STREAMOFF, error:" << errno << "("
                      << strerror(errno) << ")";
         return Status::GENERIC_ERROR;
@@ -202,7 +203,8 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     if (m_implData->fmt.fmt.pix.sizeimage < min)
         m_implData->fmt.fmt.pix.sizeimage = min;
 
-    if (-1 == xioctl(m_implData->fd, VIDIOC_S_FMT, &m_implData->fmt)) {
+    if (-1 ==
+        UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_S_FMT, &m_implData->fmt)) {
         LOG(WARNING) << "Failed to set Pixel Format, error: " << errno << "("
                      << strerror(errno) << ")";
         return Status::GENERIC_ERROR;
@@ -215,7 +217,7 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_MMAP;
 
-    if (-1 == xioctl(m_implData->fd, VIDIOC_REQBUFS, &req)) {
+    if (-1 == UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_REQBUFS, &req)) {
         if (EINVAL == errno) {
             LOG(WARNING) << m_devData.driverPath
                          << " does not support memmory mapping";
@@ -252,7 +254,8 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = m_implData->buffersCount;
 
-        if (-1 == xioctl(m_implData->fd, VIDIOC_QUERYBUF, &buf)) {
+        if (-1 ==
+            UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_QUERYBUF, &buf)) {
             LOG(WARNING) << "VIDIOC_QUERYBUF, error:" << errno << "("
                          << strerror(errno) << ")";
             return Status::GENERIC_ERROR;
@@ -283,7 +286,7 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = i;
 
-        if (-1 == xioctl(m_implData->fd, VIDIOC_QBUF, &buf)) {
+        if (-1 == UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_QBUF, &buf)) {
             LOG(WARNING) << "VIDIOC_QBUF, error:" << errno << "("
                          << strerror(errno) << ")";
             return Status::GENERIC_ERROR;
@@ -322,7 +325,8 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
             buf[1] = MAX_PACKET_SIZE;
             memcpy(&buf[2], firmware + written_bytes, MAX_PACKET_SIZE);
 
-            if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
+            if (-1 ==
+                UsbLinuxUtils::xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
                 LOG(WARNING)
                     << "Programming AFE error "
                     << "errno: " << errno << " error: " << strerror(errno);
@@ -335,7 +339,8 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
             memcpy(&buf[2], firmware + written_bytes, buf[1]);
 
             cq.data = buf;
-            if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
+            if (-1 ==
+                UsbLinuxUtils::xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
                 LOG(WARNING)
                     << "Programming AFE error "
                     << "errno: " << errno << " error: " << strerror(errno);
@@ -348,7 +353,7 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
     usleep(sleepDuration);
 
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (-1 == xioctl(m_implData->fd, VIDIOC_STREAMON, &type)) {
+    if (-1 == UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_STREAMON, &type)) {
         LOG(WARNING) << "VIDIOC_STREAMON, error:" << errno << "("
                      << strerror(errno) << ")";
         return Status::GENERIC_ERROR;
@@ -402,7 +407,7 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
 
-    if (-1 == xioctl(m_implData->fd, VIDIOC_DQBUF, &buf)) {
+    if (-1 == UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_DQBUF, &buf)) {
         LOG(WARNING) << "Stream Error";
         switch (errno) {
         case EAGAIN:
@@ -432,7 +437,7 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
 
     aditof::deinterleave(pdata, buffer, height * width * 3 / 2, width, height);
 
-    if (-1 == xioctl(m_implData->fd, VIDIOC_QBUF, &buf)) {
+    if (-1 == UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_QBUF, &buf)) {
         LOG(WARNING) << "VIDIOC_QBUF, error: " << errno << "("
                      << strerror(errno) << ")";
         return Status::GENERIC_ERROR;
@@ -441,132 +446,19 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     return status;
 }
 
-aditof::Status UsbDevice::readEeprom(uint32_t address, uint8_t *data,
-                                     size_t length) {
-    using namespace aditof;
-
-    struct uvc_xu_control_query cq;
-    uint8_t packet[MAX_BUF_SIZE];
-    size_t readBytes = 0;
-    size_t readLength = 0;
-    size_t addr = address;
-
-    while (readBytes < length) {
-        readLength = length - readBytes < MAX_BUF_SIZE ? length - readBytes
-                                                       : MAX_BUF_SIZE;
-
-        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
-        packet_ptr[0] = addr;
-        packet[4] = MAX_BUF_SIZE;
-
-        // This set property will send the EEPROM address to be read
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 5;        // WValue for EEPROM register reads
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in sending address to device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-
-        // This get property will get the value read from EEPROM address
-        CLEAR(cq);
-        cq.query = UVC_GET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 5;        // WValue for EEPROM register reads
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in reading data from device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-
-        memcpy(&data[readBytes], packet, readLength);
-        readBytes += readLength;
-        addr += readLength;
-    }
-
-    return Status::OK;
-}
-
-aditof::Status UsbDevice::writeEeprom(uint32_t address, const uint8_t *data,
-                                      size_t length) {
-    using namespace aditof;
-
-    struct uvc_xu_control_query cq;
-    uint8_t packet[MAX_BUF_SIZE];
-    size_t writeLen = 0;
-    size_t writtenBytes = 0;
-
-    while (writtenBytes < length) {
-        writeLen = length - writtenBytes > MAX_BUF_SIZE - 5
-                       ? MAX_BUF_SIZE - 5
-                       : length - writtenBytes;
-
-        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
-        packet_ptr[0] = address;
-        packet[4] = writeLen;
-        memcpy(&packet[5], data + writtenBytes, writeLen);
-
-        // This set property will send the EEPROM address and data to be written
-        // at the address
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.data = static_cast<unsigned char *>(packet);
-        cq.size = MAX_BUF_SIZE; // MAX_BUF_SIZE;
-        cq.unit = 0x03;         // wIndex
-        cq.selector = 6;        // WValue for EEPROM register writes
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in sending address to device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-        writtenBytes += writeLen;
-        address += writeLen;
-    }
-
-    return Status::OK;
-}
-
 aditof::Status UsbDevice::readAfeRegisters(const uint16_t *address,
                                            uint16_t *data, size_t length) {
     using namespace aditof;
-
-    struct uvc_xu_control_query cq;
+    int ret;
 
     for (size_t i = 0; i < length; ++i) {
-        // This set property will send the address of AFE register to be read
-        CLEAR(cq);
-        cq.query = UVC_SET_CUR; // bRequest
-        cq.data = const_cast<unsigned char *>(
-            reinterpret_cast<const unsigned char *>(&address[i]));
-        cq.size = 2;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 2; // WValue for AFE register reads
-
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in sending address to device, error: "
-                         << errno << "(" << strerror(errno) << ")";
-            return Status::GENERIC_ERROR;
-        }
-
-        // This get property will get the value read from AFE register
-        CLEAR(cq);
-        cq.query = UVC_GET_CUR; // bRequest
-        cq.data = reinterpret_cast<unsigned char *>(&data[i]);
-        cq.size = 2;     // MAX_BUF_SIZE;
-        cq.unit = 0x03;  // wIndex
-        cq.selector = 2; // WValue for AFE register reads
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-            LOG(WARNING) << "Error in reading data from device, error: "
-                         << errno << "(" << strerror(errno) << ")";
+        ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
+            m_implData->fd, 2, address[i],
+            reinterpret_cast<uint8_t *>(&data[i]), 2, 2);
+        if (ret < 0) {
+            LOG(WARNING)
+                << "Failed to read a packet via UVC extension unit. Error: "
+                << ret;
             return Status::GENERIC_ERROR;
         }
     }
@@ -604,7 +496,8 @@ aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
         }
         length -= buf[1];
 
-        if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
+        if (-1 ==
+            UsbLinuxUtils::xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
             LOG(WARNING) << "Programming AFE error "
                          << "errno: " << errno << " error: " << strerror(errno);
         }
@@ -616,19 +509,13 @@ aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
 aditof::Status UsbDevice::readAfeTemp(float &temperature) {
     using namespace aditof;
 
-    struct uvc_xu_control_query cq;
     float buffer[2];
 
-    // This get property will get the value from temperature sensor
-    CLEAR(cq);
-    cq.query = UVC_GET_CUR; // bRequest
-    cq.data = reinterpret_cast<unsigned char *>(buffer);
-    cq.size = 8;     // MAX_BUF_SIZE;
-    cq.unit = 0x03;  // wIndex
-    cq.selector = 3; // WValue for TempSensor register reads
-    if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-        LOG(WARNING) << "Error in reading data from device, error: " << errno
-                     << "(" << strerror(errno) << ")";
+    int ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
+        m_implData->fd, 3, 0, reinterpret_cast<uint8_t *>(buffer), 8, 8, true);
+    if (ret < 0) {
+        LOG(WARNING)
+            << "Failed to read a packet via UVC extension unit. Error: " << ret;
         return Status::GENERIC_ERROR;
     }
 
@@ -640,19 +527,13 @@ aditof::Status UsbDevice::readAfeTemp(float &temperature) {
 aditof::Status UsbDevice::readLaserTemp(float &temperature) {
     using namespace aditof;
 
-    struct uvc_xu_control_query cq;
     float buffer[2];
 
-    // This get property will get the value from temperature sensor
-    CLEAR(cq);
-    cq.query = UVC_GET_CUR; // bRequest
-    cq.data = reinterpret_cast<unsigned char *>(buffer);
-    cq.size = 8;     // MAX_BUF_SIZE;
-    cq.unit = 0x03;  // wIndex
-    cq.selector = 3; // WValue for TempSensor register reads
-    if (-1 == xioctl(m_implData->fd, UVCIOC_CTRL_QUERY, &cq)) {
-        LOG(WARNING) << "Error in reading data from device, error: " << errno
-                     << "(" << strerror(errno) << ")";
+    int ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
+        m_implData->fd, 3, 0, reinterpret_cast<uint8_t *>(buffer), 8, 8, true);
+    if (ret < 0) {
+        LOG(WARNING)
+            << "Failed to read a packet via UVC extension unit. Error: " << ret;
         return Status::GENERIC_ERROR;
     }
 
@@ -664,4 +545,15 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
 aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
     details = m_deviceDetails;
     return aditof::Status::OK;
+}
+
+aditof::Status UsbDevice::getHandle(void **handle) {
+    if (m_implData->opened) {
+        *handle = &m_implData->fd;
+        return aditof::Status::OK;
+    } else {
+        *handle = nullptr;
+        LOG(ERROR) << "Won't return the handle. Device hasn't been opened yet.";
+        return aditof::Status::UNAVAILABLE;
+    }
 }

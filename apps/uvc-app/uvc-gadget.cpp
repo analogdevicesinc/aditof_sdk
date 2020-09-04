@@ -43,6 +43,8 @@
 #include <aditof/device_enumerator_factory.h>
 #include <aditof/device_factory.h>
 #include <aditof/device_interface.h>
+#include <aditof/eeprom_factory.h>
+#include <aditof/eeprom_interface.h>
 
 #include "../../sdk/src/local_device.h"
 
@@ -260,6 +262,11 @@ bool DeviceStartedStreaming = false;
 int ad903x_hw = 0;
 char v4l2_subdev_prog_file[255] = "afe_firmware.bin";
 
+std::vector<aditof::DeviceConstructionData> availableSensors;
+int sensorIndex = 0; // If multiple camera sensors, work only with the first one
+char *sensorsInfoBuffer =
+    nullptr; // Points to data holding information about available sensors. First two bytes contain the size of the data in the rest of the buffer
+
 /* TODO: Make this declaration local or part of dev stucture */
 struct v4l2_plane gPlanes[8] = {{0}};
 int firmware_size = 0, flen = 0;
@@ -273,6 +280,8 @@ unsigned int eeprom_read_len = 0;
 unsigned int eeprom_write_addr = 0;
 unsigned int eeprom_write_len = 0;
 unsigned char eeprom_data[128 * 1024];
+unsigned int sensors_read_pos = 0;
+unsigned int sensors_read_len = 0;
 
 /* forward declarations */
 static int uvc_video_stream(struct uvc_device *dev, int enable);
@@ -971,11 +980,12 @@ static void uvc_events_process_standard(struct uvc_device *dev,
     (void)resp;
 }
 
-static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
-                                       uint8_t cs, uint8_t entity_id,
-                                       uint8_t len,
-                                       struct uvc_request_data *resp,
-                                       std::shared_ptr<LocalDevice> device) {
+static void
+uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
+                           uint8_t entity_id, uint8_t len,
+                           struct uvc_request_data *resp,
+                           std::shared_ptr<LocalDevice> device,
+                           std::shared_ptr<aditof::EepromInterface> eeprom) {
     switch (entity_id) {
     case 0:
         switch (cs) {
@@ -1303,6 +1313,61 @@ static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
             }
             break;
 
+        case 4: /* Get advertised sensors */
+            switch (req) {
+            case UVC_SET_CUR:
+                dev->set_cur_cs = cs;
+                resp->data[0] = 0x0;
+                resp->length = len;
+                break;
+
+            case UVC_GET_CUR:
+                memcpy(resp->data, sensorsInfoBuffer + sensors_read_pos,
+                       sensors_read_len);
+                resp->length = sensors_read_len;
+                break;
+
+            case UVC_GET_INFO:
+                /*
+                 * We support Set and Get requests and don't
+                 * support async updates on an interrupt endpt
+                 */
+                resp->data[0] = 0x03;
+                resp->length = 1;
+                break;
+
+            case UVC_GET_LEN:
+                resp->data[0] = MAX_PACKET_SIZE;
+                resp->data[1] = 0x0;
+                resp->length = 2;
+                break;
+            case UVC_GET_MIN:
+            case UVC_GET_MAX:
+            case UVC_GET_DEF:
+            case UVC_GET_RES:
+                USB_REQ_DEBUG("Received %x on %d\n", req, cs);
+
+                resp->data[0] = 0xff;
+                resp->length = 1;
+                break;
+            default:
+                printf("Unsupported bRequest: Received bRequest %x on cs %d\n",
+                       req, cs);
+                /*
+                 * We don't support this control, so STALL the
+                 * default control ep.
+                 */
+                resp->length = -EL2HLT;
+                /*
+                 * For every unsupported control request
+                 * set the request error code to appropriate
+                 * code.
+                 */
+                SET_REQ_ERROR_CODE(0x07, 1);
+                break;
+            } //switch (req)
+            break;
+
         case 5: /* EEPROM Read */
         case 6: /* EEPROM Write */
             switch (req) {
@@ -1318,8 +1383,7 @@ static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
                 USB_REQ_DEBUG("Received GET_CUR on %d\n", cs);
 
                 if (cs == 5) {
-                    device->readEeprom(eeprom_read_addr, resp->data,
-                                       eeprom_read_len);
+                    eeprom->read(eeprom_read_addr, resp->data, eeprom_read_len);
                     resp->length = eeprom_read_len;
                 }
                 break;
@@ -1459,10 +1523,11 @@ static void uvc_events_process_streaming(struct uvc_device *dev, uint8_t req,
     }
 }
 
-static void uvc_events_process_class(struct uvc_device *dev,
-                                     struct usb_ctrlrequest *ctrl,
-                                     struct uvc_request_data *resp,
-                                     std::shared_ptr<LocalDevice> device) {
+static void
+uvc_events_process_class(struct uvc_device *dev, struct usb_ctrlrequest *ctrl,
+                         struct uvc_request_data *resp,
+                         std::shared_ptr<LocalDevice> device,
+                         std::shared_ptr<aditof::EepromInterface> eeprom) {
     if ((ctrl->bRequestType & USB_RECIP_MASK) != USB_RECIP_INTERFACE)
         return;
 
@@ -1471,7 +1536,7 @@ static void uvc_events_process_class(struct uvc_device *dev,
         // printf("events_process_controll\n");
         uvc_events_process_control(dev, ctrl->bRequest, ctrl->wValue >> 8,
                                    ctrl->wIndex >> 8, ctrl->wLength, resp,
-                                   device);
+                                   device, eeprom);
         break;
 
     case UVC_INTF_STREAMING:
@@ -1484,10 +1549,11 @@ static void uvc_events_process_class(struct uvc_device *dev,
         break;
     }
 }
-static void uvc_events_process_setup(struct uvc_device *dev,
-                                     struct usb_ctrlrequest *ctrl,
-                                     struct uvc_request_data *resp,
-                                     std::shared_ptr<LocalDevice> device) {
+static void
+uvc_events_process_setup(struct uvc_device *dev, struct usb_ctrlrequest *ctrl,
+                         struct uvc_request_data *resp,
+                         std::shared_ptr<LocalDevice> device,
+                         std::shared_ptr<aditof::EepromInterface> eeprom) {
     dev->control = 0;
 
     USB_REQ_DEBUG("\nbRequestType %02x bRequest %02x wValue %04x wIndex %04x "
@@ -1503,7 +1569,7 @@ static void uvc_events_process_setup(struct uvc_device *dev,
 
     case USB_TYPE_CLASS:
         // printf("process class!\n");
-        uvc_events_process_class(dev, ctrl, resp, device);
+        uvc_events_process_class(dev, ctrl, resp, device, eeprom);
         break;
 
     default:
@@ -1563,9 +1629,10 @@ static int uvc_events_process_control_data(struct uvc_device *dev, uint8_t cs,
     return 0;
 }
 
-static int uvc_events_process_data(struct uvc_device *dev,
-                                   struct uvc_request_data *data,
-                                   std::shared_ptr<LocalDevice> device) {
+static int
+uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
+                        std::shared_ptr<LocalDevice> device,
+                        std::shared_ptr<aditof::EepromInterface> eeprom) {
     struct uvc_streaming_control *target;
     struct uvc_streaming_control *ctrl;
     const struct uvc_format_info *format;
@@ -1624,6 +1691,9 @@ static int uvc_events_process_data(struct uvc_device *dev,
                 }
             } else if (dev->set_cur_cs == 2) { /* AFE register address */
                 reg_addr = *((unsigned short *)(data->data));
+            } else if (dev->set_cur_cs == 4) {
+                sensors_read_pos = *((unsigned int *)(data->data));
+                sensors_read_len = data->data[4];
             } else if (dev->set_cur_cs == 5) { /* EEPROM Read Address */
                 eeprom_read_addr = *((unsigned int *)&(data->data[0]));
                 eeprom_read_len = data->data[4];
@@ -1633,8 +1703,8 @@ static int uvc_events_process_data(struct uvc_device *dev,
                        data->data[4]);
                 eeprom_write_len += data->data[4];
                 if (data->data[4] < MAX_PACKET_SIZE - 5) {
-                    device->writeEeprom(eeprom_write_addr, eeprom_data,
-                                        eeprom_write_len);
+                    eeprom->write(eeprom_write_addr, eeprom_data,
+                                  eeprom_write_len);
                     eeprom_write_len = 0;
                 }
             }
@@ -1713,8 +1783,9 @@ err:
     return ret;
 }
 
-static void uvc_events_process(struct uvc_device *dev,
-                               std::shared_ptr<LocalDevice> device) {
+static void
+uvc_events_process(struct uvc_device *dev, std::shared_ptr<LocalDevice> device,
+                   std::shared_ptr<aditof::EepromInterface> eeprom) {
     struct v4l2_event v4l2_event;
     struct uvc_event *uvc_event =
         reinterpret_cast<struct uvc_event *>(&v4l2_event.u.data);
@@ -1744,12 +1815,12 @@ static void uvc_events_process(struct uvc_device *dev,
 
     case UVC_EVENT_SETUP:
         // printf("UVC_EVENT_SETUP received\n");
-        uvc_events_process_setup(dev, &uvc_event->req, &resp, device);
+        uvc_events_process_setup(dev, &uvc_event->req, &resp, device, eeprom);
         break;
 
     case UVC_EVENT_DATA:
         // printf("UVC_EVENT_DATA received\n");
-        ret = uvc_events_process_data(dev, &uvc_event->data, device);
+        ret = uvc_events_process_data(dev, &uvc_event->data, device, eeprom);
         if (ret < 0)
             break;
         return;
@@ -1896,25 +1967,46 @@ int main(int argc, char *argv[]) {
     enum usb_device_speed speed = USB_SPEED_HIGH; /* High-Speed */
     enum io_method uvc_io_method = IO_METHOD_USERPTR;
 
-    std::vector<aditof::DeviceConstructionData> devsData;
     auto enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
+    enumerator->findDevices(availableSensors);
 
-    enumerator->findDevices(devsData);
-
-    if (devsData.size() < 1) {
-        printf("No device was found!\n");
+    if (availableSensors.size() < 1) {
+        printf("No camera sensor is available!\n");
         return 1;
     }
+    const aditof::DeviceConstructionData &camSensorData =
+        availableSensors[sensorIndex];
+    std::string availableSensorsBlob;
+    // Serialize information about sensors to be send to the UVC client
+    for (const auto &eeprom : camSensorData.eeproms) {
+        availableSensorsBlob += "EEPROM_NAME=" + eeprom.driverName + ";";
+        availableSensorsBlob += "EEPROM_PATH=" + eeprom.driverPath + ";";
+    }
+    const uint32_t buffLen = availableSensorsBlob.length();
+    sensorsInfoBuffer = new char[buffLen + sizeof(uint16_t)];
+    uint16_t *buffSize = reinterpret_cast<uint16_t *>(sensorsInfoBuffer);
+    *buffSize = buffLen;
+    memcpy(sensorsInfoBuffer + sizeof(uint16_t), availableSensorsBlob.c_str(),
+           buffLen);
 
     std::shared_ptr<LocalDevice> device =
         std::dynamic_pointer_cast<LocalDevice>(
             std::shared_ptr<aditof::DeviceInterface>(
-                aditof::DeviceFactory::buildDevice(devsData[0])));
+                aditof::DeviceFactory::buildDevice(camSensorData)));
 
     if (!device) {
         printf("Error when building LocalDevice!\n");
         return 1;
     }
+
+    std::shared_ptr<aditof::EepromInterface> eeprom =
+        std::shared_ptr<aditof::EepromInterface>(
+            aditof::EepromFactory::buildEeprom(aditof::ConnectionType::LOCAL));
+    if (!eeprom) {
+        return 1;
+    }
+    eeprom->open(nullptr, camSensorData.eeproms[0].driverName.c_str(),
+                 camSensorData.eeproms[0].driverPath.c_str());
 
     while ((opt = getopt(argc, argv, "abdf:hi:m:n:o:r:s:t:u:v:p:")) != -1) {
         switch (opt) {
@@ -2194,7 +2286,7 @@ int main(int argc, char *argv[]) {
 
         if (FD_ISSET(udev->uvc_fd, &efds)) {
             // printf("uvc_event_process");
-            uvc_events_process(udev, device);
+            uvc_events_process(udev, device, eeprom);
         }
 
         if (FD_ISSET(udev->uvc_fd, &dfds)) {
@@ -2220,6 +2312,13 @@ int main(int argc, char *argv[]) {
     }
 
     uvc_close(udev);
+
+    eeprom->close();
+
+    if (sensorsInfoBuffer) {
+        delete[] sensorsInfoBuffer;
+        sensorsInfoBuffer = nullptr;
+    }
 
     return 0;
 }

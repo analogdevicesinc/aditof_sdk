@@ -88,11 +88,13 @@ def run_eeprom_replace_cal(config_json, **kwargs):
     status = system.initialize()
     print("system.initialize()", status)
     cam_handle = device.open_device2(system, ipString)
-    dev_handle = cam_handle.getDevice()
+    eeproms = []
+    cam_handle.getEeproms(eeproms)
+    eeprom = eeproms[0]
 
     # Read the cal map from the camera and store it locally
     cal = ce.cal_map()
-    cal.read_eeprom_cal_map(dev_handle)
+    cal.read_eeprom_cal_map(eeprom)
     
     save_path = cal_map_path + "/eeprom_read_map.bin"
     logger.info("Save the original cal map to .bin and .json files, path: %s", save_path)
@@ -114,7 +116,7 @@ def run_eeprom_replace_cal(config_json, **kwargs):
     f.close()
 
     # Write the cal map back to the camera's EEPROM
-    cal.write_eeprom_cal_map(dev_handle)
+    cal.write_eeprom_cal_map(eeprom)
     logger.info("Write back to EEPROM complete")
 
 if __name__ == "__main__":

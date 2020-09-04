@@ -29,43 +29,19 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <libwebsockets.h>
 
-#define RX_BUFFER_BYTES (1229500)
+#include "utils.h"
 
-enum api_Values {
-    API_NOT_DEFINED,
-    FIND_DEVICES,
-    INSTANTIATE_DEVICE,
-    DESTROY_DEVICE,
-    OPEN,
-    START,
-    STOP,
-    GET_AVAILABLE_FRAME_TYPES,
-    SET_FRAME_TYPE,
-    PROGRAM,
-    GET_FRAME,
-    READ_AFE_REGISTERS,
-    WRITE_AFE_REGISTERS,
-    READ_AFE_TEMP,
-    READ_LASER_TEMP,
-    EEPROM_OPEN,
-    EEPROM_READ,
-    EEPROM_WRITE,
-    EEPROM_CLOSE,
-};
+using namespace std;
+using namespace aditof;
 
-enum protocols { PROTOCOL_EXAMPLE, PROTOCOL_COUNT };
-
-class DeviceInterface;
-
-class Network {
-  public:
-    struct lws_context *context;
-    Network();
-    static int callback_function(struct lws *wsi,
-                                 enum lws_callback_reasons reason, void *user,
-                                 void *in, size_t len);
-};
+void Utils::splitIntoTokens(const string &s, const char delimiter,
+                            vector<string> &tokens) {
+    string::size_type start = 0;
+    for (string::size_type end = 0;
+         (end = s.find(delimiter, end)) != string::npos; ++end) {
+        tokens.push_back(s.substr(start, end - start));
+        start = end + 1;
+    }
+    tokens.push_back(s.substr(start));
+}

@@ -29,43 +29,24 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <libwebsockets.h>
+#ifndef USB_UTILS_H
+#define USB_UTILS_H
 
-#define RX_BUFFER_BYTES (1229500)
+#include "aditof/device_construction_data.h"
 
-enum api_Values {
-    API_NOT_DEFINED,
-    FIND_DEVICES,
-    INSTANTIATE_DEVICE,
-    DESTROY_DEVICE,
-    OPEN,
-    START,
-    STOP,
-    GET_AVAILABLE_FRAME_TYPES,
-    SET_FRAME_TYPE,
-    PROGRAM,
-    GET_FRAME,
-    READ_AFE_REGISTERS,
-    WRITE_AFE_REGISTERS,
-    READ_AFE_TEMP,
-    READ_LASER_TEMP,
-    EEPROM_OPEN,
-    EEPROM_READ,
-    EEPROM_WRITE,
-    EEPROM_CLOSE,
-};
+#include <string>
+#include <vector>
 
-enum protocols { PROTOCOL_EXAMPLE, PROTOCOL_COUNT };
-
-class DeviceInterface;
-
-class Network {
+class UsbUtils {
   public:
-    struct lws_context *context;
-    Network();
-    static int callback_function(struct lws *wsi,
-                                 enum lws_callback_reasons reason, void *user,
-                                 void *in, size_t len);
+    /**
+     * @brief Parses sensor tokens which are strings containing a key-value pair
+     * (e.g. "EEPROM_NAME=eeprom1") and adds a new element to the DeviceConstructionData.
+     * @param tokens - The tokens to be parsed.
+     * @param[out] data - The data appended with information extracted from the parsing stage.
+     */
+    static void parseSensorTokens(const std::vector<std::string> &tokens,
+                                  aditof::DeviceConstructionData &data);
 };
+
+#endif // USB_UTILS_H

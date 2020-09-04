@@ -29,16 +29,65 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "connections/usb/usb_utils.h"
 #include "device_enumerator_impl.h"
-#include "windows_utils.h"
+#include "usb_windows_utils.h"
+#include "utils.h"
 
 #include <glog/logging.h>
 
 #include <atlstr.h>
+#include <memory>
+#include <strmif.h>
+
+static aditof::Status getAvailableSensors(IMoniker *Moniker,
+                                          std::string &advertisedSensorData) {
+    using namespace aditof;
+
+    IBaseFilter *pVideoInputFilter;
+
+    HRESULT hr = Moniker->BindToObject(nullptr, nullptr, IID_IBaseFilter,
+                                       (void **)&pVideoInputFilter);
+    if (!SUCCEEDED(hr)) {
+        LOG(WARNING) << "Failed to bind video input filter";
+        return Status::GENERIC_ERROR;
+    }
+
+    uint16_t bufferLength;
+    hr = UsbWindowsUtils::UvcExUnitReadBuffer(
+        pVideoInputFilter, 4, 0, reinterpret_cast<uint8_t *>(&bufferLength),
+        sizeof(bufferLength));
+    if (FAILED(hr)) {
+        pVideoInputFilter->Release();
+        LOG(WARNING)
+            << "Failed to read size of buffer holding sensors info. Error: "
+            << hr;
+        return Status::GENERIC_ERROR;
+    }
+
+    std::unique_ptr<uint8_t[]> data(new uint8_t[bufferLength + 1]);
+    hr = UsbWindowsUtils::UvcExUnitReadBuffer(
+        pVideoInputFilter, 4, sizeof(bufferLength), data.get(), bufferLength);
+    if (FAILED(hr)) {
+        pVideoInputFilter->Release();
+        LOG(WARNING) << "Failed to read the content of buffer holding sensors "
+                        "info. Error: "
+                     << hr;
+        return Status::GENERIC_ERROR;
+    }
+
+    pVideoInputFilter->Release();
+
+    data[bufferLength] = '\0';
+    advertisedSensorData = reinterpret_cast<char *>(data.get());
+
+    return Status::OK;
+}
 
 aditof::Status DeviceEnumeratorImpl::findDevices(
     std::vector<aditof::DeviceConstructionData> &devices) {
     using namespace aditof;
+    using namespace std;
     Status status = Status::OK;
 
     LOG(INFO) << "Looking for USB connected devices";
@@ -82,8 +131,18 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
                 std::string str(static_cast<LPCTSTR>(CString(varName.bstrVal)));
                 if (str.find(devName) != std::string::npos) {
                     DeviceConstructionData devData;
-                    devData.deviceType = DeviceType::USB;
+                    devData.connectionType = ConnectionType::USB;
                     devData.driverPath = str;
+
+                    std::string advertisedSensorData;
+                    status = getAvailableSensors(Moniker, advertisedSensorData);
+                    if (status == Status::OK) {
+                        vector<string> sensorsPaths;
+                        Utils::splitIntoTokens(advertisedSensorData, ';',
+                                               sensorsPaths);
+                        UsbUtils::parseSensorTokens(sensorsPaths, devData);
+                    }
+
                     devices.emplace_back(devData);
                 }
             }
