@@ -53,12 +53,12 @@ class EepromToolController {
 
     aditof::Status setConnection(aditof::ConnectionType connectionType, const std::string& ip = "0.0.0.0");
     
-    aditof::Status checkData(const uint8_t* data, size_t size);
-    aditof::Status writeEeprom(const uint8_t* data, size_t size);
-    aditof::Status readEeprom(uint8_t* data, size_t size);
+    aditof::Status checkData(const std::vector<uint8_t> data);
+    aditof::Status writeEeprom(const std::vector<uint8_t> data);
+    aditof::Status readEeprom(std::vector<uint8_t>& data);
     
-     aditof::Status readFile(char const* filename, std::vector<char>&);
-     aditof::Status writeFile(char const* filename, const std::vector<char>);
+    aditof::Status readFile(char const* filename, std::vector<uint8_t>&);
+    aditof::Status writeFile(char const* filename, const std::vector<uint8_t>);
 
     aditof::Status setCameraRevision(const std::string &revision);
   private:

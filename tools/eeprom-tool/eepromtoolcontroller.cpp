@@ -70,31 +70,45 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
 
 }
 
-aditof::Status EepromToolController::checkData(const uint8_t* data, size_t size){
+aditof::Status EepromToolController::checkData(const std::vector<uint8_t> data){
     return aditof::Status::OK;
 }
 
-aditof::Status EepromToolController::writeEeprom(const uint8_t* data, size_t size){
+aditof::Status EepromToolController::writeEeprom(const std::vector<uint8_t> data){
+    m_eeprom->write(0, data.data(), data.size());
     return aditof::Status::OK;
 }
 
-aditof::Status EepromToolController::readEeprom(uint8_t* data, size_t size){
+aditof::Status EepromToolController::readEeprom(std::vector<uint8_t>& data){
+    float read_size = 100;
+    aditof::Status status;
+
+    m_eeprom->read(0, (uint8_t *)&read_size, 4);
+    data.resize(read_size);
+    
+    status = m_eeprom->read(4, data.data(), read_size);
+    if (status != aditof::Status::OK) {
+        data.resize(0);
+        LOG(WARNING) << "Failed to read from eeprom";
+        return status;
+    }
+
     return aditof::Status::OK;
 }
 //TODO make static
- aditof::Status EepromToolController::readFile(char const* filename, std::vector<char>& data){
+ aditof::Status EepromToolController::readFile(char const* filename, std::vector<uint8_t>& data){
     std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
     std::ifstream::pos_type pos = ifs.tellg();
 
     data.resize(pos);
 
     ifs.seekg(0, std::ios::beg);
-    ifs.read(&data[0], pos);
+    ifs.read((char*)&data[0], pos);
 
     return aditof::Status::OK;
 }
 
- aditof::Status EepromToolController::writeFile(char const* filename, const std::vector<char> data){
+ aditof::Status EepromToolController::writeFile(char const* filename, const std::vector<uint8_t> data){
   
     auto myfile = std::fstream(filename, std::ios::out | std::ios::binary);
     myfile.write((char*)&data[0], data.size());
