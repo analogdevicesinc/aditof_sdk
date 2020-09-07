@@ -51,18 +51,17 @@ class EepromToolController {
     EepromToolController();
     ~EepromToolController();
 
-    aditof::Status writeAFEregister(uint16_t *address, uint16_t *data,
-                                    uint16_t noOfEntries = 1);
-    aditof::Status readAFEregister(uint16_t *address, uint16_t *data,
-                                   uint16_t noOfEntries = 1);
-
-
     aditof::Status setConnection(aditof::ConnectionType connectionType, const std::string& ip = "0.0.0.0");
+    
+    aditof::Status checkData(const uint8_t* data, size_t size);
+    aditof::Status writeEeprom(const uint8_t* data, size_t size);
+    aditof::Status readEeprom(uint8_t* data, size_t size);
+    
+     aditof::Status readFile(char const* filename, std::vector<char>&);
+     aditof::Status writeFile(char const* filename, const std::vector<char>);
 
     aditof::Status setCameraRevision(const std::string &revision);
   private:
-    bool setEthernetConnection(const std::string &ip);
-    bool setRegularConnection();
   private:
     aditof::System *m_system;
     std::vector<std::shared_ptr<aditof::EepromInterface>> m_eeproms;

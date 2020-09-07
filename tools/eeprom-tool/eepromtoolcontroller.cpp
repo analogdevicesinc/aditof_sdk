@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <glog/logging.h>
 #include <iostream>
+#include <fstream>
+#include <ios>
 
 EepromToolController::EepromToolController()
     : m_eepromInUse(-1){
@@ -67,6 +69,40 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     return aditof::Status::OK;
 
 }
+
+aditof::Status EepromToolController::checkData(const uint8_t* data, size_t size){
+    return aditof::Status::OK;
+}
+
+aditof::Status EepromToolController::writeEeprom(const uint8_t* data, size_t size){
+    return aditof::Status::OK;
+}
+
+aditof::Status EepromToolController::readEeprom(uint8_t* data, size_t size){
+    return aditof::Status::OK;
+}
+//TODO make static
+ aditof::Status EepromToolController::readFile(char const* filename, std::vector<char>& data){
+    std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
+    std::ifstream::pos_type pos = ifs.tellg();
+
+    data.resize(pos);
+
+    ifs.seekg(0, std::ios::beg);
+    ifs.read(&data[0], pos);
+
+    return aditof::Status::OK;
+}
+
+ aditof::Status EepromToolController::writeFile(char const* filename, const std::vector<char> data){
+  
+    auto myfile = std::fstream(filename, std::ios::out | std::ios::binary);
+    myfile.write((char*)&data[0], data.size());
+    myfile.close();
+ 
+   return aditof::Status::OK;
+}
+
 
 EepromToolController::~EepromToolController() {
     //TODO

@@ -14,12 +14,10 @@ using namespace std;
 
 Status handleWrite(unique_ptr<EepromInterface>& eeprom, const char* path){
    if (path == NULL){
-         LOG(ERROR) << "invalid pointer to path";
+        LOG(ERROR) << "invalid pointer to path";
         return Status::GENERIC_ERROR;
    }
-   string name;
-   eeprom->getName(name);
-   printf("writing via %s from %s\n", name.c_str(), path);
+
    return Status::OK;
 }
 
@@ -29,22 +27,17 @@ Status handleRead(unique_ptr<EepromInterface>& eeprom, const char* path){
         return Status::GENERIC_ERROR;
    }
    string name;
-
-
-
-
-   eeprom->getName(name);
-   printf("reading via %s to %s\n", name.c_str(), path);
    return Status::OK;
 }
 
 int main(int argc, char *argv[]){
     auto controller = std::make_shared<EepromToolController>();
     //std::cout << controller->hasCamera();
-    int option;
+   int option;
+   std::string path; 
 
    ConnectionType connectionType;
-  unique_ptr<EepromInterface> eeprom;
+   unique_ptr<EepromInterface> eeprom;
 
    while((option = getopt(argc, argv, ":ue:mr:w:")) != -1){ //get option from the getopt() method
       switch(option){
@@ -64,9 +57,11 @@ int main(int argc, char *argv[]){
             break;
          case 'w': //here f is used for some file name
             //handleWrite(eeprom, optarg);
+            path = string(optarg);
             break;
          case 'r': //here f is used for some file name
-             //handleRead(eeprom, optarg);
+            path = string(optarg);
+            printf("got path %s\n", path.c_str());
             break;
          case ':':
             printf("option needs a value\n");
@@ -76,6 +71,17 @@ int main(int argc, char *argv[]){
             break;
       }
    }
+
+   std::vector<char> buff;//TODO make constant for size?
+   controller->readFile(path.c_str(), buff);
+
+   for (auto c : buff){
+      printf("%c", c);
+   }
+
+   buff[2] = '3';
+
+   controller->writeFile(path.c_str(), buff);
 
    printf("found connection %d\n", controller->setConnection(connectionType) == aditof::Status::OK);
 
