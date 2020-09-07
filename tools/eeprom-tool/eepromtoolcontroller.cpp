@@ -1,140 +1,75 @@
 #include "eepromtoolcontroller.h"
 
+#include <aditof/device_construction_data.h>
+#include <aditof/device_enumerator_interface.h>
+#include <aditof/device_enumerator_factory.h>
+#include <aditof/device_factory.h>
+#include <aditof/eeprom_factory.h>
+
+#include <algorithm>
 #include <glog/logging.h>
 #include <iostream>
 
 EepromToolController::EepromToolController()
-    : m_cameraInUse(-1){
-    m_system = new aditof::System();
-    m_system->initialize();
-    m_system->getCameraList(m_cameras);
-    if (m_cameras.size()) {
-        // Use the first camera that is found
-        m_cameraInUse = 0;
-        auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
-        camera->initialize();
-        std::vector<std::string> frameTypes;
-        camera->getAvailableFrameTypes(frameTypes);
-        if (frameTypes.empty()) {
-            LOG(WARNING) << "no frame type available!";
-            return;
-        }
-        camera->setFrameType(frameTypes.front());
-
-        std::vector<std::string> modes;
-        camera->getAvailableModes(modes);
-        if (modes.empty()) {
-            LOG(WARNING) << "no camera modes available!";
-            return;
-        }
-
-    } else {
-        LOG(WARNING) << "No cameras found!";
-    }
+    : m_eepromInUse(-1){
+  //TODO
 }
+static const std::string skEepromName = "24c1024";
 
-bool EepromToolController::setRegularConnection() {
-    delete m_system;
-    m_system = new aditof::System();
-    m_system->initialize();
-    m_system->getCameraList(m_cameras);
-    m_IsEthernetConnection = false;
-    if (m_cameras.size()) {
-        // Use the first camera that is found
-        m_cameraInUse = 0;
-        auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
+aditof::Status EepromToolController::setConnection(aditof::ConnectionType connectionType, const std::string& ip) {
+    const unsigned int usedDevData = 0;
 
-        camera->initialize();
+    aditof::Status status;
+    std::unique_ptr<aditof::DeviceEnumeratorInterface> enumerator;
+    std::vector<aditof::DeviceConstructionData> devicesData;
+    aditof::DeviceConstructionData devData;
+    void * handle;
 
-        std::vector<std::string> frameTypes;
-        camera->getAvailableFrameTypes(frameTypes);
-        if (frameTypes.empty()) {
-            LOG(WARNING) << "no frame type available!";
-            return false;
-        }
-        camera->setFrameType(frameTypes.front());
-
-        std::vector<std::string> modes;
-        camera->getAvailableModes(modes);
-        if (modes.empty()) {
-            LOG(WARNING) << "no camera modes available!";
-            return false;
-        }
-        return true;
-
-    } else {
-        LOG(WARNING) << "No cameras found!";
-        return false;
+    if (connectionType == aditof::ConnectionType::ETHERNET){
+        enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(ip);
     }
-}
-
-bool EepromToolController::setEthernetConnection(const std::string &ip) {
-    delete m_system;
-    // TO DO: replace the boolean variable m_IsEthernetConnection with a check
-    // of the camera type (we need the sdk implementation first)
-    if (m_IsEthernetConnection == true)
-        m_cameras.clear();
-    m_system = new aditof::System();
-    m_system->initialize();
-    m_system->getCameraListAtIp(m_cameras, ip);
-    m_IsEthernetConnection = true;
-    if (m_cameras.size()) {
-        // Use the first camera that is found
-        m_cameraInUse = 0;
-        auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
-
-        camera->initialize();
-
-        std::vector<std::string> frameTypes;
-        camera->getAvailableFrameTypes(frameTypes);
-        if (frameTypes.empty()) {
-            LOG(WARNING) << "no frame type available!";
-            return false;
-        }
-        camera->setFrameType(frameTypes.front());
-
-        std::vector<std::string> modes;
-        camera->getAvailableModes(modes);
-        if (modes.empty()) {
-            LOG(WARNING) << "no camera modes available!";
-            return false;
-        }
-        return true;
-
-    } else {
-        LOG(WARNING) << "No cameras found!";
-        return false;
+    else{
+        enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
     }
+
+    enumerator->findDevices(devicesData);
+    //TO DO add check on devices size
+    devData = devicesData[usedDevData];
+    std::shared_ptr<aditof::DeviceInterface> device = aditof::DeviceFactory::buildDevice(devData);
+    device->open();
+    device->getHandle(&handle);
+    
+    auto iter = std::find_if(devData.eeproms.begin(), devData.eeproms.end(),
+                             [](const aditof::EepromConstructionData &eData) {
+                                 return eData.driverName == skEepromName;
+                             });
+    if (iter == devData.eeproms.end()) {
+        LOG(ERROR)
+            << "No available info about the EEPROM required by the camera";
+        return aditof::Status::INVALID_ARGUMENT; //TODO review returned status for this situation 
+    }
+
+    m_eeprom = aditof::EepromFactory::buildEeprom(devData.connectionType);
+    if (!m_eeprom) {
+        LOG(ERROR) << "Failed to create an Eeprom object";
+        return aditof::Status::INVALID_ARGUMENT;//TODO review returned status for this situation 
+    }
+
+    const aditof::EepromConstructionData &eeprom24c1024Info = *iter;
+    status = m_eeprom->open(handle, eeprom24c1024Info.driverName.c_str(),
+                            eeprom24c1024Info.driverPath.c_str());
+    if (status != aditof::Status::OK) {
+        LOG(ERROR) << "Failed to open EEPROM with name "
+                   << devData.eeproms.back().driverName << " is available";
+        return status;
+    }
+
+    return aditof::Status::OK;
+
 }
 
 EepromToolController::~EepromToolController() {
-    if (m_cameraInUse == -1) {
-        return;
-    }
-    m_cameras[static_cast<unsigned int>(m_cameraInUse)]->stop();
+    //TODO
     delete m_system;
 }
 
-
-aditof::Status EepromToolController::writeAFEregister(uint16_t *address,
-                                                      uint16_t *data,
-                                                      uint16_t noOfEntries) {
-    if (m_cameraInUse == -1) {
-        return aditof::Status::GENERIC_ERROR;
-    }
-
-    auto device =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDevice();
-    return device->writeAfeRegisters(address, data, noOfEntries);
-}
-
-aditof::Status EepromToolController::readAFEregister(uint16_t *address,
-                                                     uint16_t *data,
-                                                     uint16_t noOfEntries) {
-
-    auto device =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDevice();
-    return device->readAfeRegisters(address, data, noOfEntries);
-}
-
-bool EepromToolController::hasCamera() const { return !m_cameras.empty(); }

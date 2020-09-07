@@ -36,6 +36,7 @@
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
+#include <aditof/eeprom_interface.h>
 
 #include <atomic>
 #include <functional>
@@ -55,21 +56,22 @@ class EepromToolController {
     aditof::Status readAFEregister(uint16_t *address, uint16_t *data,
                                    uint16_t noOfEntries = 1);
 
-    bool hasCamera() const;
 
-    bool setEthernetConnection(const std::string &ip);
-    bool setRegularConnection();
+    aditof::Status setConnection(aditof::ConnectionType connectionType, const std::string& ip = "0.0.0.0");
 
     aditof::Status setCameraRevision(const std::string &revision);
   private:
-
+    bool setEthernetConnection(const std::string &ip);
+    bool setRegularConnection();
   private:
     aditof::System *m_system;
-    std::vector<std::shared_ptr<aditof::Camera>> m_cameras;
+    std::vector<std::shared_ptr<aditof::EepromInterface>> m_eeproms;
 
-    int m_cameraInUse;
+    std::shared_ptr<aditof::EepromInterface> m_eeprom;
 
-    bool m_IsEthernetConnection = false;
+    int m_eepromInUse;
+
+   bool m_IsEthernetConnection = false;
 };
 
 #endif

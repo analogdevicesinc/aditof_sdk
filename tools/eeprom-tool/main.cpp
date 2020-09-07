@@ -2,56 +2,71 @@
 #include <stdio.h>
 #include <glog/logging.h>
 #include <getopt.h>
-#include "eepromtoolcontroller.h"
 #include <string>
+#include <aditof/eeprom_factory.h>
+#include <aditof/device_construction_data.h>
+#include "eepromtoolcontroller.h"
+#include <iterator>
+#include <algorithm>
 
-aditof::Status handleWrite(aditof::ConnectionType selectedConnection, const char* path){
+using namespace aditof;
+using namespace std;
+
+Status handleWrite(unique_ptr<EepromInterface>& eeprom, const char* path){
    if (path == NULL){
          LOG(ERROR) << "invalid pointer to path";
-        return aditof::Status::GENERIC_ERROR;
+        return Status::GENERIC_ERROR;
    }
-   printf("writing via %d from %s\n", static_cast<int>(selectedConnection), path);
-   return aditof::Status::OK;
+   string name;
+   eeprom->getName(name);
+   printf("writing via %s from %s\n", name.c_str(), path);
+   return Status::OK;
 }
 
-
-aditof::Status handleRead(aditof::ConnectionType selectedConnection, const char* path){
+Status handleRead(unique_ptr<EepromInterface>& eeprom, const char* path){
    if (path == NULL){
          LOG(ERROR) << "invalid pointer to path";
-        return aditof::Status::GENERIC_ERROR;
+        return Status::GENERIC_ERROR;
    }
-   printf("reading via %d to %s\n", static_cast<int>(selectedConnection), path);
-   return aditof::Status::OK;
+   string name;
+
+
+
+
+   eeprom->getName(name);
+   printf("reading via %s to %s\n", name.c_str(), path);
+   return Status::OK;
 }
 
 int main(int argc, char *argv[]){
-    //auto controller = std::make_shared<EepromToolController>();
+    auto controller = std::make_shared<EepromToolController>();
     //std::cout << controller->hasCamera();
     int option;
-  
-  aditof::ConnectionType selectedConnection;
+
+   ConnectionType connectionType;
+  unique_ptr<EepromInterface> eeprom;
 
    while((option = getopt(argc, argv, ":ue:mr:w:")) != -1){ //get option from the getopt() method
       switch(option){
          //For option i, r, l, print that these are options
          case 'u':
-            selectedConnection = aditof::ConnectionType::USB;
+            connectionType = ConnectionType::USB;
             printf("Given1 Option: %c\n", option);
            break;
          case 'e':
-            selectedConnection = aditof::ConnectionType::ETHERNET;
+            connectionType = ConnectionType::ETHERNET;
             printf("Given2 Option: %c with value %s\n", option, optarg);
            break;
            //TO DO: maybe rename this options to Local instead of mipi ?
          case 'm':
-            selectedConnection = aditof::ConnectionType::LOCAL;
+            connectionType = ConnectionType::LOCAL;
             printf("Given3 Option: %c\n", option);
             break;
          case 'w': //here f is used for some file name
-            handleWrite(selectedConnection, optarg);
+            //handleWrite(eeprom, optarg);
             break;
          case 'r': //here f is used for some file name
-             handleRead(selectedConnection, optarg);
+             //handleRead(eeprom, optarg);
             break;
          case ':':
             printf("option needs a value\n");
@@ -62,7 +77,7 @@ int main(int argc, char *argv[]){
       }
    }
 
-
+   printf("found connection %d\n", controller->setConnection(connectionType) == aditof::Status::OK);
 
   return 0;
 }
