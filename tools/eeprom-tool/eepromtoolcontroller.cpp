@@ -201,8 +201,12 @@ aditof::Status EepromToolController::writeFile(char const* filename, const std::
 }
 
 EepromToolController::~EepromToolController() {
-    m_eeprom->close();
-    m_device->stop();
+     if (m_eeprom){
+        m_eeprom->close();
+    }
+    if (m_device){
+        m_device->stop();
+    }
     delete m_system;
 }
 
