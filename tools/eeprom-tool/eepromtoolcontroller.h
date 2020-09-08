@@ -37,6 +37,7 @@
 #include <aditof/frame.h>
 #include <aditof/system.h>
 #include <aditof/eeprom_interface.h>
+#include "eeprom_list.h"
 
 #include <atomic>
 #include <functional>
