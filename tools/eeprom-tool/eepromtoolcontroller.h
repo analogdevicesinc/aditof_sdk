@@ -53,13 +53,15 @@ class EepromToolController {
 
     aditof::Status setConnection(aditof::ConnectionType connectionType, const std::string& ip = "0.0.0.0");
     
+    aditof::Status writeFileToEeprom(char const* filename);
+    aditof::Status readEepromToFile(char const* filename);
+
     aditof::Status checkData(const std::vector<uint8_t> data);
     aditof::Status writeEeprom(const std::vector<uint8_t> data);
     aditof::Status readEeprom(std::vector<uint8_t>& data);
     
     aditof::Status readFile(char const* filename, std::vector<uint8_t>&);
     aditof::Status writeFile(char const* filename, const std::vector<uint8_t>);
-
     aditof::Status setCameraRevision(const std::string &revision);
   private:
   private:
@@ -67,7 +69,7 @@ class EepromToolController {
     std::vector<std::shared_ptr<aditof::EepromInterface>> m_eeproms;
 
     std::shared_ptr<aditof::EepromInterface> m_eeprom;
-
+    std::shared_ptr<aditof::DeviceInterface> m_device;
     int m_eepromInUse;
 
    bool m_IsEthernetConnection = false;

@@ -17,6 +17,8 @@ EepromToolController::EepromToolController()
   //TODO
 }
 static const std::string skEepromName = "24c1024";
+#define EEPROM_SIZE 131072
+
 
 aditof::Status EepromToolController::setConnection(aditof::ConnectionType connectionType, const std::string& ip) {
     const unsigned int usedDevData = 0;
@@ -25,6 +27,7 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     std::unique_ptr<aditof::DeviceEnumeratorInterface> enumerator;
     std::vector<aditof::DeviceConstructionData> devicesData;
     aditof::DeviceConstructionData devData;
+
     void * handle;
 
     if (connectionType == aditof::ConnectionType::ETHERNET){
@@ -37,9 +40,9 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     enumerator->findDevices(devicesData);
     //TO DO add check on devices size
     devData = devicesData[usedDevData];
-    std::shared_ptr<aditof::DeviceInterface> device = aditof::DeviceFactory::buildDevice(devData);
-    device->open();
-    device->getHandle(&handle);
+    m_device = aditof::DeviceFactory::buildDevice(devData);
+    m_device->open();
+    m_device->getHandle(&handle);
     
     auto iter = std::find_if(devData.eeproms.begin(), devData.eeproms.end(),
                              [](const aditof::EepromConstructionData &eData) {
@@ -67,7 +70,6 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     }
 
     return aditof::Status::OK;
-
 }
 
 aditof::Status EepromToolController::checkData(const std::vector<uint8_t> data){
@@ -75,7 +77,10 @@ aditof::Status EepromToolController::checkData(const std::vector<uint8_t> data){
 }
 
 aditof::Status EepromToolController::writeEeprom(const std::vector<uint8_t> data){
-    m_eeprom->write(0, data.data(), data.size());
+    float size = static_cast<float>(data.size());
+
+    m_eeprom->write((uint32_t)0, (uint8_t *)&size, (size_t)4);
+    m_eeprom->write((uint32_t)4, (uint8_t *)data.data(), (size_t)size);
     return aditof::Status::OK;
 }
 
@@ -83,9 +88,18 @@ aditof::Status EepromToolController::readEeprom(std::vector<uint8_t>& data){
     float read_size = 100;
     aditof::Status status;
 
-    m_eeprom->read(0, (uint8_t *)&read_size, 4);
-    data.resize(read_size);
+    m_eeprom->write(EEPROM_SIZE - 5, (uint8_t *)&read_size, 4);
     
+    m_eeprom->read((uint32_t)0, (uint8_t *)&read_size, (size_t)4);
+    LOG(INFO) << "EEPROM calibration data size " << read_size << " bytes";
+
+    if (read_size > EEPROM_SIZE) {
+        LOG(WARNING) << "Invalid calibration data size";
+        return aditof::Status::GENERIC_ERROR;
+    }
+    data.resize(read_size);
+
+    printf("calibration data size %d\n", (uint32_t)read_size);
     status = m_eeprom->read(4, data.data(), read_size);
     if (status != aditof::Status::OK) {
         data.resize(0);
@@ -116,6 +130,44 @@ aditof::Status EepromToolController::readEeprom(std::vector<uint8_t>& data){
  
    return aditof::Status::OK;
 }
+
+ aditof::Status EepromToolController::writeFileToEeprom(char const* filename){
+    std::vector<uint8_t> data;
+    aditof::Status status;
+
+    status = readFile(filename, data);
+    if (status != aditof::Status::OK){
+        LOG(ERROR) << "Failed to read data from file";
+        return status;
+    }
+
+    status = writeEeprom(data);
+    if (status != aditof::Status::OK){
+        LOG(ERROR) << "Failed to write data to EEPROM";
+        return status;
+    }
+
+    return aditof::Status::OK;
+ }
+
+ aditof::Status EepromToolController::readEepromToFile(char const* filename){
+    std::vector<uint8_t> data;
+    aditof::Status status;
+
+    status = readEeprom(data);
+    if (status != aditof::Status::OK){
+        LOG(ERROR) << "Failed to read data from EEPROM";
+        return status;
+    }
+
+    status = writeFile(filename, data);
+    if (status != aditof::Status::OK){
+        LOG(ERROR) << "Failed to write data to file";
+        return status;
+    }
+
+    return aditof::Status::OK;
+ }
 
 
 EepromToolController::~EepromToolController() {

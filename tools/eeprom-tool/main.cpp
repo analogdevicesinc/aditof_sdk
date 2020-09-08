@@ -12,26 +12,45 @@
 using namespace aditof;
 using namespace std;
 
-Status handleWrite(unique_ptr<EepromInterface>& eeprom, const char* path){
+Status handleWrite(ConnectionType connectionType, const char* path){
    if (path == NULL){
         LOG(ERROR) << "invalid pointer to path";
         return Status::GENERIC_ERROR;
    }
+   aditof::Status status;
+   auto controller = std::make_shared<EepromToolController>();
+   
+   status = controller->setConnection(connectionType);
+   if (status != aditof::Status::OK){
+      LOG(ERROR) << "cannot set connection";
+      return status;
+   }
+
+   controller->writeFileToEeprom(path);
 
    return Status::OK;
 }
 
-Status handleRead(unique_ptr<EepromInterface>& eeprom, const char* path){
+Status handleRead(ConnectionType connectionType, const char* path){
    if (path == NULL){
          LOG(ERROR) << "invalid pointer to path";
         return Status::GENERIC_ERROR;
    }
-   string name;
+   aditof::Status status;
+   auto controller = std::make_shared<EepromToolController>();
+   
+   status = controller->setConnection(connectionType);
+   if (status != aditof::Status::OK){
+      LOG(ERROR) << "cannot set connection";
+      return status;
+   }
+
+   controller->readEepromToFile(path);
+   
    return Status::OK;
 }
 
 int main(int argc, char *argv[]){
-    auto controller = std::make_shared<EepromToolController>();
     //std::cout << controller->hasCamera();
    int option;
    std::string path; 
@@ -55,13 +74,14 @@ int main(int argc, char *argv[]){
             connectionType = ConnectionType::LOCAL;
             printf("Given3 Option: %c\n", option);
             break;
-         case 'w': //here f is used for some file name
-            //handleWrite(eeprom, optarg);
-            path = string(optarg);
+         case 'w': 
+            handleWrite(connectionType, optarg);
+     //       path = string(optarg);
             break;
-         case 'r': //here f is used for some file name
-            path = string(optarg);
-            printf("got path %s\n", path.c_str());
+         case 'r': 
+       //     path = string(optarg);
+            handleRead(connectionType, optarg);
+         //   printf("got path %s\n", path.c_str());
             break;
          case ':':
             printf("option needs a value\n");
@@ -71,19 +91,6 @@ int main(int argc, char *argv[]){
             break;
       }
    }
-
-   std::vector<char> buff;//TODO make constant for size?
-   controller->readFile(path.c_str(), buff);
-
-   for (auto c : buff){
-      printf("%c", c);
-   }
-
-   buff[2] = '3';
-
-   controller->writeFile(path.c_str(), buff);
-
-   printf("found connection %d\n", controller->setConnection(connectionType) == aditof::Status::OK);
 
   return 0;
 }
