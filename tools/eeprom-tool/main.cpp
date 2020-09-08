@@ -16,6 +16,7 @@ using namespace std;
 enum ActionType {
    WRITE,
    READ,
+   LIST_EEPROMS,
    UNKNOWN
 };
 
@@ -28,7 +29,7 @@ typedef struct {
 Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
    int option;
 
-   while((option = getopt(argc, argv, ":ue:mr:w:")) != -1){ //get option from the getopt() method
+   while((option = getopt(argc, argv, ":ue:mr:w:l")) != -1){ //get option from the getopt() method
       switch(option){
          case 'u':
             cliArguments.connectionType = ConnectionType::USB;
@@ -36,7 +37,6 @@ Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
          case 'e':
             cliArguments.connectionType = ConnectionType::ETHERNET;
             break;
-            //TO DO: maybe rename this options to Local instead of mipi ?
          case 'm':
             cliArguments.connectionType = ConnectionType::LOCAL;
             break;
@@ -47,6 +47,9 @@ Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
          case 'r': 
             cliArguments.actionType = READ;
             cliArguments.path = string(optarg);
+            break;
+         case 'l': 
+            cliArguments.actionType = LIST_EEPROMS;
             break;
          case ':':
             printf("option needs a value\n");
@@ -72,11 +75,11 @@ int main(int argc, char *argv[]){
       return 1;
    }
 
-   status = controller->setConnection(cliArguments.connectionType);
-   if (status != aditof::Status::OK){
-      LOG(ERROR) << "cannot set connection";
-      return 1;
-   }
+   // status = controller->setConnection(cliArguments.connectionType);
+   // if (status != aditof::Status::OK){
+   //    LOG(ERROR) << "cannot set connection";
+   //    return 1;
+   // }
 
    switch (cliArguments.actionType)
    {
@@ -85,6 +88,9 @@ int main(int argc, char *argv[]){
       break;
    case WRITE:
          controller->writeFileToEeprom(cliArguments.path.c_str());
+      break;
+   case LIST_EEPROMS:
+         controller->listEeproms();
       break;
    default:
       break;

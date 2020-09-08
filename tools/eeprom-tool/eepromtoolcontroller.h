@@ -54,6 +54,7 @@ class EepromToolController {
     
     aditof::Status writeFileToEeprom(char const* filename);
     aditof::Status readEepromToFile(char const* filename);
+    aditof::Status listEeproms();
   private:
     //EEPROM operations
     aditof::Status writeEeprom(const std::vector<uint8_t> data);

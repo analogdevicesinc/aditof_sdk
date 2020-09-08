@@ -103,7 +103,16 @@ aditof::Status EepromToolController::writeFileToEeprom(char const* filename){
     }
 
     return aditof::Status::OK;
- }
+}
+
+aditof::Status EepromToolController::listEeproms(){
+    for(auto key : EEPROMS){
+        printf("%s\n", key.first.c_str());
+    }
+    
+    return aditof::Status::OK;
+}
+
 
  aditof::Status EepromToolController::readEepromToFile(char const* filename){
     std::vector<uint8_t> data;
