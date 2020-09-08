@@ -75,11 +75,11 @@ int main(int argc, char *argv[]){
       return 1;
    }
 
-   // status = controller->setConnection(cliArguments.connectionType);
-   // if (status != aditof::Status::OK){
-   //    LOG(ERROR) << "cannot set connection";
-   //    return 1;
-   // }
+   status = controller->setConnection(cliArguments.connectionType);
+   if (status != aditof::Status::OK){
+      LOG(ERROR) << "cannot set connection";
+      return 1;
+   }
 
    switch (cliArguments.actionType)
    {

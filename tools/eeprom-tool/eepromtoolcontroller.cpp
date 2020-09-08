@@ -1,10 +1,10 @@
 #include "eepromtoolcontroller.h"
 
-#include <aditof/device_construction_data.h>
 #include <aditof/device_enumerator_interface.h>
 #include <aditof/device_enumerator_factory.h>
 #include <aditof/device_factory.h>
 #include <aditof/eeprom_factory.h>
+#include <aditof/eeprom_construction_data.h>
 
 #include <algorithm>
 #include <glog/logging.h>
@@ -27,7 +27,6 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     aditof::Status status;
     std::unique_ptr<aditof::DeviceEnumeratorInterface> enumerator;
     std::vector<aditof::DeviceConstructionData> devicesData;
-    aditof::DeviceConstructionData devData;
 
     //create enumerator based on specified connection type
     if (connectionType == aditof::ConnectionType::ETHERNET){
@@ -43,33 +42,33 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     devicesData.erase(std::remove_if(devicesData.begin(), 
                                     devicesData.end(),
                                     [connectionType](aditof::DeviceConstructionData dev)
-                                        {return dev.connectionType == connectionType;}),
+                                        {return dev.connectionType != connectionType;}),
                     devicesData.end());
     if (devicesData.size() <= usedDevDataIndex){
         LOG(ERROR) << "cannot find device at index " << usedDevDataIndex;
         return aditof::Status::GENERIC_ERROR;
     }
+    m_devData = devicesData[usedDevDataIndex];
     
     //get eeproms with the specified name
-    auto iter = std::find_if(devData.eeproms.begin(), devData.eeproms.end(),
+    auto iter = std::find_if(m_devData.eeproms.begin(), m_devData.eeproms.end(),
                              [](const aditof::EepromConstructionData &eData) {
                                  return eData.driverName == skEepromName;
                              });
-    if (iter == devData.eeproms.end()) {
+    if (iter == m_devData.eeproms.end()) {
         LOG(ERROR)
             << "No available info about the EEPROM required by the camera";
         return aditof::Status::INVALID_ARGUMENT; //TODO review returned status
     }
 
-    m_eeprom = aditof::EepromFactory::buildEeprom(devData.connectionType);
+    m_eeprom = aditof::EepromFactory::buildEeprom(m_devData.connectionType);
     if (!m_eeprom) {
         LOG(ERROR) << "Failed to create an Eeprom object";
         return aditof::Status::INVALID_ARGUMENT;//TODO review returned status
     }
 
     //get handle
-    devData = devicesData[usedDevDataIndex];
-    m_device = aditof::DeviceFactory::buildDevice(devData);
+    m_device = aditof::DeviceFactory::buildDevice(m_devData);
     m_device->open();
     m_device->getHandle(&handle);
     
@@ -79,7 +78,7 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
                             eepromInfo.driverPath.c_str());
     if (status != aditof::Status::OK) {
         LOG(ERROR) << "Failed to open EEPROM with name "
-                   << devData.eeproms.back().driverName << " is available";
+                   << m_devData.eeproms.back().driverName << " is available";
         return status;
     }
 
@@ -106,8 +105,16 @@ aditof::Status EepromToolController::writeFileToEeprom(char const* filename){
 }
 
 aditof::Status EepromToolController::listEeproms(){
-    for(auto key : EEPROMS){
-        printf("%s\n", key.first.c_str());
+    printf("found %d eeprom%s:\n", m_devData.eeproms.size(), m_devData.eeproms.size() == 1 ? "" : "s");
+    
+    //list all eeproms contained in the map
+    for(aditof::EepromConstructionData eepromData : m_devData.eeproms){
+        if (EEPROMS.count(eepromData.driverName)){
+            printf("%s\n", eepromData.driverName.c_str());
+        }
+        else{
+            LOG(WARNING) << "unknown eeprom found " << eepromData.driverName;
+        }
     }
     
     return aditof::Status::OK;

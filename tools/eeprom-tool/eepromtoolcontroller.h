@@ -37,6 +37,7 @@
 #include <aditof/frame.h>
 #include <aditof/system.h>
 #include <aditof/eeprom_interface.h>
+#include <aditof/device_construction_data.h>
 #include "eeprom_list.h"
 
 #include <atomic>
@@ -64,6 +65,7 @@ class EepromToolController {
     static aditof::Status writeFile(char const* filename, const std::vector<uint8_t>);
   private:
     aditof::System *m_system;
+    aditof::DeviceConstructionData m_devData;
     std::shared_ptr<aditof::EepromInterface> m_eeprom;
     std::shared_ptr<aditof::DeviceInterface> m_device;
 };

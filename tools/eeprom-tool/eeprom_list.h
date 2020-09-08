@@ -8,13 +8,13 @@
 struct EepromProperties{
     uint16_t size;
     EepromProperties(uint16_t _size):
-        size(size)
+        size(_size)
         {}
 };
 
 const std::map<std::string, EepromProperties> EEPROMS = {
-    {"24c1024", EepromProperties(131072)},
-    {"demo", EepromProperties(42)}
+    {"24c1024", EepromProperties((uint16_t)131072)},
+    {"demo", EepromProperties((uint16_t)42)}
 };
 
 #endif
