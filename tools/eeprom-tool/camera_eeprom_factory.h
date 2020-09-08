@@ -29,49 +29,20 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EEPROM_TOOL_H
-#define EEPROM_TOOL_H
+#ifndef CAMERA_EEPROM_FACTORY_H
+#define CAMERA_EEPROM_FACTORY_H
 
-#include <aditof/camera.h>
-#include <aditof/device_interface.h>
-#include <aditof/frame.h>
-#include <aditof/system.h>
-#include <aditof/eeprom_interface.h>
-#include <aditof/device_construction_data.h>
-#include "eeprom_list.h"
 #include "camera_eeprom_interface.h"
+#include <aditof/device_definitions.h>
+#include <aditof/eeprom_interface.h>
 
-#include <atomic>
-#include <functional>
 #include <memory>
-#include <thread>
 
-class EepromTool {
-
+class CameraEepromFactory {
   public:
-    EepromTool();
-    ~EepromTool();
 
-    aditof::Status setConnection(aditof::ConnectionType connectionType, 
-                                std::string ip, 
-                                std::string eepromName);
-    
-    aditof::Status writeFileToEeprom(char const* filename);
-    aditof::Status readEepromToFile(char const* filename);
-    aditof::Status listEeproms();
-  private:
-    //EEPROM operations
-    aditof::Status writeEeprom(const std::vector<uint8_t> data);
-    aditof::Status readEeprom(std::vector<uint8_t>& data);
-    //File operations
-    static aditof::Status readFile(char const* filename, std::vector<uint8_t>&);
-    static aditof::Status writeFile(char const* filename, const std::vector<uint8_t>);
-  private:
-    aditof::System *m_system;
-    aditof::DeviceConstructionData m_devData;
-    std::shared_ptr<aditof::EepromInterface> m_eeprom;
-    std::shared_ptr<CameraEepromInterface> m_camera_eeprom;
-    std::shared_ptr<aditof::DeviceInterface> m_device;
+    static std::unique_ptr<CameraEepromInterface> 
+    buildEeprom(aditof::SensorType sensorType, std::shared_ptr<aditof::EepromInterface>  eeprom);
 };
 
-#endif
+#endif // EEPROM_FACTORY_H

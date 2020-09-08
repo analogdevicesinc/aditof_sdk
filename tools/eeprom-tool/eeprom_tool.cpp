@@ -5,17 +5,14 @@
 #include <aditof/device_factory.h>
 #include <aditof/eeprom_factory.h>
 #include <aditof/eeprom_construction_data.h>
+#include "camera_eeprom_interface.h"
+#include "camera_eeprom_factory.h"
 
 #include <algorithm>
 #include <glog/logging.h>
 #include <iostream>
 #include <fstream>
 #include <ios>
-
-//TODO allow the user to specify the name
-static const std::string skEepromName = "24c1024";
-//TODO choose the size based on the specified name
-#define EEPROM_SIZE 131072 
 
 EepromTool::EepromTool(){
   //TODO ??
@@ -25,6 +22,7 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
                                                     std::string ip, 
                                                     std::string eepromName) {
     const unsigned int usedDevDataIndex = 0;
+    const aditof::SensorType sensorType = aditof::SensorType::SENSOR_96TOF1;
     void * handle = nullptr;
     aditof::Status status;
     std::unique_ptr<aditof::DeviceEnumeratorInterface> enumerator;
@@ -98,6 +96,8 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
         return status;
     }
 
+    m_camera_eeprom = CameraEepromFactory::buildEeprom(sensorType, m_eeprom);
+
     return aditof::Status::OK;
 }
 
@@ -157,49 +157,11 @@ aditof::Status EepromTool::listEeproms(){
  }
 
 aditof::Status EepromTool::writeEeprom(const std::vector<uint8_t> data){
-    aditof::Status status;
-    float size = static_cast<float>(data.size());
-
-    status = m_eeprom->write((uint32_t)0, (uint8_t *)&size, (size_t)4);
-    if (status != aditof::Status::OK){
-        LOG(ERROR) << "failed to write to eeprom";
-        return status;
-    }
-
-    status = m_eeprom->write((uint32_t)4, (uint8_t *)data.data(), (size_t)size);
-    if (status != aditof::Status::OK){
-        LOG(ERROR) << "failed to write to eeprom";
-        return status;
-    }
-
-    return aditof::Status::OK;
+    return m_camera_eeprom->write(data);
 }
 
 aditof::Status EepromTool::readEeprom(std::vector<uint8_t>& data){
-    float read_size = 100;
-    aditof::Status status;
-
-    //mistery
-    m_eeprom->write(EEPROM_SIZE - 5, (uint8_t *)&read_size, 4);
-
-    //read size
-    m_eeprom->read((uint32_t)0, (uint8_t *)&read_size, (size_t)4);
-    LOG(INFO) << "EEPROM calibration data size " << read_size << " bytes";
-    if (read_size > EEPROM_SIZE) {
-        LOG(WARNING) << "Invalid calibration data size";
-        return aditof::Status::GENERIC_ERROR;
-    }
-
-    //read data
-    data.resize(read_size);
-    status = m_eeprom->read(4, data.data(), read_size);
-    if (status != aditof::Status::OK) {
-        data.resize(0);
-        LOG(WARNING) << "Failed to read from eeprom";
-        return status;
-    }
-
-    return aditof::Status::OK;
+    return m_camera_eeprom->read(data);
 }
 
 aditof::Status EepromTool::readFile(char const* filename, std::vector<uint8_t>& data){

@@ -1,5 +1,3 @@
-#include <aditof/eeprom_factory.h>
-#include <aditof/device_construction_data.h>
 #include "eeprom_tool.h"
 
 #include <iostream>
