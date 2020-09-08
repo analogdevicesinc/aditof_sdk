@@ -29,8 +29,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EEPROMTOOLCONTROLLER_H
-#define EEPROMTOOLCONTROLLER_H
+#ifndef EEPROM_TOOL_H
+#define EEPROM_TOOL_H
 
 #include <aditof/camera.h>
 #include <aditof/device_interface.h>
@@ -45,11 +45,11 @@
 #include <memory>
 #include <thread>
 
-class EepromToolController {
+class EepromTool {
 
   public:
-    EepromToolController();
-    ~EepromToolController();
+    EepromTool();
+    ~EepromTool();
 
     aditof::Status setConnection(aditof::ConnectionType connectionType, 
                                 std::string ip, 

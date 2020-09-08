@@ -1,6 +1,6 @@
 #include <aditof/eeprom_factory.h>
 #include <aditof/device_construction_data.h>
-#include "eepromtoolcontroller.h"
+#include "eeprom_tool.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -73,7 +73,7 @@ Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
 int main(int argc, char *argv[]){
    Status status;
    CLIArguments cliArguments;
-   auto controller = std::make_shared<EepromToolController>();
+   auto controller = std::make_shared<EepromTool>();
 
    status = parseArguments(argc, argv, cliArguments);
    if (status != aditof::Status::OK){

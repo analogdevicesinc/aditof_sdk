@@ -1,4 +1,4 @@
-#include "eepromtoolcontroller.h"
+#include "eeprom_tool.h"
 
 #include <aditof/device_enumerator_interface.h>
 #include <aditof/device_enumerator_factory.h>
@@ -17,11 +17,11 @@ static const std::string skEepromName = "24c1024";
 //TODO choose the size based on the specified name
 #define EEPROM_SIZE 131072 
 
-EepromToolController::EepromToolController(){
+EepromTool::EepromTool(){
   //TODO ??
 }
 
-aditof::Status EepromToolController::setConnection(aditof::ConnectionType connectionType, 
+aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType, 
                                                     std::string ip, 
                                                     std::string eepromName) {
     const unsigned int usedDevDataIndex = 0;
@@ -101,7 +101,7 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     return aditof::Status::OK;
 }
 
-aditof::Status EepromToolController::writeFileToEeprom(char const* filename){
+aditof::Status EepromTool::writeFileToEeprom(char const* filename){
     std::vector<uint8_t> data;
     aditof::Status status;
 
@@ -120,7 +120,7 @@ aditof::Status EepromToolController::writeFileToEeprom(char const* filename){
     return aditof::Status::OK;
 }
 
-aditof::Status EepromToolController::listEeproms(){
+aditof::Status EepromTool::listEeproms(){
     printf("found %ld eeprom%s:\n", m_devData.eeproms.size(), m_devData.eeproms.size() == 1 ? "" : "s");
     
     //list all found eeproms that are contained in the map
@@ -137,7 +137,7 @@ aditof::Status EepromToolController::listEeproms(){
 }
 
 
- aditof::Status EepromToolController::readEepromToFile(char const* filename){
+ aditof::Status EepromTool::readEepromToFile(char const* filename){
     std::vector<uint8_t> data;
     aditof::Status status;
 
@@ -156,7 +156,7 @@ aditof::Status EepromToolController::listEeproms(){
     return aditof::Status::OK;
  }
 
-aditof::Status EepromToolController::writeEeprom(const std::vector<uint8_t> data){
+aditof::Status EepromTool::writeEeprom(const std::vector<uint8_t> data){
     aditof::Status status;
     float size = static_cast<float>(data.size());
 
@@ -175,7 +175,7 @@ aditof::Status EepromToolController::writeEeprom(const std::vector<uint8_t> data
     return aditof::Status::OK;
 }
 
-aditof::Status EepromToolController::readEeprom(std::vector<uint8_t>& data){
+aditof::Status EepromTool::readEeprom(std::vector<uint8_t>& data){
     float read_size = 100;
     aditof::Status status;
 
@@ -202,7 +202,7 @@ aditof::Status EepromToolController::readEeprom(std::vector<uint8_t>& data){
     return aditof::Status::OK;
 }
 
-aditof::Status EepromToolController::readFile(char const* filename, std::vector<uint8_t>& data){
+aditof::Status EepromTool::readFile(char const* filename, std::vector<uint8_t>& data){
     std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
     std::ifstream::pos_type pos = ifs.tellg();
 
@@ -214,7 +214,7 @@ aditof::Status EepromToolController::readFile(char const* filename, std::vector<
     return aditof::Status::OK;
 }
 
-aditof::Status EepromToolController::writeFile(char const* filename, const std::vector<uint8_t> data){
+aditof::Status EepromTool::writeFile(char const* filename, const std::vector<uint8_t> data){
     auto myfile = std::fstream(filename, std::ios::out | std::ios::binary);
 
     myfile.write((char*)&data[0], data.size());
@@ -223,7 +223,7 @@ aditof::Status EepromToolController::writeFile(char const* filename, const std::
     return aditof::Status::OK;
 }
 
-EepromToolController::~EepromToolController() {
+EepromTool::~EepromTool() {
      if (m_eeprom){
         m_eeprom->close();
     }

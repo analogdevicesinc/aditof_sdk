@@ -8,5 +8,5 @@ if (MSVC)
 endif (MSVC)
 
 
-add_executable(${PROJECT_NAME} main.cpp eepromtoolcontroller.cpp)
+add_executable(${PROJECT_NAME} main.cpp eeprom_tool.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${aditof_LIBRARIES})
