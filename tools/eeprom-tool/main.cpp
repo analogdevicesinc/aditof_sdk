@@ -62,8 +62,8 @@ Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
 
 int main(int argc, char *argv[]){
    Status status;
-   auto controller = std::make_shared<EepromToolController>();
    CLIArguments cliArguments;
+   auto controller = std::make_shared<EepromToolController>();
 
    status = parseArguments(argc, argv, cliArguments);
    if (status != aditof::Status::OK){

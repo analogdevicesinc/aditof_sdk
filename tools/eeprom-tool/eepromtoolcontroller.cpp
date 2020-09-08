@@ -12,21 +12,24 @@
 #include <fstream>
 #include <ios>
 
+//TODO allow the user to specify the name
 static const std::string skEepromName = "24c1024";
-#define EEPROM_SIZE 131072
+//TODO choose the size based on the specified name
+#define EEPROM_SIZE 131072 
 
 EepromToolController::EepromToolController(){
-  //TODO
+  //TODO ??
 }
 
 aditof::Status EepromToolController::setConnection(aditof::ConnectionType connectionType, const std::string& ip) {
     const unsigned int usedDevDataIndex = 0;
-    void * handle;
+    void * handle = nullptr;
     aditof::Status status;
     std::unique_ptr<aditof::DeviceEnumeratorInterface> enumerator;
     std::vector<aditof::DeviceConstructionData> devicesData;
     aditof::DeviceConstructionData devData;
 
+    //create enumerator based on specified connection type
     if (connectionType == aditof::ConnectionType::ETHERNET){
         enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(ip);
     }
@@ -55,13 +58,13 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     if (iter == devData.eeproms.end()) {
         LOG(ERROR)
             << "No available info about the EEPROM required by the camera";
-        return aditof::Status::INVALID_ARGUMENT; //TODO review returned status for this situation 
+        return aditof::Status::INVALID_ARGUMENT; //TODO review returned status
     }
 
     m_eeprom = aditof::EepromFactory::buildEeprom(devData.connectionType);
     if (!m_eeprom) {
         LOG(ERROR) << "Failed to create an Eeprom object";
-        return aditof::Status::INVALID_ARGUMENT;//TODO review returned status for this situation 
+        return aditof::Status::INVALID_ARGUMENT;//TODO review returned status
     }
 
     //get handle
