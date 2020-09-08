@@ -43,8 +43,6 @@
 #include <memory>
 #include <thread>
 
-#include "safequeue.h"
-
 class EepromToolController {
 
   public:

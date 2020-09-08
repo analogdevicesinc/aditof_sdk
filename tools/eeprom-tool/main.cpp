@@ -1,11 +1,12 @@
+#include <aditof/eeprom_factory.h>
+#include <aditof/device_construction_data.h>
+#include "eepromtoolcontroller.h"
+
 #include <iostream>
 #include <stdio.h>
 #include <glog/logging.h>
 #include <getopt.h>
 #include <string>
-#include <aditof/eeprom_factory.h>
-#include <aditof/device_construction_data.h>
-#include "eepromtoolcontroller.h"
 #include <iterator>
 #include <algorithm>
 
