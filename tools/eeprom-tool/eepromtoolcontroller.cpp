@@ -12,8 +12,7 @@
 #include <fstream>
 #include <ios>
 
-EepromToolController::EepromToolController()
-    : m_eepromInUse(-1){
+EepromToolController::EepromToolController(){
   //TODO
 }
 static const std::string skEepromName = "24c1024";

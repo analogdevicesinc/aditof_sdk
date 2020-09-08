@@ -56,15 +56,16 @@ class EepromToolController {
     aditof::Status writeFileToEeprom(char const* filename);
     aditof::Status readEepromToFile(char const* filename);
 
-    aditof::Status writeEeprom(const std::vector<uint8_t> data);
-    aditof::Status readEeprom(std::vector<uint8_t>& data);
-    
-    aditof::Status readFile(char const* filename, std::vector<uint8_t>&);
-    aditof::Status writeFile(char const* filename, const std::vector<uint8_t>);
+   
   private:
+  //EEPROM operations
+  aditof::Status writeEeprom(const std::vector<uint8_t> data);
+  aditof::Status readEeprom(std::vector<uint8_t>& data);
+  //File operations
+  aditof::Status readFile(char const* filename, std::vector<uint8_t>&);
+  aditof::Status writeFile(char const* filename, const std::vector<uint8_t>);
   private:
     aditof::System *m_system;
-    std::vector<std::shared_ptr<aditof::EepromInterface>> m_eeproms;
 
     std::shared_ptr<aditof::EepromInterface> m_eeprom;
     std::shared_ptr<aditof::DeviceInterface> m_device;
