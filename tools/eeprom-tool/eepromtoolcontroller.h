@@ -51,7 +51,9 @@ class EepromToolController {
     EepromToolController();
     ~EepromToolController();
 
-    aditof::Status setConnection(aditof::ConnectionType connectionType, const std::string& ip = "0.0.0.0");
+    aditof::Status setConnection(aditof::ConnectionType connectionType, 
+                                std::string ip, 
+                                std::string eepromName);
     
     aditof::Status writeFileToEeprom(char const* filename);
     aditof::Status readEepromToFile(char const* filename);

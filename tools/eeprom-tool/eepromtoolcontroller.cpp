@@ -21,7 +21,9 @@ EepromToolController::EepromToolController(){
   //TODO ??
 }
 
-aditof::Status EepromToolController::setConnection(aditof::ConnectionType connectionType, const std::string& ip) {
+aditof::Status EepromToolController::setConnection(aditof::ConnectionType connectionType, 
+                                                    std::string ip, 
+                                                    std::string eepromName) {
     const unsigned int usedDevDataIndex = 0;
     void * handle = nullptr;
     aditof::Status status;
@@ -31,6 +33,10 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     //create enumerator based on specified connection type
     if (connectionType == aditof::ConnectionType::ETHERNET){
         enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(ip);
+        if (enumerator == nullptr){
+            LOG(ERROR) << "network is not enabled";
+            return aditof::Status::INVALID_ARGUMENT;
+        }
     }
     else{
         enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
@@ -50,14 +56,24 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     }
     m_devData = devicesData[usedDevDataIndex];
     
+    if(eepromName.size() == 0){
+        if(m_devData.eeproms.size() > 1){
+            LOG(ERROR) << "Multiple EEPROMs available but none selected.";
+            return aditof::Status::INVALID_ARGUMENT;
+        }
+        if (m_devData.eeproms.size() == 1){
+            eepromName = m_devData.eeproms[0].driverName;
+        }
+    }
+
     //get eeproms with the specified name
     auto iter = std::find_if(m_devData.eeproms.begin(), m_devData.eeproms.end(),
-                             [](const aditof::EepromConstructionData &eData) {
-                                 return eData.driverName == skEepromName;
+                             [eepromName](const aditof::EepromConstructionData &eData) {
+                                 return eData.driverName == eepromName;
                              });
     if (iter == m_devData.eeproms.end()) {
         LOG(ERROR)
-            << "No available info about the EEPROM required by the camera";
+            << "No available info about the EEPROM required by the user";
         return aditof::Status::INVALID_ARGUMENT; //TODO review returned status
     }
 
@@ -105,9 +121,9 @@ aditof::Status EepromToolController::writeFileToEeprom(char const* filename){
 }
 
 aditof::Status EepromToolController::listEeproms(){
-    printf("found %d eeprom%s:\n", m_devData.eeproms.size(), m_devData.eeproms.size() == 1 ? "" : "s");
+    printf("found %ld eeprom%s:\n", m_devData.eeproms.size(), m_devData.eeproms.size() == 1 ? "" : "s");
     
-    //list all eeproms contained in the map
+    //list all found eeproms that are contained in the map
     for(aditof::EepromConstructionData eepromData : m_devData.eeproms){
         if (EEPROMS.count(eepromData.driverName)){
             printf("%s\n", eepromData.driverName.c_str());

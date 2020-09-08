@@ -22,6 +22,8 @@ enum ActionType {
 
 typedef struct {
    string path;
+   string ip = "0.0.0.0";
+   string eepromName = "";
    ConnectionType connectionType = ConnectionType::LOCAL;
    ActionType actionType = UNKNOWN;
 } CLIArguments;
@@ -29,16 +31,20 @@ typedef struct {
 Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
    int option;
 
-   while((option = getopt(argc, argv, ":ue:mr:w:l")) != -1){ //get option from the getopt() method
+   while((option = getopt(argc, argv, ":ue:mn:r:w:l")) != -1){ //get option from the getopt() method
       switch(option){
          case 'u':
             cliArguments.connectionType = ConnectionType::USB;
             break;
          case 'e':
             cliArguments.connectionType = ConnectionType::ETHERNET;
+            cliArguments.ip = string(optarg);
             break;
          case 'm':
             cliArguments.connectionType = ConnectionType::LOCAL;
+            break;
+         case 'n':
+            cliArguments.eepromName = string(optarg);
             break;
          case 'w': 
             cliArguments.actionType = WRITE;
@@ -75,7 +81,7 @@ int main(int argc, char *argv[]){
       return 1;
    }
 
-   status = controller->setConnection(cliArguments.connectionType);
+   status = controller->setConnection(cliArguments.connectionType, cliArguments.ip, cliArguments.eepromName);
    if (status != aditof::Status::OK){
       LOG(ERROR) << "cannot set connection";
       return 1;
