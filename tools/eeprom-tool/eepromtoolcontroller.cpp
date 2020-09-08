@@ -71,10 +71,6 @@ aditof::Status EepromToolController::setConnection(aditof::ConnectionType connec
     return aditof::Status::OK;
 }
 
-aditof::Status EepromToolController::checkData(const std::vector<uint8_t> data){
-    return aditof::Status::OK;
-}
-
 aditof::Status EepromToolController::writeEeprom(const std::vector<uint8_t> data){
     float size = static_cast<float>(data.size());
 
@@ -170,7 +166,8 @@ aditof::Status EepromToolController::readEeprom(std::vector<uint8_t>& data){
 
 
 EepromToolController::~EepromToolController() {
-    //TODO
+    m_eeprom->close();
+    m_device->stop();
     delete m_system;
 }
 

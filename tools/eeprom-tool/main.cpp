@@ -12,7 +12,7 @@
 using namespace aditof;
 using namespace std;
 
-typedef enum ActionType {
+enum ActionType {
    WRITE,
    READ,
    UNKNOWN
@@ -24,16 +24,18 @@ typedef struct {
    ActionType actionType = UNKNOWN;
 } CLIArguments;
 
-Status parseArguments(int argc, const char *argv[], CLIArguments& cliArguments){
-     while((option = getopt(argc, argv, ":ue:mr:w:")) != -1){ //get option from the getopt() method
+Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
+   int option;
+
+   while((option = getopt(argc, argv, ":ue:mr:w:")) != -1){ //get option from the getopt() method
       switch(option){
          case 'u':
             cliArguments.connectionType = ConnectionType::USB;
-           break;
+            break;
          case 'e':
             cliArguments.connectionType = ConnectionType::ETHERNET;
-           break;
-           //TO DO: maybe rename this options to Local instead of mipi ?
+            break;
+            //TO DO: maybe rename this options to Local instead of mipi ?
          case 'm':
             cliArguments.connectionType = ConnectionType::LOCAL;
             break;
@@ -66,22 +68,22 @@ int main(int argc, char *argv[]){
    status = parseArguments(argc, argv, cliArguments);
    if (status != aditof::Status::OK){
       LOG(ERROR) << "cannot parse CLI arguments";
-      return status;
+      return 1;
    }
 
-   status = controller->setConnection(connectionType);
+   status = controller->setConnection(cliArguments.connectionType);
    if (status != aditof::Status::OK){
       LOG(ERROR) << "cannot set connection";
-      return status;
+      return 1;
    }
 
-   switch (actionType)
+   switch (cliArguments.actionType)
    {
    case READ:
-         controller->readEepromToFile(path);
+         controller->readEepromToFile(cliArguments.path.c_str());
       break;
    case WRITE:
-         controller->writeFileToEeprom(path);
+         controller->writeFileToEeprom(cliArguments.path.c_str());
       break;
    default:
       break;
