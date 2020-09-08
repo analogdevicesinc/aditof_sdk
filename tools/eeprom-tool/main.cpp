@@ -12,84 +12,79 @@
 using namespace aditof;
 using namespace std;
 
-Status handleWrite(ConnectionType connectionType, const char* path){
-   if (path == NULL){
-        LOG(ERROR) << "invalid pointer to path";
-        return Status::GENERIC_ERROR;
-   }
-   aditof::Status status;
-   auto controller = std::make_shared<EepromToolController>();
-   
-   status = controller->setConnection(connectionType);
-   if (status != aditof::Status::OK){
-      LOG(ERROR) << "cannot set connection";
-      return status;
-   }
+typedef enum ActionType {
+   WRITE,
+   READ,
+   UNKNOWN
+};
 
-   controller->writeFileToEeprom(path);
+typedef struct {
+   string path;
+   ConnectionType connectionType = ConnectionType::LOCAL;
+   ActionType actionType = UNKNOWN;
+} CLIArguments;
 
-   return Status::OK;
-}
-
-Status handleRead(ConnectionType connectionType, const char* path){
-   if (path == NULL){
-         LOG(ERROR) << "invalid pointer to path";
-        return Status::GENERIC_ERROR;
-   }
-   aditof::Status status;
-   auto controller = std::make_shared<EepromToolController>();
-   
-   status = controller->setConnection(connectionType);
-   if (status != aditof::Status::OK){
-      LOG(ERROR) << "cannot set connection";
-      return status;
-   }
-
-   controller->readEepromToFile(path);
-   
-   return Status::OK;
-}
-
-int main(int argc, char *argv[]){
-    //std::cout << controller->hasCamera();
-   int option;
-   std::string path; 
-
-   ConnectionType connectionType;
-   unique_ptr<EepromInterface> eeprom;
-
-   while((option = getopt(argc, argv, ":ue:mr:w:")) != -1){ //get option from the getopt() method
+Status parseArguments(int argc, const char *argv[], CLIArguments& cliArguments){
+     while((option = getopt(argc, argv, ":ue:mr:w:")) != -1){ //get option from the getopt() method
       switch(option){
-         //For option i, r, l, print that these are options
          case 'u':
-            connectionType = ConnectionType::USB;
-            printf("Given1 Option: %c\n", option);
+            cliArguments.connectionType = ConnectionType::USB;
            break;
          case 'e':
-            connectionType = ConnectionType::ETHERNET;
-            printf("Given2 Option: %c with value %s\n", option, optarg);
+            cliArguments.connectionType = ConnectionType::ETHERNET;
            break;
            //TO DO: maybe rename this options to Local instead of mipi ?
          case 'm':
-            connectionType = ConnectionType::LOCAL;
-            printf("Given3 Option: %c\n", option);
+            cliArguments.connectionType = ConnectionType::LOCAL;
             break;
          case 'w': 
-            handleWrite(connectionType, optarg);
-     //       path = string(optarg);
+            cliArguments.actionType = WRITE;
+            cliArguments.path = string(optarg);
             break;
          case 'r': 
-       //     path = string(optarg);
-            handleRead(connectionType, optarg);
-         //   printf("got path %s\n", path.c_str());
+            cliArguments.actionType = READ;
+            cliArguments.path = string(optarg);
             break;
          case ':':
             printf("option needs a value\n");
+            return Status::INVALID_ARGUMENT;
             break;
          case '?': //used for some unknown options
             printf("unknown option: %c\n", optopt);
             break;
       }
+   }
+
+   return Status::OK;
+}
+
+int main(int argc, char *argv[]){
+   Status status;
+   auto controller = std::make_shared<EepromToolController>();
+   CLIArguments cliArguments;
+
+   status = parseArguments(argc, argv, cliArguments);
+   if (status != aditof::Status::OK){
+      LOG(ERROR) << "cannot parse CLI arguments";
+      return status;
+   }
+
+   status = controller->setConnection(connectionType);
+   if (status != aditof::Status::OK){
+      LOG(ERROR) << "cannot set connection";
+      return status;
+   }
+
+   switch (actionType)
+   {
+   case READ:
+         controller->readEepromToFile(path);
+      break;
+   case WRITE:
+         controller->writeFileToEeprom(path);
+      break;
+   default:
+      break;
    }
 
   return 0;
