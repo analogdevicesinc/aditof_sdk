@@ -1,6 +1,13 @@
 #include "cam96tof1_eeprom.h"
 #include "eeprom_list.h"
 
+Camera96Tof1Eeprom::Camera96Tof1Eeprom(std::shared_ptr<aditof::EepromInterface> _eeprom):
+                    m_eeprom(_eeprom) {
+    if (!_eeprom){
+        LOG(ERROR) << "null pointer to eeprom.";
+    }
+}
+
 aditof::Status Camera96Tof1Eeprom::read(std::vector<uint8_t>& data){
     float read_size = 100;
     uint32_t eepromSize; 

@@ -88,16 +88,20 @@ int main(int argc, char *argv[]){
    switch (cliArguments.actionType)
    {
    case READ:
-         controller->readEepromToFile(cliArguments.path.c_str());
+         status = controller->readEepromToFile(cliArguments.path.c_str());
       break;
    case WRITE:
-         controller->writeFileToEeprom(cliArguments.path.c_str());
+         status = controller->writeFileToEeprom(cliArguments.path.c_str());
       break;
    case LIST_EEPROMS:
-         controller->listEeproms();
+         status = controller->listEeproms();
       break;
    default:
       break;
+   }
+
+   if (status != Status::OK){
+      return 1;
    }
 
   return 0;
