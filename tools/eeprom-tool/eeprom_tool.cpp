@@ -60,7 +60,7 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
     }
     m_devData = devicesData[usedDevDataIndex];
     
-    if(eepromName.size() == 0){
+    if(eepromName.empty()){
         if(m_devData.eeproms.size() > 1){
             LOG(ERROR) << "Multiple EEPROMs available but none selected.";
             return aditof::Status::INVALID_ARGUMENT;

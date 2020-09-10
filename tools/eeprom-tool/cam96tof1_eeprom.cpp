@@ -1,5 +1,5 @@
 #include "cam96tof1_eeprom.h"
-#include "eeprom_list.h"
+#include "eeprom_map.h"
 
 Camera96Tof1Eeprom::Camera96Tof1Eeprom(std::shared_ptr<aditof::EepromInterface> _eeprom):
                     m_eeprom(_eeprom) {
