@@ -37,6 +37,7 @@ endif()
 
 add_subdirectory(sdk)
 add_subdirectory(apps)
+add_subdirectory(tools/eeprom-tool)
 
 if (WITH_EXAMPLES)
         add_subdirectory(examples)
