@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 project(eeprom-tool)
-find_package(aditof)
 
 if (MSVC)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../deps/wingetopt/src)
@@ -9,4 +8,5 @@ endif (MSVC)
 
 
 add_executable(${PROJECT_NAME} main.cpp eeprom_tool.cpp cam96tof1_eeprom.cpp camera_eeprom_factory.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${aditof_LIBRARIES})
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+target_link_libraries(${PROJECT_NAME} PRIVATE aditof)
