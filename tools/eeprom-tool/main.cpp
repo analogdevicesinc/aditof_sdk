@@ -24,6 +24,7 @@ typedef struct {
    string eepromName = "";
    ConnectionType connectionType = ConnectionType::LOCAL;
    ActionType actionType = UNKNOWN;
+   bool isConnectionSpecifed = false;
 } CLIArguments;
 
 Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
@@ -33,13 +34,16 @@ Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
       switch(option){
          case 'u':
             cliArguments.connectionType = ConnectionType::USB;
+            cliArguments.isConnectionSpecifed = true;
             break;
          case 'e':
             cliArguments.connectionType = ConnectionType::ETHERNET;
             cliArguments.ip = string(optarg);
+            cliArguments.isConnectionSpecifed = true;
             break;
          case 'm':
             cliArguments.connectionType = ConnectionType::LOCAL;
+            cliArguments.isConnectionSpecifed = true;
             break;
          case 'n':
             cliArguments.eepromName = string(optarg);
@@ -79,7 +83,16 @@ int main(int argc, char *argv[]){
       return 1;
    }
 
-   status = controller->setConnection(cliArguments.connectionType, cliArguments.ip, cliArguments.eepromName);
+   if (cliArguments.isConnectionSpecifed){
+      status = controller->setConnection(cliArguments.connectionType, cliArguments.ip, cliArguments.eepromName);
+   }
+   else if (aditof::Status::OK == (status = controller->setConnection(ConnectionType::LOCAL, cliArguments.ip, cliArguments.eepromName))){
+      LOG(INFO) << "setting connection via MIPI";
+   }
+   else if (aditof::Status::OK == (status = controller->setConnection(ConnectionType::USB, cliArguments.ip, cliArguments.eepromName))){
+      LOG(INFO) << "setting connection via USB";
+   }
+
    if (status != aditof::Status::OK){
       LOG(ERROR) << "cannot set connection";
       return 1;
