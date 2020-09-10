@@ -14,6 +14,12 @@
 #include <fstream>
 #include <ios>
 
+#ifdef CHICONY_006
+    const aditof::SensorType sensorType  = aditof::SensorType::SENSOR_CHICONY;
+#else
+    const aditof::SensorType sensorType  = aditof::SensorType::SENSOR_96TOF1;
+#endif
+
 EepromTool::EepromTool(){
   //TODO ??
 }
@@ -22,7 +28,6 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
                                                     std::string ip, 
                                                     std::string eepromName) {
     const unsigned int usedDevDataIndex = 0;
-    const aditof::SensorType sensorType = aditof::SensorType::SENSOR_96TOF1;
     void * handle = nullptr;
     aditof::Status status;
     std::unique_ptr<aditof::DeviceEnumeratorInterface> enumerator;
@@ -48,6 +53,7 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
                                     [connectionType](aditof::DeviceConstructionData dev)
                                         {return dev.connectionType != connectionType;}),
                     devicesData.end());
+
     if (devicesData.size() <= usedDevDataIndex){
         LOG(ERROR) << "cannot find device at index " << usedDevDataIndex;
         return aditof::Status::GENERIC_ERROR;
@@ -83,8 +89,17 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
 
     //get handle
     m_device = aditof::DeviceFactory::buildDevice(m_devData);
-    m_device->open();
-    m_device->getHandle(&handle);
+    status = m_device->open();
+    if (status != aditof::Status::OK) {
+        LOG(WARNING) << "Failed to open device";
+        return status;
+    }
+
+    status = m_device->getHandle(&handle);
+    if (status != aditof::Status::OK) {
+        LOG(ERROR) << "Failed to obtain the handle";
+        return status;
+    }
     
     //open eeprom
     const aditof::EepromConstructionData &eepromInfo = *iter;

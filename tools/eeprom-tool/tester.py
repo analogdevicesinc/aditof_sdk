@@ -26,12 +26,12 @@ def run_eeprom_tool(connection_type, command, path, ip = ""):
     connection_type_str = {ConnectionType.USB:"-u", 
                             ConnectionType.LOCAL:"-m", 
                             ConnectionType.ETHERNET:"-e"}.get(connection_type, "-")
-    ip_str = ip if connection_type == ConnectionType.ETHERNET else "" + " "
+    ip_str = ip if connection_type == ConnectionType.ETHERNET else ""
     cmd_str = {CommandType.READ:"-r", CommandType.WRITE:"-w"}.get(command, "-")
 
-    while (subprocess.run([cmd, connection_type_str, cmd_str, path]).returncode != 0):
-        pass
-    # completed_process = subprocess.run([cmd, connection_type_str, cmd_str, path]).returncode
+    # while (subprocess.run([cmd, connection_type_str, cmd_str, ip_str, path]).returncode != 0):
+    #     pass
+    completed_process = subprocess.run([cmd, connection_type_str, cmd_str, path]).returncode
 
     # print("[TESTER] command `" + ' '.join(completed_process.args) + "` returned " + str(completed_process.returncode))
     return 0#completed_process.returncode
@@ -46,7 +46,7 @@ def test_readback(connection_type):
     else:
         print("[TESTER] error while backing up content via " + connection_type.name)
         return False
-    
+    return False
     # copy and modify backup file
     copyfile(BACKUP_FILE, ALTERED_BACKUP_FILE)
     with open(ALTERED_BACKUP_FILE, 'r+b') as f:
