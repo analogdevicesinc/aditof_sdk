@@ -31,10 +31,10 @@ def run_eeprom_tool(connection_type, command, path, ip = ""):
 
     # while (subprocess.run([cmd, connection_type_str, cmd_str, ip_str, path]).returncode != 0):
     #     pass
-    completed_process = subprocess.run([cmd, connection_type_str, cmd_str, path]).returncode
+    completed_process = subprocess.run([cmd, connection_type_str, cmd_str, path])
 
-    # print("[TESTER] command `" + ' '.join(completed_process.args) + "` returned " + str(completed_process.returncode))
-    return 0#completed_process.returncode
+    print("[TESTER] command `" + ' '.join(completed_process.args) + "` returned " + str(completed_process.returncode))
+    return completed_process.returncode
 
 #if the writing would not work at all this test would still pass
 #TODO modify something before writing 
@@ -46,7 +46,7 @@ def test_readback(connection_type):
     else:
         print("[TESTER] error while backing up content via " + connection_type.name)
         return False
-    return False
+    
     # copy and modify backup file
     copyfile(BACKUP_FILE, ALTERED_BACKUP_FILE)
     with open(ALTERED_BACKUP_FILE, 'r+b') as f:
@@ -84,15 +84,16 @@ def test_readback(connection_type):
     print("[TESTER] readback test on " + connection_type.name + " has " + "passed" if match else "failed")
 
     #cleanup
-    # os.remove(BACKUP_FILE)
-    # os.remove(ALTERED_BACKUP_FILE)
-    # os.remove(READBACK_FILE)
+    os.remove(BACKUP_FILE)
+    os.remove(ALTERED_BACKUP_FILE)
+    os.remove(READBACK_FILE)
 
     return match
 
 
 
 def main():
+    test_readback(ConnectionType.LOCAL)
     test_readback(ConnectionType.USB)
 
 if __name__ == "__main__":
