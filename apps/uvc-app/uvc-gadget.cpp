@@ -1,4 +1,4 @@
-/*
+﻿/*
  * UVC gadget test application
  *
  * Copyright (C) 2010 Ideas on board SPRL <laurent.pinchart@ideasonboard.com>
@@ -1698,7 +1698,9 @@ uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
                 eeprom_read_addr = *((unsigned int *)&(data->data[0]));
                 eeprom_read_len = data->data[4];
             } else if (dev->set_cur_cs == 6) {
-                eeprom_write_addr = *((unsigned int *)&(data->data[0]));
+                if (eeprom_write_len == 0) {
+                    eeprom_write_addr = *((unsigned int *)&(data->data[0]));
+                }
                 memcpy(&eeprom_data[eeprom_write_len], &data->data[5],
                        data->data[4]);
                 eeprom_write_len += data->data[4];
