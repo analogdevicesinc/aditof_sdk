@@ -9,6 +9,7 @@ EXEC_NAME = "build/eeprom-tool"
 BACKUP_FILE = "backup.bin"
 ALTERED_BACKUP_FILE = "altered_backup.bin"
 READBACK_FILE = "readback.bin"
+BYTE_TO_ALTER_INDEX = 100
 
 class ConnectionType(Enum):
     USB = 1
@@ -46,11 +47,13 @@ def test_readback(connection_type):
         print("[TESTER] error while backing up content via " + connection_type.name)
         return False
     
-    # copy and modify alter backup file
+    # copy and modify backup file
     copyfile(BACKUP_FILE, ALTERED_BACKUP_FILE)
     with open(ALTERED_BACKUP_FILE, 'r+b') as f:
-        f.seek(5)
-        f.write(b'a')
+        f.seek(BYTE_TO_ALTER_INDEX)
+        c = f.read()[0]
+        f.seek(BYTE_TO_ALTER_INDEX)
+        f.write(bytes(c + 1))
 
     #write the same values
     status = run_eeprom_tool(connection_type, CommandType.WRITE, ALTERED_BACKUP_FILE)
