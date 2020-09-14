@@ -1,76 +1,15 @@
 #include "eeprom_tool.h"
+#include "cli_helper.h"
 
 #include <iostream>
 #include <stdio.h>
 #include <glog/logging.h>
-#include <getopt.h>
 #include <string>
 #include <iterator>
 #include <algorithm>
 
 using namespace aditof;
 using namespace std;
-
-enum ActionType {
-   WRITE,
-   READ,
-   LIST_EEPROMS,
-   UNKNOWN
-};
-
-typedef struct {
-   string path;
-   string ip = "0.0.0.0";
-   string eepromName = "";
-   ConnectionType connectionType = ConnectionType::LOCAL;
-   ActionType actionType = UNKNOWN;
-   bool isConnectionSpecifed = false;
-} CLIArguments;
-
-Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
-   int option;
-
-   while((option = getopt(argc, argv, ":ue:mn:r:w:l")) != -1){ //get option from the getopt() method
-      switch(option){
-         case 'u':
-            cliArguments.connectionType = ConnectionType::USB;
-            cliArguments.isConnectionSpecifed = true;
-            break;
-         case 'e':
-            cliArguments.connectionType = ConnectionType::ETHERNET;
-            cliArguments.ip = string(optarg);
-            cliArguments.isConnectionSpecifed = true;
-            break;
-         case 'm':
-            cliArguments.connectionType = ConnectionType::LOCAL;
-            cliArguments.isConnectionSpecifed = true;
-            break;
-         case 'n':
-            cliArguments.eepromName = string(optarg);
-            break;
-         case 'w': 
-            cliArguments.actionType = WRITE;
-            cliArguments.path = string(optarg);
-            break;
-         case 'r': 
-            cliArguments.actionType = READ;
-            cliArguments.path = string(optarg);
-            break;
-         case 'l': 
-            cliArguments.actionType = LIST_EEPROMS;
-            break;
-         case ':':
-            printf("option needs a value\n");
-            return Status::INVALID_ARGUMENT;
-            break;
-         case '?': //used for some unknown options
-            printf("unknown option: %c\n", optopt);
-            break;
-      }
-   }
-
-   return Status::OK;
-}
 
 int main(int argc, char *argv[]){
    Status status;
@@ -79,7 +18,6 @@ int main(int argc, char *argv[]){
 
    status = parseArguments(argc, argv, cliArguments);
    if (status != aditof::Status::OK){
-      LOG(ERROR) << "cannot parse CLI arguments";
       return 1;
    }
 
