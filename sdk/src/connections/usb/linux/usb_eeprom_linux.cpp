@@ -102,6 +102,26 @@ Status UsbEeprom::write(const uint32_t address, const uint8_t *data,
         return Status::GENERIC_ERROR;
     }
 
+    uint8_t eepromWriteStatus = 0;
+    int attempts = 3;
+
+    while (eepromWriteStatus == 0 && attempts-- > 0) {
+        ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
+            m_implData->fd, 7, 0, &eepromWriteStatus, 1, 1, true);
+        if (ret < 0) {
+            LOG(WARNING)
+                << "Failed to read a packet via UVC extension unit. Error: "
+                << ret;
+            return Status::GENERIC_ERROR;
+        }
+    }
+
+    if (attempts == 0 && !eepromWriteStatus) {
+        LOG(WARNING) << "Write operation failed. Target is in a state where "
+                        "EEPROM write operations cannot be done.";
+        return Status::GENERIC_ERROR;
+    }
+
     return Status::OK;
 }
 
