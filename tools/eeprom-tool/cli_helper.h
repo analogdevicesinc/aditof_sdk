@@ -66,4 +66,4 @@ void printHelpMessage();
 Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments);
 
 
-#endif
+#endif // CLI_HELPER_H

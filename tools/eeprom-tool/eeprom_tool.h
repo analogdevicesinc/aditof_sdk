@@ -74,4 +74,4 @@ class EepromTool {
     std::shared_ptr<aditof::DeviceInterface> m_device;
 };
 
-#endif
+#endif // EEPROM_TOOL_H

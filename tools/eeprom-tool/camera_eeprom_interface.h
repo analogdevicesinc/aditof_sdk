@@ -44,4 +44,5 @@ class CameraEepromInterface {
         virtual aditof::Status write(const std::vector<uint8_t>& data) = 0;
 };
 
-#endif
+#endif // CAMERA_EEPROM_INTERFACE_H
+

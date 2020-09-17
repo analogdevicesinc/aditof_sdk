@@ -45,4 +45,4 @@ class CameraEepromFactory {
     buildEeprom(aditof::SensorType sensorType, std::shared_ptr<aditof::EepromInterface>  eeprom);
 };
 
-#endif // EEPROM_FACTORY_H
+#endif // CAMERA_EEPROM_FACTORY_H

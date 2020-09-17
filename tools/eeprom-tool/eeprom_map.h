@@ -48,4 +48,4 @@ const std::map<std::string, EepromProperties> EEPROMS = {
     {"demo", EepromProperties((uint32_t)42)}
 };
 
-#endif
+#endif // EEPROMLIST_H

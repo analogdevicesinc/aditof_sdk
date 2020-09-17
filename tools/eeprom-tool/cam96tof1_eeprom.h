@@ -35,7 +35,6 @@
 #include <aditof/system.h>
 #include <aditof/eeprom_interface.h>
 #include "camera_eeprom_interface.h"
-#include <glog/logging.h>
 
 #include <memory>
 
@@ -49,4 +48,4 @@ class Camera96Tof1Eeprom: public CameraEepromInterface {
         std::shared_ptr<aditof::EepromInterface> m_eeprom;
 };
 
-#endif
+#endif // CAM96TOF1_EEPROM_H
