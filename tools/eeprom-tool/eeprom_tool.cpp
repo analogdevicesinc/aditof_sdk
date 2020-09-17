@@ -223,7 +223,7 @@ aditof::Status EepromTool::readFile(char const* filename, std::vector<uint8_t>& 
 }
 
 aditof::Status EepromTool::writeFile(char const* filename, const std::vector<uint8_t> data){
-    auto myfile = std::fstream(filename, std::ios::out | std::ios::binary);
+    std::fstream myfile(filename, std::ios::out | std::ios::binary);
 
     myfile.write((char*)&data[0], data.size());
     myfile.close();
