@@ -45,7 +45,7 @@ using namespace std;
 int main(int argc, char *argv[]){
    Status status;
    CLIArguments cliArguments;
-   auto controller = std::make_shared<EepromTool>();
+   auto controller = EepromTool();
 
    status = parseArguments(argc, argv, cliArguments);
    if (status != aditof::Status::OK){
@@ -54,13 +54,13 @@ int main(int argc, char *argv[]){
 
    //try to set a connection of the specied type
    if (cliArguments.isConnectionSpecifed){
-      status = controller->setConnection(cliArguments.connectionType, cliArguments.ip, cliArguments.eepromName);
+      status = controller.setConnection(cliArguments.connectionType, cliArguments.ip, cliArguments.eepromName);
    }
    //if none is specified try local and usb
-   else if (aditof::Status::OK == (status = controller->setConnection(ConnectionType::LOCAL, cliArguments.ip, cliArguments.eepromName))){
+   else if (aditof::Status::OK == (status = controller.setConnection(ConnectionType::LOCAL, cliArguments.ip, cliArguments.eepromName))){
       LOG(INFO) << "setting connection via MIPI";
    }
-   else if (aditof::Status::OK == (status = controller->setConnection(ConnectionType::USB, cliArguments.ip, cliArguments.eepromName))){
+   else if (aditof::Status::OK == (status = controller.setConnection(ConnectionType::USB, cliArguments.ip, cliArguments.eepromName))){
       LOG(INFO) << "setting connection via USB";
    }
 
@@ -72,13 +72,13 @@ int main(int argc, char *argv[]){
    switch (cliArguments.actionType)
    {
    case READ:
-         status = controller->readEepromToFile(cliArguments.path.c_str());
+         status = controller.readEepromToFile(cliArguments.path.c_str());
       break;
    case WRITE:
-         status = controller->writeFileToEeprom(cliArguments.path.c_str());
+         status = controller.writeFileToEeprom(cliArguments.path.c_str());
       break;
    case LIST_EEPROMS:
-         status = controller->listEeproms();
+         status = controller.listEeproms();
       break;
    default:
       break;
