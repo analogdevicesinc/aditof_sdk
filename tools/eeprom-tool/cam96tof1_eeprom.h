@@ -44,7 +44,7 @@ class Camera96Tof1Eeprom: public CameraEepromInterface {
     public:
         Camera96Tof1Eeprom(std::shared_ptr<aditof::EepromInterface> _eeprom);
         virtual aditof::Status read(std::vector<uint8_t>& data) override;
-        virtual aditof::Status write(std::vector<uint8_t> data) override;
+        virtual aditof::Status write(const std::vector<uint8_t>& data) override;
     private:
         std::shared_ptr<aditof::EepromInterface> m_eeprom;
 };

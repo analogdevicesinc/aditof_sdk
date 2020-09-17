@@ -71,7 +71,7 @@ aditof::Status Camera96Tof1Eeprom::read(std::vector<uint8_t>& data){
     return aditof::Status::OK;
 }
 
-aditof::Status Camera96Tof1Eeprom::write(std::vector<uint8_t> data){
+aditof::Status Camera96Tof1Eeprom::write(const std::vector<uint8_t>& data){
     aditof::Status status;
     float size = static_cast<float>(data.size());
 
