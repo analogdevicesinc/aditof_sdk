@@ -15,9 +15,6 @@ if (WITH_NETWORK)
         find_package(Libwebsockets REQUIRED)
   endif()
 endif()
-
-
-
 if (NOT TARGET aditof::aditof)
         include("${aditof_CMAKE_DIR}/aditof-targets.cmake")
 endif()
