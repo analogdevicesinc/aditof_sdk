@@ -34,6 +34,7 @@
 
 #include <aditof/device_construction_data.h>
 #include <aditof/device_interface.h>
+#include "sdk_exports.h"
 
 #include <memory>
 
@@ -43,7 +44,7 @@ namespace aditof {
  * @class DeviceFactory
  * @brief Provides the means to construct different types of devices
  */
-class DeviceFactory {
+class SDK_API DeviceFactory {
   public:
     /**
      * @brief Factory method to create a device.

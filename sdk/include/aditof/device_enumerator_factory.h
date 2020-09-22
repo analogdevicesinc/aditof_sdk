@@ -33,6 +33,7 @@
 #define DEVICE_ENUMERATOR_FACTORY_H
 
 #include "aditof/device_enumerator_interface.h"
+#include "sdk_exports.h"
 
 #include <memory>
 
@@ -42,7 +43,7 @@ namespace aditof {
  * @class DeviceEnumeratorFactory
  * @brief Provides the means to construct different types of device enumerators
  */
-class DeviceEnumeratorFactory {
+class SDK_API DeviceEnumeratorFactory {
   public:
     /**
      * @brief Factory method to create a device enumerator on the system.
