@@ -34,15 +34,14 @@
 
 #include <aditof/status_definitions.h>
 
-#include <vector>
 #include <cinttypes>
+#include <vector>
 
 class CameraEepromInterface {
-    public:
-        virtual ~CameraEepromInterface() = default;
-        virtual aditof::Status read(std::vector<uint8_t>& data) = 0;
-        virtual aditof::Status write(const std::vector<uint8_t>& data) = 0;
+  public:
+    virtual ~CameraEepromInterface() = default;
+    virtual aditof::Status read(std::vector<uint8_t> &data) = 0;
+    virtual aditof::Status write(const std::vector<uint8_t> &data) = 0;
 };
 
 #endif // CAMERA_EEPROM_INTERFACE_H
-

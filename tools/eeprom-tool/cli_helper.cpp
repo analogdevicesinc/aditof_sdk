@@ -31,7 +31,7 @@
  */
 #include "cli_helper.h"
 
-const char * helpString = R"V0G0N(
+const char *helpString = R"V0G0N(
    Usage: eeprom-tool [(-u | -m | -e <ip>)] [-n <eeprom_name>]  (-h | -l | -w <file_path> | -r <file_path>) 
    
    Reads or writes the contents of the eeprom memory to / from a file. The connection interface may be mipi, local or ethernet. 
@@ -52,71 +52,69 @@ const char * helpString = R"V0G0N(
    
    )V0G0N";
 
-struct option longopts[] = {
-   { "usb",     no_argument,       NULL,    'u' },
-   { "ethernet",required_argument, NULL,    'e' },
-   { "mipi",    no_argument,       NULL,    'm' },
-   { "name",    required_argument, NULL,    'n' },
-   { "write",   required_argument, NULL,    'w' },
-   { "read",    required_argument, NULL,    'r' },
-   { "list",    no_argument,       NULL,    'l' },
-   { "help",    no_argument,       NULL,    'h' },
-   { 0, 0, 0, 0 }
-};
+struct option longopts[] = {{"usb", no_argument, NULL, 'u'},
+                            {"ethernet", required_argument, NULL, 'e'},
+                            {"mipi", no_argument, NULL, 'm'},
+                            {"name", required_argument, NULL, 'n'},
+                            {"write", required_argument, NULL, 'w'},
+                            {"read", required_argument, NULL, 'r'},
+                            {"list", no_argument, NULL, 'l'},
+                            {"help", no_argument, NULL, 'h'},
+                            {0, 0, 0, 0}};
 
-void printHelpMessage(){
-   printf("%s", helpString);
-}
+void printHelpMessage() { printf("%s", helpString); }
 
-Status parseArguments(int argc, char *argv[], CLIArguments& cliArguments){
-   int option;
+Status parseArguments(int argc, char *argv[], CLIArguments &cliArguments) {
+    int option;
 
-   while((option = getopt_long(argc, argv, ":ue:mn:r:w:lh", longopts, NULL)) != -1){ //get option from the getopt() method
-      switch(option){
-         case 'u':
+    while (
+        (option = getopt_long(argc, argv, ":ue:mn:r:w:lh", longopts, NULL)) !=
+        -1) { //get option from the getopt() method
+        switch (option) {
+        case 'u':
             cliArguments.connectionType = ConnectionType::USB;
             cliArguments.isConnectionSpecifed = true;
             break;
-         case 'e':
+        case 'e':
             cliArguments.connectionType = ConnectionType::ETHERNET;
             cliArguments.ip = string(optarg);
             printf("%s\n", cliArguments.ip.c_str());
             cliArguments.isConnectionSpecifed = true;
             break;
-         case 'm':
+        case 'm':
             cliArguments.connectionType = ConnectionType::LOCAL;
             cliArguments.isConnectionSpecifed = true;
             break;
-         case 'n':
+        case 'n':
             cliArguments.eepromName = string(optarg);
             break;
-         case 'w': 
+        case 'w':
             cliArguments.actionType = WRITE;
             cliArguments.path = string(optarg);
             break;
-         case 'r': 
+        case 'r':
             cliArguments.actionType = READ;
             cliArguments.path = string(optarg);
             break;
-         case 'l': 
+        case 'l':
             cliArguments.actionType = LIST_EEPROMS;
             break;
-         case 'h': 
+        case 'h':
             printHelpMessage();
             return Status::INVALID_ARGUMENT;
             break;
-         case ':':
+        case ':':
             printf("option needs a value\n");
             printHelpMessage();
             return Status::INVALID_ARGUMENT;
             break;
-         case '?': //used for some unknown options
+        case '?': //used for some unknown options
             printf("unknown option: %c\n", optopt);
             printHelpMessage();
             return Status::INVALID_ARGUMENT;
             break;
-      }
-   }
+        }
+    }
 
-   return Status::OK;
+    return Status::OK;
 }

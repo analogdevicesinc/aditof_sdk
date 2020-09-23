@@ -32,9 +32,9 @@
 #ifndef DEVICE_FACTORY_H
 #define DEVICE_FACTORY_H
 
+#include "sdk_exports.h"
 #include <aditof/device_construction_data.h>
 #include <aditof/device_interface.h>
-#include "sdk_exports.h"
 
 #include <memory>
 

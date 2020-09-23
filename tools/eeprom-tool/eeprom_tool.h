@@ -32,14 +32,14 @@
 #ifndef EEPROM_TOOL_H
 #define EEPROM_TOOL_H
 
+#include "camera_eeprom_interface.h"
+#include "eeprom_map.h"
 #include <aditof/camera.h>
+#include <aditof/device_construction_data.h>
 #include <aditof/device_interface.h>
+#include <aditof/eeprom_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
-#include <aditof/eeprom_interface.h>
-#include <aditof/device_construction_data.h>
-#include "eeprom_map.h"
-#include "camera_eeprom_interface.h"
 
 #include <atomic>
 #include <functional>
@@ -52,20 +52,23 @@ class EepromTool {
     EepromTool();
     ~EepromTool();
 
-    aditof::Status setConnection(aditof::ConnectionType connectionType, 
-                                std::string ip, 
-                                std::string eepromName);
-    
-    aditof::Status writeFileToEeprom(char const* filename);
-    aditof::Status readEepromToFile(char const* filename);
+    aditof::Status setConnection(aditof::ConnectionType connectionType,
+                                 std::string ip, std::string eepromName);
+
+    aditof::Status writeFileToEeprom(char const *filename);
+    aditof::Status readEepromToFile(char const *filename);
     aditof::Status listEeproms();
+
   private:
     //EEPROM operations
     aditof::Status writeEeprom(const std::vector<uint8_t> data);
-    aditof::Status readEeprom(std::vector<uint8_t>& data);
+    aditof::Status readEeprom(std::vector<uint8_t> &data);
     //File operations
-    static aditof::Status readFile(char const* filename, std::vector<uint8_t>&);
-    static aditof::Status writeFile(char const* filename, const std::vector<uint8_t>);
+    static aditof::Status readFile(char const *filename,
+                                   std::vector<uint8_t> &);
+    static aditof::Status writeFile(char const *filename,
+                                    const std::vector<uint8_t>);
+
   private:
     aditof::System *m_system;
     aditof::DeviceConstructionData m_devData;

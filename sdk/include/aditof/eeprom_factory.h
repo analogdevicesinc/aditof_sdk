@@ -32,10 +32,10 @@
 #ifndef EEPROM_FACTORY_H
 #define EEPROM_FACTORY_H
 
+#include "sdk_exports.h"
 #include <aditof/connections.h>
 #include <aditof/eeprom_construction_data.h>
 #include <aditof/eeprom_interface.h>
-#include "sdk_exports.h"
 
 #include <memory>
 

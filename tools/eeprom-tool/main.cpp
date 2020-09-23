@@ -29,64 +29,68 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "eeprom_tool.h"
 #include "cli_helper.h"
+#include "eeprom_tool.h"
 
-#include <iostream>
-#include <stdio.h>
-#include <glog/logging.h>
-#include <string>
-#include <iterator>
 #include <algorithm>
+#include <glog/logging.h>
+#include <iostream>
+#include <iterator>
+#include <stdio.h>
+#include <string>
 
 using namespace aditof;
 using namespace std;
 
-int main(int argc, char *argv[]){
-   Status status;
-   CLIArguments cliArguments;
-   auto controller = EepromTool();
+int main(int argc, char *argv[]) {
+    Status status;
+    CLIArguments cliArguments;
+    auto controller = EepromTool();
 
-   status = parseArguments(argc, argv, cliArguments);
-   if (status != aditof::Status::OK){
-      return 1;
-   }
+    status = parseArguments(argc, argv, cliArguments);
+    if (status != aditof::Status::OK) {
+        return 1;
+    }
 
-   //try to set a connection of the specied type
-   if (cliArguments.isConnectionSpecifed){
-      status = controller.setConnection(cliArguments.connectionType, cliArguments.ip, cliArguments.eepromName);
-   }
-   //if none is specified try local and usb
-   else if (aditof::Status::OK == (status = controller.setConnection(ConnectionType::LOCAL, cliArguments.ip, cliArguments.eepromName))){
-      LOG(INFO) << "setting connection via MIPI";
-   }
-   else if (aditof::Status::OK == (status = controller.setConnection(ConnectionType::USB, cliArguments.ip, cliArguments.eepromName))){
-      LOG(INFO) << "setting connection via USB";
-   }
+    //try to set a connection of the specied type
+    if (cliArguments.isConnectionSpecifed) {
+        status =
+            controller.setConnection(cliArguments.connectionType,
+                                     cliArguments.ip, cliArguments.eepromName);
+    }
+    //if none is specified try local and usb
+    else if (aditof::Status::OK == (status = controller.setConnection(
+                                        ConnectionType::LOCAL, cliArguments.ip,
+                                        cliArguments.eepromName))) {
+        LOG(INFO) << "setting connection via MIPI";
+    } else if (aditof::Status::OK == (status = controller.setConnection(
+                                          ConnectionType::USB, cliArguments.ip,
+                                          cliArguments.eepromName))) {
+        LOG(INFO) << "setting connection via USB";
+    }
 
-   if (status != aditof::Status::OK){
-      LOG(ERROR) << "cannot set connection";
-      return 1;
-   }
+    if (status != aditof::Status::OK) {
+        LOG(ERROR) << "cannot set connection";
+        return 1;
+    }
 
-   switch (cliArguments.actionType)
-   {
-   case READ:
-         status = controller.readEepromToFile(cliArguments.path.c_str());
-      break;
-   case WRITE:
-         status = controller.writeFileToEeprom(cliArguments.path.c_str());
-      break;
-   case LIST_EEPROMS:
-         status = controller.listEeproms();
-      break;
-   default:
-      break;
-   }
+    switch (cliArguments.actionType) {
+    case READ:
+        status = controller.readEepromToFile(cliArguments.path.c_str());
+        break;
+    case WRITE:
+        status = controller.writeFileToEeprom(cliArguments.path.c_str());
+        break;
+    case LIST_EEPROMS:
+        status = controller.listEeproms();
+        break;
+    default:
+        break;
+    }
 
-   if (status != Status::OK){
-      return 1;
-   }
+    if (status != Status::OK) {
+        return 1;
+    }
 
-  return 0;
+    return 0;
 }

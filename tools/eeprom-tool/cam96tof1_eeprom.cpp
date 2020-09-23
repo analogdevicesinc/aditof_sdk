@@ -34,16 +34,17 @@
 
 #include <glog/logging.h>
 
-Camera96Tof1Eeprom::Camera96Tof1Eeprom(std::shared_ptr<aditof::EepromInterface> _eeprom):
-                    m_eeprom(_eeprom) {
-    if (!_eeprom){
+Camera96Tof1Eeprom::Camera96Tof1Eeprom(
+    std::shared_ptr<aditof::EepromInterface> _eeprom)
+    : m_eeprom(_eeprom) {
+    if (!_eeprom) {
         LOG(ERROR) << "null pointer to eeprom.";
     }
 }
 
-aditof::Status Camera96Tof1Eeprom::read(std::vector<uint8_t>& data){
+aditof::Status Camera96Tof1Eeprom::read(std::vector<uint8_t> &data) {
     float read_size = 100;
-    uint32_t eepromSize; 
+    uint32_t eepromSize;
     aditof::Status status;
     std::string eepromName;
 
@@ -73,18 +74,18 @@ aditof::Status Camera96Tof1Eeprom::read(std::vector<uint8_t>& data){
     return aditof::Status::OK;
 }
 
-aditof::Status Camera96Tof1Eeprom::write(const std::vector<uint8_t>& data){
+aditof::Status Camera96Tof1Eeprom::write(const std::vector<uint8_t> &data) {
     aditof::Status status;
     float size = static_cast<float>(data.size());
 
     status = m_eeprom->write((uint32_t)0, (uint8_t *)&size, (size_t)4);
-    if (status != aditof::Status::OK){
+    if (status != aditof::Status::OK) {
         LOG(ERROR) << "failed to write to eeprom";
         return status;
     }
 
     status = m_eeprom->write((uint32_t)4, (uint8_t *)data.data(), (size_t)size);
-    if (status != aditof::Status::OK){
+    if (status != aditof::Status::OK) {
         LOG(ERROR) << "failed to write to eeprom";
         return status;
     }

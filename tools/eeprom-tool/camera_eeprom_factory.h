@@ -40,9 +40,9 @@
 
 class CameraEepromFactory {
   public:
-
-    static std::unique_ptr<CameraEepromInterface> 
-    buildEeprom(aditof::SensorType sensorType, std::shared_ptr<aditof::EepromInterface>  eeprom);
+    static std::unique_ptr<CameraEepromInterface>
+    buildEeprom(aditof::SensorType sensorType,
+                std::shared_ptr<aditof::EepromInterface> eeprom);
 };
 
 #endif // CAMERA_EEPROM_FACTORY_H
