@@ -25,12 +25,14 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#include <atomic>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <thread>
 #include <unistd.h>
 
 #include <linux/usb/ch9.h>
@@ -282,7 +284,8 @@ unsigned int eeprom_write_len = 0;
 unsigned char eeprom_data[128 * 1024];
 unsigned int sensors_read_pos = 0;
 unsigned int sensors_read_len = 0;
-bool eeprom_write_ready = false;
+std::atomic<bool> eeprom_write_ready;
+std::thread eepromWriteThread;
 
 /* forward declarations */
 static int uvc_video_stream(struct uvc_device *dev, int enable);
@@ -1451,7 +1454,7 @@ uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
                 break;
 
             case UVC_GET_CUR:
-                resp->data[0] = eeprom_write_ready ? 1 : 0;
+                resp->data[0] = eeprom_write_ready.load() ? 1 : 0;
                 resp->length = 1;
                 break;
 
@@ -1752,18 +1755,27 @@ uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
                 eeprom_read_addr = *((unsigned int *)&(data->data[0]));
                 eeprom_read_len = data->data[4];
             } else if (dev->set_cur_cs == 6) {
-                if (eeprom_write_len == 0) {
-                    eeprom_write_addr = *((unsigned int *)&(data->data[0]));
-                }
-                memcpy(&eeprom_data[eeprom_write_len], &data->data[5],
-                       data->data[4]);
-                eeprom_write_len += data->data[4];
-                if (data->data[4] < MAX_PACKET_SIZE - 5) {
-                    eeprom_write_ready = false;
-                    eeprom->write(eeprom_write_addr, eeprom_data,
-                                  eeprom_write_len);
-                    eeprom_write_ready = true;
-                    eeprom_write_len = 0;
+                if (eeprom_write_ready.load()) {
+                    if (eeprom_write_len == 0) {
+                        eeprom_write_addr = *((unsigned int *)&(data->data[0]));
+                    }
+                    memcpy(&eeprom_data[eeprom_write_len], &data->data[5],
+                           data->data[4]);
+                    eeprom_write_len += data->data[4];
+                    if (data->data[4] < MAX_PACKET_SIZE - 5) {
+                        if (eepromWriteThread.joinable()) {
+                            eepromWriteThread.join();
+                        }
+                        eepromWriteThread = std::thread(
+                            [=](std::shared_ptr<aditof::EepromInterface> e) {
+                                eeprom_write_ready = false;
+                                e->write(eeprom_write_addr, eeprom_data,
+                                         eeprom_write_len);
+                                eeprom_write_ready = true;
+                                eeprom_write_len = 0;
+                            },
+                            eeprom);
+                    }
                 }
             }
             dev->set_cur_cs = 0;
@@ -2373,6 +2385,8 @@ int main(int argc, char *argv[]) {
 
     uvc_close(udev);
 
+    if (eepromWriteThread.joinable())
+        eepromWriteThread.join();
     eeprom->close();
 
     if (sensorsInfoBuffer) {
