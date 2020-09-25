@@ -140,7 +140,7 @@ CalibrationFx1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
 
         uint16_t pulse_space = *(it++);
         uint16_t pulse_cnt = m_mode_settings[i].pulse_cnt;
-        uint16_t pulse_hd = (((pulse_cnt - 1) * pulse_space + 90) / 928 + 3) * 36 - 57;
+        uint16_t pulse_hd = (((pulse_cnt - 1) * pulse_space + 90) / 928 + 3) * 36 + 57;
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
                        MODE_REG_BASE_ADDR[i] + R_PULSECNT);
         if(it == m_afe_code.end()) {
