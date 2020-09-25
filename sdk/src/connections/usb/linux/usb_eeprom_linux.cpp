@@ -33,7 +33,9 @@
 #include "usb_linux_utils.h"
 #include "utils.h"
 
+#include <chrono>
 #include <glog/logging.h>
+#include <thread>
 
 using namespace aditof;
 
@@ -103,20 +105,25 @@ Status UsbEeprom::write(const uint32_t address, const uint8_t *data,
     }
 
     uint8_t eepromWriteStatus = 0;
-    int attempts = 3;
+    int attempts = 300;
 
-    while (eepromWriteStatus == 0 && attempts-- > 0) {
+    while (eepromWriteStatus == 0 && attempts > 0) {
         ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
             m_implData->fd, 7, 0, &eepromWriteStatus, 1, 1, true);
+        --attempts;
         if (ret < 0) {
             LOG(WARNING)
                 << "Failed to read a packet via UVC extension unit. Error: "
                 << ret;
             return Status::GENERIC_ERROR;
         }
+
+        if (!eepromWriteStatus) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
     }
 
-    if (attempts == 0 && !eepromWriteStatus) {
+    if (attempts == 0 && eepromWriteStatus == 0) {
         LOG(WARNING) << "Write operation failed. Target is in a state where "
                         "EEPROM write operations cannot be done.";
         return Status::GENERIC_ERROR;
