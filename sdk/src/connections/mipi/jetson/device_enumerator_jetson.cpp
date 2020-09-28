@@ -73,10 +73,11 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     // TO DO: Don't guess the device, find a way to identify it so we are sure
     // we've got the right device and is compatible with the SDK
     DeviceConstructionData devData;
-    devData.deviceType = DeviceType::LOCAL;
+    devData.connetionType = ConnectionType::LOCAL;
     devData.driverPath = "/dev/video0";
-    devices.emplace_back(devData);
 
+    devices.emplace_back(devData);
+    
     DLOG(INFO) << "Looking at: " << devData.driverPath
                << " for an eligible TOF camera";
 
