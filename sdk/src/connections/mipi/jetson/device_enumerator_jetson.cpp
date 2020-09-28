@@ -79,15 +79,15 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     devData.driverPath = "/dev/video0";
 
     struct stat st;
-    if (stat(EEPROM_DEV_PATH, &st) == 0){
+    if (stat(EEPROM_DEV_PATH, &st) == 0) {
         EepromConstructionData eData;
         eData.driverName = EEPROM_NAME;
         eData.driverPath = EEPROM_DEV_PATH;
         devData.eeproms.emplace_back(eData);
     }
-    
+
     devices.emplace_back(devData);
-    
+
     DLOG(INFO) << "Looking at: " << devData.driverPath
                << " for an eligible TOF camera";
 
