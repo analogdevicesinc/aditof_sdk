@@ -1,0 +1,10 @@
+{
+    "firmware_config_json_path": "config/BM_Kit/Far/sweep_config_far.json",
+    "target_ir": 2000,
+    "start_pc": 5,
+    "max_pc": 2000,
+    "board_type": "new",
+    "distance": 210,
+    "out_file": "new_far.json"
+}
+
