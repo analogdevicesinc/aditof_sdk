@@ -64,11 +64,11 @@ def generate_eeprom(source_folder_path, bin_file_path):
         mode = PurePath(folder).parts[-1].lower()
         cal.add_load_files_to_map(get_lf_key(mode), folder)
 
-        json_path = PurePath(folder, LINEAR_CAL_FILE_NAME)
+        json_path = str(PurePath(folder, LINEAR_CAL_FILE_NAME))
         if (path.exists(json_path)):
             cal.add_json_to_map(get_cal_key(mode), json_path)
         else:
-            print(json_path._str + " not found.")
+            print(json_path + " not found.")
     # cal.display_cal_map()
     cal.save_cal_map(bin_file_path)
     print("calibration map saved to " + bin_file_path)
