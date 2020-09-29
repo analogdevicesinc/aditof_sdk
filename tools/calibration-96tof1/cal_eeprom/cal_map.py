@@ -273,8 +273,8 @@ class cal_map(object):
 
     # Function to replace calibration mode block
     def replace_eeprom_mode(self, mode, linear_cal_json_file, load_file_path):
-        self.add_json_to_map((mode_dict[mode]*2+2), linear_cal_json_file)
-        self.add_load_files_to_map((mode_dict[mode]*2+3), load_file_path)
+        self.add_json_to_map((get_cal_key(mode)), linear_cal_json_file)
+        self.add_load_files_to_map((get_lf_key(mode)), load_file_path)
 
     def write_eeprom_cal_map(self, eeprom):
         #print("\n\nWriting EEPROM")
