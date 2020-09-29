@@ -157,6 +157,8 @@ class cal_map(object):
     def save_cal_map(self, filename):
         # writing float values
         f = open(filename, "wb")
+        print(self.get_map_size())
+        f.write(struct.pack('<f', self.get_map_size()))
         for key, list_params in self.calibration_map.items():
             # write the primary key (for Packet Type)
             f.write(struct.pack('<f', key))
@@ -181,6 +183,7 @@ class cal_map(object):
     def read_cal_map(self, filename):
         # open the file
         with open(filename, "rb") as f:
+            size = f.read(4)
             while True:
                 key = f.read(4)
                 if not key:
