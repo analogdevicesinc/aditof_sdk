@@ -5,15 +5,25 @@ Predefined Hashmap key Defination
 # Dictionary for modes
 mode_dict = {'near': 0, 'mid': 1, 'far': 2}
 
+
+# helper functions. cannot move to utils because of circular dependecy
+def get_cal_key(mode):
+    return mode_dict[mode] * 2 + 2
+
+
+def get_lf_key(mode):
+    return mode_dict[mode] * 2 + 3
+
+
 # Hashmap key for packet type
 HEADER = 0
 CAMERA_INTRINSIC = 1
-NEAR_CAL = 2
-NEAR_LF = 3
-MID_CAL = 4
-MID_LF = 5
-FAR_CAL = 6
-FAR_LF = 7
+NEAR_CAL = get_cal_key("near")
+NEAR_LF = get_lf_key("near")
+MID_CAL = get_cal_key("mid")
+MID_LF = get_lf_key("mid")
+FAR_CAL = get_cal_key("far")
+FAR_LF = get_lf_key("far")
 
 
 # Hashmap key for common parameters
@@ -51,3 +61,21 @@ ADDR_DATA_LIST = 5
 # Indices for PARAM STRUCT
 SIZE = 0
 VALUE = 1
+
+LINEAR_CAL_FILE_NAME = "linear_cal.json"
+
+source_file_names = ["1_AFEstartup_silicon.lf",
+                     "2_LDstartup.lf",
+                     "3_MIPIstartup_ADDI9033_CYP.lf",
+                     "4_Driver_enable.lf",
+                     "5_mn34906bl_addi9033_HPT_data.lf",
+                     "6_mn34906bl_addi9033_data.lf",
+                     "7_mn34906bl_addi9033.lf",
+                     "8_LoopNumAddrList.lf",
+                     "9_RepeatNumAddrList.lf",
+                     "10_TGstartup_ADILD.lf",
+                     "11_XV_mux.lf",
+                     "12_TOF_ProcCtrl.lf",
+                     "13_Mode_Start.lf",
+                     #  LINEAR_CAL_FILE_NAME,
+                     ]
