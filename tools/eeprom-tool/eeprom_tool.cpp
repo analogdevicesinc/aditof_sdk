@@ -240,5 +240,4 @@ EepromTool::~EepromTool() {
     if (m_device) {
         m_device->stop();
     }
-    delete m_system;
 }
