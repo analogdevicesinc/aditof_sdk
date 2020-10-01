@@ -30,6 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "device_enumerator_impl.h"
+#include "target_definitions.h"
 
 #include <dirent.h>
 #include <glog/logging.h>
@@ -37,6 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <sys/stat.h>
 #include <unistd.h>
 
 aditof::Status DeviceEnumeratorImpl::findDevices(
@@ -73,8 +75,17 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     // TO DO: Don't guess the device, find a way to identify it so we are sure
     // we've got the right device and is compatible with the SDK
     DeviceConstructionData devData;
-    devData.deviceType = DeviceType::LOCAL;
+    devData.connectionType = ConnectionType::LOCAL;
     devData.driverPath = "/dev/video0";
+
+    struct stat st;
+    if (stat(EEPROM_DEV_PATH, &st) == 0) {
+        EepromConstructionData eData;
+        eData.driverName = EEPROM_NAME;
+        eData.driverPath = EEPROM_DEV_PATH;
+        devData.eeproms.emplace_back(eData);
+    }
+
     devices.emplace_back(devData);
 
     DLOG(INFO) << "Looking at: " << devData.driverPath
