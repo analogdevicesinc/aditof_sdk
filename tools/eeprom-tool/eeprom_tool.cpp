@@ -51,6 +51,8 @@ const aditof::SensorType sensorType = aditof::SensorType::SENSOR_CHICONY;
 const aditof::SensorType sensorType = aditof::SensorType::SENSOR_96TOF1;
 #endif
 
+const std::string connectionTypeMapStr[] = {"LOCAL", "USB", "ETHERNET"};
+
 EepromTool::EepromTool() {
     //TODO ??
 }
@@ -69,12 +71,16 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
         enumerator =
             aditof::DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(ip);
         if (enumerator == nullptr) {
-            LOG(ERROR) << "network is not enabled";
+            LOG(ERROR) << "Network is not enabled";
             return aditof::Status::INVALID_ARGUMENT;
         }
     } else {
         enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
     }
+
+    LOG(INFO)
+        << "Setting connection via "
+        << connectionTypeMapStr[static_cast<unsigned int>(connectionType)];
 
     //get devices
     enumerator->findDevices(devicesData);
@@ -87,7 +93,7 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
         devicesData.end());
 
     if (devicesData.size() <= usedDevDataIndex) {
-        LOG(ERROR) << "cannot find device at index " << usedDevDataIndex;
+        LOG(ERROR) << "Cannot find device at index " << usedDevDataIndex;
         return aditof::Status::GENERIC_ERROR;
     }
     m_devData = devicesData[usedDevDataIndex];
@@ -139,11 +145,13 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
                             eepromInfo.driverPath.c_str());
     if (status != aditof::Status::OK) {
         LOG(ERROR) << "Failed to open EEPROM with name "
-                   << m_devData.eeproms.back().driverName << " is available";
+                   << m_devData.eeproms.back().driverName;
         return status;
     }
 
     m_camera_eeprom = CameraEepromFactory::buildEeprom(sensorType, m_eeprom);
+
+    LOG(INFO) << "Successfully created connection to EEPROM";
 
     return aditof::Status::OK;
 }
@@ -164,6 +172,8 @@ aditof::Status EepromTool::writeFileToEeprom(char const *filename) {
         return status;
     }
 
+    LOG(INFO) << "Successfully wrote data to EEPROM from file";
+
     return aditof::Status::OK;
 }
 
@@ -176,7 +186,7 @@ aditof::Status EepromTool::listEeproms() {
         if (EEPROMS.count(eepromData.driverName)) {
             printf("%s\n", eepromData.driverName.c_str());
         } else {
-            LOG(WARNING) << "unknown eeprom found " << eepromData.driverName;
+            LOG(WARNING) << "Unknown eeprom found " << eepromData.driverName;
         }
     }
 
@@ -199,6 +209,8 @@ aditof::Status EepromTool::readEepromToFile(char const *filename) {
         return status;
     }
 
+    LOG(INFO) << "Successfully wrote data to file from EEPROM";
+
     return aditof::Status::OK;
 }
 
@@ -220,6 +232,8 @@ aditof::Status EepromTool::readFile(char const *filename,
     ifs.seekg(0, std::ios::beg);
     ifs.read((char *)&data[0], pos);
 
+    LOG(INFO) << "Successfully read data from file";
+
     return aditof::Status::OK;
 }
 
@@ -229,6 +243,8 @@ aditof::Status EepromTool::writeFile(char const *filename,
 
     myfile.write((char *)&data[0], data.size());
     myfile.close();
+
+    LOG(INFO) << "Successfully wrote data to file";
 
     return aditof::Status::OK;
 }
@@ -240,4 +256,5 @@ EepromTool::~EepromTool() {
     if (m_device) {
         m_device->stop();
     }
+    LOG(INFO) << "Destroyed connection";
 }
