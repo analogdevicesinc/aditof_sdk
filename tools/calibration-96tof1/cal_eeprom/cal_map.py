@@ -139,7 +139,6 @@ class cal_map(object):
             print("Packet Key: ", (key), end="")
             size, nested_dict = list_params
             print("\tPacket Size: ", size)  # print the size of pimary packet
-            #print ("Packet Key: ", (key),"\tPacket Size: ", size, file=open("output.txt", "a"))
             for nested_key, nested_value in nested_dict.items():
                 # print the nested key (Parameter key)
                 print("\tParam Key: ", nested_key, end="")
@@ -150,7 +149,6 @@ class cal_map(object):
                 for i in range(int(param_size/4)):
                     value.append(param_value[i])
                 print("\tParam Value: ", value)  # print the value of Param
-                # print("\tParam Key: ", nested_key,"\tParam Size: ",param_size,"\tParam Value: ",value, file=open("output.txt", "a")) #print the Param to file
 
     # Generates the binary file for writing to EEPROM
 
@@ -211,7 +209,6 @@ class cal_map(object):
                     value = []
                     for j in range(number_of_elements):
                         sub_packet_value = struct.unpack('<f', f.read(4))
-                        #sub_packet_value = int(sub_packet_value[0])
                         value.append(sub_packet_value[0])
                         i = i + 1
                     sub_packet_map.update(
@@ -234,9 +231,8 @@ class cal_map(object):
                     lf_list.append(addr[i])
                     lf_list.append(data[i])
                 #print("Parsed File", file_name,  " ", file_num, "\n", lf_list)
-                #input("Press Enter to continue...")
+
         lf_map[ADDR_DATA_LIST] = self.param_struct(lf_list)
-        # print(lf_map)
         self.update_packet_checksum(lf_map)
         self.calibration_map[packet_type] = [
             self.get_packet_size(lf_map), lf_map]
@@ -307,7 +303,6 @@ class cal_map(object):
         for index in range(0, size):
             eeprom_write_list.append(eeprom_write_bytearray[index])
         #print("EEPROM WRITE List\n", eeprom_write_list)
-        #input("Press Enter to continue...")
 
         size_list = []
         size_byte = bytes()
@@ -366,7 +361,6 @@ class cal_map(object):
                     # print(r_b[j:j+4])
                     sub_packet_value = struct.unpack('<f', r_b[j:j+4])
                     j = j+4
-                    #sub_packet_value = int(sub_packet_value[0])
                     value.append(sub_packet_value[0])
                     i = i + 1
                 sub_packet_map.update({parameter_key: [parameter_size, value]})

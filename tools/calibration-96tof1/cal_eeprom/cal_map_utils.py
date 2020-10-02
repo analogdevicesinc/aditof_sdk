@@ -23,7 +23,6 @@ def compare_map(cal1, cal2):
     ret = True
     for i in range(len(lst1)):
         if(lst1[i]-lst2[i] > 0.2):
-            #print(lst1[1], lst2[2])
             ret = False
     return ret
 
@@ -89,10 +88,6 @@ def test_cal_eeprom():
     print("\n\nSaving to 'calibration_map.bin'")
     cal2.save_cal_map("caibration_map.bin")
     input("Press Enter to continue...")
-
-    #cal2.add_linear_correct_offset(NEAR_CAL, "../saved_results/latest/linear_offset.csv")
-    # cal2.display_cal_map()
-    # cal2.save_cal_map()
 
     # Open the ADI TOF Camera
     system = tof.System()

@@ -37,7 +37,6 @@ Calibration Map
 This module contains functions for generating calibration map for storing in EEPROM, storing in file, reading it back from file and parsing the map.
 '''
 
-# import os
 import logging
 import logging.config
 import click
