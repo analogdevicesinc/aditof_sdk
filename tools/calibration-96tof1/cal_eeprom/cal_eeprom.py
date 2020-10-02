@@ -30,11 +30,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 '''
-===================
-Calibration Map
-===================
-
-This module contains functions for generating calibration map for storing in EEPROM, storing in file, reading it back from file and parsing the map.
+This script is used to generate binary files, ready to be written into the EEPROM, from calibration files (.lf, lin_calib.json and camera_intrinsic.json)
 '''
 
 import logging
@@ -87,7 +83,6 @@ def generate_eeprom(source_folder_path, bin_file_path):
 @ click.argument('source-folder-path', type=click.Path(exists=True))
 @ click.argument('bin-file-name', type=click.Path(exists=False))
 def run_tool(source_folder_path, bin_file_name, **kwargs):
-    logger = logging.getLogger(__name__)
     generate_eeprom(source_folder_path, bin_file_name)
 
 
