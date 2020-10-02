@@ -46,7 +46,7 @@ import os.path
 from os import path
 from pathlib import PurePath
 from cal_map import cal_map
-from cal_map_consts import get_cal_key, get_lf_key, LINEAR_CAL_FILE_NAME
+from cal_map_consts import *
 from cal_map_utils import check_folder_structure
 
 
@@ -58,8 +58,10 @@ def setup_logging():
 
 def generate_eeprom(source_folder_path, bin_file_path):
     load_file_folders = check_folder_structure(source_folder_path)
+
     cal = cal_map()
     cal.init_default_cal_map()
+
     for folder in load_file_folders:
         mode = PurePath(folder).parts[-1].lower()
         cal.add_load_files_to_map(get_lf_key(mode), folder)
@@ -69,7 +71,14 @@ def generate_eeprom(source_folder_path, bin_file_path):
             cal.add_json_to_map(get_cal_key(mode), json_path)
         else:
             print(json_path + " not found.")
-    # cal.display_cal_map()
+
+    intrinsic_json_path = str(
+        PurePath(source_folder_path, INTRINSIC_FILE_NAME))
+    if (path.exists(intrinsic_json_path)):
+        cal.add_json_to_map(CAMERA_INTRINSIC, intrinsic_json_path)
+    else:
+        print(intrinsic_json_path + " not found.")
+
     cal.save_cal_map(bin_file_path)
     print("calibration map saved to " + bin_file_path)
     pass

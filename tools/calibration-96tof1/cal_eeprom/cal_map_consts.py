@@ -63,6 +63,7 @@ SIZE = 0
 VALUE = 1
 
 LINEAR_CAL_FILE_NAME = "linear_cal.json"
+INTRINSIC_FILE_NAME = "camera_intrinsic.json"
 
 source_file_names = ["1_AFEstartup_silicon.lf",
                      "2_LDstartup.lf",
