@@ -39,6 +39,7 @@ import pandas as pd
 import firmware_gen as lf
 import json
 from cal_map_consts import *
+import logging
 
 '''
 Class for managing the calibration map
@@ -52,9 +53,19 @@ Consist functions to:
 '''
 
 
+def setup_logging():
+    with open('./../logger.json', 'r') as f:
+        config = json.load(f)
+        logging.config.dictConfig(config)
+
+
+logger = logging.getLogger(__name__)
+
+
 class cal_map(object):
 
     def __init__(self):
+        setup_logging()
         self.calibration_map = {}
         header_packet = {
             TOTAL_SIZE: self.param_struct([8]),
@@ -175,7 +186,7 @@ class cal_map(object):
                     f.write(struct.pack('<f', param_value[i]))
         f.close()
 
-    '''Reads the binary file and parses it back to map, 
+    '''Reads the binary file and parses it back to map,
     replaces the value if already exist'''
 
     def read_cal_map(self, filename):
@@ -222,7 +233,7 @@ class cal_map(object):
         lf_list = []
         file_list = natsorted(os.listdir(
             "./"+lf_path+"/"), alg=ns.IGNORECASE)[:13]
-        # print(file_list)
+        logger.debug(file_list)
         for file_name in file_list:
             if file_name.endswith(".lf"):
                 addr, data, mode_locations = lf.extract_code_block(
@@ -230,7 +241,8 @@ class cal_map(object):
                 for i in range(len(addr)):
                     lf_list.append(addr[i])
                     lf_list.append(data[i])
-                #print("Parsed File", file_name,  " ", file_num, "\n", lf_list)
+                logger.debug("Parsed File", file_name,
+                             "\n", lf_list)
 
         lf_map[ADDR_DATA_LIST] = self.param_struct(lf_list)
         self.update_packet_checksum(lf_map)
@@ -276,7 +288,7 @@ class cal_map(object):
         self.add_load_files_to_map((get_lf_key(mode)), load_file_path)
 
     def write_eeprom_cal_map(self, eeprom):
-        #print("\n\nWriting EEPROM")
+        logger.debug("\n\nWriting EEPROM")
         eeprom_write_bytearray = bytes()
         for key, list_params in self.calibration_map.items():
             eeprom_write_bytearray = eeprom_write_bytearray + \
@@ -302,7 +314,7 @@ class cal_map(object):
         size = eeprom_write_bytearray.__len__()
         for index in range(0, size):
             eeprom_write_list.append(eeprom_write_bytearray[index])
-        #print("EEPROM WRITE List\n", eeprom_write_list)
+        logger.debug("EEPROM WRITE List\n", eeprom_write_list)
 
         size_list = []
         size_byte = bytes()
@@ -314,11 +326,11 @@ class cal_map(object):
                                       dtype='uint8'), eeprom_write_list.__len__())
 
     def read_eeprom_cal_map(self, eeprom):
-        #print("Reading EEPROM")
+        logger.debug("Reading EEPROM")
         data_array = np.zeros(4, dtype='uint8')
         eeprom.read(int(0), data_array, 4)
         read_size = struct.unpack('<f', data_array)
-        #print("Read Size",read_size)
+        logger.debug("Read Size", read_size)
 
         data_array = np.zeros(int(read_size[0]), dtype='uint8')
         eeprom.read(int(4), data_array, int(read_size[0]))
@@ -332,11 +344,11 @@ class cal_map(object):
                 break
             key = struct.unpack('<f', key)
             key = int(key[0])
-            #print("Primary Key", key)
+            logger.debug("Primary Key", key)
             sub_packet_size = struct.unpack('<f', r_b[j:j+4])
             j = j+4
             sub_packet_size = int(sub_packet_size[0])
-            #print("Sub Size",sub_packet_size)
+            logger.debug("Sub Size", sub_packet_size)
             sub_packet_map = {}
             i = 0
             while i < (sub_packet_size/4):  # 4:size of float
@@ -345,20 +357,20 @@ class cal_map(object):
                 sub_packet_value = int(sub_packet_value[0])
                 i = i + 1
                 parameter_key = sub_packet_value
-                #print("Param Key", parameter_key)
+                logger.debug("Param Key", parameter_key)
 
                 sub_packet_value = struct.unpack('<f', r_b[j:j+4])
                 j = j+4
                 sub_packet_value = int(sub_packet_value[0])
                 i = i + 1
                 parameter_size = sub_packet_value
-                #print("Param Size", parameter_size)
+                logger.debug("Param Size", parameter_size)
 
                 number_of_elements = int(parameter_size/4)  # 4:size of float
-                #print("Number of elements", number_of_elements)
+                logger.debug("Number of elements", number_of_elements)
                 value = []
                 for k in range(number_of_elements):
-                    # print(r_b[j:j+4])
+                    logger.debug(r_b[j:j+4])
                     sub_packet_value = struct.unpack('<f', r_b[j:j+4])
                     j = j+4
                     value.append(sub_packet_value[0])
