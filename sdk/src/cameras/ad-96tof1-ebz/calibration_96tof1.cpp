@@ -478,19 +478,29 @@ void Calibration96Tof1::buildGeometryCalibrationCache(
     float x0 = cameraMatrix[2];
     float y0 = cameraMatrix[5];
 
+    const bool validParameters = (fx != 0 && fy != 0);
+
     if (m_geometry_cache) {
         delete[] m_geometry_cache;
+    }
+
+    if (!validParameters) {
+        LOG(WARNING) << "Invalid intrinsic parameters fx or fy are 0. No "
+                        "correction will be applied!";
     }
 
     m_geometry_cache = new double[width * height];
     for (uint16_t i = 0; i < height; i++) {
         for (uint16_t j = 0; j < width; j++) {
+            if (validParameters) {
+                double tanXAngle = (x0 - j) / fx;
+                double tanYAngle = (y0 - i) / fy;
 
-            double tanXAngle = (x0 - j) / fx;
-            double tanYAngle = (y0 - i) / fy;
-
-            m_geometry_cache[i * width + j] =
-                1.0 / sqrt(1 + tanXAngle * tanXAngle + tanYAngle * tanYAngle);
+                m_geometry_cache[i * width + j] =
+                    sqrt(1 + tanXAngle * tanXAngle + tanYAngle * tanYAngle);
+            } else {
+                m_geometry_cache[i * width + j] = 1;
+            }
         }
     }
 }
