@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  *
- * Copyright (c) 2019, Analog Devices, Inc.
+ * Copyright (c) 2020, Analog Devices, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,36 +29,51 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_FACTORY_H
-#define DEVICE_ENUMERATOR_FACTORY_H
+#ifndef EEPROM_TOOL_H
+#define EEPROM_TOOL_H
 
-#include "aditof/device_enumerator_interface.h"
-#include "sdk_exports.h"
+#include "camera_eeprom_interface.h"
+#include "eeprom_map.h"
+#include <aditof/camera.h>
+#include <aditof/device_construction_data.h>
+#include <aditof/device_interface.h>
+#include <aditof/eeprom_interface.h>
+#include <aditof/frame.h>
+#include <aditof/system.h>
 
+#include <atomic>
+#include <functional>
 #include <memory>
+#include <thread>
 
-namespace aditof {
+class EepromTool {
 
-/**
- * @class DeviceEnumeratorFactory
- * @brief Provides the means to construct different types of device enumerators
- */
-class SDK_API DeviceEnumeratorFactory {
   public:
-    /**
-     * @brief Factory method to create a device enumerator on the system.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface> buildDeviceEnumerator();
+    EepromTool();
+    ~EepromTool();
 
-    /**
-     * @brief Factory method to create a device enumerator over ethernet.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface>
-    buildDeviceEnumeratorEthernet(const std::string &ip);
+    aditof::Status setConnection(aditof::ConnectionType connectionType,
+                                 std::string ip, std::string eepromName);
+
+    aditof::Status writeFileToEeprom(char const *filename);
+    aditof::Status readEepromToFile(char const *filename);
+    aditof::Status listEeproms();
+
+  private:
+    //EEPROM operations
+    aditof::Status writeEeprom(const std::vector<uint8_t> data);
+    aditof::Status readEeprom(std::vector<uint8_t> &data);
+    //File operations
+    static aditof::Status readFile(char const *filename,
+                                   std::vector<uint8_t> &);
+    static aditof::Status writeFile(char const *filename,
+                                    const std::vector<uint8_t>);
+
+  private:
+    aditof::DeviceConstructionData m_devData;
+    std::shared_ptr<aditof::EepromInterface> m_eeprom;
+    std::shared_ptr<CameraEepromInterface> m_camera_eeprom;
+    std::shared_ptr<aditof::DeviceInterface> m_device;
 };
 
-} // namespace aditof
-
-#endif // DEVICE_ENUMERATOR_FACTORY_H
+#endif // EEPROM_TOOL_H

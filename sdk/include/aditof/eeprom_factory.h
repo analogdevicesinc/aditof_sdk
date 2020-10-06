@@ -32,6 +32,7 @@
 #ifndef EEPROM_FACTORY_H
 #define EEPROM_FACTORY_H
 
+#include "sdk_exports.h"
 #include <aditof/connections.h>
 #include <aditof/eeprom_construction_data.h>
 #include <aditof/eeprom_interface.h>
@@ -44,7 +45,7 @@ namespace aditof {
  * @class EepromFactory
  * @brief Provides the means to construct different types of EEPROM devices
  */
-class EepromFactory {
+class SDK_API EepromFactory {
   public:
     /**
      * @brief Factory method to create an EEPPROM device.

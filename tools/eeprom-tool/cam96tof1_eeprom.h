@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  *
- * Copyright (c) 2019, Analog Devices, Inc.
+ * Copyright (c) 2020, Analog Devices, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,36 +29,23 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_FACTORY_H
-#define DEVICE_ENUMERATOR_FACTORY_H
+#ifndef CAM96TOF1_EEPROM_H
+#define CAM96TOF1_EEPROM_H
 
-#include "aditof/device_enumerator_interface.h"
-#include "sdk_exports.h"
+#include "camera_eeprom_interface.h"
+#include <aditof/eeprom_interface.h>
+#include <aditof/system.h>
 
 #include <memory>
 
-namespace aditof {
-
-/**
- * @class DeviceEnumeratorFactory
- * @brief Provides the means to construct different types of device enumerators
- */
-class SDK_API DeviceEnumeratorFactory {
+class Camera96Tof1Eeprom : public CameraEepromInterface {
   public:
-    /**
-     * @brief Factory method to create a device enumerator on the system.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface> buildDeviceEnumerator();
+    Camera96Tof1Eeprom(std::shared_ptr<aditof::EepromInterface> _eeprom);
+    virtual aditof::Status read(std::vector<uint8_t> &data) override;
+    virtual aditof::Status write(const std::vector<uint8_t> &data) override;
 
-    /**
-     * @brief Factory method to create a device enumerator over ethernet.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface>
-    buildDeviceEnumeratorEthernet(const std::string &ip);
+  private:
+    std::shared_ptr<aditof::EepromInterface> m_eeprom;
 };
 
-} // namespace aditof
-
-#endif // DEVICE_ENUMERATOR_FACTORY_H
+#endif // CAM96TOF1_EEPROM_H

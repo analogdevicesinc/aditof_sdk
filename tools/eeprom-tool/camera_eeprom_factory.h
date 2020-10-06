@@ -29,36 +29,20 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_FACTORY_H
-#define DEVICE_ENUMERATOR_FACTORY_H
+#ifndef CAMERA_EEPROM_FACTORY_H
+#define CAMERA_EEPROM_FACTORY_H
 
-#include "aditof/device_enumerator_interface.h"
-#include "sdk_exports.h"
+#include "camera_eeprom_interface.h"
+#include <aditof/device_definitions.h>
+#include <aditof/eeprom_interface.h>
 
 #include <memory>
 
-namespace aditof {
-
-/**
- * @class DeviceEnumeratorFactory
- * @brief Provides the means to construct different types of device enumerators
- */
-class SDK_API DeviceEnumeratorFactory {
+class CameraEepromFactory {
   public:
-    /**
-     * @brief Factory method to create a device enumerator on the system.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface> buildDeviceEnumerator();
-
-    /**
-     * @brief Factory method to create a device enumerator over ethernet.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface>
-    buildDeviceEnumeratorEthernet(const std::string &ip);
+    static std::unique_ptr<CameraEepromInterface>
+    buildEeprom(aditof::SensorType sensorType,
+                std::shared_ptr<aditof::EepromInterface> eeprom);
 };
 
-} // namespace aditof
-
-#endif // DEVICE_ENUMERATOR_FACTORY_H
+#endif // CAMERA_EEPROM_FACTORY_H

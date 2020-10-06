@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  *
- * Copyright (c) 2019, Analog Devices, Inc.
+ * Copyright (c) 2020, Analog Devices, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,36 +29,18 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_FACTORY_H
-#define DEVICE_ENUMERATOR_FACTORY_H
+#include "camera_eeprom_factory.h"
+#include "cam96tof1_eeprom.h"
 
-#include "aditof/device_enumerator_interface.h"
-#include "sdk_exports.h"
-
-#include <memory>
-
-namespace aditof {
-
-/**
- * @class DeviceEnumeratorFactory
- * @brief Provides the means to construct different types of device enumerators
- */
-class SDK_API DeviceEnumeratorFactory {
-  public:
-    /**
-     * @brief Factory method to create a device enumerator on the system.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface> buildDeviceEnumerator();
-
-    /**
-     * @brief Factory method to create a device enumerator over ethernet.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface>
-    buildDeviceEnumeratorEthernet(const std::string &ip);
-};
-
-} // namespace aditof
-
-#endif // DEVICE_ENUMERATOR_FACTORY_H
+std::unique_ptr<CameraEepromInterface> CameraEepromFactory::buildEeprom(
+    aditof::SensorType sensorType,
+    std::shared_ptr<aditof::EepromInterface> eeprom) {
+    switch (sensorType) {
+    case aditof::SensorType::SENSOR_96TOF1:
+        return std::unique_ptr<CameraEepromInterface>(
+            new Camera96Tof1Eeprom(eeprom));
+    case aditof::SensorType::SENSOR_CHICONY:
+        return nullptr;
+    }
+    return nullptr;
+}

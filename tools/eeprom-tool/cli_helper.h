@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  *
- * Copyright (c) 2019, Analog Devices, Inc.
+ * Copyright (c) 2020, Analog Devices, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,36 +29,33 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_FACTORY_H
-#define DEVICE_ENUMERATOR_FACTORY_H
+#ifndef CLI_HELPER_H
+#define CLI_HELPER_H
 
-#include "aditof/device_enumerator_interface.h"
-#include "sdk_exports.h"
+#include <getopt.h>
+#include <iostream>
+#include <stdio.h>
+#include <string>
 
-#include <memory>
+#include <aditof/connections.h>
+#include <aditof/device_interface.h>
+#include <aditof/status_definitions.h>
 
-namespace aditof {
+using namespace aditof;
+using namespace std;
 
-/**
- * @class DeviceEnumeratorFactory
- * @brief Provides the means to construct different types of device enumerators
- */
-class SDK_API DeviceEnumeratorFactory {
-  public:
-    /**
-     * @brief Factory method to create a device enumerator on the system.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface> buildDeviceEnumerator();
+enum ActionType { WRITE, READ, LIST_EEPROMS, UNKNOWN };
 
-    /**
-     * @brief Factory method to create a device enumerator over ethernet.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface>
-    buildDeviceEnumeratorEthernet(const std::string &ip);
-};
+typedef struct {
+    string path;
+    string ip = "0.0.0.0";
+    string eepromName = "";
+    ConnectionType connectionType = ConnectionType::LOCAL;
+    ActionType actionType = UNKNOWN;
+    bool isConnectionSpecifed = false;
+} CLIArguments;
 
-} // namespace aditof
+void printHelpMessage();
+Status parseArguments(int argc, char *argv[], CLIArguments &cliArguments);
 
-#endif // DEVICE_ENUMERATOR_FACTORY_H
+#endif // CLI_HELPER_H
