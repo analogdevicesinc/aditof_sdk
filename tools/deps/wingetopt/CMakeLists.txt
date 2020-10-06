@@ -3,7 +3,4 @@ PROJECT(wingetopt)
 
 add_library(wingetopt STATIC src/getopt.c src/getopt.h)
 
-target_include_directories(${PROJECT_NAME} 
-	PUBLIC
-		src/
-)
+target_include_directories(${PROJECT_NAME} PUBLIC src/)
