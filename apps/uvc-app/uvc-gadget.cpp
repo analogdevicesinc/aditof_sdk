@@ -1,4 +1,4 @@
-/*
+﻿/*
  * UVC gadget test application
  *
  * Copyright (C) 2010 Ideas on board SPRL <laurent.pinchart@ideasonboard.com>
@@ -25,12 +25,14 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#include <atomic>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <thread>
 #include <unistd.h>
 
 #include <linux/usb/ch9.h>
@@ -282,6 +284,8 @@ unsigned int eeprom_write_len = 0;
 unsigned char eeprom_data[128 * 1024];
 unsigned int sensors_read_pos = 0;
 unsigned int sensors_read_len = 0;
+std::atomic<bool> eeprom_write_ready;
+std::thread eepromWriteThread;
 
 /* forward declarations */
 static int uvc_video_stream(struct uvc_device *dev, int enable);
@@ -1442,6 +1446,59 @@ uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
             }
             break;
 
+        case 7: /* Ready for writing to EEPROM */
+            switch (req) {
+            case UVC_SET_CUR:
+                resp->data[0] = 0x0;
+                resp->length = len;
+                break;
+
+            case UVC_GET_CUR:
+                resp->data[0] = eeprom_write_ready.load() ? 1 : 0;
+                resp->length = 1;
+                break;
+
+            case UVC_GET_INFO:
+                /*
+                 * We support Set and Get requests and don't
+                 * support async updates on an interrupt endpt
+                 */
+                resp->data[0] = 0x03;
+                resp->length = 1;
+                break;
+
+            case UVC_GET_LEN:
+                resp->data[0] = 0x01; // 1 byte
+                resp->data[1] = 0x00;
+                resp->length = 2;
+                break;
+
+            case UVC_GET_MIN:
+            case UVC_GET_MAX:
+            case UVC_GET_DEF:
+            case UVC_GET_RES:
+                resp->data[0] = 0xff;
+                resp->length = 1;
+                break;
+
+            default:
+                printf("Unsupported bRequest: Received bRequest %x on cs %d\n",
+                       req, cs);
+                /*
+                 * We don't support this control, so STALL the
+                 * default control ep.
+                 */
+                resp->length = -EL2HLT;
+                /*
+                 * For every unsupported control request
+                 * set the request error code to appropriate
+                 * code.
+                 */
+                SET_REQ_ERROR_CODE(0x07, 1);
+                break;
+            }
+            break;
+
         default:
             printf("Unsupported cs: Received cs %d \n", cs);
             /*
@@ -1698,14 +1755,27 @@ uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
                 eeprom_read_addr = *((unsigned int *)&(data->data[0]));
                 eeprom_read_len = data->data[4];
             } else if (dev->set_cur_cs == 6) {
-                eeprom_write_addr = *((unsigned int *)&(data->data[0]));
-                memcpy(&eeprom_data[eeprom_write_len], &data->data[5],
-                       data->data[4]);
-                eeprom_write_len += data->data[4];
-                if (data->data[4] < MAX_PACKET_SIZE - 5) {
-                    eeprom->write(eeprom_write_addr, eeprom_data,
-                                  eeprom_write_len);
-                    eeprom_write_len = 0;
+                if (eeprom_write_ready.load()) {
+                    if (eeprom_write_len == 0) {
+                        eeprom_write_addr = *((unsigned int *)&(data->data[0]));
+                    }
+                    memcpy(&eeprom_data[eeprom_write_len], &data->data[5],
+                           data->data[4]);
+                    eeprom_write_len += data->data[4];
+                    if (data->data[4] < MAX_PACKET_SIZE - 5) {
+                        if (eepromWriteThread.joinable()) {
+                            eepromWriteThread.join();
+                        }
+                        eepromWriteThread = std::thread(
+                            [=](std::shared_ptr<aditof::EepromInterface> e) {
+                                eeprom_write_ready = false;
+                                e->write(eeprom_write_addr, eeprom_data,
+                                         eeprom_write_len);
+                                eeprom_write_ready = true;
+                                eeprom_write_len = 0;
+                            },
+                            eeprom);
+                    }
                 }
             }
             dev->set_cur_cs = 0;
@@ -2250,6 +2320,8 @@ int main(int argc, char *argv[]) {
 
     stop.store(false);
 
+    eeprom_write_ready = true;
+
     while (!stop.load()) {
 
         FD_ZERO(&fdsu);
@@ -2313,6 +2385,8 @@ int main(int argc, char *argv[]) {
 
     uvc_close(udev);
 
+    if (eepromWriteThread.joinable())
+        eepromWriteThread.join();
     eeprom->close();
 
     if (sensorsInfoBuffer) {

@@ -32,8 +32,10 @@
 #include "usb_eeprom.h"
 #include "usb_windows_utils.h"
 
+#include <chrono>
 #include <glog/logging.h>
 #include <string>
+#include <thread>
 
 using namespace aditof;
 
@@ -101,6 +103,42 @@ Status UsbEeprom::write(const uint32_t address, const uint8_t *data,
             << hr;
         return Status::GENERIC_ERROR;
     }
+
+    ExUnitHandle handle;
+
+    hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
+        &handle, &m_implData->handle->pVideoInputFilter);
+    if (hr != S_OK) {
+        LOG(WARNING) << "Failed to find node and get control. Error: "
+                     << std::hex << hr;
+        return Status::GENERIC_ERROR;
+    }
+
+    uint8_t eepromWriteStatus = 0;
+    int attempts = 300;
+
+    while (eepromWriteStatus == 0 && attempts > 0) {
+        hr = UsbWindowsUtils::UvcExUnitGetProperty(&handle, 7,
+                                                   &eepromWriteStatus, 1);
+        --attempts;
+        if (FAILED(hr)) {
+            LOG(WARNING)
+                << "Failed to read a property via UVC extension unit. Error: "
+                << hr;
+            return Status::GENERIC_ERROR;
+        }
+
+        if (!eepromWriteStatus) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+
+    if (attempts == 0 && eepromWriteStatus == 0) {
+        LOG(WARNING) << "Write operation failed. Target is in a state where "
+                        "EEPROM write operations cannot be done.";
+        return Status::GENERIC_ERROR;
+    }
+
     return Status::OK;
 }
 
