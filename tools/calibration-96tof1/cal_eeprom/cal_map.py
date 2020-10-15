@@ -29,16 +29,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-from collections import namedtuple
-import struct
-import sys
-from natsort import natsorted, ns
-import re
-import os
+
 import pandas as pd
+import os
+import re
+from natsort import natsorted, ns
+import sys
+import struct
+from collections import namedtuple
 import firmware_gen as lf
-import json
-from cal_map_consts import *
+import cal_map_consts
 import logging
 
 '''
