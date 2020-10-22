@@ -6,7 +6,7 @@ By default the sdk will be built in folder: **current_script_path\build** using 
 The dependencies (glog, protobuf and websockets) will be downloaded and installed in **current_script_path\deps\installed**.
 Please use option -h or --help for further reference on how to change the defaults.
 
-#Pre-requisites
+## Pre-requisites
 
 * CMake (Windows installer can be downloaded from: https://cmake.org/download/)
 
