@@ -31,6 +31,7 @@
 #
 
 import pandas as pd
+import numpy as np
 import os
 import re
 from natsort import natsorted, ns
@@ -38,9 +39,9 @@ import sys
 import struct
 from collections import namedtuple
 import firmware_gen as lf
-import cal_map_consts
+from cal_map_consts import *
 import logging
-
+import json
 '''
 Class for managing the calibration map
 Consist functions to:
@@ -54,7 +55,7 @@ Consist functions to:
 
 
 def setup_logging():
-    with open('./../logger.json', 'r') as f:
+    with open('logger.json', 'r') as f:
         config = json.load(f)
         logging.config.dictConfig(config)
 
