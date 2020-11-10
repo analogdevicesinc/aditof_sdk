@@ -7,7 +7,7 @@
         "serial_number": 1,
         "min_checkerboards": 3,
         
-        "firmware_path": "config/BM_Kit/Near",
+        "firmware_path": "config/BM_Kit_RevD/Near",
         "config_path": "config",
         "output_path": "intrinsic",
 	"results_path": "saved_results",

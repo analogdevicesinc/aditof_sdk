@@ -1,5 +1,5 @@
 {
-    "firmware_config_json_path": "config/BM_Kit/Near/sweep_config_near.json",
+    "firmware_config_json_path": "config/BM_Kit_RevD/Near/sweep_config_near.json",
     "target_ir": 2000,
     "start_pc": 5,
     "max_pc": 2000,

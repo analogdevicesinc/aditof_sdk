@@ -1,5 +1,5 @@
 {
-    "firmware_config_json_path": "config/BM_Kit/M3W/sweep_config_mid.json",
+    "firmware_config_json_path": "config/BM_Kit_RevD/M3W/sweep_config_mid.json",
     "target_ir": 2000,
     "start_pc": 5,
     "max_pc": 2000,

@@ -417,31 +417,31 @@ if __name__ == "__main__":
                calib.run_intrinsic_calibration(intrinsic_config, dev_handle, unique_id)
            elif station == 'near':
                msg = "\nSelected: NEAR\n"
-               sweep_config_json = os.path.join('config/BM_Kit/Near/sweep_config_near.json')
+               sweep_config_json = os.path.join('config/BM_Kit_RevD/Near/sweep_config_near.json')
                ld_config_json = os.path.join('config/ld_config.json')
                print(msg)
                run_ld_test(ld_config_json, sweep_config_json, dev_handle)
                lin_offset_df, dev, cfg = run_all_calibration(sweep_config_json, dev_handle, unique_id)
            elif station == 'warm0':
                logger.info("warming up for mid mode")
-               sweep_config_json = os.path.join('config/BM_Kit/M3W/sweep_config_m3w.json')
+               sweep_config_json = os.path.join('config/BM_Kit_RevD/M3W/sweep_config_m3w.json')
                warmup(sweep_config_json, dev_handle, 90)
            elif station == 'mid':
                msg = "\nSelected: MID\n"
-               sweep_config_json = os.path.join('config/BM_Kit/M3W/sweep_config_m3w.json')
+               sweep_config_json = os.path.join('config/BM_Kit_RevD/M3W/sweep_config_m3w.json')
                print(msg)
                lin_offset_df, dev, cfg = run_all_calibration(sweep_config_json, dev_handle, unique_id)
            elif station == 'warm1':
                logger.info("warming up for far mode")
-               sweep_config_json = os.path.join('config/BM_Kit/Far/sweep_config_far.json')
+               sweep_config_json = os.path.join('config/BM_Kit_RevD/Far/sweep_config_far.json')
                warmup(sweep_config_json, dev_handle, 150)
            elif station == 'far':
                msg = "\nSelected: FAR\n"
-               sweep_config_json = os.path.join('config/BM_Kit/Far/sweep_config_far.json')
+               sweep_config_json = os.path.join('config/BM_Kit_RevD/Far/sweep_config_far.json')
                print(msg)
                lin_offset_df, dev, cfg = run_all_calibration(sweep_config_json, dev_handle, unique_id)
            elif station == 'save':
-               sweep_config_json = os.path.join('config/BM_Kit/Far/sweep_config_far.json')
+               sweep_config_json = os.path.join('config/BM_Kit_RevD/Far/sweep_config_far.json')
                camera_results_path = save.get_results_path(sweep_config_json, unique_id)
                logger.info('camera results path %s', camera_results_path)
                write_verify_eeprom(camera_results_path, dev_handle)

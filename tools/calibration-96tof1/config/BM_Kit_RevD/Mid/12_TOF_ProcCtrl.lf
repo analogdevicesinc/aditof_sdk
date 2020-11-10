@@ -1,0 +1,190 @@
+c300 0000
+c316 0f80
+c317 0002
+c318 0fff
+c319 0fff
+c31a 0fff
+c31b 0fff
+c31c 0fff
+c31d 0fff
+c31e 0fff
+c31f 0fff
+c320 0fff
+c321 0fff
+c322 0fff
+c323 0fff
+c327 0000
+c328 0fff
+c329 0400
+c32a 007b
+c32b 0002
+c32c 0003
+c32d 0004
+c32e 0006
+c32f 0007
+c330 0008
+c331 0009
+c332 000b
+c333 000d
+c334 0010
+c335 0012
+c336 0016
+c337 0018
+c338 0002
+c339 0003
+c33a 0004
+c33b 0006
+c33c 0007
+c33d 0008
+c33e 0009
+c33f 000b
+c340 000d
+c341 0010
+c342 0012
+c343 0016
+c344 0018
+c345 0203
+c346 3e00
+c347 6655
+c348 8866
+c349 ba99
+c34a 8030
+c34b 0000
+c34c 0000
+c34d 0000
+c34e 0200
+c34f 0018
+c350 0000
+c351 0200
+c352 0018
+c371 0100
+c372 9999
+c373 9999
+c374 0009
+c375 0080
+c376 0080
+c377 0080
+c378 0080
+c379 0080
+c37a 0080
+c37b 0080
+c37c 0080
+c37d 0080
+c37e 0000
+c37f 2000
+c380 0000
+c381 0400
+
+C382    0000	//    LNR_OFST00    
+C383    0000	//    LNR_OFST01    
+C384    0000	//    LNR_OFST02    
+C385    0000	//    LNR_OFST03    
+C386    0000	//    LNR_OFST04    
+C387    0000	//    LNR_OFST05    
+C388    0000	//    LNR_OFST06    
+C389    0000	//    LNR_OFST07    
+C38A    0000	//    LNR_OFST08    
+C38B    0000	//    LNR_OFST09    
+C38C    0000	//    LNR_OFST10    
+C38D    0000	//    LNR_OFST11    
+C38E    0000	//    LNR_OFST12    
+C38F    0000	//    LNR_OFST13    
+C390    0000	//    LNR_OFST14    
+C391    0000	//    LNR_OFST15    
+C392    0000	//    LNR_OFST16    
+C393    0000	//    LNR_OFST17    
+C394    0000	//    LNR_OFST18    
+C395    0000	//    LNR_OFST19    
+C396    0000	//    LNR_OFST20    
+C397    0000	//    LNR_OFST21    
+C398    0000	//    LNR_OFST22    
+C399    0000	//    LNR_OFST23    
+C39A    0000	//    LNR_OFST24    
+C39B    0000	//    LNR_OFST25    
+C39C    0000	//    LNR_OFST26    
+C39D    0000	//    LNR_OFST27    
+C39E    0000	//    LNR_OFST28    
+C39F    0000	//    LNR_OFST29    
+C3A0    0000	//    LNR_OFST30    
+C3A1    0000	//    LNR_OFST31    
+C3A2    0000	//    LNR_OFST32    
+C3A3    0000	//    LNR_OFST33    
+C3A4    0000	//    LNR_OFST34    
+C3A5    0000	//    LNR_OFST35    
+C3A6    0000	//    LNR_OFST36    
+C3A7    0000	//    LNR_OFST37    
+C3A8    0000	//    LNR_OFST38    
+C3A9    0000	//    LNR_OFST39    
+C3AA    0000	//    LNR_OFST40    
+C3AB    0000	//    LNR_OFST41    
+C3AC    0000	//    LNR_OFST42    
+C3AD    0000	//    LNR_OFST43    
+C3AE    0000	//    LNR_OFST44    
+C3AF    0000	//    LNR_OFST45    
+C3B0    0000	//    LNR_OFST46    
+C3B1    0000	//    LNR_OFST47    
+C3B2    0000	//    LNR_OFST48    
+C3B3    3FFF	//    LNR_X0    
+C3B4    8888    //    LNR_XPWR_01    
+C3B5    8888    //    LNR_XPWR_05    
+C3B6    8888    //    LNR_XPWR_09    
+C3B7    8888    //    LNR_XPWR_13    
+C3B8    8888    //    LNR_XPWR_17    
+C3B9    8888    //    LNR_XPWR_21    
+C3BA    8888    //    LNR_XPWR_25    
+C3BB    8888    //    LNR_XPWR_29    
+C3BC    9999    //    LNR_XPWR_33    
+C3BD    9999    //    LNR_XPWR_37    
+C3BE    9999    //    LNR_XPWR_41    
+C3BF    9999    //    LNR_XPWR_45    
+
+c3c0 0000
+c3c1 0000
+c3c2 7777
+c3c3 7777
+c3c4 7777
+c3c5 7777
+c3c6 0000
+c3c7 7777
+c3c8 7777
+c3c9 0777
+c3cc 0344
+c3d2 01e0
+c3d3 0000
+c3d4 0000
+c3d5 0280
+c3d6 0000
+c3d7 0000
+c3d8 0000
+c3d9 0000
+c3da 0007
+c3db 0000
+c3dc 0000
+c3dd 0000
+c3de 0000
+c3df 0000
+c353 0010
+c354 0010
+c355 0010
+c3e8 001c
+c36e 8766
+c36f 9988
+c370 ba99
+c3e9 170c
+c3ea 2d20
+c3eb 4e40
+c3ec 6f5b
+c3ed 8f80
+c3ee b59d
+c3ef 00de
+c3e6 1000
+c3e7 0000
+c371 0100
+c08f 0040
+c3e0 0000
+c3e1 0000
+c3e2 0280
+c3e3 01e0
+c300 0801
+c033 0002
+c032 0010

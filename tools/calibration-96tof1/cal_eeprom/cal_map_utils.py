@@ -112,7 +112,7 @@ def test_cal_eeprom():
     input("Press Enter to continue...")
 
     cal3.replace_eeprom_mode(
-        'near', "./config/BM_Kit/Near/linear_cal.json", "./config/BM_Kit/Near/")
+        'near', "./config/BM_Kit_RevD/Near/linear_cal.json", "./config/BM_Kit_RevD/Near/")
     with open("eeprom_read_map_modified.json", 'w') as f:
         f.write(str(cal1.calibration_map))
     f.close()
