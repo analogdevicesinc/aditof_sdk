@@ -78,7 +78,7 @@ def run_example(remote):
 
     if (from_software):
         #Choose firmware path from here
-        firmware_path = "config/BM_Kit_RevD/Near/"
+        firmware_path = "config/BM_Kit/Near/"
         
         logger.info("Programming firmware from : " + firmware_path)
         cam_handle = device.open_device2(system, cam_ip)

@@ -7,7 +7,7 @@
         "verification_type": "Sweep",
         "calculate_metrics": true,
         
-        "firmware_path": "config/BM_Kit_RevC/Far",
+        "firmware_path": "config/BM_Kit/Far",
         
         "repeat_num_filename": "9_RepeatNumAddrList.lf",
         "hpt_data_filename": "5_mn34906bl_addi9033_HPT_data.lf",

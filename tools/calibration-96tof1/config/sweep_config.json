@@ -7,7 +7,7 @@
         "calculate_metrics": false,
         "show_report": false,
         
-        "firmware_path": "config/BM_Kit_RevD/Far",
+        "firmware_path": "config/BM_Kit/Far",
         
         "repeat_num_filename": "9_RepeatNumAddrList.lf",
         "hpt_data_filename": "5_MN34906BL_ADDI9033_HPT_data.lf",

@@ -6,7 +6,7 @@
         "verification_type": "Sweep",
         "calculate_metrics": true,
         
-        "firmware_path": "config/BM_Kit_RevC/M3W",
+        "firmware_path": "config/BM_Kit/M3W",
         
         "unique_id": "00",
         

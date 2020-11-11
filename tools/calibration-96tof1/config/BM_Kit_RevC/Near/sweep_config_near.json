@@ -6,7 +6,7 @@
         "verification_type": "Sweep",
         "calculate_metrics": true,
         
-        "firmware_path": "config/BM_Kit_RevC/Near",
+        "firmware_path": "config/BM_Kit/Near",
         
         "unique_id": "00",
         
