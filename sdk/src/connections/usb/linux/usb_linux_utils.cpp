@@ -131,7 +131,7 @@ int UsbLinuxUtils::uvcExUnitReadOnePacket(int fd, uint8_t selector,
 int UsbLinuxUtils::uvcExUnitReadBuffer(int fd, uint8_t selector,
                                        uint32_t address, uint8_t *data,
                                        uint32_t bufferLength) {
-    int ret;
+    int ret = 0;
     uint32_t readBytes = 0;
     uint32_t readLength = 0;
     uint32_t crtAddress = address;
