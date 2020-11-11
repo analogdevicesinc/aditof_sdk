@@ -2,7 +2,7 @@
           
         "mode" : "far", 
         "calibrate" : true,
-        "verify_sweep": true,
+        "verify_sweep": false,
         "calib_type": "Sweep",
         "verification_type": "Sweep",
         "calculate_metrics": true,
@@ -27,12 +27,12 @@
         "frame_width": 640,
         "frame_count": 50,
 
-        "unique_id" : "2053",
-        "warmup_time" : 120,
+        "unique_id" : "11810021",
+        "warmup_time" : 150,
 
         "depth_conv_gain": 4,
         "sw_gain" : 1.22014,
-        "sw_offset" : 2300,
+        "sw_offset" : 2000,
         "xcorr": [0,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
         
         "min_delay": -250,

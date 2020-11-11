@@ -1,0 +1,11 @@
+c3cf 010a \\ PIXCNT Alignment 
+
+c34a 0000 \\ Coring Disable Small sig Removal 
+
+c084 001f
+c085 001f \\ Enable LDs via Blanking signals
+
+c0a9 0002
+
+4001 0007
+7c22 0004

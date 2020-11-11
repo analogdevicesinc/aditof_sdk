@@ -148,8 +148,8 @@ void AdiTofDemoView::render() {
 
     bool revBChecked = false;
     bool revCChecked = true;
-    int revCurrentValue = 1; // 2 = RevB; 1 = RevC(default)
-    std::string revisions[2] = {"RevB", "RevC"};
+    int revCurrentValue = 1; // 2 = RevB; 1 = RevC (default)
+    std::string revisions[2] = {"RevB", "RevC / RevD"};
 
     if (typeOfDevice.find(typeUSBDevice) != std::string::npos) {
         USBModeChecked = true;
@@ -263,7 +263,7 @@ void AdiTofDemoView::render() {
         cvui::beginRow(frame, 50, 555);
         cvui::checkbox("RevB", &revBChecked);
         cvui::space(10);
-        cvui::checkbox("RevC", &revCChecked);
+        cvui::checkbox("RevC / RevD", &revCChecked);
         cvui::endRow();
         cvui::endColumn();
 

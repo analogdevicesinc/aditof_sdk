@@ -8,7 +8,7 @@
         
         "firmware_path": "config/BM_Kit/Near",
         
-        "unique_id": "00",
+        "unique_id": "11810021",
         
         "repeat_num_filename": "9_RepeatNumAddrList.lf",
         "hpt_data_filename": "5_mn34906bl_addi9033_HPT_data.lf",
@@ -54,7 +54,7 @@
         "rail_dist_step": 50,
         "results_path": "saved_results",
         "verify_mode": "near",
-        "depth_perc_err_threshold": 2
+        "depth_perc_err_threshold": 4
         
         
     }

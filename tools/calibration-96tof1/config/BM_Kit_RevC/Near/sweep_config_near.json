@@ -1,0 +1,62 @@
+{
+        "mode" : "near", 
+        "calibrate" : true,
+        "verify_sweep": false,
+        "calib_type": "Sweep",
+        "verification_type": "Sweep",
+        "calculate_metrics": true,
+        
+        "firmware_path": "config/BM_Kit/Near",
+        
+        "unique_id": "00",
+        
+        "repeat_num_filename": "9_RepeatNumAddrList.lf",
+        "hpt_data_filename": "5_mn34906bl_addi9033_HPT_data.lf",
+        "data_filename": "6_mn34906bl_addi9033_data.lf",
+        "non_linear_off_lf_file": "12_TOF_ProcCtrl.lf",
+        "non_linear_off_calib_lf_file": "12_TOF_ProcCtrl_calibrated.lf",
+        "seq_info_filename": "seqInfo.txt",
+
+        "pulse_count_min": 100,
+        "pulse_count_max": 100,
+
+        "raw_frame_height": 960,
+        "raw_frame_width": 640,
+        "window_x": 10,
+        "window_y": 10,
+        "frame_height": 480,
+        "frame_width": 640,
+        "frame_count": 50,
+
+
+        "warmup_time": 0,
+        "depth_conv_gain": 4,
+        "sw_gain" : 1,
+        "sw_offset" : 0,
+        "xcorr": [0,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+        
+        "min_delay": -50,
+        "max_delay": 100,
+        
+        "target_distance": 295,
+        "min_dist": 0,
+        "max_dist": 1000,
+        "verify_min_dist": 96,
+        "verify_max_dist": 800,
+        "dist_interval": 26.0239,
+        "dist_step": 104.0956,
+        "round_dist_range_to_interval": 0,
+        
+        "rail_port": "ttyUSB0",
+        "rail_offset": 150,
+        "rail_min_dist": 200,
+        "rail_max_dist": 800,
+        "rail_dist_step": 50,
+        "results_path": "saved_results",
+        "verify_mode": "near",
+        "depth_perc_err_threshold": 2
+        
+        
+    }
+
+
