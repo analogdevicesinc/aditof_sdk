@@ -29,8 +29,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EEPROM_INTERFACE_H
-#define EEPROM_INTERFACE_H
+#ifndef STORAGE_INTERFACE_H
+#define STORAGE_INTERFACE_H
 
 #include <aditof/status_definitions.h>
 #include <cstddef>
@@ -40,28 +40,29 @@
 namespace aditof {
 
 /**
- * @class EepromInterface
- * @brief Interface for an EEPROM
+ * @class StorageInterface
+ * @brief Interface for storage of data.
+ * For example: EEPROM, Flash, file on disk, etc.
  */
-class EepromInterface {
+class StorageInterface {
   public:
     /**
    * @brief Destructor
    */
-    virtual ~EepromInterface() = default;
+    virtual ~StorageInterface() = default;
 
     /**
-     * @brief Open the communication channel with the EEPROM.
+     * @brief Open the communication channel with the storage.
      * @param handle - A handle to the object through which communication is done
-     * @param name - The name of EEPROM device available on sysfs
-     * @param driver_path - The EEPROM driver path on sysfs
+     * @param name - The name of the storage available on sysfs
+     * @param driver_path - The storage driver path on sysfs
      * @return Status
      */
     virtual aditof::Status open(void *handle, const std::string &name,
                                 const std::string &driver_path) = 0;
 
     /**
-     * @brief Read data from EEPROM
+     * @brief Read data from storage
      * @param address - The address from where the data should be read
      * @param[out] data - The location where the read data should be stored
      * @param bytesCount - The number of bytes to read
@@ -71,7 +72,7 @@ class EepromInterface {
                                 const size_t bytesCount) = 0;
 
     /**
-     * @brief Write data to EEPROM
+     * @brief Write data to storage
      * @param address - The starting address where the data should be written
      * @param data - The location of the data to be written
      * @param bytesCount - The number of bytes to write
@@ -81,14 +82,14 @@ class EepromInterface {
                                  const size_t bytesCount) = 0;
 
     /**
-     * @brief Close the communication channel with the EEPROM.
+     * @brief Close the communication channel with the storage.
      * @return Status
      */
     virtual aditof::Status close() = 0;
 
     /**
-     * @brief Retrieves the name of the eeprom
-     * @param[out] name - This gets set with the name of the eeprom
+     * @brief Retrieves the name of the storage
+     * @param[out] name - This gets set with the name of the storage
      * @return Status
      */
     virtual aditof::Status getName(std::string &name) = 0;
@@ -96,4 +97,4 @@ class EepromInterface {
 
 } // namespace aditof
 
-#endif // EEPROM_INTERFACE_H
+#endif // STORAGE_INTERFACE_H

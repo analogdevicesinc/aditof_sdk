@@ -29,11 +29,11 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_INTERFACE_H
-#define DEVICE_INTERFACE_H
+#ifndef DEPTH_SENSOR_INTERFACE_H
+#define DEPTH_SENSOR_INTERFACE_H
 
-#include <aditof/device_definitions.h>
 #include <aditof/frame_definitions.h>
+#include <aditof/sensor_definitions.h>
 #include <aditof/status_definitions.h>
 
 #include <cstddef>
@@ -42,16 +42,16 @@
 namespace aditof {
 
 /**
- * @class DeviceInterface
- * @brief Provides access to the low level functionality of the camera. This
+ * @class DepthSensorInterface
+ * @brief Provides access to the low level functionality of the camera sensor. This
  * includes sensor configuration as well as analog front end(AFE) configuration.
  */
-class DeviceInterface {
+class DepthSensorInterface {
   public:
     /**
      * @brief Destructor
      */
-    virtual ~DeviceInterface() = default;
+    virtual ~DepthSensorInterface() = default;
 
     /**
      * @brief Open the communication channels with the hardware.
@@ -60,19 +60,19 @@ class DeviceInterface {
     virtual aditof::Status open() = 0;
 
     /**
-     * @brief Start the streaming of data from the device.
+     * @brief Start the streaming of data from the sensor.
      * @return Status
      */
     virtual aditof::Status start() = 0;
 
     /**
-     * @brief Stop the device data stream.
+     * @brief Stop the sensor data stream.
      * @return Status
      */
     virtual aditof::Status stop() = 0;
 
     /**
-     * @brief Return all frame types that are supported by the device.
+     * @brief Return all frame types that are supported by the sensor.
      * @param[out] types
      * @return Status
      */
@@ -80,7 +80,7 @@ class DeviceInterface {
     getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) = 0;
 
     /**
-     * @brief Set the device frame type to the given type
+     * @brief Set the sensor frame type to the given type
      * @param details - frame details structure containing the frame type
      * @return Status
      */
@@ -88,7 +88,7 @@ class DeviceInterface {
     setFrameType(const aditof::FrameDetails &details) = 0;
 
     /**
-     * @brief Program the devices with the given firmware
+     * @brief Program the sensor with the given firmware
      * @param firmware - chunk of data representin the firmware
      * @param size - the size of the firmware data in bytes
      * @return Status
@@ -96,7 +96,7 @@ class DeviceInterface {
     virtual aditof::Status program(const uint8_t *firmware, size_t size) = 0;
 
     /**
-     * @brief Request a frame from the device
+     * @brief Request a frame from the sensor
      * @param buffer - a valid location where the new frame should be stored.
      * The size of the frame is known (cached) internally and gets updated each
      * time setFrameType() is called.
@@ -129,32 +129,16 @@ class DeviceInterface {
                                              size_t length) = 0;
 
     /**
-     * @brief Read the AFE temperature
-     * @param[out] temperature - the variable where the read temperature is
-     * stored
-     * @return Status
-     */
-    virtual aditof::Status readAfeTemp(float &temperature) = 0;
-
-    /**
-     * @brief Read the laser temperature
-     * @param[out] temperature - the variable where the read temperature is
-     * stored
-     * @return Status
-     */
-    virtual aditof::Status readLaserTemp(float &temperature) = 0;
-
-    /**
      * @brief Get a structure that contains information about the instance of
-     * the device
-     * @param[out] details - the variable where the device details should be
+     * the sensor
+     * @param[out] details - the variable where the sensor details should be
      * stored
      * @return Status
      */
-    virtual aditof::Status getDetails(aditof::DeviceDetails &details) const = 0;
+    virtual aditof::Status getDetails(aditof::SensorDetails &details) const = 0;
 
     /**
-     * @brief Gets a handle to be used by other devices such as EEPROM,
+     * @brief Gets a handle to be used by other devices such as Storage,
      * Temperature, etc. This handle will allow the other devices to
      * communicate remotely with the embedded target.
      * @param[out] handle - the handle which is owned by this instance
@@ -165,4 +149,4 @@ class DeviceInterface {
 
 } // namespace aditof
 
-#endif // DEVICE_INTERFACE_H
+#endif // DEPTH_SENSOR_INTERFACE_H
