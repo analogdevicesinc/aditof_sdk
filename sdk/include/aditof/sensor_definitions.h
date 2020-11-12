@@ -29,36 +29,35 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_FACTORY_H
-#define DEVICE_ENUMERATOR_FACTORY_H
+#ifndef SENSOR_DEFINITIONS_H
+#define SENSOR_DEFINITIONS_H
 
-#include "aditof/device_enumerator_interface.h"
-#include "sdk_exports.h"
+#include <string>
 
-#include <memory>
-
+/**
+ * @brief Namespace aditof
+ */
 namespace aditof {
 
 /**
- * @class DeviceEnumeratorFactory
- * @brief Provides the means to construct different types of device enumerators
+ * @enum SensorType
+ * @brief Provides the types of sensor assosiated with the device
  */
-class SDK_API DeviceEnumeratorFactory {
-  public:
-    /**
-     * @brief Factory method to create a device enumerator on the system.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
-     */
-    static std::unique_ptr<DeviceEnumeratorInterface> buildDeviceEnumerator();
+enum class SensorType {
+    SENSOR_ADDI9036, //!< ADDI9036 CCD sensor
+};
 
+/**
+ * @struct SensorDetails
+ * @brief Provides details about the device
+ */
+struct SensorDetails {
     /**
-     * @brief Factory method to create a device enumerator over ethernet.
-     * @return std::unique_ptr<DeviceEnumeratorInterface>
+     * @brief The type of sensor
      */
-    static std::unique_ptr<DeviceEnumeratorInterface>
-    buildDeviceEnumeratorEthernet(const std::string &ip);
+    SensorType sensorType;
 };
 
 } // namespace aditof
 
-#endif // DEVICE_ENUMERATOR_FACTORY_H
+#endif // SENSOR_DEFINITIONS_H

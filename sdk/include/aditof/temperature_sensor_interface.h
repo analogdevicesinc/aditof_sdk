@@ -29,38 +29,58 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_INTERFACE_H
-#define DEVICE_ENUMERATOR_INTERFACE_H
+#ifndef TEMPERATURE_SENSOR_INTERFACE_H
+#define TEMPERATURE_SENSOR_INTERFACE_H
 
-#include <aditof/device_construction_data.h>
-#include <aditof/status_definitions.h>
+#include "aditof/status_definitions.h"
+#include "sdk_exports.h"
 
-#include <vector>
+#include <string>
 
 namespace aditof {
 
 /**
- * @class DeviceEnumeratorInterface
- * @brief Provides the mean to find and access devices.
+ * @class TemperatureSensorInterface
+ * @brief Interface for a temperature sensor
  */
-class DeviceEnumeratorInterface {
+class SDK_API TemperatureSensorInterface {
   public:
     /**
-     * @brief Destructor
-     */
-    virtual ~DeviceEnumeratorInterface() = default;
+   * @brief Destructor
+   */
+    virtual ~TemperatureSensorInterface() = default;
 
     /**
-     * @brief Find devices that are available. A device is available if either
-     * has an associated drivers (happens on target) or is connected to via USB
-     * to the system (usually on a host).
-     * @param[out] devices - list of found devices
+     * @brief Open the communication channel with the temperature sensor.
+     * @param handle - A handle to the object through which communication is done
+     * @param name - The name of temperature sensor available on sysfs
+     * @param driver_path - The temperature sensor driver path on sysfs
      * @return Status
      */
-    virtual aditof::Status
-    findDevices(std::vector<aditof::DeviceConstructionData> &devices) = 0;
+    virtual aditof::Status open(void *handle, const std::string &name,
+                                const std::string &driver_path) = 0;
+
+    /**
+     * @brief Read data from the temperature sensor
+     * @param[out] temperature - This is set with the temperature read from the sensor
+     * @return Status
+     */
+    virtual aditof::Status read(float &temperature) = 0;
+
+    /**
+     * @brief Close the communication channel with the EEPROM.
+     * @return Status
+     */
+    virtual aditof::Status close() = 0;
+
+    /**
+     * @brief Retrieves the name of the temperature sensor
+     * @param[out] name - This gets set with the name of the temperature sensor
+     * @return Status
+     */
+    virtual aditof::Status getName(std::string &name) const = 0;
 };
 
 } // namespace aditof
 
-#endif // DEVICE_ENUMERATOR_INTERFACE_H
+#endif // TEMPERATURE_SENSOR_INTERFACE_H
