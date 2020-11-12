@@ -29,38 +29,47 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_INTERFACE_H
-#define DEVICE_ENUMERATOR_INTERFACE_H
+#ifndef SENSOR_ENUMERATOR_FACTORY_H
+#define SENSOR_ENUMERATOR_FACTORY_H
 
-#include <aditof/device_construction_data.h>
-#include <aditof/status_definitions.h>
+#include "aditof/sensor_enumerator_interface.h"
+#include "sdk_exports.h"
 
-#include <vector>
+#include <memory>
 
 namespace aditof {
 
 /**
- * @class DeviceEnumeratorInterface
- * @brief Provides the mean to find and access devices.
+ * @class SensorEnumeratorFactory
+ * @brief Provides the means to construct different types of sensors enumerators.
+ * Based on the connection type (on target, USB, Network), different enumerators need
+ * to be used.
  */
-class DeviceEnumeratorInterface {
+class SDK_API SensorEnumeratorFactory {
   public:
     /**
-     * @brief Destructor
+     * @brief Factory method to create an enumerator to look for sensors on target.
+     * Factory method will return null if the call is not made on target.
+     * @return std::unique_ptr<SensorEnumeratorInterface>
      */
-    virtual ~DeviceEnumeratorInterface() = default;
+    static std::unique_ptr<SensorEnumeratorInterface>
+    buildTargetSensorEnumerator();
 
     /**
-     * @brief Find devices that are available. A device is available if either
-     * has an associated drivers (happens on target) or is connected to via USB
-     * to the system (usually on a host).
-     * @param[out] devices - list of found devices
-     * @return Status
+     * Factory method to create an enumerator to look for sensors over USB.
+     * @return std::unique_ptr<DeviceEnumeratorInterface>
      */
-    virtual aditof::Status
-    findDevices(std::vector<aditof::DeviceConstructionData> &devices) = 0;
+    static std::unique_ptr<SensorEnumeratorInterface>
+    buildUsbSensorEnumerator();
+
+    /**
+     * Factory method to create an enumerator to look for sensors over network.
+     * @return std::unique_ptr<DeviceEnumeratorInterface>
+     */
+    static std::unique_ptr<SensorEnumeratorInterface>
+    buildNetworkSensorEnumerator(const std::string &ip);
 };
 
 } // namespace aditof
 
-#endif // DEVICE_ENUMERATOR_INTERFACE_H
+#endif // SENSOR_ENUMERATOR_FACTORY_H
