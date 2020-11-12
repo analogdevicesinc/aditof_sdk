@@ -29,8 +29,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_DEFINITIONS_H
-#define DEVICE_DEFINITIONS_H
+#ifndef SENSOR_DEFINITIONS_H
+#define SENSOR_DEFINITIONS_H
 
 #include <string>
 
@@ -44,16 +44,14 @@ namespace aditof {
  * @brief Provides the types of sensor assosiated with the device
  */
 enum class SensorType {
-    SENSOR_96TOF1,  //!< 96Tof 1 sensor
-    SENSOR_CHICONY, //!< Chicony sensor
-    SENSOR_FXTOF1,  //!< FXTOF1 sensor
+    SENSOR_ADDI9036, //!< ADDI9036 CCD sensor
 };
 
 /**
- * @struct DeviceDetails
+ * @struct SensorDetails
  * @brief Provides details about the device
  */
-struct DeviceDetails {
+struct SensorDetails {
     /**
      * @brief The type of sensor
      */
@@ -62,4 +60,4 @@ struct DeviceDetails {
 
 } // namespace aditof
 
-#endif // DEVICE_DEFINITIONS_H
+#endif // SENSOR_DEFINITIONS_H
