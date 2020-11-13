@@ -29,8 +29,37 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* This file should include implementation of DeviceEnumeratorImpl, that is
- * common on all operating systems.
- */
+#include "connections/usb/usb_sensor_enumerator.h"
 
-#include "device_enumerator_impl.h"
+using namespace aditof;
+
+Status UsbSensorEnumerator::searchSensors() {
+    // TO DO: implement this when enabling macos support
+
+    return Status::OK;
+}
+
+Status UsbSensorEnumerator::getDepthSensors(
+    std::vector<std::shared_ptr<DepthSensorInterface>> & /*depthSensors*/) {
+
+    // TO DO: implement this when enabling macos support
+
+    return Status::OK;
+}
+
+Status UsbSensorEnumerator::getStorages(
+    std::vector<std::shared_ptr<StorageInterface>> & /*storages*/) {
+
+    // TO DO: implement this when enabling macos support
+
+    return Status::OK;
+}
+
+Status UsbSensorEnumerator::getTemperatureSensors(
+    std::vector<std::shared_ptr<TemperatureSensorInterface>>
+        & /*temperatureSensors*/) {
+
+    // TO DO: implement this when enabling macos support
+
+    return Status::OK;
+}

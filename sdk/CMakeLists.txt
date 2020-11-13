@@ -145,7 +145,6 @@ target_include_directories(${PROJECT_NAME}
         src/cameras/ad-96tof1-ebz/
         src/cameras/chicony-006/
         src/cameras/ad-fxtof1-ebz/
-        src/connections/network/
         ${Protobuf_INCLUDE_DIRS}
         ${GENERATED_PROTO_FILES_DIR}
         ${LIBWEBSOCKETS_INCLUDE_DIRS}

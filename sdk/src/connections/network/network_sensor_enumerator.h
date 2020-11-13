@@ -29,14 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "device_enumerator_impl.h"
+#ifndef NETWORK_SENSOR_ENUMERATOR_H
+#define NETWORK_SENSOR_ENUMERATOR_H
 
-aditof::Status DeviceEnumeratorImpl::findDevices(
-    std::vector<aditof::DeviceConstructionData> &devices) {
-    using namespace aditof;
-    Status status = Status::OK;
+#include "aditof/sensor_enumerator_interface.h"
 
-    // TO DO
+#include <string>
 
-    return status;
-}
+class NetworkSensorEnumerator : public aditof::SensorEnumeratorInterface {
+  public:
+    NetworkSensorEnumerator(const std::string &ip);
+    ~NetworkSensorEnumerator();
+
+  public: // implements SensorEnumeratorInterface
+    virtual aditof::Status searchSensors() override;
+    virtual aditof::Status
+    getDepthSensors(std::vector<std::shared_ptr<aditof::DepthSensorInterface>>
+                        &depthSensors) override;
+    virtual aditof::Status getStorages(
+        std::vector<std::shared_ptr<aditof::StorageInterface>> &storages)
+        override;
+    virtual aditof::Status getTemperatureSensors(
+        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+            &temperatureSensors) override;
+
+  private:
+    std::string m_ip;
+};
+
+#endif // NETWORK_SENSOR_ENUMERATOR_H
