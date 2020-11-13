@@ -29,24 +29,29 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <aditof/device_enumerator_factory.h>
-#ifdef HAS_NETWORK
-#include "device_enumerator_ethernet.h"
-#endif
-#include "device_enumerator_impl.h"
+#include "connections/mipi/target_sensor_enumerator.h"
 
 using namespace aditof;
 
-std::unique_ptr<DeviceEnumeratorInterface>
-DeviceEnumeratorFactory::buildDeviceEnumerator() {
-    return std::unique_ptr<DeviceEnumeratorInterface>(new DeviceEnumeratorImpl);
+Status TargetSensorEnumerator::getDepthSensors(
+    std::vector<std::shared_ptr<DepthSensorInterface>> &depthSensors) {
+
+    depthSensors = m_depthSensors;
+
+    return Status::OK;
 }
 
-std::unique_ptr<DeviceEnumeratorInterface>
-DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(const std::string &ip) {
-#ifdef HAS_NETWORK
-    return std::unique_ptr<DeviceEnumeratorInterface>(
-        new DeviceEnumeratorEthernet(ip));
-#endif
-    return nullptr;
+Status TargetSensorEnumerator::getStorages(
+    std::vector<std::shared_ptr<StorageInterface>> &storages) {
+    storages = m_storages;
+
+    return Status::OK;
+}
+
+Status TargetSensorEnumerator::getTemperatureSensors(
+    std::vector<std::shared_ptr<TemperatureSensorInterface>>
+        &temperatureSensors) {
+    temperatureSensors = m_temperatureSensors;
+
+    return Status::OK;
 }

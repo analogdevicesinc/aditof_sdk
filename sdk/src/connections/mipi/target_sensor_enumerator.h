@@ -29,24 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_ETHERNET_H
-#define DEVICE_ENUMERATOR_ETHERNET_H
+#ifndef TARGET_SENSOR_ENUMERATOR_H
+#define TARGET_SENSOR_ENUMERATOR_H
 
-#include <aditof/device_enumerator_interface.h>
+#include "aditof/sensor_enumerator_interface.h"
 
-#include <string>
-
-class DeviceEnumeratorEthernet : public aditof::DeviceEnumeratorInterface {
+class TargetSensorEnumerator : public aditof::SensorEnumeratorInterface {
   public:
-    DeviceEnumeratorEthernet(const std::string &ip);
-    ~DeviceEnumeratorEthernet();
+    ~TargetSensorEnumerator() = default;
 
-  public: // implements DeviceEnumeratorInterface
+  public: // implements SensorEnumeratorInterface
+    virtual aditof::Status searchSensors() override;
     virtual aditof::Status
-    findDevices(std::vector<aditof::DeviceConstructionData> &devices);
+    getDepthSensors(std::vector<std::shared_ptr<aditof::DepthSensorInterface>>
+                        &depthSensors) override;
+    virtual aditof::Status getStorages(
+        std::vector<std::shared_ptr<aditof::StorageInterface>> &storages)
+        override;
+    virtual aditof::Status getTemperatureSensors(
+        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+            &temperatureSensors) override;
 
   private:
-    std::string m_ip;
+    std::vector<std::shared_ptr<aditof::DepthSensorInterface>> m_depthSensors;
+    std::vector<std::shared_ptr<aditof::StorageInterface>> m_storages;
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+        m_temperatureSensors;
 };
 
-#endif // DEVICE_ENUMERATOR_ETHERNET_H
+#endif // TARGET_SENSOR_ENUMERATOR_H
