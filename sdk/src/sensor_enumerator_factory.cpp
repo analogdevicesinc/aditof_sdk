@@ -29,18 +29,38 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DEVICE_ENUMERATOR_IMPL_H
-#define DEVICE_ENUMERATOR_IMPL_H
+#include "aditof/sensor_enumerator_factory.h"
 
-#include <aditof/device_enumerator_interface.h>
+#ifdef TARGET
+#include "connections/mipi/target_sensor_enumerator.h"
+#else
+#include "connections/usb/usb_sensor_enumerator.h"
+#ifdef HAS_NETWORK
+#include "connections/network/network_sensor_enumerator.h"
+#endif
+#endif
 
-class DeviceEnumeratorImpl : public aditof::DeviceEnumeratorInterface {
-  public:
-    ~DeviceEnumeratorImpl() = default;
+using namespace aditof;
 
-  public: // implements DeviceEnumeratorInterface
-    virtual aditof::Status
-    findDevices(std::vector<aditof::DeviceConstructionData> &devices);
-};
+std::unique_ptr<SensorEnumeratorInterface>
+SensorEnumeratorFactory::buildTargetSensorEnumerator() {
+#ifdef TARGET
+    return std::unique_ptr<SensorEnumeratorInterface>(
+        new TargetSensorEnumerator);
+#endif
+    return nullptr;
+}
 
-#endif // DEVICE_ENUMERATOR_IMPL_H
+std::unique_ptr<SensorEnumeratorInterface>
+SensorEnumeratorFactory::buildUsbSensorEnumerator() {
+    return std::unique_ptr<SensorEnumeratorInterface>(new UsbSensorEnumerator);
+}
+
+std::unique_ptr<SensorEnumeratorInterface>
+SensorEnumeratorFactory::buildNetworkSensorEnumerator(const std::string &ip) {
+#ifdef HAS_NETWORK
+    return std::unique_ptr<SensorEnumeratorInterface>(
+        new NetworkSensorEnumerator(ip));
+#endif
+    return nullptr;
+}
