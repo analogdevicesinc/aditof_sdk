@@ -29,15 +29,19 @@ elseif( APPLE )
 elseif( DRAGONBOARD )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR dragonboard)
+        add_definitions(-DTARGET="dragonboard")
 elseif ( RASPBERRYPI )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR raspberrypi)
+        add_definitions(-DTARGET="raspberrypi")
 elseif( JETSON )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR jetson)
+        add_definitions(-DTARGET="jetson")
 elseif( TOYBRICK )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR toybrick)
+        add_definitions(-DTARGET="toybrick")
 elseif ( UNIX )
         set(OS_SPECIFIC_DIR "connections/usb/linux")
 else()
@@ -122,7 +126,6 @@ target_include_directories(${PROJECT_NAME}
         src/cameras/ad-96tof1-ebz/
         src/cameras/chicony-006/
         src/cameras/ad-fxtof1-ebz/
-        src/connections/network/
         ${Protobuf_INCLUDE_DIRS}
         ${GENERATED_PROTO_FILES_DIR}
         ${LIBWEBSOCKETS_INCLUDE_DIRS}
