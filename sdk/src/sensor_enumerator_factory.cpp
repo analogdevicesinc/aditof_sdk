@@ -32,7 +32,7 @@
 #include "aditof/sensor_enumerator_factory.h"
 
 #ifdef TARGET
-#include "connections/mipi/target_sensor_enumerator.h"
+#include "connections/target/target_sensor_enumerator.h"
 #else
 #include "connections/usb/usb_sensor_enumerator.h"
 #ifdef HAS_NETWORK
