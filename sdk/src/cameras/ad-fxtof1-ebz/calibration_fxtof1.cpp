@@ -29,48 +29,49 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "calibration_fx1.h"
+#include "calibration_fxtof1.h"
 #include "basecode.h"
 
+#include <algorithm>
 #include <glog/logging.h>
 #include <math.h>
-#include <algorithm>
 
 #define MODE_CFG_SIZE 256
 static const uint16_t ROMADDR_CFG_BASE[] = {0x100, 0x200};
-#define PULSE_CNT_OFFSET    0
-#define DEPTH_PWR_OFFSET    2
-#define DEPTH_X0_OFFSET     50
+#define PULSE_CNT_OFFSET 0
+#define DEPTH_PWR_OFFSET 2
+#define DEPTH_X0_OFFSET 50
 #define DEPTH_OFFSET_OFFSET 52
-#define DEPTH_3_OFFSET      252
-#define DEPTH_2_OFFSET      254
+#define DEPTH_3_OFFSET 252
+#define DEPTH_2_OFFSET 254
 
 #define COMMON_SIZE 255
 #define ROMADDR_COMMOM_BASE 0x300
 #define COMMON_BASE_OFFSET 227
 
 static const uint16_t MODE_REG_BASE_ADDR[] = {0x6B80, 0x6BC0};
-#define R_MODE_PSPACE   1
-#define R_PULSECNT      5
-#define R_PULSEHD       6
+#define R_MODE_PSPACE 1
+#define R_PULSECNT 5
+#define R_PULSEHD 6
 
 static const uint16_t MODE_LCORR_BASE_ADDR[] = {0x6A80, 0x6AC0};
-#define R_DEPTH_2       2
-#define R_DEPTH_3       3
-#define R_DEPTH_OFST    4
+#define R_DEPTH_2 2
+#define R_DEPTH_3 3
+#define R_DEPTH_OFST 4
 
-#define DEPTH_PWR_CNT   48
-#define DEPTH_OFST_CNT  49
+#define DEPTH_PWR_CNT 48
+#define DEPTH_OFST_CNT 49
 
-#define ARRAY_SIZE(X) sizeof(X)/sizeof(X[0])
+#define ARRAY_SIZE(X) sizeof(X) / sizeof(X[0])
 
-CalibrationFx1::CalibrationFx1()
+CalibrationFxTof1::CalibrationFxTof1()
     : m_depth_cache(nullptr), m_geometry_cache(nullptr), m_range(16000),
       m_cal_valid(false) {
-    m_afe_code.insert(m_afe_code.end(), &basecode[0], &basecode[ARRAY_SIZE(basecode)]);
+    m_afe_code.insert(m_afe_code.end(), &basecode[0],
+                      &basecode[ARRAY_SIZE(basecode)]);
 }
 
-CalibrationFx1::~CalibrationFx1() {
+CalibrationFxTof1::~CalibrationFxTof1() {
     if (m_depth_cache) {
         delete[] m_depth_cache;
     }
@@ -86,7 +87,7 @@ ReadCalMap - Read the entire calibration map from a binary file
 \device - Pointer to a device instance
 */
 aditof::Status
-CalibrationFx1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
+CalibrationFxTof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -94,13 +95,14 @@ CalibrationFx1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
     float intrinsic_data[COMMON_SIZE / sizeof(float)];
 
     /*Read the mode data*/
-    for(int i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
         device->readEeprom(ROMADDR_CFG_BASE[i], mode_data, MODE_CFG_SIZE);
 
-        if(mode_data[0] == 0xFF) {
-			LOG(WARNING) << "Invalid calibration in EEPROM, using default settings";
-			return Status::OK;
-		}
+        if (mode_data[0] == 0xFF) {
+            LOG(WARNING)
+                << "Invalid calibration in EEPROM, using default settings";
+            return Status::OK;
+        }
 
         m_mode_settings[i].pulse_cnt =
             (uint16_t)mode_data[PULSE_CNT_OFFSET] |
@@ -113,11 +115,10 @@ CalibrationFx1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
             (uint16_t)mode_data[DEPTH_X0_OFFSET] |
             ((uint16_t)mode_data[DEPTH_X0_OFFSET + 1] << 8);
 
-        for(int j = DEPTH_OFFSET_OFFSET;
-            j < DEPTH_OFFSET_OFFSET + DEPTH_OFST_CNT; j += 2) {
+        for (int j = DEPTH_OFFSET_OFFSET;
+             j < DEPTH_OFFSET_OFFSET + DEPTH_OFST_CNT; j += 2) {
             m_mode_settings[i].depth_offset[j - DEPTH_OFFSET_OFFSET] =
-                (uint16_t)mode_data[j] |
-                ((uint16_t)mode_data[j + 1] << 8);
+                (uint16_t)mode_data[j] | ((uint16_t)mode_data[j + 1] << 8);
         }
 
         m_mode_settings[i].depth3 =
@@ -130,56 +131,58 @@ CalibrationFx1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
     }
 
     /*Replace the settings in the base code with the eeprom values*/
-    for(int i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
         auto it = std::find(m_afe_code.begin(), m_afe_code.end(),
                             MODE_REG_BASE_ADDR[i] + R_MODE_PSPACE);
-        if(it == m_afe_code.end()) {
-			LOG(WARNING) << "Could not find R_MODE_PSPACE";
-			return Status::INVALID_ARGUMENT;
-		}
+        if (it == m_afe_code.end()) {
+            LOG(WARNING) << "Could not find R_MODE_PSPACE";
+            return Status::INVALID_ARGUMENT;
+        }
 
         uint16_t pulse_space = *(it++);
         uint16_t pulse_cnt = m_mode_settings[i].pulse_cnt;
-        uint16_t pulse_hd = (((pulse_cnt - 1) * pulse_space + 90) / 928 + 3) * 36 + 57;
+        uint16_t pulse_hd =
+            (((pulse_cnt - 1) * pulse_space + 90) / 928 + 3) * 36 + 57;
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
                        MODE_REG_BASE_ADDR[i] + R_PULSECNT);
-        if(it == m_afe_code.end()) {
-			LOG(WARNING) << "Could not find R_PULSECNT";
-			return Status::INVALID_ARGUMENT;
-		}
-        *(it+1) = pulse_cnt;
+        if (it == m_afe_code.end()) {
+            LOG(WARNING) << "Could not find R_PULSECNT";
+            return Status::INVALID_ARGUMENT;
+        }
+        *(it + 1) = pulse_cnt;
 
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
                        MODE_REG_BASE_ADDR[i] + R_PULSEHD);
-        if(it == m_afe_code.end()) {
-			LOG(WARNING) << "Could not find R_PULSEHD";
-			return Status::INVALID_ARGUMENT;
-		}
-        *(it+1) = pulse_hd;
+        if (it == m_afe_code.end()) {
+            LOG(WARNING) << "Could not find R_PULSEHD";
+            return Status::INVALID_ARGUMENT;
+        }
+        *(it + 1) = pulse_hd;
 
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
                        MODE_LCORR_BASE_ADDR[i] + R_DEPTH_2);
-        if(it == m_afe_code.end()) {
-			LOG(WARNING) << "Could not find R_DEPTH_2";
-			return Status::INVALID_ARGUMENT;
-		}
-        *(it+1) = m_mode_settings[i].depth2;
+        if (it == m_afe_code.end()) {
+            LOG(WARNING) << "Could not find R_DEPTH_2";
+            return Status::INVALID_ARGUMENT;
+        }
+        *(it + 1) = m_mode_settings[i].depth2;
 
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
                        MODE_LCORR_BASE_ADDR[i] + R_DEPTH_3);
-        if(it == m_afe_code.end()) {
-			LOG(WARNING) << "Could not find R_DEPTH_3";
-			return Status::INVALID_ARGUMENT;
-		}
-        *(it+1) = m_mode_settings[i].depth3;
+        if (it == m_afe_code.end()) {
+            LOG(WARNING) << "Could not find R_DEPTH_3";
+            return Status::INVALID_ARGUMENT;
+        }
+        *(it + 1) = m_mode_settings[i].depth3;
 
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
-                       MODE_LCORR_BASE_ADDR[i] + R_DEPTH_OFST) + 1;
-        if(it == m_afe_code.end()) {
-			LOG(WARNING) << "Could not find R_DEPTH_OFST";
-			return Status::INVALID_ARGUMENT;
-		}
-        for(int j = 0; j < DEPTH_OFST_CNT; j++) {
+                       MODE_LCORR_BASE_ADDR[i] + R_DEPTH_OFST) +
+             1;
+        if (it == m_afe_code.end()) {
+            LOG(WARNING) << "Could not find R_DEPTH_OFST";
+            return Status::INVALID_ARGUMENT;
+        }
+        for (int j = 0; j < DEPTH_OFST_CNT; j++) {
             *it = m_mode_settings[i].depth_offset[j];
             it += 2;
         }
@@ -187,12 +190,12 @@ CalibrationFx1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
 
     /*Read the intrinsics and distortion params*/
     device->readEeprom(ROMADDR_COMMOM_BASE + COMMON_BASE_OFFSET,
-                       (uint8_t*)intrinsic_data,
+                       (uint8_t *)intrinsic_data,
                        MODE_CFG_SIZE - COMMON_BASE_OFFSET);
     m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0],
                         &intrinsic_data[ARRAY_SIZE(intrinsic_data)]);
 
-	m_cal_valid = true;
+    m_cal_valid = true;
 
     return status;
 }
@@ -204,8 +207,8 @@ getAfeFirmware - Get the firmware for a mode
 \param data - Buffer where to store the firmware
 */
 aditof::Status
-CalibrationFx1::getAfeFirmware(const std::string &mode,
-                               std::vector<uint16_t> &data) const {
+CalibrationFxTof1::getAfeFirmware(const std::string &mode,
+                                  std::vector<uint16_t> &data) const {
     using namespace aditof;
 
     data = m_afe_code;
@@ -220,8 +223,8 @@ getIntrinsic - Get the geometric camera clibration
              intrinsincs or distortion coefficients
 \param data - Buffer to store the returned data
 */
-aditof::Status CalibrationFx1::getIntrinsic(float key,
-                                            std::vector<float> &data) const {
+aditof::Status CalibrationFxTof1::getIntrinsic(float key,
+                                               std::vector<float> &data) const {
     using namespace aditof;
 
     bool validParam = (INTRINSIC == key) || (DISTORTION_COEFFICIENTS == key);
@@ -231,7 +234,7 @@ aditof::Status CalibrationFx1::getIntrinsic(float key,
         return Status::INVALID_ARGUMENT;
     }
 
-    if(key == INTRINSIC) {
+    if (key == INTRINSIC) {
         data.insert(data.end(), m_intrinsics.begin(), m_intrinsics.end() - 3);
     } else {
         data.insert(data.end(), m_intrinsics.end() - 3, m_intrinsics.end());
@@ -249,9 +252,9 @@ setMode - Sets the mode to be used for depth calibration
 \param frameHeight - Height of the depth image in pixels
 */
 aditof::Status
-CalibrationFx1::setMode(std::shared_ptr<aditof::DeviceInterface> device,
-                       const std::string &mode, int range,
-                       unsigned int frameWidth, unsigned int frameheight) {
+CalibrationFxTof1::setMode(std::shared_ptr<aditof::DeviceInterface> device,
+                           const std::string &mode, int range,
+                           unsigned int frameWidth, unsigned int frameheight) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -269,12 +272,12 @@ CalibrationFx1::setMode(std::shared_ptr<aditof::DeviceInterface> device,
                   << "    fy: " << cameraMatrix[3] << "\n"
                   << "    cx: " << cameraMatrix[0] << "\n"
                   << "    cy: " << cameraMatrix[1];
-		buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
-	}
+        buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
+    }
 
     /*Execute the mode change command*/
     uint16_t afeRegsAddr[] = {0x4000, 0x4001, 0x7c22};
-    uint16_t afeRegsVal[]  = {mode_id, 0x0004, 0x0004};
+    uint16_t afeRegsVal[] = {mode_id, 0x0004, 0x0004};
     device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
 
     return Status::OK;
@@ -286,13 +289,13 @@ calibrateCameraGeometry - Compensate for lens distorsion in the depth data
 \param frame - Buffer with the depth data, used to return the calibrated data
 \param frame_size - Number of samples in the frame data
 */
-aditof::Status CalibrationFx1::calibrateCameraGeometry(uint16_t *frame,
-                                                       uint32_t frame_size) {
+aditof::Status CalibrationFxTof1::calibrateCameraGeometry(uint16_t *frame,
+                                                          uint32_t frame_size) {
     using namespace aditof;
 
-    if(!m_cal_valid) {
-		return Status::OK;
-	}
+    if (!m_cal_valid) {
+        return Status::OK;
+    }
 
     for (uint32_t i = 0; i < frame_size; i++) {
         if (frame[i] != m_range) {
@@ -307,7 +310,7 @@ aditof::Status CalibrationFx1::calibrateCameraGeometry(uint16_t *frame,
 }
 
 // Create a cache to speed up depth geometric camera calibration computation
-void CalibrationFx1::buildGeometryCalibrationCache(
+void CalibrationFxTof1::buildGeometryCalibrationCache(
     const std::vector<float> &cameraMatrix, unsigned int width,
     unsigned int height) {
 

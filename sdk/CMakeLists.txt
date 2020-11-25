@@ -53,9 +53,9 @@ if ( USE_CHICONY AND (RASPBERRYPI OR TOYBRICK) )
 	set(CHICONY_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h)
 endif()
 
-if ( USE_FX1 AND TOYBRICK )
-	set(FX1_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/fx1/*.cpp)
-	set(FX1_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/fx1/*.h)
+if ( USE_FXTOF1 AND TOYBRICK )
+	set(FXTOF1_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.cpp)
+	set(FXTOF1_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.h)
 endif()
 
 # Platform specific sources and headers
@@ -66,7 +66,7 @@ file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.cpp
     ${CHICONY_SRC}
-    ${FX1_SRC}
+    ${FXTOF1_SRC}
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
@@ -75,7 +75,7 @@ file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
     ${CHICONY_H}
-    ${FX1_H}
+    ${FXTOF1_H}
 )
 
 file(GLOB NETWORK_SOURCES
@@ -121,7 +121,7 @@ target_include_directories(${PROJECT_NAME}
         src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
         src/cameras/ad-96tof1-ebz/
         src/cameras/chicony-006/
-        src/cameras/fx1/
+        src/cameras/ad-fxtof1-ebz/
         src/connections/network/
         ${Protobuf_INCLUDE_DIRS}
         ${GENERATED_PROTO_FILES_DIR}
