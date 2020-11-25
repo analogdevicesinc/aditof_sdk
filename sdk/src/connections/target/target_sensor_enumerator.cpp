@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "connections/mipi/target_sensor_enumerator.h"
+#include "connections/target/target_sensor_enumerator.h"
 
 using namespace aditof;
 
