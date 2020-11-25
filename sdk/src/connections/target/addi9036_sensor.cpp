@@ -29,10 +29,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "local_device.h"
+#include "addi9036_sensor.h"
 #include "target_definitions.h"
-#include <aditof/frame_operations.h>
-#include <fstream>
 
 extern "C" {
 #include "temp_sensor.h"
@@ -42,12 +40,12 @@ extern "C" {
 #include <arm_neon.h>
 #include <cmath>
 #include <fcntl.h>
+#include <fstream>
 #include <glog/logging.h>
 #include <linux/videodev2.h>
 #include <sstream>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <target_definitions.h>
 #include <unordered_map>
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
@@ -71,7 +69,7 @@ struct CalibrationData {
     uint16_t *cache;
 };
 
-struct LocalDevice::ImplData {
+struct Addi9036Sensor::ImplData {
     int fd;
     int sfd;
     struct buffer *videoBuffers;
@@ -99,21 +97,14 @@ static int xioctl(int fh, unsigned int request, void *arg) {
     return r;
 }
 
-LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
-    : m_devData(data), m_implData(new LocalDevice::ImplData) {
+Addi9036Sensor::Addi9036Sensor(const aditof::DeviceConstructionData &data)
+    : m_devData(data), m_implData(new Addi9036Sensor::ImplData) {
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
-
-#if defined(CHICONY_006)
-    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
-#elif defined(FXTOF1)
-    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_FXTOF1;
-#else
-    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
-#endif
+    m_sensorDetails.sensorType = aditof::SensorType::SENSOR_ADDI9036;
 }
 
-LocalDevice::~LocalDevice() {
+Addi9036Sensor::~Addi9036Sensor() {
     if (m_implData->started) {
         stop();
     }
@@ -144,7 +135,7 @@ LocalDevice::~LocalDevice() {
     }
 }
 
-aditof::Status LocalDevice::open() {
+aditof::Status Addi9036Sensor::open() {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -231,7 +222,7 @@ aditof::Status LocalDevice::open() {
     return status;
 }
 
-aditof::Status LocalDevice::start() {
+aditof::Status Addi9036Sensor::start() {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -269,7 +260,7 @@ aditof::Status LocalDevice::start() {
     return status;
 }
 
-aditof::Status LocalDevice::stop() {
+aditof::Status Addi9036Sensor::stop() {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -291,8 +282,8 @@ aditof::Status LocalDevice::stop() {
     return status;
 }
 
-aditof::Status
-LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
+aditof::Status Addi9036Sensor::getAvailableFrameTypes(
+    std::vector<aditof::FrameDetails> &types) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -327,7 +318,8 @@ LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     return status;
 }
 
-aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
+aditof::Status
+Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -428,7 +420,7 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
     return status;
 }
 
-aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
+aditof::Status Addi9036Sensor::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -500,7 +492,7 @@ aditof::Status LocalDevice::program(const uint8_t *firmware, size_t size) {
     return status;
 }
 
-aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
+aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
     using namespace aditof;
 
     Status status = waitForBuffer();
@@ -654,8 +646,8 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
     return status;
 }
 
-aditof::Status LocalDevice::readAfeRegisters(const uint16_t *address,
-                                             uint16_t *data, size_t length) {
+aditof::Status Addi9036Sensor::readAfeRegisters(const uint16_t *address,
+                                                uint16_t *data, size_t length) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -682,9 +674,9 @@ aditof::Status LocalDevice::readAfeRegisters(const uint16_t *address,
     return status;
 }
 
-aditof::Status LocalDevice::writeAfeRegisters(const uint16_t *address,
-                                              const uint16_t *data,
-                                              size_t length) {
+aditof::Status Addi9036Sensor::writeAfeRegisters(const uint16_t *address,
+                                                 const uint16_t *data,
+                                                 size_t length) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -722,91 +714,94 @@ aditof::Status LocalDevice::writeAfeRegisters(const uint16_t *address,
     return status;
 }
 
-aditof::Status LocalDevice::readAfeTemp(float &temperature) {
+aditof::Status Addi9036Sensor::readAfeTemp(float &temperature) {
     using namespace aditof;
     Status status = Status::OK;
 
-    if (m_deviceDetails.sensorType == aditof::SensorType::SENSOR_96TOF1) {
-        temp_sensor tdev;
+    // TO DO: Move this to temperature sensor
+    //    if (m_sensorDetails.sensorType == aditof::SensorType::SENSOR_96TOF1) {
+    //        temp_sensor tdev;
 
-        if (temp_sensor_open(TEMP_SENSOR_DEV_PATH, AFE_TEMP_SENSOR_I2C_ADDR,
-                             &tdev) < 0) {
-            LOG(WARNING) << "Temp sensor open error";
-            return Status::GENERIC_ERROR;
-        }
+    //        if (temp_sensor_open(TEMP_SENSOR_DEV_PATH, AFE_TEMP_SENSOR_I2C_ADDR,
+    //                             &tdev) < 0) {
+    //            LOG(WARNING) << "Temp sensor open error";
+    //            return Status::GENERIC_ERROR;
+    //        }
 
-        if (temp_sensor_read(&tdev, &temperature) == -1) {
-            LOG(WARNING) << "Error reading AFE_TEMP_SENSOR";
-            return Status::GENERIC_ERROR;
-        }
+    //        if (temp_sensor_read(&tdev, &temperature) == -1) {
+    //            LOG(WARNING) << "Error reading AFE_TEMP_SENSOR";
+    //            return Status::GENERIC_ERROR;
+    //        }
 
-        temp_sensor_close(&tdev);
-    } else if ((m_deviceDetails.sensorType ==
-                aditof::SensorType::SENSOR_CHICONY) ||
-               (m_deviceDetails.sensorType ==
-                aditof::SensorType::SENSOR_FXTOF1)) {
-        int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
-        if (fd <= 0) {
-            LOG(WARNING) << "Temp sensor open error";
-            return Status::GENERIC_ERROR;
-        }
-        char buf[6];
-        pread(fd, buf, 6, 0);
-        close(fd);
-        temperature = atof(buf) / 1000.0f;
-    }
+    //        temp_sensor_close(&tdev);
+    //    } else if ((m_deviceDetails.sensorType ==
+    //                aditof::SensorType::SENSOR_CHICONY) ||
+    //               (m_deviceDetails.sensorType ==
+    //                aditof::SensorType::SENSOR_FXTOF1)) {
+    //        int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
+    //        if (fd <= 0) {
+    //            LOG(WARNING) << "Temp sensor open error";
+    //            return Status::GENERIC_ERROR;
+    //        }
+    //        char buf[6];
+    //        pread(fd, buf, 6, 0);
+    //        close(fd);
+    //        temperature = atof(buf) / 1000.0f;
+    //    }
 
     return status;
 }
 
-aditof::Status LocalDevice::readLaserTemp(float &temperature) {
+aditof::Status Addi9036Sensor::readLaserTemp(float &temperature) {
     using namespace aditof;
     Status status = Status::OK;
 
-    if (m_deviceDetails.sensorType == aditof::SensorType::SENSOR_96TOF1) {
-        temp_sensor tdev;
+    // TO DO: Move this to temperature sensor
+    //    if (m_sensorDetails.sensorType == aditof::SensorType::SENSOR_96TOF1) {
+    //        temp_sensor tdev;
 
-        if (temp_sensor_open(TEMP_SENSOR_DEV_PATH, LASER_TEMP_SENSOR_I2C_ADDR,
-                             &tdev) < 0) {
-            LOG(WARNING) << "Temp sensor open error";
-            return Status::GENERIC_ERROR;
-        }
+    //        if (temp_sensor_open(TEMP_SENSOR_DEV_PATH, LASER_TEMP_SENSOR_I2C_ADDR,
+    //                             &tdev) < 0) {
+    //            LOG(WARNING) << "Temp sensor open error";
+    //            return Status::GENERIC_ERROR;
+    //        }
 
-        if (temp_sensor_read(&tdev, &temperature) == -1) {
-            LOG(WARNING) << "Error reading LASER_TEMP_SENSOR";
-            return Status::GENERIC_ERROR;
-        }
+    //        if (temp_sensor_read(&tdev, &temperature) == -1) {
+    //            LOG(WARNING) << "Error reading LASER_TEMP_SENSOR";
+    //            return Status::GENERIC_ERROR;
+    //        }
 
-        temp_sensor_close(&tdev);
-    } else if ((m_deviceDetails.sensorType ==
-                aditof::SensorType::SENSOR_CHICONY) ||
-               (m_deviceDetails.sensorType ==
-                aditof::SensorType::SENSOR_FXTOF1)) {
-        int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
-        if (fd <= 0) {
-            LOG(WARNING) << "Temp sensor open error";
-            return Status::GENERIC_ERROR;
-        }
-        char buf[6];
-        pread(fd, buf, 6, 0);
-        close(fd);
-        temperature = atof(buf) / 1000.0f;
-    }
+    //        temp_sensor_close(&tdev);
+    //    } else if ((m_deviceDetails.sensorType ==
+    //                aditof::SensorType::SENSOR_CHICONY) ||
+    //               (m_deviceDetails.sensorType ==
+    //                aditof::SensorType::SENSOR_FXTOF1)) {
+    //        int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
+    //        if (fd <= 0) {
+    //            LOG(WARNING) << "Temp sensor open error";
+    //            return Status::GENERIC_ERROR;
+    //        }
+    //        char buf[6];
+    //        pread(fd, buf, 6, 0);
+    //        close(fd);
+    //        temperature = atof(buf) / 1000.0f;
+    //    }
 
     return status;
 }
 
-aditof::Status LocalDevice::getDetails(aditof::DeviceDetails &details) const {
-    details = m_deviceDetails;
+aditof::Status
+Addi9036Sensor::getDetails(aditof::SensorDetails &details) const {
+    details = m_sensorDetails;
     return aditof::Status::OK;
 }
 
-aditof::Status LocalDevice::getHandle(void **handle) {
+aditof::Status Addi9036Sensor::getHandle(void **handle) {
     *handle = nullptr;
     return aditof::Status::OK;
 }
 
-aditof::Status LocalDevice::waitForBuffer() {
+aditof::Status Addi9036Sensor::waitForBuffer() {
     fd_set fds;
     struct timeval tv;
     int r;
@@ -831,7 +826,7 @@ aditof::Status LocalDevice::waitForBuffer() {
     return aditof ::Status::OK;
 }
 
-aditof::Status LocalDevice::dequeueInternalBuffer(struct v4l2_buffer &buf) {
+aditof::Status Addi9036Sensor::dequeueInternalBuffer(struct v4l2_buffer &buf) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -861,9 +856,9 @@ aditof::Status LocalDevice::dequeueInternalBuffer(struct v4l2_buffer &buf) {
     return status;
 }
 
-aditof::Status LocalDevice::getInternalBuffer(uint8_t **buffer,
-                                              uint32_t &buf_data_len,
-                                              const struct v4l2_buffer &buf) {
+aditof::Status
+Addi9036Sensor::getInternalBuffer(uint8_t **buffer, uint32_t &buf_data_len,
+                                  const struct v4l2_buffer &buf) {
 
     *buffer = static_cast<uint8_t *>(m_implData->videoBuffers[buf.index].start);
     buf_data_len =
@@ -872,7 +867,7 @@ aditof::Status LocalDevice::getInternalBuffer(uint8_t **buffer,
     return aditof::Status::OK;
 }
 
-aditof::Status LocalDevice::enqueueInternalBuffer(struct v4l2_buffer &buf) {
+aditof::Status Addi9036Sensor::enqueueInternalBuffer(struct v4l2_buffer &buf) {
     if (xioctl(m_implData->fd, VIDIOC_QBUF, &buf) == -1) {
         LOG(WARNING) << "VIDIOC_QBUF error "
                      << "errno: " << errno << " error: " << strerror(errno);
@@ -882,7 +877,7 @@ aditof::Status LocalDevice::enqueueInternalBuffer(struct v4l2_buffer &buf) {
     return aditof::Status::OK;
 }
 
-aditof::Status LocalDevice::getDeviceFileDescriptor(int &fileDescriptor) {
+aditof::Status Addi9036Sensor::getDeviceFileDescriptor(int &fileDescriptor) {
     using namespace aditof;
 
     if (m_implData->fd != -1) {
