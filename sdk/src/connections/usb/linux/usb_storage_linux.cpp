@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "usb_eeprom.h"
+#include "connections/usb/usb_storage.h"
 #include "usb_linux_utils.h"
 #include "utils.h"
 
@@ -39,16 +39,16 @@
 
 using namespace aditof;
 
-struct UsbEeprom::ImplData {
+struct UsbStorage::ImplData {
     int fd;
     std::string name;
     std::string driverPath;
 };
 
-UsbEeprom::UsbEeprom() : m_implData(new ImplData) { m_implData->fd = -1; }
+UsbStorage::UsbStorage() : m_implData(new ImplData) { m_implData->fd = -1; }
 
-Status UsbEeprom::open(void *handle, const std::string &name,
-                       const std::string &driver_path) {
+Status UsbStorage::open(void *handle, const std::string &name,
+                        const std::string &driver_path) {
     if (!handle) {
         LOG(ERROR) << "Invalid handle";
         return Status::INVALID_ARGUMENT;
@@ -61,8 +61,8 @@ Status UsbEeprom::open(void *handle, const std::string &name,
     return Status::OK;
 }
 
-Status UsbEeprom::read(const uint32_t address, uint8_t *data,
-                       const size_t bytesCount) {
+Status UsbStorage::read(const uint32_t address, uint8_t *data,
+                        const size_t bytesCount) {
     if (!m_implData->fd) {
         LOG(ERROR) << "Cannot read! EEPROM is not opened.";
         return Status::GENERIC_ERROR;
@@ -83,8 +83,8 @@ Status UsbEeprom::read(const uint32_t address, uint8_t *data,
     return Status::OK;
 }
 
-Status UsbEeprom::write(const uint32_t address, const uint8_t *data,
-                        const size_t bytesCount) {
+Status UsbStorage::write(const uint32_t address, const uint8_t *data,
+                         const size_t bytesCount) {
 
     if (!m_implData->fd) {
         LOG(ERROR) << "Cannot write! EEPROM is not opened.";
@@ -132,7 +132,7 @@ Status UsbEeprom::write(const uint32_t address, const uint8_t *data,
     return Status::OK;
 }
 
-Status UsbEeprom::close() {
+Status UsbStorage::close() {
     m_implData->fd = -1;
     m_implData->name.clear();
     m_implData->driverPath.clear();
@@ -140,7 +140,7 @@ Status UsbEeprom::close() {
     return Status::OK;
 }
 
-Status UsbEeprom::getName(std::string &name) {
+Status UsbStorage::getName(std::string &name) {
     name = m_implData->name;
     return Status::OK;
 }
