@@ -53,7 +53,28 @@ class CalibrationChicony006 {
     aditof::Status setMode(const std::string &mode);
 
   private:
-    aditof::Status readEeprom(uint32_t address, uint8_t *data, size_t length);
+    aditof::Status SetEEPROMData_0(uint16_t Gdata[][2], uint16_t Gdata_size,
+                                   uint16_t SetData[]);
+    aditof::Status SetEEPROMData_1(uint16_t Gdata[][2], uint16_t Gdata_size,
+                                   uint16_t SetData[][2]);
+    aditof::Status TofEepromRead(uint16_t unAddr, uint16_t *punData,
+                                 uint16_t unSlave);
+    aditof::Status TofEepromWrite(uint16_t unAddr, uint16_t punData);
+
+    aditof::Status TofSendCsTable(uint16_t *punSndTbl, uint32_t ulWords);
+    aditof::Status unWriteTofRamReg(uint16_t *punReg, uint16_t unReg,
+                                    uint16_t unSetNum);
+    aditof::Status SetExposureDelay(uint16_t unMode, uint16_t unVdInitOfst);
+    aditof::Status unReadTofRamReg(uint16_t *punRegAddr, uint16_t *punReg,
+                                   uint16_t unRegNum);
+    aditof::Status GetExposureDelay(uint16_t unMode, uint16_t *punVdInitOfst);
+    aditof::Status GetIdlePeriod(uint16_t unMode, uint16_t *punIdlePeriod);
+    aditof::Status TofChangeRangeMode(uint16_t unMode);
+    aditof::Status TofSetCcdDummy(uint16_t unCcdDummy);
+    aditof::Status TofSetExpValue(uint16_t unExp, uint16_t *unHdExp);
+    aditof::Status TofSetEmissionEnable(uint16_t unEnable);
+    aditof::Status sensorPowerUp();
+    aditof::Status sensorPowerDown();
 
   private:
     std::shared_ptr<aditof::DeviceInterface> m_device;
