@@ -29,15 +29,15 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CALIBRATION_FX1_H
-#define CALIBRATION_FX1_H
+#ifndef CALIBRATION_FXTOF1_H
+#define CALIBRATION_FXTOF1_H
 
 #include <aditof/device_interface.h>
 #include <aditof/status_definitions.h>
 #include <iostream>
-#include <vector>
 #include <memory>
 #include <stdint.h>
+#include <vector>
 
 #define INTRINSIC 5
 #define DISTORTION_COEFFICIENTS 6
@@ -48,17 +48,17 @@
 */
 struct mode_struct {
     uint16_t pulse_cnt;
-    uint8_t  depth_pwr[48];
+    uint8_t depth_pwr[48];
     uint16_t depth_x0;
     uint16_t depth_offset[49];
     uint16_t depth3;
     uint16_t depth2;
 };
 
-class CalibrationFx1 {
+class CalibrationFxTof1 {
   public:
-    CalibrationFx1();
-    ~CalibrationFx1();
+    CalibrationFxTof1();
+    ~CalibrationFxTof1();
 
   public:
     aditof::Status readCalMap(std::shared_ptr<aditof::DeviceInterface> device);
@@ -85,4 +85,4 @@ class CalibrationFx1 {
     bool m_cal_valid;
 };
 
-#endif /*CALIBRATION_FX1_H*/
+#endif /*CALIBRATION_FXTOF1_H*/

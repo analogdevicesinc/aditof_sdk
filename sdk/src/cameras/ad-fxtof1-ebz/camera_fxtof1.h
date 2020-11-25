@@ -29,19 +29,19 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CAMERA_FX1_H
-#define CAMERA_FX1_H
+#ifndef CAMERA_FXTOF1_H
+#define CAMERA_FXTOF1_H
 
-#include "calibration_fx1.h"
+#include "calibration_fxtof1.h"
 
 #include <memory>
 
 #include <aditof/camera.h>
 
-class CameraFx1 : public aditof::Camera {
+class CameraFxTof1 : public aditof::Camera {
   public:
-    CameraFx1(std::unique_ptr<aditof::DeviceInterface> device);
-    ~CameraFx1();
+    CameraFxTof1(std::unique_ptr<aditof::DeviceInterface> device);
+    ~CameraFxTof1();
 
   public: // implements Camera
     aditof::Status initialize();
@@ -75,10 +75,10 @@ class CameraFx1 : public aditof::Camera {
     bool m_devStarted;
     bool m_devProgrammed;
     std::vector<std::string> m_availableControls;
-    CalibrationFx1 m_calibration;
+    CalibrationFxTof1 m_calibration;
     uint16_t m_noiseReductionThreshold;
     float m_irGammaCorrection;
     std::string m_revision;
 };
 
-#endif // CAMERA_FX1_H
+#endif // CAMERA_FXTOF1_H

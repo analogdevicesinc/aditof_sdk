@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "camera_fx1.h"
+#include "camera_fxtof1.h"
 
 #include <aditof/device_interface.h>
 #include <aditof/frame.h>
@@ -52,22 +52,20 @@ struct rangeStruct {
 // A map that contains the specific values for each revision
 static const std::map<std::string, std::array<rangeStruct, 3>>
     RangeValuesForRevision = {
-        {"RevA", {{{"near", 250, 800}, {"medium", 300, 3000}}}}
-};
+        {"RevA", {{{"near", 250, 800}, {"medium", 300, 3000}}}}};
 
 static const std::string skCustomMode = "custom";
 
 static const std::vector<std::string> availableControls = {
     "noise_reduction_threshold", "ir_gamma_correction"};
 
-CameraFx1::CameraFx1(std::unique_ptr<aditof::DeviceInterface> device)
-    : m_device(std::move(device)), m_devStarted(false),
-      m_devProgrammed(false), m_availableControls(availableControls),
-      m_revision("RevA") {}
+CameraFxTof1::CameraFxTof1(std::unique_ptr<aditof::DeviceInterface> device)
+    : m_device(std::move(device)), m_devStarted(false), m_devProgrammed(false),
+      m_availableControls(availableControls), m_revision("RevA") {}
 
-CameraFx1::~CameraFx1() = default;
+CameraFxTof1::~CameraFxTof1() = default;
 
-aditof::Status CameraFx1::initialize() {
+aditof::Status CameraFxTof1::initialize() {
     using namespace aditof;
 
     LOG(INFO) << "Initializing camera";
@@ -99,18 +97,18 @@ aditof::Status CameraFx1::initialize() {
     return Status::OK;
 }
 
-aditof::Status CameraFx1::start() {
+aditof::Status CameraFxTof1::start() {
     // return m_device->start(); // For now we keep the device open all the time
     return aditof::Status::OK;
 }
 
-aditof::Status CameraFx1::stop() {
+aditof::Status CameraFxTof1::stop() {
     // return m_device->stop(); // For now we keep the device open all the time
     return aditof::Status::OK;
 }
 
-aditof::Status CameraFx1::setMode(const std::string &mode,
-                                  const std::string &modeFilename) {
+aditof::Status CameraFxTof1::setMode(const std::string &mode,
+                                     const std::string &modeFilename) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -135,8 +133,7 @@ aditof::Status CameraFx1::setMode(const std::string &mode,
               << " is: " << m_details.minDepth << " mm and "
               << m_details.maxDepth << " mm";
 
-
-    if(!m_devProgrammed) {
+    if (!m_devProgrammed) {
         std::vector<uint16_t> firmwareData;
         status = m_calibration.getAfeFirmware(mode, firmwareData);
         if (status != Status::OK) {
@@ -157,8 +154,7 @@ aditof::Status CameraFx1::setMode(const std::string &mode,
         m_devProgrammed = true;
     }
 
-    status = m_calibration.setMode(m_device, mode,
-                                   m_details.maxDepth,
+    status = m_calibration.setMode(m_device, mode, m_details.maxDepth,
                                    m_details.frameType.width,
                                    m_details.frameType.height);
     if (status != Status::OK) {
@@ -185,7 +181,7 @@ aditof::Status CameraFx1::setMode(const std::string &mode,
     return status;
 }
 
-aditof::Status CameraFx1::getAvailableModes(
+aditof::Status CameraFxTof1::getAvailableModes(
     std::vector<std::string> &availableModes) const {
     using namespace aditof;
     Status status = Status::OK;
@@ -197,7 +193,7 @@ aditof::Status CameraFx1::getAvailableModes(
     return status;
 }
 
-aditof::Status CameraFx1::setFrameType(const std::string &frameType) {
+aditof::Status CameraFxTof1::setFrameType(const std::string &frameType) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -238,7 +234,7 @@ aditof::Status CameraFx1::setFrameType(const std::string &frameType) {
     return status;
 }
 
-aditof::Status CameraFx1::getAvailableFrameTypes(
+aditof::Status CameraFxTof1::getAvailableFrameTypes(
     std::vector<std::string> &availableFrameTypes) const {
     using namespace aditof;
     Status status = Status::OK;
@@ -257,7 +253,7 @@ aditof::Status CameraFx1::getAvailableFrameTypes(
     return status;
 }
 
-aditof::Status CameraFx1::requestFrame(aditof::Frame *frame,
+aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
                                           aditof::FrameUpdateCallback /*cb*/) {
     using namespace aditof;
     Status status = Status::OK;
@@ -290,7 +286,7 @@ aditof::Status CameraFx1::requestFrame(aditof::Frame *frame,
     return Status::OK;
 }
 
-aditof::Status CameraFx1::getDetails(aditof::CameraDetails &details) const {
+aditof::Status CameraFxTof1::getDetails(aditof::CameraDetails &details) const {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -299,12 +295,12 @@ aditof::Status CameraFx1::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<aditof::DeviceInterface> CameraFx1::getDevice() {
+std::shared_ptr<aditof::DeviceInterface> CameraFxTof1::getDevice() {
     return m_device;
 }
 
 aditof::Status
-CameraFx1::getAvailableControls(std::vector<std::string> &controls) const {
+CameraFxTof1::getAvailableControls(std::vector<std::string> &controls) const {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -313,7 +309,7 @@ CameraFx1::getAvailableControls(std::vector<std::string> &controls) const {
     return status;
 }
 
-aditof::Status CameraFx1::setControl(const std::string &control,
+aditof::Status CameraFxTof1::setControl(const std::string &control,
                                         const std::string &value) {
     using namespace aditof;
     Status status = Status::OK;
@@ -336,7 +332,7 @@ aditof::Status CameraFx1::setControl(const std::string &control,
     return status;
 }
 
-aditof::Status CameraFx1::getControl(const std::string &control,
+aditof::Status CameraFxTof1::getControl(const std::string &control,
                                         std::string &value) const {
     using namespace aditof;
     Status status = Status::OK;
@@ -359,7 +355,7 @@ aditof::Status CameraFx1::getControl(const std::string &control,
     return status;
 }
 
-aditof::Status CameraFx1::setNoiseReductionTreshold(uint16_t treshold) {
+aditof::Status CameraFxTof1::setNoiseReductionTreshold(uint16_t treshold) {
     using namespace aditof;
 
     const size_t REGS_CNT = 5;
@@ -372,7 +368,7 @@ aditof::Status CameraFx1::setNoiseReductionTreshold(uint16_t treshold) {
     return m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
 }
 
-aditof::Status CameraFx1::setIrGammaCorrection(float gamma) {
+aditof::Status CameraFxTof1::setIrGammaCorrection(float gamma) {
     using namespace aditof;
     aditof::Status status = Status::OK;
     const float x_val[] = {256, 512, 768, 896, 1024, 1536, 2048, 3072, 4096};

@@ -106,8 +106,8 @@ LocalDevice::LocalDevice(const aditof::DeviceConstructionData &data)
 
 #if defined(CHICONY_006)
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_CHICONY;
-#elif defined(FX1)
-    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_FX1;
+#elif defined(FXTOF1)
+    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_FXTOF1;
 #else
     m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
 #endif
@@ -555,18 +555,20 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
         } else if (m_implData->frameDetails.type == "ir_only") {
             memcpy(buffer + (width * height) / 2, pdata, buf.bytesused);
         } else {
-			uint32_t j = 0, j1 = width*height/2;
-			for(uint32_t i = 0; i < height; i+=2) {
-				memcpy(buffer + j, pdata + i*width*2, width*2);
-				j+= width;
-				memcpy(buffer + j1, pdata + (i+1)*width*2, width*2);
-				j1+= width;
-			}
-			for(uint32_t i = 0; i < width*height; i += 2) {
-				buffer[i] = ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
-				buffer[i+1] = ((buffer[i+1] & 0x00FF) << 4) | ((buffer[i + 1]) & 0xF000) >> 12;
-			}
-		}
+            uint32_t j = 0, j1 = width * height / 2;
+            for (uint32_t i = 0; i < height; i += 2) {
+                memcpy(buffer + j, pdata + i * width * 2, width * 2);
+                j += width;
+                memcpy(buffer + j1, pdata + (i + 1) * width * 2, width * 2);
+                j1 += width;
+            }
+            for (uint32_t i = 0; i < width * height; i += 2) {
+                buffer[i] =
+                    ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
+                buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
+                                ((buffer[i + 1]) & 0xF000) >> 12;
+            }
+        }
     } else {
         // clang-format off
         uint16_t *depthPtr = buffer;
@@ -729,8 +731,8 @@ aditof::Status LocalDevice::readAfeTemp(float &temperature) {
         temp_sensor_close(&tdev);
     } else if ((m_deviceDetails.sensorType ==
                 aditof::SensorType::SENSOR_CHICONY) ||
-			   (m_deviceDetails.sensorType ==
-                aditof::SensorType::SENSOR_FX1)) {
+               (m_deviceDetails.sensorType ==
+                aditof::SensorType::SENSOR_FXTOF1)) {
         int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
@@ -767,7 +769,7 @@ aditof::Status LocalDevice::readLaserTemp(float &temperature) {
     } else if ((m_deviceDetails.sensorType ==
                 aditof::SensorType::SENSOR_CHICONY) ||
                (m_deviceDetails.sensorType ==
-                aditof::SensorType::SENSOR_FX1)) {
+                aditof::SensorType::SENSOR_FXTOF1)) {
         int fd = ::open(TEMP_SENSOR_DEV_PATH, O_RDONLY);
         if (fd <= 0) {
             LOG(WARNING) << "Temp sensor open error";
