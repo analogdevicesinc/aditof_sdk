@@ -29,22 +29,22 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef LOCAL_DEVICE_H
-#define LOCAL_DEVICE_H
+#ifndef ADDI9036_H
+#define ADDI9036_H
 
+#include "aditof/depth_sensor_interface.h"
 #include "aditof/device_construction_data.h"
-#include "aditof/device_interface.h"
 
 #include <memory>
 
 struct v4l2_buffer;
 
-class LocalDevice : public aditof::DeviceInterface {
+class Addi9036Sensor : public aditof::DepthSensorInterface {
   public:
-    LocalDevice(const aditof::DeviceConstructionData &data);
-    ~LocalDevice();
+    Addi9036Sensor(const aditof::DeviceConstructionData &data);
+    ~Addi9036Sensor();
 
-  public: // implements DeviceInterface
+  public: // implements DepthSensorInterface
     virtual aditof::Status open();
     virtual aditof::Status start();
     virtual aditof::Status stop();
@@ -60,7 +60,7 @@ class LocalDevice : public aditof::DeviceInterface {
                                              size_t length);
     virtual aditof::Status readAfeTemp(float &temperature);
     virtual aditof::Status readLaserTemp(float &temperature);
-    virtual aditof::Status getDetails(aditof::DeviceDetails &details) const;
+    virtual aditof::Status getDetails(aditof::SensorDetails &details) const;
     virtual aditof::Status getHandle(void **handle) override;
 
   public:
@@ -75,9 +75,9 @@ class LocalDevice : public aditof::DeviceInterface {
 
   private:
     struct ImplData;
-    aditof::DeviceDetails m_deviceDetails;
+    aditof::SensorDetails m_sensorDetails;
     aditof::DeviceConstructionData m_devData;
     std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // LOCAL_DEVICE_H
+#endif // ADDI9036_H
