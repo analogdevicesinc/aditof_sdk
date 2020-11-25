@@ -29,18 +29,18 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef ETHERNET_EEPROM_H
-#define ETHERNET_EEPROM_H
+#ifndef NETWORK_STORAGE_H
+#define NETWORK_STORAGE_H
 
-#include "aditof/eeprom_interface.h"
+#include "aditof/storage_interface.h"
 
 #include <memory>
 
-class EthernetEeprom : public aditof::EepromInterface {
+class NetworkStorage : public aditof::StorageInterface {
   public:
-    EthernetEeprom();
+    NetworkStorage();
 
-  public: // implements EepromInterface
+  public: // implements StorageInterface
     virtual aditof::Status open(void *handle, const std::string &name,
                                 const std::string &driver_path) override;
     virtual aditof::Status read(const uint32_t address, uint8_t *data,
@@ -55,4 +55,4 @@ class EthernetEeprom : public aditof::EepromInterface {
     std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // ETHERNET_EEPROM_H
+#endif // NETWORK_STORAGE_H
