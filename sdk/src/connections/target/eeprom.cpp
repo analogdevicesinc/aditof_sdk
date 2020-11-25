@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "local_eeprom.h"
+#include "connections/target/eeprom.h"
 #include "i2c_common.h"
 
 #include <errno.h>
@@ -42,16 +42,16 @@
 
 using namespace aditof;
 
-struct LocalEeprom::ImplData {
+struct Eeprom::ImplData {
     eeprom eepromDev;
     std::string name;
     std::string driverPath;
 };
 
-LocalEeprom::LocalEeprom() : m_implData(new ImplData) {}
+Eeprom::Eeprom() : m_implData(new ImplData) {}
 
-Status LocalEeprom::open(void *, const std::string &name,
-                         const std::string &driver_path) {
+Status Eeprom::open(void *, const std::string &name,
+                    const std::string &driver_path) {
     eeprom *e = &m_implData->eepromDev;
 
     e->fd = fopen(driver_path.c_str(), "w+");
@@ -75,8 +75,8 @@ Status LocalEeprom::open(void *, const std::string &name,
     return Status::OK;
 }
 
-Status LocalEeprom::read(const uint32_t address, uint8_t *data,
-                         const size_t bytesCount) {
+Status Eeprom::read(const uint32_t address, uint8_t *data,
+                    const size_t bytesCount) {
     auto fd = m_implData->eepromDev.fd;
 
     if (!fd) {
@@ -97,8 +97,8 @@ Status LocalEeprom::read(const uint32_t address, uint8_t *data,
     return Status::OK;
 }
 
-Status LocalEeprom::write(const uint32_t address, const uint8_t *data,
-                          const size_t bytesCount) {
+Status Eeprom::write(const uint32_t address, const uint8_t *data,
+                     const size_t bytesCount) {
     auto fd = m_implData->eepromDev.fd;
 
     if (!fd) {
@@ -119,7 +119,7 @@ Status LocalEeprom::write(const uint32_t address, const uint8_t *data,
     return Status::OK;
 }
 
-Status LocalEeprom::close() {
+Status Eeprom::close() {
     if (m_implData->eepromDev.fd) {
         fclose(m_implData->eepromDev.fd);
         m_implData->eepromDev.fd = nullptr;
@@ -128,7 +128,7 @@ Status LocalEeprom::close() {
     return Status::OK;
 }
 
-Status LocalEeprom::getName(std::string &name) {
+Status Eeprom::getName(std::string &name) {
     name = m_implData->name;
     return Status::OK;
 }
