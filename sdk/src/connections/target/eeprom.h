@@ -29,36 +29,34 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* This is an empty implementation and it's purpose is to give the LocalEeprom
- * a default implementation on platforms where it is not used (Windows, Linux,
- * MacOS).
- */
+#ifndef EEPROM_H
+#define EEPROM_H
 
-#include "local_eeprom.h"
+#include "aditof/storage_interface.h"
 #include <aditof/eeprom_construction_data.h>
+#include <memory>
 
-using namespace aditof;
+namespace aditof {
 
-struct LocalEeprom::ImplData {};
+class Eeprom : public StorageInterface {
+  public:
+    Eeprom();
 
-LocalEeprom::LocalEeprom() {}
+    // Implements StorageInterface
+    virtual aditof::Status open(void *handle, const std::string &name,
+                                const std::string &driver_path) override;
+    virtual aditof::Status read(const uint32_t address, uint8_t *data,
+                                const size_t bytesCount) override;
+    virtual aditof::Status write(const uint32_t address, const uint8_t *data,
+                                 const size_t bytesCount) override;
+    virtual aditof::Status close() override;
+    virtual aditof::Status getName(std::string &name) override;
 
-aditof::Status LocalEeprom::open(void *, const std::string &,
-                                 const std::string &) {
-    return Status::UNAVAILABLE;
-}
+  private:
+    struct ImplData;
+    std::unique_ptr<ImplData> m_implData;
+};
 
-aditof::Status LocalEeprom::read(const uint32_t, uint8_t *, const size_t) {
-    return Status::UNAVAILABLE;
-}
+} // namespace aditof
 
-aditof::Status LocalEeprom::write(const uint32_t, const uint8_t *,
-                                  const size_t) {
-    return Status::UNAVAILABLE;
-}
-
-aditof::Status LocalEeprom::close() { return Status::UNAVAILABLE; }
-
-aditof::Status LocalEeprom::getName(std::string &name) {
-    return Status::UNAVAILABLE;
-}
+#endif /* EEPROM_H */
