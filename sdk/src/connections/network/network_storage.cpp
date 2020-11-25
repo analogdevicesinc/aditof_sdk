@@ -29,22 +29,22 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ethernet_eeprom.h"
-#include "network.h"
+#include "connections/network/network_storage.h"
+#include "connections/network/network.h"
 
 #include <glog/logging.h>
 
 using namespace aditof;
 
-struct EthernetEeprom::ImplData {
+struct NetworkStorage::ImplData {
     EthernetHandle *handle;
     std::string name;
     std::string driverPath;
 };
 
-EthernetEeprom::EthernetEeprom() : m_implData(new EthernetEeprom::ImplData) {}
+NetworkStorage::NetworkStorage() : m_implData(new NetworkStorage::ImplData) {}
 
-Status EthernetEeprom::open(void *handle, const std::string &name,
+Status NetworkStorage::open(void *handle, const std::string &name,
                             const std::string &driver_path) {
     if (!handle) {
         LOG(ERROR) << "Invalid handle";
@@ -89,7 +89,7 @@ Status EthernetEeprom::open(void *handle, const std::string &name,
     return status;
 }
 
-Status EthernetEeprom::read(const uint32_t address, uint8_t *data,
+Status NetworkStorage::read(const uint32_t address, uint8_t *data,
                             const size_t bytesCount) {
     Network *net = m_implData->handle->net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
@@ -133,7 +133,7 @@ Status EthernetEeprom::read(const uint32_t address, uint8_t *data,
     return status;
 }
 
-Status EthernetEeprom::write(const uint32_t address, const uint8_t *data,
+Status NetworkStorage::write(const uint32_t address, const uint8_t *data,
                              const size_t bytesCount) {
     Network *net = m_implData->handle->net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
@@ -173,7 +173,7 @@ Status EthernetEeprom::write(const uint32_t address, const uint8_t *data,
     return status;
 }
 
-Status EthernetEeprom::close() {
+Status NetworkStorage::close() {
     Network *net = m_implData->handle->net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
@@ -214,7 +214,7 @@ Status EthernetEeprom::close() {
     return status;
 }
 
-Status EthernetEeprom::getName(std::string &name) {
+Status NetworkStorage::getName(std::string &name) {
     name = m_implData->name;
     return Status::OK;
 }
