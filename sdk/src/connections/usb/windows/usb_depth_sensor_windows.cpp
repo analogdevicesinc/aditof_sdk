@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "usb_device.h"
+#include "connections/usb/usb_depth_sensor.h"
 #include "usb_windows_utils.h"
 
 #include "device_utils.h"
@@ -45,7 +45,7 @@ struct CalibrationData {
     uint16_t *cache;
 };
 
-struct UsbDevice::ImplData {
+struct UsbDepthSensor::ImplData {
     UsbHandle handle;
     bool opened;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
@@ -219,14 +219,15 @@ static void destroyGraph(IGraphBuilder *pGraph) {
     return;
 }
 
-UsbDevice::UsbDevice(const aditof::DeviceConstructionData &data)
-    : m_devData(data), m_implData(new UsbDevice::ImplData) {
+UsbDepthSensor::UsbDepthSensor(const aditof::DeviceConstructionData &data)
+    : m_devData(data), m_implData(new UsbDepthSensor::ImplData) {
     m_implData->handle.pMediaEvent = nullptr;
     m_implData->opened = false;
-    m_deviceDetails.sensorType = aditof::SensorType::SENSOR_96TOF1;
+    // TO DO: The sensor type should come from target (throug UVC gadget)
+    m_sensorDetails.sensorType = aditof::SensorType::SENSOR_ADDI9036;
 }
 
-UsbDevice::~UsbDevice() {
+UsbDepthSensor::~UsbDepthSensor() {
     HRESULT HR = NOERROR;
 
     // Check to see if the graph is running, if so stop it.
@@ -305,7 +306,7 @@ UsbDevice::~UsbDevice() {
     }
 }
 
-aditof::Status UsbDevice::open() {
+aditof::Status UsbDepthSensor::open() {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -484,7 +485,7 @@ aditof::Status UsbDevice::open() {
     return status;
 }
 
-aditof::Status UsbDevice::start() {
+aditof::Status UsbDepthSensor::start() {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -493,7 +494,7 @@ aditof::Status UsbDevice::start() {
     return status;
 }
 
-aditof::Status UsbDevice::stop() {
+aditof::Status UsbDepthSensor::stop() {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -508,8 +509,8 @@ aditof::Status UsbDevice::stop() {
     return status;
 }
 
-aditof::Status
-UsbDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
+aditof::Status UsbDepthSensor::getAvailableFrameTypes(
+    std::vector<aditof::FrameDetails> &types) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -533,7 +534,8 @@ UsbDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     return status;
 }
 
-aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
+aditof::Status
+UsbDepthSensor::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -559,7 +561,7 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     return status;
 }
 
-aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
+aditof::Status UsbDepthSensor::program(const uint8_t *firmware, size_t size) {
     using namespace aditof;
 
     ExUnitHandle handle;
@@ -612,7 +614,7 @@ aditof::Status UsbDevice::program(const uint8_t *firmware, size_t size) {
     return Status::OK;
 }
 
-aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
+aditof::Status UsbDepthSensor::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -662,8 +664,8 @@ aditof::Status UsbDevice::getFrame(uint16_t *buffer) {
     return retryCount >= 1000 ? Status::GENERIC_ERROR : status;
 }
 
-aditof::Status UsbDevice::readAfeRegisters(const uint16_t *address,
-                                           uint16_t *data, size_t length) {
+aditof::Status UsbDepthSensor::readAfeRegisters(const uint16_t *address,
+                                                uint16_t *data, size_t length) {
     using namespace aditof;
 
     ExUnitHandle handle;
@@ -701,9 +703,9 @@ aditof::Status UsbDevice::readAfeRegisters(const uint16_t *address,
     return Status::OK;
 }
 
-aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
-                                            const uint16_t *data,
-                                            size_t length) {
+aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
+                                                 const uint16_t *data,
+                                                 size_t length) {
     using namespace aditof;
 
     ExUnitHandle handle;
@@ -761,7 +763,7 @@ aditof::Status UsbDevice::writeAfeRegisters(const uint16_t *address,
     return Status::OK;
 }
 
-aditof::Status UsbDevice::readAfeTemp(float &temperature) {
+aditof::Status UsbDepthSensor::readAfeTemp(float &temperature) {
     using namespace aditof;
 
     ExUnitHandle handle;
@@ -788,7 +790,7 @@ aditof::Status UsbDevice::readAfeTemp(float &temperature) {
     return Status::OK;
 }
 
-aditof::Status UsbDevice::readLaserTemp(float &temperature) {
+aditof::Status UsbDepthSensor::readLaserTemp(float &temperature) {
     using namespace aditof;
 
     ExUnitHandle handle;
@@ -815,12 +817,13 @@ aditof::Status UsbDevice::readLaserTemp(float &temperature) {
     return Status::OK;
 }
 
-aditof::Status UsbDevice::getDetails(aditof::DeviceDetails &details) const {
-    details = m_deviceDetails;
+aditof::Status
+UsbDepthSensor::getDetails(aditof::SensorDetails &details) const {
+    details = m_sensorDetails;
     return aditof::Status::OK;
 }
 
-aditof::Status UsbDevice::getHandle(void **handle) {
+aditof::Status UsbDepthSensor::getHandle(void **handle) {
     if (m_implData->opened) {
         *handle = &m_implData->handle;
         return aditof::Status::OK;
