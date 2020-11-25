@@ -20,7 +20,7 @@ file(GLOB HEADERS
     ${CMAKE_SOURCE_DIR}/sdk/include/aditof/*.h
 )
 
-set(TARGET_STRING "connections/mipi")
+set(TARGET_STRING "connections/target")
 
 if( WIN32 )
         set(OS_SPECIFIC_DIR "connections/usb/windows")
