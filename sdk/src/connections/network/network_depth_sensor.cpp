@@ -29,9 +29,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "ethernet_device.h"
+#include "network_depth_sensor.h"
+#include "connections/network/network.h"
 #include "device_utils.h"
-#include "network.h"
 
 #include <glog/logging.h>
 #include <unordered_map>
@@ -42,7 +42,7 @@ struct CalibrationData {
     float offset;
     uint16_t *cache;
 };
-struct EthernetDevice::ImplData {
+struct NetworkDepthSensor::ImplData {
     EthernetHandle handle;
     std::string ip;
     aditof::FrameDetails frameDetails_cache;
@@ -50,8 +50,9 @@ struct EthernetDevice::ImplData {
     bool opened;
 };
 
-EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
-    : m_implData(new EthernetDevice::ImplData) {
+NetworkDepthSensor::NetworkDepthSensor(
+    const aditof::DeviceConstructionData &data)
+    : m_implData(new NetworkDepthSensor::ImplData) {
 
     Network *net = new Network();
     m_implData->handle.net = net;
@@ -92,12 +93,12 @@ EthernetDevice::EthernetDevice(const aditof::DeviceConstructionData &data)
         LOG(WARNING) << "API execution on Target Failed with error: "
                      << static_cast<int>(status);
     } else {
-        m_deviceDetails.sensorType =
+        m_sensorDetails.sensorType =
             static_cast<aditof::SensorType>(net->recv_buff.sensor_type());
     }
 }
 
-EthernetDevice::~EthernetDevice() {
+NetworkDepthSensor::~NetworkDepthSensor() {
     Network *net = m_implData->handle.net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
@@ -125,7 +126,7 @@ EthernetDevice::~EthernetDevice() {
     }
 }
 
-aditof::Status EthernetDevice::open() {
+aditof::Status NetworkDepthSensor::open() {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -164,7 +165,7 @@ aditof::Status EthernetDevice::open() {
     return status;
 }
 
-aditof::Status EthernetDevice::start() {
+aditof::Status NetworkDepthSensor::start() {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -199,7 +200,7 @@ aditof::Status EthernetDevice::start() {
     return status;
 }
 
-aditof::Status EthernetDevice::stop() {
+aditof::Status NetworkDepthSensor::stop() {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -236,7 +237,7 @@ aditof::Status EthernetDevice::stop() {
     return status;
 }
 
-aditof::Status EthernetDevice::getAvailableFrameTypes(
+aditof::Status NetworkDepthSensor::getAvailableFrameTypes(
     std::vector<aditof::FrameDetails> &types) {
     using namespace aditof;
 
@@ -289,7 +290,7 @@ aditof::Status EthernetDevice::getAvailableFrameTypes(
 }
 
 aditof::Status
-EthernetDevice::setFrameType(const aditof::FrameDetails &details) {
+NetworkDepthSensor::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -331,7 +332,8 @@ EthernetDevice::setFrameType(const aditof::FrameDetails &details) {
     return status;
 }
 
-aditof::Status EthernetDevice::program(const uint8_t *firmware, size_t size) {
+aditof::Status NetworkDepthSensor::program(const uint8_t *firmware,
+                                           size_t size) {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -368,7 +370,7 @@ aditof::Status EthernetDevice::program(const uint8_t *firmware, size_t size) {
     return status;
 }
 
-aditof::Status EthernetDevice::getFrame(uint16_t *buffer) {
+aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer) {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -416,8 +418,9 @@ aditof::Status EthernetDevice::getFrame(uint16_t *buffer) {
     return status;
 }
 
-aditof::Status EthernetDevice::readAfeRegisters(const uint16_t *address,
-                                                uint16_t *data, size_t length) {
+aditof::Status NetworkDepthSensor::readAfeRegisters(const uint16_t *address,
+                                                    uint16_t *data,
+                                                    size_t length) {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -460,9 +463,9 @@ aditof::Status EthernetDevice::readAfeRegisters(const uint16_t *address,
     return status;
 }
 
-aditof::Status EthernetDevice::writeAfeRegisters(const uint16_t *address,
-                                                 const uint16_t *data,
-                                                 size_t length) {
+aditof::Status NetworkDepthSensor::writeAfeRegisters(const uint16_t *address,
+                                                     const uint16_t *data,
+                                                     size_t length) {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -500,7 +503,8 @@ aditof::Status EthernetDevice::writeAfeRegisters(const uint16_t *address,
     return status;
 }
 
-aditof::Status EthernetDevice::readAfeTemp(float &temperature) {
+// TO DO: Move this to temperature sensor
+aditof::Status NetworkDepthSensor::readAfeTemp(float &temperature) {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -539,7 +543,8 @@ aditof::Status EthernetDevice::readAfeTemp(float &temperature) {
     return status;
 }
 
-aditof::Status EthernetDevice::readLaserTemp(float &temperature) {
+// TO DO: Move this to temperature sensor
+aditof::Status NetworkDepthSensor::readLaserTemp(float &temperature) {
     using namespace aditof;
 
     Network *net = m_implData->handle.net;
@@ -579,13 +584,13 @@ aditof::Status EthernetDevice::readLaserTemp(float &temperature) {
 }
 
 aditof::Status
-EthernetDevice::getDetails(aditof::DeviceDetails &details) const {
-    details = m_deviceDetails;
+NetworkDepthSensor::getDetails(aditof::SensorDetails &details) const {
+    details = m_sensorDetails;
 
     return aditof::Status::OK;
 }
 
-aditof::Status EthernetDevice::getHandle(void **handle) {
+aditof::Status NetworkDepthSensor::getHandle(void **handle) {
     if (m_implData->opened) {
         *handle = &m_implData->handle;
         return aditof::Status::OK;
