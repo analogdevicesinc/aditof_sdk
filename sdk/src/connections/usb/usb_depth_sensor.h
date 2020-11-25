@@ -29,20 +29,20 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef USB_DEVICE_H
-#define USB_DEVICE_H
+#ifndef USB_DEPTH_SENSOR_H
+#define USB_DEPTH_SENSOR_H
 
+#include "aditof/depth_sensor_interface.h"
 #include "aditof/device_construction_data.h"
-#include "aditof/device_interface.h"
 
 #include <memory>
 
-class UsbDevice : public aditof::DeviceInterface {
+class UsbDepthSensor : public aditof::DepthSensorInterface {
   public:
-    UsbDevice(const aditof::DeviceConstructionData &data);
-    ~UsbDevice();
+    UsbDepthSensor(const aditof::DeviceConstructionData &data);
+    ~UsbDepthSensor();
 
-  public: // implements DeviceInterface
+  public: // implements DepthSensorInterface
     virtual aditof::Status open();
     virtual aditof::Status start();
     virtual aditof::Status stop();
@@ -58,15 +58,15 @@ class UsbDevice : public aditof::DeviceInterface {
                                              size_t length);
     virtual aditof::Status readAfeTemp(float &temperature);
     virtual aditof::Status readLaserTemp(float &temperature);
-    virtual aditof::Status getDetails(aditof::DeviceDetails &details) const;
+    virtual aditof::Status getDetails(aditof::SensorDetails &details) const;
     virtual aditof::Status getHandle(void **handle) override;
 
   private:
     struct ImplData;
 
-    aditof::DeviceDetails m_deviceDetails;
+    aditof::SensorDetails m_sensorDetails;
     aditof::DeviceConstructionData m_devData;
     std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // USB_DEVICE_H
+#endif // USB_DEPTH_SENSOR_H
