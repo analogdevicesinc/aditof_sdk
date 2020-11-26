@@ -44,8 +44,8 @@ namespace aditof {
 
 class Frame;
 class CameraSpecifics;
-class DeviceInterface;
-class EepromInterface;
+class DepthSensorInterface;
+class StorageInterface;
 
 /**
  * @class Camera
@@ -159,12 +159,11 @@ class SDK_API Camera {
                               std::string &value) const = 0;
 
     /**
-     * @brief Gets the device of the camera. The device is ownen by the camera,
-     * therefore when the camera gets destroy the reference to the device will
-     * not be valid anymore.
-     * @return std::shared_ptr<DeviceInterface>
+     * @brief Gets the sensor of the camera. This gives direct access
+     * to low level configuration of the camera sensor.
+     * @return std::shared_ptr<DepthSensorInterface>
      */
-    virtual std::shared_ptr<DeviceInterface> getDevice() = 0;
+    virtual std::shared_ptr<DepthSensorInterface> getSensor() = 0;
 
     /**
      * @brief Gets the eeprom(s) used internally by the camera. This gives
@@ -173,7 +172,7 @@ class SDK_API Camera {
      * @return Status
      */
     virtual Status
-    getEeproms(std::vector<std::shared_ptr<EepromInterface>> &eeproms) = 0;
+    getEeproms(std::vector<std::shared_ptr<StorageInterface>> &eeproms) = 0;
 };
 
 } // namespace aditof
