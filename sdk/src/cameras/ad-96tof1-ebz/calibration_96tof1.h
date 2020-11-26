@@ -81,7 +81,7 @@ struct packet_struct {
 };
 
 namespace aditof {
-class EepromInterface;
+class StorageInterface;
 }
 
 class Calibration96Tof1 {
@@ -90,8 +90,8 @@ class Calibration96Tof1 {
     ~Calibration96Tof1();
 
   public:
-    aditof::Status saveCalMap(aditof::EepromInterface &eeprom);
-    aditof::Status readCalMap(aditof::EepromInterface &eeprom);
+    aditof::Status saveCalMap(std::shared_ptr<aditof::StorageInterface> eeprom);
+    aditof::Status readCalMap(std::shared_ptr<aditof::StorageInterface> eeprom);
     aditof::Status displayCalMap() const;
     aditof::Status getAfeFirmware(const std::string &mode,
                                   std::vector<uint16_t> &data) const;

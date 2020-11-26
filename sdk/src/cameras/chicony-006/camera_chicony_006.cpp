@@ -31,9 +31,7 @@
  */
 #include "camera_chicony_006.h"
 
-#include <aditof/device_interface.h>
 #include <aditof/eeprom_factory.h>
-#include <aditof/eeprom_interface.h>
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
 
@@ -61,8 +59,9 @@ static const std::string skCustomMode = "custom";
 // The driver name of the EEPROM that belongs to this camera
 static const std::string skEepromName = "24c1024";
 
-CameraChicony::CameraChicony(std::unique_ptr<aditof::DeviceInterface> device,
-                             const aditof::DeviceConstructionData &data)
+CameraChicony::CameraChicony(
+    std::unique_ptr<aditof::DepthSensorInterface> device,
+    const aditof::DeviceConstructionData &data)
     : m_devData(data), m_device(std::move(device)),
       m_availableControls({"noise_reduction_threshold", "ir_gamma_correction"}),
       m_devStarted(false), m_eepromInitialized(false) {}
@@ -329,7 +328,7 @@ aditof::Status CameraChicony::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<aditof::DeviceInterface> CameraChicony::getDevice() {
+std::shared_ptr<aditof::DepthSensorInterface> CameraChicony::getDevice() {
     return m_device;
 }
 
