@@ -31,11 +31,12 @@
  */
 #include <aditof/camera.h>
 #include <aditof/camera_definitions.h>
-#include <aditof/device_interface.h>
-#include <aditof/eeprom_interface.h>
+#include <aditof/depth_sensor_interface.h>
 #include <aditof/frame.h>
 #include <aditof/frame_definitions.h>
 #include <aditof/frame_operations.h>
 #include <aditof/status_definitions.h>
+#include <aditof/storage_interface.h>
 #include <aditof/system.h>
+#include <aditof/temperature_sensor_interface.h>
 #include <aditof/version.h>
