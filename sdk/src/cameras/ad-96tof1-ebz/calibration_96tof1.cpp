@@ -30,8 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "calibration_96tof1.h"
+#include "aditof/storage_interface.h"
 
-#include <aditof/eeprom_interface.h>
 #include <glog/logging.h>
 #include <math.h>
 
@@ -112,9 +112,10 @@ aditof::Status Calibration96Tof1::displayCalMap() const {
 //! SaveCalMap - Save the entire calibration map
 /*!
 SaveCalMap - Saves the entire calibration map as binary to a file.
-\eeprom - Reference to an eeprom instance
+\eeprom - Pointer to an eeprom instance
 */
-aditof::Status Calibration96Tof1::saveCalMap(aditof::EepromInterface &eeprom) {
+aditof::Status Calibration96Tof1::saveCalMap(
+    std::shared_ptr<aditof::StorageInterface> eeprom) {
     using namespace aditof;
 
     std::vector<float> data;
@@ -136,8 +137,8 @@ aditof::Status Calibration96Tof1::saveCalMap(aditof::EepromInterface &eeprom) {
     }
 
     float size = static_cast<float>(data.size() * sizeof(uint32_t));
-    eeprom.write((uint32_t)0, (uint8_t *)&size, (size_t)4);
-    eeprom.write((uint32_t)4, (uint8_t *)data.data(), (size_t)size);
+    eeprom->write((uint32_t)0, (uint8_t *)&size, (size_t)4);
+    eeprom->write((uint32_t)4, (uint8_t *)data.data(), (size_t)size);
 
     return Status::OK;
 }
@@ -145,9 +146,10 @@ aditof::Status Calibration96Tof1::saveCalMap(aditof::EepromInterface &eeprom) {
 //! ReadCalMap - Read the entire calibration map
 /*!
 ReadCalMap - Read the entire calibration map from a binary file
-\eeprom - Reference to an eeprom instance
+\eeprom - Pointer to an eeprom instance
 */
-aditof::Status Calibration96Tof1::readCalMap(aditof::EepromInterface &eeprom) {
+aditof::Status Calibration96Tof1::readCalMap(
+    std::shared_ptr<aditof::StorageInterface> eeprom) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -156,9 +158,9 @@ aditof::Status Calibration96Tof1::readCalMap(aditof::EepromInterface &eeprom) {
     uint32_t j = 0;
     float key;
 
-    eeprom.write(EEPROM_SIZE - 5, (uint8_t *)&read_size, 4);
+    eeprom->write(EEPROM_SIZE - 5, (uint8_t *)&read_size, 4);
 
-    eeprom.read(0, (uint8_t *)&read_size, 4);
+    eeprom->read(0, (uint8_t *)&read_size, 4);
     LOG(INFO) << "EEPROM calibration data size " << read_size << " bytes";
 
     if (read_size > EEPROM_SIZE) {
@@ -168,7 +170,7 @@ aditof::Status Calibration96Tof1::readCalMap(aditof::EepromInterface &eeprom) {
 
     data = (uint8_t *)malloc((size_t)read_size);
 
-    status = eeprom.read(4, data, (size_t)read_size);
+    status = eeprom->read(4, data, (size_t)read_size);
     if (status != Status::OK) {
         free(data);
         LOG(WARNING) << "Failed to read from eeprom";

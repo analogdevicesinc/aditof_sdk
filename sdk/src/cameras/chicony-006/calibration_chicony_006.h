@@ -32,9 +32,9 @@
 #ifndef CALIBRATION_CHICONY_006_H
 #define CALIBRATION_CHICONY_006_H
 
-#include <aditof/device_interface.h>
-#include <aditof/eeprom_interface.h>
+#include <aditof/depth_sensor_interface.h>
 #include <aditof/status_definitions.h>
+#include <aditof/storage_interface.h>
 #include <iostream>
 #include <list>
 #include <memory>
@@ -47,8 +47,9 @@ class CalibrationChicony006 {
     ~CalibrationChicony006();
 
   public:
-    aditof::Status initialize(std::shared_ptr<aditof::DeviceInterface> device,
-                              std::shared_ptr<aditof::EepromInterface> eeprom);
+    aditof::Status
+    initialize(std::shared_ptr<aditof::DepthSensorInterface> device,
+               std::shared_ptr<aditof::StorageInterface> eeprom);
     aditof::Status close();
     aditof::Status setMode(const std::string &mode);
 
@@ -77,8 +78,8 @@ class CalibrationChicony006 {
     aditof::Status sensorPowerDown();
 
   private:
-    std::shared_ptr<aditof::DeviceInterface> m_device;
-    std::shared_ptr<aditof::EepromInterface> m_eeprom;
+    std::shared_ptr<aditof::DepthSensorInterface> m_device;
+    std::shared_ptr<aditof::StorageInterface> m_eeprom;
 };
 
 #endif /*CALIBRATION_CHICONY_006_H*/
