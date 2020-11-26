@@ -64,7 +64,7 @@ class CameraChicony : public aditof::Camera {
                               const std::string &value);
     aditof::Status getControl(const std::string &control,
                               std::string &value) const;
-    std::shared_ptr<aditof::DeviceInterface> getDevice();
+    std::shared_ptr<aditof::DepthSensorInterface> getDevice();
     aditof::Status
     getEeproms(std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms);
 
@@ -75,8 +75,8 @@ class CameraChicony : public aditof::Camera {
   private:
     aditof::CameraDetails m_details;
     aditof::DeviceConstructionData m_devData;
-    std::shared_ptr<aditof::DeviceInterface> m_device;
-    std::shared_ptr<aditof::EepromInterface> m_eeprom;
+    std::shared_ptr<aditof::DepthSensorInterface> m_device;
+    std::shared_ptr<aditof::StorageInterface> m_eeprom;
     std::vector<std::string> m_availableControls;
     bool m_devStarted;
     bool m_eepromInitialized;

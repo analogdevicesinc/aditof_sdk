@@ -31,8 +31,6 @@
  */
 #include "camera_96tof1.h"
 
-#include <aditof/device_interface.h>
-#include <aditof/eeprom_factory.h>
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
 
@@ -66,9 +64,10 @@ static const std::vector<std::string> availableControls = {
 // The driver name of the EEPROM that belongs to this camera
 static const std::string skEepromName = "24c1024";
 
-Camera96Tof1::Camera96Tof1(std::unique_ptr<aditof::DeviceInterface> device,
-                           const aditof::DeviceConstructionData &data)
-    : m_device(std::move(device)), m_devData(data), m_devStarted(false),
+Camera96Tof1::Camera96Tof1(
+    std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
+    std::shared_ptr<aditof::StorageInterface> eeprom)
+    : m_depthSensor(depthSensor), m_eeprom(eeprom), m_devStarted(false),
       m_eepromInitialized(false), m_availableControls(availableControls),
       m_revision("RevC") {}
 
@@ -84,47 +83,31 @@ aditof::Status Camera96Tof1::initialize() {
 
     LOG(INFO) << "Initializing camera";
 
-    status = m_device->open();
+    status = m_depthSensor->open();
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to open device";
         return status;
     }
 
     void *handle;
-    status = m_device->getHandle(&handle);
+    status = m_depthSensor->getHandle(&handle);
     if (status != Status::OK) {
         LOG(ERROR) << "Failed to obtain the handle";
         return status;
     }
 
     // Initialize EEPROM
-    auto iter = std::find_if(m_devData.eeproms.begin(), m_devData.eeproms.end(),
-                             [](const EepromConstructionData &eData) {
-                                 return eData.driverName == skEepromName;
-                             });
-    if (iter == m_devData.eeproms.end()) {
-        LOG(ERROR)
-            << "No available info about the EEPROM required by the camera";
-        return status;
-    }
-
-    m_eeprom = EepromFactory::buildEeprom(m_devData.connectionType);
-    if (!m_eeprom) {
-        LOG(ERROR) << "Failed to create an Eeprom object";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    const EepromConstructionData &eeprom24c1024Info = *iter;
-    status = m_eeprom->open(handle, eeprom24c1024Info.driverName.c_str(),
-                            eeprom24c1024Info.driverPath.c_str());
+    // TO DO: rework the open() method so that it doesn't take driver paths. They should be provided upon obj construction
+    status = m_eeprom->open(handle, "", "");
     if (status != Status::OK) {
-        LOG(ERROR) << "Failed to open EEPROM with name "
-                   << m_devData.eeproms.back().driverName << " is available";
+        std::string name;
+        m_eeprom->getName(name);
+        LOG(ERROR) << "Failed to open EEPROM with name " << name;
         return status;
     }
     m_eepromInitialized = true;
 
-    status = m_calibration.readCalMap(*m_eeprom);
+    status = m_calibration.readCalMap(m_eeprom);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to read calibration data from eeprom";
         return status;
@@ -145,12 +128,12 @@ aditof::Status Camera96Tof1::initialize() {
 }
 
 aditof::Status Camera96Tof1::start() {
-    // return m_device->start(); // For now we keep the device open all the time
+    // return m_depthSensor->start(); // For now we keep the device open all the time
     return aditof::Status::OK;
 }
 
 aditof::Status Camera96Tof1::stop() {
-    // return m_device->stop(); // For now we keep the device open all the time
+    // return m_depthSensor->stop(); // For now we keep the device open all the time
     return aditof::Status::OK;
 }
 
@@ -188,7 +171,8 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         std::copy(std::istreambuf_iterator<char>(firmwareFile),
                   std::istreambuf_iterator<char>(),
                   std::back_inserter(firmwareData));
-        status = m_device->program(firmwareData.data(), firmwareData.size());
+        status =
+            m_depthSensor->program(firmwareData.data(), firmwareData.size());
         firmwareFile.close();
         m_details.maxDepth = 4095;
         m_details.minDepth = 0;
@@ -219,8 +203,8 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
 
         LOG(INFO) << "Firmware size: " << firmwareData.size() * sizeof(uint16_t)
                   << " bytes";
-        status = m_device->program((uint8_t *)firmwareData.data(),
-                                   2 * firmwareData.size());
+        status = m_depthSensor->program((uint8_t *)firmwareData.data(),
+                                        2 * firmwareData.size());
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to program AFE";
             return Status::UNREACHABLE;
@@ -244,11 +228,11 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
     if (m_details.frameType.type == "depth_only") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
-        m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+        m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     } else if (m_details.frameType.type == "ir_only") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x05, 0x0007, 0x0004};
-        m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+        m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
 
     m_details.mode = mode;
@@ -278,7 +262,7 @@ aditof::Status Camera96Tof1::setFrameType(const std::string &frameType) {
     Status status = Status::OK;
 
     std::vector<FrameDetails> detailsList;
-    status = m_device->getAvailableFrameTypes(detailsList);
+    status = m_depthSensor->getAvailableFrameTypes(detailsList);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get available frame types";
         return status;
@@ -295,7 +279,7 @@ aditof::Status Camera96Tof1::setFrameType(const std::string &frameType) {
     }
 
     if (m_details.frameType != *frameDetailsIt) {
-        status = m_device->setFrameType(*frameDetailsIt);
+        status = m_depthSensor->setFrameType(*frameDetailsIt);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to set frame type";
             return status;
@@ -304,7 +288,7 @@ aditof::Status Camera96Tof1::setFrameType(const std::string &frameType) {
     }
 
     if (!m_devStarted) {
-        status = m_device->start();
+        status = m_depthSensor->start();
         if (status != Status::OK) {
             return status;
         }
@@ -320,7 +304,7 @@ aditof::Status Camera96Tof1::getAvailableFrameTypes(
     Status status = Status::OK;
 
     std::vector<FrameDetails> frameDetailsList;
-    status = m_device->getAvailableFrameTypes(frameDetailsList);
+    status = m_depthSensor->getAvailableFrameTypes(frameDetailsList);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get available frame types";
         return status;
@@ -348,7 +332,7 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
     uint16_t *frameDataLocation;
     frame->getData(FrameDataType::RAW, &frameDataLocation);
 
-    status = m_device->getFrame(frameDataLocation);
+    status = m_depthSensor->getFrame(frameDataLocation);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from device";
         return status;
@@ -377,12 +361,12 @@ aditof::Status Camera96Tof1::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<aditof::DeviceInterface> Camera96Tof1::getDevice() {
-    return m_device;
+std::shared_ptr<aditof::DepthSensorInterface> Camera96Tof1::getSensor() {
+    return m_depthSensor;
 }
 
 aditof::Status Camera96Tof1::getEeproms(
-    std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms) {
+    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms) {
     eeproms.clear();
     eeproms.push_back(m_eeprom);
 
@@ -468,7 +452,7 @@ aditof::Status Camera96Tof1::setNoiseReductionTreshold(uint16_t treshold) {
     afeRegsVal[2] |= treshold;
     m_noiseReductionThreshold = treshold;
 
-    return m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    return m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
 }
 
 aditof::Status Camera96Tof1::setIrGammaCorrection(float gamma) {
@@ -489,11 +473,12 @@ aditof::Status Camera96Tof1::setIrGammaCorrection(float gamma) {
                              y_val[3], y_val[4], y_val[5], y_val[6],
                              y_val[7], y_val[8], 0x0007,   0x0004};
 
-    status = m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 8);
+    status = m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 8);
     if (status != Status::OK) {
         return status;
     }
-    status = m_device->writeAfeRegisters(afeRegsAddr + 8, afeRegsVal + 8, 8);
+    status =
+        m_depthSensor->writeAfeRegisters(afeRegsAddr + 8, afeRegsVal + 8, 8);
     if (status != Status::OK) {
         return status;
     }

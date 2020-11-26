@@ -30,72 +30,116 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "system_impl.h"
-#include "camera_factory.h"
+#include "aditof/sensor_enumerator_factory.h"
+#include "aditof/sensor_enumerator_interface.h"
+#include "camera_96tof1.h"
 
 #include <aditof/camera.h>
-#include <aditof/device_construction_data.h>
-#include <aditof/device_enumerator_factory.h>
-#include <device_enumerator_ethernet.h>
-
+#include <algorithm>
 #include <glog/logging.h>
+
+using namespace aditof;
+
+static const std::string skEeprom_24c1024 = "24c1024";
+
+static std::vector<std::shared_ptr<Camera>>
+buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
+
+    std::vector<std::shared_ptr<Camera>> cameras;
+    std::vector<std::shared_ptr<DepthSensorInterface>> depthSensors;
+    std::vector<std::shared_ptr<StorageInterface>> storages;
+    std::vector<std::shared_ptr<TemperatureSensorInterface>> temperatureSensors;
+
+    enumerator->getDepthSensors(depthSensors);
+    enumerator->getStorages(storages);
+    enumerator->getTemperatureSensors(temperatureSensors);
+
+    for (const auto &dSensor : depthSensors) {
+        SensorDetails dSensorDetails;
+        dSensor->getDetails(dSensorDetails);
+
+        switch (dSensorDetails.sensorType) {
+        case SensorType::SENSOR_ADDI9036: {
+            // Look for EEPROM
+            auto eeprom_iter =
+                std::find_if(storages.begin(), storages.end(),
+                             [](std::shared_ptr<StorageInterface> storage) {
+                                 std::string name;
+                                 storage->getName(name);
+                                 return name == skEeprom_24c1024;
+                             });
+            if (eeprom_iter == storages.end()) {
+                DLOG(INFO)
+                    << "Could not find " << skEeprom_24c1024
+                    << " while looking for storage for camera AD-96TOF1-EBZ";
+                break;
+            }
+            // TO DO: look for temperature sensors
+            // ---
+
+            std::shared_ptr<StorageInterface> eeprom = *eeprom_iter;
+            std::shared_ptr<Camera> camera =
+                std::make_shared<Camera96Tof1>(dSensor, eeprom);
+            cameras.emplace_back(camera);
+            break;
+        } // case SensorType::SENSOR_ADDI9036
+        } // switch (dSensorDetails.sensorType)
+    }
+
+    return cameras;
+}
 
 SystemImpl::SystemImpl() {}
 
 SystemImpl::~SystemImpl() = default;
 
-aditof::Status SystemImpl::initialize() {
-    using namespace aditof;
-    Status status = Status::OK;
-
+Status SystemImpl::initialize() {
     LOG(INFO) << "System initialized";
 
-    return status;
+    return Status::OK;
 }
 
-aditof::Status SystemImpl::getCameraList(
-    std::vector<std::shared_ptr<aditof::Camera>> &cameraList) const {
-    using namespace aditof;
-    Status status = Status::OK;
-
-    auto enumerator = DeviceEnumeratorFactory::buildDeviceEnumerator();
-    std::vector<aditof::DeviceConstructionData> devsData;
-    enumerator->findDevices(devsData);
-
-    for (const auto &data : devsData) {
-        std::shared_ptr<Camera> camera = CameraFactory::buildCamera(data);
-        cameraList.emplace_back(camera);
-    }
-
-    return status;
-}
-
-aditof::Status SystemImpl::getCameraListAtIp(
-    std::vector<std::shared_ptr<aditof::Camera>> &cameraList,
-    const std::string &ip) const {
-    using namespace aditof;
-    Status status = Status::OK;
+Status SystemImpl::getCameraList(
+    std::vector<std::shared_ptr<Camera>> &cameraList) const {
 
     cameraList.clear();
 
-    std::vector<aditof::DeviceConstructionData> devsData;
-    auto ethernetEnumerator =
-        DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(ip);
-    if (!ethernetEnumerator) {
+    // At first, assume SDK is running on target
+    std::unique_ptr<SensorEnumeratorInterface> sensorEnumerator =
+        SensorEnumeratorFactory::buildTargetSensorEnumerator();
+    if (!sensorEnumerator) {
+        DLOG(INFO) << "Could not create TargetSensorEnumerator because SDK is "
+                      "not running on target.";
+        // Assume SDK is running on remote
+        sensorEnumerator = SensorEnumeratorFactory::buildUsbSensorEnumerator();
+        if (!sensorEnumerator) {
+            LOG(ERROR) << "Failed to create UsbSensorEnumerator";
+            return Status::GENERIC_ERROR;
+        }
+    }
+    sensorEnumerator->searchSensors();
+    cameraList = buildCameras(std::move(sensorEnumerator));
+
+    return Status::OK;
+}
+
+Status
+SystemImpl::getCameraListAtIp(std::vector<std::shared_ptr<Camera>> &cameraList,
+                              const std::string &ip) const {
+
+    cameraList.clear();
+
+    std::unique_ptr<SensorEnumeratorInterface> sensorEnumerator =
+        SensorEnumeratorFactory::buildNetworkSensorEnumerator(ip);
+
+    if (!sensorEnumerator) {
         LOG(ERROR) << "Network interface is not enabled."
                       " Please rebuild the SDK "
                       "with the option WITH_NETWORK=on";
         return Status::GENERIC_ERROR;
     }
-    status = ethernetEnumerator->findDevices(devsData);
-    if (status != Status::OK) {
-        LOG(WARNING) << "Failed to get find devices on target with ip: " << ip;
-        return status;
-    }
-
-    for (const auto &data : devsData) {
-        std::shared_ptr<Camera> camera = CameraFactory::buildCamera(data);
-        cameraList.emplace_back(camera);
-    }
+    sensorEnumerator->searchSensors();
+    cameraList = buildCameras(std::move(sensorEnumerator));
 
     return Status::OK;
 }
