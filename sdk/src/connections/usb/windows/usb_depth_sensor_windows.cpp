@@ -219,12 +219,14 @@ static void destroyGraph(IGraphBuilder *pGraph) {
     return;
 }
 
-UsbDepthSensor::UsbDepthSensor(const aditof::DeviceConstructionData &data)
-    : m_devData(data), m_implData(new UsbDepthSensor::ImplData) {
+UsbDepthSensor::UsbDepthSensor(aditof::SensorType sensorType,
+                               const std::string &driverPath)
+    : m_driverPath(driverPath), m_implData(new UsbDepthSensor::ImplData) {
     m_implData->handle.pMediaEvent = nullptr;
     m_implData->opened = false;
-    // TO DO: The sensor type should come from target (throug UVC gadget)
-    m_sensorDetails.sensorType = aditof::SensorType::SENSOR_ADDI9036;
+
+    m_sensorDetails.sensorType = sensorType;
+    m_sensorDetails.connectionType = aditof::ConnectionType::USB;
 }
 
 UsbDepthSensor::~UsbDepthSensor() {

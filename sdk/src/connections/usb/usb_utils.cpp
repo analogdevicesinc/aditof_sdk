@@ -36,18 +36,29 @@
 using namespace std;
 using namespace aditof;
 
-void UsbUtils::parseSensorTokens(const std::vector<std::string> &tokens,
-                                 DeviceConstructionData &data) {
+int UsbUtils::getDepthSensoType(const std::vector<std::string> &tokens) {
+    for (const auto &t : tokens) {
+        vector<string> keyValueStr;
+        Utils::splitIntoTokens(t, '=', keyValueStr);
+        if (keyValueStr[0] == "DEPTH_SENSOR_TYPE") {
+            return std::stoi(keyValueStr[1]);
+        }
+    }
+
+    return -1;
+}
+
+std::vector<std::string>
+UsbUtils::getStorageNames(const std::vector<std::string> &tokens) {
+    vector<string> names;
+
     for (const auto &t : tokens) {
         vector<string> keyValueStr;
         Utils::splitIntoTokens(t, '=', keyValueStr);
         if (keyValueStr[0] == "EEPROM_NAME") {
-            EepromConstructionData ecd;
-            ecd.driverName = keyValueStr[1];
-            data.eeproms.push_back(ecd);
-        } else if (keyValueStr[0] == "EEPROM_PATH") {
-            auto &ecd = data.eeproms.back();
-            ecd.driverPath = keyValueStr[1];
+            names.emplace_back(keyValueStr[1]);
         }
     }
+
+    return names;
 }

@@ -32,21 +32,27 @@
 #ifndef USB_UTILS_H
 #define USB_UTILS_H
 
-#include "aditof/device_construction_data.h"
-
 #include <string>
 #include <vector>
 
 class UsbUtils {
   public:
     /**
-     * @brief Parses sensor tokens which are strings containing a key-value pair
-     * (e.g. "EEPROM_NAME=eeprom1") and adds a new element to the DeviceConstructionData.
+     * @brief Parses sensor tokens which are strings containing a key-value pair and finds
+     * the type of the sensor which can take values starting from 0.
      * @param tokens - The tokens to be parsed.
-     * @param[out] data - The data appended with information extracted from the parsing stage.
+     * @return int
      */
-    static void parseSensorTokens(const std::vector<std::string> &tokens,
-                                  aditof::DeviceConstructionData &data);
+    static int getDepthSensoType(const std::vector<std::string> &tokens);
+
+    /**
+     * @brief Parses sensor tokens which are strings containing a key-value pair
+     * (e.g. "EEPROM_NAME=eeprom1") and returns the names of the storages.
+     * @param tokens - The tokens to be parsed.
+     * return std::vector<std::string>
+     */
+    static std::vector<std::string>
+    getStorageNames(const std::vector<std::string> &tokens);
 };
 
 #endif // USB_UTILS_H

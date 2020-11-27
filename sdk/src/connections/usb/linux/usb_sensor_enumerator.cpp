@@ -31,6 +31,8 @@
  */
 #include "connections/usb/usb_sensor_enumerator.h"
 #include "connections/usb/linux/usb_linux_utils.h"
+#include "connections/usb/usb_depth_sensor.h"
+#include "connections/usb/usb_storage.h"
 #include "connections/usb/usb_utils.h"
 #include "utils.h"
 
@@ -77,22 +79,142 @@ static aditof::Status getAvailableSensors(int fd,
 UsbSensorEnumerator::~UsbSensorEnumerator() = default;
 
 Status UsbSensorEnumerator::searchSensors() {
-    // TO DO: implement this
+    Status status = Status::OK;
 
-    return Status::OK;
+    LOG(INFO) << "Looking for USB connected sensors";
+
+    const char *path = "/dev/";
+    DIR *d;
+
+    d = opendir(path);
+    if (!d) {
+        LOG(WARNING) << "Failed to open dir at path: " << path;
+        return Status::UNREACHABLE;
+    }
+
+    struct dirent *dir;
+    char sset[] = "video";
+    while ((dir = readdir(d)) != nullptr) {
+        if (strspn(sset, (dir->d_name)) != 5) {
+            continue;
+        }
+        string driverPath(path);
+        driverPath += dir->d_name;
+
+        struct stat st;
+        if (-1 == stat(driverPath.c_str(), &st)) {
+            LOG(WARNING) << "Cannot identify '" << driverPath
+                         << "' error: " << errno << "(" << strerror(errno)
+                         << ")";
+            continue;
+        }
+
+        if (!S_ISCHR(st.st_mode)) {
+            LOG(WARNING) << driverPath << " is no device";
+            continue;
+        }
+
+        int fd = open(driverPath.c_str(), O_RDWR | O_NONBLOCK, 0);
+        if (-1 == fd) {
+            LOG(WARNING) << "Cannot open '" << driverPath
+                         << "' error: " << errno << "(" << strerror(errno)
+                         << ")";
+            continue;
+        }
+
+        struct v4l2_capability cap;
+        if (-1 == UsbLinuxUtils::xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
+            if (EINVAL == errno) {
+                LOG(WARNING) << driverPath << " is not V4L2 device";
+                close(fd);
+                continue;
+            } else {
+                LOG(WARNING) << "VIDIOC_QUERYCAP";
+            }
+        }
+
+        // Skip device which does not support VIDIOC_G_FMT
+        struct v4l2_format fmt;
+        CLEAR(fmt);
+        fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        if (-1 == UsbLinuxUtils::xioctl(fd, VIDIOC_G_FMT, &fmt)) {
+            close(fd);
+            continue;
+        }
+
+        if (strncmp(reinterpret_cast<const char *>(cap.card),
+                    "ADI TOF DEPTH SENSOR", 20) != 0) {
+            close(fd);
+            continue;
+        }
+
+        if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
+            LOG(WARNING) << driverPath << " is no video capture device";
+            close(fd);
+            continue;
+        }
+
+        if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
+            LOG(WARNING) << driverPath << " does not support streaming i/o";
+            close(fd);
+            continue;
+        }
+        string advertisedSensorData;
+        getAvailableSensors(fd, advertisedSensorData);
+        close(fd);
+
+        vector<string> sensorsPaths;
+        Utils::splitIntoTokens(advertisedSensorData, ';', sensorsPaths);
+
+        SensorInfo sInfo;
+        sInfo.driverPath = driverPath;
+        int sensorType = UsbUtils::getDepthSensoType(sensorsPaths);
+        switch (sensorType) {
+        case 0: {
+            sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+            break;
+        }
+        default: {
+            if (sensorType == -1) {
+                LOG(WARNING) << "Failed to indetify sensorType";
+            } else {
+                LOG(WARNING) << "Unkown sensorType";
+            }
+        }
+        } //switch (sensorType)
+
+        m_sensorsInfo.emplace_back(sInfo);
+
+        m_storagesInfo = UsbUtils::getStorageNames(sensorsPaths);
+    }
+
+    closedir(d);
+
+    return status;
 }
 
 Status UsbSensorEnumerator::getDepthSensors(
-    std::vector<std::shared_ptr<DepthSensorInterface>> & /*depthSensors*/) {
+    std::vector<std::shared_ptr<DepthSensorInterface>> &depthSensors) {
 
-    // TO DO: implement this
+    depthSensors.clear();
+
+    for (const auto &sInfo : m_sensorsInfo) {
+        auto sensor = std::make_shared<UsbDepthSensor>(sInfo.sensorType,
+                                                       sInfo.driverPath);
+        depthSensors.emplace_back(sensor);
+    }
 
     return Status::OK;
 }
 
 Status UsbSensorEnumerator::getStorages(
-    std::vector<std::shared_ptr<StorageInterface>> & /*storages*/) {
-    // TO DO: implement this
+    std::vector<std::shared_ptr<StorageInterface>> &storages) {
+
+    storages.clear();
+
+    for (const auto &name : m_storagesInfo) {
+        auto storage = std::make_shared<UsbStorage>(name);
+    }
 
     return Status::OK;
 }
@@ -104,106 +226,3 @@ Status UsbSensorEnumerator::getTemperatureSensors(
 
     return Status::OK;
 }
-
-//aditof::Status DeviceEnumeratorImpl::findDevices(
-//    vector<aditof::DeviceConstructionData> &devices) {
-//    using namespace aditof;
-//    Status status = Status::OK;
-
-//    LOG(INFO) << "Looking for USB connected devices";
-
-//    const char *path = "/dev/";
-//    DIR *d;
-
-//    d = opendir(path);
-//    if (!d) {
-//        LOG(WARNING) << "Failed to open dir at path: " << path;
-//        return Status::UNREACHABLE;
-//    }
-
-//    struct dirent *dir;
-//    char sset[] = "video";
-//    while ((dir = readdir(d)) != nullptr) {
-//        if (strspn(sset, (dir->d_name)) != 5) {
-//            continue;
-//        }
-//        string driverPath(path);
-//        driverPath += dir->d_name;
-
-//        struct stat st;
-//        if (-1 == stat(driverPath.c_str(), &st)) {
-//            LOG(WARNING) << "Cannot identify '" << driverPath
-//                         << "' error: " << errno << "(" << strerror(errno)
-//                         << ")";
-//            continue;
-//        }
-
-//        if (!S_ISCHR(st.st_mode)) {
-//            LOG(WARNING) << driverPath << " is no device";
-//            continue;
-//        }
-
-//        int fd = open(driverPath.c_str(), O_RDWR | O_NONBLOCK, 0);
-//        if (-1 == fd) {
-//            LOG(WARNING) << "Cannot open '" << driverPath
-//                         << "' error: " << errno << "(" << strerror(errno)
-//                         << ")";
-//            continue;
-//        }
-
-//        struct v4l2_capability cap;
-//        if (-1 == UsbLinuxUtils::xioctl(fd, VIDIOC_QUERYCAP, &cap)) {
-//            if (EINVAL == errno) {
-//                LOG(WARNING) << driverPath << " is not V4L2 device";
-//                close(fd);
-//                continue;
-//            } else {
-//                LOG(WARNING) << "VIDIOC_QUERYCAP";
-//            }
-//        }
-
-//        // Skip device which does not support VIDIOC_G_FMT
-//        struct v4l2_format fmt;
-//        CLEAR(fmt);
-//        fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-//        if (-1 == UsbLinuxUtils::xioctl(fd, VIDIOC_G_FMT, &fmt)) {
-//            close(fd);
-//            continue;
-//        }
-
-//        if (strncmp(reinterpret_cast<const char *>(cap.card),
-//                    "ADI TOF DEPTH SENSOR", 20) != 0) {
-//            close(fd);
-//            continue;
-//        }
-
-//        if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
-//            LOG(WARNING) << driverPath << " is no video capture device";
-//            close(fd);
-//            continue;
-//        }
-
-//        if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
-//            LOG(WARNING) << driverPath << " does not support streaming i/o";
-//            close(fd);
-//            continue;
-//        }
-//        string advertisedSensorData;
-//        getAvailableSensors(fd, advertisedSensorData);
-//        close(fd);
-
-//        DeviceConstructionData devData;
-//        devData.connectionType = ConnectionType::USB;
-//        devData.driverPath = driverPath;
-
-//        vector<string> sensorsPaths;
-//        Utils::splitIntoTokens(advertisedSensorData, ';', sensorsPaths);
-//        UsbUtils::parseSensorTokens(sensorsPaths, devData);
-
-//        devices.emplace_back(devData);
-//    }
-
-//    closedir(d);
-
-//    return status;
-//}
