@@ -149,68 +149,59 @@ aditof::Status findDevicePathsAtMedia(const std::string &media,
 
 }; // namespace local
 
-//aditof::Status DeviceEnumeratorImpl::findDevices(
-//    std::vector<aditof::DeviceConstructionData> &devices) {
-//    using namespace aditof;
-//    Status status = Status::OK;
-
-//    LOG(INFO) << "Looking for devices on the target";
-
-//    // Find all media device paths
-//    std::vector<std::string> mediaPaths;
-//    const std::string mediaDirPath("/dev/");
-//    const std::string mediaBaseName("media");
-
-//    DIR *dirp = opendir(mediaDirPath.c_str());
-//    struct dirent *dp;
-//    while ((dp = readdir(dirp))) {
-//        if (!strncmp(dp->d_name, mediaBaseName.c_str(),
-//                     mediaBaseName.length())) {
-//            std::string fullMediaPath = mediaDirPath + std::string(dp->d_name);
-//            mediaPaths.emplace_back(fullMediaPath);
-//        }
-//    }
-//    closedir(dirp);
-
-//    // Identify any eligible time of flight cameras
-//    for (const auto &media : mediaPaths) {
-
-//        DLOG(INFO) << "Looking at: " << media << " for an eligible TOF camera";
-
-//        std::string devPath;
-//        std::string subdevPath;
-
-//        status = local::findDevicePathsAtMedia(media, devPath, subdevPath);
-//        if (status != Status::OK) {
-//            LOG(WARNING) << "failed to find device paths at media: " << media;
-//            return status;
-//        }
-
-//        if (devPath.empty() || subdevPath.empty()) {
-//            continue;
-//        }
-
-//        DeviceConstructionData devData;
-//        devData.connectionType = ConnectionType::LOCAL;
-//        devData.driverPath = devPath + ";" + subdevPath;
-
-//        // Check if EEPROM is available
-//        struct stat st;
-//        if (stat(EEPROM_DEV_PATH, &st) == 0) {
-//            EepromConstructionData eData;
-//            eData.driverName = EEPROM_NAME;
-//            eData.driverPath = EEPROM_DEV_PATH;
-//            devData.eeproms.emplace_back(eData);
-//        }
-
-//        devices.emplace_back(devData);
-//    }
-
-//    return status;
-//}
-
 Status TargetSensorEnumerator::searchSensors() {
-    // TO DO: implement this
+    Status status = Status::OK;
 
-    return Status::OK;
+    LOG(INFO) << "Looking for sensors on the target";
+
+    // Find all media device paths
+    std::vector<std::string> mediaPaths;
+    const std::string mediaDirPath("/dev/");
+    const std::string mediaBaseName("media");
+
+    DIR *dirp = opendir(mediaDirPath.c_str());
+    struct dirent *dp;
+    while ((dp = readdir(dirp))) {
+        if (!strncmp(dp->d_name, mediaBaseName.c_str(),
+                     mediaBaseName.length())) {
+            std::string fullMediaPath = mediaDirPath + std::string(dp->d_name);
+            mediaPaths.emplace_back(fullMediaPath);
+        }
+    }
+    closedir(dirp);
+
+    // Identify any eligible time of flight cameras
+    for (const auto &media : mediaPaths) {
+
+        DLOG(INFO) << "Looking at: " << media << " for an eligible TOF camera";
+
+        std::string devPath;
+        std::string subdevPath;
+
+        status = local::findDevicePathsAtMedia(media, devPath, subdevPath);
+        if (status != Status::OK) {
+            LOG(WARNING) << "failed to find device paths at media: " << media;
+            return status;
+        }
+
+        if (devPath.empty() || subdevPath.empty()) {
+            continue;
+        }
+
+        SensorInfo sInfo;
+        sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+        sInfo.driverPath = devPath;
+        sInfo.subDevPath = subdevPath;
+    }
+
+    // Check if EEPROM is available
+    struct stat st;
+    if (stat(EEPROM_DEV_PATH, &st) == 0) {
+        StorageInfo eepromInfo;
+        eepromInfo.driverName = EEPROM_NAME;
+        eepromInfo.driverPath = EEPROM_DEV_PATH;
+        m_storagesInfo.emplace_back(eepromInfo);
+    }
+
+    return status;
 }

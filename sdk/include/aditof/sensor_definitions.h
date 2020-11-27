@@ -32,6 +32,8 @@
 #ifndef SENSOR_DEFINITIONS_H
 #define SENSOR_DEFINITIONS_H
 
+#include "aditof/connections.h"
+
 #include <string>
 
 /**
@@ -56,6 +58,11 @@ struct SensorDetails {
      * @brief The type of sensor
      */
     SensorType sensorType;
+
+    /**
+     * @brief The type of connection with the sensor
+     */
+    ConnectionType connectionType;
 };
 
 } // namespace aditof

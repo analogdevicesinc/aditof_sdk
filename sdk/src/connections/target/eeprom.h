@@ -33,14 +33,13 @@
 #define EEPROM_H
 
 #include "aditof/storage_interface.h"
-#include <aditof/eeprom_construction_data.h>
 #include <memory>
 
 namespace aditof {
 
 class Eeprom : public StorageInterface {
   public:
-    Eeprom();
+    Eeprom(const std::string &driverName, const std::string &driverPath);
 
     // Implements StorageInterface
     virtual aditof::Status open(void *handle, const std::string &name,
