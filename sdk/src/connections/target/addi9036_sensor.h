@@ -59,8 +59,6 @@ class Addi9036Sensor : public aditof::DepthSensorInterface {
     virtual aditof::Status writeAfeRegisters(const uint16_t *address,
                                              const uint16_t *data,
                                              size_t length);
-    virtual aditof::Status readAfeTemp(float &temperature);
-    virtual aditof::Status readLaserTemp(float &temperature);
     virtual aditof::Status getDetails(aditof::SensorDetails &details) const;
     virtual aditof::Status getHandle(void **handle) override;
 
