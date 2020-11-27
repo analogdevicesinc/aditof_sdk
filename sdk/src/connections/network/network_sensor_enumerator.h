@@ -55,6 +55,8 @@ class NetworkSensorEnumerator : public aditof::SensorEnumeratorInterface {
 
   private:
     std::string m_ip;
+    std::vector<aditof::SensorType> m_sensorsType;
+    std::vector<std::string> m_storagesInfo;
 };
 
 #endif // NETWORK_SENSOR_ENUMERATOR_H
