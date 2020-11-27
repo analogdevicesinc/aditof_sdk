@@ -32,6 +32,7 @@
 #ifndef TARGET_SENSOR_ENUMERATOR_H
 #define TARGET_SENSOR_ENUMERATOR_H
 
+#include "aditof/sensor_definitions.h"
 #include "aditof/sensor_enumerator_interface.h"
 
 class TargetSensorEnumerator : public aditof::SensorEnumeratorInterface {
@@ -51,10 +52,19 @@ class TargetSensorEnumerator : public aditof::SensorEnumeratorInterface {
             &temperatureSensors) override;
 
   private:
-    std::vector<std::shared_ptr<aditof::DepthSensorInterface>> m_depthSensors;
-    std::vector<std::shared_ptr<aditof::StorageInterface>> m_storages;
-    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
-        m_temperatureSensors;
+    struct StorageInfo {
+        std::string driverName;
+        std::string driverPath;
+    };
+
+    struct SensorInfo {
+        aditof::SensorType sensorType;
+        std::string driverPath;
+        std::string subDevPath;
+    };
+
+    std::vector<SensorInfo> m_sensorsInfo;
+    std::vector<StorageInfo> m_storagesInfo;
 };
 
 #endif // TARGET_SENSOR_ENUMERATOR_H
