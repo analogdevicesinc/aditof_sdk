@@ -39,10 +39,14 @@ using namespace aditof;
 struct NetworkStorage::ImplData {
     EthernetHandle *handle;
     std::string name;
-    std::string driverPath;
 };
 
-NetworkStorage::NetworkStorage() : m_implData(new NetworkStorage::ImplData) {}
+NetworkStorage::NetworkStorage(const std::string &name)
+    : m_implData(new NetworkStorage::ImplData) {
+    m_implData->name = name;
+}
+
+NetworkStorage::~NetworkStorage() = default;
 
 Status NetworkStorage::open(void *handle, const std::string &name,
                             const std::string &driver_path) {
@@ -51,8 +55,6 @@ Status NetworkStorage::open(void *handle, const std::string &name,
         return Status::INVALID_ARGUMENT;
     }
     m_implData->handle = reinterpret_cast<struct EthernetHandle *>(handle);
-    m_implData->name = name;
-    m_implData->driverPath = driver_path;
 
     Network *net = m_implData->handle->net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
@@ -64,8 +66,7 @@ Status NetworkStorage::open(void *handle, const std::string &name,
 
     net->send_buff.set_func_name("EepromOpen");
     auto pbEeprom = net->send_buff.mutable_device_data()->add_eeproms();
-    pbEeprom->set_driver_name(name);
-    pbEeprom->set_driver_path(driver_path);
+    pbEeprom->set_driver_name(m_implData->name);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -207,8 +208,6 @@ Status NetworkStorage::close() {
 
     if (status == Status::OK) {
         m_implData->handle = nullptr;
-        m_implData->name.clear();
-        m_implData->driverPath.clear();
     }
 
     return status;

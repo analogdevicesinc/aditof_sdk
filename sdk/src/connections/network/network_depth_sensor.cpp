@@ -50,14 +50,15 @@ struct NetworkDepthSensor::ImplData {
     bool opened;
 };
 
-NetworkDepthSensor::NetworkDepthSensor(
-    const aditof::DeviceConstructionData &data)
+NetworkDepthSensor::NetworkDepthSensor(const std::string &ip,
+                                       aditof::SensorType sensorType)
     : m_implData(new NetworkDepthSensor::ImplData) {
 
     Network *net = new Network();
     m_implData->handle.net = net;
-    m_implData->ip = data.ip;
+    m_implData->ip = ip;
     m_implData->opened = false;
+    m_sensorDetails.sensorType = sensorType;
 
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
@@ -67,12 +68,13 @@ NetworkDepthSensor::NetworkDepthSensor(
     }
 
     net->send_buff.set_func_name("InstantiateDevice");
-    net->send_buff.mutable_device_data()->set_driver_path(data.driverPath);
-    for (const auto &eeprom : data.eeproms) {
-        auto pbEeprom = net->send_buff.mutable_device_data()->add_eeproms();
-        pbEeprom->set_driver_name(eeprom.driverName);
-        pbEeprom->set_driver_path(eeprom.driverPath);
-    }
+    // TO DO: remove InstantiateDevice(). It's not needed.
+    //    net->send_buff.mutable_device_data()->set_driver_path(data.driverPath);
+    //    for (const auto &eeprom : data.eeproms) {
+    //        auto pbEeprom = net->send_buff.mutable_device_data()->add_eeproms();
+    //        pbEeprom->set_driver_name(eeprom.driverName);
+    //        pbEeprom->set_driver_path(eeprom.driverPath);
+    //    }
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
