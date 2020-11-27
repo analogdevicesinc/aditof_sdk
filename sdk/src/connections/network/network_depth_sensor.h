@@ -39,26 +39,30 @@
 
 class NetworkDepthSensor : public aditof::DepthSensorInterface {
   public:
-    NetworkDepthSensor(const aditof::DeviceConstructionData &data);
+    NetworkDepthSensor(const std::string &ip, aditof::SensorType sensorType);
     ~NetworkDepthSensor();
 
   public: // implements DepthSensorInterface
-    virtual aditof::Status open();
-    virtual aditof::Status start();
-    virtual aditof::Status stop();
+    virtual aditof::Status open() override;
+    virtual aditof::Status start() override;
+    virtual aditof::Status stop() override;
     virtual aditof::Status
-    getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types);
-    virtual aditof::Status setFrameType(const aditof::FrameDetails &details);
-    virtual aditof::Status program(const uint8_t *firmware, size_t size);
-    virtual aditof::Status getFrame(uint16_t *buffer);
+    getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) override;
+    virtual aditof::Status
+    setFrameType(const aditof::FrameDetails &details) override;
+    virtual aditof::Status program(const uint8_t *firmware,
+                                   size_t size) override;
+    virtual aditof::Status getFrame(uint16_t *buffer) override;
     virtual aditof::Status readAfeRegisters(const uint16_t *address,
-                                            uint16_t *data, size_t length);
+                                            uint16_t *data,
+                                            size_t length) override;
     virtual aditof::Status writeAfeRegisters(const uint16_t *address,
                                              const uint16_t *data,
-                                             size_t length);
+                                             size_t length) override;
     virtual aditof::Status readAfeTemp(float &temperature);
     virtual aditof::Status readLaserTemp(float &temperature);
-    virtual aditof::Status getDetails(aditof::SensorDetails &details) const;
+    virtual aditof::Status
+    getDetails(aditof::SensorDetails &details) const override;
     virtual aditof::Status getHandle(void **handle) override;
 
   private:
