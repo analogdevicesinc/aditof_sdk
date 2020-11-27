@@ -102,11 +102,14 @@ static int xioctl(int fh, unsigned int request, void *arg) {
     return r;
 }
 
-Addi9036Sensor::Addi9036Sensor(const aditof::DeviceConstructionData &data)
-    : m_devData(data), m_implData(new Addi9036Sensor::ImplData) {
+Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
+                               const std::string &driverSubPath)
+    : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
+      m_implData(new Addi9036Sensor::ImplData) {
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
     m_sensorDetails.sensorType = aditof::SensorType::SENSOR_ADDI9036;
+    m_sensorDetails.connectionType = aditof::ConnectionType::LOCAL;
 }
 
 Addi9036Sensor::~Addi9036Sensor() {
