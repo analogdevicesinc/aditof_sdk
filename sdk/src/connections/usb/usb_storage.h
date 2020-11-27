@@ -32,15 +32,16 @@
 #ifndef USB_EEPROM_H
 #define USB_EEPROM_H
 
-#include <aditof/eeprom_construction_data.h>
 #include <aditof/storage_interface.h>
 #include <memory>
+#include <string>
 
 namespace aditof {
 
 class UsbStorage : public aditof::StorageInterface {
   public:
-    UsbStorage();
+    UsbStorage(const std::string &name);
+    ~UsbStorage();
 
     // Implements StorageInterface
     virtual aditof::Status open(void *handle, const std::string &name,

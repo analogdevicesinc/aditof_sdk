@@ -30,6 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "connections/usb/usb_sensor_enumerator.h"
+#include "connections/usb/usb_depth_sensor.h"
+#include "connections/usb/usb_storage.h"
 #include "connections/usb/usb_utils.h"
 #include "connections/usb/windows/usb_windows_utils.h"
 #include "utils.h"
@@ -86,100 +88,119 @@ static aditof::Status getAvailableSensors(IMoniker *Moniker,
     return Status::OK;
 }
 
-//aditof::Status DeviceEnumeratorImpl::findDevices(
-//    std::vector<aditof::DeviceConstructionData> &devices) {
-//    using namespace aditof;
-//    using namespace std;
-//    Status status = Status::OK;
-
-//    LOG(INFO) << "Looking for USB connected devices";
-
-//    HRESULT hr;
-
-//    hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-
-//    std::string devName("ADI TOF DEPTH SENSOR");
-//    ICreateDevEnum *DevEnum = NULL;
-
-//    hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER,
-//                          IID_PPV_ARGS(&DevEnum));
-//    if (FAILED(hr)) {
-//        std::cout << "Create Device Enumeration Failed" << std::endl;
-//        return Status::GENERIC_ERROR;
-//    }
-
-//    IEnumMoniker *EnumMoniker = NULL;
-//    hr = DevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory,
-//                                        &EnumMoniker, 0);
-
-//    if (hr != S_OK) {
-//        DevEnum->Release();
-//        std::cout << "Device Enumeration Error" << std::endl;
-//        return Status::GENERIC_ERROR;
-//    }
-
-//    IMoniker *Moniker = NULL;
-//    ULONG cFetched;
-//    while (EnumMoniker->Next(1, &Moniker, &cFetched) == S_OK) {
-//        IPropertyBag *PropBag;
-//        hr = Moniker->BindToStorage(0, 0, IID_PPV_ARGS(&PropBag));
-
-//        if (SUCCEEDED(hr)) {
-//            VARIANT varName;
-//            VariantInit(&varName);
-//            hr = PropBag->Read(L"FriendlyName", &varName, 0);
-
-//            if (SUCCEEDED(hr)) {
-//                std::string str(static_cast<LPCTSTR>(CString(varName.bstrVal)));
-//                if (str.find(devName) != std::string::npos) {
-//                    DeviceConstructionData devData;
-//                    devData.connectionType = ConnectionType::USB;
-//                    devData.driverPath = str;
-
-//                    std::string advertisedSensorData;
-//                    status = getAvailableSensors(Moniker, advertisedSensorData);
-//                    if (status == Status::OK) {
-//                        vector<string> sensorsPaths;
-//                        Utils::splitIntoTokens(advertisedSensorData, ';',
-//                                               sensorsPaths);
-//                        UsbUtils::parseSensorTokens(sensorsPaths, devData);
-//                    }
-
-//                    devices.emplace_back(devData);
-//                }
-//            }
-//            VariantClear(&varName);
-//            PropBag->Release();
-//            PropBag = NULL;
-//        }
-
-//        Moniker->Release();
-//        Moniker = NULL;
-//    }
-
-//    EnumMoniker->Release();
-//    DevEnum->Release();
-
-//    return status;
-//}
-
 Status UsbSensorEnumerator::searchSensors() {
-    // TO DO: implement this
+    using namespace std;
+    Status status = Status::OK;
 
-    return Status::OK;
+    LOG(INFO) << "Looking for USB connected sensors";
+
+    HRESULT hr;
+
+    hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+
+    std::string devName("ADI TOF DEPTH SENSOR");
+    ICreateDevEnum *DevEnum = NULL;
+
+    hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER,
+                          IID_PPV_ARGS(&DevEnum));
+    if (FAILED(hr)) {
+        LOG(ERROR) << "Create Device Enumeration Failed" << std::endl;
+        return Status::GENERIC_ERROR;
+    }
+
+    IEnumMoniker *EnumMoniker = NULL;
+    hr = DevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory,
+                                        &EnumMoniker, 0);
+
+    if (hr != S_OK) {
+        DevEnum->Release();
+        LOG(ERROR) << "Device Enumeration Error" << std::endl;
+        return Status::GENERIC_ERROR;
+    }
+
+    IMoniker *Moniker = NULL;
+    ULONG cFetched;
+    while (EnumMoniker->Next(1, &Moniker, &cFetched) == S_OK) {
+        IPropertyBag *PropBag;
+        hr = Moniker->BindToStorage(0, 0, IID_PPV_ARGS(&PropBag));
+
+        if (SUCCEEDED(hr)) {
+            VARIANT varName;
+            VariantInit(&varName);
+            hr = PropBag->Read(L"FriendlyName", &varName, 0);
+
+            if (SUCCEEDED(hr)) {
+                std::string str(static_cast<LPCTSTR>(CString(varName.bstrVal)));
+                if (str.find(devName) != std::string::npos) {
+                    SensorInfo sInfo;
+                    sInfo.driverPath = str;
+
+                    std::string advertisedSensorData;
+                    status = getAvailableSensors(Moniker, advertisedSensorData);
+                    if (status == Status::OK) {
+                        vector<string> sensorsPaths;
+                        Utils::splitIntoTokens(advertisedSensorData, ';',
+                                               sensorsPaths);
+
+                        int sensorType =
+                            UsbUtils::getDepthSensoType(sensorsPaths);
+                        switch (sensorType) {
+                        case 0: {
+                            sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+                            break;
+                        }
+                        default: {
+                            if (sensorType == -1) {
+                                LOG(WARNING) << "Failed to indetify sensorType";
+                            } else {
+                                LOG(WARNING) << "Unkown sensorType";
+                            }
+                        }
+                        } //switch (sensorType)
+
+                        m_sensorsInfo.emplace_back(sInfo);
+
+                        m_storagesInfo =
+                            UsbUtils::getStorageNames(sensorsPaths);
+                    }
+                }
+            }
+            VariantClear(&varName);
+            PropBag->Release();
+            PropBag = NULL;
+        }
+
+        Moniker->Release();
+        Moniker = NULL;
+    }
+
+    EnumMoniker->Release();
+    DevEnum->Release();
+
+    return status;
 }
 
 Status UsbSensorEnumerator::getDepthSensors(
-    std::vector<std::shared_ptr<DepthSensorInterface>> & /*depthSensors*/) {
+    std::vector<std::shared_ptr<DepthSensorInterface>> &depthSensors) {
 
-    // TO DO: implement this
+    depthSensors.clear();
+
+    for (const auto &sInfo : m_sensorsInfo) {
+        auto sensor = std::make_shared<UsbDepthSensor>(sInfo.sensorType,
+                                                       sInfo.driverPath);
+        depthSensors.emplace_back(sensor);
+    }
 
     return Status::OK;
 }
 
 Status UsbSensorEnumerator::getStorages(
-    std::vector<std::shared_ptr<StorageInterface>> & /*storages*/) {
-    // TO DO: implement this
+    std::vector<std::shared_ptr<StorageInterface>> &storages) {
+    storages.clear();
+
+    for (const auto &name : m_storagesInfo) {
+        auto storage = std::make_shared<UsbStorage>(name);
+    }
 
     return Status::OK;
 }

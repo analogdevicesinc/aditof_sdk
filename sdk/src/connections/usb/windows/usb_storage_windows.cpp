@@ -42,11 +42,11 @@ using namespace aditof;
 struct UsbStorage::ImplData {
     struct UsbHandle *handle;
     std::string name;
-    std::string driverPath;
 };
 
-UsbStorage::UsbStorage() : m_implData(new ImplData) {
+UsbStorage::UsbStorage(const std::string &name) : m_implData(new ImplData) {
     m_implData->handle = nullptr;
+    m_implData->name = name;
 }
 
 Status UsbStorage::open(void *handle, const std::string &name,
@@ -56,8 +56,6 @@ Status UsbStorage::open(void *handle, const std::string &name,
         return Status::INVALID_ARGUMENT;
     }
     m_implData->handle = reinterpret_cast<struct UsbHandle *>(handle);
-    m_implData->name = name;
-    m_implData->driverPath = driver_path;
 
     return Status::OK;
 }
@@ -144,8 +142,6 @@ Status UsbStorage::write(const uint32_t address, const uint8_t *data,
 
 Status UsbStorage::close() {
     m_implData->handle = nullptr;
-    m_implData->name.clear();
-    m_implData->driverPath.clear();
 
     return Status::OK;
 }

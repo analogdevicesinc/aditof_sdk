@@ -66,14 +66,16 @@ struct UsbDepthSensor::ImplData {
     std::unordered_map<std::string, CalibrationData> calibration_cache;
 };
 
-UsbDepthSensor::UsbDepthSensor(const aditof::DeviceConstructionData &data)
-    : m_devData(data), m_implData(new UsbDepthSensor::ImplData) {
+UsbDepthSensor::UsbDepthSensor(aditof::SensorType sensorType,
+                               const std::string &driverPath)
+    : m_driverPath(driverPath), m_implData(new UsbDepthSensor::ImplData) {
     m_implData->fd = 0;
     m_implData->opened = false;
     m_implData->started = false;
     m_implData->buffers = nullptr;
     m_implData->buffersCount = 0;
-    m_sensorDetails.sensorType = aditof::SensorType::SENSOR_ADDI9036;
+    m_sensorDetails.sensorType = sensorType;
+    m_sensorDetails.connectionType = aditof::ConnectionType::USB;
 }
 
 UsbDepthSensor::~UsbDepthSensor() {
@@ -111,11 +113,10 @@ aditof::Status UsbDepthSensor::open() {
 
     LOG(INFO) << "Opening device";
 
-    m_implData->fd =
-        ::open(m_devData.driverPath.c_str(), O_RDWR | O_NONBLOCK, 0);
+    m_implData->fd = ::open(m_driverPath.c_str(), O_RDWR | O_NONBLOCK, 0);
     if (-1 == m_implData->fd) {
-        LOG(WARNING) << "Cannot open '" << m_devData.driverPath
-                     << "' error: " << errno << "(" << strerror(errno) << ")";
+        LOG(WARNING) << "Cannot open '" << m_driverPath << "' error: " << errno
+                     << "(" << strerror(errno) << ")";
         return Status::UNREACHABLE;
     }
 
@@ -222,8 +223,7 @@ UsbDepthSensor::setFrameType(const aditof::FrameDetails &details) {
 
     if (-1 == UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_REQBUFS, &req)) {
         if (EINVAL == errno) {
-            LOG(WARNING) << m_devData.driverPath
-                         << " does not support memmory mapping";
+            LOG(WARNING) << m_driverPath << " does not support memmory mapping";
         } else {
             LOG(WARNING) << "VIDIOC_REQBUFS, error:" << errno << "("
                          << strerror(errno) << ")";
@@ -232,8 +232,7 @@ UsbDepthSensor::setFrameType(const aditof::FrameDetails &details) {
     }
 
     if (req.count < 2) {
-        LOG(WARNING) << "Insufficient buffer memory on "
-                     << m_devData.driverPath;
+        LOG(WARNING) << "Insufficient buffer memory on " << m_driverPath;
         return Status::GENERIC_ERROR;
     }
 
