@@ -42,10 +42,14 @@ using namespace aditof;
 struct UsbStorage::ImplData {
     int fd;
     std::string name;
-    std::string driverPath;
 };
 
-UsbStorage::UsbStorage() : m_implData(new ImplData) { m_implData->fd = -1; }
+UsbStorage::UsbStorage(const std::string &name) : m_implData(new ImplData) {
+    m_implData->fd = -1;
+    m_implData->name = name;
+}
+
+UsbStorage::~UsbStorage() = default;
 
 Status UsbStorage::open(void *handle, const std::string &name,
                         const std::string &driver_path) {
@@ -55,8 +59,6 @@ Status UsbStorage::open(void *handle, const std::string &name,
     }
 
     m_implData->fd = *(reinterpret_cast<int *>(handle));
-    m_implData->name = name;
-    m_implData->driverPath = driver_path;
 
     return Status::OK;
 }
@@ -134,8 +136,6 @@ Status UsbStorage::write(const uint32_t address, const uint8_t *data,
 
 Status UsbStorage::close() {
     m_implData->fd = -1;
-    m_implData->name.clear();
-    m_implData->driverPath.clear();
 
     return Status::OK;
 }
