@@ -41,7 +41,8 @@ struct v4l2_buffer;
 
 class Addi9036Sensor : public aditof::DepthSensorInterface {
   public:
-    Addi9036Sensor(const aditof::DeviceConstructionData &data);
+    Addi9036Sensor(const std::string &driverPath,
+                   const std::string &driverSubPath);
     ~Addi9036Sensor();
 
   public: // implements DepthSensorInterface
@@ -76,7 +77,8 @@ class Addi9036Sensor : public aditof::DepthSensorInterface {
   private:
     struct ImplData;
     aditof::SensorDetails m_sensorDetails;
-    aditof::DeviceConstructionData m_devData;
+    std::string m_driverPath;
+    std::string m_driverSubPath;
     std::unique_ptr<ImplData> m_implData;
 };
 

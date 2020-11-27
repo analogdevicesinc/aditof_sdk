@@ -30,20 +30,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "connections/target/target_sensor_enumerator.h"
+#include "connections/target/addi9036_sensor.h"
+#include "connections/target/eeprom.h"
 
 using namespace aditof;
 
 Status TargetSensorEnumerator::getDepthSensors(
     std::vector<std::shared_ptr<DepthSensorInterface>> &depthSensors) {
 
-    depthSensors = m_depthSensors;
+    depthSensors.clear();
+
+    for (const auto &sInfo : m_sensorsInfo) {
+        switch (sInfo.sensorType) {
+        case SensorType::SENSOR_ADDI9036: {
+            auto sensor = std::make_shared<Addi9036Sensor>(sInfo.driverPath,
+                                                           sInfo.subDevPath);
+            depthSensors.emplace_back(sensor);
+            break;
+        }
+        } //switch (sInfo.sensorType) {
+    }
 
     return Status::OK;
 }
 
 Status TargetSensorEnumerator::getStorages(
     std::vector<std::shared_ptr<StorageInterface>> &storages) {
-    storages = m_storages;
+
+    storages.clear();
+
+    for (const auto &eInfo : m_storagesInfo) {
+        auto storage =
+            std::make_shared<Eeprom>(eInfo.driverName, eInfo.driverPath);
+        storages.emplace_back(storage);
+    }
 
     return Status::OK;
 }
@@ -51,7 +71,8 @@ Status TargetSensorEnumerator::getStorages(
 Status TargetSensorEnumerator::getTemperatureSensors(
     std::vector<std::shared_ptr<TemperatureSensorInterface>>
         &temperatureSensors) {
-    temperatureSensors = m_temperatureSensors;
+
+    temperatureSensors.clear();
 
     return Status::OK;
 }

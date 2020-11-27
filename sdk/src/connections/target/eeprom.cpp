@@ -48,13 +48,17 @@ struct Eeprom::ImplData {
     std::string driverPath;
 };
 
-Eeprom::Eeprom() : m_implData(new ImplData) {}
+Eeprom::Eeprom(const std::string &driverName, const std::string &driverPath)
+    : m_implData(new ImplData) {
+    m_implData->name = driverName;
+    m_implData->driverPath = driverPath;
+}
 
 Status Eeprom::open(void *, const std::string &name,
                     const std::string &driver_path) {
     eeprom *e = &m_implData->eepromDev;
 
-    e->fd = fopen(driver_path.c_str(), "w+");
+    e->fd = fopen(m_implData->driverPath.c_str(), "w+");
     if (!e->fd) {
         LOG(ERROR) << "fopen() failed. Error: " << strerror(errno);
         return Status::GENERIC_ERROR;
@@ -68,9 +72,6 @@ Status Eeprom::open(void *, const std::string &name,
     }
     e->length = static_cast<unsigned int>(len);
     fseek(e->fd, 0x0, SEEK_SET);
-
-    m_implData->name = name;
-    m_implData->driverPath = driver_path;
 
     return Status::OK;
 }

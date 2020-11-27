@@ -97,12 +97,15 @@ static int xioctl(int fh, unsigned int request, void *arg) {
     return r;
 }
 
-Addi9036Sensor::Addi9036Sensor(const aditof::DeviceConstructionData &data)
-    : m_devData(data), m_implData(new Addi9036Sensor::ImplData) {
+Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
+                               const std::string &driverSubPath)
+    : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
+      m_implData(new Addi9036Sensor::ImplData) {
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
 
     m_sensorDetails.sensorType = aditof::SensorType::SENSOR_ADDI9036;
+    m_sensorDetails.connectionType = aditof::ConnectionType::LOCAL;
 }
 
 Addi9036Sensor::~Addi9036Sensor() {
@@ -145,15 +148,8 @@ aditof::Status Addi9036Sensor::open() {
     struct stat st;
     struct v4l2_capability cap;
 
-    std::vector<std::string> paths;
-    std::stringstream ss(m_devData.driverPath);
-    std::string token;
-    while (std::getline(ss, token, ';')) {
-        paths.push_back(token);
-    }
-
-    const char *devName = paths.front().c_str();
-    const char *subDevName = paths.back().c_str();
+    const char *devName = m_driverPath.c_str();
+    const char *subDevName = m_driverSubPath.c_str();
 
     /* Open V4L2 device */
     if (stat(devName, &st) == -1) {
