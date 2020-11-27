@@ -31,7 +31,19 @@
  */
 #include "connections/target/target_sensor_enumerator.h"
 #include "connections/target/addi9036_sensor.h"
+#include "connections/target/chicony_temperature_sensor.h"
 #include "connections/target/eeprom.h"
+#include "connections/target/i2c_temperature_sensor.h"
+#include "target_definitions.h"
+
+#include <sys/stat.h>
+
+static const char *LASER_TEMP_SENSOR_NAME = "LaserTemperature";
+static const char *AFE_TEMP_SENSOR_NAME = "AfeTemperature";
+static const char *CHICONY_TEMPERATURE_SENSOR = "Chicony Temperature Sensor";
+
+static const char LASER_TEMP_SENSOR_I2C_ADDR = 0x49;
+static const char AFE_TEMP_SENSOR_I2C_ADDR = 0x4b;
 
 using namespace aditof;
 
@@ -73,6 +85,27 @@ Status TargetSensorEnumerator::getTemperatureSensors(
         &temperatureSensors) {
 
     temperatureSensors.clear();
+
+    // Check if laser temperature is available
+    struct stat st;
+    if (stat(TEMP_SENSOR_DEV_PATH, &st) == 0) {
+        // TO DO: Find a way to check if device is available at a given I2C address. Now we're just assuming they are available
+        auto laserSensor = std::make_shared<I2CTemperatureSensor>(
+            LASER_TEMP_SENSOR_NAME, TEMP_SENSOR_DEV_PATH,
+            LASER_TEMP_SENSOR_I2C_ADDR);
+        temperatureSensors.emplace_back(laserSensor);
+
+        auto afeSensor = std::make_shared<I2CTemperatureSensor>(
+            AFE_TEMP_SENSOR_NAME, TEMP_SENSOR_DEV_PATH,
+            AFE_TEMP_SENSOR_I2C_ADDR);
+        temperatureSensors.emplace_back(afeSensor);
+    }
+
+#ifdef CHICONY_006
+    auto sensor = std::make_shared<ChiconyTemperatureSensor>(
+        CHICONY_TEMPERATURE_SENSOR, TEMP_SENSOR_DEV_PATH);
+    temperatureSensors.emplace_back(sensor);
+#endif
 
     return Status::OK;
 }
