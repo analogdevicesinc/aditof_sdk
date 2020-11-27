@@ -31,6 +31,8 @@
  */
 #include "network_sensor_enumerator.h"
 #include "connections/network/network.h"
+#include "connections/network/network_depth_sensor.h"
+#include "connections/network/network_storage.h"
 
 #include <glog/logging.h>
 
@@ -42,22 +44,75 @@ NetworkSensorEnumerator::NetworkSensorEnumerator(const std::string &ip)
 NetworkSensorEnumerator::~NetworkSensorEnumerator() = default;
 
 Status NetworkSensorEnumerator::searchSensors() {
-    // TO DO: implement this
+    Status status = Status::OK;
 
-    return Status::OK;
+    LOG(INFO) << "Looking for devices over ethernet";
+
+    std::unique_ptr<Network> net(new Network());
+
+    if (net->ServerConnect(m_ip) != 0) {
+        LOG(WARNING) << "Server Connect Failed";
+        return Status::UNREACHABLE;
+    }
+
+    net->send_buff.set_func_name("FindDevices");
+    net->send_buff.set_expect_reply(true);
+
+    if (net->SendCommand() != 0) {
+        LOG(WARNING) << "Send Command Failed";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (net->recv_server_data() != 0) {
+        LOG(WARNING) << "Receive Data Failed";
+        return Status::GENERIC_ERROR;
+    }
+
+    if (net->recv_buff.server_status() !=
+        payload::ServerStatus::REQUEST_ACCEPTED) {
+        LOG(WARNING) << "API execution on Target Failed";
+        return Status::GENERIC_ERROR;
+    }
+    const payload::ServerResponse &msg = net->recv_buff;
+    for (int i = 0; i < msg.device_info().size(); ++i) {
+        const payload::DeviceConstructionData &pbData = msg.device_info(i);
+
+        m_sensorsType.emplace_back(
+            static_cast<aditof::SensorType>(pbData.device_type()));
+
+        for (int j = 0; j < pbData.eeproms().size(); ++j) {
+            const payload::EepromConstructionData &pbEepromData =
+                pbData.eeproms(j);
+            m_storagesInfo.emplace_back(pbEepromData.driver_name());
+        }
+    }
+    status = static_cast<Status>(net->recv_buff.status());
+
+    return status;
 }
 
 Status NetworkSensorEnumerator::getDepthSensors(
-    std::vector<std::shared_ptr<DepthSensorInterface>> & /*depthSensors*/) {
+    std::vector<std::shared_ptr<DepthSensorInterface>> &depthSensors) {
 
-    // TO DO: implement this
+    depthSensors.clear();
+
+    for (auto sensorType : m_sensorsType) {
+        auto sensor = std::make_shared<NetworkDepthSensor>(m_ip, sensorType);
+        depthSensors.emplace_back(sensor);
+    }
 
     return Status::OK;
 }
 
 Status NetworkSensorEnumerator::getStorages(
-    std::vector<std::shared_ptr<StorageInterface>> & /*storages*/) {
-    // TO DO: implement this
+    std::vector<std::shared_ptr<StorageInterface>> &storages) {
+
+    storages.clear();
+
+    for (const auto &name : m_storagesInfo) {
+        auto storage = std::make_shared<NetworkStorage>(name);
+        storages.emplace_back(storage);
+    }
 
     return Status::OK;
 }
@@ -69,61 +124,3 @@ Status NetworkSensorEnumerator::getTemperatureSensors(
 
     return Status::OK;
 }
-
-//aditof::Status NetworkSensorEnumerator::findDevices(
-//    std::vector<aditof::DeviceConstructionData> &devices) {
-//    using namespace aditof;
-//    Status status = Status::OK;
-
-//    LOG(INFO) << "Looking for devices over ethernet";
-
-//    std::unique_ptr<Network> net(new Network());
-
-//    if (net->ServerConnect(m_ip) != 0) {
-//        LOG(WARNING) << "Server Connect Failed";
-//        return Status::UNREACHABLE;
-//    }
-
-//    net->send_buff.set_func_name("FindDevices");
-//    net->send_buff.set_expect_reply(true);
-
-//    if (net->SendCommand() != 0) {
-//        LOG(WARNING) << "Send Command Failed";
-//        return Status::INVALID_ARGUMENT;
-//    }
-
-//    if (net->recv_server_data() != 0) {
-//        LOG(WARNING) << "Receive Data Failed";
-//        return Status::GENERIC_ERROR;
-//    }
-
-//    if (net->recv_buff.server_status() !=
-//        payload::ServerStatus::REQUEST_ACCEPTED) {
-//        LOG(WARNING) << "API execution on Target Failed";
-//        return Status::GENERIC_ERROR;
-//    }
-//    const payload::ServerResponse &msg = net->recv_buff;
-//    for (int i = 0; i < msg.device_info().size(); ++i) {
-//        const payload::DeviceConstructionData &pbData = msg.device_info(i);
-//        aditof::DeviceConstructionData tofData;
-
-//        tofData.connectionType =
-//            static_cast<aditof::ConnectionType>(pbData.device_type());
-//        tofData.driverPath = pbData.driver_path();
-//        tofData.ip = m_ip;
-
-//        for (int j = 0; j < pbData.eeproms().size(); ++j) {
-//            const payload::EepromConstructionData &pbEepromData =
-//                pbData.eeproms(j);
-//            aditof::EepromConstructionData tofEepromData;
-//            tofEepromData.driverName = pbEepromData.driver_name();
-//            tofEepromData.driverPath = pbEepromData.driver_path();
-//            tofData.eeproms.push_back(tofEepromData);
-//        }
-
-//        devices.push_back(tofData);
-//    }
-//    status = static_cast<Status>(net->recv_buff.status());
-
-//    return status;
-//}
