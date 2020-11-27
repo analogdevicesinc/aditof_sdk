@@ -29,55 +29,31 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEMPERATURE_SENSOR_INTERFACE_H
-#define TEMPERATURE_SENSOR_INTERFACE_H
+#ifndef I2C_TEMPERATURE_SENSOR_H
+#define I2C_TEMPERATURE_SENSOR_H
 
-#include "aditof/status_definitions.h"
-#include "sdk_exports.h"
-
-#include <string>
+#include <aditof/temperature_sensor_interface.h>
+#include <memory>
 
 namespace aditof {
 
-/**
- * @class TemperatureSensorInterface
- * @brief Interface for a temperature sensor
- */
-class SDK_API TemperatureSensorInterface {
+class I2CTemperatureSensor : public TemperatureSensorInterface {
   public:
-    /**
-   * @brief Destructor
-   */
-    virtual ~TemperatureSensorInterface() = default;
+    I2CTemperatureSensor(const std::string &name,
+                         const std::string &driver_path, int i2c_address);
+    ~I2CTemperatureSensor();
 
-    /**
-     * @brief Open the communication channel with the temperature sensor.
-     * @param handle - A handle to the object through which communication is done
-     * @return Status
-     */
-    virtual aditof::Status open(void *handle) = 0;
+    // Implements TemperatureSensorInterface
+    virtual aditof::Status open(void *handle) override;
+    virtual aditof::Status read(float &temperature) override;
+    virtual aditof::Status close() override;
+    virtual aditof::Status getName(std::string &name) const override;
 
-    /**
-     * @brief Read data from the temperature sensor
-     * @param[out] temperature - This is set with the temperature read from the sensor
-     * @return Status
-     */
-    virtual aditof::Status read(float &temperature) = 0;
-
-    /**
-     * @brief Close the communication channel with the EEPROM.
-     * @return Status
-     */
-    virtual aditof::Status close() = 0;
-
-    /**
-     * @brief Retrieves the name of the temperature sensor
-     * @param[out] name - This gets set with the name of the temperature sensor
-     * @return Status
-     */
-    virtual aditof::Status getName(std::string &name) const = 0;
+  private:
+    struct ImplData;
+    std::unique_ptr<ImplData> m_implData;
 };
 
 } // namespace aditof
 
-#endif // TEMPERATURE_SENSOR_INTERFACE_H
+#endif /* I2C_TEMPERATURE_SENSOR_H */
