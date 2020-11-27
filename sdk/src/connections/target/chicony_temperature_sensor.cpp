@@ -29,55 +29,68 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEMPERATURE_SENSOR_INTERFACE_H
-#define TEMPERATURE_SENSOR_INTERFACE_H
+#include "chicony_temperature_sensor.h"
 
-#include "aditof/status_definitions.h"
-#include "sdk_exports.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <glog/logging.h>
+#include <linux/fs.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
-#include <string>
+using namespace aditof;
 
-namespace aditof {
-
-/**
- * @class TemperatureSensorInterface
- * @brief Interface for a temperature sensor
- */
-class SDK_API TemperatureSensorInterface {
-  public:
-    /**
-   * @brief Destructor
-   */
-    virtual ~TemperatureSensorInterface() = default;
-
-    /**
-     * @brief Open the communication channel with the temperature sensor.
-     * @param handle - A handle to the object through which communication is done
-     * @return Status
-     */
-    virtual aditof::Status open(void *handle) = 0;
-
-    /**
-     * @brief Read data from the temperature sensor
-     * @param[out] temperature - This is set with the temperature read from the sensor
-     * @return Status
-     */
-    virtual aditof::Status read(float &temperature) = 0;
-
-    /**
-     * @brief Close the communication channel with the EEPROM.
-     * @return Status
-     */
-    virtual aditof::Status close() = 0;
-
-    /**
-     * @brief Retrieves the name of the temperature sensor
-     * @param[out] name - This gets set with the name of the temperature sensor
-     * @return Status
-     */
-    virtual aditof::Status getName(std::string &name) const = 0;
+struct ChiconyTemperatureSensor::ImplData {
+    int fd;
+    std::string name;
+    std::string driverPath;
+    int i2c_address;
 };
 
-} // namespace aditof
+ChiconyTemperatureSensor::ChiconyTemperatureSensor(
+    const std::string &name, const std::string &driver_path)
+    : m_implData(new ImplData) {
+    m_implData->fd = -1;
+    m_implData->name = name;
+    m_implData->driverPath = driver_path;
+}
 
-#endif // TEMPERATURE_SENSOR_INTERFACE_H
+ChiconyTemperatureSensor::~ChiconyTemperatureSensor() = default;
+
+Status ChiconyTemperatureSensor::open(void *) {
+    m_implData->fd = ::open(m_implData->driverPath.c_str(), O_RDONLY);
+    if (m_implData->fd <= 0) {
+        LOG(ERROR) << "Temp sensor open error";
+        return Status::GENERIC_ERROR;
+    }
+
+    return Status::OK;
+}
+
+Status ChiconyTemperatureSensor::read(float &temperature) {
+    if (!m_implData->fd) {
+        LOG(ERROR) << "Cannot read! Temperature sensor is not opened.";
+        return Status::GENERIC_ERROR;
+    }
+
+    char buf[6];
+    pread(m_implData->fd, buf, 6, 0);
+    temperature = atof(buf) / 1000.0f;
+
+    return Status::OK;
+}
+
+Status ChiconyTemperatureSensor::close() {
+    if (m_implData->fd >= 0) {
+        ::close(m_implData->fd);
+        m_implData->fd = -1;
+    }
+
+    return Status::OK;
+}
+
+Status ChiconyTemperatureSensor::getName(std::string &name) const {
+    name = m_implData->name;
+    return Status::OK;
+}
