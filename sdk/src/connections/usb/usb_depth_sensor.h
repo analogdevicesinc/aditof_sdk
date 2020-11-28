@@ -66,8 +66,6 @@ class UsbDepthSensor : public aditof::DepthSensorInterface {
     virtual aditof::Status writeAfeRegisters(const uint16_t *address,
                                              const uint16_t *data,
                                              size_t length) override;
-    virtual aditof::Status readAfeTemp(float &temperature);
-    virtual aditof::Status readLaserTemp(float &temperature);
     virtual aditof::Status
     getDetails(aditof::SensorDetails &details) const override;
     virtual aditof::Status getHandle(void **handle) override;

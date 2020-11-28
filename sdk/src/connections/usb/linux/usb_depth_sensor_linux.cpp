@@ -508,42 +508,6 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
     return status;
 }
 
-aditof::Status UsbDepthSensor::readAfeTemp(float &temperature) {
-    using namespace aditof;
-
-    float buffer[2];
-
-    int ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
-        m_implData->fd, 3, 0, reinterpret_cast<uint8_t *>(buffer), 8, 8, true);
-    if (ret < 0) {
-        LOG(WARNING)
-            << "Failed to read a packet via UVC extension unit. Error: " << ret;
-        return Status::GENERIC_ERROR;
-    }
-
-    temperature = buffer[0];
-
-    return Status::OK;
-}
-
-aditof::Status UsbDepthSensor::readLaserTemp(float &temperature) {
-    using namespace aditof;
-
-    float buffer[2];
-
-    int ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
-        m_implData->fd, 3, 0, reinterpret_cast<uint8_t *>(buffer), 8, 8, true);
-    if (ret < 0) {
-        LOG(WARNING)
-            << "Failed to read a packet via UVC extension unit. Error: " << ret;
-        return Status::GENERIC_ERROR;
-    }
-
-    temperature = buffer[1];
-
-    return Status::OK;
-}
-
 aditof::Status
 UsbDepthSensor::getDetails(aditof::SensorDetails &details) const {
     details = m_sensorDetails;

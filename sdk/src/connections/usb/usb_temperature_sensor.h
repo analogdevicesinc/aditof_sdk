@@ -29,36 +29,31 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef USB_SENSOR_ENUMERATOR_H
-#define USB_SENSOR_ENUMERATOR_H
+#ifndef USB_TEMPERATURE_SENSOR
+#define USB_TEMPERATURE_SENSOR
 
-#include "aditof/sensor_enumerator_interface.h"
+#include <aditof/temperature_sensor_interface.h>
+#include <memory>
+#include <string>
 
-class UsbSensorEnumerator : public aditof::SensorEnumeratorInterface {
+namespace aditof {
+
+class UsbTemperatureSensor : public aditof::TemperatureSensorInterface {
   public:
-    ~UsbSensorEnumerator();
+    UsbTemperatureSensor(const std::string &name);
+    ~UsbTemperatureSensor();
 
-  public: // implements SensorEnumeratorInterface
-    virtual aditof::Status searchSensors() override;
-    virtual aditof::Status
-    getDepthSensors(std::vector<std::shared_ptr<aditof::DepthSensorInterface>>
-                        &depthSensors) override;
-    virtual aditof::Status getStorages(
-        std::vector<std::shared_ptr<aditof::StorageInterface>> &storages)
-        override;
-    virtual aditof::Status getTemperatureSensors(
-        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
-            &temperatureSensors) override;
+    // Implements TemperatureSensorInterface
+    virtual aditof::Status open(void *handle) override;
+    virtual aditof::Status read(float &temperature) override;
+    virtual aditof::Status close() override;
+    virtual aditof::Status getName(std::string &name) const override;
 
   private:
-    struct SensorInfo {
-        aditof::SensorType sensorType;
-        std::string driverPath;
-    };
-
-    std::vector<SensorInfo> m_sensorsInfo;
-    std::vector<std::string> m_storagesInfo;
-    std::vector<std::string> m_temperatureSensorsInfo;
+    struct ImplData;
+    std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // USB_SENSOR_ENUMERATOR_H
+} // namespace aditof
+
+#endif // USB_TEMPERATURE_SENSOR
