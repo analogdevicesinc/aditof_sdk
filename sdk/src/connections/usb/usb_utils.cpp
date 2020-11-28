@@ -62,3 +62,18 @@ UsbUtils::getStorageNames(const std::vector<std::string> &tokens) {
 
     return names;
 }
+
+std::vector<std::string>
+UsbUtils::getTemperatureSensorNames(const std::vector<std::string> &tokens) {
+    vector<string> names;
+
+    for (const auto &t : tokens) {
+        vector<string> keyValueStr;
+        Utils::splitIntoTokens(t, '=', keyValueStr);
+        if (keyValueStr[0] == "TEMP_SENSOR_NAME") {
+            names.emplace_back(keyValueStr[1]);
+        }
+    }
+
+    return names;
+}

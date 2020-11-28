@@ -29,36 +29,32 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef USB_SENSOR_ENUMERATOR_H
-#define USB_SENSOR_ENUMERATOR_H
+#include "connections/usb/usb_temperature_sensor.h"
 
-#include "aditof/sensor_enumerator_interface.h"
+using namespace aditof;
 
-class UsbSensorEnumerator : public aditof::SensorEnumeratorInterface {
-  public:
-    ~UsbSensorEnumerator();
+struct UsbTemperatureSensor::ImplData {};
 
-  public: // implements SensorEnumeratorInterface
-    virtual aditof::Status searchSensors() override;
-    virtual aditof::Status
-    getDepthSensors(std::vector<std::shared_ptr<aditof::DepthSensorInterface>>
-                        &depthSensors) override;
-    virtual aditof::Status getStorages(
-        std::vector<std::shared_ptr<aditof::StorageInterface>> &storages)
-        override;
-    virtual aditof::Status getTemperatureSensors(
-        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
-            &temperatureSensors) override;
+UsbTemperatureSensor::UsbTemperatureSensor(const std::string &name) {}
 
-  private:
-    struct SensorInfo {
-        aditof::SensorType sensorType;
-        std::string driverPath;
-    };
+UsbTemperatureSensor::~UsbTemperatureSensor() = default;
 
-    std::vector<SensorInfo> m_sensorsInfo;
-    std::vector<std::string> m_storagesInfo;
-    std::vector<std::string> m_temperatureSensorsInfo;
-};
+Status UsbTemperatureSensor::open(void *handle) {
+    // TO DO when enabling macos support
+    return Status::UNAVAILABLE;
+}
 
-#endif // USB_SENSOR_ENUMERATOR_H
+Status UsbTemperatureSensor::read(float & /*temperature*/) {
+    // TO DO when enabling macos support
+    return Status::UNAVAILABLE;
+}
+
+Status UsbTemperatureSensor::close() {
+    // TO DO when enabling macos support
+    return Status::UNAVAILABLE;
+}
+
+Status UsbTemperatureSensor::getName(std::string & /*name*/) const {
+    // TO DO when enabling macos support
+    return Status::UNAVAILABLE;
+}
