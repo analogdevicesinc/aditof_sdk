@@ -53,6 +53,15 @@ class UsbUtils {
      */
     static std::vector<std::string>
     getStorageNames(const std::vector<std::string> &tokens);
+
+    /**
+     * @brief Parses sensor tokens which are strings containing a key-value pair
+     * and returns the names of the temperature sensors.
+     * @param tokens - The tokens to be parsed.
+     * return std::vector<std::string>
+     */
+    static std::vector<std::string>
+    getTemperatureSensorNames(const std::vector<std::string> &tokens);
 };
 
 #endif // USB_UTILS_H

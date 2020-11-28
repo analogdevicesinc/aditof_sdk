@@ -763,60 +763,6 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
     return Status::OK;
 }
 
-aditof::Status UsbDepthSensor::readAfeTemp(float &temperature) {
-    using namespace aditof;
-
-    ExUnitHandle handle;
-
-    HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
-        &handle, &m_implData->handle.pVideoInputFilter);
-    if (hr != S_OK) {
-        LOG(WARNING) << "Failed to find node and get control. Error: "
-                     << std::hex << hr;
-        return Status::GENERIC_ERROR;
-    }
-
-    float integerTemperature[2];
-    hr = UsbWindowsUtils::UvcExUnitGetProperty(
-        &handle, 3, reinterpret_cast<uint8_t *>(&integerTemperature),
-        8 /* two floats, each having 4 bytes */);
-    if (FAILED(hr)) {
-        LOG(WARNING) << "Failed to get property via UVC extension unit. Error: "
-                     << std::hex << hr;
-        return Status::GENERIC_ERROR;
-    }
-    temperature = integerTemperature[0];
-
-    return Status::OK;
-}
-
-aditof::Status UsbDepthSensor::readLaserTemp(float &temperature) {
-    using namespace aditof;
-
-    ExUnitHandle handle;
-
-    HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
-        &handle, &m_implData->handle.pVideoInputFilter);
-    if (hr != S_OK) {
-        LOG(WARNING) << "Failed to find node and get control. Error: "
-                     << std::hex << hr;
-        return Status::GENERIC_ERROR;
-    }
-
-    float integerTemperature[2];
-    hr = UsbWindowsUtils::UvcExUnitGetProperty(
-        &handle, 3, reinterpret_cast<uint8_t *>(&integerTemperature),
-        8 /* two floats, each having 4 bytes */);
-    if (FAILED(hr)) {
-        LOG(WARNING) << "Failed to get property via UVC extension unit. Error: "
-                     << std::hex << hr;
-        return Status::GENERIC_ERROR;
-    }
-    temperature = integerTemperature[1];
-
-    return Status::OK;
-}
-
 aditof::Status
 UsbDepthSensor::getDetails(aditof::SensorDetails &details) const {
     details = m_sensorDetails;
