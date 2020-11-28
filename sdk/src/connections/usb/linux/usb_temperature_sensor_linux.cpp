@@ -29,36 +29,67 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef USB_SENSOR_ENUMERATOR_H
-#define USB_SENSOR_ENUMERATOR_H
+#include "connections/usb/usb_temperature_sensor.h"
+#include "usb_linux_utils.h"
 
-#include "aditof/sensor_enumerator_interface.h"
+#include <glog/logging.h>
 
-class UsbSensorEnumerator : public aditof::SensorEnumeratorInterface {
-  public:
-    ~UsbSensorEnumerator();
+using namespace aditof;
 
-  public: // implements SensorEnumeratorInterface
-    virtual aditof::Status searchSensors() override;
-    virtual aditof::Status
-    getDepthSensors(std::vector<std::shared_ptr<aditof::DepthSensorInterface>>
-                        &depthSensors) override;
-    virtual aditof::Status getStorages(
-        std::vector<std::shared_ptr<aditof::StorageInterface>> &storages)
-        override;
-    virtual aditof::Status getTemperatureSensors(
-        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
-            &temperatureSensors) override;
-
-  private:
-    struct SensorInfo {
-        aditof::SensorType sensorType;
-        std::string driverPath;
-    };
-
-    std::vector<SensorInfo> m_sensorsInfo;
-    std::vector<std::string> m_storagesInfo;
-    std::vector<std::string> m_temperatureSensorsInfo;
+struct UsbTemperatureSensor::ImplData {
+    int fd;
+    std::string name;
 };
 
-#endif // USB_SENSOR_ENUMERATOR_H
+UsbTemperatureSensor::UsbTemperatureSensor(const std::string &name)
+    : m_implData(new ImplData) {
+    m_implData->fd = -1;
+    m_implData->name = name;
+}
+
+UsbTemperatureSensor::~UsbTemperatureSensor() = default;
+
+Status UsbTemperatureSensor::open(void *handle) {
+    if (!handle) {
+        LOG(ERROR) << "Invalid handle";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    m_implData->fd = *(reinterpret_cast<int *>(handle));
+
+    return Status::OK;
+}
+
+Status UsbTemperatureSensor::read(float &temperature) {
+    if (!m_implData->fd) {
+        LOG(ERROR) << "Cannot read! Temperature sensor is not opened.";
+        return Status::GENERIC_ERROR;
+    }
+
+    float buffer[2];
+
+    // TO DO: add a request id to differentiate different temperature sensors
+
+    int ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
+        m_implData->fd, 3, 0, reinterpret_cast<uint8_t *>(buffer), 8, 8, true);
+    if (ret < 0) {
+        LOG(WARNING)
+            << "Failed to read a packet via UVC extension unit. Error: " << ret;
+        return Status::GENERIC_ERROR;
+    }
+
+    temperature = buffer[0];
+
+    return Status::OK;
+}
+
+Status UsbTemperatureSensor::close() {
+    m_implData->fd = -1;
+
+    return Status::OK;
+}
+
+Status UsbTemperatureSensor::getName(std::string &name) const {
+    name = m_implData->name;
+    return Status::OK;
+}
