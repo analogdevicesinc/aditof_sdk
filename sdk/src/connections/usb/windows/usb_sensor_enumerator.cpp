@@ -32,6 +32,7 @@
 #include "connections/usb/usb_sensor_enumerator.h"
 #include "connections/usb/usb_depth_sensor.h"
 #include "connections/usb/usb_storage.h"
+#include "connections/usb/usb_temperature_sensor.h"
 #include "connections/usb/usb_utils.h"
 #include "connections/usb/windows/usb_windows_utils.h"
 #include "utils.h"
@@ -162,6 +163,9 @@ Status UsbSensorEnumerator::searchSensors() {
 
                         m_storagesInfo =
                             UsbUtils::getStorageNames(sensorsPaths);
+
+                        m_temperatureSensorsInfo =
+                            UsbUtils::getTemperatureSensorNames(sensorsPaths);
                     }
                 }
             }
@@ -207,8 +211,13 @@ Status UsbSensorEnumerator::getStorages(
 
 Status UsbSensorEnumerator::getTemperatureSensors(
     std::vector<std::shared_ptr<TemperatureSensorInterface>>
-        & /*temperatureSensors*/) {
-    // TO DO: implement this
+        &temperatureSensors) {
+
+    temperatureSensors.clear();
+
+    for (const auto &name : m_temperatureSensorsInfo) {
+        auto tSensor = std::make_shared<UsbTemperatureSensor>(name);
+    }
 
     return Status::OK;
 }
