@@ -33,6 +33,7 @@
 #include "connections/network/network.h"
 #include "connections/network/network_depth_sensor.h"
 #include "connections/network/network_storage.h"
+#include "connections/network/network_temperature_sensor.h"
 
 #include <glog/logging.h>
 
@@ -85,6 +86,10 @@ Status NetworkSensorEnumerator::searchSensors() {
                 pbData.eeproms(j);
             m_storagesInfo.emplace_back(pbEepromData.driver_name());
         }
+
+        for (int k = 0; k < pbData.temperature_sensors_size(); ++k) {
+            m_tempeatureSensorsInfo.emplace_back(pbData.temperature_sensors(k));
+        }
     }
     status = static_cast<Status>(net->recv_buff.status());
 
@@ -119,8 +124,14 @@ Status NetworkSensorEnumerator::getStorages(
 
 Status NetworkSensorEnumerator::getTemperatureSensors(
     std::vector<std::shared_ptr<TemperatureSensorInterface>>
-        & /*temperatureSensors*/) {
-    // TO DO: implement this
+        &temperatureSensors) {
+
+    temperatureSensors.clear();
+
+    for (const auto &name : m_tempeatureSensorsInfo) {
+        auto tSensor = std::make_shared<NetworkTemperatureSensor>(name);
+        temperatureSensors.emplace_back(tSensor);
+    }
 
     return Status::OK;
 }
