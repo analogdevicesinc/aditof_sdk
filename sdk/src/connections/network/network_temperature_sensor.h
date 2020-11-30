@@ -29,45 +29,31 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef NETWORK_DEPTH_SENSOR_H
-#define NETWORK_DEPTH_SENSOR_H
+#ifndef NETWORK_TEMPERATURE_SENSOR
+#define NETWORK_TEMPERATURE_SENSOR
 
-#include "aditof/depth_sensor_interface.h"
-#include "aditof/device_construction_data.h"
-
+#include <aditof/temperature_sensor_interface.h>
 #include <memory>
+#include <string>
 
-class NetworkDepthSensor : public aditof::DepthSensorInterface {
+namespace aditof {
+
+class NetworkTemperatureSensor : public aditof::TemperatureSensorInterface {
   public:
-    NetworkDepthSensor(const std::string &ip, aditof::SensorType sensorType);
-    ~NetworkDepthSensor();
+    NetworkTemperatureSensor(const std::string &name);
+    ~NetworkTemperatureSensor();
 
-  public: // implements DepthSensorInterface
-    virtual aditof::Status open() override;
-    virtual aditof::Status start() override;
-    virtual aditof::Status stop() override;
-    virtual aditof::Status
-    getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) override;
-    virtual aditof::Status
-    setFrameType(const aditof::FrameDetails &details) override;
-    virtual aditof::Status program(const uint8_t *firmware,
-                                   size_t size) override;
-    virtual aditof::Status getFrame(uint16_t *buffer) override;
-    virtual aditof::Status readAfeRegisters(const uint16_t *address,
-                                            uint16_t *data,
-                                            size_t length) override;
-    virtual aditof::Status writeAfeRegisters(const uint16_t *address,
-                                             const uint16_t *data,
-                                             size_t length) override;
-    virtual aditof::Status
-    getDetails(aditof::SensorDetails &details) const override;
-    virtual aditof::Status getHandle(void **handle) override;
+    // Implements TemperatureSensorInterface
+    virtual aditof::Status open(void *handle) override;
+    virtual aditof::Status read(float &temperature) override;
+    virtual aditof::Status close() override;
+    virtual aditof::Status getName(std::string &name) const override;
 
   private:
     struct ImplData;
-
-    aditof::SensorDetails m_sensorDetails;
     std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // NETWORK_DEPTH_SENSOR_H
+} // namespace aditof
+
+#endif // NETWORK_TEMPERATURE_SENSOR
