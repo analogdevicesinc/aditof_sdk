@@ -42,6 +42,7 @@ message DeviceConstructionData
   DeviceType device_type = 10;                  // The type of a device
   string driver_path = 20;                      // Information about the driver the device is using
   repeated EepromConstructionData eeproms = 30; // Information about available eeproms
+  repeated string temperature_sensors = 40;     // Temperature sensors names that are available
 }
 
 message FrameDetails
