@@ -89,6 +89,8 @@ static aditof::Status getAvailableSensors(IMoniker *Moniker,
     return Status::OK;
 }
 
+UsbSensorEnumerator::~UsbSensorEnumerator() = default;
+
 Status UsbSensorEnumerator::searchSensors() {
     using namespace std;
     Status status = Status::OK;

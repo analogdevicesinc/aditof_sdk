@@ -350,12 +350,12 @@ aditof::Status UsbDepthSensor::open() {
     }
 
     status =
-        getDevice(&m_implData->handle.pVideoInputFilter, m_devData.driverPath);
+        getDevice(&m_implData->handle.pVideoInputFilter, m_driverPath);
     if (status != Status::OK) {
         return status;
     }
 
-    std::wstring stemp = s2ws(m_devData.driverPath);
+    std::wstring stemp = s2ws(m_driverPath);
     hr = m_implData->handle.pGraph->AddFilter(
         m_implData->handle.pVideoInputFilter, stemp.c_str());
     if (FAILED(hr)) {
