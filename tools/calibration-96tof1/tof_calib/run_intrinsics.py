@@ -71,8 +71,6 @@ def run_intrinsic_calibration(intrinsic_config_json, **kwargs):
     
     #Initialize tof class
     system = tof.System()
-    status = system.initialize()
-    logger.info("System Initialize: " + str(status))
 
     # Get Camera and program firmware
     cam_handle = device.open_device2(system)

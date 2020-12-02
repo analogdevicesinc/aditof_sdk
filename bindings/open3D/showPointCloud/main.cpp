@@ -50,11 +50,6 @@ int main(int argc, char *argv[]) {
     Status status = Status::OK;
 
     System system;
-    status = system.initialize();
-    if (status != Status::OK) {
-        LOG(ERROR) << "Could not initialize system!";
-        return 0;
-    }
 
     std::vector<std::shared_ptr<Camera>> cameras;
     system.getCameraList(cameras);

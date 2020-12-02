@@ -127,12 +127,6 @@ SystemImpl::SystemImpl() {}
 
 SystemImpl::~SystemImpl() = default;
 
-Status SystemImpl::initialize() {
-    LOG(INFO) << "System initialized";
-
-    return Status::OK;
-}
-
 Status SystemImpl::getCameraList(
     std::vector<std::shared_ptr<Camera>> &cameraList) const {
 

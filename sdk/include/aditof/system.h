@@ -74,14 +74,6 @@ class SDK_API System {
 
   public:
     /**
-     * @brief Initializes the system. Detects available TOF cameras and stores
-     * them internally. The System object owns the cameras, which will be
-     * destroyed the objects gets out of scope.
-     * @return Status
-     */
-    Status initialize();
-
-    /**
      * @brief Populates the given list with Camera objects that correspond to
      * the available cameras.
      * @param[out] cameraList - A container to be set with the available cameras

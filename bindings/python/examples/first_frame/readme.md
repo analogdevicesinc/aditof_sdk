@@ -10,10 +10,9 @@ If NumPy library is not found you should install it using pip (a package manager
 pip install numpy
 ```
 
-For initializing the system
+For creating the system object
 ```python
 system = tof.System()
-status = system.initialize()
 ```
 
 Getting a camera from the system, configuring the mode and the frame type and initializing it
