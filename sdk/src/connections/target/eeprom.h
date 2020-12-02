@@ -40,6 +40,7 @@ namespace aditof {
 class Eeprom : public StorageInterface {
   public:
     Eeprom(const std::string &driverName, const std::string &driverPath);
+    ~Eeprom();
 
     // Implements StorageInterface
     virtual aditof::Status open(void *handle) override;
