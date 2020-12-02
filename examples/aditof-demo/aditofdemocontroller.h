@@ -33,7 +33,6 @@
 #define ADITOFDEMOCONTROLLER_H
 
 #include <aditof/camera.h>
-#include <aditof/device_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
 
