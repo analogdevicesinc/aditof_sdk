@@ -54,6 +54,8 @@ Eeprom::Eeprom(const std::string &driverName, const std::string &driverPath)
     m_implData->driverPath = driverPath;
 }
 
+Eeprom::~Eeprom() = default;
+
 Status Eeprom::open(void *) {
     eeprom *e = &m_implData->eepromDev;
 
