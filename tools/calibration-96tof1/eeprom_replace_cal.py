@@ -85,8 +85,6 @@ def run_eeprom_replace_cal(config_json, **kwargs):
 
     # Open the ADI TOF Camera
     system = tof.System()
-    status = system.initialize()
-    print("system.initialize()", status)
     cam_handle = device.open_device2(system, ipString)
     eeproms = []
     cam_handle.getEeproms(eeproms)

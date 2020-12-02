@@ -171,9 +171,6 @@ if __name__ == "__main__":
 
     # Initialize ToF camera
     system = tof.System()
-    status = system.initialize()
-    if not status:
-        print("system.initialize() failed with status: ", status)
 
     cameras = []
     status = system.getCameraList(cameras)

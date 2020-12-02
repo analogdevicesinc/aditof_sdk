@@ -78,9 +78,6 @@ if __name__ == "__main__":
                   17: 'sheep', 18: 'sofa', 19: 'train', 20: 'tvmonitor'}
 
     system = tof.System()
-    status = system.initialize()
-    if not status:
-        print("system.initialize() failed with status: ", status)
 
     cameras = []
     status = system.getCameraList(cameras)

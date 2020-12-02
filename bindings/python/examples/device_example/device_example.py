@@ -36,8 +36,6 @@ import numpy as np
 # Find a camera
 
 system = tof.System()
-status = system.initialize()
-print("system.initialize()", status)
 
 cameras = []
 status = system.getCameraList(cameras)
