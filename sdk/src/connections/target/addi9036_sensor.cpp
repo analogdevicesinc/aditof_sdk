@@ -30,6 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "addi9036_sensor.h"
+#include "aditof/frame_operations.h"
 #include "target_definitions.h"
 
 extern "C" {
