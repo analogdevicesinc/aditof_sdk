@@ -49,6 +49,8 @@ UsbStorage::UsbStorage(const std::string &name) : m_implData(new ImplData) {
     m_implData->name = name;
 }
 
+UsbStorage::~UsbStorage() = default;
+
 Status UsbStorage::open(void *handle) {
     if (!handle) {
         LOG(ERROR) << "Invalid handle";
