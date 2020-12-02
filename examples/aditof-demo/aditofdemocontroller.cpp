@@ -31,6 +31,8 @@
  */
 #include "aditofdemocontroller.h"
 
+#include <aditof/depth_sensor_interface.h>
+#include <aditof/temperature_sensor_interface.h>
 #include <glog/logging.h>
 #include <iostream>
 
@@ -190,10 +192,16 @@ std::pair<float, float> AdiTofDemoController::getTemperature() {
 
     auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
 
-    std::shared_ptr<aditof::DeviceInterface> device = camera->getDevice();
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+        tempSensors;
+    camera->getTemperatureSensors(tempSensors);
 
-    device->readAfeTemp(returnValue.first);
-    device->readLaserTemp(returnValue.second);
+    if (tempSensors.size() > 0) {
+        tempSensors[0]->read(returnValue.first);
+    }
+    if (tempSensors.size() > 1) {
+        tempSensors[0]->read(returnValue.second);
+    }
 
     return returnValue;
 }
@@ -205,18 +213,18 @@ aditof::Status AdiTofDemoController::writeAFEregister(uint16_t *address,
         return aditof::Status::GENERIC_ERROR;
     }
 
-    auto device =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDevice();
-    return device->writeAfeRegisters(address, data, noOfEntries);
+    auto camSensor =
+        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSensor();
+    return camSensor->writeAfeRegisters(address, data, noOfEntries);
 }
 
 aditof::Status AdiTofDemoController::readAFEregister(uint16_t *address,
                                                      uint16_t *data,
                                                      uint16_t noOfEntries) {
 
-    auto device =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDevice();
-    return device->readAfeRegisters(address, data, noOfEntries);
+    auto camSensor =
+        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSensor();
+    return camSensor->readAfeRegisters(address, data, noOfEntries);
 }
 
 void AdiTofDemoController::startRecording(const std::string &fileName,
