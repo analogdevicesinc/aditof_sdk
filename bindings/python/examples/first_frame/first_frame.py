@@ -33,8 +33,6 @@ import aditofpython as tof
 import numpy as np
 
 system = tof.System()
-status = system.initialize()
-print("system.initialize()", status)
 
 cameras = []
 status = system.getCameraList(cameras)

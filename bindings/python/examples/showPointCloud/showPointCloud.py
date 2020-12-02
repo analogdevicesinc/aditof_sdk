@@ -51,9 +51,6 @@ def transform_image(np_image):
 
 if __name__ == "__main__":
     system = tof.System()
-    status = system.initialize()
-    if not status:
-        print("system.initialize() failed with status: ", status)
 
     cameras = []
     status = system.getCameraList(cameras)

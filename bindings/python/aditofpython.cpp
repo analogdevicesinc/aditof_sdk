@@ -114,7 +114,6 @@ PYBIND11_MODULE(aditofpython, m) {
     // System
     py::class_<aditof::System>(m, "System")
         .def(py::init<>())
-        .def("initialize", &aditof::System::initialize)
         .def("getCameraList",
              [](aditof::System &system, py::list cameras) {
                  std::vector<std::shared_ptr<aditof::Camera>> cameraList;
