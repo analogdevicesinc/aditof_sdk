@@ -38,12 +38,16 @@
 
 #include "aditof/depth_sensor_interface.h"
 #include "aditof/storage_interface.h"
+#include "aditof/temperature_sensor_interface.h"
 #include <aditof/camera.h>
 
 class Camera96Tof1 : public aditof::Camera {
   public:
-    Camera96Tof1(std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-                 std::shared_ptr<aditof::StorageInterface> eeprom);
+    Camera96Tof1(
+        std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
+        std::shared_ptr<aditof::StorageInterface> eeprom,
+        std::shared_ptr<aditof::TemperatureSensorInterface> afeTempSensor,
+        std::shared_ptr<aditof::TemperatureSensorInterface> laserTempSensor);
     ~Camera96Tof1();
 
   public: // implements Camera
@@ -69,6 +73,9 @@ class Camera96Tof1 : public aditof::Camera {
     std::shared_ptr<aditof::DepthSensorInterface> getSensor();
     aditof::Status
     getEeproms(std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms);
+    aditof::Status getTemperatureSensors(
+        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+            &sensors);
 
   private:
     aditof::Status setNoiseReductionTreshold(uint16_t treshold);
@@ -78,6 +85,8 @@ class Camera96Tof1 : public aditof::Camera {
     aditof::CameraDetails m_details;
     std::shared_ptr<aditof::DepthSensorInterface> m_depthSensor;
     std::shared_ptr<aditof::StorageInterface> m_eeprom;
+    std::shared_ptr<aditof::TemperatureSensorInterface> m_afeTempSensor;
+    std::shared_ptr<aditof::TemperatureSensorInterface> m_laserTempSensor;
     bool m_devStarted;
     bool m_eepromInitialized;
     std::vector<std::string> m_availableControls;
