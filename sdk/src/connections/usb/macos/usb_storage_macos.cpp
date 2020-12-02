@@ -42,8 +42,7 @@ struct UsbStorage::ImplData {};
 
 UsbStorage::UsbStorage() {}
 
-aditof::Status UsbStorage::open(void *, const std::string &,
-                                const std::string &) {
+aditof::Status UsbStorage::open(void *) {
     // TO DO when enabling macos support
     return Status::UNAVAILABLE;
 }

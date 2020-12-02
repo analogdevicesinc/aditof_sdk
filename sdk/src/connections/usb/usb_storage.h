@@ -44,8 +44,7 @@ class UsbStorage : public aditof::StorageInterface {
     ~UsbStorage();
 
     // Implements StorageInterface
-    virtual aditof::Status open(void *handle, const std::string &name,
-                                const std::string &driver_path) override;
+    virtual aditof::Status open(void *handle) override;
     virtual aditof::Status read(const uint32_t address, uint8_t *data,
                                 const size_t bytesCount) override;
     virtual aditof::Status write(const uint32_t address, const uint8_t *data,

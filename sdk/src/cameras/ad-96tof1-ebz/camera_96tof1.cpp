@@ -100,8 +100,7 @@ aditof::Status Camera96Tof1::initialize() {
     }
 
     // Initialize EEPROM
-    // TO DO: rework the open() method so that it doesn't take driver paths. They should be provided upon obj construction
-    status = m_eeprom->open(handle, "", "");
+    status = m_eeprom->open(handle);
     if (status != Status::OK) {
         std::string name;
         m_eeprom->getName(name);
