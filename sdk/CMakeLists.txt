@@ -85,7 +85,6 @@ file(GLOB PLATFORM_SOURCES
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
@@ -103,7 +102,6 @@ file(GLOB NETWORK_HEADERS
 
 file(GLOB NETWORK_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.c
 )
 file(GLOB NETWORK_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.h
