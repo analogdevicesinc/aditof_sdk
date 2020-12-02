@@ -69,7 +69,7 @@ Status UsbTemperatureSensor::read(float &temperature) {
     ExUnitHandle handle;
 
     HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
-        &handle, &m_implData->handle.pVideoInputFilter);
+        &handle, &m_implData->handle->pVideoInputFilter);
     if (hr != S_OK) {
         LOG(WARNING) << "Failed to find node and get control. Error: "
                      << std::hex << hr;
