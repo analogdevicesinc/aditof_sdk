@@ -46,6 +46,7 @@ class Frame;
 class CameraSpecifics;
 class DepthSensorInterface;
 class StorageInterface;
+class TemperatureSensorInterface;
 
 /**
  * @class Camera
@@ -173,6 +174,15 @@ class SDK_API Camera {
      */
     virtual Status
     getEeproms(std::vector<std::shared_ptr<StorageInterface>> &eeproms) = 0;
+
+    /**
+     * @brief Gets the temperature sensors used internally by the camera.
+     * This gives direct access to the temperature sensor(s) of the camera.
+     * @param[out] sensors - List of internal temperature sensors
+     * @return Status
+     */
+    virtual Status getTemperatureSensors(
+        std::vector<std::shared_ptr<TemperatureSensorInterface>> &sensors) = 0;
 };
 
 } // namespace aditof
