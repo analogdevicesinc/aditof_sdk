@@ -66,10 +66,13 @@ static const std::string skEepromName = "24c1024";
 
 Camera96Tof1::Camera96Tof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-    std::shared_ptr<aditof::StorageInterface> eeprom)
-    : m_depthSensor(depthSensor), m_eeprom(eeprom), m_devStarted(false),
-      m_eepromInitialized(false), m_availableControls(availableControls),
-      m_revision("RevC") {}
+    std::shared_ptr<aditof::StorageInterface> eeprom,
+    std::shared_ptr<aditof::TemperatureSensorInterface> afeTempSensor,
+    std::shared_ptr<aditof::TemperatureSensorInterface> laserTempSensor)
+    : m_depthSensor(depthSensor), m_eeprom(eeprom),
+      m_afeTempSensor(afeTempSensor), m_laserTempSensor(laserTempSensor),
+      m_devStarted(false), m_eepromInitialized(false),
+      m_availableControls(availableControls), m_revision("RevC") {}
 
 Camera96Tof1::~Camera96Tof1() {
     if (m_eepromInitialized) {
@@ -374,6 +377,15 @@ aditof::Status Camera96Tof1::getEeproms(
     std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms) {
     eeproms.clear();
     eeproms.push_back(m_eeprom);
+
+    return aditof::Status::OK;
+}
+
+aditof::Status Camera96Tof1::getTemperatureSensors(
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &sensors) {
+    sensors.clear();
+    sensors.push_back(m_afeTempSensor);
+    sensors.push_back(m_laserTempSensor);
 
     return aditof::Status::OK;
 }
