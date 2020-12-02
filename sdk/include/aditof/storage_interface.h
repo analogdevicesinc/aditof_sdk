@@ -54,12 +54,9 @@ class StorageInterface {
     /**
      * @brief Open the communication channel with the storage.
      * @param handle - A handle to the object through which communication is done
-     * @param name - The name of the storage available on sysfs
-     * @param driver_path - The storage driver path on sysfs
      * @return Status
      */
-    virtual aditof::Status open(void *handle, const std::string &name,
-                                const std::string &driver_path) = 0;
+    virtual aditof::Status open(void *handle) = 0;
 
     /**
      * @brief Read data from storage
