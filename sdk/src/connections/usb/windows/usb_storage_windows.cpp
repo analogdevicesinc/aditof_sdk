@@ -49,8 +49,7 @@ UsbStorage::UsbStorage(const std::string &name) : m_implData(new ImplData) {
     m_implData->name = name;
 }
 
-Status UsbStorage::open(void *handle, const std::string &name,
-                        const std::string &driver_path) {
+Status UsbStorage::open(void *handle) {
     if (!handle) {
         LOG(ERROR) << "Invalid handle";
         return Status::INVALID_ARGUMENT;

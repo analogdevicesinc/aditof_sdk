@@ -48,8 +48,7 @@ NetworkStorage::NetworkStorage(const std::string &name)
 
 NetworkStorage::~NetworkStorage() = default;
 
-Status NetworkStorage::open(void *handle, const std::string &name,
-                            const std::string &driver_path) {
+Status NetworkStorage::open(void *handle) {
     if (!handle) {
         LOG(ERROR) << "Invalid handle";
         return Status::INVALID_ARGUMENT;
