@@ -91,8 +91,6 @@ def test_cal_eeprom():
 
     # Open the ADI TOF Camera
     system = tof.System()
-    status = system.initialize()
-    print("system.initialize()", status)
     cam_handle = device.open_device2(system)
     eeproms = []
     cam_handle.getEeproms(eeproms)

@@ -52,8 +52,7 @@ aditof::System system;
 aditof::Status status;
 std::vector<aditof::Camera *> cameras;
  
-// Initialize TOF system
-status = system.initialize();
+// Get the cameras
 status = system.getCameraList(cameras);
  
 // Initialize first TOF camera

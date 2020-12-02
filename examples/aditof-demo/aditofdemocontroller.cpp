@@ -38,7 +38,6 @@ AdiTofDemoController::AdiTofDemoController()
     : m_cameraInUse(-1), m_frameRequested(false),
       m_recorder(new AditofDemoRecorder()) {
     m_system = new aditof::System();
-    m_system->initialize();
     m_system->getCameraList(m_cameras);
     if (m_cameras.size()) {
         // Use the first camera that is found
@@ -68,7 +67,6 @@ AdiTofDemoController::AdiTofDemoController()
 bool AdiTofDemoController::setRegularConnection() {
     delete m_system;
     m_system = new aditof::System();
-    m_system->initialize();
     m_system->getCameraList(m_cameras);
     m_IsEthernetConnection = false;
     if (m_cameras.size()) {
@@ -107,7 +105,6 @@ bool AdiTofDemoController::setEthernetConnection(const std::string &ip) {
     if (m_IsEthernetConnection == true)
         m_cameras.clear();
     m_system = new aditof::System();
-    m_system->initialize();
     m_system->getCameraListAtIp(m_cameras, ip);
     m_IsEthernetConnection = true;
     if (m_cameras.size()) {

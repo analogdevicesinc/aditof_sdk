@@ -59,11 +59,6 @@ std::shared_ptr<Camera> initCamera(int argc, char **argv) {
     std::string ip = parseArgs(argc, argv);
 
     System system;
-    status = system.initialize();
-    if (status != Status::OK) {
-        LOG(ERROR) << "Could not initialize system!";
-        return nullptr;
-    }
 
     std::vector<std::shared_ptr<Camera>> cameras;
     if (ip.empty()) {
