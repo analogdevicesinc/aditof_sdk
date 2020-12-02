@@ -83,24 +83,12 @@ file(GLOB PLATFORM_HEADERS
 )
 
 file(GLOB NETWORK_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.c
 )
 file(GLOB NETWORK_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.h
 )
-
-if ( ${OS_SPECIFIC_DIR} STREQUAL ${TARGET_STRING} )
-    list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_device.cpp)
-    list(REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/local_eeprom.cpp)
-endif()
-
-if ( NOT WITH_NETWORK )
-    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_device.cpp)
-    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_device.h)
-    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_eeprom.cpp)
-    list (REMOVE_ITEM SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/ethernet_eeprom.h)
-endif()
 
 # Create target and set properties
 add_library(${PROJECT_NAME} SHARED
