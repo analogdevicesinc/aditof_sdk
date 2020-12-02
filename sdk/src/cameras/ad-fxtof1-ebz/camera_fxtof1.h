@@ -37,10 +37,13 @@
 #include <memory>
 
 #include <aditof/camera.h>
+#include <aditof/device_construction_data.h>
+#include <aditof/eeprom_interface.h>
 
 class CameraFxTof1 : public aditof::Camera {
   public:
-    CameraFxTof1(std::unique_ptr<aditof::DeviceInterface> device);
+    CameraFxTof1(std::unique_ptr<aditof::DeviceInterface> device,
+                 const aditof::DeviceConstructionData &data);
     ~CameraFxTof1();
 
   public: // implements Camera
@@ -63,6 +66,8 @@ class CameraFxTof1 : public aditof::Camera {
                               const std::string &value);
     aditof::Status getControl(const std::string &control,
                               std::string &value) const;
+    aditof::Status
+    getEeproms(std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms);
     std::shared_ptr<aditof::DeviceInterface> getDevice();
 
   private:
@@ -72,8 +77,11 @@ class CameraFxTof1 : public aditof::Camera {
   private:
     aditof::CameraDetails m_details;
     std::shared_ptr<aditof::DeviceInterface> m_device;
+    aditof::DeviceConstructionData m_devData;
+    std::shared_ptr<aditof::EepromInterface> m_eeprom;
     bool m_devStarted;
     bool m_devProgrammed;
+    bool m_eepromInitialized;
     std::vector<std::string> m_availableControls;
     CalibrationFxTof1 m_calibration;
     uint16_t m_noiseReductionThreshold;

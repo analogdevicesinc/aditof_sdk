@@ -32,6 +32,7 @@
 #include "calibration_fxtof1.h"
 #include "basecode.h"
 
+#include <aditof/eeprom_interface.h>
 #include <algorithm>
 #include <glog/logging.h>
 #include <math.h>
@@ -86,8 +87,7 @@ CalibrationFxTof1::~CalibrationFxTof1() {
 ReadCalMap - Read the entire calibration map from a binary file
 \device - Pointer to a device instance
 */
-aditof::Status
-CalibrationFxTof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
+aditof::Status CalibrationFxTof1::readCalMap(aditof::EepromInterface &eeprom) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -96,7 +96,7 @@ CalibrationFxTof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
 
     /*Read the mode data*/
     for (int i = 0; i < 2; i++) {
-        device->readEeprom(ROMADDR_CFG_BASE[i], mode_data, MODE_CFG_SIZE);
+        eeprom.read(ROMADDR_CFG_BASE[i], mode_data, MODE_CFG_SIZE);
 
         if (mode_data[0] == 0xFF) {
             LOG(WARNING)
@@ -189,9 +189,8 @@ CalibrationFxTof1::readCalMap(std::shared_ptr<aditof::DeviceInterface> device) {
     }
 
     /*Read the intrinsics and distortion params*/
-    device->readEeprom(ROMADDR_COMMOM_BASE + COMMON_BASE_OFFSET,
-                       (uint8_t *)intrinsic_data,
-                       MODE_CFG_SIZE - COMMON_BASE_OFFSET);
+    eeprom.read(ROMADDR_COMMOM_BASE + COMMON_BASE_OFFSET,
+                (uint8_t *)intrinsic_data, MODE_CFG_SIZE - COMMON_BASE_OFFSET);
     m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0],
                         &intrinsic_data[ARRAY_SIZE(intrinsic_data)]);
 

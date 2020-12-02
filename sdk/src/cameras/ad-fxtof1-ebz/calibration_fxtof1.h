@@ -33,6 +33,7 @@
 #define CALIBRATION_FXTOF1_H
 
 #include <aditof/device_interface.h>
+#include <aditof/eeprom_interface.h>
 #include <aditof/status_definitions.h>
 #include <iostream>
 #include <memory>
@@ -55,13 +56,17 @@ struct mode_struct {
     uint16_t depth2;
 };
 
+namespace aditof {
+class EepromInterface;
+}
+
 class CalibrationFxTof1 {
   public:
     CalibrationFxTof1();
     ~CalibrationFxTof1();
 
   public:
-    aditof::Status readCalMap(std::shared_ptr<aditof::DeviceInterface> device);
+    aditof::Status readCalMap(aditof::EepromInterface &eeprom);
     aditof::Status getAfeFirmware(const std::string &mode,
                                   std::vector<uint16_t> &data) const;
     aditof::Status getIntrinsic(float key, std::vector<float> &data) const;

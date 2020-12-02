@@ -65,7 +65,8 @@ CameraFactory::buildCamera(const DeviceConstructionData &data) {
 #endif
     case SensorType::SENSOR_FXTOF1:
 #ifdef FXTOF1
-        return std::unique_ptr<Camera>(new CameraFxTof1(std::move(device)));
+        return std::unique_ptr<Camera>(
+            new CameraFxTof1(std::move(device), data));
 #else
         return nullptr;
 #endif
