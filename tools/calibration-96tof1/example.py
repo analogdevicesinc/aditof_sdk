@@ -71,7 +71,6 @@ def run_example(remote):
         cam_ip = remote
 
     system = tof.System()
-    status = system.initialize()
     
     #Specify if you want to load firmware from lf files, or from EEPROM
     from_software = True

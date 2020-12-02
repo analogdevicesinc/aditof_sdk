@@ -147,8 +147,6 @@ def run_find_pc(config_json, **kwargs):
 
     # Initialize tof class
     system = tof.System()
-    status = system.initialize()
-    logger.info("System Initialize: " + str(status))
 
     ipString = ''
     # Get Camera and program firmware
