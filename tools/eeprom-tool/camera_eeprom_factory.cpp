@@ -41,6 +41,8 @@ std::unique_ptr<CameraEepromInterface> CameraEepromFactory::buildEeprom(
             new Camera96Tof1Eeprom(eeprom));
     case aditof::SensorType::SENSOR_CHICONY:
         return nullptr;
+    case aditof::SensorType::SENSOR_FXTOF1:
+        return nullptr;
     }
     return nullptr;
 }

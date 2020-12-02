@@ -32,6 +32,7 @@
 #include "camera_fxtof1.h"
 
 #include <aditof/device_interface.h>
+#include <aditof/eeprom_factory.h>
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
 
@@ -55,15 +56,20 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
         {"RevA", {{{"near", 250, 800}, {"medium", 300, 3000}}}}};
 
 static const std::string skCustomMode = "custom";
-
 static const std::vector<std::string> availableControls = {
     "noise_reduction_threshold", "ir_gamma_correction"};
-
-CameraFxTof1::CameraFxTof1(std::unique_ptr<aditof::DeviceInterface> device)
-    : m_device(std::move(device)), m_devStarted(false), m_devProgrammed(false),
+static const std::string skEepromName = "custom";
+CameraFxTof1::CameraFxTof1(std::unique_ptr<aditof::DeviceInterface> device,
+                           const aditof::DeviceConstructionData &data)
+    : m_device(std::move(device)), m_devData(data), m_devStarted(false),
+      m_devProgrammed(false), m_eepromInitialized(false),
       m_availableControls(availableControls), m_revision("RevA") {}
 
-CameraFxTof1::~CameraFxTof1() = default;
+CameraFxTof1::~CameraFxTof1() {
+    if (m_eepromInitialized) {
+        m_eeprom->close();
+    }
+}
 
 aditof::Status CameraFxTof1::initialize() {
     using namespace aditof;
@@ -72,18 +78,53 @@ aditof::Status CameraFxTof1::initialize() {
 
     Status status = m_device->open();
 
+    m_details.bitCount = 12;
+
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to open device";
         return status;
     }
 
-    status = m_calibration.readCalMap(m_device);
+    void *handle;
+    status = m_device->getHandle(&handle);
+    if (status != Status::OK) {
+        LOG(ERROR) << "Failed to obtain the handle";
+        return status;
+    }
+
+    // Initialize EEPROM
+    auto iter = std::find_if(m_devData.eeproms.begin(), m_devData.eeproms.end(),
+                             [](const EepromConstructionData &eData) {
+                                 return eData.driverName == skEepromName;
+                             });
+    if (iter == m_devData.eeproms.end()) {
+        LOG(ERROR)
+            << "No available info abouth the EEPROM required by the camera";
+        return status;
+    }
+
+    m_eeprom = EepromFactory::buildEeprom(m_devData.connectionType);
+    if (!m_eeprom) {
+        LOG(ERROR) << "Failed to create Eeprom object";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    const EepromConstructionData &eeprom24c1024Info = *iter;
+    status = m_eeprom->open(handle, eeprom24c1024Info.driverName.c_str(),
+                            eeprom24c1024Info.driverPath.c_str());
+    if (status != Status::OK) {
+        LOG(ERROR) << "Failed to open EEPROM with name "
+                   << m_devData.eeproms.back().driverName << " is available";
+        return status;
+    }
+
+    m_eepromInitialized = true;
+
+    status = m_calibration.readCalMap(*m_eeprom);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to read calibration data from eeprom";
         return status;
     }
-
-    m_details.bitCount = 12;
 
     LOG(INFO) << "Camera initialized";
 
@@ -282,7 +323,6 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
             frameDataLocation,
             m_details.frameType.width * m_details.frameType.height / 2);
     }
-
     return Status::OK;
 }
 
@@ -293,6 +333,14 @@ aditof::Status CameraFxTof1::getDetails(aditof::CameraDetails &details) const {
     details = m_details;
 
     return status;
+}
+
+aditof::Status CameraFxTof1::getEeproms(
+    std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms) {
+    eeproms.clear();
+    eeproms.push_back(m_eeprom);
+
+    return aditof::Status::OK;
 }
 
 std::shared_ptr<aditof::DeviceInterface> CameraFxTof1::getDevice() {
