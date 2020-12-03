@@ -69,6 +69,15 @@ Status TargetSensorEnumerator::getDepthSensors(
 Status TargetSensorEnumerator::getStorages(
     std::vector<std::shared_ptr<StorageInterface>> &storages) {
 
+    // Check if EEPROM is available
+    struct stat st;
+    if (stat(EEPROM_DEV_PATH, &st) == 0) {
+        StorageInfo eepromInfo;
+        eepromInfo.driverName = EEPROM_NAME;
+        eepromInfo.driverPath = EEPROM_DEV_PATH;
+        m_storagesInfo.emplace_back(eepromInfo);
+    }
+
     storages.clear();
 
     for (const auto &eInfo : m_storagesInfo) {
