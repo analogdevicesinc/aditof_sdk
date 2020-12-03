@@ -172,7 +172,6 @@ Status TargetSensorEnumerator::searchSensors() {
 
     // Identify any eligible time of flight cameras
     for (const auto &media : mediaPaths) {
-
         DLOG(INFO) << "Looking at: " << media << " for an eligible TOF camera";
 
         std::string devPath;
@@ -187,21 +186,13 @@ Status TargetSensorEnumerator::searchSensors() {
         if (devPath.empty() || subdevPath.empty()) {
             continue;
         }
+        DLOG(INFO) << "Considering: " << media << " an eligible TOF camera";
 
         SensorInfo sInfo;
         sInfo.sensorType = SensorType::SENSOR_ADDI9036;
         sInfo.driverPath = devPath;
         sInfo.subDevPath = subdevPath;
-	m_sensorsInfo.emplace_back(sInfo);
-    }
-
-    // Check if EEPROM is available
-    struct stat st;
-    if (stat(EEPROM_DEV_PATH, &st) == 0) {
-        StorageInfo eepromInfo;
-        eepromInfo.driverName = EEPROM_NAME;
-        eepromInfo.driverPath = EEPROM_DEV_PATH;
-        m_storagesInfo.emplace_back(eepromInfo);
+        m_sensorsInfo.emplace_back(sInfo);
     }
 
     return status;
