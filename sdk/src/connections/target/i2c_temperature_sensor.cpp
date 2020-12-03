@@ -30,7 +30,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "i2c_temperature_sensor.h"
+extern "C" {
 #include "temp_sensor.h"
+}
 
 #include <errno.h>
 #include <fcntl.h>
