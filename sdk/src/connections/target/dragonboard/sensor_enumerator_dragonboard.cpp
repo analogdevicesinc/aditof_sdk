@@ -192,6 +192,7 @@ Status TargetSensorEnumerator::searchSensors() {
         sInfo.sensorType = SensorType::SENSOR_ADDI9036;
         sInfo.driverPath = devPath;
         sInfo.subDevPath = subdevPath;
+	m_sensorsInfo.emplace_back(sInfo);
     }
 
     // Check if EEPROM is available
