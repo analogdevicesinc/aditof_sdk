@@ -29,56 +29,72 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef ADDI9036_H
-#define ADDI9036_H
+#ifndef ADDI9036_SENSOR_H
+#define ADDI9036_SENSOR_H
 
 #include "aditof/depth_sensor_interface.h"
 #include "aditof/device_construction_data.h"
+#include "connections/target/v4l_buffer_access_interface.h"
 
 #include <memory>
-
-struct v4l2_buffer;
 
 namespace aditof {
 static const unsigned int FRAME_WIDTH = 640;
 static const unsigned int FRAME_HEIGHT = 480;
 } // namespace aditof
 
-class Addi9036Sensor : public aditof::DepthSensorInterface {
+class Addi9036Sensor : public aditof::DepthSensorInterface,
+                       public aditof::V4lBufferAccessInterface {
   public:
     Addi9036Sensor(const std::string &driverPath,
                    const std::string &driverSubPath);
     ~Addi9036Sensor();
 
   public: // implements DepthSensorInterface
-    virtual aditof::Status open();
-    virtual aditof::Status start();
-    virtual aditof::Status stop();
+    virtual aditof::Status open() override;
+    virtual aditof::Status start() override;
+    virtual aditof::Status stop() override;
     virtual aditof::Status
-    getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types);
-    virtual aditof::Status setFrameType(const aditof::FrameDetails &details);
-    virtual aditof::Status program(const uint8_t *firmware, size_t size);
-    virtual aditof::Status getFrame(uint16_t *buffer);
+    getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) override;
+    virtual aditof::Status
+    setFrameType(const aditof::FrameDetails &details) override;
+    virtual aditof::Status program(const uint8_t *firmware,
+                                   size_t size) override;
+    virtual aditof::Status getFrame(uint16_t *buffer) override;
     virtual aditof::Status readAfeRegisters(const uint16_t *address,
-                                            uint16_t *data, size_t length);
+                                            uint16_t *data,
+                                            size_t length) override;
     virtual aditof::Status writeAfeRegisters(const uint16_t *address,
                                              const uint16_t *data,
-                                             size_t length);
-    virtual aditof::Status getDetails(aditof::SensorDetails &details) const;
+                                             size_t length) override;
+    virtual aditof::Status
+    getDetails(aditof::SensorDetails &details) const override;
     virtual aditof::Status getHandle(void **handle) override;
 
-  public:
+  public: // implements V4lBufferAccessInterface
     // Methods that give a finer control than getFrame()
-    aditof::Status waitForBuffer(struct VideoDev *dev = nullptr);
-    aditof::Status dequeueInternalBuffer(struct v4l2_buffer &buf,
-                                         struct VideoDev *dev = nullptr);
-    aditof::Status getInternalBuffer(uint8_t **buffer, uint32_t &buf_data_len,
-                                     const struct v4l2_buffer &buf,
-                                     struct VideoDev *dev = nullptr);
-    aditof::Status enqueueInternalBuffer(struct v4l2_buffer &buf,
-                                         struct VideoDev *dev = nullptr);
+    // And works if there is only one v4lbuffer (if many, then I don't know, maybe restructure this interface)
+    virtual aditof::Status waitForBuffer() override;
+    virtual aditof::Status
+    dequeueInternalBuffer(struct v4l2_buffer &buf) override;
+    virtual aditof::Status
+    getInternalBuffer(uint8_t **buffer, uint32_t &buf_data_len,
+                      const struct v4l2_buffer &buf) override;
+    virtual aditof::Status
+    enqueueInternalBuffer(struct v4l2_buffer &buf) override;
+    virtual aditof::Status
+    getDeviceFileDescriptor(int &fileDescriptor) override;
 
-    aditof::Status getDeviceFileDescriptor(int &fileDescriptor);
+  private:
+    aditof::Status waitForBufferPrivate(struct VideoDev *dev = nullptr);
+    aditof::Status dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
+                                                struct VideoDev *dev = nullptr);
+    aditof::Status getInternalBufferPrivate(uint8_t **buffer,
+                                            uint32_t &buf_data_len,
+                                            const struct v4l2_buffer &buf,
+                                            struct VideoDev *dev = nullptr);
+    aditof::Status enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
+                                                struct VideoDev *dev = nullptr);
 
   private:
     struct ImplData;
@@ -88,4 +104,4 @@ class Addi9036Sensor : public aditof::DepthSensorInterface {
     std::unique_ptr<ImplData> m_implData;
 };
 
-#endif // ADDI9036_H
+#endif // ADDI9036_SENSOR_H

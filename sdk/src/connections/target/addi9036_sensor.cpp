@@ -556,12 +556,12 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
 
     for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
         dev = &m_implData->videoDevs[i];
-        status = waitForBuffer(dev);
+        status = waitForBufferPrivate(dev);
         if (status != Status::OK) {
             return status;
         }
 
-        status = dequeueInternalBuffer(buf[i], dev);
+        status = dequeueInternalBufferPrivate(buf[i], dev);
         if (status != Status::OK) {
             return status;
         }
@@ -581,7 +581,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
 
     for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
         dev = &m_implData->videoDevs[i];
-        status = getInternalBuffer(&pdata[i], buf_data_len, buf[i], dev);
+        status = getInternalBufferPrivate(&pdata[i], buf_data_len, buf[i], dev);
         if (status != Status::OK) {
             return status;
         }
@@ -723,7 +723,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
 
     for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
         dev = &m_implData->videoDevs[i];
-        status = enqueueInternalBuffer(buf[i], dev);
+        status = enqueueInternalBufferPrivate(buf[i], dev);
         if (status != Status::OK) {
             return status;
         }
@@ -813,7 +813,7 @@ aditof::Status Addi9036Sensor::getHandle(void **handle) {
     return aditof::Status::OK;
 }
 
-aditof::Status Addi9036Sensor::waitForBuffer(struct VideoDev *dev) {
+aditof::Status Addi9036Sensor::waitForBufferPrivate(struct VideoDev *dev) {
     fd_set fds;
     struct timeval tv;
     int r;
@@ -841,8 +841,9 @@ aditof::Status Addi9036Sensor::waitForBuffer(struct VideoDev *dev) {
     return aditof ::Status::OK;
 }
 
-aditof::Status Addi9036Sensor::dequeueInternalBuffer(struct v4l2_buffer &buf,
-                                                     struct VideoDev *dev) {
+aditof::Status
+Addi9036Sensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
+                                             struct VideoDev *dev) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -875,10 +876,9 @@ aditof::Status Addi9036Sensor::dequeueInternalBuffer(struct v4l2_buffer &buf,
     return status;
 }
 
-aditof::Status Addi9036Sensor::getInternalBuffer(uint8_t **buffer,
-                                                 uint32_t &buf_data_len,
-                                                 const struct v4l2_buffer &buf,
-                                                 struct VideoDev *dev) {
+aditof::Status Addi9036Sensor::getInternalBufferPrivate(
+    uint8_t **buffer, uint32_t &buf_data_len, const struct v4l2_buffer &buf,
+    struct VideoDev *dev) {
     if (dev == nullptr)
         struct VideoDev *dev = &m_implData->videoDevs[0];
 
@@ -889,8 +889,9 @@ aditof::Status Addi9036Sensor::getInternalBuffer(uint8_t **buffer,
     return aditof::Status::OK;
 }
 
-aditof::Status Addi9036Sensor::enqueueInternalBuffer(struct v4l2_buffer &buf,
-                                                     struct VideoDev *dev) {
+aditof::Status
+Addi9036Sensor::enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
+                                             struct VideoDev *dev) {
     if (dev == nullptr)
         struct VideoDev *dev = &m_implData->videoDevs[0];
 
@@ -913,4 +914,22 @@ aditof::Status Addi9036Sensor::getDeviceFileDescriptor(int &fileDescriptor) {
     }
 
     return Status::INVALID_ARGUMENT;
+}
+
+aditof::Status Addi9036Sensor::waitForBuffer() {
+    return waitForBufferPrivate();
+}
+
+aditof::Status Addi9036Sensor::dequeueInternalBuffer(struct v4l2_buffer &buf) {
+    return dequeueInternalBufferPrivate(buf);
+}
+
+aditof::Status
+Addi9036Sensor::getInternalBuffer(uint8_t **buffer, uint32_t &buf_data_len,
+                                  const struct v4l2_buffer &buf) {
+    return getInternalBufferPrivate(buffer, buf_data_len, buf);
+}
+
+aditof::Status Addi9036Sensor::enqueueInternalBuffer(struct v4l2_buffer &buf) {
+    return enqueueInternalBufferPrivate(buf);
 }
