@@ -33,11 +33,11 @@
 
 #include "camera_eeprom_factory.h"
 #include "camera_eeprom_interface.h"
-#include <aditof/device_enumerator_factory.h>
-#include <aditof/device_enumerator_interface.h>
-#include <aditof/device_factory.h>
+#include <aditof/sensor_enumerator_factory.h>
+#include <aditof/sensor_enumerator_interface.h>
+// #include <aditof/sensor_factory.h>
+#include <aditof/connections.h>
 #include <aditof/eeprom_construction_data.h>
-#include <aditof/eeprom_factory.h>
 
 #include <algorithm>
 #include <fstream>
@@ -46,9 +46,10 @@
 #include <iostream>
 
 #ifdef CHICONY_006
+#error CHICONY_006 not yet supported
 const aditof::SensorType sensorType = aditof::SensorType::SENSOR_CHICONY;
 #else
-const aditof::SensorType sensorType = aditof::SensorType::SENSOR_96TOF1;
+const aditof::SensorType sensorType = aditof::SensorType::SENSOR_ADDI9036;
 #endif
 
 const std::string connectionTypeMapStr[] = {"LOCAL", "USB", "ETHERNET"};
@@ -60,96 +61,98 @@ EepromTool::EepromTool() {
 aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
                                          std::string ip,
                                          std::string eepromName) {
-    const unsigned int usedDevDataIndex = 0;
+    const unsigned int usedDepthSensorIndex = 0;
     void *handle = nullptr;
     aditof::Status status;
-    std::unique_ptr<aditof::DeviceEnumeratorInterface> enumerator;
-    std::vector<aditof::DeviceConstructionData> devicesData;
+    std::unique_ptr<aditof::SensorEnumeratorInterface> enumerator;
+    std::vector<std::shared_ptr<aditof::DepthSensorInterface>> depthSensors;
+    std::vector<std::shared_ptr<aditof::StorageInterface>> storages;
 
     //create enumerator based on specified connection type
-    if (connectionType == aditof::ConnectionType::ETHERNET) {
+    switch (connectionType) {
+    case aditof::ConnectionType::ETHERNET:
         enumerator =
-            aditof::DeviceEnumeratorFactory::buildDeviceEnumeratorEthernet(ip);
+            aditof::SensorEnumeratorFactory::buildNetworkSensorEnumerator(ip);
         if (enumerator == nullptr) {
             LOG(ERROR) << "Network is not enabled";
             return aditof::Status::INVALID_ARGUMENT;
         }
-    } else {
-        enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
+        break;
+    case aditof::ConnectionType::USB:
+        enumerator =
+            aditof::SensorEnumeratorFactory::buildUsbSensorEnumerator();
+        break;
+    case aditof::ConnectionType::LOCAL:
+        enumerator =
+            aditof::SensorEnumeratorFactory::buildTargetSensorEnumerator();
+        break;
+    default:
+        LOG(ERROR) << "Selected connection type is not supported";
+        return aditof::Status::INVALID_ARGUMENT;
+        break;
     }
 
     LOG(INFO)
         << "Setting connection via "
         << connectionTypeMapStr[static_cast<unsigned int>(connectionType)];
 
-    //get devices
-    enumerator->findDevices(devicesData);
-    //only keep devices that use the specified connection type
-    devicesData.erase(
-        std::remove_if(devicesData.begin(), devicesData.end(),
-                       [connectionType](aditof::DeviceConstructionData dev) {
-                           return dev.connectionType != connectionType;
-                       }),
-        devicesData.end());
+    enumerator->searchSensors();
+    enumerator->getStorages(storages);
+    enumerator->getDepthSensors(depthSensors);
 
-    if (devicesData.size() <= usedDevDataIndex) {
-        LOG(ERROR) << "Cannot find device at index " << usedDevDataIndex;
+    if (storages.size() == 0) {
+        LOG(ERROR) << "Cannot find any storages";
         return aditof::Status::GENERIC_ERROR;
     }
-    m_devData = devicesData[usedDevDataIndex];
 
     if (eepromName.empty()) {
-        if (m_devData.eeproms.size() > 1) {
-            LOG(ERROR) << "Multiple EEPROMs available but none selected.";
+        if (storages.size() > 1) {
+            LOG(ERROR) << "Multiple storages available but none selected.";
             return aditof::Status::INVALID_ARGUMENT;
         }
-        if (m_devData.eeproms.size() == 1) {
-            eepromName = m_devData.eeproms[0].driverName;
+        if (storages.size() == 1) {
+            storages[0]->getName(eepromName);
         }
     }
 
     //get eeproms with the specified name
-    auto iter =
-        std::find_if(m_devData.eeproms.begin(), m_devData.eeproms.end(),
-                     [eepromName](const aditof::EepromConstructionData &eData) {
-                         return eData.driverName == eepromName;
-                     });
-    if (iter == m_devData.eeproms.end()) {
+    auto iter = std::find_if(
+        storages.begin(), storages.end(),
+        [eepromName](
+            const std::shared_ptr<aditof::StorageInterface>
+                &storage) { //TODO make storage const when getName is const
+            std::string storageName;
+            storage->getName(storageName);
+            return storageName == eepromName;
+        });
+    if (iter == storages.end()) {
         LOG(ERROR) << "No available info about the EEPROM required by the user";
         return aditof::Status::INVALID_ARGUMENT; //TODO review returned status
     }
 
-    m_eeprom = aditof::EepromFactory::buildEeprom(m_devData.connectionType);
-    if (!m_eeprom) {
-        LOG(ERROR) << "Failed to create an Eeprom object";
-        return aditof::Status::INVALID_ARGUMENT; //TODO review returned status
-    }
+    m_storage = *iter;
 
     //get handle
-    m_device = aditof::DeviceFactory::buildDevice(m_devData);
-    status = m_device->open();
+    status = depthSensors[usedDepthSensorIndex]->open();
     if (status != aditof::Status::OK) {
         LOG(WARNING) << "Failed to open device";
         return status;
     }
 
-    status = m_device->getHandle(&handle);
+    status = depthSensors[usedDepthSensorIndex]->getHandle(&handle);
     if (status != aditof::Status::OK) {
         LOG(ERROR) << "Failed to obtain the handle";
         return status;
     }
 
     //open eeprom
-    const aditof::EepromConstructionData &eepromInfo = *iter;
-    status = m_eeprom->open(handle, eepromInfo.driverName.c_str(),
-                            eepromInfo.driverPath.c_str());
+    status = m_storage->open(handle);
     if (status != aditof::Status::OK) {
-        LOG(ERROR) << "Failed to open EEPROM with name "
-                   << m_devData.eeproms.back().driverName;
+        LOG(ERROR) << "Failed to open storage";
         return status;
     }
 
-    m_camera_eeprom = CameraEepromFactory::buildEeprom(sensorType, m_eeprom);
+    m_camera_eeprom = CameraEepromFactory::buildEeprom(sensorType, m_storage);
 
     LOG(INFO) << "Successfully created connection to EEPROM";
 

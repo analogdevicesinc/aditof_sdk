@@ -33,19 +33,19 @@
 #define CAM96TOF1_EEPROM_H
 
 #include "camera_eeprom_interface.h"
-#include <aditof/eeprom_interface.h>
+#include <aditof/storage_interface.h>
 #include <aditof/system.h>
 
 #include <memory>
 
 class Camera96Tof1Eeprom : public CameraEepromInterface {
   public:
-    Camera96Tof1Eeprom(std::shared_ptr<aditof::EepromInterface> _eeprom);
+    Camera96Tof1Eeprom(std::shared_ptr<aditof::StorageInterface> _eeprom);
     virtual aditof::Status read(std::vector<uint8_t> &data) override;
     virtual aditof::Status write(const std::vector<uint8_t> &data) override;
 
   private:
-    std::shared_ptr<aditof::EepromInterface> m_eeprom;
+    std::shared_ptr<aditof::StorageInterface> m_eeprom;
 };
 
 #endif // CAM96TOF1_EEPROM_H
