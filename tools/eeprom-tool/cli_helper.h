@@ -38,7 +38,7 @@
 #include <string>
 
 #include <aditof/connections.h>
-#include <aditof/device_interface.h>
+//#include <aditof/device_interface.h>
 #include <aditof/status_definitions.h>
 
 using namespace aditof;
