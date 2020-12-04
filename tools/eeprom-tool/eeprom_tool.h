@@ -36,8 +36,8 @@
 #include "eeprom_map.h"
 #include <aditof/camera.h>
 #include <aditof/device_construction_data.h>
-#include <aditof/device_interface.h>
-#include <aditof/eeprom_interface.h>
+#include <aditof/depth_sensor_interface.h>
+#include <aditof/storage_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
 
@@ -71,9 +71,10 @@ class EepromTool {
 
   private:
     aditof::DeviceConstructionData m_devData;
-    std::shared_ptr<aditof::EepromInterface> m_eeprom;
+    std::shared_ptr<aditof::StorageInterface> m_eeprom;
     std::shared_ptr<CameraEepromInterface> m_camera_eeprom;
-    std::shared_ptr<aditof::DeviceInterface> m_device;
+    std::shared_ptr<aditof::DepthSensorInterface> m_device;
+    std::shared_ptr<aditof::StorageInterface> m_storage;
 };
 
 #endif // EEPROM_TOOL_H

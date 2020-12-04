@@ -35,7 +35,7 @@
 #include <glog/logging.h>
 
 Camera96Tof1Eeprom::Camera96Tof1Eeprom(
-    std::shared_ptr<aditof::EepromInterface> _eeprom)
+    std::shared_ptr<aditof::StorageInterface> _eeprom)
     : m_eeprom(_eeprom) {
     if (!_eeprom) {
         LOG(ERROR) << "null pointer to EEPROM.";
