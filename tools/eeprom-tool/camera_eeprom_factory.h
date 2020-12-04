@@ -33,8 +33,8 @@
 #define CAMERA_EEPROM_FACTORY_H
 
 #include "camera_eeprom_interface.h"
-#include <aditof/device_definitions.h>
-#include <aditof/eeprom_interface.h>
+#include <aditof/sensor_definitions.h>
+#include <aditof/storage_interface.h>
 
 #include <memory>
 
@@ -42,7 +42,7 @@ class CameraEepromFactory {
   public:
     static std::unique_ptr<CameraEepromInterface>
     buildEeprom(aditof::SensorType sensorType,
-                std::shared_ptr<aditof::EepromInterface> eeprom);
+                std::shared_ptr<aditof::StorageInterface> eeprom);
 };
 
 #endif // CAMERA_EEPROM_FACTORY_H
