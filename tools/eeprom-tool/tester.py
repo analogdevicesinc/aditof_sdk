@@ -26,7 +26,7 @@ class CommandType(Enum):
 
 
 def run_eeprom_tool(connection_type, command, path, ip=""):
-    cmd = "./" + EXEC_NAME
+    cmd = "./" + ls 
     connection_type_str = {ConnectionType.USB: "-u",
                            ConnectionType.LOCAL: "-m",
                            ConnectionType.ETHERNET: "-e"}.get(connection_type, "-")
