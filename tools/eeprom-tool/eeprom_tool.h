@@ -70,10 +70,7 @@ class EepromTool {
                                     const std::vector<uint8_t>);
 
   private:
-    aditof::DeviceConstructionData m_devData;
-    std::shared_ptr<aditof::StorageInterface> m_eeprom;
     std::shared_ptr<CameraEepromInterface> m_camera_eeprom;
-    std::shared_ptr<aditof::DepthSensorInterface> m_device;
     std::shared_ptr<aditof::StorageInterface> m_storage;
     std::vector<std::shared_ptr<aditof::StorageInterface>> m_storages;
 };
