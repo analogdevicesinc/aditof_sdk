@@ -254,11 +254,8 @@ aditof::Status EepromTool::writeFile(char const *filename,
 }
 
 EepromTool::~EepromTool() {
-    if (m_eeprom) {
-        m_eeprom->close();
-    }
-    if (m_device) {
-        m_device->stop();
+    if (m_storage) {
+        m_storage->close();
     }
     LOG(INFO) << "Destroyed connection";
 }
