@@ -66,7 +66,6 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
     aditof::Status status;
     std::unique_ptr<aditof::SensorEnumeratorInterface> enumerator;
     std::vector<std::shared_ptr<aditof::DepthSensorInterface>> depthSensors;
-    std::vector<std::shared_ptr<aditof::StorageInterface>> m_storages;
 
     //create enumerator based on specified connection type
     switch (connectionType) {
@@ -181,7 +180,7 @@ aditof::Status EepromTool::writeFileToEeprom(char const *filename) {
 }
 
 aditof::Status EepromTool::listEeproms() {
-    printf("found %ld storages%s:\n", m_storages.size(),
+    printf("found %ld storage%s:\n", m_storages.size(),
            m_storages.size() == 1 ? "" : "s");
 
     //list all found eeproms that are contained in the map
