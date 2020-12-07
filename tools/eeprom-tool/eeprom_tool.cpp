@@ -66,7 +66,7 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
     aditof::Status status;
     std::unique_ptr<aditof::SensorEnumeratorInterface> enumerator;
     std::vector<std::shared_ptr<aditof::DepthSensorInterface>> depthSensors;
-    std::vector<std::shared_ptr<aditof::StorageInterface>> storages;
+    std::vector<std::shared_ptr<aditof::StorageInterface>> m_storages;
 
     //create enumerator based on specified connection type
     switch (connectionType) {
@@ -97,27 +97,27 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
         << connectionTypeMapStr[static_cast<unsigned int>(connectionType)];
 
     enumerator->searchSensors();
-    enumerator->getStorages(storages);
+    enumerator->getStorages(m_storages);
     enumerator->getDepthSensors(depthSensors);
 
-    if (storages.size() == 0) {
+    if (m_storages.size() == 0) {
         LOG(ERROR) << "Cannot find any storages";
         return aditof::Status::GENERIC_ERROR;
     }
 
     if (eepromName.empty()) {
-        if (storages.size() > 1) {
+        if (m_storages.size() > 1) {
             LOG(ERROR) << "Multiple storages available but none selected.";
             return aditof::Status::INVALID_ARGUMENT;
         }
-        if (storages.size() == 1) {
-            storages[0]->getName(eepromName);
+        if (m_storages.size() == 1) {
+            m_storages[0]->getName(eepromName);
         }
     }
 
     //get eeproms with the specified name
     auto iter = std::find_if(
-        storages.begin(), storages.end(),
+        m_storages.begin(), m_storages.end(),
         [eepromName](
             const std::shared_ptr<aditof::StorageInterface>
                 &storage) { //TODO make storage const when getName is const
@@ -125,7 +125,7 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
             storage->getName(storageName);
             return storageName == eepromName;
         });
-    if (iter == storages.end()) {
+    if (iter == m_storages.end()) {
         LOG(ERROR) << "No available info about the EEPROM required by the user";
         return aditof::Status::INVALID_ARGUMENT; //TODO review returned status
     }
@@ -181,15 +181,17 @@ aditof::Status EepromTool::writeFileToEeprom(char const *filename) {
 }
 
 aditof::Status EepromTool::listEeproms() {
-    printf("found %ld eeprom%s:\n", m_devData.eeproms.size(),
-           m_devData.eeproms.size() == 1 ? "" : "s");
+    printf("found %ld storages%s:\n", m_storages.size(),
+           m_storages.size() == 1 ? "" : "s");
 
     //list all found eeproms that are contained in the map
-    for (aditof::EepromConstructionData eepromData : m_devData.eeproms) {
-        if (EEPROMS.count(eepromData.driverName)) {
-            printf("%s\n", eepromData.driverName.c_str());
+    for (std::shared_ptr<aditof::StorageInterface> storage : m_storages) {
+        std::string storageName;
+        storage->getName(storageName);
+        if (EEPROMS.count(storageName)) {
+            printf("%s\n", storageName.c_str());
         } else {
-            LOG(WARNING) << "Unknown eeprom found " << eepromData.driverName;
+            LOG(WARNING) << "Unknown storage found " << storageName;
         }
     }
 
