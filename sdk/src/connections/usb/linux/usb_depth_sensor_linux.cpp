@@ -453,7 +453,7 @@ aditof::Status UsbDepthSensor::readAfeRegisters(const uint16_t *address,
 
     for (size_t i = 0; i < length; ++i) {
         ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
-            m_implData->fd, 2, address[i],
+            m_implData->fd, 2, reinterpret_cast<uint8_t *>(address[i]), 0,
             reinterpret_cast<uint8_t *>(&data[i]), 2, 2);
         if (ret < 0) {
             LOG(WARNING)

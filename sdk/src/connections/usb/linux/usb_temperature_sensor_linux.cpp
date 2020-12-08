@@ -39,12 +39,15 @@ using namespace aditof;
 struct UsbTemperatureSensor::ImplData {
     int fd;
     std::string name;
+    unsigned char id;
 };
 
-UsbTemperatureSensor::UsbTemperatureSensor(const std::string &name)
+UsbTemperatureSensor::UsbTemperatureSensor(const std::string &name,
+                                           unsigned char id)
     : m_implData(new ImplData) {
     m_implData->fd = -1;
     m_implData->name = name;
+    m_implData->id = id;
 }
 
 UsbTemperatureSensor::~UsbTemperatureSensor() = default;
@@ -66,19 +69,15 @@ Status UsbTemperatureSensor::read(float &temperature) {
         return Status::GENERIC_ERROR;
     }
 
-    float buffer[2];
-
-    // TO DO: add a request id to differentiate different temperature sensors
-
     int ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
-        m_implData->fd, 3, 0, reinterpret_cast<uint8_t *>(buffer), 8, 8, true);
+        m_implData->fd, 3, static_cast<uint8_t *>(&m_implData->id),
+        sizeof(m_implData->id), reinterpret_cast<uint8_t *>(&temperature), 4,
+        4);
     if (ret < 0) {
         LOG(WARNING)
             << "Failed to read a packet via UVC extension unit. Error: " << ret;
         return Status::GENERIC_ERROR;
     }
-
-    temperature = buffer[0];
 
     return Status::OK;
 }

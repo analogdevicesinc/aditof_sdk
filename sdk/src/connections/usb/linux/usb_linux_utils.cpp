@@ -70,9 +70,10 @@ int UsbLinuxUtils::xioctl(int fh, unsigned long request, void *arg) {
 }
 
 int UsbLinuxUtils::uvcExUnitReadOnePacket(int fd, uint8_t selector,
-                                          uint32_t address, uint8_t *data,
+                                          uint8_t *BytesToWrite,
+                                          uint8_t nbBytesToWrite, uint8_t *data,
                                           uint8_t nbPacketBytes,
-                                          uint8_t nbBytesToRead, bool getOnly) {
+                                          uint8_t nbBytesToRead) {
     int ret = 0;
 
     if (nbPacketBytes > MAX_BUF_SIZE) {
@@ -83,16 +84,22 @@ int UsbLinuxUtils::uvcExUnitReadOnePacket(int fd, uint8_t selector,
         return -EINVAL;
     }
 
+    if (nbBytesToWrite > MAX_BUF_SIZE) {
+        LOG(ERROR)
+            << nbBytesToWrite
+            << " is greater than the maximum size for a packet which is: "
+            << MAX_BUF_SIZE;
+        return -EINVAL;
+    }
+
     struct uvc_xu_control_query cq;
     uint8_t packet[nbPacketBytes];
 
-    if (!getOnly) {
-        // Use the first 5 bytes to set the address and size of paylod
-        uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
-        packet_ptr[0] = address;
-        packet[4] = nbPacketBytes;
+    if (nbBytesToWrite > 0) {
+        memcpy(packet, BytesToWrite, nbBytesToWrite);
+        packet[nbBytesToWrite] = nbPacketBytes;
 
-        // This set property will send the address from where the get property will do the reading
+        // This set property will send bytes needed by get property
         CLEAR(cq);
         cq.query = UVC_SET_CUR;
         cq.data = static_cast<unsigned char *>(packet);
@@ -108,7 +115,7 @@ int UsbLinuxUtils::uvcExUnitReadOnePacket(int fd, uint8_t selector,
         }
     }
 
-    // This get property will get the values at the address set previously
+    // This get property will get the bytes
     CLEAR(cq);
     cq.query = UVC_GET_CUR;
     cq.data = static_cast<unsigned char *>(packet);
@@ -128,41 +135,69 @@ int UsbLinuxUtils::uvcExUnitReadOnePacket(int fd, uint8_t selector,
     return ret;
 }
 
-int UsbLinuxUtils::uvcExUnitReadBuffer(int fd, uint8_t selector,
+int UsbLinuxUtils::uvcExUnitReadBuffer(int fd, uint8_t selector, int16_t id,
                                        uint32_t address, uint8_t *data,
                                        uint32_t bufferLength) {
     int ret = 0;
+
+    if (id < -1 || id > 255) {
+        LOG(ERROR)
+            << id
+            << " is greater than the maximum size (255) accepted for an id";
+        return -EINVAL;
+    }
+
+    uint8_t nbWrPacketBytes = sizeof(address) + (id > -1 ? 1 : 0);
+    uint8_t wrPacket[nbWrPacketBytes];
+    uint32_t *crtAddress =
+        reinterpret_cast<uint32_t *>(wrPacket + (id > -1 ? 1 : 0));
+
     uint32_t readBytes = 0;
     uint32_t readLength = 0;
-    uint32_t crtAddress = address;
 
+    *crtAddress = address;
+    if (id > -1) {
+        wrPacket[0] = id;
+    }
     while (readBytes < bufferLength) {
         readLength = bufferLength - readBytes < MAX_BUF_SIZE
                          ? bufferLength - readBytes
                          : MAX_BUF_SIZE;
-        ret = uvcExUnitReadOnePacket(fd, selector, crtAddress, data + readBytes,
-                                     MAX_BUF_SIZE, readLength);
+        ret =
+            uvcExUnitReadOnePacket(fd, selector, wrPacket, nbWrPacketBytes,
+                                   data + readBytes, MAX_BUF_SIZE, readLength);
         if (ret < 0) {
             LOG(WARNING) << "Failed to read a packet via UVC extension unit";
             return ret;
         }
-        crtAddress += readLength;
+        *crtAddress += readLength;
         readBytes += readLength;
     }
 
     return ret;
 }
 
-int UsbLinuxUtils::uvcExUnitWriteBuffer(int fd, uint8_t selector,
+int UsbLinuxUtils::uvcExUnitWriteBuffer(int fd, uint8_t selector, int16_t id,
                                         uint32_t address, const uint8_t *data,
                                         uint32_t bufferLength) {
+    int ret = 0;
+
+    if (id < -1 || id > 255) {
+        LOG(ERROR)
+            << id
+            << " is greater than the maximum size (255) accepted for an id";
+        return -EINVAL;
+    }
+
+    uint8_t nbLeadingBytes = sizeof(address) + (id > -1 ? 1 : 0);
     struct uvc_xu_control_query cq;
-    uint8_t packet[MAX_BUF_SIZE];
-    uint32_t *packet_ptr = reinterpret_cast<uint32_t *>(packet);
+    uint8_t packet[MAX_BUF_SIZE + 1]; // extra byte is for id
+    uint32_t *crtAddress =
+        reinterpret_cast<uint32_t *>(packet + (id > -1 ? 1 : 0));
     size_t writeLen = 0;
     size_t writtenBytes = 0;
-    uint32_t crtAddress = address;
-    int ret = 0;
+
+    *crtAddress = address;
 
     // This set property will send the address and data to be written at the address
     CLEAR(cq);
@@ -173,12 +208,11 @@ int UsbLinuxUtils::uvcExUnitWriteBuffer(int fd, uint8_t selector,
     cq.selector = selector;
 
     while (writtenBytes < bufferLength) {
-        writeLen = bufferLength - writtenBytes > MAX_BUF_SIZE - 5
-                       ? MAX_BUF_SIZE - 5
+        writeLen = bufferLength - writtenBytes > MAX_BUF_SIZE - nbLeadingBytes
+                       ? MAX_BUF_SIZE - nbLeadingBytes
                        : bufferLength - writtenBytes;
-        packet_ptr[0] = crtAddress;
-        packet[4] = writeLen;
-        memcpy(&packet[5], data + writtenBytes, writeLen);
+        packet[nbLeadingBytes] = writeLen;
+        memcpy(&packet[nbLeadingBytes], data + writtenBytes, writeLen);
 
         ret = UsbLinuxUtils::xioctl(fd, UVCIOC_CTRL_QUERY, &cq);
         if (ret == -1) {
@@ -186,7 +220,7 @@ int UsbLinuxUtils::uvcExUnitWriteBuffer(int fd, uint8_t selector,
             return ret;
         }
         writtenBytes += writeLen;
-        crtAddress += writeLen;
+        *crtAddress += writeLen;
     }
 
     return ret;
