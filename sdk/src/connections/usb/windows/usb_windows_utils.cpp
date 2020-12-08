@@ -128,12 +128,17 @@ HRESULT UsbWindowsUtils::UvcExUnitGetProperty(ExUnitHandle *handle,
 }
 
 HRESULT UsbWindowsUtils::UvcExUnitReadBuffer(IBaseFilter *pVideoInputFilter,
-                                             ULONG selector, uint32_t address,
-                                             uint8_t *data,
+                                             ULONG selector, int16_t id,
+                                             uint32_t address, uint8_t *data,
                                              uint32_t bufferLength) {
-    ExUnitHandle handle;
-    uint8_t packet[MAX_BUF_SIZE];
+    if (id < -1 || id > 255) {
+        LOG(ERROR)
+            << id
+            << " is greater than the maximum size (255) accepted for an id";
+        return E_INVALIDARG;
+    }
 
+    ExUnitHandle handle;
     HRESULT hr =
         UsbWindowsUtils::UvcFindNodeAndGetControl(&handle, &pVideoInputFilter);
     if (hr != S_OK) {
@@ -141,16 +146,22 @@ HRESULT UsbWindowsUtils::UvcExUnitReadBuffer(IBaseFilter *pVideoInputFilter,
         return hr;
     }
 
+    uint8_t nbWrPacketBytes = sizeof(address) + (id > -1 ? 1 : 0);
+    uint8_t posAddrInPacket = id > -1 ? 1 : 0;
+    uint8_t packet[MAX_BUF_SIZE];
     size_t readBytes = 0;
     size_t readlength = 0;
     size_t addr = address;
 
     while (readBytes < bufferLength) {
-        *(reinterpret_cast<uint32_t *>(&packet[0])) = addr;
+        if (id > -1) {
+            packet[0] = static_cast<uint8_t>(id);
+        }
+        *(reinterpret_cast<uint32_t *>(&packet[posAddrInPacket])) = addr;
         readlength = bufferLength - readBytes < MAX_BUF_SIZE
                          ? bufferLength - readBytes
                          : MAX_BUF_SIZE;
-        packet[4] = static_cast<uint8_t>(readlength);
+        packet[nbWrPacketBytes] = static_cast<uint8_t>(readlength);
 
         hr = UvcExUnitSetProperty(&handle, selector, packet, MAX_BUF_SIZE);
         if (FAILED(hr)) {
@@ -172,12 +183,18 @@ HRESULT UsbWindowsUtils::UvcExUnitReadBuffer(IBaseFilter *pVideoInputFilter,
 }
 
 HRESULT UsbWindowsUtils::UvcExUnitWriteBuffer(IBaseFilter *pVideoInputFilter,
-                                              ULONG selector, uint32_t address,
+                                              ULONG selector, int16_t id,
+                                              uint32_t address,
                                               const uint8_t *data,
                                               uint32_t bufferLength) {
-    ExUnitHandle handle;
-    uint8_t packet[MAX_BUF_SIZE];
+    if (id < -1 || id > 255) {
+        LOG(ERROR)
+            << id
+            << " is greater than the maximum size (255) accepted for an id";
+        return E_INVALIDARG;
+    }
 
+    ExUnitHandle handle;
     HRESULT hr =
         UsbWindowsUtils::UvcFindNodeAndGetControl(&handle, &pVideoInputFilter);
     if (hr != S_OK) {
@@ -185,16 +202,20 @@ HRESULT UsbWindowsUtils::UvcExUnitWriteBuffer(IBaseFilter *pVideoInputFilter,
         return hr;
     }
 
+    uint8_t nbLeadingBytes = sizeof(address) + (id > -1 ? 1 : 0);
+    uint8_t posAddrInPacket = id > -1 ? 1 : 0;
+    uint8_t packet[MAX_BUF_SIZE];
     size_t writeLen = 0;
     size_t writtenBytes = 0;
 
     while (writtenBytes < bufferLength) {
-        *(reinterpret_cast<uint32_t *>(&packet[0])) = address;
-        writeLen = bufferLength - writtenBytes > MAX_BUF_SIZE - 5
-                       ? MAX_BUF_SIZE - 5
-                       : bufferLength - writtenBytes;
-        packet[4] = static_cast<uint8_t>(writeLen);
-        memcpy(&packet[5], data + writtenBytes, writeLen);
+        *(reinterpret_cast<uint32_t *>(&packet[posAddrInPacket])) = address;
+        writeLen =
+            bufferLength - writtenBytes > MAX_BUF_SIZE - (nbLeadingBytes + 1)
+                ? MAX_BUF_SIZE - (nbLeadingBytes + 1)
+                : bufferLength - writtenBytes;
+        packet[nbLeadingBytes] = static_cast<uint8_t>(writeLen);
+        memcpy(&packet[nbLeadingBytes + 1], data + writtenBytes, writeLen);
 
         hr = UvcExUnitSetProperty(&handle, selector, packet, MAX_BUF_SIZE);
         if (FAILED(hr)) {
