@@ -76,7 +76,8 @@ Status UsbStorage::read(const uint32_t address, uint8_t *data,
     }
 
     HRESULT hr = UsbWindowsUtils::UvcExUnitReadBuffer(
-        m_implData->handle->pVideoInputFilter, 5, address, data, bytesCount);
+        m_implData->handle->pVideoInputFilter, 5, m_implData->id, address, data,
+        bytesCount);
     if (FAILED(hr)) {
         LOG(WARNING)
             << "Failed to read buffer through UVC extension unit. Error: "
@@ -98,7 +99,8 @@ Status UsbStorage::write(const uint32_t address, const uint8_t *data,
     }
 
     HRESULT hr = UsbWindowsUtils::UvcExUnitWriteBuffer(
-        m_implData->handle->pVideoInputFilter, 6, address, data, bytesCount);
+        m_implData->handle->pVideoInputFilter, 6, m_implData->id, address, data,
+        bytesCount);
     if (FAILED(hr)) {
         LOG(WARNING)
             << "Failed to write buffer through UVC extension unit. Error: "

@@ -186,11 +186,12 @@ class UsbWindowsUtils {
                                         uint8_t *buffer, ULONG nbBytes);
 
     static HRESULT UvcExUnitReadBuffer(IBaseFilter *pVideoInputFilter,
-                                       ULONG selector, uint32_t address,
-                                       uint8_t *data, uint32_t bufferLength);
+                                       ULONG selector, int16_t id,
+                                       uint32_t address, uint8_t *data,
+                                       uint32_t bufferLength);
 
     static HRESULT UvcExUnitWriteBuffer(IBaseFilter *pVideoInputFilter,
-                                        ULONG selector, uint32_t address,
-                                        const uint8_t *data,
+                                        ULONG selector, int16_t id,
+                                        uint32_t address, const uint8_t *data,
                                         uint32_t bufferLength);
 };

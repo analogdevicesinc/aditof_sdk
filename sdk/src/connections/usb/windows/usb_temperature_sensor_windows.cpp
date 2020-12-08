@@ -79,19 +79,21 @@ Status UsbTemperatureSensor::read(float &temperature) {
         return Status::GENERIC_ERROR;
     }
 
-    float integerTemperature[2];
-
-    // TO DO: add a request id to differentiate different temperature sensors
+    hr = UsbWindowsUtils::UvcExUnitSetProperty(
+        &handle, 2, reinterpret_cast<const uint8_t *>(&m_implData->id), 4);
+    if (FAILED(hr)) {
+        LOG(WARNING) << "Failed to set property via UVC extension unit. Error: "
+                     << std::hex << hr;
+        return Status::GENERIC_ERROR;
+    }
 
     hr = UsbWindowsUtils::UvcExUnitGetProperty(
-        &handle, 3, reinterpret_cast<uint8_t *>(&integerTemperature),
-        8 /* two floats, each having 4 bytes */);
+        &handle, 2, reinterpret_cast<uint8_t *>(&temperature), 4);
     if (FAILED(hr)) {
         LOG(WARNING) << "Failed to get property via UVC extension unit. Error: "
                      << std::hex << hr;
         return Status::GENERIC_ERROR;
     }
-    temperature = integerTemperature[1];
 
     return Status::OK;
 }
