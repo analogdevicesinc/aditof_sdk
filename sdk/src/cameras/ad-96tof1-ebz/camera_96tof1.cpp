@@ -72,11 +72,16 @@ Camera96Tof1::Camera96Tof1(
     : m_depthSensor(depthSensor), m_eeprom(eeprom),
       m_afeTempSensor(afeTempSensor), m_laserTempSensor(laserTempSensor),
       m_devStarted(false), m_eepromInitialized(false),
-      m_availableControls(availableControls), m_revision("RevC") {}
+      m_tempSensorsInitialized(false), m_availableControls(availableControls),
+      m_revision("RevC") {}
 
 Camera96Tof1::~Camera96Tof1() {
     if (m_eepromInitialized) {
         m_eeprom->close();
+    }
+    if (m_tempSensorsInitialized) {
+        m_afeTempSensor->close();
+        m_laserTempSensor->close();
     }
 }
 
@@ -86,6 +91,7 @@ aditof::Status Camera96Tof1::initialize() {
 
     LOG(INFO) << "Initializing camera";
 
+    // Open communication with the depth sensor
     status = m_depthSensor->open();
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to open device";
@@ -99,7 +105,7 @@ aditof::Status Camera96Tof1::initialize() {
         return status;
     }
 
-    // Initialize EEPROM
+    // Open communication with EEPROM
     status = m_eeprom->open(handle);
     if (status != Status::OK) {
         std::string name;
@@ -108,6 +114,23 @@ aditof::Status Camera96Tof1::initialize() {
         return status;
     }
     m_eepromInitialized = true;
+
+    // Open communication with temperature sensors
+    m_afeTempSensor->open(handle);
+    if (status != Status::OK) {
+        std::string name;
+        m_afeTempSensor->getName(name);
+        LOG(ERROR) << "Failed to open temperature sensor with name " << name;
+        return status;
+    }
+    m_laserTempSensor->open(handle);
+    if (status != Status::OK) {
+        std::string name;
+        m_laserTempSensor->getName(name);
+        LOG(ERROR) << "Failed to open temperature sensor with name " << name;
+        return status;
+    }
+    m_tempSensorsInitialized = true;
 
     status = m_calibration.readCalMap(m_eeprom);
     if (status != Status::OK) {

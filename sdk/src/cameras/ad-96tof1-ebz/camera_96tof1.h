@@ -89,6 +89,7 @@ class Camera96Tof1 : public aditof::Camera {
     std::shared_ptr<aditof::TemperatureSensorInterface> m_laserTempSensor;
     bool m_devStarted;
     bool m_eepromInitialized;
+    bool m_tempSensorsInitialized;
     std::vector<std::string> m_availableControls;
     Calibration96Tof1 m_calibration;
     uint16_t m_noiseReductionThreshold;
