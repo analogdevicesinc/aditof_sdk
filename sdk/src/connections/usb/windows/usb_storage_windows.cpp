@@ -42,11 +42,14 @@ using namespace aditof;
 struct UsbStorage::ImplData {
     struct UsbHandle *handle;
     std::string name;
+    unsigned char id;
 };
 
-UsbStorage::UsbStorage(const std::string &name) : m_implData(new ImplData) {
+UsbStorage::UsbStorage(const std::string &name, unsigned char id)
+    : m_implData(new ImplData) {
     m_implData->handle = nullptr;
     m_implData->name = name;
+    m_implData->id = id;
 }
 
 UsbStorage::~UsbStorage() = default;

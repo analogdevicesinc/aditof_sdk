@@ -47,7 +47,9 @@ class UsbLinuxUtils {
      * @brief uvcExUnitReadOnePacket - Reads one packet of data through the UVC Extension Unit
      * @param fd - The file descriptor for the UVC communication channel
      * @param selector - The UVC control selector
-     * @param address - The address from where the reading should start
+     * @param BytesToWrite - Location of the bytes to be written before doing the read
+     * @param nbBytesToWrite - The number of bytes to write before doing the read. Set to 0 to only
+     *                         use UVC_GET_CUR property and skip setting something with UVC_SET_CUR
      * @param[out] data - The location where the read data should be stored
      * @param nbPacketBytes - The size the package should have
      * @param nbBytesToRead - The number of bytes to read from the entire package
@@ -55,34 +57,38 @@ class UsbLinuxUtils {
      * @return int - Return 0 is operation is succesful or a negative error code otherwise
      */
     static int uvcExUnitReadOnePacket(int fd, uint8_t selector,
-                                      uint32_t address, uint8_t *data,
+                                      uint8_t *BytesToWrite,
+                                      uint8_t nbBytesToWrite, uint8_t *data,
                                       uint8_t nbPacketBytes,
-                                      uint8_t nbBytesToRead,
-                                      bool getOnly = false);
+                                      uint8_t nbBytesToRead);
 
     /**
      * @brief uvcExUnitReadBuffer - Reads a chunk of data (a buffer) through the UVC Extension Unit
      * @param fd - The file descriptor for the UVC communication channel
      * @param selector - The UVC control selector
+     * @param id - The id of the instance (Temperature sensor, Storage, etc.). Setting to -1 will not send id
      * @param address - The address from there the reading should start
      * @param data - The location where the read data should be stored
      * @param bufferLength - The number of bytes to read
      * @return int - Return 0 is operation is succesful or a negative error code otherwise
      */
-    static int uvcExUnitReadBuffer(int fd, uint8_t selector, uint32_t address,
-                                   uint8_t *data, uint32_t bufferLength);
+    static int uvcExUnitReadBuffer(int fd, uint8_t selector, int16_t id,
+                                   uint32_t address, uint8_t *data,
+                                   uint32_t bufferLength);
 
     /**
      * @brief uvcExUnitWriteBuffer
      * @param fd - The file descriptor for the UVC communication channel
      * @param selector - The UVC control selector
+     * @param id - The id of the instance (Temperature sensor, Storage, etc.). Setting to -1 will not send id
      * @param address - The address where the writing should start
      * @param data - The location of the data to be written
      * @param bufferLength - The number of bytes to write
      * @return int - Return 0 is operation is succesful or a negative error code otherwise
      */
-    static int uvcExUnitWriteBuffer(int fd, uint8_t selector, uint32_t address,
-                                    const uint8_t *data, uint32_t bufferLength);
+    static int uvcExUnitWriteBuffer(int fd, uint8_t selector, int16_t id,
+                                    uint32_t address, const uint8_t *data,
+                                    uint32_t bufferLength);
 };
 
 #endif // USB_LINUX_UTILS_H
