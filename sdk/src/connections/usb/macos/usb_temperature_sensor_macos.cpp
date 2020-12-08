@@ -35,11 +35,12 @@ using namespace aditof;
 
 struct UsbTemperatureSensor::ImplData {};
 
-UsbTemperatureSensor::UsbTemperatureSensor(const std::string &name) {}
+UsbTemperatureSensor::UsbTemperatureSensor(const std::string & /*name*/,
+                                           unsigned char /*id*/) {}
 
 UsbTemperatureSensor::~UsbTemperatureSensor() = default;
 
-Status UsbTemperatureSensor::open(void *handle) {
+Status UsbTemperatureSensor::open(void * /*handle*/) {
     // TO DO when enabling macos support
     return Status::UNAVAILABLE;
 }

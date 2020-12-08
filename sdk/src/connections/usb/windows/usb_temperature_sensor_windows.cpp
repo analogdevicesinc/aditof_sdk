@@ -39,12 +39,15 @@ using namespace aditof;
 struct UsbTemperatureSensor::ImplData {
     struct UsbHandle *handle;
     std::string name;
+    unsigned char id;
 };
 
-UsbTemperatureSensor::UsbTemperatureSensor(const std::string &name)
+UsbTemperatureSensor::UsbTemperatureSensor(const std::string &name,
+                                           unsigned char id)
     : m_implData(new ImplData) {
     m_implData->handle = nullptr;
     m_implData->name = name;
+    m_implData->id = id;
 }
 
 UsbTemperatureSensor::~UsbTemperatureSensor() = default;

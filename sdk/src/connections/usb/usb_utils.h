@@ -47,21 +47,21 @@ class UsbUtils {
 
     /**
      * @brief Parses sensor tokens which are strings containing a key-value pair
-     * (e.g. "EEPROM_NAME=eeprom1") and returns the names of the storages.
+     * (e.g. "EEPROM_NAME=eeprom1") and returns the names and IDs of the storages.
      * @param tokens - The tokens to be parsed.
      * return std::vector<std::string>
      */
-    static std::vector<std::string>
-    getStorageNames(const std::vector<std::string> &tokens);
+    static std::vector<std::pair<std::string, unsigned int>>
+    getStorageNamesAndIds(const std::vector<std::string> &tokens);
 
     /**
      * @brief Parses sensor tokens which are strings containing a key-value pair
-     * and returns the names of the temperature sensors.
+     * and returns the names and IDs of the temperature sensors.
      * @param tokens - The tokens to be parsed.
      * return std::vector<std::string>
      */
-    static std::vector<std::string>
-    getTemperatureSensorNames(const std::vector<std::string> &tokens);
+    static std::vector<std::pair<std::string, unsigned int>>
+    getTemperatureSensorNamesAndIds(const std::vector<std::string> &tokens);
 };
 
 #endif // USB_UTILS_H
