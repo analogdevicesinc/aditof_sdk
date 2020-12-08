@@ -42,11 +42,14 @@ using namespace aditof;
 struct UsbStorage::ImplData {
     int fd;
     std::string name;
+    unsigned char id;
 };
 
-UsbStorage::UsbStorage(const std::string &name) : m_implData(new ImplData) {
+UsbStorage::UsbStorage(const std::string &name, unsigned char id)
+    : m_implData(new ImplData) {
     m_implData->fd = -1;
     m_implData->name = name;
+    m_implData->id = id;
 }
 
 UsbStorage::~UsbStorage() = default;
@@ -73,8 +76,8 @@ Status UsbStorage::read(const uint32_t address, uint8_t *data,
         return Status::INVALID_ARGUMENT;
     }
 
-    int ret = UsbLinuxUtils::uvcExUnitReadBuffer(m_implData->fd, 5, address,
-                                                 data, bytesCount);
+    int ret = UsbLinuxUtils::uvcExUnitReadBuffer(
+        m_implData->fd, 5, m_implData->id, address, data, bytesCount);
     if (ret < 0) {
         LOG(WARNING)
             << "Failed to read buffer through UVC extension unit. Error: "
@@ -96,8 +99,8 @@ Status UsbStorage::write(const uint32_t address, const uint8_t *data,
         return Status::INVALID_ARGUMENT;
     }
 
-    int ret = UsbLinuxUtils::uvcExUnitWriteBuffer(m_implData->fd, 6, address,
-                                                  data, bytesCount);
+    int ret = UsbLinuxUtils::uvcExUnitWriteBuffer(
+        m_implData->fd, 6, m_implData->id, address, data, bytesCount);
     if (ret < 0) {
         LOG(WARNING)
             << "Failed to write buffer through UVC extension unit. Error: "
@@ -110,7 +113,7 @@ Status UsbStorage::write(const uint32_t address, const uint8_t *data,
 
     while (eepromWriteStatus == 0 && attempts > 0) {
         ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
-            m_implData->fd, 7, 0, &eepromWriteStatus, 1, 1, true);
+            m_implData->fd, 7, nullptr, 0, &eepromWriteStatus, 1, 1);
         --attempts;
         if (ret < 0) {
             LOG(WARNING)

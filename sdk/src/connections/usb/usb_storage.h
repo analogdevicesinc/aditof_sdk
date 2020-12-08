@@ -40,7 +40,7 @@ namespace aditof {
 
 class UsbStorage : public aditof::StorageInterface {
   public:
-    UsbStorage(const std::string &name);
+    UsbStorage(const std::string &name, unsigned char id);
     ~UsbStorage();
 
     // Implements StorageInterface

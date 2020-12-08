@@ -48,32 +48,43 @@ int UsbUtils::getDepthSensoType(const std::vector<std::string> &tokens) {
     return -1;
 }
 
-std::vector<std::string>
-UsbUtils::getStorageNames(const std::vector<std::string> &tokens) {
-    vector<string> names;
+std::vector<std::pair<std::string, unsigned int>>
+UsbUtils::getStorageNamesAndIds(const std::vector<std::string> &tokens) {
+    std::vector<std::pair<std::string, unsigned int>> v;
 
     for (const auto &t : tokens) {
         vector<string> keyValueStr;
         Utils::splitIntoTokens(t, '=', keyValueStr);
-        if (keyValueStr[0] == "EEPROM_NAME") {
-            names.emplace_back(keyValueStr[1]);
+        if (keyValueStr[0] == "STORAGE_NAME") {
+            std::pair<std::string, unsigned int> pair;
+            pair.first = keyValueStr[1];
+            v.emplace_back(pair);
+        } else if (keyValueStr[0] == "STORAGE_ID") {
+            auto pair = v.back();
+            pair.second = std::stoi(keyValueStr[1]);
         }
     }
 
-    return names;
+    return v;
 }
 
-std::vector<std::string>
-UsbUtils::getTemperatureSensorNames(const std::vector<std::string> &tokens) {
-    vector<string> names;
+std::vector<std::pair<std::string, unsigned int>>
+UsbUtils::getTemperatureSensorNamesAndIds(
+    const std::vector<std::string> &tokens) {
+    std::vector<std::pair<std::string, unsigned int>> v;
 
     for (const auto &t : tokens) {
         vector<string> keyValueStr;
         Utils::splitIntoTokens(t, '=', keyValueStr);
         if (keyValueStr[0] == "TEMP_SENSOR_NAME") {
-            names.emplace_back(keyValueStr[1]);
+            std::pair<std::string, unsigned int> pair;
+            pair.first = keyValueStr[1];
+            v.emplace_back(pair);
+        } else if (keyValueStr[0] == "TEMP_SENSOR_ID") {
+            auto pair = v.back();
+            pair.second = std::stoi(keyValueStr[1]);
         }
     }
 
-    return names;
+    return v;
 }

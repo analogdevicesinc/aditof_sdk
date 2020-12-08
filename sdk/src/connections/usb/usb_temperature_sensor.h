@@ -40,7 +40,7 @@ namespace aditof {
 
 class UsbTemperatureSensor : public aditof::TemperatureSensorInterface {
   public:
-    UsbTemperatureSensor(const std::string &name);
+    UsbTemperatureSensor(const std::string &name, unsigned char id);
     ~UsbTemperatureSensor();
 
     // Implements TemperatureSensorInterface

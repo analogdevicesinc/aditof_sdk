@@ -52,7 +52,7 @@ static aditof::Status getAvailableSensors(int fd,
     uint16_t bufferLength;
 
     int ret = UsbLinuxUtils::uvcExUnitReadBuffer(
-        fd, 4, 0, reinterpret_cast<uint8_t *>(&bufferLength),
+        fd, 4, -1, 0, reinterpret_cast<uint8_t *>(&bufferLength),
         sizeof(bufferLength));
     if (ret < 0) {
         LOG(WARNING)
@@ -62,7 +62,7 @@ static aditof::Status getAvailableSensors(int fd,
     }
 
     unique_ptr<uint8_t[]> data(new uint8_t[bufferLength + 1]);
-    ret = UsbLinuxUtils::uvcExUnitReadBuffer(fd, 4, sizeof(bufferLength),
+    ret = UsbLinuxUtils::uvcExUnitReadBuffer(fd, 4, -1, sizeof(bufferLength),
                                              data.get(), bufferLength);
     if (ret < 0) {
         LOG(WARNING) << "Failed to read the content of buffer holding sensors "
@@ -186,9 +186,9 @@ Status UsbSensorEnumerator::searchSensors() {
 
         m_sensorsInfo.emplace_back(sInfo);
 
-        m_storagesInfo = UsbUtils::getStorageNames(sensorsPaths);
+        m_storagesInfo = UsbUtils::getStorageNamesAndIds(sensorsPaths);
         m_temperatureSensorsInfo =
-            UsbUtils::getTemperatureSensorNames(sensorsPaths);
+            UsbUtils::getTemperatureSensorNamesAndIds(sensorsPaths);
     }
 
     closedir(d);
@@ -215,8 +215,10 @@ Status UsbSensorEnumerator::getStorages(
 
     storages.clear();
 
-    for (const auto &name : m_storagesInfo) {
-        auto storage = std::make_shared<UsbStorage>(name);
+    for (const auto &nameAndId : m_storagesInfo) {
+        auto storage =
+            std::make_shared<UsbStorage>(nameAndId.first, nameAndId.second);
+        storages.emplace_back(storage);
     }
 
     return Status::OK;
@@ -228,8 +230,10 @@ Status UsbSensorEnumerator::getTemperatureSensors(
 
     temperatureSensors.clear();
 
-    for (const auto &name : m_temperatureSensorsInfo) {
-        auto tSensor = std::make_shared<UsbTemperatureSensor>(name);
+    for (const auto &nameAndId : m_temperatureSensorsInfo) {
+        auto tSensor = std::make_shared<UsbTemperatureSensor>(nameAndId.first,
+                                                              nameAndId.second);
+        temperatureSensors.emplace_back(tSensor);
     }
 
     return Status::OK;
