@@ -60,7 +60,7 @@ static aditof::Status getAvailableSensors(IMoniker *Moniker,
 
     uint16_t bufferLength;
     hr = UsbWindowsUtils::UvcExUnitReadBuffer(
-        pVideoInputFilter, 4, 0, reinterpret_cast<uint8_t *>(&bufferLength),
+        pVideoInputFilter, 4, -1, 0, reinterpret_cast<uint8_t *>(&bufferLength),
         sizeof(bufferLength));
     if (FAILED(hr)) {
         pVideoInputFilter->Release();
@@ -71,8 +71,9 @@ static aditof::Status getAvailableSensors(IMoniker *Moniker,
     }
 
     std::unique_ptr<uint8_t[]> data(new uint8_t[bufferLength + 1]);
-    hr = UsbWindowsUtils::UvcExUnitReadBuffer(
-        pVideoInputFilter, 4, sizeof(bufferLength), data.get(), bufferLength);
+    hr = UsbWindowsUtils::UvcExUnitReadBuffer(pVideoInputFilter, 4, -1,
+                                              sizeof(bufferLength), data.get(),
+                                              bufferLength);
     if (FAILED(hr)) {
         pVideoInputFilter->Release();
         LOG(WARNING) << "Failed to read the content of buffer holding sensors "
@@ -164,10 +165,11 @@ Status UsbSensorEnumerator::searchSensors() {
                         m_sensorsInfo.emplace_back(sInfo);
 
                         m_storagesInfo =
-                            UsbUtils::getStorageNames(sensorsPaths);
+                            UsbUtils::getStorageNamesAndIds(sensorsPaths);
 
                         m_temperatureSensorsInfo =
-                            UsbUtils::getTemperatureSensorNames(sensorsPaths);
+                            UsbUtils::getTemperatureSensorNamesAndIds(
+                                sensorsPaths);
                     }
                 }
             }
