@@ -191,7 +191,7 @@ int UsbLinuxUtils::uvcExUnitWriteBuffer(int fd, uint8_t selector, int16_t id,
 
     uint8_t nbLeadingBytes = sizeof(address) + (id > -1 ? 1 : 0);
     struct uvc_xu_control_query cq;
-    uint8_t packet[MAX_BUF_SIZE + 1]; // extra byte is for id
+    uint8_t packet[MAX_BUF_SIZE];
     uint32_t *crtAddress =
         reinterpret_cast<uint32_t *>(packet + (id > -1 ? 1 : 0));
     size_t writeLen = 0;
@@ -208,11 +208,12 @@ int UsbLinuxUtils::uvcExUnitWriteBuffer(int fd, uint8_t selector, int16_t id,
     cq.selector = selector;
 
     while (writtenBytes < bufferLength) {
-        writeLen = bufferLength - writtenBytes > MAX_BUF_SIZE - nbLeadingBytes
-                       ? MAX_BUF_SIZE - nbLeadingBytes
-                       : bufferLength - writtenBytes;
+        writeLen =
+            bufferLength - writtenBytes > MAX_BUF_SIZE - (nbLeadingBytes + 1)
+                ? MAX_BUF_SIZE - (nbLeadingBytes + 1)
+                : bufferLength - writtenBytes;
         packet[nbLeadingBytes] = writeLen;
-        memcpy(&packet[nbLeadingBytes], data + writtenBytes, writeLen);
+        memcpy(&packet[nbLeadingBytes + 1], data + writtenBytes, writeLen);
 
         ret = UsbLinuxUtils::xioctl(fd, UVCIOC_CTRL_QUERY, &cq);
         if (ret == -1) {
