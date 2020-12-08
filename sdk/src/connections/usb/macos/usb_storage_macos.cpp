@@ -40,7 +40,7 @@ using namespace aditof;
 
 struct UsbStorage::ImplData {};
 
-UsbStorage::UsbStorage() {}
+UsbStorage::UsbStorage(const std::string & /*name*/, unsigned char /*id*/) {}
 
 aditof::Status UsbStorage::open(void *) {
     // TO DO when enabling macos support

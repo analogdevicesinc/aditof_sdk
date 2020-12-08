@@ -204,8 +204,9 @@ Status UsbSensorEnumerator::getStorages(
     std::vector<std::shared_ptr<StorageInterface>> &storages) {
     storages.clear();
 
-    for (const auto &name : m_storagesInfo) {
-        auto storage = std::make_shared<UsbStorage>(name);
+    for (const auto &nameAndId : m_storagesInfo) {
+        auto storage =
+            std::make_shared<UsbStorage>(nameAndId.first, nameAndId.second);
     }
 
     return Status::OK;
@@ -217,8 +218,9 @@ Status UsbSensorEnumerator::getTemperatureSensors(
 
     temperatureSensors.clear();
 
-    for (const auto &name : m_temperatureSensorsInfo) {
-        auto tSensor = std::make_shared<UsbTemperatureSensor>(name);
+    for (const auto &nameAndId : m_temperatureSensorsInfo) {
+        auto tSensor = std::make_shared<UsbTemperatureSensor>(nameAndId.first,
+                                                              nameAndId.second);
     }
 
     return Status::OK;

@@ -41,14 +41,13 @@
 
 #include "uvc.h"
 
-#include <aditof/device_construction_data.h>
-#include <aditof/device_enumerator_factory.h>
-#include <aditof/device_factory.h>
-#include <aditof/device_interface.h>
-#include <aditof/eeprom_factory.h>
-#include <aditof/eeprom_interface.h>
+#include <aditof/depth_sensor_interface.h>
+#include <aditof/sensor_enumerator_factory.h>
+#include <aditof/sensor_enumerator_interface.h>
+#include <aditof/storage_interface.h>
+#include <aditof/temperature_sensor_interface.h>
 
-#include "../../sdk/src/local_device.h"
+#include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
 
 #include <atomic>
 
@@ -259,13 +258,11 @@ struct uvc_device {
     bool hasNewFrame;
 };
 
-bool DeviceStartedStreaming = false;
+bool SensorStartedStreaming = false;
 
 int ad903x_hw = 0;
 char v4l2_subdev_prog_file[255] = "afe_firmware.bin";
 
-std::vector<aditof::DeviceConstructionData> availableSensors;
-int sensorIndex = 0; // If multiple camera sensors, work only with the first one
 char *sensorsInfoBuffer =
     nullptr; // Points to data holding information about available sensors. First two bytes contain the size of the data in the rest of the buffer
 
@@ -276,16 +273,30 @@ const static int FIRMWARE_CAPACITY = 16384;
 char firmware[FIRMWARE_CAPACITY] = {0};
 unsigned short reg_addr;
 
-/* EEPROM data */
+/* Available sensors */
+std::vector<std::shared_ptr<aditof::DepthSensorInterface>> depthSensors;
+std::vector<std::shared_ptr<aditof::StorageInterface>> storages;
+std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+    temperatureSensors;
+
+/* UVC only works with one depth sensor */
+std::shared_ptr<aditof::DepthSensorInterface> camDepthSensor;
+std::shared_ptr<aditof::V4lBufferAccessInterface> sensorV4lBufAccess;
+
+/* Storages */
 unsigned int eeprom_read_addr = 0;
 unsigned int eeprom_read_len = 0;
 unsigned int eeprom_write_addr = 0;
 unsigned int eeprom_write_len = 0;
+unsigned int storage_index = 0;
 unsigned char eeprom_data[128 * 1024];
 unsigned int sensors_read_pos = 0;
 unsigned int sensors_read_len = 0;
 std::atomic<bool> eeprom_write_ready;
 std::thread eepromWriteThread;
+
+/* Temperature sensors */
+unsigned char temp_index = 0;
 
 /* forward declarations */
 static int uvc_video_stream(struct uvc_device *dev, int enable);
@@ -298,13 +309,12 @@ void stopHandler(int code) { stop.store(true); }
  * V4L2 streaming related
  */
 
-static int v4l2_process_data(std::shared_ptr<LocalDevice> device,
-                             uvc_device *udev) {
+static int v4l2_process_data(uvc_device *udev) {
     int ret;
     struct v4l2_buffer ubuf;
     struct v4l2_buffer vbuf;
 
-    if (!DeviceStartedStreaming) {
+    if (!SensorStartedStreaming) {
         return 0;
     }
 
@@ -319,14 +329,14 @@ static int v4l2_process_data(std::shared_ptr<LocalDevice> device,
         return 0;
     }
 
-    auto status = device->dequeueInternalBuffer(vbuf);
+    auto status = sensorV4lBufAccess->dequeueInternalBuffer(vbuf);
     ubuf.bytesused = udev->width * udev->height * 2;
     ubuf.index = vbuf.index;
     ubuf.length = vbuf.m.planes[0].length * 2;
 
     uint8_t *bufferStart;
     uint32_t dummyLength;
-    device->getInternalBuffer(&bufferStart, dummyLength, vbuf);
+    sensorV4lBufAccess->getInternalBuffer(&bufferStart, dummyLength, vbuf);
     ubuf.m.userptr = (unsigned long)bufferStart;
 
     if (status == aditof::Status::GENERIC_ERROR) {
@@ -338,7 +348,7 @@ static int v4l2_process_data(std::shared_ptr<LocalDevice> device,
         /* Check for a USB disconnect/shutdown event. */
         if (errno == ENODEV) {
             udev->uvc_shutdown_requested = 1;
-            DeviceStartedStreaming = false;
+            SensorStartedStreaming = false;
             printf("UVC: Possible USB shutdown requested from "
                    "Host, seen during VIDIOC_QBUF\n");
             return 0;
@@ -566,8 +576,7 @@ static void uvc_video_fill_buffer(struct uvc_device *dev,
     }
 }
 
-static int uvc_video_process(struct uvc_device *dev,
-                             std::shared_ptr<LocalDevice> device) {
+static int uvc_video_process(struct uvc_device *dev) {
     struct v4l2_buffer ubuf;
     struct v4l2_buffer vbuf;
 
@@ -601,7 +610,7 @@ static int uvc_video_process(struct uvc_device *dev,
      * started streaming yet or if QBUF was not called even once on
      * the UVC side.
      */
-    if (!DeviceStartedStreaming || !dev->first_buffer_queued) {
+    if (!SensorStartedStreaming || !dev->first_buffer_queued) {
         // printf("Streaming is OFF\n");
         return 0;
     }
@@ -616,7 +625,7 @@ static int uvc_video_process(struct uvc_device *dev,
     /* Dequeue the spent buffer from UVC domain */
     ret = ioctl(dev->uvc_fd, VIDIOC_DQBUF, &ubuf);
     if (ret < 0) {
-        DeviceStartedStreaming = false;
+        SensorStartedStreaming = false;
         printf("UVC: Unable to dequeue buffer: %s (%d).\n", strerror(errno),
                errno);
         return ret;
@@ -651,7 +660,7 @@ static int uvc_video_process(struct uvc_device *dev,
     vbuf.m.planes = gPlanes;
     vbuf.length = 1;
 
-    device->enqueueInternalBuffer(vbuf);
+    sensorV4lBufAccess->enqueueInternalBuffer(vbuf);
 
     dev->hasNewFrame = true;
 
@@ -886,8 +895,7 @@ static int uvc_video_reqbufs(struct uvc_device *dev, int nbufs) {
  *	- A UVC_VS_COMMIT_CONTROL command from USB host, if the UVC gadget
  *	  supports a BULK type video streaming endpoint.
  */
-static int uvc_handle_streamon_event(struct uvc_device *dev,
-                                     std::shared_ptr<LocalDevice> device) {
+static int uvc_handle_streamon_event(struct uvc_device *dev) {
     int ret;
 
     ret = uvc_video_reqbufs(dev, dev->nbufs);
@@ -895,9 +903,9 @@ static int uvc_handle_streamon_event(struct uvc_device *dev,
         goto err;
 
     if (!dev->run_standalone) {
-        aditof::Status status = device->start();
+        camDepthSensor->start();
 
-        DeviceStartedStreaming = true;
+        SensorStartedStreaming = true;
 
         dev->hasNewFrame = true;
     }
@@ -984,12 +992,10 @@ static void uvc_events_process_standard(struct uvc_device *dev,
     (void)resp;
 }
 
-static void
-uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
-                           uint8_t entity_id, uint8_t len,
-                           struct uvc_request_data *resp,
-                           std::shared_ptr<LocalDevice> device,
-                           std::shared_ptr<aditof::EepromInterface> eeprom) {
+static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
+                                       uint8_t cs, uint8_t entity_id,
+                                       uint8_t len,
+                                       struct uvc_request_data *resp) {
     switch (entity_id) {
     case 0:
         switch (cs) {
@@ -1178,7 +1184,7 @@ uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
                 USB_REQ_DEBUG("Received GET_CUR on %d\n", cs);
 
                 if (cs == 2) {
-                    device->readAfeRegisters(
+                    camDepthSensor->readAfeRegisters(
                         &reg_addr,
                         reinterpret_cast<unsigned short *>(resp->data), 1);
                     resp->length = 2;
@@ -1257,14 +1263,10 @@ uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
             case UVC_GET_CUR:
                 USB_REQ_DEBUG("Received GET_CUR on %d\n", cs);
 
-                // printf("Reading temperatures\n");
-
                 float temperature;
-                device->readAfeTemp(temperature);
+                temperatureSensors[temp_index]->read(temperature);
                 *((float *)resp->data) = temperature;
-                device->readLaserTemp(temperature);
-                *((float *)&resp->data[4]) = temperature;
-                resp->length = 8;
+                resp->length = 4;
                 break;
 
             case UVC_GET_INFO:
@@ -1281,7 +1283,7 @@ uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
             case UVC_GET_LEN:
                 USB_REQ_DEBUG("Received GET_LEN on %d\n", cs);
 
-                resp->data[0] = 0x08; // 8 bytes
+                resp->data[0] = 0x04; // 4 bytes
                 resp->data[1] = 0x00;
                 resp->length = 2;
 
@@ -1387,7 +1389,8 @@ uvc_events_process_control(struct uvc_device *dev, uint8_t req, uint8_t cs,
                 USB_REQ_DEBUG("Received GET_CUR on %d\n", cs);
 
                 if (cs == 5) {
-                    eeprom->read(eeprom_read_addr, resp->data, eeprom_read_len);
+                    storages[storage_index]->read(eeprom_read_addr, resp->data,
+                                                  eeprom_read_len);
                     resp->length = eeprom_read_len;
                 }
                 break;
@@ -1580,11 +1583,9 @@ static void uvc_events_process_streaming(struct uvc_device *dev, uint8_t req,
     }
 }
 
-static void
-uvc_events_process_class(struct uvc_device *dev, struct usb_ctrlrequest *ctrl,
-                         struct uvc_request_data *resp,
-                         std::shared_ptr<LocalDevice> device,
-                         std::shared_ptr<aditof::EepromInterface> eeprom) {
+static void uvc_events_process_class(struct uvc_device *dev,
+                                     struct usb_ctrlrequest *ctrl,
+                                     struct uvc_request_data *resp) {
     if ((ctrl->bRequestType & USB_RECIP_MASK) != USB_RECIP_INTERFACE)
         return;
 
@@ -1592,8 +1593,7 @@ uvc_events_process_class(struct uvc_device *dev, struct usb_ctrlrequest *ctrl,
     case UVC_INTF_CONTROL:
         // printf("events_process_controll\n");
         uvc_events_process_control(dev, ctrl->bRequest, ctrl->wValue >> 8,
-                                   ctrl->wIndex >> 8, ctrl->wLength, resp,
-                                   device, eeprom);
+                                   ctrl->wIndex >> 8, ctrl->wLength, resp);
         break;
 
     case UVC_INTF_STREAMING:
@@ -1606,11 +1606,9 @@ uvc_events_process_class(struct uvc_device *dev, struct usb_ctrlrequest *ctrl,
         break;
     }
 }
-static void
-uvc_events_process_setup(struct uvc_device *dev, struct usb_ctrlrequest *ctrl,
-                         struct uvc_request_data *resp,
-                         std::shared_ptr<LocalDevice> device,
-                         std::shared_ptr<aditof::EepromInterface> eeprom) {
+static void uvc_events_process_setup(struct uvc_device *dev,
+                                     struct usb_ctrlrequest *ctrl,
+                                     struct uvc_request_data *resp) {
     dev->control = 0;
 
     USB_REQ_DEBUG("\nbRequestType %02x bRequest %02x wValue %04x wIndex %04x "
@@ -1626,7 +1624,7 @@ uvc_events_process_setup(struct uvc_device *dev, struct usb_ctrlrequest *ctrl,
 
     case USB_TYPE_CLASS:
         // printf("process class!\n");
-        uvc_events_process_class(dev, ctrl, resp, device, eeprom);
+        uvc_events_process_class(dev, ctrl, resp);
         break;
 
     default:
@@ -1686,10 +1684,8 @@ static int uvc_events_process_control_data(struct uvc_device *dev, uint8_t cs,
     return 0;
 }
 
-static int
-uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
-                        std::shared_ptr<LocalDevice> device,
-                        std::shared_ptr<aditof::EepromInterface> eeprom) {
+static int uvc_events_process_data(struct uvc_device *dev,
+                                   struct uvc_request_data *data) {
     struct uvc_streaming_control *target;
     struct uvc_streaming_control *ctrl;
     const struct uvc_format_info *format;
@@ -1719,11 +1715,11 @@ uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
                 /* Store the firmware data from Host and flash it when enough is
                  * available */
 
-                static bool shouldRestartDevice = false;
+                static bool shouldRestartSensor = false;
 
-                if (DeviceStartedStreaming) {
-                    shouldRestartDevice = true;
-                    DeviceStartedStreaming = false;
+                if (SensorStartedStreaming) {
+                    shouldRestartSensor = true;
+                    SensorStartedStreaming = false;
                 }
 
                 firmware_size = data->data[1];
@@ -1731,29 +1727,32 @@ uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
                 flen += firmware_size;
 
                 if (data->data[0] == 0x02) {
-                    device->start(); // make sure the device is started
-                    aditof::Status status = device->program(
+                    camDepthSensor->start(); // make sure the device is started
+                    aditof::Status status = camDepthSensor->program(
                         reinterpret_cast<uint8_t *>(firmware), flen);
                     if (status == aditof::Status::OK) {
                         printf("Flashed firmware, flen %d\n", flen);
                     } else {
                         printf("Error Programing the chip\n");
                     }
-                    if (shouldRestartDevice) {
-                        DeviceStartedStreaming = true;
-                        shouldRestartDevice = false;
+                    if (shouldRestartSensor) {
+                        SensorStartedStreaming = true;
+                        shouldRestartSensor = false;
                     }
                     flen = 0;
                     memset(&firmware[flen], 0, FIRMWARE_CAPACITY);
                 }
             } else if (dev->set_cur_cs == 2) { /* AFE register address */
                 reg_addr = *((unsigned short *)(data->data));
+            } else if (dev->set_cur_cs == 3) { /* Temperature index */
+                temp_index = data->data[0];
             } else if (dev->set_cur_cs == 4) {
                 sensors_read_pos = *((unsigned int *)(data->data));
                 sensors_read_len = data->data[4];
-            } else if (dev->set_cur_cs == 5) { /* EEPROM Read Address */
-                eeprom_read_addr = *((unsigned int *)&(data->data[0]));
-                eeprom_read_len = data->data[4];
+            } else if (dev->set_cur_cs == 5) { /* Storage index, read address */
+                storage_index = data->data[0];
+                eeprom_read_addr = *((unsigned int *)&(data->data[1]));
+                eeprom_read_len = data->data[5];
             } else if (dev->set_cur_cs == 6) {
                 if (eeprom_write_ready.load()) {
                     if (eeprom_write_len == 0) {
@@ -1767,14 +1766,14 @@ uvc_events_process_data(struct uvc_device *dev, struct uvc_request_data *data,
                             eepromWriteThread.join();
                         }
                         eepromWriteThread = std::thread(
-                            [=](std::shared_ptr<aditof::EepromInterface> e) {
+                            [=](std::shared_ptr<aditof::StorageInterface> e) {
                                 eeprom_write_ready = false;
                                 e->write(eeprom_write_addr, eeprom_data,
                                          eeprom_write_len);
                                 eeprom_write_ready = true;
                                 eeprom_write_len = 0;
                             },
-                            eeprom);
+                            storages[storage_index]);
                     }
                 }
             }
@@ -1853,9 +1852,7 @@ err:
     return ret;
 }
 
-static void
-uvc_events_process(struct uvc_device *dev, std::shared_ptr<LocalDevice> device,
-                   std::shared_ptr<aditof::EepromInterface> eeprom) {
+static void uvc_events_process(struct uvc_device *dev) {
     struct v4l2_event v4l2_event;
     struct uvc_event *uvc_event =
         reinterpret_cast<struct uvc_event *>(&v4l2_event.u.data);
@@ -1885,12 +1882,12 @@ uvc_events_process(struct uvc_device *dev, std::shared_ptr<LocalDevice> device,
 
     case UVC_EVENT_SETUP:
         // printf("UVC_EVENT_SETUP received\n");
-        uvc_events_process_setup(dev, &uvc_event->req, &resp, device, eeprom);
+        uvc_events_process_setup(dev, &uvc_event->req, &resp);
         break;
 
     case UVC_EVENT_DATA:
         // printf("UVC_EVENT_DATA received\n");
-        ret = uvc_events_process_data(dev, &uvc_event->data, device, eeprom);
+        ret = uvc_events_process_data(dev, &uvc_event->data);
         if (ret < 0)
             break;
         return;
@@ -1898,17 +1895,17 @@ uvc_events_process(struct uvc_device *dev, std::shared_ptr<LocalDevice> device,
     case UVC_EVENT_STREAMON:
         printf("UVC_EVENT_STREAMON received\n");
         if (!dev->bulk)
-            uvc_handle_streamon_event(dev, device);
+            uvc_handle_streamon_event(dev);
         return;
 
     case UVC_EVENT_STREAMOFF:
         printf("UVC_EVENT_STREAMOFF received\n");
         /* Stop V4L2 streaming... */
-        if (!dev->run_standalone && DeviceStartedStreaming) {
+        if (!dev->run_standalone && SensorStartedStreaming) {
             /* UVC - V4L2 integrated path. */
 
-            device->stop();
-            DeviceStartedStreaming = false;
+            camDepthSensor->stop();
+            SensorStartedStreaming = false;
         }
 
         /* ... and now UVC streaming.. */
@@ -2037,46 +2034,63 @@ int main(int argc, char *argv[]) {
     enum usb_device_speed speed = USB_SPEED_HIGH; /* High-Speed */
     enum io_method uvc_io_method = IO_METHOD_USERPTR;
 
-    auto enumerator = aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
-    enumerator->findDevices(availableSensors);
-
-    if (availableSensors.size() < 1) {
-        printf("No camera sensor is available!\n");
+    auto sensorsEnumerator =
+        aditof::SensorEnumeratorFactory::buildTargetSensorEnumerator();
+    if (!sensorsEnumerator) {
+        printf("Failed to construct a sensors enumerator!\n");
         return 1;
     }
-    const aditof::DeviceConstructionData &camSensorData =
-        availableSensors[sensorIndex];
-    std::string availableSensorsBlob;
-    // Serialize information about sensors to be send to the UVC client
-    for (const auto &eeprom : camSensorData.eeproms) {
-        availableSensorsBlob += "EEPROM_NAME=" + eeprom.driverName + ";";
-        availableSensorsBlob += "EEPROM_PATH=" + eeprom.driverPath + ";";
+
+    sensorsEnumerator->searchSensors();
+    sensorsEnumerator->getDepthSensors(depthSensors);
+    sensorsEnumerator->getStorages(storages);
+    sensorsEnumerator->getTemperatureSensors(temperatureSensors);
+
+    if (depthSensors.size() < 1) {
+        printf("No camera sensor are available!\n");
+        return 1;
     }
+
+    camDepthSensor = depthSensors[0];
+    sensorV4lBufAccess =
+        std::dynamic_pointer_cast<aditof::V4lBufferAccessInterface>(
+            camDepthSensor);
+    if (!sensorV4lBufAccess) {
+        printf("Camera sensor is not of type V4lBufferAccessInterface!\n");
+        return 1;
+    }
+    std::string availableSensorsBlob;
+    // Build a message about available sensors types to be sent to the UVC client
+    aditof::SensorDetails camSensorDetails;
+    camDepthSensor->getDetails(camSensorDetails);
+    availableSensorsBlob +=
+        "DEPTH_SENSOR_TYPE=" +
+        std::to_string(static_cast<int>(camSensorDetails.sensorType)) + ";";
+    int storage_id = 0;
+    for (const auto &storage : storages) {
+        std::string name;
+        storage->getName(name);
+        availableSensorsBlob += "STORAGE_NAME=" + name + ";";
+        availableSensorsBlob +=
+            "STORAGE_ID=" + std::to_string(storage_id) + ";";
+        ++storage_id;
+    }
+    int temp_sensor_id = 0;
+    for (const auto &sensor : temperatureSensors) {
+        std::string name;
+        sensor->getName(name);
+        availableSensorsBlob += "TEMP_SENSOR_NAME=" + name + ";";
+        availableSensorsBlob +=
+            "TEMP_SENSOR_ID=" + std::to_string(temp_sensor_id) + ";";
+        ++temp_sensor_id;
+    }
+
     const uint32_t buffLen = availableSensorsBlob.length();
     sensorsInfoBuffer = new char[buffLen + sizeof(uint16_t)];
     uint16_t *buffSize = reinterpret_cast<uint16_t *>(sensorsInfoBuffer);
     *buffSize = buffLen;
     memcpy(sensorsInfoBuffer + sizeof(uint16_t), availableSensorsBlob.c_str(),
            buffLen);
-
-    std::shared_ptr<LocalDevice> device =
-        std::dynamic_pointer_cast<LocalDevice>(
-            std::shared_ptr<aditof::DeviceInterface>(
-                aditof::DeviceFactory::buildDevice(camSensorData)));
-
-    if (!device) {
-        printf("Error when building LocalDevice!\n");
-        return 1;
-    }
-
-    std::shared_ptr<aditof::EepromInterface> eeprom =
-        std::shared_ptr<aditof::EepromInterface>(
-            aditof::EepromFactory::buildEeprom(aditof::ConnectionType::LOCAL));
-    if (!eeprom) {
-        return 1;
-    }
-    eeprom->open(nullptr, camSensorData.eeproms[0].driverName.c_str(),
-                 camSensorData.eeproms[0].driverPath.c_str());
 
     while ((opt = getopt(argc, argv, "abdf:hi:m:n:o:r:s:t:u:v:p:")) != -1) {
         switch (opt) {
@@ -2211,7 +2225,22 @@ int main(int argc, char *argv[]) {
             (default_format == 0) ? V4L2_PIX_FMT_YUYV : V4L2_PIX_FMT_MJPEG;
         fmt.fmt.pix.field = V4L2_FIELD_ANY;
 
-        device->open();
+        // Open communication with depth sensor
+        camDepthSensor->open();
+
+        // Get depth sensor handle
+        void *handle;
+        camDepthSensor->getHandle(&handle);
+
+        // Open communication with storages
+        for (auto &storage : storages) {
+            storage->open(handle);
+        }
+
+        // Open communication with temperature sensors
+        for (auto &sensor : temperatureSensors) {
+            sensor->open(handle);
+        }
     }
 
     /* Open the UVC device. */
@@ -2307,16 +2336,16 @@ int main(int argc, char *argv[]) {
     }
 
     std::vector<aditof::FrameDetails> frameDetailsVector;
-    device->getAvailableFrameTypes(frameDetailsVector);
+    camDepthSensor->getAvailableFrameTypes(frameDetailsVector);
 
-    device->setFrameType(frameDetailsVector.front());
-    aditof::Status status = device->start();
+    camDepthSensor->setFrameType(frameDetailsVector.front());
+    camDepthSensor->start();
 
     /* Init UVC events. */
     uvc_events_init(udev);
 
     int deviceFd = -1;
-    device->getDeviceFileDescriptor(deviceFd);
+    sensorV4lBufAccess->getDeviceFileDescriptor(deviceFd);
 
     stop.store(false);
 
@@ -2358,21 +2387,21 @@ int main(int argc, char *argv[]) {
 
         if (FD_ISSET(udev->uvc_fd, &efds)) {
             // printf("uvc_event_process");
-            uvc_events_process(udev, device, eeprom);
+            uvc_events_process(udev);
         }
 
         if (FD_ISSET(udev->uvc_fd, &dfds)) {
             // printf("UVC VIDEO PROCESS called !!!!!");
-            uvc_video_process(udev, device);
+            uvc_video_process(udev);
         }
 
         if (FD_ISSET(deviceFd, &fdsv)) {
-            v4l2_process_data(device, udev);
+            v4l2_process_data(udev);
         }
     }
 
-    if (!dummy_data_gen_mode && !mjpeg_image && DeviceStartedStreaming) {
-        device->stop();
+    if (!dummy_data_gen_mode && !mjpeg_image && SensorStartedStreaming) {
+        camDepthSensor->stop();
     }
 
     if (udev->is_streaming) {
@@ -2387,7 +2416,16 @@ int main(int argc, char *argv[]) {
 
     if (eepromWriteThread.joinable())
         eepromWriteThread.join();
-    eeprom->close();
+
+    // Close storages
+    for (auto &storage : storages) {
+        storage->close();
+    }
+
+    // Close temperature sensors
+    for (auto &sensor : temperatureSensors) {
+        sensor->close();
+    }
 
     if (sensorsInfoBuffer) {
         delete[] sensorsInfoBuffer;
