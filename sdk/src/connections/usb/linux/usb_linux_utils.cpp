@@ -198,6 +198,9 @@ int UsbLinuxUtils::uvcExUnitWriteBuffer(int fd, uint8_t selector, int16_t id,
     size_t writtenBytes = 0;
 
     *crtAddress = address;
+    if (id > -1) {
+        packet[0] = static_cast<uint8_t>(id);
+    }
 
     // This set property will send the address and data to be written at the address
     CLEAR(cq);
