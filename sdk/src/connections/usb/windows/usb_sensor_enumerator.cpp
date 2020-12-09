@@ -209,6 +209,7 @@ Status UsbSensorEnumerator::getStorages(
     for (const auto &nameAndId : m_storagesInfo) {
         auto storage =
             std::make_shared<UsbStorage>(nameAndId.first, nameAndId.second);
+        storages.emplace_back(storage);
     }
 
     return Status::OK;
@@ -223,6 +224,7 @@ Status UsbSensorEnumerator::getTemperatureSensors(
     for (const auto &nameAndId : m_temperatureSensorsInfo) {
         auto tSensor = std::make_shared<UsbTemperatureSensor>(nameAndId.first,
                                                               nameAndId.second);
+        temperatureSensors.emplace_back(tSensor);
     }
 
     return Status::OK;
