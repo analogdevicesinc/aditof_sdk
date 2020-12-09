@@ -208,6 +208,10 @@ HRESULT UsbWindowsUtils::UvcExUnitWriteBuffer(IBaseFilter *pVideoInputFilter,
     size_t writeLen = 0;
     size_t writtenBytes = 0;
 
+    if (id > -1) {
+        packet[0] = static_cast<uint8_t>(id);
+    }
+
     while (writtenBytes < bufferLength) {
         *(reinterpret_cast<uint32_t *>(&packet[posAddrInPacket])) = address;
         writeLen =
