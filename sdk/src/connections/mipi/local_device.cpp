@@ -84,7 +84,7 @@ struct LocalDevice::ImplData {
 
     ImplData()
         : fd(-1), sfd(-1), videoBuffers(nullptr),
-          nVideoBuffers(0), frameDetails{0, 0, ""}, started(false) {}
+          nVideoBuffers(0), frameDetails{0, 0, 0, 0, ""}, started(false) {}
 };
 
 // TO DO: This exists in linux_utils.h which is not included on Dragoboard.
@@ -515,11 +515,15 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
 
     unsigned int width;
     unsigned int height;
+    unsigned int fullDataWidth;
+    unsigned int fullDataHeight;
     unsigned int buf_data_len;
     uint8_t *pdata;
 
     width = m_implData->frameDetails.width;
     height = m_implData->frameDetails.height;
+    fullDataWidth = m_implData->frameDetails.fullDataWidth;
+    fullDataHeight = m_implData->frameDetails.fullDataHeight;
 
     status = getInternalBuffer(&pdata, buf_data_len, buf);
     if (status != Status::OK) {
@@ -553,7 +557,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
                         ((((unsigned short)*(pdata + i + 2)) & 0x00F0) >> 4);
             j++;
         }
-    } else if (!isBufferPacked(buf, width, height)) {
+    } else if (!isBufferPacked(buf, fullDataWidth, fullDataHeight)) {
         // TODO: investigate optimizations for this (arm neon / 1024 bytes
         // chunks)
         if (m_implData->frameDetails.type == "depth_only") {
@@ -578,7 +582,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
     } else {
         // clang-format off
         uint16_t *depthPtr = buffer;
-        uint16_t *irPtr = buffer + (width * height) / 2;
+        uint16_t *irPtr = buffer + (width * height);
         unsigned int j = 0;
 
 	if (m_implData->frameDetails.type == "depth_only" ||
