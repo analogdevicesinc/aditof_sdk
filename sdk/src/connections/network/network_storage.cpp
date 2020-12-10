@@ -212,7 +212,7 @@ Status NetworkStorage::close() {
     return status;
 }
 
-Status NetworkStorage::getName(std::string &name) {
+Status NetworkStorage::getName(std::string &name) const {
     name = m_implData->name;
     return Status::OK;
 }

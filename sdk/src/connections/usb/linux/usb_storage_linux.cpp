@@ -142,7 +142,7 @@ Status UsbStorage::close() {
     return Status::OK;
 }
 
-Status UsbStorage::getName(std::string &name) {
+Status UsbStorage::getName(std::string &name) const {
     name = m_implData->name;
     return Status::OK;
 }
