@@ -301,21 +301,21 @@ LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-    details.fullDataHeight = details.height * ((NUM_VIDEO_DEV == 2) ? 1 : 2);
+    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
     details.type = "depth_ir";
     types.push_back(details);
 
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-    details.fullDataHeight = details.height * ((NUM_VIDEO_DEV == 2) ? 1 : 2);
+    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
     details.type = "depth_only";
     types.push_back(details);
 
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-    details.fullDataHeight = details.height * ((NUM_VIDEO_DEV == 2) ? 1 : 2);
+    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
     details.type = "ir_only";
     types.push_back(details);
 
