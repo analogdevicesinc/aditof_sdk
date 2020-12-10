@@ -65,6 +65,16 @@ struct FrameDetails {
     unsigned int height;
 
     /**
+     * @brief The width of the actual full frame.
+     */
+    unsigned int fullDataWidth;
+
+    /**
+     * @brief The height of the actual full frame.
+     */
+    unsigned int fullDataHeight;
+
+    /**
      * @brief The type of the frame. Can be one of the types provided by the
      * camera.
      */
