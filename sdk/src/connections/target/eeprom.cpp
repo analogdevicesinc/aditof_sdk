@@ -130,7 +130,7 @@ Status Eeprom::close() {
     return Status::OK;
 }
 
-Status Eeprom::getName(std::string &name) {
+Status Eeprom::getName(std::string &name) const {
     name = m_implData->name;
     return Status::OK;
 }

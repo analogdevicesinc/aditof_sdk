@@ -63,7 +63,7 @@ aditof::Status UsbStorage::close() {
     return Status::UNAVAILABLE;
 }
 
-aditof::Status UsbStorage::getName(std::string &name) {
+aditof::Status UsbStorage::getName(std::string &name) const {
     // TO DO when enabling macos support
     return Status::UNAVAILABLE;
 }
