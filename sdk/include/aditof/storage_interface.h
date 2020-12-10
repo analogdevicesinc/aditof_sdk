@@ -89,7 +89,7 @@ class StorageInterface {
      * @param[out] name - This gets set with the name of the storage
      * @return Status
      */
-    virtual aditof::Status getName(std::string &name) = 0;
+    virtual aditof::Status getName(std::string &name) const = 0;
 };
 
 } // namespace aditof
