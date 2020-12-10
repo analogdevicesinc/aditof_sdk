@@ -38,7 +38,7 @@
 #include <glog/logging.h>
 
 FrameImpl::FrameImpl()
-    : m_details{0, 0, ""}, m_depthData(nullptr), m_irData(nullptr),
+    : m_details{0, 0, 0, 0, ""}, m_depthData(nullptr), m_irData(nullptr),
       m_rawData(nullptr) {}
 
 FrameImpl::~FrameImpl() {
