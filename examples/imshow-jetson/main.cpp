@@ -48,7 +48,7 @@ aditof::Status fromFrameToDepthMat(aditof::Frame &frame, cv::Mat &mat) {
     aditof::FrameDetails frameDetails;
     frame.getDetails(frameDetails);
 
-    const int frameHeight = static_cast<int>(frameDetails.height) / 2;
+    const int frameHeight = static_cast<int>(frameDetails.height);
     const int frameWidth = static_cast<int>(frameDetails.width);
 
     uint16_t *depthData;

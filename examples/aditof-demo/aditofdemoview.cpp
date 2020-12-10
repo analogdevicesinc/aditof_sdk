@@ -913,7 +913,7 @@ void AdiTofDemoView::_displayDepthImage() {
         aditof::FrameDetails frameDetails;
         localFrame->getDetails(frameDetails);
 
-        int frameHeight = static_cast<int>(frameDetails.height) / 2;
+        int frameHeight = static_cast<int>(frameDetails.height);
         int frameWidth = static_cast<int>(frameDetails.width);
 
         m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
@@ -985,7 +985,7 @@ void AdiTofDemoView::_displayIrImage() {
         aditof::FrameDetails frameDetails;
         localFrame->getDetails(frameDetails);
 
-        int frameHeight = static_cast<int>(frameDetails.height) / 2;
+        int frameHeight = static_cast<int>(frameDetails.height);
         int frameWidth = static_cast<int>(frameDetails.width);
         int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
 
@@ -1014,7 +1014,7 @@ void AdiTofDemoView::_displayBlendedImage() {
     aditof::FrameDetails frameDetails;
     localFrame->getDetails(frameDetails);
 
-    int frameHeight = static_cast<int>(frameDetails.height) / 2;
+    int frameHeight = static_cast<int>(frameDetails.height);
     int frameWidth = static_cast<int>(frameDetails.width);
     int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
 
