@@ -51,7 +51,8 @@ FrameImpl::~FrameImpl() {
 FrameImpl::FrameImpl(const FrameImpl &op) {
     allocFrameData(op.m_details);
     memcpy(m_rawData, op.m_rawData,
-           sizeof(uint16_t) * op.m_details.width * op.m_details.height);
+           sizeof(uint16_t) * op.m_details.fullDataWidth *
+               op.m_details.fullDataHeight);
     m_details = op.m_details;
 }
 
@@ -63,7 +64,8 @@ FrameImpl &FrameImpl::operator=(const FrameImpl &op) {
         }
         allocFrameData(op.m_details);
         memcpy(m_rawData, op.m_rawData,
-               sizeof(uint16_t) * op.m_details.width * op.m_details.height);
+               sizeof(uint16_t) * op.m_details.fullDataWidth *
+                   op.m_details.fullDataHeight);
         m_details = op.m_details;
     }
 
