@@ -31,14 +31,11 @@
  */
 #include "server.h"
 #include "aditof/aditof.h"
-#include "aditof/device_construction_data.h"
-#include "aditof/device_enumerator_factory.h"
-#include "aditof/device_factory.h"
-#include "aditof/eeprom_factory.h"
-#include "aditof/eeprom_interface.h"
+#include "aditof/sensor_enumerator_factory.h"
+#include "aditof/sensor_enumerator_interface.h"
 #include "buffer.pb.h"
 
-#include "../../sdk/src/local_device.h"
+#include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
 
 #include <glog/logging.h>
 #include <iostream>
@@ -51,8 +48,17 @@ using namespace google::protobuf::io;
 
 static int interrupted = 0;
 
-static std::shared_ptr<LocalDevice> device = nullptr;
-static std::vector<std::shared_ptr<aditof::EepromInterface>> eeproms;
+/* Available sensors */
+std::vector<std::shared_ptr<aditof::DepthSensorInterface>> depthSensors;
+static std::vector<std::shared_ptr<aditof::StorageInterface>> storages;
+static std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+    temperatureSensors;
+bool sensors_are_created = false;
+
+/* Server only works with one depth sensor */
+std::shared_ptr<aditof::DepthSensorInterface> camDepthSensor;
+std::shared_ptr<aditof::V4lBufferAccessInterface> sensorV4lBufAccess;
+
 static payload::ClientRequest buff_recv;
 static payload::ServerResponse buff_send;
 static std::map<std::string, api_Values> s_map_api_Values;
@@ -78,6 +84,21 @@ static struct lws_protocols protocols[] = {
     },
     {NULL, NULL, 0, 0} /* terminator */
 };
+
+static void cleanup_sensors() {
+    for (auto &storage : storages) {
+        storage->close();
+    }
+    storages.clear();
+    for (auto &sensor : temperatureSensors) {
+        sensor->close();
+    }
+    temperatureSensors.clear();
+    sensorV4lBufAccess.reset();
+    camDepthSensor.reset();
+
+    sensors_are_created = false;
+}
 
 Network ::Network() : context(nullptr) {}
 
@@ -191,9 +212,7 @@ int Network::callback_function(struct lws *wsi,
         if (Client_Connected == true && no_of_client_connected == false) {
             /*CONN_CLOSED event is for first and only client connected*/
             std::cout << "Connection Closed" << std::endl;
-            if (device) {
-                device.reset();
-            }
+
             Client_Connected = false;
             break;
         } else {
@@ -215,65 +234,6 @@ int Network::callback_function(struct lws *wsi,
 }
 
 void sigint_handler(int) { interrupted = 1; }
-
-std::shared_ptr<aditof::EepromInterface>
-findEepromByName(const std::string &name) {
-    std::shared_ptr<aditof::EepromInterface> eeprom;
-
-    for (const auto &e : eeproms) {
-        std::string eName;
-        e->getName(eName);
-        if (eName == name) {
-            eeprom = e;
-            break;
-        }
-    }
-
-    return eeprom;
-}
-
-std::shared_ptr<aditof::EepromInterface>
-getEeprom(const ::payload::DeviceConstructionData &data, aditof::Status &status,
-          std::string &msg, bool instantiateEeprom = false) {
-    std::shared_ptr<aditof::EepromInterface> eeprom;
-
-    // Check if client has sent exactly one name to identify the EEPROM
-    if (data.eeproms_size() != 1) {
-        msg = "Failed to identify EEPROM. Exactly one name for the eeprom is "
-              "accepted. Number of names provided: " +
-              std::to_string(data.eeproms_size());
-        status = aditof::Status::INVALID_ARGUMENT;
-
-        return eeprom;
-    }
-    std::string eName = buff_recv.device_data().eeproms(0).driver_name();
-
-    // We lookup the EEPROM instance by name
-    eeprom = findEepromByName(eName);
-    if (!eeprom) {
-        if (instantiateEeprom) {
-            // If EEPROM hasn't been instantiated yet, we do it here
-            eeprom = std::shared_ptr<aditof::EepromInterface>(
-                aditof::EepromFactory::buildEeprom(
-                    aditof::ConnectionType::LOCAL));
-            if (!eeprom) {
-                msg = "Failed to instantiate an EEPROM object";
-                status = aditof::Status::GENERIC_ERROR;
-
-                return eeprom;
-            }
-        }
-        msg = "Failed to identify EEPROM with name: " + eName;
-        status = aditof::Status::INVALID_ARGUMENT;
-
-        return eeprom;
-    }
-
-    msg.clear();
-    status = aditof::Status::OK;
-
-    return eeprom;
-}
 
 int main(int argc, char *argv[]) {
 
@@ -306,6 +266,10 @@ int main(int argc, char *argv[]) {
         lws_service(network->context, 0 /* timeout_ms */);
     }
 
+    if (sensors_are_created) {
+        cleanup_sensors();
+    }
+
     lws_context_destroy(network->context);
     delete network;
 
@@ -318,70 +282,81 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
     switch (s_map_api_Values[buff_recv.func_name()]) {
 
-    case FIND_DEVICES: {
-        DLOG(INFO) << "FindDevices function\n";
+    case FIND_SENSORS: {
+        DLOG(INFO) << "FindSensors function\n";
 
-        std::vector<aditof::DeviceConstructionData> devicesInfo;
-        auto localDevEnumerator =
-            aditof::DeviceEnumeratorFactory::buildDeviceEnumerator();
-
-        aditof::Status status = localDevEnumerator->findDevices(devicesInfo);
-        for (const auto &devInfo : devicesInfo) {
-            auto pbDevInfo = buff_send.add_device_info();
-            pbDevInfo->set_device_type(static_cast<::payload::DeviceType>(
-                aditof::ConnectionType::ETHERNET));
-            pbDevInfo->set_driver_path(devInfo.driverPath);
-            for (const auto &eepromInfo : devInfo.eeproms) {
-                auto pbEepromInfo = pbDevInfo->add_eeproms();
-                pbEepromInfo->set_driver_name(eepromInfo.driverName);
-                pbEepromInfo->set_driver_path(eepromInfo.driverPath);
-            }
-        }
-        buff_send.set_status(static_cast<::payload::Status>(status));
-        break;
-    }
-
-    case INSTANTIATE_DEVICE: {
-        DLOG(INFO) << "InstantiateDevice function\n";
-
-        aditof::Status status = aditof::Status::OK;
-        std::string errMsg;
-        aditof::DeviceConstructionData devData;
-
-        devData.connectionType = aditof::ConnectionType::LOCAL;
-        devData.driverPath = buff_recv.device_data().driver_path();
-        std::shared_ptr<aditof::DeviceInterface> deviceI =
-            aditof::DeviceFactory::buildDevice(devData);
-        device = std::dynamic_pointer_cast<LocalDevice>(deviceI);
-        if (!device) {
-            errMsg = "Failed to create local device";
-            status = aditof::Status::INVALID_ARGUMENT;
-        } else {
-            aditof::DeviceDetails devDetails;
-            deviceI->getDetails(devDetails);
-            buff_send.set_sensor_type(
-                static_cast<::payload::SensorType>(devDetails.sensorType));
+        // Start from a clean state
+        if (sensors_are_created) {
+            cleanup_sensors();
         }
 
-        buff_send.set_status(static_cast<::payload::Status>(status));
-        if (!errMsg.empty())
+        auto sensorsEnumerator =
+            aditof::SensorEnumeratorFactory::buildTargetSensorEnumerator();
+        if (!sensorsEnumerator) {
+            std::string errMsg = "Failed to create a target sensor enumerator";
+            LOG(WARNING) << errMsg;
             buff_send.set_message(errMsg);
-        break;
-    }
-
-    case DESTROY_DEVICE: {
-        DLOG(INFO) << "DestroyDevice function\n";
-
-        if (device) {
-            device.reset();
+            buff_send.set_status(
+                static_cast<::payload::Status>(aditof::Status::UNAVAILABLE));
+            break;
         }
+
+        sensorsEnumerator->searchSensors();
+        sensorsEnumerator->getDepthSensors(depthSensors);
+        sensorsEnumerator->getStorages(storages);
+        sensorsEnumerator->getTemperatureSensors(temperatureSensors);
+        sensors_are_created = true;
+
+        /* Add information about available sensors */
+
+        // Depth sensor
+        if (depthSensors.size() < 1) {
+            buff_send.set_message("No depth sensors are available");
+            buff_send.set_status(::payload::Status::UNREACHABLE);
+            break;
+        }
+        camDepthSensor = depthSensors.front();
+        aditof::SensorDetails depthSensorDetails;
+        camDepthSensor->getDetails(depthSensorDetails);
+        auto pbSensorsInfo = buff_send.mutable_sensors_info();
+        pbSensorsInfo->set_sensor_type(
+            static_cast<::payload::SensorType>(depthSensorDetails.sensorType));
+
+        sensorV4lBufAccess =
+            std::dynamic_pointer_cast<aditof::V4lBufferAccessInterface>(
+                camDepthSensor);
+
+        // Storages
+        int storage_id = 0;
+        for (const auto &storage : storages) {
+            std::string name;
+            storage->getName(name);
+            auto pbStorageInfo = pbSensorsInfo->add_storages();
+            pbStorageInfo->set_name(name);
+            pbStorageInfo->set_id(storage_id);
+            ++storage_id;
+        }
+
+        // Temperature sensors
+        int temp_sensor_id = 0;
+        for (const auto &sensor : temperatureSensors) {
+            std::string name;
+            sensor->getName(name);
+            auto pbTempSensorInfo = pbSensorsInfo->add_temp_sensors();
+            pbTempSensorInfo->set_name(name);
+            pbTempSensorInfo->set_id(temp_sensor_id);
+            ++temp_sensor_id;
+        }
+
+        buff_send.set_status(
+            static_cast<::payload::Status>(aditof::Status::OK));
         break;
     }
 
     case OPEN: {
         DLOG(INFO) << "Open function\n";
 
-        aditof::Status status = device->open();
+        aditof::Status status = camDepthSensor->open();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
@@ -389,7 +364,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     case START: {
         DLOG(INFO) << "Start function\n";
 
-        aditof::Status status = device->start();
+        aditof::Status status = camDepthSensor->start();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
@@ -397,7 +372,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     case STOP: {
         DLOG(INFO) << "Stop function\n";
 
-        aditof::Status status = device->stop();
+        aditof::Status status = camDepthSensor->stop();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
@@ -406,7 +381,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         DLOG(INFO) << "GetAvailableFrameTypes function";
 
         std::vector<aditof::FrameDetails> frameDetails;
-        aditof::Status status = device->getAvailableFrameTypes(frameDetails);
+        aditof::Status status =
+            camDepthSensor->getAvailableFrameTypes(frameDetails);
         for (auto detail : frameDetails) {
             auto type = buff_send.add_available_frame_types();
             type->set_width(detail.width);
@@ -424,7 +400,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         details.width = buff_recv.frame_type().width();
         details.height = buff_recv.frame_type().height();
         details.type = buff_recv.frame_type().type();
-        aditof::Status status = device->setFrameType(details);
+        aditof::Status status = camDepthSensor->setFrameType(details);
         buff_send.set_status(static_cast<::payload::Status>(status));
 
         frame_width = details.width;
@@ -438,7 +414,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         size_t programSize = static_cast<size_t>(buff_recv.func_int32_param(0));
         const uint8_t *pdata = reinterpret_cast<const uint8_t *>(
             buff_recv.func_bytes_param(0).c_str());
-        aditof::Status status = device->program(pdata, programSize);
+        aditof::Status status = camDepthSensor->program(pdata, programSize);
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
@@ -446,7 +422,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     case GET_FRAME: {
         DLOG(INFO) << "GetFrame function\n";
 
-        aditof::Status status = device->waitForBuffer();
+        aditof::Status status = sensorV4lBufAccess->waitForBuffer();
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
@@ -454,7 +430,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
         struct v4l2_buffer buf;
 
-        status = device->dequeueInternalBuffer(buf);
+        status = sensorV4lBufAccess->dequeueInternalBuffer(buf);
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
@@ -463,7 +439,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         unsigned int buf_data_len;
         uint8_t *buffer;
 
-        status = device->getInternalBuffer(&buffer, buf_data_len, buf);
+        status =
+            sensorV4lBufAccess->getInternalBuffer(&buffer, buf_data_len, buf);
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
@@ -471,7 +448,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
         buff_send.add_bytes_payload(buffer, buf_data_len * sizeof(uint8_t));
 
-        status = device->enqueueInternalBuffer(buf);
+        status = sensorV4lBufAccess->enqueueInternalBuffer(buf);
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
@@ -488,7 +465,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         const uint16_t *address = reinterpret_cast<const uint16_t *>(
             buff_recv.func_bytes_param(0).c_str());
         uint16_t *data = new uint16_t[length];
-        aditof::Status status = device->readAfeRegisters(address, data, length);
+        aditof::Status status =
+            camDepthSensor->readAfeRegisters(address, data, length);
         if (status == aditof::Status::OK) {
             buff_send.add_bytes_payload(data, length * sizeof(uint16_t));
         }
@@ -506,74 +484,56 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         const uint16_t *data = reinterpret_cast<const uint16_t *>(
             buff_recv.func_bytes_param(1).c_str());
         aditof::Status status =
-            device->writeAfeRegisters(address, data, length);
+            camDepthSensor->writeAfeRegisters(address, data, length);
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
-    case READ_AFE_TEMP: {
-        DLOG(INFO) << "ReadAfeTemp function\n";
-
-        float temperature;
-        aditof::Status status = device->readAfeTemp(temperature);
-        if (status == aditof::Status::OK) {
-            buff_send.add_float_payload(temperature);
-        }
-        buff_send.set_status(static_cast<::payload::Status>(status));
-        break;
-    }
-
-    case READ_LASER_TEMP: {
-        DLOG(INFO) << "ReadLaserTemp function\n";
-
-        float temperature;
-        aditof::Status status = device->readLaserTemp(temperature);
-        if (status == aditof::Status::OK) {
-            buff_send.add_float_payload(temperature);
-        }
-        buff_send.set_status(static_cast<::payload::Status>(status));
-        break;
-    }
-
-    case EEPROM_OPEN: {
-        DLOG(INFO) << "EepromOpen function\n";
+    case STORAGE_OPEN: {
+        DLOG(INFO) << "StorageOpen function\n";
 
         aditof::Status status;
         std::string msg;
-        auto eeprom = getEeprom(buff_recv.device_data(), status, msg, true);
-        if (status != aditof::Status::OK) {
-            buff_send.set_message(msg);
-            buff_send.set_status(static_cast<::payload::Status>(status));
+        size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
+
+        if (index < 0 || index >= storages.size()) {
+            buff_send.set_message("The ID of the storage is invalid");
+            buff_send.set_status(::payload::Status::INVALID_ARGUMENT);
             break;
         }
 
-        status = eeprom->open(nullptr,
-                              buff_recv.device_data().eeproms(0).driver_name(),
-                              buff_recv.device_data().eeproms(0).driver_path());
-        if (status == aditof::Status::OK) {
-            eeproms.push_back(eeprom);
+        void *sensorHandle;
+        status = camDepthSensor->getHandle(&sensorHandle);
+        if (status != aditof::Status::OK) {
+            buff_send.set_message("Failed to obtain handle from depth sensor "
+                                  "needed to open storage");
+            buff_send.set_status(::payload::Status::GENERIC_ERROR);
+            break;
         }
+
+        status = storages[index]->open(sensorHandle);
 
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
-    case EEPROM_READ: {
-        DLOG(INFO) << "EepromRead function\n";
+    case STORAGE_READ: {
+        DLOG(INFO) << "StorageRead function\n";
 
         aditof::Status status;
         std::string msg;
-        auto eeprom = getEeprom(buff_recv.device_data(), status, msg);
-        if (status != aditof::Status::OK) {
-            buff_send.set_message(msg);
-            buff_send.set_status(static_cast<::payload::Status>(status));
+        size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
+
+        if (index < 0 || index >= storages.size()) {
+            buff_send.set_message("The ID of the storage is invalid");
+            buff_send.set_status(::payload::Status::INVALID_ARGUMENT);
             break;
         }
 
-        uint32_t address = static_cast<uint32_t>(buff_recv.func_int32_param(0));
-        size_t length = static_cast<size_t>(buff_recv.func_int32_param(1));
+        uint32_t address = static_cast<uint32_t>(buff_recv.func_int32_param(1));
+        size_t length = static_cast<size_t>(buff_recv.func_int32_param(2));
         uint8_t *buffer = new uint8_t[length];
-        status = eeprom->read(address, buffer, length);
+        status = storages[index]->read(address, buffer, length);
         if (status == aditof::Status::OK) {
             buff_send.add_bytes_payload(buffer, length);
         }
@@ -582,46 +542,109 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         break;
     }
 
-    case EEPROM_WRITE: {
-        DLOG(INFO) << "Eepromrite function\n";
+    case STORAGE_WRITE: {
+        DLOG(INFO) << "Storagewrite function\n";
 
         aditof::Status status;
         std::string msg;
-        auto eeprom = getEeprom(buff_recv.device_data(), status, msg);
-        if (status != aditof::Status::OK) {
-            buff_send.set_message(msg);
-            buff_send.set_status(static_cast<::payload::Status>(status));
+        size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
+
+        if (index < 0 || index >= storages.size()) {
+            buff_send.set_message("The ID of the storage is invalid");
+            buff_send.set_status(::payload::Status::INVALID_ARGUMENT);
             break;
         }
 
-        uint32_t address = static_cast<uint32_t>(buff_recv.func_int32_param(0));
-        size_t length = static_cast<size_t>(buff_recv.func_int32_param(1));
+        uint32_t address = static_cast<uint32_t>(buff_recv.func_int32_param(1));
+        size_t length = static_cast<size_t>(buff_recv.func_int32_param(2));
         const uint8_t *buffer = reinterpret_cast<const uint8_t *>(
             buff_recv.func_bytes_param(0).c_str());
 
-        status = eeprom->write(address, buffer, length);
+        status = storages[index]->write(address, buffer, length);
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
-    case EEPROM_CLOSE: {
-        DLOG(INFO) << "EepromClose function\n";
+    case STORAGE_CLOSE: {
+        DLOG(INFO) << "StorageClose function\n";
 
         aditof::Status status;
         std::string msg;
-        auto eeprom = getEeprom(buff_recv.device_data(), status, msg);
-        if (status != aditof::Status::OK) {
-            buff_send.set_message(msg);
-            buff_send.set_status(static_cast<::payload::Status>(status));
+        size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
+
+        if (index < 0 || index >= storages.size()) {
+            buff_send.set_message("The ID of the storage is invalid");
+            buff_send.set_status(::payload::Status::INVALID_ARGUMENT);
             break;
         }
 
-        status = eeprom->close();
+        status = storages[index]->close();
 
-        if (status == aditof::Status::OK) {
-            eeproms.erase(std::remove(eeproms.begin(), eeproms.end(), eeprom),
-                          eeproms.end());
+        buff_send.set_status(static_cast<::payload::Status>(status));
+        break;
+    }
+
+    case TEMPERATURE_SENSOR_OPEN: {
+        DLOG(INFO) << "TemperatureSensorOpen function\n";
+
+        size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
+
+        if (index < 0 || index >= temperatureSensors.size()) {
+            buff_send.set_message(
+                "The ID of the temperature sensor is invalid");
+            buff_send.set_status(::payload::Status::INVALID_ARGUMENT);
+            break;
         }
+
+        void *sensorHandle;
+        aditof::Status status = camDepthSensor->getHandle(&sensorHandle);
+        if (status != aditof::Status::OK) {
+            buff_send.set_message("Failed to obtain handle from depth sensor "
+                                  "needed to open temperature sensor");
+            buff_send.set_status(::payload::Status::GENERIC_ERROR);
+            break;
+        }
+
+        status = temperatureSensors[index]->open(sensorHandle);
+
+        buff_send.set_status(static_cast<::payload::Status>(status));
+        break;
+    }
+
+    case TEMPERATURE_SENSOR_READ: {
+        DLOG(INFO) << "TemperatureSensorRead function\n";
+
+        size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
+
+        if (index < 0 || index >= temperatureSensors.size()) {
+            buff_send.set_message(
+                "The ID of the temperature sensor is invalid");
+            buff_send.set_status(::payload::Status::INVALID_ARGUMENT);
+            break;
+        }
+
+        float temperature;
+        aditof::Status status = temperatureSensors[index]->read(temperature);
+        if (status == aditof::Status::OK) {
+            buff_send.add_float_payload(temperature);
+        }
+        buff_send.set_status(static_cast<::payload::Status>(status));
+        break;
+    }
+
+    case TEMPERATURE_SENSOR_CLOSE: {
+        DLOG(INFO) << "TemperatureSensorClose function\n";
+
+        size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
+
+        if (index < 0 || index >= temperatureSensors.size()) {
+            buff_send.set_message(
+                "The ID of the temperature sensor is invalid");
+            buff_send.set_status(::payload::Status::INVALID_ARGUMENT);
+            break;
+        }
+
+        aditof::Status status = temperatureSensors[index]->close();
 
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
@@ -641,9 +664,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 }
 
 void Initialize() {
-    s_map_api_Values["FindDevices"] = FIND_DEVICES;
-    s_map_api_Values["InstantiateDevice"] = INSTANTIATE_DEVICE;
-    s_map_api_Values["DestroyDevice"] = DESTROY_DEVICE;
+    s_map_api_Values["FindSensors"] = FIND_SENSORS;
     s_map_api_Values["Open"] = OPEN;
     s_map_api_Values["Start"] = START;
     s_map_api_Values["Stop"] = STOP;
@@ -653,10 +674,11 @@ void Initialize() {
     s_map_api_Values["GetFrame"] = GET_FRAME;
     s_map_api_Values["ReadAfeRegisters"] = READ_AFE_REGISTERS;
     s_map_api_Values["WriteAfeRegisters"] = WRITE_AFE_REGISTERS;
-    s_map_api_Values["ReadAfeTemp"] = READ_AFE_TEMP;
-    s_map_api_Values["ReadLaserTemp"] = READ_LASER_TEMP;
-    s_map_api_Values["EepromOpen"] = EEPROM_OPEN;
-    s_map_api_Values["EepromRead"] = EEPROM_READ;
-    s_map_api_Values["EepromWrite"] = EEPROM_WRITE;
-    s_map_api_Values["EepromClose"] = EEPROM_CLOSE;
+    s_map_api_Values["StorageOpen"] = STORAGE_OPEN;
+    s_map_api_Values["StorageRead"] = STORAGE_READ;
+    s_map_api_Values["StorageWrite"] = STORAGE_WRITE;
+    s_map_api_Values["StorageClose"] = STORAGE_CLOSE;
+    s_map_api_Values["TemperatureSensorOpen"] = TEMPERATURE_SENSOR_OPEN;
+    s_map_api_Values["TemperatureSensorRead"] = TEMPERATURE_SENSOR_READ;
+    s_map_api_Values["TemperatureSensorClose"] = TEMPERATURE_SENSOR_CLOSE;
 }
