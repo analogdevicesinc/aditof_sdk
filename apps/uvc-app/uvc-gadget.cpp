@@ -1756,12 +1756,13 @@ static int uvc_events_process_data(struct uvc_device *dev,
             } else if (dev->set_cur_cs == 6) {
                 if (eeprom_write_ready.load()) {
                     if (eeprom_write_len == 0) {
-                        eeprom_write_addr = *((unsigned int *)&(data->data[0]));
+                        storage_index = data->data[0];
+                        eeprom_write_addr = *((unsigned int *)&(data->data[1]));
                     }
-                    memcpy(&eeprom_data[eeprom_write_len], &data->data[5],
-                           data->data[4]);
-                    eeprom_write_len += data->data[4];
-                    if (data->data[4] < MAX_PACKET_SIZE - 5) {
+                    memcpy(&eeprom_data[eeprom_write_len], &data->data[6],
+                           data->data[5]);
+                    eeprom_write_len += data->data[5];
+                    if (data->data[5] < MAX_PACKET_SIZE - 6) {
                         if (eepromWriteThread.joinable()) {
                             eepromWriteThread.join();
                         }
