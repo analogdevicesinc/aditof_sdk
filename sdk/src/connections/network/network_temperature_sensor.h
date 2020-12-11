@@ -40,7 +40,7 @@ namespace aditof {
 
 class NetworkTemperatureSensor : public aditof::TemperatureSensorInterface {
   public:
-    NetworkTemperatureSensor(const std::string &name);
+    NetworkTemperatureSensor(const std::string &name, unsigned int id);
     ~NetworkTemperatureSensor();
 
     // Implements TemperatureSensorInterface
