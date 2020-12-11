@@ -59,66 +59,9 @@ NetworkDepthSensor::NetworkDepthSensor(const std::string &ip,
     m_implData->ip = ip;
     m_implData->opened = false;
     m_sensorDetails.sensorType = sensorType;
-
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
-
-    /* Make connection with LWS server running on Dragonboard */
-    if (net->ServerConnect(m_implData->ip) != 0) {
-        LOG(WARNING) << "Server Connect Failed";
-    }
-
-    net->send_buff.set_func_name("InstantiateDevice");
-    // TO DO: remove InstantiateDevice(). It's not needed.
-    //    net->send_buff.mutable_device_data()->set_driver_path(data.driverPath);
-    //    for (const auto &eeprom : data.eeproms) {
-    //        auto pbEeprom = net->send_buff.mutable_device_data()->add_eeproms();
-    //        pbEeprom->set_driver_name(eeprom.driverName);
-    //        pbEeprom->set_driver_path(eeprom.driverPath);
-    //    }
-    net->send_buff.set_expect_reply(true);
-
-    if (net->SendCommand() != 0) {
-        LOG(WARNING) << "Send Command Failed";
-    }
-
-    if (net->recv_server_data() != 0) {
-        LOG(WARNING) << "Receive Data Failed";
-    }
-
-    if (net->recv_buff.server_status() !=
-        payload::ServerStatus::REQUEST_ACCEPTED) {
-        LOG(WARNING) << "API execution on Target Failed";
-    }
-
-    auto status = static_cast<aditof::Status>(net->recv_buff.status());
-    if (status != aditof::Status::OK) {
-        LOG(WARNING) << "API execution on Target Failed with error: "
-                     << static_cast<int>(status);
-    } else {
-        m_sensorDetails.sensorType =
-            static_cast<aditof::SensorType>(net->recv_buff.sensor_type());
-    }
 }
 
 NetworkDepthSensor::~NetworkDepthSensor() {
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
-
-    if (!net->isServer_Connected()) {
-        LOG(WARNING) << "Not connected to server";
-    }
-
-    net->send_buff.set_func_name("DestroyDevice");
-    net->send_buff.set_expect_reply(false);
-
-    if (net->SendCommand() != 0) {
-        LOG(WARNING) << "Send Command Failed";
-    }
-
-    if (net->recv_server_data() != 0) {
-        LOG(WARNING) << "Receive Data Failed";
-    }
-
     delete m_implData->handle.net;
 
     for (auto it = m_implData->calibration_cache.begin();

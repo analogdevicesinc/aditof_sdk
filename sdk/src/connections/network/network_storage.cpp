@@ -39,11 +39,13 @@ using namespace aditof;
 struct NetworkStorage::ImplData {
     EthernetHandle *handle;
     std::string name;
+    unsigned int id;
 };
 
-NetworkStorage::NetworkStorage(const std::string &name)
+NetworkStorage::NetworkStorage(const std::string &name, unsigned int id)
     : m_implData(new NetworkStorage::ImplData) {
     m_implData->name = name;
+    m_implData->id = id;
 }
 
 NetworkStorage::~NetworkStorage() = default;
@@ -63,9 +65,8 @@ Status NetworkStorage::open(void *handle) {
         return Status::UNREACHABLE;
     }
 
-    net->send_buff.set_func_name("EepromOpen");
-    auto pbEeprom = net->send_buff.mutable_device_data()->add_eeproms();
-    pbEeprom->set_driver_name(m_implData->name);
+    net->send_buff.set_func_name("StorageOpen");
+    net->send_buff.add_func_int32_param(m_implData->id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -99,9 +100,8 @@ Status NetworkStorage::read(const uint32_t address, uint8_t *data,
         return Status::UNREACHABLE;
     }
 
-    net->send_buff.set_func_name("EepromRead");
-    auto pbEeprom = net->send_buff.mutable_device_data()->add_eeproms();
-    pbEeprom->set_driver_name(m_implData->name);
+    net->send_buff.set_func_name("StorageRead");
+    net->send_buff.add_func_int32_param(m_implData->id);
     net->send_buff.add_func_int32_param(static_cast<::google::int32>(address));
     net->send_buff.add_func_int32_param(
         static_cast<::google::int32>(bytesCount));
@@ -143,9 +143,8 @@ Status NetworkStorage::write(const uint32_t address, const uint8_t *data,
         return Status::UNREACHABLE;
     }
 
-    net->send_buff.set_func_name("EepromWrite");
-    auto pbEeprom = net->send_buff.mutable_device_data()->add_eeproms();
-    pbEeprom->set_driver_name(m_implData->name);
+    net->send_buff.set_func_name("StorageWrite");
+    net->send_buff.add_func_int32_param(m_implData->id);
     net->send_buff.add_func_int32_param(static_cast<::google::int32>(address));
     net->send_buff.add_func_int32_param(
         static_cast<::google::int32>(bytesCount));
@@ -182,9 +181,8 @@ Status NetworkStorage::close() {
         return Status::UNREACHABLE;
     }
 
-    net->send_buff.set_func_name("EepromClose");
-    auto pbEeprom = net->send_buff.mutable_device_data()->add_eeproms();
-    pbEeprom->set_driver_name(m_implData->name);
+    net->send_buff.set_func_name("StorageClose");
+    net->send_buff.add_func_int32_param(m_implData->id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
