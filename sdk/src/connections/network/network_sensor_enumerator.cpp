@@ -47,7 +47,7 @@ NetworkSensorEnumerator::~NetworkSensorEnumerator() = default;
 Status NetworkSensorEnumerator::searchSensors() {
     Status status = Status::OK;
 
-    LOG(INFO) << "Looking for devices over ethernet";
+    LOG(INFO) << "Looking for sensors over ethernet";
 
     std::unique_ptr<Network> net(new Network());
 
@@ -56,7 +56,7 @@ Status NetworkSensorEnumerator::searchSensors() {
         return Status::UNREACHABLE;
     }
 
-    net->send_buff.set_func_name("FindDevices");
+    net->send_buff.set_func_name("FindSensors");
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -74,23 +74,29 @@ Status NetworkSensorEnumerator::searchSensors() {
         LOG(WARNING) << "API execution on Target Failed";
         return Status::GENERIC_ERROR;
     }
+
     const payload::ServerResponse &msg = net->recv_buff;
-    for (int i = 0; i < msg.device_info().size(); ++i) {
-        const payload::DeviceConstructionData &pbData = msg.device_info(i);
+    const payload::SensorsInfo &pbSensorsInfo = msg.sensors_info();
 
-        m_sensorsType.emplace_back(
-            static_cast<aditof::SensorType>(pbData.device_type()));
-
-        for (int j = 0; j < pbData.eeproms().size(); ++j) {
-            const payload::EepromConstructionData &pbEepromData =
-                pbData.eeproms(j);
-            m_storagesInfo.emplace_back(pbEepromData.driver_name());
-        }
-
-        for (int k = 0; k < pbData.temperature_sensors_size(); ++k) {
-            m_tempeatureSensorsInfo.emplace_back(pbData.temperature_sensors(k));
-        }
+    if (msg.sensors_info().sensor_type()) {
+        m_sensorType =
+            static_cast<aditof::SensorType>(pbSensorsInfo.sensor_type());
     }
+
+    for (int i = 0; i < pbSensorsInfo.storages().size(); ++i) {
+        std::string name = pbSensorsInfo.storages(i).name();
+        unsigned int id = pbSensorsInfo.storages(i).id();
+        m_storagesInfo.emplace_back(
+            std::pair<std::string, unsigned int>(name, id));
+    }
+
+    for (int i = 0; i < pbSensorsInfo.temp_sensors().size(); ++i) {
+        std::string name = pbSensorsInfo.temp_sensors(i).name();
+        unsigned int id = pbSensorsInfo.temp_sensors(i).id();
+        m_storagesInfo.emplace_back(
+            std::pair<std::string, unsigned int>(name, id));
+    }
+
     status = static_cast<Status>(net->recv_buff.status());
 
     return status;
@@ -101,10 +107,8 @@ Status NetworkSensorEnumerator::getDepthSensors(
 
     depthSensors.clear();
 
-    for (auto sensorType : m_sensorsType) {
-        auto sensor = std::make_shared<NetworkDepthSensor>(m_ip, sensorType);
-        depthSensors.emplace_back(sensor);
-    }
+    auto sensor = std::make_shared<NetworkDepthSensor>(m_ip, m_sensorType);
+    depthSensors.emplace_back(sensor);
 
     return Status::OK;
 }
@@ -114,8 +118,9 @@ Status NetworkSensorEnumerator::getStorages(
 
     storages.clear();
 
-    for (const auto &name : m_storagesInfo) {
-        auto storage = std::make_shared<NetworkStorage>(name);
+    for (const auto &nameAndId : m_storagesInfo) {
+        auto storage =
+            std::make_shared<NetworkStorage>(nameAndId.first, nameAndId.second);
         storages.emplace_back(storage);
     }
 
@@ -128,8 +133,9 @@ Status NetworkSensorEnumerator::getTemperatureSensors(
 
     temperatureSensors.clear();
 
-    for (const auto &name : m_tempeatureSensorsInfo) {
-        auto tSensor = std::make_shared<NetworkTemperatureSensor>(name);
+    for (const auto &nameAndId : m_temperatureSensorsInfo) {
+        auto tSensor = std::make_shared<NetworkTemperatureSensor>(
+            nameAndId.first, nameAndId.second);
         temperatureSensors.emplace_back(tSensor);
     }
 

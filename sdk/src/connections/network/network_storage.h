@@ -38,7 +38,7 @@
 
 class NetworkStorage : public aditof::StorageInterface {
   public:
-    NetworkStorage(const std::string &name);
+    NetworkStorage(const std::string &name, unsigned int id);
     ~NetworkStorage();
 
   public: // implements StorageInterface
