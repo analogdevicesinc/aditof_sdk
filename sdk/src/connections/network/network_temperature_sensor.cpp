@@ -39,11 +39,14 @@ using namespace aditof;
 struct NetworkTemperatureSensor::ImplData {
     EthernetHandle *handle;
     std::string name;
+    unsigned int id;
 };
 
-NetworkTemperatureSensor::NetworkTemperatureSensor(const std::string &name)
+NetworkTemperatureSensor::NetworkTemperatureSensor(const std::string &name,
+                                                   unsigned int id)
     : m_implData(new ImplData) {
     m_implData->name = name;
+    m_implData->id = id;
 }
 
 NetworkTemperatureSensor::~NetworkTemperatureSensor() = default;
@@ -65,8 +68,7 @@ Status NetworkTemperatureSensor::open(void *handle) {
     }
 
     net->send_buff.set_func_name("TemperatureSensorOpen");
-    net->send_buff.mutable_device_data()->add_temperature_sensors(
-        m_implData->name);
+    net->send_buff.add_func_int32_param(m_implData->id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -100,8 +102,7 @@ Status NetworkTemperatureSensor::read(float &temperature) {
     }
 
     net->send_buff.set_func_name("TemperatureSensorRead");
-    net->send_buff.mutable_device_data()->add_temperature_sensors(
-        m_implData->name);
+    net->send_buff.add_func_int32_param(m_implData->id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -139,8 +140,7 @@ Status NetworkTemperatureSensor::close() {
     }
 
     net->send_buff.set_func_name("TemperatureSensorClose");
-    net->send_buff.mutable_device_data()->add_temperature_sensors(
-        m_implData->name);
+    net->send_buff.add_func_int32_param(m_implData->id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
