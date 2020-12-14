@@ -60,8 +60,7 @@ UsbUtils::getStorageNamesAndIds(const std::vector<std::string> &tokens) {
             pair.first = keyValueStr[1];
             v.emplace_back(pair);
         } else if (keyValueStr[0] == "STORAGE_ID") {
-            auto pair = v.back();
-            pair.second = std::stoi(keyValueStr[1]);
+            v.back().second = std::stoi(keyValueStr[1]);
         }
     }
 
@@ -81,8 +80,7 @@ UsbUtils::getTemperatureSensorNamesAndIds(
             pair.first = keyValueStr[1];
             v.emplace_back(pair);
         } else if (keyValueStr[0] == "TEMP_SENSOR_ID") {
-            auto pair = v.back();
-            pair.second = std::stoi(keyValueStr[1]);
+            v.back().second = std::stoi(keyValueStr[1]);
         }
     }
 
