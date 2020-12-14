@@ -1255,7 +1255,7 @@ static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
             switch (req) {
             case UVC_SET_CUR:
                 USB_REQ_DEBUG("Received SET_CUR on %d\n", cs);
-
+                dev->set_cur_cs = cs;
                 resp->data[0] = 0x0;
                 resp->length = len;
                 break;
