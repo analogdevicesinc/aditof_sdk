@@ -78,10 +78,7 @@ Status NetworkSensorEnumerator::searchSensors() {
     const payload::ServerResponse &msg = net->recv_buff;
     const payload::SensorsInfo &pbSensorsInfo = msg.sensors_info();
 
-    if (msg.sensors_info().sensor_type()) {
-        m_sensorType =
-            static_cast<aditof::SensorType>(pbSensorsInfo.sensor_type());
-    }
+    m_sensorType = static_cast<aditof::SensorType>(pbSensorsInfo.sensor_type());
 
     for (int i = 0; i < pbSensorsInfo.storages().size(); ++i) {
         std::string name = pbSensorsInfo.storages(i).name();
@@ -93,7 +90,7 @@ Status NetworkSensorEnumerator::searchSensors() {
     for (int i = 0; i < pbSensorsInfo.temp_sensors().size(); ++i) {
         std::string name = pbSensorsInfo.temp_sensors(i).name();
         unsigned int id = pbSensorsInfo.temp_sensors(i).id();
-        m_storagesInfo.emplace_back(
+        m_temperatureSensorsInfo.emplace_back(
             std::pair<std::string, unsigned int>(name, id));
     }
 
