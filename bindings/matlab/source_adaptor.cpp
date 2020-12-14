@@ -37,7 +37,8 @@
 #include "temperature_get_fcn.h"
 #include <string>
 
-#include <aditof/device_interface.h>
+#include <aditof/depth_sensor_interface.h>
+#include <aditof/temperature_sensor_interface.h>
 
 #include <exception>
 #ifndef _WIN32
@@ -114,9 +115,7 @@ void SourceAdaptor::initDevice() {
 
         // Add custom get functions to the timestamp properties.  For the other
         // properties add post-set listeners.
-        if ((std::string(aditof::AFE_TEMPERATURE_STR) == devicePropNames[i]) ||
-            (std::string(aditof::LASER_TEMPERATURE_STR) ==
-             devicePropNames[i])) {
+        if (std::string(aditof::TEMPERATURE_STR) == devicePropNames[i]) {
             adaptorPropContainer->setCustomGetFcn(devicePropNames[i],
                                                   new TemperatureGetFcn(this));
         } else {
@@ -299,7 +298,7 @@ void SourceAdaptor::setSmallSignalValue(int16_t value) {
     // TO DO: This breaks things over USB. Works well on the target and
     // over ethernet.
     if (m_camera) {
-        m_camera->getDevice()->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+        m_camera->getSensor()->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
 }
 
@@ -315,7 +314,7 @@ std::pair<int, int> SourceAdaptor::getCurrentHwRange() const {
     return std::make_pair(cameraDetails.minDepth, cameraDetails.maxDepth);
 }
 
-int SourceAdaptor::getCurrentBitCount() {
+int SourceAdaptor::getCurrentBitCount() const {
     aditof::CameraDetails cameraDetails;
 
     if (!m_camera) {
@@ -338,26 +337,29 @@ std::shared_ptr<aditof::Frame> SourceAdaptor::getFrameFromHwDevice() {
     return frame;
 }
 
-float SourceAdaptor::readAfeTemp() {
-    float afeTemp = 0.0;
+std::string SourceAdaptor::readTemp() const {
+    if (m_camera) {
+        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> tempSensors;
+        m_camera->getTemperatureSensors(tempSensors);
 
-    if (!m_camera) {
-        return 0.0;
+        std::string temperature;
+        for (const auto &sensor : tempSensors) {
+            std::string sensorName;
+            sensor->getName(sensorName);
+
+            float temperatureValue = 0.0f;
+            sensor->read(temperatureValue);
+
+            temperature +=
+                sensorName + ": " + std::to_string(temperatureValue) + " ";
+        }
+
+        if (!temperature.empty()) {
+            return temperature;
+        }
     }
 
-    m_camera->getDevice()->readAfeTemp(afeTemp);
-    return afeTemp;
-}
-
-float SourceAdaptor::readLaserTemp() {
-    float laserTemp = 0.0;
-
-    if (!m_camera) {
-        return 0.0;
-    }
-
-    m_camera->getDevice()->readLaserTemp(laserTemp);
-    return laserTemp;
+    return std::string{"No temperature sensor found!"};
 }
 
 void SourceAdaptor::setAcquisitionActive(bool state) {

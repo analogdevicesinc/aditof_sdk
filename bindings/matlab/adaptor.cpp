@@ -49,7 +49,6 @@ aditof::System *m_system = nullptr;
 
 void initializeAdaptor() {
     m_system = new aditof::System();
-    m_system->initialize();
 }
 
 /**
@@ -240,14 +239,10 @@ void getDeviceAttributes(const imaqkit::IDeviceInfo *deviceInfo,
                                     aditof::ADITOF_PROPERTY_SMALL_SIGNAL);
 
         // Temp readings
-        hProp = devicePropFact->createDoubleProperty(
-            aditof::AFE_TEMPERATURE_STR, 0.0);
+        hProp = devicePropFact->createStringProperty(
+            aditof::TEMPERATURE_STR, "No temperature sensor found!");
         devicePropFact->setPropReadOnly(hProp, imaqkit::propreadonly::ALWAYS);
-        devicePropFact->addProperty(hProp, aditof::ADITOF_PROPERTY_AFE_TEMP);
-        hProp = devicePropFact->createDoubleProperty(
-            aditof::LASER_TEMPERATURE_STR, 0.0);
-        devicePropFact->setPropReadOnly(hProp, imaqkit::propreadonly::ALWAYS);
-        devicePropFact->addProperty(hProp, aditof::ADITOF_PROPERTY_LASER_TEMP);
+        devicePropFact->addProperty(hProp, aditof::ADITOF_PROPERTY_TEMP);
 
     } else {
         // Throw an error in MATLAB.
