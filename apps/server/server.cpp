@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
     info.gid = -1;
     info.uid = -1;
     info.pt_serv_buf_size = 4096;
-    Network *network = new Network();
+    std::unique_ptr<Network> network(new Network);
 
     network->context = lws_create_context(&info);
 
@@ -270,7 +270,6 @@ int main(int argc, char *argv[]) {
     }
 
     lws_context_destroy(network->context);
-    delete network;
 
     return 0;
 }
@@ -532,12 +531,11 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
         uint32_t address = static_cast<uint32_t>(buff_recv.func_int32_param(1));
         size_t length = static_cast<size_t>(buff_recv.func_int32_param(2));
-        uint8_t *buffer = new uint8_t[length];
-        status = storages[index]->read(address, buffer, length);
+        std::unique_ptr<uint8_t[]> buffer(new uint8_t[length]);
+        status = storages[index]->read(address, buffer.get(), length);
         if (status == aditof::Status::OK) {
-            buff_send.add_bytes_payload(buffer, length);
+            buff_send.add_bytes_payload(buffer.get(), length);
         }
-        delete[] buffer;
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
