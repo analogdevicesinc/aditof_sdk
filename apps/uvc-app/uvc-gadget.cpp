@@ -17,28 +17,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  */
 
-#include <signal.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <sys/select.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/types.h>
-
-#include <atomic>
-#include <errno.h>
-#include <fcntl.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <thread>
-#include <unistd.h>
-
-#include <linux/usb/ch9.h>
-#include <linux/usb/video.h>
-#include <linux/videodev2.h>
-
+#include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
 #include "uvc.h"
 
 #include <aditof/depth_sensor_interface.h>
@@ -46,12 +25,26 @@
 #include <aditof/sensor_enumerator_interface.h>
 #include <aditof/storage_interface.h>
 #include <aditof/temperature_sensor_interface.h>
-
-#include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
-
 #include <atomic>
-
+#include <errno.h>
+#include <fcntl.h>
 #include <glog/logging.h>
+#include <linux/usb/ch9.h>
+#include <linux/usb/video.h>
+#include <linux/videodev2.h>
+#include <signal.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/select.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <thread>
+#include <unistd.h>
 
 #define MAX_PACKET_SIZE 60
 
