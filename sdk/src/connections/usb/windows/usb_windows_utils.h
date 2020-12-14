@@ -158,6 +158,12 @@ struct UsbHandle {
     IMediaEventEx *pMediaEvent;
     SampleGrabberCallback *pCB;
     GUID videoType;
+
+    UsbHandle()
+        : pCaptureGraph{nullptr}, pGraph{nullptr}, pControl{nullptr},
+          pVideoInputFilter{nullptr}, pGrabberF{nullptr}, pDestFilter{nullptr},
+          streamConf{nullptr}, pGrabber{nullptr}, pAmMediaType{nullptr},
+          pMediaEvent{nullptr}, pCB{nullptr} {}
 };
 
 struct ExUnitHandle {
