@@ -51,31 +51,32 @@ class Camera96Tof1 : public aditof::Camera {
     ~Camera96Tof1();
 
   public: // implements Camera
-    aditof::Status initialize();
-    aditof::Status start();
-    aditof::Status stop();
+    aditof::Status initialize() override;
+    aditof::Status start() override;
+    aditof::Status stop() override;
     aditof::Status setMode(const std::string &mode,
-                           const std::string &modeFilename);
+                           const std::string &modeFilename) override;
     aditof::Status
-    getAvailableModes(std::vector<std::string> &availableModes) const;
-    aditof::Status setFrameType(const std::string &frameType);
-    aditof::Status
-    getAvailableFrameTypes(std::vector<std::string> &availableFrameTypes) const;
+    getAvailableModes(std::vector<std::string> &availableModes) const override;
+    aditof::Status setFrameType(const std::string &frameType) override;
+    aditof::Status getAvailableFrameTypes(
+        std::vector<std::string> &availableFrameTypes) const override;
     aditof::Status requestFrame(aditof::Frame *frame,
-                                aditof::FrameUpdateCallback cb);
-    aditof::Status getDetails(aditof::CameraDetails &details) const;
+                                aditof::FrameUpdateCallback cb) override;
+    aditof::Status getDetails(aditof::CameraDetails &details) const override;
     aditof::Status
-    getAvailableControls(std::vector<std::string> &controls) const;
+    getAvailableControls(std::vector<std::string> &controls) const override;
     aditof::Status setControl(const std::string &control,
-                              const std::string &value);
+                              const std::string &value) override;
     aditof::Status getControl(const std::string &control,
-                              std::string &value) const;
-    std::shared_ptr<aditof::DepthSensorInterface> getSensor();
+                              std::string &value) const override;
+    std::shared_ptr<aditof::DepthSensorInterface> getSensor() override;
     aditof::Status
-    getEeproms(std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms);
+    getEeproms(std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms)
+        override;
     aditof::Status getTemperatureSensors(
         std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
-            &sensors);
+            &sensors) override;
 
   private:
     aditof::Status setNoiseReductionTreshold(uint16_t treshold);
