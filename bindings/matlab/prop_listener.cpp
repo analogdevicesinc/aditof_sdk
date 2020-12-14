@@ -74,8 +74,7 @@ void PropListener::notify(imaqkit::IPropInfo *propertyInfo, void *newValue) {
         // Do not re-configure the property value unless the device is already
         // opened.
         if (m_parent->isOpen() &&
-            m_propInfo->getPropertyName() != aditof::AFE_TEMPERATURE_STR &&
-            m_propInfo->getPropertyName() != aditof::LASER_TEMPERATURE_STR) {
+            m_propInfo->getPropertyName() != aditof::TEMPERATURE_STR) {
 
             //	    std::cout << " applying value\n";
 
