@@ -65,8 +65,6 @@ static void Initialize();
 void invoke_sdk_api(payload::ClientRequest buff_recv);
 static bool Client_Connected = false;
 static bool no_of_client_connected = false;
-static unsigned int frame_width = 0;
-static unsigned int frame_height = 0;
 bool latest_sent_msg_is_was_buffered = false;
 
 struct clientData {
@@ -391,9 +389,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         details.type = buff_recv.frame_type().type();
         aditof::Status status = camDepthSensor->setFrameType(details);
         buff_send.set_status(static_cast<::payload::Status>(status));
-
-        frame_width = details.width;
-        frame_height = details.height;
         break;
     }
 
