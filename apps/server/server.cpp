@@ -278,11 +278,11 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     buff_send.Clear();
     buff_send.set_server_status(::payload::ServerStatus::REQUEST_ACCEPTED);
 
+    DLOG(INFO) << buff_recv.func_name() << " function";
+
     switch (s_map_api_Values[buff_recv.func_name()]) {
 
     case FIND_SENSORS: {
-        DLOG(INFO) << "FindSensors function\n";
-
         std::vector<std::shared_ptr<aditof::DepthSensorInterface>> depthSensors;
 
         if (!sensors_are_created) {
@@ -352,24 +352,18 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case OPEN: {
-        DLOG(INFO) << "Open function\n";
-
         aditof::Status status = camDepthSensor->open();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case START: {
-        DLOG(INFO) << "Start function\n";
-
         aditof::Status status = camDepthSensor->start();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case STOP: {
-        DLOG(INFO) << "Stop function\n";
-
         aditof::Status status = camDepthSensor->stop();
         buff_send.set_status(static_cast<::payload::Status>(status));
 
@@ -377,8 +371,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case GET_AVAILABLE_FRAME_TYPES: {
-        DLOG(INFO) << "GetAvailableFrameTypes function";
-
         std::vector<aditof::FrameDetails> frameDetails;
         aditof::Status status =
             camDepthSensor->getAvailableFrameTypes(frameDetails);
@@ -393,8 +385,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case SET_FRAME_TYPE: {
-        DLOG(INFO) << "SetFrameType function\n";
-
         aditof::FrameDetails details;
         details.width = buff_recv.frame_type().width();
         details.height = buff_recv.frame_type().height();
@@ -408,8 +398,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case PROGRAM: {
-        DLOG(INFO) << "Program function\n";
-
         size_t programSize = static_cast<size_t>(buff_recv.func_int32_param(0));
         const uint8_t *pdata = reinterpret_cast<const uint8_t *>(
             buff_recv.func_bytes_param(0).c_str());
@@ -419,8 +407,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case GET_FRAME: {
-        DLOG(INFO) << "GetFrame function\n";
-
         aditof::Status status = sensorV4lBufAccess->waitForBuffer();
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
@@ -458,8 +444,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case READ_AFE_REGISTERS: {
-        DLOG(INFO) << "ReadAfeRegisters function\n";
-
         size_t length = static_cast<size_t>(buff_recv.func_int32_param(0));
         const uint16_t *address = reinterpret_cast<const uint16_t *>(
             buff_recv.func_bytes_param(0).c_str());
@@ -475,8 +459,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case WRITE_AFE_REGISTERS: {
-        DLOG(INFO) << "WriteAfeRegisters function\n";
-
         size_t length = static_cast<size_t>(buff_recv.func_int32_param(0));
         const uint16_t *address = reinterpret_cast<const uint16_t *>(
             buff_recv.func_bytes_param(0).c_str());
@@ -489,8 +471,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case STORAGE_OPEN: {
-        DLOG(INFO) << "StorageOpen function\n";
-
         aditof::Status status;
         std::string msg;
         size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
@@ -517,8 +497,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case STORAGE_READ: {
-        DLOG(INFO) << "StorageRead function\n";
-
         aditof::Status status;
         std::string msg;
         size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
@@ -541,8 +519,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case STORAGE_WRITE: {
-        DLOG(INFO) << "Storagewrite function\n";
-
         aditof::Status status;
         std::string msg;
         size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
@@ -564,8 +540,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case STORAGE_CLOSE: {
-        DLOG(INFO) << "StorageClose function\n";
-
         aditof::Status status;
         std::string msg;
         size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
@@ -583,8 +557,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case TEMPERATURE_SENSOR_OPEN: {
-        DLOG(INFO) << "TemperatureSensorOpen function\n";
-
         size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
 
         if (index < 0 || index >= temperatureSensors.size()) {
@@ -610,8 +582,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case TEMPERATURE_SENSOR_READ: {
-        DLOG(INFO) << "TemperatureSensorRead function\n";
-
         size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
 
         if (index < 0 || index >= temperatureSensors.size()) {
@@ -631,8 +601,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case TEMPERATURE_SENSOR_CLOSE: {
-        DLOG(INFO) << "TemperatureSensorClose function\n";
-
         size_t index = static_cast<size_t>(buff_recv.func_int32_param(0));
 
         if (index < 0 || index >= temperatureSensors.size()) {
@@ -649,8 +617,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case HANG_UP: {
-        DLOG(INFO) << "HangUp function\n";
-
         if (sensors_are_created) {
             cleanup_sensors();
         }
