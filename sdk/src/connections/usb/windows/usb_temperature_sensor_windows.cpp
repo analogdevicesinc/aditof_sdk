@@ -80,7 +80,7 @@ Status UsbTemperatureSensor::read(float &temperature) {
     }
 
     hr = UsbWindowsUtils::UvcExUnitSetProperty(
-        &handle, 2, reinterpret_cast<const uint8_t *>(&m_implData->id), 4);
+        &handle, 3, reinterpret_cast<const uint8_t *>(&m_implData->id), 4);
     if (FAILED(hr)) {
         LOG(WARNING) << "Failed to set property via UVC extension unit. Error: "
                      << std::hex << hr;
@@ -88,7 +88,7 @@ Status UsbTemperatureSensor::read(float &temperature) {
     }
 
     hr = UsbWindowsUtils::UvcExUnitGetProperty(
-        &handle, 2, reinterpret_cast<uint8_t *>(&temperature), 4);
+        &handle, 3, reinterpret_cast<uint8_t *>(&temperature), 4);
     if (FAILED(hr)) {
         LOG(WARNING) << "Failed to get property via UVC extension unit. Error: "
                      << std::hex << hr;
