@@ -49,7 +49,6 @@ using namespace google::protobuf::io;
 static int interrupted = 0;
 
 /* Available sensors */
-std::vector<std::shared_ptr<aditof::DepthSensorInterface>> depthSensors;
 static std::vector<std::shared_ptr<aditof::StorageInterface>> storages;
 static std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
     temperatureSensors;
@@ -285,27 +284,27 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     case FIND_SENSORS: {
         DLOG(INFO) << "FindSensors function\n";
 
-        // Start from a clean state
-        if (sensors_are_created) {
-            cleanup_sensors();
-        }
+        std::vector<std::shared_ptr<aditof::DepthSensorInterface>> depthSensors;
 
-        auto sensorsEnumerator =
-            aditof::SensorEnumeratorFactory::buildTargetSensorEnumerator();
-        if (!sensorsEnumerator) {
-            std::string errMsg = "Failed to create a target sensor enumerator";
-            LOG(WARNING) << errMsg;
-            buff_send.set_message(errMsg);
-            buff_send.set_status(
-                static_cast<::payload::Status>(aditof::Status::UNAVAILABLE));
-            break;
-        }
+        if (!sensors_are_created) {
+            auto sensorsEnumerator =
+                aditof::SensorEnumeratorFactory::buildTargetSensorEnumerator();
+            if (!sensorsEnumerator) {
+                std::string errMsg =
+                    "Failed to create a target sensor enumerator";
+                LOG(WARNING) << errMsg;
+                buff_send.set_message(errMsg);
+                buff_send.set_status(static_cast<::payload::Status>(
+                    aditof::Status::UNAVAILABLE));
+                break;
+            }
 
-        sensorsEnumerator->searchSensors();
-        sensorsEnumerator->getDepthSensors(depthSensors);
-        sensorsEnumerator->getStorages(storages);
-        sensorsEnumerator->getTemperatureSensors(temperatureSensors);
-        sensors_are_created = true;
+            sensorsEnumerator->searchSensors();
+            sensorsEnumerator->getDepthSensors(depthSensors);
+            sensorsEnumerator->getStorages(storages);
+            sensorsEnumerator->getTemperatureSensors(temperatureSensors);
+            sensors_are_created = true;
+        }
 
         /* Add information about available sensors */
 
@@ -374,6 +373,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
         aditof::Status status = camDepthSensor->stop();
         buff_send.set_status(static_cast<::payload::Status>(status));
+
         break;
     }
 
@@ -650,6 +650,16 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         break;
     }
 
+    case HANG_UP: {
+        DLOG(INFO) << "HangUp function\n";
+
+        if (sensors_are_created) {
+            cleanup_sensors();
+        }
+
+        break;
+    }
+
     default: {
         std::string msgErr = "Function not found";
         std::cout << msgErr << "\n";
@@ -681,4 +691,5 @@ void Initialize() {
     s_map_api_Values["TemperatureSensorOpen"] = TEMPERATURE_SENSOR_OPEN;
     s_map_api_Values["TemperatureSensorRead"] = TEMPERATURE_SENSOR_READ;
     s_map_api_Values["TemperatureSensorClose"] = TEMPERATURE_SENSOR_CLOSE;
+    s_map_api_Values["HangUp"] = HANG_UP;
 }

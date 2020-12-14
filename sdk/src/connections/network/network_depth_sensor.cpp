@@ -62,6 +62,19 @@ NetworkDepthSensor::NetworkDepthSensor(const std::string &ip,
 }
 
 NetworkDepthSensor::~NetworkDepthSensor() {
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+
+    if (!m_implData->handle.net->isServer_Connected()) {
+        LOG(WARNING) << "Not connected to server";
+    }
+
+    m_implData->handle.net->send_buff.set_func_name("HangUp");
+    m_implData->handle.net->send_buff.set_expect_reply(false);
+
+    if (m_implData->handle.net->SendCommand() != 0) {
+        LOG(WARNING) << "Send Command Failed";
+    }
+
     delete m_implData->handle.net;
 
     for (auto it = m_implData->calibration_cache.begin();
@@ -76,6 +89,11 @@ aditof::Status NetworkDepthSensor::open() {
 
     Network *net = m_implData->handle.net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+
+    if (net->ServerConnect(m_implData->ip) != 0) {
+        LOG(WARNING) << "Server Connect Failed";
+        return Status::UNREACHABLE;
+    }
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
