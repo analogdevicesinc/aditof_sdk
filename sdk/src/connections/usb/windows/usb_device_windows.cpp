@@ -545,8 +545,8 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     }
     VIDEOINFOHEADER *pVih = reinterpret_cast<VIDEOINFOHEADER *>(
         m_implData->handle.pAmMediaType->pbFormat);
-    HEADER(pVih)->biWidth = details.width;
-    HEADER(pVih)->biHeight = details.height;
+    HEADER(pVih)->biWidth = details.fullDataWidth;
+    HEADER(pVih)->biHeight = details.fullDataHeight;
 
     hr = m_implData->handle.streamConf->SetFormat(
         m_implData->handle.pAmMediaType);
