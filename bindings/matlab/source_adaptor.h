@@ -209,14 +209,13 @@ class SourceAdaptor : public imaqkit::IAdaptor {
 
     std::pair<int, int> getCurrentHwRange() const;
 
-    int getCurrentBitCount();
+    int getCurrentBitCount() const;
 
     void setDisplayedFrameType(int16_t type);
 
     void setSmallSignalValue(int16_t value);
 
-    float readAfeTemp();
-    float readLaserTemp();
+    std::string readTemp() const;
 
   private:
     std::shared_ptr<aditof::Frame> getFrameFromHwDevice();
