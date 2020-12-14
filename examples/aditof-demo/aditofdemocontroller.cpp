@@ -200,7 +200,7 @@ std::pair<float, float> AdiTofDemoController::getTemperature() {
         tempSensors[0]->read(returnValue.first);
     }
     if (tempSensors.size() > 1) {
-        tempSensors[0]->read(returnValue.second);
+        tempSensors[1]->read(returnValue.second);
     }
 
     return returnValue;
