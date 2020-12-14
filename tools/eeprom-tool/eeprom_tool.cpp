@@ -33,11 +33,10 @@
 
 #include "camera_eeprom_factory.h"
 #include "camera_eeprom_interface.h"
-#include <aditof/sensor_enumerator_factory.h>
-#include <aditof/sensor_enumerator_interface.h>
-// #include <aditof/sensor_factory.h>
 #include <aditof/connections.h>
 #include <aditof/eeprom_construction_data.h>
+#include <aditof/sensor_enumerator_factory.h>
+#include <aditof/sensor_enumerator_interface.h>
 
 #include <algorithm>
 #include <fstream>
