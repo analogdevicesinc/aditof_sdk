@@ -36,6 +36,11 @@
 #include "aditof/device_interface.h"
 
 #include <memory>
+namespace aditof {
+//TODO this is temporary and should be removed imediately after these details are read from the hardware
+static const unsigned int USB_FRAME_WIDTH = 640;
+static const unsigned int USB_FRAME_HEIGHT = 480;
+} // namespace aditof
 
 class UsbDevice : public aditof::DeviceInterface {
   public:

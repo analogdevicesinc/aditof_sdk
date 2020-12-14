@@ -170,8 +170,10 @@ UsbDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     // Hardcored for now
     FrameDetails details;
 
-    details.width = 640;
-    details.height = 960;
+    details.width = aditof::USB_FRAME_WIDTH;
+    details.height = aditof::USB_FRAME_HEIGHT;
+    details.fullDataWidth = details.width;
+    details.fullDataHeight = details.height * 2; //TODO
     details.type = "depth_ir";
     types.push_back(details);
 
@@ -193,8 +195,8 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     // Buggy driver paranoia.
     unsigned int min;
 
-    m_implData->fmt.fmt.pix.width = details.width;
-    m_implData->fmt.fmt.pix.height = details.height;
+    m_implData->fmt.fmt.pix.width = details.fullDataWidth;
+    m_implData->fmt.fmt.pix.height = details.fullDataHeight;
 
     min = m_implData->fmt.fmt.pix.width * 2;
     if (m_implData->fmt.fmt.pix.bytesperline < min)
