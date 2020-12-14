@@ -86,8 +86,7 @@ enum {
     ADITOF_PROPERTY_MODE = 1,
     ADITOF_PROPERTY_FRAME_TYPE = 2,
     ADITOF_PROPERTY_SMALL_SIGNAL = 3,
-    ADITOF_PROPERTY_AFE_TEMP = 4,
-    ADITOF_PROPERTY_LASER_TEMP = 5
+    ADITOF_PROPERTY_TEMP = 4,
 };
 
 /// Mode enum property
@@ -109,8 +108,7 @@ const int64_t SMALL_SIGNAL_LOWER_LIMIT = 0;
 const int64_t SMALL_SIGNAL_UPPER_LIMIT = 16383;
 const int64_t SMALL_SIGNAL_DEFAULT = 50;
 
-const char *const AFE_TEMPERATURE_STR = "AfeTemperature";
-const char *const LASER_TEMPERATURE_STR = "LaserTemperature";
+const char *const TEMPERATURE_STR = "Temperature";
 
 /// Properties with custom get functions
 const char *const TIMESTAMP_STRING_STR = "TimestampString";
