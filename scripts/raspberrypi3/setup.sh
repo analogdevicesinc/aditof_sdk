@@ -26,6 +26,8 @@ print_help() {
         echo "        Path to opencv installation "
         echo "-ur|--udevrules"
         echo "        Install udev rules for devices permissions"
+        echo "-na|--no-apt"
+        echo "        Do not install apt packages"
         echo ""
 }
 
@@ -62,6 +64,7 @@ yes_or_exit() {
 
 setup() {
         NUM_JOBS=$(nproc --all)
+        no_apt="False"
 
         while [[ $# -gt 0 ]]
         do
@@ -108,6 +111,10 @@ setup() {
                 udev_rules="True"
                 shift # next argument
                 ;;
+                -na|--no-apt)
+                no_apt="True"
+                shift # next argument
+                ;;
                 *)    # unknown option
                 POSITIONAL+=("$1") # save it in an array for later
                 shift # past argument
@@ -121,7 +128,9 @@ setup() {
                 exit
         fi
 
-        install_required_packages
+        if [[ "${no_apt}" == "False" ]]; then
+             install_required_packages
+        fi
 
         if [[ -z "${build_dir}" ]]; then
                 build_dir=$(pwd)/build
