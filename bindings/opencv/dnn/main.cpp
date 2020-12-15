@@ -40,7 +40,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/photo.hpp>
 // #include <opencv2/ximgproc/edge_filter.hpp>
-#include <aditof/device_interface.h>
+#include <aditof/depth_sensor_interface.h>
 
 #include <cstdlib>
 #include <iomanip>
