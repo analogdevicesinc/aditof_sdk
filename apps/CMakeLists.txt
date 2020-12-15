@@ -6,6 +6,7 @@ if (DRAGONBOARD)
                 add_subdirectory(server)
         endif()
         add_subdirectory(uvc-app)
+        add_subdirectory(daemon)
 endif()
 
 if (RASPBERRYPI)
