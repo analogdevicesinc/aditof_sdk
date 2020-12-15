@@ -6,7 +6,12 @@ DISTRO_CODENAME=$( (lsb_release -sc || . /etc/os-release; echo ${VERSION_CODENAM
 if [ $DISTRO_CODENAME = "bionic" ]
 then
 	ROS_DISTRO="melodic"
+
+elif [ $DISTRO_CODENAME = "focal" ]
+then
+        ROS_DISTRO="noetic"
 fi
+
 
 mkdir -p ${CATKIN_WS}/src
 cd ${CATKIN_WS}/src
