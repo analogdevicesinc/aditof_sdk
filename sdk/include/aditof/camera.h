@@ -43,7 +43,6 @@
 namespace aditof {
 
 class Frame;
-class CameraSpecifics;
 class DepthSensorInterface;
 class StorageInterface;
 class TemperatureSensorInterface;
