@@ -36,37 +36,40 @@
 
 #include "calibration_chicony_006.h"
 #include <aditof/camera.h>
-#include <aditof/device_construction_data.h>
 
 class CameraChicony : public aditof::Camera {
   public:
-    CameraChicony(std::unique_ptr<aditof::DeviceInterface> device,
-                  const aditof::DeviceConstructionData &data);
+    CameraChicony(std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
+                  std::shared_ptr<aditof::StorageInterface> eeprom);
     ~CameraChicony();
 
   public: // implements Camera
-    aditof::Status initialize();
-    aditof::Status start();
-    aditof::Status stop();
+    aditof::Status initialize() override;
+    aditof::Status start() override;
+    aditof::Status stop() override;
     aditof::Status setMode(const std::string &mode,
-                           const std::string &modeFilename);
+                           const std::string &modeFilename) override;
     aditof::Status
-    getAvailableModes(std::vector<std::string> &availableModes) const;
-    aditof::Status setFrameType(const std::string &frameType);
-    aditof::Status
-    getAvailableFrameTypes(std::vector<std::string> &availableFrameTypes) const;
+    getAvailableModes(std::vector<std::string> &availableModes) const override;
+    aditof::Status setFrameType(const std::string &frameType) override;
+    aditof::Status getAvailableFrameTypes(
+        std::vector<std::string> &availableFrameTypes) const override;
     aditof::Status requestFrame(aditof::Frame *frame,
-                                aditof::FrameUpdateCallback cb);
-    aditof::Status getDetails(aditof::CameraDetails &details) const;
+                                aditof::FrameUpdateCallback cb) override;
+    aditof::Status getDetails(aditof::CameraDetails &details) const override;
     aditof::Status
-    getAvailableControls(std::vector<std::string> &controls) const;
+    getAvailableControls(std::vector<std::string> &controls) const override;
     aditof::Status setControl(const std::string &control,
-                              const std::string &value);
+                              const std::string &value) override;
     aditof::Status getControl(const std::string &control,
-                              std::string &value) const;
-    std::shared_ptr<aditof::DepthSensorInterface> getDevice();
+                              std::string &value) const override;
+    std::shared_ptr<aditof::DepthSensorInterface> getSensor() override;
     aditof::Status
-    getEeproms(std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms);
+    getEeproms(std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms)
+        override;
+    aditof::Status getTemperatureSensors(
+        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+            &sensors) override;
 
   private:
     aditof::Status setNoiseReductionTreshold(uint16_t treshold);
@@ -74,11 +77,10 @@ class CameraChicony : public aditof::Camera {
 
   private:
     aditof::CameraDetails m_details;
-    aditof::DeviceConstructionData m_devData;
-    std::shared_ptr<aditof::DepthSensorInterface> m_device;
+    std::shared_ptr<aditof::DepthSensorInterface> m_sensor;
     std::shared_ptr<aditof::StorageInterface> m_eeprom;
     std::vector<std::string> m_availableControls;
-    bool m_devStarted;
+    bool m_sensorStarted;
     bool m_eepromInitialized;
     CalibrationChicony006 m_calibration;
     uint16_t m_noiseReductionThreshold;
