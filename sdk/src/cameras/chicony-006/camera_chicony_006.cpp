@@ -57,8 +57,9 @@ static const std::string skCustomMode = "custom";
 
 CameraChicony::CameraChicony(
     std::shared_ptr<aditof::DepthSensorInterface> sensor,
-    std::shared_ptr<aditof::StorageInterface> eeprom)
-    : m_sensor(sensor), m_eeprom(eeprom),
+    std::shared_ptr<aditof::StorageInterface> eeprom,
+    std::shared_ptr<aditof::TemperatureSensorInterface> temperatureSensor)
+    : m_sensor(sensor), m_eeprom(eeprom), m_tempSensor(temperatureSensor),
       m_availableControls({"noise_reduction_threshold", "ir_gamma_correction"}),
       m_sensorStarted(false), m_eepromInitialized(false) {}
 
@@ -315,6 +316,15 @@ aditof::Status CameraChicony::getEeproms(
     std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms) {
     eeproms.clear();
     eeproms.emplace_back(m_eeprom);
+
+    return aditof::Status::OK;
+}
+
+aditof::Status CameraChicony::getTemperatureSensors(
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &sensors) {
+    sensors.clear();
+
+    sensors.emplace_back(m_tempSensor);
 
     return aditof::Status::OK;
 }
