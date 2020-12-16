@@ -236,7 +236,7 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
             return status;
         }
     }
-#ifdef XAVIER OR XAVIERNX
+#if defined XAVIER || defined XAVIERNX
     // Register set for VC ID. Set Depth on VC=0 and IR on VC=1
     uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3dc, 0x4001, 0x7c22};
     uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0xe4, 0x0007, 0x0004};
