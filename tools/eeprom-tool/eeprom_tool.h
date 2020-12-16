@@ -36,7 +36,6 @@
 #include "eeprom_map.h"
 #include <aditof/camera.h>
 #include <aditof/depth_sensor_interface.h>
-#include <aditof/device_construction_data.h>
 #include <aditof/frame.h>
 #include <aditof/storage_interface.h>
 #include <aditof/system.h>

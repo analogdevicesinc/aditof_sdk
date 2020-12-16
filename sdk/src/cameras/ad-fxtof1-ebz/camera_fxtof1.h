@@ -37,11 +37,11 @@
 #include <memory>
 
 #include <aditof/camera.h>
-#include <aditof/device_construction_data.h>
+#include <aditof/device_construction_data.h> // TO DO: remove when adapting FXTOF1 to new low level API
 #include <aditof/eeprom_interface.h>
 
 class CameraFxTof1 : public aditof::Camera {
-  public:
+  public:#include <aditof/device_construction_data.h>#include <aditof/device_construction_data.h>
     CameraFxTof1(std::unique_ptr<aditof::DeviceInterface> device,
                  const aditof::DeviceConstructionData &data);
     ~CameraFxTof1();
