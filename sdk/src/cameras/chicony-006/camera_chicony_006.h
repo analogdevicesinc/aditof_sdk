@@ -39,8 +39,10 @@
 
 class CameraChicony : public aditof::Camera {
   public:
-    CameraChicony(std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-                  std::shared_ptr<aditof::StorageInterface> eeprom);
+    CameraChicony(
+        std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
+        std::shared_ptr<aditof::StorageInterface> eeprom,
+        std::shared_ptr<aditof::TemperatureSensorInterface> temperatureSensor);
     ~CameraChicony();
 
   public: // implements Camera
@@ -79,6 +81,7 @@ class CameraChicony : public aditof::Camera {
     aditof::CameraDetails m_details;
     std::shared_ptr<aditof::DepthSensorInterface> m_sensor;
     std::shared_ptr<aditof::StorageInterface> m_eeprom;
+    std::shared_ptr<aditof::TemperatureSensorInterface> m_tempSensor;
     std::vector<std::string> m_availableControls;
     bool m_sensorStarted;
     bool m_eepromInitialized;
