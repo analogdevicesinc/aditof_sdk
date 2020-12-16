@@ -33,7 +33,6 @@
 #define NETWORK_DEPTH_SENSOR_H
 
 #include "aditof/depth_sensor_interface.h"
-#include "aditof/device_construction_data.h"
 
 #include <memory>
 
