@@ -33,7 +33,6 @@
 #define ADDI9036_SENSOR_H
 
 #include "aditof/depth_sensor_interface.h"
-#include "aditof/device_construction_data.h"
 #include "connections/target/v4l_buffer_access_interface.h"
 
 #include <memory>
