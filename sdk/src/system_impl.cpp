@@ -44,6 +44,7 @@ using namespace aditof;
 static const std::string skEeprom_24c1024 = "24c1024";
 static const std::string skAfeTempSensor = "AfeTemperature";
 static const std::string skLaserTempSensor = "LaserTemperature";
+static const std::string skChiconyTempSensor = "Chicony Temperature Sensor";
 
 static std::vector<std::shared_ptr<Camera>>
 buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
@@ -114,8 +115,27 @@ buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
             std::shared_ptr<TemperatureSensorInterface> laserTempSensor =
                 *laserTempSensorIter;
 #ifdef CHICONY_006
+
+            // Look for temperature sensor
+            auto tempSensorIter = std::find_if(
+                temperatureSensors.begin(), temperatureSensors.end(),
+                [](std::shared_ptr<TemperatureSensorInterface> tSensor) {
+                    std::string name;
+                    tSensor->getName(name);
+                    return name == skChiconyTempSensor;
+                });
+            if (tempSensorIter == temperatureSensors.end()) {
+                DLOG(INFO) << "Could not find " << skChiconyTempSensor
+                           << " while looking for temperature sensors for "
+                              "camera Chicony";
+                break;
+            }
+
+            std::shared_ptr<TemperatureSensorInterface> tempSensor =
+                *tempSensorIter;
+
             std::shared_ptr<Camera> camera =
-                std::make_shared<CameraChicony>(dSensor, eeprom);
+                std::make_shared<CameraChicony>(dSensor, eeprom, tempSensor);
 #else
             std::shared_ptr<Camera> camera = std::make_shared<Camera96Tof1>(
                 dSensor, eeprom, afeTempSensor, laserTempSensor);
