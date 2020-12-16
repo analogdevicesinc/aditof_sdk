@@ -75,7 +75,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     // TO DO: Don't guess the device, find a way to identify it so we are sure
     // we've got the right device and is compatible with the SDK
     DeviceConstructionData devData;
-    devData.connectionType = ConnectionType::LOCAL;
+    devData.connectionType = ConnectionType::TARGET;
     devData.driverPath = "/dev/video2;/dev/v4l-subdev0";
 
     //Check if EEPROM is availible

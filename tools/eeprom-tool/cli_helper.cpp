@@ -82,7 +82,7 @@ Status parseArguments(int argc, char *argv[], CLIArguments &cliArguments) {
             cliArguments.isConnectionSpecifed = true;
             break;
         case 'm':
-            cliArguments.connectionType = ConnectionType::LOCAL;
+            cliArguments.connectionType = ConnectionType::TARGET;
             cliArguments.isConnectionSpecifed = true;
             break;
         case 'n':
