@@ -38,7 +38,7 @@
 #include <glog/logging.h>
 
 FrameImpl::FrameImpl()
-    : m_details{0, 0, ""}, m_depthData(nullptr), m_irData(nullptr),
+    : m_details{0, 0, 0, 0, ""}, m_depthData(nullptr), m_irData(nullptr),
       m_rawData(nullptr) {}
 
 FrameImpl::~FrameImpl() {
@@ -51,7 +51,8 @@ FrameImpl::~FrameImpl() {
 FrameImpl::FrameImpl(const FrameImpl &op) {
     allocFrameData(op.m_details);
     memcpy(m_rawData, op.m_rawData,
-           sizeof(uint16_t) * op.m_details.width * op.m_details.height);
+           sizeof(uint16_t) * op.m_details.fullDataWidth *
+               op.m_details.fullDataHeight);
     m_details = op.m_details;
 }
 
@@ -63,7 +64,8 @@ FrameImpl &FrameImpl::operator=(const FrameImpl &op) {
         }
         allocFrameData(op.m_details);
         memcpy(m_rawData, op.m_rawData,
-               sizeof(uint16_t) * op.m_details.width * op.m_details.height);
+               sizeof(uint16_t) * op.m_details.fullDataWidth *
+                   op.m_details.fullDataHeight);
         m_details = op.m_details;
     }
 
@@ -118,7 +120,7 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
 }
 
 void FrameImpl::allocFrameData(const aditof::FrameDetails &details) {
-    m_rawData = new uint16_t[details.width * details.height];
+    m_rawData = new uint16_t[details.fullDataWidth * details.fullDataHeight];
     m_depthData = m_rawData;
-    m_irData = m_rawData + (details.width * details.height) / 2;
+    m_irData = m_rawData + (details.width * details.height);
 }

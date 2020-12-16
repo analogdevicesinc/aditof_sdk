@@ -516,8 +516,10 @@ UsbDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     // Hardcored for now
     FrameDetails details;
 
-    details.width = 640;
-    details.height = 960;
+    details.width = aditof::USB_FRAME_WIDTH;
+    details.height = aditof::USB_FRAME_HEIGHT;
+    details.fullDataWidth = details.width;
+    details.fullDataHeight = details.height * 2; //TODO
     details.type = "depth_ir";
     types.push_back(details);
 
@@ -543,8 +545,8 @@ aditof::Status UsbDevice::setFrameType(const aditof::FrameDetails &details) {
     }
     VIDEOINFOHEADER *pVih = reinterpret_cast<VIDEOINFOHEADER *>(
         m_implData->handle.pAmMediaType->pbFormat);
-    HEADER(pVih)->biWidth = details.width;
-    HEADER(pVih)->biHeight = details.height;
+    HEADER(pVih)->biWidth = details.fullDataWidth;
+    HEADER(pVih)->biHeight = details.fullDataHeight;
 
     hr = m_implData->handle.streamConf->SetFormat(
         m_implData->handle.pAmMediaType);

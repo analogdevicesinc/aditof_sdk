@@ -41,4 +41,6 @@ static const char *CAPTURE_DEVICE_NAME = "Qualcomm Camera Subsystem";
 
 static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
 
+static const int NUM_VIDEO_DEVS = 1;
+
 #endif // TARGET_DEFINITIONS_H

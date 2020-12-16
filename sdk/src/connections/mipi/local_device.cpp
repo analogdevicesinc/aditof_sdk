@@ -84,7 +84,7 @@ struct LocalDevice::ImplData {
 
     ImplData()
         : fd(-1), sfd(-1), videoBuffers(nullptr),
-          nVideoBuffers(0), frameDetails{0, 0, ""}, started(false) {}
+          nVideoBuffers(0), frameDetails{0, 0, 0, 0, ""}, started(false) {}
 };
 
 // TO DO: This exists in linux_utils.h which is not included on Dragoboard.
@@ -298,18 +298,24 @@ LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
 
     FrameDetails details;
 
-    details.width = 640;
-    details.height = 960;
+    details.width = aditof::FRAME_WIDTH;
+    details.height = aditof::FRAME_HEIGHT;
+    details.fullDataWidth = details.width;
+    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
     details.type = "depth_ir";
     types.push_back(details);
 
-    details.width = 640;
-    details.height = 960;
+    details.width = aditof::FRAME_WIDTH;
+    details.height = aditof::FRAME_HEIGHT;
+    details.fullDataWidth = details.width;
+    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
     details.type = "depth_only";
     types.push_back(details);
 
-    details.width = 640;
-    details.height = 960;
+    details.width = aditof::FRAME_WIDTH;
+    details.height = aditof::FRAME_HEIGHT;
+    details.fullDataWidth = details.width;
+    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
     details.type = "ir_only";
     types.push_back(details);
 
@@ -509,11 +515,15 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
 
     unsigned int width;
     unsigned int height;
+    unsigned int fullDataWidth;
+    unsigned int fullDataHeight;
     unsigned int buf_data_len;
     uint8_t *pdata;
 
     width = m_implData->frameDetails.width;
     height = m_implData->frameDetails.height;
+    fullDataWidth = m_implData->frameDetails.fullDataWidth;
+    fullDataHeight = m_implData->frameDetails.fullDataHeight;
 
     status = getInternalBuffer(&pdata, buf_data_len, buf);
     if (status != Status::OK) {
@@ -529,7 +539,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
             bytesused = buf.bytesused;
         }
 
-        return bytesused == (width * height * 3 / 2);
+        return bytesused == (width * height * 3);
     };
 
     if ((width == 668)) {
@@ -547,22 +557,22 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
                         ((((unsigned short)*(pdata + i + 2)) & 0x00F0) >> 4);
             j++;
         }
-    } else if (!isBufferPacked(buf, width, height)) {
+    } else if (!isBufferPacked(buf, fullDataWidth, fullDataHeight)) {
         // TODO: investigate optimizations for this (arm neon / 1024 bytes
         // chunks)
         if (m_implData->frameDetails.type == "depth_only") {
             memcpy(buffer, pdata, buf.bytesused);
         } else if (m_implData->frameDetails.type == "ir_only") {
-            memcpy(buffer + (width * height) / 2, pdata, buf.bytesused);
+            memcpy(buffer + (width * height), pdata, buf.bytesused);
         } else {
-            uint32_t j = 0, j1 = width * height / 2;
-            for (uint32_t i = 0; i < height; i += 2) {
+            uint32_t j = 0, j1 = width * height;
+            for (uint32_t i = 0; i < fullDataHeight; i += 2) {
                 memcpy(buffer + j, pdata + i * width * 2, width * 2);
                 j += width;
                 memcpy(buffer + j1, pdata + (i + 1) * width * 2, width * 2);
                 j1 += width;
             }
-            for (uint32_t i = 0; i < width * height; i += 2) {
+            for (uint32_t i = 0; i < fullDataWidth * fullDataHeight; i += 2) {
                 buffer[i] =
                     ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
                 buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
@@ -572,7 +582,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
     } else {
         // clang-format off
         uint16_t *depthPtr = buffer;
-        uint16_t *irPtr = buffer + (width * height) / 2;
+        uint16_t *irPtr = buffer + (width * height);
         unsigned int j = 0;
 
 	if (m_implData->frameDetails.type == "depth_only" ||
@@ -854,8 +864,8 @@ aditof::Status LocalDevice::getInternalBuffer(uint8_t **buffer,
                                               const struct v4l2_buffer &buf) {
 
     *buffer = static_cast<uint8_t *>(m_implData->videoBuffers[buf.index].start);
-    buf_data_len = m_implData->frameDetails.width *
-                   m_implData->frameDetails.height * 3 / 2;
+    buf_data_len =
+        m_implData->frameDetails.width * m_implData->frameDetails.height * 3;
 
     return aditof::Status::OK;
 }

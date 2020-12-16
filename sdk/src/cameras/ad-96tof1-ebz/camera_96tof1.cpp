@@ -359,10 +359,10 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
          m_details.frameType.type == "depth_only")) {
         m_calibration.calibrateDepth(frameDataLocation,
                                      m_details.frameType.width *
-                                         m_details.frameType.height / 2);
-        m_calibration.calibrateCameraGeometry(
-            frameDataLocation,
-            m_details.frameType.width * m_details.frameType.height / 2);
+                                         m_details.frameType.height);
+        m_calibration.calibrateCameraGeometry(frameDataLocation,
+                                              m_details.frameType.width *
+                                                  m_details.frameType.height);
     }
 
     return Status::OK;

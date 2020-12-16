@@ -44,4 +44,6 @@ static const char *TEMP_SENSOR_REPLACEMENT_DEV_PATH = "";
 
 static const char *CAPTURE_DEVICE_NAME = "vi-output, addi9036 6-0064";
 
+static const int NUM_VIDEO_DEVS = 1;
+
 #endif // TARGET_DEFINITIONS_H
