@@ -31,7 +31,6 @@
  */
 #include "camera_chicony_006.h"
 
-#include <aditof/eeprom_factory.h>
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
 
@@ -56,15 +55,12 @@ static const std::array<rangeStruct, 3> rangeValues = {
 
 static const std::string skCustomMode = "custom";
 
-// The driver name of the EEPROM that belongs to this camera
-static const std::string skEepromName = "24c1024";
-
 CameraChicony::CameraChicony(
-    std::unique_ptr<aditof::DepthSensorInterface> device,
-    const aditof::DeviceConstructionData &data)
-    : m_devData(data), m_device(std::move(device)),
+    std::shared_ptr<aditof::DepthSensorInterface> sensor,
+    std::shared_ptr<aditof::StorageInterface> eeprom)
+    : m_sensor(sensor), m_eeprom(eeprom),
       m_availableControls({"noise_reduction_threshold", "ir_gamma_correction"}),
-      m_devStarted(false), m_eepromInitialized(false) {}
+      m_sensorStarted(false), m_eepromInitialized(false) {}
 
 CameraChicony::~CameraChicony() {
     if (m_eepromInitialized) {
@@ -77,43 +73,26 @@ aditof::Status CameraChicony::initialize() {
 
     LOG(INFO) << "Initializing camera";
 
-    Status status = m_device->open();
-
+    // Open communication with the depth sensor
+    Status status = m_sensor->open();
     if (status != Status::OK) {
-        LOG(WARNING) << "Failed to open device";
+        LOG(WARNING) << "Failed to open the depth sensor";
         return status;
     }
 
     void *handle;
-    status = m_device->getHandle(&handle);
+    status = m_sensor->getHandle(&handle);
     if (status != Status::OK) {
         LOG(ERROR) << "Failed to obtain the handle";
         return status;
     }
 
-    // Initialize EEPROM
-    auto iter = std::find_if(m_devData.eeproms.begin(), m_devData.eeproms.end(),
-                             [](const EepromConstructionData &eData) {
-                                 return eData.driverName == skEepromName;
-                             });
-    if (iter == m_devData.eeproms.end()) {
-        LOG(ERROR)
-            << "No available info about the EEPROM required by the camera";
-        return status;
-    }
-
-    m_eeprom = EepromFactory::buildEeprom(m_devData.connectionType);
-    if (!m_eeprom) {
-        LOG(ERROR) << "Failed to create an Eeprom object";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    const EepromConstructionData &eeprom24c1024Info = *iter;
-    status = m_eeprom->open(handle, eeprom24c1024Info.driverName.c_str(),
-                            eeprom24c1024Info.driverPath.c_str());
+    // Open communication with EEPROM
+    status = m_eeprom->open(handle);
     if (status != Status::OK) {
-        LOG(ERROR) << "Failed to open EEPROM with name "
-                   << m_devData.eeproms.back().driverName << " is available";
+        std::string name;
+        m_eeprom->getName(name);
+        LOG(ERROR) << "Failed to open EEPROM with name " << name;
         return status;
     }
     m_eepromInitialized = true;
@@ -122,7 +101,7 @@ aditof::Status CameraChicony::initialize() {
 
     LOG(INFO) << "Camera initialized";
 
-    status = m_calibration.initialize(m_device, m_eeprom);
+    status = m_calibration.initialize(m_sensor, m_eeprom);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to initialize calibration";
         return status;
@@ -132,7 +111,7 @@ aditof::Status CameraChicony::initialize() {
 }
 
 aditof::Status CameraChicony::start() {
-    // return m_device->start(); // For now we keep the device open all the time
+    // return m_sensor->start(); // For now we keep the device open all the time
     return aditof::Status::OK;
 }
 
@@ -140,7 +119,7 @@ aditof::Status CameraChicony::stop() {
     using namespace aditof;
     Status status = Status::OK;
 
-    // return m_device->stop(); // For now we keep the device open all the time
+    // return m_sensor->stop(); // For now we keep the device open all the time
     status = m_calibration.close();
 
     return status;
@@ -187,7 +166,7 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
         std::copy(std::istreambuf_iterator<char>(firmwareFile),
                   std::istreambuf_iterator<char>(),
                   std::back_inserter(firmwareData));
-        status = m_device->program(firmwareData.data(), firmwareData.size());
+        status = m_sensor->program(firmwareData.data(), firmwareData.size());
         firmwareFile.close();
     } else {
         if (mode != "near" && mode != "medium") {
@@ -209,11 +188,11 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
     if (m_details.frameType.type == "depth_only") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
-        m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+        m_sensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     } else if (m_details.frameType.type == "ir_only") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x05, 0x0007, 0x0004};
-        m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+        m_sensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
 
     m_details.mode = mode;
@@ -240,7 +219,7 @@ aditof::Status CameraChicony::setFrameType(const std::string &frameType) {
     Status status = Status::OK;
 
     std::vector<FrameDetails> detailsList;
-    status = m_device->getAvailableFrameTypes(detailsList);
+    status = m_sensor->getAvailableFrameTypes(detailsList);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get available frame types";
         return status;
@@ -257,7 +236,7 @@ aditof::Status CameraChicony::setFrameType(const std::string &frameType) {
     }
 
     if (m_details.frameType != *frameDetailsIt) {
-        status = m_device->setFrameType(*frameDetailsIt);
+        status = m_sensor->setFrameType(*frameDetailsIt);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to set frame type";
             return status;
@@ -265,12 +244,12 @@ aditof::Status CameraChicony::setFrameType(const std::string &frameType) {
         m_details.frameType = *frameDetailsIt;
     }
 
-    if (!m_devStarted) {
-        status = m_device->start();
+    if (!m_sensorStarted) {
+        status = m_sensor->start();
         if (status != Status::OK) {
             return status;
         }
-        m_devStarted = true;
+        m_sensorStarted = true;
     }
 
     return status;
@@ -282,7 +261,7 @@ aditof::Status CameraChicony::getAvailableFrameTypes(
     Status status = Status::OK;
 
     std::vector<FrameDetails> frameDetailsList;
-    status = m_device->getAvailableFrameTypes(frameDetailsList);
+    status = m_sensor->getAvailableFrameTypes(frameDetailsList);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get available frame types";
         return status;
@@ -310,7 +289,7 @@ aditof::Status CameraChicony::requestFrame(aditof::Frame *frame,
     uint16_t *frameDataLocation;
     frame->getData(FrameDataType::RAW, &frameDataLocation);
 
-    status = m_device->getFrame(frameDataLocation);
+    status = m_sensor->getFrame(frameDataLocation);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from device";
         return status;
@@ -328,16 +307,16 @@ aditof::Status CameraChicony::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<aditof::DepthSensorInterface> CameraChicony::getDevice() {
-    return m_device;
+std::shared_ptr<aditof::DepthSensorInterface> CameraChicony::getSensor() {
+    return m_sensor;
 }
 
 aditof::Status CameraChicony::getEeproms(
-    std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms) {
+    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms) {
     eeproms.clear();
-    // TO DO: Add eeprom
+    eeproms.emplace_back(m_eeprom);
 
-    return aditof::Status::UNAVAILABLE;
+    return aditof::Status::OK;
 }
 
 aditof::Status
@@ -411,7 +390,7 @@ aditof::Status CameraChicony::setNoiseReductionTreshold(uint16_t treshold) {
     afeRegsVal[2] |= treshold;
     m_noiseReductionThreshold = treshold;
 
-    return m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    return m_sensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
 }
 
 aditof::Status CameraChicony::setIrGammaCorrection(float gamma) {
@@ -432,11 +411,11 @@ aditof::Status CameraChicony::setIrGammaCorrection(float gamma) {
                              y_val[3], y_val[4], y_val[5], y_val[6],
                              y_val[7], y_val[8], 0x0007,   0x0004};
 
-    status = m_device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 8);
+    status = m_sensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 8);
     if (status != Status::OK) {
         return status;
     }
-    status = m_device->writeAfeRegisters(afeRegsAddr + 8, afeRegsVal + 8, 8);
+    status = m_sensor->writeAfeRegisters(afeRegsAddr + 8, afeRegsVal + 8, 8);
     if (status != Status::OK) {
         return status;
     }
