@@ -99,13 +99,13 @@ aditof::Status CalibrationChicony006::SetEEPROMData_1(uint16_t Gdata[][2],
 }
 
 aditof::Status CalibrationChicony006::initialize(
-    std::shared_ptr<aditof::DeviceInterface> device,
-    std::shared_ptr<aditof::EepromInterface> eeprom) {
+    std::shared_ptr<aditof::DepthSensorInterface> device,
+    std::shared_ptr<aditof::StorageInterface> eeprom) {
     using namespace aditof;
 
     aditof::Status status = Status::OK;
 
-    m_device = device;
+    m_sensor = device;
     m_eeprom = m_eeprom;
 
     CEEPROM.ReadEEPROMVersion(EEPROM_V_data, EEPROM_V_size);
@@ -169,7 +169,7 @@ aditof::Status CalibrationChicony006::initialize(
 
     CEEPROM.PowerUpSequence(PowerUp_data, PowerUp_data_size, gunCsTable);
     for (int i = 0; i < PowerUp_data_size; ++i) {
-        m_device->writeAfeRegisters(&PowerUp_data[i][0], &PowerUp_data[i][1],
+        m_sensor->writeAfeRegisters(&PowerUp_data[i][0], &PowerUp_data[i][1],
                                     1);
     }
     LOG(INFO) << "**************power up sequence finish";
@@ -185,7 +185,7 @@ aditof::Status CalibrationChicony006::initialize(
                            gunIspRegMode);
     // SetImageFormat(gunRangeMode,Format_data,Format_size);
     for (int i = 0; i < Format_size; ++i) {
-        m_device->writeAfeRegisters(&Format_data[i][0], &Format_data[i][1], 1);
+        m_sensor->writeAfeRegisters(&Format_data[i][0], &Format_data[i][1], 1);
     }
     LOG(INFO) << "********************Set Format finish";
 
@@ -268,13 +268,13 @@ aditof::Status CalibrationChicony006::sensorPowerUp() {
     CEEPROM.wait(20);
 
     addr_v = 0xC300;
-    m_device->readAfeRegisters(&addr_v, &unData, 1);
+    m_sensor->readAfeRegisters(&addr_v, &unData, 1);
 
     uint16_t SPU_D[30][2] = {0}, SPU_D_size = 0;
     CEEPROM.sensorPowerUp_Data(unData, SPU_D, SPU_D_size, gunExSync);
 
     for (int i = 0; i < SPU_D_size; ++i) {
-        m_device->writeAfeRegisters(&SPU_D[i][0], &SPU_D[i][1], 1);
+        m_sensor->writeAfeRegisters(&SPU_D[i][0], &SPU_D[i][1], 1);
     }
 
     LOG(WARNING) << " Powered On";
@@ -289,7 +289,7 @@ aditof::Status CalibrationChicony006::sensorPowerDown() {
     CEEPROM.sensorPowerDown_Data(SPD_D, SPD_D_size, gunExSync);
 
     for (int i = 0; i < SPD_D_size; ++i) {
-        m_device->writeAfeRegisters(&SPD_D[i][0], &SPD_D[i][1], 1);
+        m_sensor->writeAfeRegisters(&SPD_D[i][0], &SPD_D[i][1], 1);
     }
 
     LOG(WARNING) << " Powered Down";
@@ -303,13 +303,13 @@ aditof::Status CalibrationChicony006::TofSetEmissionEnable(uint16_t unEnable) {
     uint16_t addr_v, unData;
 
     addr_v = 0xc08e;
-    m_device->readAfeRegisters(&addr_v, &unData, 1);
+    m_sensor->readAfeRegisters(&addr_v, &unData, 1);
 
     uint16_t TSEE_D[30][2] = {0}, TSEE_D_size = 0;
     CEEPROM.TofSetEmissionEnable_Data(unEnable, unData, TSEE_D, TSEE_D_size);
 
     for (int i = 0; i < TSEE_D_size; ++i) {
-        m_device->writeAfeRegisters(&TSEE_D[i][0], &TSEE_D[i][1], 1);
+        m_sensor->writeAfeRegisters(&TSEE_D[i][0], &TSEE_D[i][1], 1);
         CEEPROM.wait(30);
     }
 
@@ -334,7 +334,7 @@ aditof::Status CalibrationChicony006::TofSendCsTable(uint16_t *punSndTbl,
     for (ulLoop = 0; ulLoop < ulWords; ulLoop++) {
         uint16_t addr_v = *punSndCurr;
         uint16_t data_v = *(punSndCurr + 1);
-        m_device->writeAfeRegisters(&addr_v, &data_v, 1);
+        m_sensor->writeAfeRegisters(&addr_v, &data_v, 1);
         punSndCurr += 2;
     }
 
@@ -349,7 +349,7 @@ aditof::Status CalibrationChicony006::unWriteTofRamReg(uint16_t *punReg,
     int i;
 
     for (i = 0; i < unSetNum; i++) {
-        m_device->writeAfeRegisters(&punReg[i], &unReg, 1);
+        m_sensor->writeAfeRegisters(&punReg[i], &unReg, 1);
     }
 
     return status;
@@ -390,10 +390,10 @@ aditof::Status CalibrationChicony006::unReadTofRamReg(uint16_t *punRegAddr,
 
     if (unRegNum > 0) {
         addr_v = punRegAddr[0];
-        m_device->readAfeRegisters(&addr_v, &unData0, 1);
+        m_sensor->readAfeRegisters(&addr_v, &unData0, 1);
         for (uni = 1; uni < unRegNum; uni++) {
             addr_v = punRegAddr[uni];
-            m_device->readAfeRegisters(&addr_v, &unDataX, 1);
+            m_sensor->readAfeRegisters(&addr_v, &unDataX, 1);
             if (unDataX != unData0)
                 printf("**************unReadTofRamReg error\n");
         }
@@ -448,7 +448,7 @@ aditof::Status CalibrationChicony006::TofSetCcdDummy(uint16_t unCcdDummy) {
     CEEPROM.TofSetCcdDummy_data(gunIspRamMode, unCcdDummy, CCD_data,
                                 CCD_data_size, gunRangeMode);
     for (int i = 0; i < CCD_data_size; ++i) {
-        m_device->writeAfeRegisters(
+        m_sensor->writeAfeRegisters(
             &gunIspRamMode[gunRangeMode][CCD_data[i][0]], &CCD_data[i][1], 1);
     }
 
@@ -485,7 +485,7 @@ aditof::Status CalibrationChicony006::TofSetExpValue(uint16_t unExp,
 
     uint16_t addr_v = 0xC3CC;
     uint16_t data_v = (unsigned short)iReadSize2;
-    m_device->writeAfeRegisters(&addr_v, &data_v, 1);
+    m_sensor->writeAfeRegisters(&addr_v, &data_v, 1);
     (*unHdExp) = iHdExp + 750;
 
     return status;
@@ -508,7 +508,7 @@ aditof::Status CalibrationChicony006::TofChangeRangeMode(uint16_t unMode) {
         uint16_t TMC_Data[2][2] = {0};
         CEEPROM.GetTMC_data(TMC_Data);
         for (int i = 0; i < 2; ++i) {
-            m_device->writeAfeRegisters(&TMC_Data[i][0], &TMC_Data[i][1], 1);
+            m_sensor->writeAfeRegisters(&TMC_Data[i][0], &TMC_Data[i][1], 1);
         }
     }
 
@@ -529,7 +529,7 @@ aditof::Status CalibrationChicony006::TofChangeRangeMode(uint16_t unMode) {
     //////////// set VD Duration
     uint16_t vd_data[2] = {0};
     CEEPROM.SetVD(vd_data, gunCtrlMode, gunIspRamMode, unMode);
-    m_device->writeAfeRegisters(&vd_data[0], &vd_data[1], 1);
+    m_sensor->writeAfeRegisters(&vd_data[0], &vd_data[1], 1);
 
     /////////// set VD initial offset
     gunVdInitialOffset = gunCtrlMode[unMode][19];
@@ -551,20 +551,20 @@ aditof::Status CalibrationChicony006::TofChangeRangeMode(uint16_t unMode) {
     uint16_t SE_D[3][2] = {0};
     CEEPROM.SetExp_data(SE_D, gunHdExp);
     for (int i = 0; i < 3; ++i)
-        m_device->writeAfeRegisters(&SE_D[i][0], &SE_D[i][1], 1);
+        m_sensor->writeAfeRegisters(&SE_D[i][0], &SE_D[i][1], 1);
 
     TofSetCcdDummy(gunCcdDummy);
 
     ////////////////// set mode
     uint16_t MD_D[2] = {0};
     CEEPROM.GetMD(MD_D, unMode);
-    m_device->writeAfeRegisters(&MD_D[0], &MD_D[1], 1);
+    m_sensor->writeAfeRegisters(&MD_D[0], &MD_D[1], 1);
 
     //set LD
     uint16_t LD_D[2][2] = {0};
     CEEPROM.SetLD(LD_D, unLdFlag);
     for (int i = 0; i < 2; ++i)
-        m_device->writeAfeRegisters(&LD_D[i][0], &LD_D[i][1], 1);
+        m_sensor->writeAfeRegisters(&LD_D[i][0], &LD_D[i][1], 1);
 
     //TAL mode check
     unData = LD_D[0][1];
@@ -574,7 +574,7 @@ aditof::Status CalibrationChicony006::TofChangeRangeMode(uint16_t unMode) {
 
     if (btal) {
         for (int i = 0; i < 2; ++i)
-            m_device->writeAfeRegisters(&TAL_D[i][0], &TAL_D[i][1], 1);
+            m_sensor->writeAfeRegisters(&TAL_D[i][0], &TAL_D[i][1], 1);
     }
 
     LOG(WARNING) << "ChangeMode:" << unMode;

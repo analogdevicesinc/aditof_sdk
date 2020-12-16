@@ -48,7 +48,7 @@ class CalibrationChicony006 {
 
   public:
     aditof::Status
-    initialize(std::shared_ptr<aditof::DepthSensorInterface> device,
+    initialize(std::shared_ptr<aditof::DepthSensorInterface> sensor,
                std::shared_ptr<aditof::StorageInterface> eeprom);
     aditof::Status close();
     aditof::Status setMode(const std::string &mode);
@@ -78,7 +78,7 @@ class CalibrationChicony006 {
     aditof::Status sensorPowerDown();
 
   private:
-    std::shared_ptr<aditof::DepthSensorInterface> m_device;
+    std::shared_ptr<aditof::DepthSensorInterface> m_sensor;
     std::shared_ptr<aditof::StorageInterface> m_eeprom;
 };
 
