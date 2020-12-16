@@ -42,7 +42,7 @@ namespace aditof {
  * @brief Types of connections
  */
 enum class ConnectionType {
-    LOCAL,    //!< on the target, direct sysfs access
+    TARGET,   //!< on the target, direct sysfs access
     USB,      //!< connects to target via USB
     ETHERNET, //!< connects to target via Ethernet
 };
