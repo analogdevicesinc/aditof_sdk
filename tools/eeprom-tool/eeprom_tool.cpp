@@ -51,7 +51,7 @@ const aditof::SensorType sensorType = aditof::SensorType::SENSOR_CHICONY;
 const aditof::SensorType sensorType = aditof::SensorType::SENSOR_ADDI9036;
 #endif
 
-const std::string connectionTypeMapStr[] = {"TARGET", "USB", "ETHERNET"};
+const std::string connectionTypeMapStr[] = {"ON_TARGET", "USB", "ETHERNET"};
 
 EepromTool::EepromTool() {
     //TODO ??
@@ -80,7 +80,7 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
         enumerator =
             aditof::SensorEnumeratorFactory::buildUsbSensorEnumerator();
         break;
-    case aditof::ConnectionType::TARGET:
+    case aditof::ConnectionType::ON_TARGET:
         enumerator =
             aditof::SensorEnumeratorFactory::buildTargetSensorEnumerator();
         break;

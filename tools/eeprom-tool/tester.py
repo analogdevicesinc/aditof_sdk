@@ -14,7 +14,7 @@ BYTE_TO_ALTER_INDEX = 100
 
 class ConnectionType(Enum):
     USB = 1
-    TARGET = 2
+    ON_TARGET = 2
     ETHERNET = 3
 
 
@@ -28,7 +28,7 @@ class CommandType(Enum):
 def run_eeprom_tool(connection_type, command, path, ip=""):
     cmd = "./" + ls 
     connection_type_str = {ConnectionType.USB: "-u",
-                           ConnectionType.TARGET: "-m",
+                           ConnectionType.ON_TARGET: "-m",
                            ConnectionType.ETHERNET: "-e"}.get(connection_type, "-")
     ip_str = ip if connection_type == ConnectionType.ETHERNET else ""
     cmd_str = {CommandType.READ: "-r",
@@ -105,7 +105,7 @@ def test_readback(connection_type):
 
 
 def main():
-    test_readback(ConnectionType.TARGET)
+    test_readback(ConnectionType.ON_TARGET)
     test_readback(ConnectionType.USB)
 
 
