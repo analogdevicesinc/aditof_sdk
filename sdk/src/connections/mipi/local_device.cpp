@@ -358,8 +358,8 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
 #if defined TOYBRICK
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
 #endif
-    fmt.fmt.pix.width = details.width;
-    fmt.fmt.pix.height = details.height;
+    fmt.fmt.pix.width = details.fullDataWidth;
+    fmt.fmt.pix.height = details.fullDataHeight;
 
     if (xioctl(m_implData->fd, VIDIOC_S_FMT, &fmt) == -1) {
         LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
@@ -559,7 +559,7 @@ aditof::Status LocalDevice::getFrame(uint16_t *buffer) {
                         ((((unsigned short)*(pdata + i + 2)) & 0x00F0) >> 4);
             j++;
         }
-    } else if (!isBufferPacked(buf, fullDataWidth, fullDataHeight)) {
+    } else if (!isBufferPacked(buf, width, height)) {
         // TODO: investigate optimizations for this (arm neon / 1024 bytes
         // chunks)
         if (m_implData->frameDetails.type == "depth_only") {
