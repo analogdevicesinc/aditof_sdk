@@ -49,7 +49,7 @@ typedef struct {
     string path;
     string ip = "0.0.0.0";
     string eepromName = "";
-    ConnectionType connectionType = ConnectionType::TARGET;
+    ConnectionType connectionType = ConnectionType::ON_TARGET;
     ActionType actionType = UNKNOWN;
     bool isConnectionSpecifed = false;
 } CLIArguments;

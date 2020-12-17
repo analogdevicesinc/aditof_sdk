@@ -105,7 +105,7 @@ Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
     m_implData->calibration_cache =
         std::unordered_map<std::string, CalibrationData>();
     m_sensorDetails.sensorType = aditof::SensorType::SENSOR_ADDI9036;
-    m_sensorDetails.connectionType = aditof::ConnectionType::TARGET;
+    m_sensorDetails.connectionType = aditof::ConnectionType::ON_TARGET;
 }
 
 Addi9036Sensor::~Addi9036Sensor() {
