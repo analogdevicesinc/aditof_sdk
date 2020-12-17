@@ -355,7 +355,9 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
     /* Set the frame format in the driver */
     CLEAR(fmt);
     fmt.type = m_implData->videoBuffersType;
+#if defined TOYBRICK
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
+#endif
     fmt.fmt.pix.width = details.width;
     fmt.fmt.pix.height = details.height;
 
