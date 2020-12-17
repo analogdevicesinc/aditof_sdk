@@ -192,7 +192,9 @@ aditof::Status LocalDevice::open() {
 
     for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
         devName = paths.at(i * 2).c_str();
-        subDevName = paths.at(i * 2 + 1).c_str();
+        //TODO find a nicer way to do this
+        subDevName =
+            paths.at(i * 2 + (paths.size() > i * 2 + 1) ? 1 : 0).c_str();
         cardName = cards.at(i).c_str();
         dev = &m_implData->videoDevs[i];
 
