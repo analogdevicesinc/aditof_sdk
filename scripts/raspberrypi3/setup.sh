@@ -28,6 +28,8 @@ print_help() {
         echo "        Install udev rules for devices permissions"
         echo "-na|--no-apt"
         echo "        Do not install apt packages"
+        echo "-es|--enable-server"
+        echo "        Enable the server service"
         echo ""
 }
 
@@ -65,6 +67,7 @@ yes_or_exit() {
 setup() {
         NUM_JOBS=$(nproc --all)
         no_apt="False"
+        enable_server="False"
 
         while [[ $# -gt 0 ]]
         do
@@ -113,6 +116,10 @@ setup() {
                 ;;
                 -na|--no-apt)
                 no_apt="True"
+                shift # next argument
+                ;;
+                -es|--enable-server)
+                enable_server="True"
                 shift # next argument
                 ;;
                 *)    # unknown option
@@ -194,6 +201,13 @@ setup() {
 		
         if [[ "${udev_rules}" == "True" ]]; then
              sudo make install-udev-rules
+        fi
+
+        popd
+
+        if [[ "${enable_server}" == "True" ]]; then
+             sudo cp ${source_dir}/utils/raspberrypi/tof-server.service /etc/systemd/system/
+             sudo systemctl enable tof-server
         fi
 }
 
