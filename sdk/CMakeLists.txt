@@ -139,6 +139,20 @@ else()
     )
 endif()
 
+if (USE_CHICONY AND (RASPBERRYPI OR TOYBRICK))
+    if (NOT DEFINED CHICONY_EEPROM_SO)
+        set(CHICONY_EEPROM_SO "/home/analog/workspace/github/aditof_sdk/misc/chicony/libChicony_EEPROM.so")
+    endif()
+
+    add_library(chicony-eeprom SHARED IMPORTED)
+    set_target_properties(chicony-eeprom PROPERTIES
+        IMPORTED_LOCATION ${CHICONY_EEPROM_SO}
+        IMPORTED_NO_SONAME 1
+    )
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE chicony-eeprom)
+endif()
+
 if (CMAKE_COMPILER_IS_GNUCC)
     target_compile_options(${PROJECT_NAME} PUBLIC
             -Wall
