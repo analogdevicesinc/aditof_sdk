@@ -6,7 +6,7 @@ After=NetworkManager.service
 
 [Service]
 User=root
-ExecStart=/home/pi/workspace/github/aditof_sdk/build/apps/server/aditof-server
+ExecStart=/home/analog/workspace/github/aditof_sdk/build/apps/server/aditof-server
 
 [Install]
 WantedBy=multi-user.target
