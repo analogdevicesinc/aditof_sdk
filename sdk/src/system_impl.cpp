@@ -34,6 +34,7 @@
 #include "aditof/sensor_enumerator_interface.h"
 #include "camera_96tof1.h"
 #include "camera_chicony_006.h"
+#include "camera_fxtof1.h"
 
 #include <aditof/camera.h>
 #include <algorithm>
@@ -136,6 +137,10 @@ buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
 
             std::shared_ptr<Camera> camera =
                 std::make_shared<CameraChicony>(dSensor, eeprom, tempSensor);
+
+#elif FXTOF1
+	    std::shared_ptr<Camera> camera = std::make_shared<CameraFxTof1>(
+		dSensor, eeprom, afeTempSensor, laserTempSensor);
 #else
             std::shared_ptr<Camera> camera = std::make_shared<Camera96Tof1>(
                 dSensor, eeprom, afeTempSensor, laserTempSensor);
