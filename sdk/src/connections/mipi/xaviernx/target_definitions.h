@@ -32,6 +32,7 @@
 #ifndef TARGET_DEFINITIONS_H
 #define TARGET_DEFINITIONS_H
 
+static const char *EEPROM_NAME = "24c1024";
 static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-9";
 static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/9-0056/eeprom";
 
