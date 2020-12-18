@@ -151,6 +151,11 @@ aditof::Status Addi9036Sensor::open() {
     const char *devName = m_driverPath.c_str();
     const char *subDevName = m_driverSubPath.c_str();
 
+    // On RPI the driver path and sub path are the same
+    if (!subDevName.length()) {
+        subDevName = m_driverPath.c_str();
+    }
+
     /* Open V4L2 device */
     if (stat(devName, &st) == -1) {
         LOG(WARNING) << "Cannot identify " << devName << "errno: " << errno
