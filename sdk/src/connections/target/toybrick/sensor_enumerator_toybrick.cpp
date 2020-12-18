@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "device_enumerator_impl.h"
+#include "connections/target/target_sensor_enumerator.h"
 #include "target_definitions.h"
 
 #include <dirent.h>
@@ -41,15 +41,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-aditof::Status DeviceEnumeratorImpl::findDevices(
-    std::vector<aditof::DeviceConstructionData> &devices) {
-    using namespace aditof;
+using namespace aditof;
+
+aditof::Status TargetSensorEnumerator::searchSensors() {
     Status status = Status::OK;
 
-    LOG(INFO) << "Looking for devices on the target";
+    LOG(INFO) << "Looking for sensors on the target";
 
     // TO DO: Do we still need to do this?
-    // Find all video device paths
+    // Find all media device paths
     std::vector<std::string> videoPaths;
     const std::string videoDirPath("/dev/");
     const std::string videoBaseName("video");
@@ -66,31 +66,21 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     closedir(dirp);
 
     for (const auto &video : videoPaths) {
-        std::string devPath;
-
+        std::string devPath = "/dev/video2;/dev/v4l-subdev0";
+	
         if (devPath.empty()) {
             continue;
         }
+
+        DLOG(INFO) << "Considering: "  << video << " an eligible TOF camera";
+        // TO DO: Don't guess the device, find a way to identify it so we are sure
+        // we've got the right device and is compatible with the SDK
+        SensorInfo sInfo;
+        sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+        sInfo.driverPath = devPath;
+        m_sensorsInfo.emplace_back(sInfo);
+
     }
-    // TO DO: Don't guess the device, find a way to identify it so we are sure
-    // we've got the right device and is compatible with the SDK
-    DeviceConstructionData devData;
-    devData.connectionType = ConnectionType::ON_TARGET;
-    devData.driverPath = "/dev/video2;/dev/v4l-subdev0";
-
-    //Check if EEPROM is availible
-    struct stat st;
-    if (stat(EEPROM_DEV_PATH, &st) == 0) {
-        EepromConstructionData eData;
-        eData.driverName = EEPROM_NAME;
-        eData.driverPath = EEPROM_DEV_PATH;
-        devData.eeproms.emplace_back(eData);
-    }
-
-    devices.emplace_back(devData);
-
-    DLOG(INFO) << "Looking at: " << devData.driverPath
-               << " for an eligible TOF camera";
 
     return status;
 }

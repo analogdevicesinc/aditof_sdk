@@ -32,8 +32,9 @@
 #ifndef CALIBRATION_FXTOF1_H
 #define CALIBRATION_FXTOF1_H
 
-#include <aditof/device_interface.h>
-#include <aditof/eeprom_interface.h>
+#include "aditof/depth_sensor_interface.h"
+#include "aditof/storage_interface.h"
+#include "aditof/temperature_sensor_interface.h"
 #include <aditof/status_definitions.h>
 #include <iostream>
 #include <memory>
@@ -57,7 +58,7 @@ struct mode_struct {
 };
 
 namespace aditof {
-class EepromInterface;
+class StorageInterface;
 }
 
 class CalibrationFxTof1 {
@@ -66,11 +67,11 @@ class CalibrationFxTof1 {
     ~CalibrationFxTof1();
 
   public:
-    aditof::Status readCalMap(aditof::EepromInterface &eeprom);
+    aditof::Status readCalMap(std::shared_ptr<aditof::StorageInterface> eeprom);
     aditof::Status getAfeFirmware(const std::string &mode,
                                   std::vector<uint16_t> &data) const;
     aditof::Status getIntrinsic(float key, std::vector<float> &data) const;
-    aditof::Status setMode(std::shared_ptr<aditof::DeviceInterface> device,
+    aditof::Status setMode(std::shared_ptr<aditof::DepthSensorInterface> sensor,
                            const std::string &mode, int range,
                            unsigned int frameWidth, unsigned int frameheight);
     aditof::Status calibrateCameraGeometry(uint16_t *frame,
