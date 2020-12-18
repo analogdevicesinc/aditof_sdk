@@ -152,7 +152,7 @@ aditof::Status Addi9036Sensor::open() {
     const char *subDevName = m_driverSubPath.c_str();
 
     // On RPI the driver path and sub path are the same
-    if (!subDevName.length()) {
+    if (!m_driverSubPath.length()) {
         subDevName = m_driverPath.c_str();
     }
 
