@@ -39,4 +39,6 @@ static const char *TEMP_SENSOR_DEV_PATH = "/sys/class/hwmon/hwmon0/temp1_input";
 static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/1-0056/eeprom";
 static const char *CAPTURE_DEVICE_NAME = "rkisp10_mainpath";
 
+static const int NUM_VIDEO_DEVS = 1;
+
 #endif // TARGET_DEFINITIONS_H

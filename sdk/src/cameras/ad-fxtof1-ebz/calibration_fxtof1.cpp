@@ -30,9 +30,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "calibration_fxtof1.h"
+#include "aditof/storage_interface.h"
 #include "basecode.h"
 
-#include <aditof/eeprom_interface.h>
 #include <algorithm>
 #include <glog/logging.h>
 #include <math.h>
@@ -87,7 +87,8 @@ CalibrationFxTof1::~CalibrationFxTof1() {
 ReadCalMap - Read the entire calibration map from a binary file
 \device - Pointer to a device instance
 */
-aditof::Status CalibrationFxTof1::readCalMap(aditof::EepromInterface &eeprom) {
+aditof::Status CalibrationFxTof1::readCalMap(
+    std::shared_ptr<aditof::StorageInterface> eeprom) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -96,7 +97,7 @@ aditof::Status CalibrationFxTof1::readCalMap(aditof::EepromInterface &eeprom) {
 
     /*Read the mode data*/
     for (int i = 0; i < 2; i++) {
-        eeprom.read(ROMADDR_CFG_BASE[i], mode_data, MODE_CFG_SIZE);
+        eeprom->read(ROMADDR_CFG_BASE[i], mode_data, MODE_CFG_SIZE);
 
         if (mode_data[0] == 0xFF) {
             LOG(WARNING)
@@ -189,8 +190,8 @@ aditof::Status CalibrationFxTof1::readCalMap(aditof::EepromInterface &eeprom) {
     }
 
     /*Read the intrinsics and distortion params*/
-    eeprom.read(ROMADDR_COMMOM_BASE + COMMON_BASE_OFFSET,
-                (uint8_t *)intrinsic_data, MODE_CFG_SIZE - COMMON_BASE_OFFSET);
+    eeprom->read(ROMADDR_COMMOM_BASE + COMMON_BASE_OFFSET,
+                 (uint8_t *)intrinsic_data, MODE_CFG_SIZE - COMMON_BASE_OFFSET);
     m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0],
                         &intrinsic_data[ARRAY_SIZE(intrinsic_data)]);
 
@@ -250,10 +251,10 @@ setMode - Sets the mode to be used for depth calibration
 \param frameWidth - Width of the depth image in pixels
 \param frameHeight - Height of the depth image in pixels
 */
-aditof::Status
-CalibrationFxTof1::setMode(std::shared_ptr<aditof::DeviceInterface> device,
-                           const std::string &mode, int range,
-                           unsigned int frameWidth, unsigned int frameheight) {
+aditof::Status CalibrationFxTof1::setMode(
+    std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
+    const std::string &mode, int range, unsigned int frameWidth,
+    unsigned int frameheight) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -277,7 +278,7 @@ CalibrationFxTof1::setMode(std::shared_ptr<aditof::DeviceInterface> device,
     /*Execute the mode change command*/
     uint16_t afeRegsAddr[] = {0x4000, 0x4001, 0x7c22};
     uint16_t afeRegsVal[] = {mode_id, 0x0004, 0x0004};
-    device->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
 
     return Status::OK;
 }
