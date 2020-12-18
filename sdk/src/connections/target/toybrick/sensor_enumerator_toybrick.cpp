@@ -66,7 +66,7 @@ aditof::Status TargetSensorEnumerator::searchSensors() {
     closedir(dirp);
 
     for (const auto &video : videoPaths) {
-        std::string devPath = "/dev/video2;/dev/v4l-subdev0";
+        std::string devPath = "/dev/video2";
 	
         if (devPath.empty()) {
             continue;
@@ -77,7 +77,8 @@ aditof::Status TargetSensorEnumerator::searchSensors() {
         // we've got the right device and is compatible with the SDK
         SensorInfo sInfo;
         sInfo.sensorType = SensorType::SENSOR_ADDI9036;
-        sInfo.driverPath = devPath;
+        sInfo.driverPath = "/dev/video2";
+//	sInfo.subDevPath = "/dev/v4l-subdev0";
         m_sensorsInfo.emplace_back(sInfo);
 
     }
