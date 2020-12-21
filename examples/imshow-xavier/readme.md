@@ -1,4 +1,4 @@
-# Imshow jetson example
+# Imshow xavier example
 
 ### Overview
 This example demonstrates how to capture data from the TOF system on the Nvidia jetson and display it using OpenCV
