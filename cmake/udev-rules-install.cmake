@@ -6,6 +6,9 @@ elseif(RASPBERRYPI)
 
 elseif(JETSON)
     set(ADITOF_UDEV_RULES "${CMAKE_SOURCE_DIR}/utils/jetson/53-aditofsdkjetson.rules")
+elseif(XAVIER)
+    set(ADITOF_UDEV_RULES "${CMAKE_SOURCE_DIR}/utils/xavier/53-aditofsdkxavier.rules")
+    
 endif()
 add_custom_target(install-udev-rules
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ADITOF_UDEV_RULES} ${UDEV_RULES_PATH}

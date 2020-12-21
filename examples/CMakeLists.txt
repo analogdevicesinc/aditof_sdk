@@ -12,6 +12,10 @@ if (JETSON)
     add_subdirectory(imshow-jetson)
 endif()
 
+if (XAVIER)
+    add_subdirectory(imshow-xavier)
+endif()
+
 include(GNUInstallDirs)
 
 install(PROGRAMS

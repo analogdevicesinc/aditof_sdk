@@ -1,0 +1,317 @@
+/*
+ * Copyright (c) 2016-2019, NVIDIA CORPORATION.  All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#include <dt-bindings/media/camera.h>
+#define CAM_I2C_MUX 	TEGRA194_AON_GPIO(CC, 3)
+/ {
+	host1x {
+		vi@15c10000 {
+			num-channels = <2>;
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				port@0 {
+					reg = <0>;
+					addi9036_vi_in0: endpoint {
+						port-index = <0>;
+						bus-width = <2>;
+						vc-id = <0>;
+						remote-endpoint = <&addi9036_csi_out0>;
+					};
+				};
+				port@1 {
+					reg = <1>;
+					addi9036_vi_in1: endpoint {
+						port-index = <0>;
+						bus-width = <2>;
+						vc-id = <1>;
+						remote-endpoint = <&addi9036_csi_out1>;
+					};
+				};
+			};
+		};
+
+		nvcsi@15a00000 {
+			num-channels = <2>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			channel@0 {
+				reg = <0>;
+				ports {
+					#address-cells = <1>;
+					#size-cells = <0>;
+					port@0 {
+						reg = <0>;
+						addi9036_csi_in0: endpoint@0 {
+							port-index = <0>;
+							bus-width = <2>;
+							remote-endpoint = <&adi9036_out0>;
+						};
+					};
+					port@1 {
+						reg = <1>;
+						addi9036_csi_out0: endpoint@1 {
+							remote-endpoint = <&addi9036_vi_in0>;
+						};
+					};
+				};
+			};
+
+			channel@1 {
+				reg = <1>;
+				ports {
+					#address-cells = <1>;
+					#size-cells = <0>;
+					port@0 {
+						reg = <0>;
+						addi9036_csi_in1: endpoint@0 {
+							port-index = <0>;
+							bus-width = <2>;
+							remote-endpoint = <&adi9036_out1>;
+						};
+					};
+					port@1 {
+						reg = <1>;
+						addi9036_csi_out1: endpoint@1 {
+							remote-endpoint = <&addi9036_vi_in1>;
+						};
+					};
+				};
+			};
+		};
+	};
+	cam_i2cmux {
+		compatible = "i2c-mux-gpio";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		i2c-parent = <&cam_i2c>;
+		mux-gpios = <&tegra_aon_gpio CAM_I2C_MUX GPIO_ACTIVE_HIGH>;
+
+		i2c@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			adi_tof_cam0@64 {
+				compatible = "adi,addi9036";
+				reg = <0x64>;
+				sensor_model = "MN34906BL";
+				physical_w = "2.688";
+				use_decibel_gain = "true";
+				devnode = "video0";
+				delayed_gain = "true";
+				use_sensor_mode_id = "true";
+				physical_h = "3.584";
+
+				mode0 {				
+					mclk_khz = "45000";
+					num_lanes = "2";
+					tegra_sinterface = "serial_e";
+					phy_mode = "DPHY";
+					discontinuous_clk = "no";
+					dpcm_enable = "false";
+					cil_settletime = "0";
+
+					active_w = "640";
+					active_h = "480";
+					mode_type = "bayer";
+					pixel_phase = "bggr";
+					csi_pixel_bit_depth = "12";
+					pix_clk_hz = "73728000";
+					line_length = "640";
+					inherent_gain = "1";
+					min_hdr_ratio = "1";
+					max_hdr_ratio = "1";
+
+					min_gain_val = "0";         /* 0dB */
+						max_gain_val = "0";       /* 48dB */
+						step_gain_val = "1";        /* 0.3 */
+						default_gain = "0";
+
+					min_framerate = "5000000";
+					max_framerate = "30000000";
+					step_framerate = "1";
+					default_framerate = "30000000";
+
+					embedded_metadata_height = "0";
+				};
+
+				ports {
+					#address-cells = <0x1>;
+					#size-cells = <0x0>;
+
+					port@0 {
+						reg = <0x0>;
+						adi9036_out0: endpoint {
+							port-index = <0>;
+							remote-endpoint = <&addi9036_csi_in0>;
+							bus-width = <2>;
+							vc-id = <0>;
+						};
+					};
+				};
+			};
+
+			eeprom@56 {
+				reg = <0x56>;
+				compatible = "atmel,24c1024";
+				pagesize = <32>;
+			};	
+		};
+		i2c@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			adi_tof_cam1@64 {
+				compatible = "adi,addi9036";
+				reg = <0x64>;
+				sensor_model = "MN34906BL";
+				physical_w = "2.688";
+				use_decibel_gain = "true";
+				devnode = "video0";
+				delayed_gain = "true";
+				use_sensor_mode_id = "true";
+				physical_h = "3.584";
+
+				mode0 {				
+					mclk_khz = "45000";
+					num_lanes = "2";
+					tegra_sinterface = "serial_e";
+					phy_mode = "DPHY";
+					discontinuous_clk = "no";
+					dpcm_enable = "false";
+					cil_settletime = "0";
+
+					active_w = "640";
+					active_h = "480";
+					mode_type = "bayer";
+					pixel_phase = "bggr";
+					csi_pixel_bit_depth = "12";
+					pix_clk_hz = "73728000";
+					line_length = "640";
+					inherent_gain = "1";
+					min_hdr_ratio = "1";
+					max_hdr_ratio = "1";
+
+					min_gain_val = "0";         /* 0dB */
+						max_gain_val = "0";       /* 48dB */
+						step_gain_val = "1";        /* 0.3 */
+						default_gain = "0";
+
+					min_framerate = "5000000";
+					max_framerate = "30000000";
+					step_framerate = "1";
+					default_framerate = "30000000";
+
+					embedded_metadata_height = "0";
+				};
+
+				ports {
+					#address-cells = <0x1>;
+					#size-cells = <0x0>;
+
+					port@0 {
+						reg = <0x0>;
+						adi9036_out1: endpoint {
+							port-index = <0>;
+							remote-endpoint = <&addi9036_csi_in1>;
+							bus-width = <2>;
+							vc-id = <1>;
+						};
+					};
+				};
+			};		
+			eeprom@56 {
+				reg = <0x56>;
+				compatible = "atmel,24c1024";
+				pagesize = <32>;
+			};	
+		};
+	};
+};
+
+/ {
+	tegra-camera-platform {
+		compatible = "nvidia, tegra-camera-platform";
+		/**
+		* Physical settings to calculate max ISO BW
+		*
+		* num_csi_lanes = <>;
+		* Total number of CSI lanes when all cameras are active
+		*
+		* max_lane_speed = <>;
+		* Max lane speed in Kbit/s
+		*
+		* min_bits_per_pixel = <>;
+		* Min bits per pixel
+		*
+		* vi_peak_byte_per_pixel = <>;
+		* Max byte per pixel for the VI ISO case
+		*
+		* vi_bw_margin_pct = <>;
+		* Vi bandwidth margin in percentage
+		*
+		* max_pixel_rate = <>;
+		* Max pixel rate in Kpixel/s for the ISP ISO case
+		*
+		* isp_peak_byte_per_pixel = <>;
+		* Max byte per pixel for the ISP ISO case
+		*
+		* isp_bw_margin_pct = <>;
+		* Isp bandwidth margin in percentage
+		*/
+		num_csi_lanes = <2>;
+		max_lane_speed = <1500000>;
+		max_pixel_rate = <240000>;
+		min_bits_per_pixel = <12>;
+		vi_peak_byte_per_pixel = <2>;
+		vi_bw_margin_pct = <25>;
+		isp_peak_byte_per_pixel = <5>;
+		isp_bw_margin_pct = <25>;
+
+		/**
+		 * The general guideline for naming badge_info contains 3 parts, and is as follows,
+		 * The first part is the camera_board_id for the module; if the module is in a FFD
+		 * platform, then use the platform name for this part.
+		 * The second part contains the position of the module, ex. "rear" or "front".
+		 * The third part contains the last 6 characters of a part number which is found
+		 * in the module's specsheet from the vender.
+		 */
+		modules {
+			module0 {
+				badge = "adi_tof_depth";
+				position = "bottom";
+				orientation = "0";
+				drivernode0 {
+					devname = "addi9036 9-0064";
+					pcl_id = "v4l2_sensor";
+					proc-device-tree = "/proc/device-tree/cam_i2cmux/i2c@0/adi_tof_cam0@64";
+				};
+			};
+
+			module1 {
+				badge = "adi_tof_ir";
+				position = "top";
+				orientation = "1";
+				drivernode1 {
+					devname = "addi9036 10-0064";
+					pcl_id = "v4l2_sensor";
+					proc-device-tree = "/proc/device-tree/cam_i2cmux/i2c@1/adi_tof_cam1@64";
+				};
+			};
+		};
+	};
+};
+

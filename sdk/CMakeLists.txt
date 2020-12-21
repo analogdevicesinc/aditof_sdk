@@ -29,15 +29,30 @@ elseif( APPLE )
 elseif( DRAGONBOARD )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR dragonboard)
+	add_definitions(-DDRAGONBOARD)
 elseif ( RASPBERRYPI )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR raspberrypi)
+	add_definitions(-DRASPBERRYPI)
 elseif( JETSON )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR jetson)
+        add_definitions(-DJETSON)
 elseif( TOYBRICK )
         set(OS_SPECIFIC_DIR ${TARGET_STRING})
         set(TARGET_SPECIFIC_DIR toybrick)
+elseif( XAVIER )
+        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(TARGET_SPECIFIC_DIR xavier)
+	    add_definitions(-DXAVIER)
+elseif( XAVIERNX )
+        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(TARGET_SPECIFIC_DIR xaviernx)
+	    add_definitions(-DXAVIERNX)
+elseif( TOYBRICK )
+        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(TARGET_SPECIFIC_DIR toybrick)
+	    add_definitions(-DTOYBRICK)
 elseif ( UNIX )
         set(OS_SPECIFIC_DIR "connections/usb/linux")
 else()
@@ -76,6 +91,14 @@ file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
     ${CHICONY_H}
     ${FXTOF1_H}
+)
+
+file(GLOB NETWORK_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.c
+)
+file(GLOB NETWORK_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.h
 )
 
 file(GLOB NETWORK_SOURCES
