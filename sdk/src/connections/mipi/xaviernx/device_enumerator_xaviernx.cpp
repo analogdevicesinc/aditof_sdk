@@ -53,7 +53,7 @@ aditof::Status DeviceEnumeratorImpl::findDevices(
     DeviceConstructionData devData;
     devData.connectionType = ConnectionType::LOCAL;
     devData.driverPath =
-        "/dev/video0;/dev/v4l-subdev2|/dev/video1;/dev/v4l-subdev3";
+        "/dev/video0;/dev/v4l-subdev1|/dev/video1;/dev/v4l-subdev2";
 
     // Check if EEPROM is available
     struct stat st;
