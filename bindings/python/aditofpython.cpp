@@ -63,6 +63,8 @@ PYBIND11_MODULE(aditofpython, m) {
         .def(py::init<>())
         .def_readwrite("width", &aditof::FrameDetails::width)
         .def_readwrite("height", &aditof::FrameDetails::height)
+        .def_readwrite("fullDataWidth", &aditof::FrameDetails::fullDataWidth)
+        .def_readwrite("fullDataHeight", &aditof::FrameDetails::fullDataHeight)
         .def_readwrite("type", &aditof::FrameDetails::type);
 
     // Camera declarations
@@ -70,7 +72,7 @@ PYBIND11_MODULE(aditofpython, m) {
     py::enum_<aditof::ConnectionType>(m, "ConnectionType")
         .value("Usb", aditof::ConnectionType::USB)
         .value("Ethernet", aditof::ConnectionType::ETHERNET)
-        .value("local", aditof::ConnectionType::ON_TARGET);
+        .value("OnTarget", aditof::ConnectionType::ON_TARGET);
 
     py::class_<aditof::IntrinsicParameters>(m, "IntrinsicParameters")
         .def(py::init<>())
@@ -175,18 +177,6 @@ PYBIND11_MODULE(aditofpython, m) {
         .def("requestFrame", &aditof::Camera::requestFrame, py::arg("frame"),
              py::arg("cb") = nullptr)
         .def("getDetails", &aditof::Camera::getDetails, py::arg("details"))
-        .def("getDevice", &aditof::Camera::getDevice)
-        .def("getEeproms",
-             [](aditof::Camera &camera, py::list eeproms) {
-                 std::vector<std::shared_ptr<aditof::EepromInterface>>
-                     eepromList;
-                 aditof::Status status = camera.getEeproms(eepromList);
-
-                 for (const auto &e : eepromList)
-                     eeproms.append(e);
-
-                 return status;
-             })
         .def("getAvailableControls",
              [](const aditof::Camera &camera, py::list controls) {
                  std::vector<std::string> controlsList;
@@ -202,7 +192,34 @@ PYBIND11_MODULE(aditofpython, m) {
         .def("setControl", &aditof::Camera::setControl, py::arg("control"),
              py::arg("value"))
         .def("getControl", &aditof::Camera::getControl, py::arg("control"),
-             py::arg("value"));
+             py::arg("value"))
+        .def("getSensor", &aditof::Camera::getSensor)
+        .def("getEeproms",
+             [](aditof::Camera &camera, py::list eeproms) {
+                 std::vector<std::shared_ptr<aditof::StorageInterface>>
+                     eepromList;
+                 aditof::Status status = camera.getEeproms(eepromList);
+
+                 for (const auto &e : eepromList)
+                     eeproms.append(e);
+
+                 return status;
+             },
+             py::arg("eeproms"))
+        .def(
+            "getTemperatureSensors",
+            [](aditof::Camera &camera, py::list tempSensors) {
+                std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+                    sensorList;
+                aditof::Status status =
+                    camera.getTemperatureSensors(sensorList);
+
+                for (const auto &s : sensorList)
+                    tempSensors.append(s);
+
+                return status;
+            },
+            py::arg("tempSensors"));
 
     // Frame
     py::class_<aditof::Frame>(m, "Frame")
@@ -216,6 +233,7 @@ PYBIND11_MODULE(aditofpython, m) {
 
                  frame.getData(dataType, &f.pData);
                  frame.getDetails(f.details);
+                 // TO DO: Do we still need to do this now that we have fullDataWidth and fullDataHeight?
                  if (dataType != aditof::FrameDataType::RAW) {
                      f.details.height /= 2;
                  }
@@ -224,14 +242,15 @@ PYBIND11_MODULE(aditofpython, m) {
              },
              py::arg("dataType"));
 
-    // DeviceInterface
-    py::class_<aditof::DeviceInterface,
-               std::shared_ptr<aditof::DeviceInterface>>(m, "DeviceInterface")
-        .def("open", &aditof::DeviceInterface::open)
-        .def("start", &aditof::DeviceInterface::start)
-        .def("stop", &aditof::DeviceInterface::stop)
+    // DepthSensorInterface
+    py::class_<aditof::DepthSensorInterface,
+               std::shared_ptr<aditof::DepthSensorInterface>>(
+        m, "DepthSensorInterface")
+        .def("open", &aditof::DepthSensorInterface::open)
+        .def("start", &aditof::DepthSensorInterface::start)
+        .def("stop", &aditof::DepthSensorInterface::stop)
         .def("getAvailableFrameTypes",
-             [](aditof::DeviceInterface &device, py::list types) {
+             [](aditof::DepthSensorInterface &device, py::list types) {
                  std::vector<aditof::FrameDetails> typeList;
                  aditof::Status status =
                      device.getAvailableFrameTypes(typeList);
@@ -242,11 +261,11 @@ PYBIND11_MODULE(aditofpython, m) {
                  return status;
              },
              py::arg("types"))
-        .def("setFrameType", &aditof::DeviceInterface::setFrameType,
+        .def("setFrameType", &aditof::DepthSensorInterface::setFrameType,
              py::arg("details"))
         .def("program",
-             [](aditof::DeviceInterface &device, py::array_t<uint8_t> firmware,
-                size_t size) {
+             [](aditof::DepthSensorInterface &device,
+                py::array_t<uint8_t> firmware, size_t size) {
                  py::buffer_info buffInfo = firmware.request();
                  uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
 
@@ -254,7 +273,8 @@ PYBIND11_MODULE(aditofpython, m) {
              },
              py::arg("firmware"), py::arg("size"))
         .def("getFrame",
-             [](aditof::DeviceInterface &device, py::array_t<uint16_t> buffer) {
+             [](aditof::DepthSensorInterface &device,
+                py::array_t<uint16_t> buffer) {
                  py::buffer_info buffInfo = buffer.request(true);
                  uint16_t *ptr = static_cast<uint16_t *>(buffInfo.ptr);
 
@@ -262,8 +282,9 @@ PYBIND11_MODULE(aditofpython, m) {
              },
              py::arg("buffer"))
         .def("readAfeRegisters",
-             [](aditof::DeviceInterface &device, py::array_t<uint16_t> address,
-                py::array_t<uint16_t> data, size_t length) {
+             [](aditof::DepthSensorInterface &device,
+                py::array_t<uint16_t> address, py::array_t<uint16_t> data,
+                size_t length) {
                  py::buffer_info addrBuffInfo = address.request();
                  uint16_t *addrPtr = static_cast<uint16_t *>(addrBuffInfo.ptr);
 
@@ -274,8 +295,9 @@ PYBIND11_MODULE(aditofpython, m) {
              },
              py::arg("address"), py::arg("data"), py::arg("length"))
         .def("writeAfeRegisters",
-             [](aditof::DeviceInterface &device, py::array_t<uint16_t> address,
-                py::array_t<uint16_t> data, size_t length) {
+             [](aditof::DepthSensorInterface &device,
+                py::array_t<uint16_t> address, py::array_t<uint16_t> data,
+                size_t length) {
                  py::buffer_info addrBuffInfo = address.request();
                  uint16_t *addrPtr = static_cast<uint16_t *>(addrBuffInfo.ptr);
 
@@ -284,28 +306,14 @@ PYBIND11_MODULE(aditofpython, m) {
 
                  return device.writeAfeRegisters(addrPtr, dataPtr, length);
              },
-             py::arg("address"), py::arg("data"), py::arg("length"))
-        .def("readAfeTemp",
-             [](aditof::DeviceInterface &device, py::list temperature) {
-                 float temp;
-                 aditof::Status status = device.readAfeTemp(temp);
-                 temperature.append(temp);
-                 return status;
-             })
-        .def("readLaserTemp",
-             [](aditof::DeviceInterface &device, py::list temperature) {
-                 float temp;
-                 aditof::Status status = device.readLaserTemp(temp);
-                 temperature.append(temp);
-                 return status;
-             });
+             py::arg("address"), py::arg("data"), py::arg("length"));
 
-    // EepromInterface
-    py::class_<aditof::EepromInterface,
-               std::shared_ptr<aditof::EepromInterface>>(m, "EepromInterface")
-        .def("open", &aditof::EepromInterface::open)
+    // StorageInterface
+    py::class_<aditof::StorageInterface,
+               std::shared_ptr<aditof::StorageInterface>>(m, "StorageInterface")
+        .def("open", &aditof::StorageInterface::open)
         .def("read",
-             [](aditof::EepromInterface &eeprom, uint32_t address,
+             [](aditof::StorageInterface &eeprom, uint32_t address,
                 py::array_t<uint8_t> data, size_t length) {
                  py::buffer_info buffInfo = data.request(true);
                  uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
@@ -314,7 +322,7 @@ PYBIND11_MODULE(aditofpython, m) {
              },
              py::arg("address"), py::arg("data"), py::arg("length"))
         .def("write",
-             [](aditof::EepromInterface &eeprom, uint32_t address,
+             [](aditof::StorageInterface &eeprom, uint32_t address,
                 py::array_t<uint8_t> data, size_t length) {
                  py::buffer_info buffInfo = data.request();
                  uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
@@ -322,10 +330,34 @@ PYBIND11_MODULE(aditofpython, m) {
                  return eeprom.write(address, ptr, length);
              },
              py::arg("address"), py::arg("data"), py::arg("length"))
-        .def("close", &aditof::EepromInterface::close)
-        .def("getName", [](aditof::EepromInterface &eeprom) {
+        .def("close", &aditof::StorageInterface::close)
+        .def("getName", [](aditof::StorageInterface &eeprom) {
             std::string n;
             eeprom.getName(n);
+
+            return n;
+        });
+
+    // TemperatureSensorInterface
+    py::class_<aditof::TemperatureSensorInterface,
+               std::shared_ptr<aditof::TemperatureSensorInterface>>(
+        m, "TemperatureSensorInterface")
+        .def("open", &aditof::TemperatureSensorInterface::open)
+        .def("read",
+             [](aditof::TemperatureSensorInterface &sensor,
+                py::list temperature) {
+                 float temp;
+                 aditof::Status status = sensor.read(temp);
+                 if (status == aditof::Status::OK) {
+                     temperature.append(temp);
+                 }
+                 return status;
+             },
+             py::arg("temperature"))
+        .def("close", &aditof::TemperatureSensorInterface::close)
+        .def("getName", [](aditof::TemperatureSensorInterface &sensor) {
+            std::string n;
+            sensor.getName(n);
 
             return n;
         });
