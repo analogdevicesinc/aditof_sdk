@@ -121,13 +121,14 @@ aditof::Status CameraFxTof1::initialize() {
         LOG(ERROR) << "Failed to open temperature sensor with name " << name;
         return status;
     }
-
+    
     m_laserTempSensor->open(handle);
-    std::string name;
-    m_laserTempSensor->getName(name);
-    LOG(ERROR) << "Failed to open temperature sensor with name " << name;
-    return status;
-
+    if (status != Status::OK) {
+        std::string name;
+        m_laserTempSensor->getName(name);
+        LOG(ERROR) << "Failed to open temperature sensor with name " << name;
+        return status;
+    }
     m_tempSensorsInitialized = true;
 
     status = m_calibration.readCalMap(m_eeprom);
