@@ -233,10 +233,6 @@ PYBIND11_MODULE(aditofpython, m) {
 
                  frame.getData(dataType, &f.pData);
                  frame.getDetails(f.details);
-                 // TO DO: Do we still need to do this now that we have fullDataWidth and fullDataHeight?
-                 if (dataType != aditof::FrameDataType::RAW) {
-                     f.details.height /= 2;
-                 }
 
                  return f;
              },
