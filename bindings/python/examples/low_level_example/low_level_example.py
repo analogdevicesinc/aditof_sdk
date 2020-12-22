@@ -71,7 +71,7 @@ status = camera1.setMode(modes[0])
 print("camera1.setMode()", status)
 
 # Get access to the low-level API of the camera
-device1 = camera1.getDevice()
+cam1Sensor = camera1.getSensor()
 
 eeproms = []
 status = camera1.getEeproms(eeproms)
@@ -87,15 +87,19 @@ print(eeprom_read_data, "at address:", eeprom_read_address)
 # Read a couple of bytes from AFE
 afe_read_addresses = np.array([0x4001, 0x7c22], dtype=np.uint16)
 afe_read_data = np.array([0, 0], dtype=np.uint16)
-device1.readAfeRegisters(afe_read_addresses, afe_read_data, len(afe_read_data))
+cam1Sensor.readAfeRegisters(afe_read_addresses, afe_read_data, len(afe_read_data))
 print(afe_read_data, "at addresses:", afe_read_addresses)
 
-# Read the AFE and laser temperatures
-afe_temp = []
-status = device1.readAfeTemp(afe_temp)
-print("device1.readAfeTemp()", status)
-print("AFE temperature:", afe_temp, status)
-laser_temp = []
-status = device1.readLaserTemp(laser_temp)
-print("device1.readLaserTemp()", status)
-print("Laser temperature:", afe_temp, status)
+# Read temperatures from available temperature sensors
+cam1TempSensors = []
+camera1.getTemperatureSensors(cam1TempSensors)
+
+for sensor in cam1TempSensors:
+    name = sensor.getName()
+    temperature = []
+    status = sensor.read(temperature)
+    temperatureToPrint = "Unknown"
+    if status == tof.Status.Ok:
+        temperatureToPrint = temperature[0]
+    print('Sensor: {} reads: {}'.format(name, temperatureToPrint))
+

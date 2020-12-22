@@ -1,4 +1,4 @@
-# Device Example
+# Low level API Example
 
 ### Overview
 This example shows how to get access to the low-level API of the camera.
