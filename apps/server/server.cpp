@@ -377,6 +377,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             type->set_width(detail.width);
             type->set_height(detail.height);
             type->set_type(detail.type);
+            type->set_full_data_width(detail.fullDataWidth);
+            type->set_full_data_height(detail.fullDataHeight);
         }
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
@@ -387,6 +389,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         details.width = buff_recv.frame_type().width();
         details.height = buff_recv.frame_type().height();
         details.type = buff_recv.frame_type().type();
+        details.fullDataWidth = buff_recv.frame_type().full_data_width();
+        details.fullDataWidth = buff_recv.frame_type().full_data_height();
         aditof::Status status = camDepthSensor->setFrameType(details);
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
