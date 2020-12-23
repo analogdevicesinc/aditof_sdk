@@ -20,7 +20,9 @@ which will generate all the necessary recipes for building and installing. Usefu
 | WITH_OPENCV | on/off | off | Build the opencv bindings |
 | WITH_MATLAB | on/off | off | Build the matlab bindings |
 | WITH_OPEN3D | on/off | off | Build the open3D bindings |
+| WITH_ROS | on/off | off | Build the ROS bindings |
 | WITH_NETWORK | on/off | on | Build the network interface |
+| WITH_TOOLS | on/off | on | Build the tools |
 | CMAKE_PREFIX_PATH | \<path\> | Empty | Specifies a path which will be used by the FIND_XXX() commands |
 | CMAKE_INSTALL_PREFIX | \<path\> |  /usr/local on UNIX, c:/Program Files on Windows | Installation directory used by `cmake install` |
 | PYTHON_EXECUTABLE | \<path\> | Path to default python executable used | Specify which python executable should be used for building the python bindings |
