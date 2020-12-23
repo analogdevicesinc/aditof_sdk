@@ -15,17 +15,16 @@ which will generate all the necessary recipes for building and installing. Usefu
 | \<option\> | value | default | description |
 | --------- | ----------- | ----------- | ----------- |
 | WITH_EXAMPLES | on/off | on | Build the examples |
+| WITH_DOC | on/off | off | Build the doxygen documentation |
 | WITH_PYTHON | on/off | off | Build the python bindings |
 | WITH_OPENCV | on/off | off | Build the opencv bindings |
+| WITH_MATLAB | on/off | off | Build the matlab bindings |
 | WITH_OPEN3D | on/off | off | Build the open3D bindings |
 | WITH_NETWORK | on/off | on | Build the network interface |
-| WITH_MATLAB | on/off | off | Build the matlab bindings |
-| WITH_DOC | on/off | off | Build the doxygen documentation |
 | CMAKE_PREFIX_PATH | \<path\> | Empty | Specifies a path which will be used by the FIND_XXX() commands |
 | CMAKE_INSTALL_PREFIX | \<path\> |  /usr/local on UNIX, c:/Program Files on Windows | Installation directory used by `cmake install` |
 | PYTHON_EXECUTABLE | \<path\> | Path to default python executable used | Specify which python executable should be used for building the python bindings |
 | WITH_REVB | on/off | off | When building for raspberry pi platforms, specify WITH_REVB if you are using hardware revision B, else leave it off |
-| WITH_TOOLS | on/off | off | Build the sdk tools |
 
 
 #### Building and Installing 
