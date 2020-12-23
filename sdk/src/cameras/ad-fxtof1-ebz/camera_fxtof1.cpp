@@ -63,10 +63,9 @@ static const std::string skEepromName = "custom";
 CameraFxTof1::CameraFxTof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
     std::shared_ptr<aditof::StorageInterface> eeprom,
-    std::shared_ptr<aditof::TemperatureSensorInterface> afeTempSensor,
-    std::shared_ptr<aditof::TemperatureSensorInterface> laserTempSensor)
+    std::shared_ptr<aditof::TemperatureSensorInterface> temperatureSensor)
     : m_depthSensor(depthSensor), m_eeprom(eeprom),
-      m_afeTempSensor(afeTempSensor), m_laserTempSensor(laserTempSensor),
+      m_temperatureSensor(temperatureSensor), 
       m_devStarted(false), m_eepromInitialized(false),
       m_tempSensorsInitialized(false), m_availableControls(availableControls),
       m_revision("RevA") {}
@@ -76,8 +75,7 @@ CameraFxTof1::~CameraFxTof1() {
         m_eeprom->close();
     }
     if (m_tempSensorsInitialized) {
-        m_afeTempSensor->close();
-        m_laserTempSensor->close();
+        m_temperatureSensor->close();
     }
 }
 
@@ -114,21 +112,14 @@ aditof::Status CameraFxTof1::initialize() {
     m_eepromInitialized = true;
 
     // Open communication with temperature sensors
-    m_afeTempSensor->open(handle);
+    m_temperatureSensor->open(handle);
     if (status != Status::OK) {
         std::string name;
-        m_afeTempSensor->getName(name);
+        m_temperatureSensor->getName(name);
         LOG(ERROR) << "Failed to open temperature sensor with name " << name;
         return status;
     }
     
-    m_laserTempSensor->open(handle);
-    if (status != Status::OK) {
-        std::string name;
-        m_laserTempSensor->getName(name);
-        LOG(ERROR) << "Failed to open temperature sensor with name " << name;
-        return status;
-    }
     m_tempSensorsInitialized = true;
 
     status = m_calibration.readCalMap(m_eeprom);
@@ -357,9 +348,7 @@ aditof::Status CameraFxTof1::getEeproms(
 aditof::Status CameraFxTof1::getTemperatureSensors(
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &sensors) {
     sensors.clear();
-    sensors.push_back(m_afeTempSensor);
-    sensors.push_back(m_laserTempSensor);
-
+    sensors.push_back(m_temperatureSensor);
     return aditof::Status::OK;
 }
 

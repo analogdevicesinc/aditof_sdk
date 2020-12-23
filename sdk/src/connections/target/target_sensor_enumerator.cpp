@@ -116,5 +116,11 @@ Status TargetSensorEnumerator::getTemperatureSensors(
     temperatureSensors.emplace_back(sensor);
 #endif
 
+#ifdef FXTOF1
+    auto sensor = std::make_shared<ChiconyTemperatureSensor>(
+	CHICONY_TEMPERATURE_SENSOR, TEMP_SENSOR_DEV_PATH);
+    temperatureSensors.emplace_back(sensor);
+#endif
+
     return Status::OK;
 }
