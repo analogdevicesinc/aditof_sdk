@@ -36,39 +36,46 @@
 
 #include <memory>
 
+#include "aditof/depth_sensor_interface.h"
+#include "aditof/storage_interface.h"
+#include "aditof/temperature_sensor_interface.h"
 #include <aditof/camera.h>
-#include <aditof/device_construction_data.h> // TO DO: remove when adapting FXTOF1 to new low level API
-#include <aditof/eeprom_interface.h>
 
 class CameraFxTof1 : public aditof::Camera {
-  public:#include <aditof/device_construction_data.h>#include <aditof/device_construction_data.h>
-    CameraFxTof1(std::unique_ptr<aditof::DeviceInterface> device,
-                 const aditof::DeviceConstructionData &data);
+  public:
+    CameraFxTof1(
+        std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
+        std::shared_ptr<aditof::StorageInterface> eeprom,
+        std::shared_ptr<aditof::TemperatureSensorInterface> temperatureSensor); 
     ~CameraFxTof1();
 
   public: // implements Camera
-    aditof::Status initialize();
-    aditof::Status start();
-    aditof::Status stop();
+    aditof::Status initialize() override;
+    aditof::Status start() override;
+    aditof::Status stop() override;
     aditof::Status setMode(const std::string &mode,
-                           const std::string &modeFilename);
+                           const std::string &modeFilename) override;
     aditof::Status
-    getAvailableModes(std::vector<std::string> &availableModes) const;
-    aditof::Status setFrameType(const std::string &frameType);
-    aditof::Status
-    getAvailableFrameTypes(std::vector<std::string> &availableFrameTypes) const;
+    getAvailableModes(std::vector<std::string> &availableModes) const override;
+    aditof::Status setFrameType(const std::string &frameType) override;
+    aditof::Status getAvailableFrameTypes(
+        std::vector<std::string> &availableFrameTypes) const override;
     aditof::Status requestFrame(aditof::Frame *frame,
-                                aditof::FrameUpdateCallback cb);
-    aditof::Status getDetails(aditof::CameraDetails &details) const;
+                                aditof::FrameUpdateCallback cb) override;
+    aditof::Status getDetails(aditof::CameraDetails &details) const override;
+    std::shared_ptr<aditof::DepthSensorInterface> getSensor() override;
     aditof::Status
-    getAvailableControls(std::vector<std::string> &controls) const;
+    getAvailableControls(std::vector<std::string> &controls) const override;
     aditof::Status setControl(const std::string &control,
-                              const std::string &value);
+                              const std::string &value) override;
     aditof::Status getControl(const std::string &control,
-                              std::string &value) const;
+                              std::string &value) const override;
     aditof::Status
-    getEeproms(std::vector<std::shared_ptr<aditof::EepromInterface>> &eeproms);
-    std::shared_ptr<aditof::DeviceInterface> getDevice();
+    getEeproms(std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms)
+        override;
+    aditof::Status getTemperatureSensors(
+        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+            &sensors) override;
 
   private:
     aditof::Status setNoiseReductionTreshold(uint16_t treshold);
@@ -76,12 +83,13 @@ class CameraFxTof1 : public aditof::Camera {
 
   private:
     aditof::CameraDetails m_details;
-    std::shared_ptr<aditof::DeviceInterface> m_device;
-    aditof::DeviceConstructionData m_devData;
-    std::shared_ptr<aditof::EepromInterface> m_eeprom;
+    std::shared_ptr<aditof::DepthSensorInterface> m_depthSensor;
+    std::shared_ptr<aditof::StorageInterface> m_eeprom;
+    std::shared_ptr<aditof::TemperatureSensorInterface> m_temperatureSensor;
     bool m_devStarted;
     bool m_devProgrammed;
     bool m_eepromInitialized;
+    bool m_tempSensorsInitialized;
     std::vector<std::string> m_availableControls;
     CalibrationFxTof1 m_calibration;
     uint16_t m_noiseReductionThreshold;

@@ -34,6 +34,7 @@
 #include "aditof/sensor_enumerator_interface.h"
 #include "camera_96tof1.h"
 #include "camera_chicony_006.h"
+#include "camera_fxtof1.h"
 
 #include <aditof/camera.h>
 #include <algorithm>
@@ -114,7 +115,7 @@ buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
                 *afeTempSensorIter;
             std::shared_ptr<TemperatureSensorInterface> laserTempSensor =
                 *laserTempSensorIter;
-#ifdef CHICONY_006
+#if defined CHICONY_006 || defined FXTOF1
 
             // Look for temperature sensor
             auto tempSensorIter = std::find_if(
@@ -134,8 +135,14 @@ buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
             std::shared_ptr<TemperatureSensorInterface> tempSensor =
                 *tempSensorIter;
 
+#ifdef CHICONY_006
             std::shared_ptr<Camera> camera =
                 std::make_shared<CameraChicony>(dSensor, eeprom, tempSensor);
+#endif
+#ifdef FXTOF1
+	    std::shared_ptr<Camera> camera = std::make_shared<CameraFxTof1>(
+		dSensor, eeprom, tempSensor);
+#endif
 #else
             std::shared_ptr<Camera> camera = std::make_shared<Camera96Tof1>(
                 dSensor, eeprom, afeTempSensor, laserTempSensor);
