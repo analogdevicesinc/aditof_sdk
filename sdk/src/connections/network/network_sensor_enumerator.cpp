@@ -47,7 +47,7 @@ NetworkSensorEnumerator::~NetworkSensorEnumerator() = default;
 Status NetworkSensorEnumerator::searchSensors() {
     Status status = Status::OK;
 
-    LOG(INFO) << "Looking for sensors over ethernet";
+    LOG(INFO) << "Looking for sensors over network";
 
     std::unique_ptr<Network> net(new Network());
 

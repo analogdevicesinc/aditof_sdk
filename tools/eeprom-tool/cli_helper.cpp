@@ -34,16 +34,16 @@
 const char *helpString = R"V0G0N(
    Usage: eeprom-tool [(-u | -m | -e <ip>)] [-n <eeprom_name>]  (-h | -l | -w <file_path> | -r <file_path>) 
    
-   Reads or writes the contents of the eeprom memory to / from a file. The connection interface may be mipi, local or ethernet. 
+   Reads or writes the contents of the eeprom memory to / from a file. The connection interface may be mipi, local or network. 
    If none is specified the tool tries usb and local.
    Also, if multiple memories are available the target should be specified by name. All memories available can be listed.
    
    Connection interfaces:
    -u, --usb      connect to the eeprom memory through usb.
    -m, --mipi     connect to the eeprom memory through mipi (local connection)
-   -e, --ethernet connect to the eeprom memory through ethernet, the <ip> of the target must be specified
+   -n, --network  connect to the eeprom memory through network, the <ip> of the target must be specified
 
-   -n, --name       specifies the name of the target memory.
+   -e, --eeprom   specifies the name of eeprom on the target.
 
    -r, --read     reads the contnets of the eeprom memory and writes it into the specified file
    -w, --write    reads the contents of the specified file and writes is into the eeprom memory 
@@ -53,9 +53,9 @@ const char *helpString = R"V0G0N(
    )V0G0N";
 
 struct option longopts[] = {{"usb", no_argument, NULL, 'u'},
-                            {"ethernet", required_argument, NULL, 'e'},
+                            {"network", required_argument, NULL, 'n'},
                             {"mipi", no_argument, NULL, 'm'},
-                            {"name", required_argument, NULL, 'n'},
+                            {"eeprom", required_argument, NULL, 'e'},
                             {"write", required_argument, NULL, 'w'},
                             {"read", required_argument, NULL, 'r'},
                             {"list", no_argument, NULL, 'l'},
@@ -68,15 +68,15 @@ Status parseArguments(int argc, char *argv[], CLIArguments &cliArguments) {
     int option;
 
     while (
-        (option = getopt_long(argc, argv, ":ue:mn:r:w:lh", longopts, NULL)) !=
+        (option = getopt_long(argc, argv, ":un:me:r:w:lh", longopts, NULL)) !=
         -1) { //get option from the getopt() method
         switch (option) {
         case 'u':
             cliArguments.connectionType = ConnectionType::USB;
             cliArguments.isConnectionSpecifed = true;
             break;
-        case 'e':
-            cliArguments.connectionType = ConnectionType::ETHERNET;
+        case 'n':
+            cliArguments.connectionType = ConnectionType::NETWORK;
             cliArguments.ip = string(optarg);
             printf("%s\n", cliArguments.ip.c_str());
             cliArguments.isConnectionSpecifed = true;
@@ -85,7 +85,7 @@ Status parseArguments(int argc, char *argv[], CLIArguments &cliArguments) {
             cliArguments.connectionType = ConnectionType::ON_TARGET;
             cliArguments.isConnectionSpecifed = true;
             break;
-        case 'n':
+        case 'e':
             cliArguments.eepromName = string(optarg);
             break;
         case 'w':

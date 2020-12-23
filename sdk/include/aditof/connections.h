@@ -44,7 +44,7 @@ namespace aditof {
 enum class ConnectionType {
     ON_TARGET,   //!< on the target, direct sysfs access
     USB,      //!< connects to target via USB
-    ETHERNET, //!< connects to target via Ethernet
+    NETWORK, //!< connects to target via Network
 };
 
 } // namespace aditof
