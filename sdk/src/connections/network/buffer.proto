@@ -47,6 +47,8 @@ message FrameDetails
   uint32 width = 10;   // The width of the frame
   uint32 height = 20;  // The height of the frame
   string type = 30;    // The type of the frame
+  uint32 full_data_width = 40;   // The full width of the frame
+  uint32 full_data_height = 50;  // The full height of the frame
 }
 
 message ClientRequest

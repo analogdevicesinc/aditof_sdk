@@ -243,6 +243,8 @@ aditof::Status NetworkDepthSensor::getAvailableFrameTypes(
         aditofDetails.width = details.width();
         aditofDetails.height = details.height();
         aditofDetails.type = details.type();
+        aditofDetails.fullDataWidth = details.full_data_width();
+        aditofDetails.fullDataHeight = details.full_data_height();
 
         types.push_back(aditofDetails);
     }
@@ -268,6 +270,10 @@ NetworkDepthSensor::setFrameType(const aditof::FrameDetails &details) {
     net->send_buff.mutable_frame_type()->set_width(details.width);
     net->send_buff.mutable_frame_type()->set_height(details.height);
     net->send_buff.mutable_frame_type()->set_type(details.type);
+    net->send_buff.mutable_frame_type()->set_full_data_width(
+        details.fullDataWidth);
+    net->send_buff.mutable_frame_type()->set_full_data_height(
+        details.fullDataHeight);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
