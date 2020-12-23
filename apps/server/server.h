@@ -59,8 +59,6 @@ enum api_Values {
 
 enum protocols { PROTOCOL_EXAMPLE, PROTOCOL_COUNT };
 
-class DeviceInterface;
-
 class Network {
   public:
     struct lws_context *context;
