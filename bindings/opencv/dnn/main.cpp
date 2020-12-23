@@ -136,19 +136,19 @@ int main(int argc, char *argv[]) {
     cv::namedWindow("Display Objects Depth", cv::WINDOW_AUTOSIZE);
 
     cv::Size cropSize;
-    if ((float)frameDetails.width / (float)(frameDetails.height / 2) >
+    if ((float)frameDetails.width / (float)(frameDetails.height) >
         WHRatio) {
         cropSize = cv::Size(
-            static_cast<int>((float)(frameDetails.height / 2) * WHRatio),
-            (frameDetails.height / 2));
+            static_cast<int>((float)(frameDetails.height) * WHRatio),
+            (frameDetails.height));
     } else {
         cropSize =
             cv::Size(frameDetails.width,
                      static_cast<int>((float)frameDetails.width / WHRatio));
     }
 
-    cv::Rect crop(cv::Point((frameDetails.width - cropSize.width) / 2,
-                            ((frameDetails.height / 2) - cropSize.height) / 2),
+    cv::Rect crop(cv::Point(frameDetails.width - cropSize.width,
+                            frameDetails.height - cropSize.height),
                   cropSize);
 
     // Look up table to adjust image => use gamma correction
