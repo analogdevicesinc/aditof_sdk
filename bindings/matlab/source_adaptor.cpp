@@ -296,7 +296,7 @@ void SourceAdaptor::setSmallSignalValue(int16_t value) {
     afeRegsVal[2] |= 0x8000; // enable disable property
     //    }
     // TO DO: This breaks things over USB. Works well on the target and
-    // over ethernet.
+    // over network.
     if (m_camera) {
         m_camera->getSensor()->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }

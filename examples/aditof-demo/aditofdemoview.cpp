@@ -346,7 +346,7 @@ void AdiTofDemoView::render() {
             if (ipConnectionEnabled) {
                 if (!ipvalue.empty()) {
                     bool connectionResult =
-                        m_ctrl->setEthernetConnection(ipvalue);
+                        m_ctrl->setNetworkConnection(ipvalue);
                     if (connectionResult == true) {
                         int selectedMode =
                             (2 - static_cast<int>(std::log2(modeCurrentValue)));
@@ -518,7 +518,7 @@ void AdiTofDemoView::render() {
             cvui::space(10);
         }
         if (typeOfDevice.find(typeEthDevice) != std::string::npos) {
-            cvui::checkbox("Ethernet", &ethModeChecked);
+            cvui::checkbox("Network", &ethModeChecked);
         }
         cvui::endRow();
         cvui::endColumn();

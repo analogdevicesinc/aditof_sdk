@@ -49,12 +49,12 @@ def setup_logging():
 
 @click.command()
 @click.argument('config-json', type=click.STRING)
-@click.option('--remote', type=click.STRING, help="To connect to a camera over ethernet, specify the ip (e.g. '192.168.1.101')")
+@click.option('--remote', type=click.STRING, help="To connect to a camera over network, specify the ip (e.g. '192.168.1.101')")
 def run_eeprom_replace_cal(config_json, **kwargs):
     '''
     Replace the calibration data for a single mode in an ADI TOF module
 
-    SWEEP_CONFIG_JSON: Specify the default sweep config json file. The default options can be overriden by explictly specifying the options on the command line
+    SWEEP_CONFIG_JSON: Specify the default sweep config json file. The default options can be overridden by explicitly specifying the options on the command line
     '''
     logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ def run_eeprom_replace_cal(config_json, **kwargs):
     ipString = ''
     if 'remote' in config_dict:
         ip = ipaddress.ip_address(config_dict['remote'])
-        print('Running script for a camera connected over Ethernet at ip:', ip)
+        print('Running script for a camera connected over Network at ip:', ip)
         ipString = config_dict['remote']
 
     # Retrieve parameters

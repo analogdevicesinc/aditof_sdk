@@ -71,7 +71,7 @@ PYBIND11_MODULE(aditofpython, m) {
 
     py::enum_<aditof::ConnectionType>(m, "ConnectionType")
         .value("Usb", aditof::ConnectionType::USB)
-        .value("Ethernet", aditof::ConnectionType::ETHERNET)
+        .value("Network", aditof::ConnectionType::NETWORK)
         .value("OnTarget", aditof::ConnectionType::ON_TARGET);
 
     py::class_<aditof::IntrinsicParameters>(m, "IntrinsicParameters")
