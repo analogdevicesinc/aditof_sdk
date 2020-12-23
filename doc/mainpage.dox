@@ -13,8 +13,8 @@
  The **Camera** object is associated to the physical camera and makes possible the communication with the hardware.
  Frames can be retrieved from the **Camera** by using the **Frame** object which behaves as a data container and also holds information about the data it contains such as frame resolution.
   
- The other layer is the low level API which exposes the **DeviceInterface** through which low level operations can be made to the camera hardware.
- For example one can read or write the internal registers of the hardware device or read it's internal temperature.
+ The other layer is the low level API which exposes the **DepthSensorInterface**, **StorageInterface** and **TemperatureSensorInterface** through which low level operations can be made to the camera hardware.
+ For example one can read or write the internal registers of the hardware or read it's internal temperature.
  
  @subsection top-level-diagram Top Level Diagram
  A top level overview of the Aditof SDK consisting of the high level API and low level API:
@@ -24,9 +24,9 @@
  The class diagram add more details on top of what the top level diagram describes.
   
  The **System**, **Camera** and **Frame** use the pimpl (pointer to implementation) idiom which provides some advantages such as helping achieve binary compatibility.
- The **DeviceInterface** and **DeviceEnumeratorInterface** mark the invisible line between high level and low level API.
- The **DeviceInterface** abstracts over the connection type made with the hardware device thus keeping the implementation specifics hidden from the client code (high level layer or external client code).
- The responsibility of the **DeviceEnumeratorInterface** is to detect any hardware that is compatibile with Aditof SDK.
+ The **DepthSensorInterface**, **StorageInterface**, **TemperatureSensorInterface** and **SensorEnumeratorInterface** mark the invisible line between high level and low level API.
+ The **DepthSensorInterface**, **StorageInterface** and **TemperatureSensorInterface** abstract over the connection type made with the hardware thus keeping the implementation specifics hidden from the client code (high level layer or external client code).
+ The responsibility of the **SensorEnumeratorInterface** is to detect any hardware that is compatible with Aditof SDK.
      
  ![Aditof SDK Class Diagram](img/sdk_class_diagram.png)
 
