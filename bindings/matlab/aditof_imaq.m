@@ -6,11 +6,11 @@ imaqreset;
 imaqhwinfo
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%% Connect to the camera using either USB or Ethernet
+%%%% Connect to the camera using either USB or Network
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% USB connection
 vid = videoinput('aditofadapter');
-%% Ethernet connection
+%% Network connection
 %vid = videoinput('aditofadapter', 1, "<ip>"); % replace <ip> with the IP of the camera device 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

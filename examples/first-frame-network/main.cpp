@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     Status status = Status::OK;
 
     if (argc < 2) {
-        LOG(ERROR) << "No ip provided! ./first-frame-ethernet ip!";
+        LOG(ERROR) << "No ip provided! ./first-frame-network ip!";
         return 0;
     }
 

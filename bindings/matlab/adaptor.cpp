@@ -127,9 +127,9 @@ void getAvailHW(imaqkit::IHardwareInfo *hardwareContainer) {
         currentCount++;
     }
 
-    // ethernet device with configurable ip (FORMAT)
+    // network device with configurable ip (FORMAT)
     imaqkit::IDeviceInfo *deviceInfo = hardwareContainer->createDeviceInfo(
-        currentCount + 1, aditof::ETHERNET_DEVICE_STR);
+        currentCount + 1, aditof::NETWORK_DEVICE_STR);
 
     deviceInfo->setDeviceFileSupport(true);
 
@@ -189,9 +189,9 @@ void getDeviceAttributes(const imaqkit::IDeviceInfo *deviceInfo,
     const char *devName = deviceInfo->getDeviceName();
 
     // Create properties based on which device was selected.
-    // Ethernet and usb devices have the same properties.
+    // Network and usb devices have the same properties.
     if (strcmp(devName, aditof::USB_DEVICE_STR) == 0 ||
-        strcmp(devName, aditof::ETHERNET_DEVICE_STR) == 0) {
+        strcmp(devName, aditof::NETWORK_DEVICE_STR) == 0) {
         // ******************************************************
         // IDENTIFY THE VIDEO SOURCE
         // ********************************************************

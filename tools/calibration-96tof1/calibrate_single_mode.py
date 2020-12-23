@@ -156,7 +156,7 @@ def parse_cal_mode_folder(cal_folder_path, calmap):
 
 @click.command()
 @click.argument('sweep-config-json', type=click.STRING)
-@click.option('--remote', type=click.STRING, help="To connect to a camera over ethernet, specify the ip (e.g. '192.168.1.101')")
+@click.option('--remote', type=click.STRING, help="To connect to a camera over network, specify the ip (e.g. '192.168.1.101')")
 @click.option('--firmware-path', type=click.Path(exists=True), help='Path to the firmware files (bin and lf)')
 @click.option('--target-distance', type=click.FloatRange(0, 5000), help='Distance of the target board from the camera in millimeters')
 @click.option('--camera-id', help='Unique camera identifier for the camera being calibrated')
@@ -208,7 +208,7 @@ def run_all_calibration(sweep_config_json, **kwargs):
     ipString = ''
     if 'remote' in sweep_config_dict:
         ip = ipaddress.ip_address(sweep_config_dict['remote'])
-        print('Running script for a camera connected over Ethernet at ip:', ip)
+        print('Running script for a camera connected over Network at ip:', ip)
         ipString = sweep_config_dict['remote']
 
     # Initialize tof class

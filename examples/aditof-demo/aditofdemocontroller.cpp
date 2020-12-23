@@ -70,7 +70,7 @@ bool AdiTofDemoController::setRegularConnection() {
     delete m_system;
     m_system = new aditof::System();
     m_system->getCameraList(m_cameras);
-    m_IsEthernetConnection = false;
+    m_IsNetworkConnection = false;
     if (m_cameras.size()) {
         // Use the first camera that is found
         m_cameraInUse = 0;
@@ -100,15 +100,15 @@ bool AdiTofDemoController::setRegularConnection() {
     }
 }
 
-bool AdiTofDemoController::setEthernetConnection(const std::string &ip) {
+bool AdiTofDemoController::setNetworkConnection(const std::string &ip) {
     delete m_system;
-    // TO DO: replace the boolean variable m_IsEthernetConnection with a check
+    // TO DO: replace the boolean variable m_IsNetworkConnection with a check
     // of the camera type (we need the sdk implementation first)
-    if (m_IsEthernetConnection == true)
+    if (m_IsNetworkConnection == true)
         m_cameras.clear();
     m_system = new aditof::System();
     m_system->getCameraListAtIp(m_cameras, ip);
-    m_IsEthernetConnection = true;
+    m_IsNetworkConnection = true;
     if (m_cameras.size()) {
         // Use the first camera that is found
         m_cameraInUse = 0;

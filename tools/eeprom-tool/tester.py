@@ -15,7 +15,7 @@ BYTE_TO_ALTER_INDEX = 100
 class ConnectionType(Enum):
     USB = 1
     ON_TARGET = 2
-    ETHERNET = 3
+    NETWORK = 3
 
 
 class CommandType(Enum):
@@ -29,8 +29,8 @@ def run_eeprom_tool(connection_type, command, path, ip=""):
     cmd = "./" + ls 
     connection_type_str = {ConnectionType.USB: "-u",
                            ConnectionType.ON_TARGET: "-m",
-                           ConnectionType.ETHERNET: "-e"}.get(connection_type, "-")
-    ip_str = ip if connection_type == ConnectionType.ETHERNET else ""
+                           ConnectionType.NETWORK: "-n"}.get(connection_type, "-")
+    ip_str = ip if connection_type == ConnectionType.NETWORK else ""
     cmd_str = {CommandType.READ: "-r",
                CommandType.WRITE: "-w"}.get(command, "-")
 
@@ -51,7 +51,7 @@ def test_readback(connection_type):
     # backup content
     status = run_eeprom_tool(connection_type, CommandType.READ, BACKUP_FILE)
     if (status == 0):
-        print("[TESTER] backed-up content succesfully via " + connection_type.name)
+        print("[TESTER] backed-up content successfully via " + connection_type.name)
     else:
         print("[TESTER] error while backing up content via " +
               connection_type.name)
@@ -69,7 +69,7 @@ def test_readback(connection_type):
     status = run_eeprom_tool(
         connection_type, CommandType.WRITE, ALTERED_BACKUP_FILE)
     if (status == 0):
-        print("[TESTER] wrote content succesfully via " + connection_type.name)
+        print("[TESTER] wrote content successfully via " + connection_type.name)
     else:
         print("[TESTER] error while writing content via " + connection_type.name)
         return False
@@ -77,7 +77,7 @@ def test_readback(connection_type):
     # readback
     status = run_eeprom_tool(connection_type, CommandType.READ, READBACK_FILE)
     if (status == 0):
-        print("[TESTER] readback succesfully via " + connection_type.name)
+        print("[TESTER] readback successfully via " + connection_type.name)
     else:
         print("[TESTER] error while reading back content via " +
               connection_type.name)
@@ -86,7 +86,7 @@ def test_readback(connection_type):
     # restore file
     status = run_eeprom_tool(connection_type, CommandType.WRITE, BACKUP_FILE)
     if (status == 0):
-        print("[TESTER] wrote content succesfully via " + connection_type.name)
+        print("[TESTER] wrote content successfully via " + connection_type.name)
     else:
         print("[TESTER] error while writing content via " + connection_type.name)
         return False

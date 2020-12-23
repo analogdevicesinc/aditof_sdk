@@ -37,7 +37,7 @@
 using namespace aditof;
 
 struct NetworkTemperatureSensor::ImplData {
-    EthernetHandle *handle;
+    NetworkHandle *handle;
     std::string name;
     unsigned int id;
 };
@@ -57,7 +57,7 @@ Status NetworkTemperatureSensor::open(void *handle) {
         return Status::INVALID_ARGUMENT;
     }
 
-    m_implData->handle = reinterpret_cast<struct EthernetHandle *>(handle);
+    m_implData->handle = reinterpret_cast<struct NetworkHandle *>(handle);
 
     Network *net = m_implData->handle->net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);

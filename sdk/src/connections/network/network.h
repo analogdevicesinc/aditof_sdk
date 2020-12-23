@@ -37,7 +37,7 @@
 
 class Network;
 
-struct EthernetHandle {
+struct NetworkHandle {
     Network *net;
     std::mutex net_mutex;
 };
