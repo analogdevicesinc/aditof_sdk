@@ -57,9 +57,9 @@ const char *const DRIVER_VERSION_STR = "Version 0.1 (Beta 1)";
 // ********** Time of Flight Device Information **********
 
 const char *const USB_DEVICE_STR = "ToF Usb Device";
-const char *const ETHERNET_DEVICE_STR = "ToF Ethernet Device";
+const char *const NETWORK_DEVICE_STR = "ToF Network Device";
 
-enum { USB_DEVICE_ID = 1, ETHERNET_DEVICE_ID = 2 };
+enum { USB_DEVICE_ID = 1, NETWORK_DEVICE_ID = 2 };
 
 // end aditof
 

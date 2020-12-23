@@ -8,4 +8,4 @@ The examples in this directory provide sample applications to demonstrate how 3D
 | --------- | ----------- | -------------- |
 | aditof-demo | C++ | An application that uses OpenCV to display infrared and depth images |
 | first-frame | C++ | An example code that shows the step required to get to the point where camera frames can be captured |
-| first-frame-ethernet | C++ | An example code that shows the step required to get to the point where camera frames can be captured from a remote target |
+| first-frame-network | C++ | An example code that shows the step required to get to the point where camera frames can be captured from a remote target |

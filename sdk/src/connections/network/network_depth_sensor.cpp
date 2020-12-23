@@ -43,7 +43,7 @@ struct CalibrationData {
     uint16_t *cache;
 };
 struct NetworkDepthSensor::ImplData {
-    EthernetHandle handle;
+    NetworkHandle handle;
     std::string ip;
     aditof::FrameDetails frameDetails_cache;
     std::unordered_map<std::string, CalibrationData> calibration_cache;

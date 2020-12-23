@@ -82,7 +82,7 @@ class AdiTofDemoController {
 
     int getbitCount() const;
 
-    bool setEthernetConnection(const std::string &ip);
+    bool setNetworkConnection(const std::string &ip);
     bool setRegularConnection();
 
     aditof::Status enableNoiseReduction(bool en);
@@ -109,7 +109,7 @@ class AdiTofDemoController {
 
     std::unique_ptr<AditofDemoRecorder> m_recorder;
 
-    bool m_IsEthernetConnection = false;
+    bool m_IsNetworkConnection = false;
 };
 
 #endif
