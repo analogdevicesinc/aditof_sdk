@@ -46,8 +46,7 @@ class CameraFxTof1 : public aditof::Camera {
     CameraFxTof1(
         std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
         std::shared_ptr<aditof::StorageInterface> eeprom,
-        std::shared_ptr<aditof::TemperatureSensorInterface> afeTempSensor,
-        std::shared_ptr<aditof::TemperatureSensorInterface> laserTempSensor);
+        std::shared_ptr<aditof::TemperatureSensorInterface> temperatureSensor); 
     ~CameraFxTof1();
 
   public: // implements Camera
@@ -86,8 +85,7 @@ class CameraFxTof1 : public aditof::Camera {
     aditof::CameraDetails m_details;
     std::shared_ptr<aditof::DepthSensorInterface> m_depthSensor;
     std::shared_ptr<aditof::StorageInterface> m_eeprom;
-    std::shared_ptr<aditof::TemperatureSensorInterface> m_afeTempSensor;
-    std::shared_ptr<aditof::TemperatureSensorInterface> m_laserTempSensor;
+    std::shared_ptr<aditof::TemperatureSensorInterface> m_temperatureSensor;
     bool m_devStarted;
     bool m_devProgrammed;
     bool m_eepromInitialized;
