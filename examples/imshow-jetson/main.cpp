@@ -31,7 +31,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <aditof/camera.h>
-#include <aditof/device_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
 #include <glog/logging.h>
