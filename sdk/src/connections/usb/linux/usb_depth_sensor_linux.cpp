@@ -485,17 +485,35 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
     cq.size = MAX_BUF_SIZE;
 
     size_t sampleCnt = 0;
+    uint8_t b = sizeof(uint16_t); // Size (in bytes) of an AFE register
 
     length *= 2 * sizeof(uint16_t);
+
+    const uint8_t *pAddr = reinterpret_cast<const uint8_t *>(address);
+    const uint8_t *pData = reinterpret_cast<const uint8_t *>(data);
+    const uint8_t *ptr = pAddr;
+    bool pointingAtAddr = true;
+
     while (length) {
         memset(buf, 0, MAX_BUF_SIZE);
         buf[0] = length > MAX_PACKET_SIZE ? 0x01 : 0x02;
         buf[1] = length > MAX_PACKET_SIZE ? MAX_PACKET_SIZE : length;
-        for (int i = 0; i < buf[1]; i += 4) {
-            *(uint16_t *)(buf + 2 + i) = address[sampleCnt];
-            *(uint16_t *)(buf + 4 + i) = data[sampleCnt];
-            sampleCnt++;
+
+        for (int n = 0; n < buf[1]; ++n) {
+            if ((sampleCnt / b) && (sampleCnt % b == 0)) {
+                if (pointingAtAddr) {
+                    pAddr = ptr;
+                    ptr = pData;
+                } else {
+                    pData = ptr;
+                    ptr = pAddr;
+                }
+                pointingAtAddr = !pointingAtAddr;
+            }
+            buf[2 + n] = *ptr++;
+            ++sampleCnt;
         }
+
         length -= buf[1];
 
         if (-1 ==
