@@ -484,8 +484,9 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
     cq.data = buf;
     cq.size = MAX_BUF_SIZE;
 
-    size_t sampleCnt = 0;
-    uint8_t b = sizeof(uint16_t); // Size (in bytes) of an AFE register
+    size_t elementCnt = 0;
+    const uint8_t regSize =
+        sizeof(address[0]); // Size (in bytes) of an AFE register
 
     length *= 2 * sizeof(uint16_t);
 
@@ -499,8 +500,10 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
         buf[0] = length > MAX_PACKET_SIZE ? 0x01 : 0x02;
         buf[1] = length > MAX_PACKET_SIZE ? MAX_PACKET_SIZE : length;
 
-        for (int n = 0; n < buf[1]; ++n) {
-            if ((sampleCnt / b) && (sampleCnt % b == 0)) {
+        for (int i = 0; i < buf[1]; ++i) {
+            // once every two bytes (or more if reg size is bigger) the ptr is switch to point to the
+            // other array (data or addr) in order to interleave the values to be send */
+            if ((elementCnt / regSize) && (elementCnt % regSize == 0)) {
                 if (pointingAtAddr) {
                     pAddr = ptr;
                     ptr = pData;
@@ -510,8 +513,8 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
                 }
                 pointingAtAddr = !pointingAtAddr;
             }
-            buf[2 + n] = *ptr++;
-            ++sampleCnt;
+            buf[2 + i] = *ptr++;
+            ++elementCnt;
         }
 
         length -= buf[1];
