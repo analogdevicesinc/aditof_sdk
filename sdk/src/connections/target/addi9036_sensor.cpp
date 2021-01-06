@@ -659,7 +659,8 @@ aditof::Status Addi9036Sensor::readAfeRegisters(const uint16_t *address,
     extCtrl.size = 2048 * sizeof(unsigned short);
 
     for (size_t i = 0; i < length; i++) {
-        extCtrl.p_u16 = const_cast<uint16_t *>(&address[i]);
+        uint16_t aux_address = address[i];
+        extCtrl.p_u16 = const_cast<uint16_t *>(&aux_address);
         extCtrl.id = V4L2_CID_AD_DEV_READ_REG;
         memset(&extCtrls, 0, sizeof(struct v4l2_ext_controls));
         extCtrls.controls = &extCtrl;
