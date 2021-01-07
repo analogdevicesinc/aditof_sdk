@@ -8,7 +8,7 @@ if (WITH_NETWORK)
     add_subdirectory(first-frame-ethernet)
 endif()
 
-if (JETSON)
+if ((JETSON) OR (IMX8MM))
     add_subdirectory(imshow-jetson)
 endif()
 

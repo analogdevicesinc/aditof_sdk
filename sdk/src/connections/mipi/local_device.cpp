@@ -344,7 +344,7 @@ LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
 
     FrameDetails details;
 
-#ifndef JETSON
+#if !defined(JETSON) && !defined(IMX8MM)
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
@@ -356,14 +356,14 @@ LocalDevice::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
+    details.fullDataHeight = details.height;
     details.type = "depth_only";
     types.push_back(details);
 
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
+    details.fullDataHeight = details.height;
     details.type = "ir_only";
     types.push_back(details);
 
@@ -406,7 +406,7 @@ aditof::Status LocalDevice::setFrameType(const aditof::FrameDetails &details) {
         /* Set the frame format in the driver */
         CLEAR(fmt);
         fmt.type = dev->videoBuffersType;
-#if defined TOYBRICK
+#if defined(TOYBRICK) || defined(IMX8MM)
         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
 #endif
         fmt.fmt.pix.width = details.fullDataWidth;

@@ -31,6 +31,7 @@ For more details on building the SDK on an embedded platform please check the **
 | Nvidia Jetson Xavier NX | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-96tof1-ebz/ug_jetson_xavier_nx) <br> [Build Instructions](doc/xavier-nx/build_instructions.md) | [![Build Status](https://travis-ci.com/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.com/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/jetson-latest.tar.xz) |
 | Nvidia Jetson Xavier AGX | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-96tof1-ebz/ug_jetson_xavier_agx) <br> [Build Instructions](doc/xavier-agx/build_instructions.md) | [![Build Status](https://travis-ci.com/analogdevicesinc/aditof_sdk.svg?branch=master)](https://travis-ci.com/analogdevicesinc/aditof_sdk) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/jetson-latest.tar.xz) |
 | Thor96 | [Arrow Electronics Github](https://github.com/ArrowElectronics/aditof_sdk#supported-embedded-platforms) | - | - |
+| IMX8MM | [Variscite DART-MX8M-Mimi](https://www.variscite.com/product/system-on-module-som/cortex-a53-krait/dart-mx8m-mini-nxp-i-mx8m-mini/) | [Build Instructions](doc/imx8mm/build_instructions.md) | - |
 
 ### Chicony ToF
 | Platform | Documentation | GitHub master status | Downloads |
