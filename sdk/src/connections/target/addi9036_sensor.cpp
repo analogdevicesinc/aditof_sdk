@@ -48,6 +48,7 @@ extern "C" {
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unordered_map>
+#include <string.h>
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -349,9 +350,11 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
     /* Set the frame format in the driver */
     CLEAR(fmt);
     fmt.type = m_implData->videoBuffersType;
-#if defined FXTOF1
+
+    if (!strncmp(TARGET, "toybrick", 4)) {
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
-#endif
+    }
+
     fmt.fmt.pix.width = details.fullDataWidth;
     fmt.fmt.pix.height = details.fullDataHeight;
 
