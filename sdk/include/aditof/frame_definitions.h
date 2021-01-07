@@ -44,9 +44,9 @@ namespace aditof {
  * @brief Types of data that a frame can contain
  */
 enum class FrameDataType {
-    RAW,   //!< Raw information
-    DEPTH, //!< Depth information
-    IR,    //!< Infrared information
+    FULL_DATA, //!< Raw information
+    DEPTH,     //!< Depth information
+    IR,        //!< Infrared information
 };
 
 /**
