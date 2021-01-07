@@ -48,7 +48,7 @@ frame->setDetails(frameDetails);
 
 Frame frame;
 uint16_t *frameDataLocation;
-frame->getData(aditof::FrameDataType::RAW, &frameDataLocation);
+frame->getData(aditof::FrameDataType::FULL_DATA, &frameDataLocation);
 
 // Read one frame from the file. This read can be repeted 
 // numberOfFrames times (playbackFile.eof() will return true)

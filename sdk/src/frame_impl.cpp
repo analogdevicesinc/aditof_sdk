@@ -39,18 +39,18 @@
 
 FrameImpl::FrameImpl()
     : m_details{0, 0, 0, 0, ""}, m_depthData(nullptr), m_irData(nullptr),
-      m_rawData(nullptr) {}
+      m_fullData(nullptr) {}
 
 FrameImpl::~FrameImpl() {
-    if (m_rawData) {
-        delete[] m_rawData;
-        m_rawData = nullptr;
+    if (m_fullData) {
+        delete[] m_fullData;
+        m_fullData = nullptr;
     }
 }
 
 FrameImpl::FrameImpl(const FrameImpl &op) {
     allocFrameData(op.m_details);
-    memcpy(m_rawData, op.m_rawData,
+    memcpy(m_fullData, op.m_fullData,
            sizeof(uint16_t) * op.m_details.fullDataWidth *
                op.m_details.fullDataHeight);
     m_details = op.m_details;
@@ -58,12 +58,12 @@ FrameImpl::FrameImpl(const FrameImpl &op) {
 
 FrameImpl &FrameImpl::operator=(const FrameImpl &op) {
     if (this != &op) {
-        if (m_rawData) {
-            delete[] m_rawData;
-            m_rawData = nullptr;
+        if (m_fullData) {
+            delete[] m_fullData;
+            m_fullData = nullptr;
         }
         allocFrameData(op.m_details);
-        memcpy(m_rawData, op.m_rawData,
+        memcpy(m_fullData, op.m_fullData,
                sizeof(uint16_t) * op.m_details.fullDataWidth *
                    op.m_details.fullDataHeight);
         m_details = op.m_details;
@@ -81,9 +81,9 @@ aditof::Status FrameImpl::setDetails(const aditof::FrameDetails &details) {
         return status;
     }
 
-    if (m_rawData) {
-        delete[] m_rawData;
-        m_rawData = nullptr;
+    if (m_fullData) {
+        delete[] m_fullData;
+        m_fullData = nullptr;
     }
     allocFrameData(details);
     m_details = details;
@@ -102,8 +102,8 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
     using namespace aditof;
 
     switch (dataType) {
-    case FrameDataType::RAW: {
-        *dataPtr = m_rawData;
+    case FrameDataType::FULL_DATA: {
+        *dataPtr = m_fullData;
         break;
     }
     case FrameDataType::IR: {
@@ -120,7 +120,7 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
 }
 
 void FrameImpl::allocFrameData(const aditof::FrameDetails &details) {
-    m_rawData = new uint16_t[details.fullDataWidth * details.fullDataHeight];
-    m_depthData = m_rawData;
-    m_irData = m_rawData + (details.width * details.height);
+    m_fullData = new uint16_t[details.fullDataWidth * details.fullDataHeight];
+    m_depthData = m_fullData;
+    m_irData = m_fullData + (details.width * details.height);
 }

@@ -355,7 +355,7 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
     }
 
     uint16_t *frameDataLocation;
-    frame->getData(FrameDataType::RAW, &frameDataLocation);
+    frame->getData(FrameDataType::FULL_DATA, &frameDataLocation);
 
     status = m_depthSensor->getFrame(frameDataLocation);
     if (status != Status::OK) {
