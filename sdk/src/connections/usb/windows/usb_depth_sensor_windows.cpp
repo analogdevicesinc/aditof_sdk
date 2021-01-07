@@ -349,8 +349,7 @@ aditof::Status UsbDepthSensor::open() {
         return Status::GENERIC_ERROR;
     }
 
-    status =
-        getDevice(&m_implData->handle.pVideoInputFilter, m_driverPath);
+    status = getDevice(&m_implData->handle.pVideoInputFilter, m_driverPath);
     if (status != Status::OK) {
         return status;
     }
@@ -524,11 +523,6 @@ aditof::Status UsbDepthSensor::getAvailableFrameTypes(
     details.fullDataWidth = details.width;
     details.fullDataHeight = details.height * 2; //TODO
     details.type = "depth_ir";
-    types.push_back(details);
-
-    details.width = 668;
-    details.height = 750;
-    details.type = "raw";
     types.push_back(details);
 
     // TO DO: Should get these details from the hardware/firmware
