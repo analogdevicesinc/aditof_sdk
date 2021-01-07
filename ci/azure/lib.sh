@@ -1,7 +1,5 @@
 #!/bin/bash
 
-NUM_JOBS=4
-
 echo_red() { printf "\033[1;31m$*\033[m\n"; }
 echo_green() { printf "\033[1;32m$*\033[m\n"; }
 
@@ -57,14 +55,13 @@ is_source_file() {
 ############################################################################
 check_clangformat() {
 
-    COMMIT_RANGE=$TRAVIS_COMMIT_RANGE
-
     if [ -z "$TRAVIS_PULL_REQUEST_SHA" ]
     then
         COMMIT_RANGE=HEAD~1
     fi
 
-    git diff --name-only --diff-filter=d $COMMIT_RANGE | while read -r file; do
+    # git diff --name-only --diff-filter=d $COMMIT_RANGE | while read -r file; do
+    git ls-tree -r --name-only HEAD | while read -r file; do
         if is_source_file "$file" && is_not_ignored "$file"
         then
             /usr/bin/clang-format-6.0 -i "$file"
@@ -90,7 +87,7 @@ check_cppcheck() {
 # Check if the documentation will be generated w/o warnings or errors
 ############################################################################
 check_doxygen() {
-    pushd ${TRAVIS_BUILD_DIR}/doc
+    pushd ${WORK_DIR}/doc
     (cd build && ! make doc 2>&1 | grep -E "warning|error") || {
         echo_red "Documentation incomplete or errors in the generation of it have occured!"
         exit 1
@@ -105,28 +102,33 @@ check_doxygen() {
 # since the last version that was pushed
 ############################################################################
 deploy_doxygen() {
-    if [[ "${TRAVIS_PULL_REQUEST}" == "false" && "${TRAVIS_BRANCH}" == "master" ]]
+    if [[ "${IS_PULL_REQUEST}" == "False" && "${BRANCH_NAME}" == "master" ]]
     then
-        pushd ${TRAVIS_BUILD_DIR}/doc
-        git clone https://github.com/${TRAVIS_REPO_SLUG} --depth 1 --branch=gh-pages doc/html &>/dev/null
+        echo_green "Running Github docs update on commit '$CURRENT_COMMIT'"
 
-        pushd doc/html
-        rm -rf *
-        popd
-        
-        cp -R build/doxygen_doc/html/* doc/html/
+        git config --global user.email "cse-ci-notifications@analog.com"
+        git config --global user.name "CSE-CI"
 
-        pushd doc/html
-        CURRENT_COMMIT=$(git log -1 --pretty=%B)
-        if [[ ${CURRENT_COMMIT:(-7)} != ${TRAVIS_COMMIT:0:7} ]]
+        git fetch --depth 1 origin +refs/heads/gh-pages:gh-pages
+
+        rm -rf ${DEPS_DIR}
+
+        git checkout gh-pages
+    
+        cp -R ${WORK_DIR}/doc/build/doxygen_doc/html/* ${WORK_DIR}
+
+        rm -rf ${WORK_DIR}/doc
+
+        GHPAGES_CURRENT_COMMIT=$(git log -1 --pretty=%B)
+        if [[ ${GHPAGES_CURRENT_COMMIT:(-7)} != ${CURRENT_COMMIT:0:7} ]]
         then
             git add --all .
-            git commit --allow-empty --amend -m "Update documentation to ${TRAVIS_COMMIT:0:7}"
-            git push https://${GITHUB_DOC_TOKEN}@github.com/${TRAVIS_REPO_SLUG} gh-pages -f &>/dev/null
+            git commit --allow-empty --amend -m "Update documentation to ${CURRENT_COMMIT:0:7}"
+            git push origin gh-pages -f
         else
             echo_green "Documentation already up to date!"
         fi
-        popd
+
     else
         echo_green "Documentation will be updated when this commit gets on master!"
     fi
@@ -139,13 +141,17 @@ build_and_install_glog() {
     REPO_DIR=$1
     INSTALL_DIR=$2
     EXTRA_CMAKE_OPTIONS=$3
-    BUILD_DIR=${REPO_DIR}/build_0_3_5
+    LIB_BUILD_DIR=${REPO_DIR}/build_0_3_5
 
-    mkdir -p ${BUILD_DIR}
-    pushd ${BUILD_DIR}
-    cmake .. -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ${EXTRA_CMAKE_OPTIONS}
+    mkdir -p ${LIB_BUILD_DIR}
+    mkdir -p ${INSTALL_DIR}
+
+    pushd ${LIB_BUILD_DIR}
+   
+    cmake .. -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" ${EXTRA_CMAKE_OPTIONS}     
     make -j${NUM_JOBS}
-    sudo make install
+    make install
+    
     popd
 }
 
@@ -156,13 +162,17 @@ build_and_install_protobuf() {
     REPO_DIR=$1
     INSTALL_DIR=$2
     EXTRA_CMAKE_OPTIONS=$3
-    BUILD_DIR=${REPO_DIR}/build_3_9_0
+    LIB_BUILD_DIR=${REPO_DIR}/build_3_9_0
 
-    mkdir -p ${BUILD_DIR}
-    pushd ${BUILD_DIR}
-    cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ${EXTRA_CMAKE_OPTIONS}
+    mkdir -p ${LIB_BUILD_DIR}
+    mkdir -p ${INSTALL_DIR}
+
+    pushd ${LIB_BUILD_DIR}
+    
+    cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" #${EXTRA_CMAKE_OPTIONS}   
     make -j${NUM_JOBS}
-    sudo make install
+    make install
+
     popd
 }
 
@@ -173,13 +183,17 @@ build_and_install_websockets() {
     REPO_DIR=$1
     INSTALL_DIR=$2
     EXTRA_CMAKE_OPTIONS=$3
-    BUILD_DIR=${REPO_DIR}/build_3_1_0
+    LIB_BUILD_DIR=${REPO_DIR}/build_3_1_0
 
-    mkdir -p ${BUILD_DIR}
-    pushd ${BUILD_DIR}
-    cmake .. -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ${EXTRA_CMAKE_OPTIONS}
+    mkdir -p ${INSTALL_DIR}
+    mkdir -p ${LIB_BUILD_DIR}
+    
+    pushd ${LIB_BUILD_DIR}
+     
+    cmake .. -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" ${EXTRA_CMAKE_OPTIONS}
     make -j${NUM_JOBS}
-    sudo make install
+    make install
+
     popd
 }
 
@@ -192,18 +206,17 @@ build_and_install_opencv() {
     OPENCV_BUILD_VERSION=`echo ${OPENCV} | sed -r 's/[.]/_/g'`
     REPO_DIR=$1
     INSTALL_DIR=$2
-    BUILD_DIR=${REPO_DIR}/build_${OPENCV_BUILD_VERSION}
+    LIB_BUILD_DIR=${REPO_DIR}/build_${OPENCV_BUILD_VERSION}
 
     # Install some packages requiered for OpenCV
-    sudo apt-get install -y build-essential libgtk2.0-dev pkg-config libavcodec-dev \
-        libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev \
-        libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev binutils
+    sudo apt-get install -y build-essential libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
 
-    mkdir -p ${BUILD_DIR}
-    pushd ${BUILD_DIR}
-    cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=${INSTALL_DIR} -D WITH_TBB=OFF -D WITH_IPP=OFF -D BUILD_NEW_PYTHON_SUPPORT=OFF -D WITH_V4L=OFF -D INSTALL_C_EXAMPLES=OFF -D INSTALL_PYTHON_EXAMPLES=OFF -D BUILD_EXAMPLES=OFF -D WITH_QT=OFF -D WITH_OPENGL=OFF -D WITH_OPENCL=OFF -DCPU_DISPATCH= ..
+    mkdir -p ${LIB_BUILD_DIR}
+    pushd ${LIB_BUILD_DIR}
+     
+    cmake -D CMAKE_BUILD_TYPE=RELEASE -DWITH_CUDA=0 -D CMAKE_INSTALL_PREFIX=${INSTALL_DIR} -D WITH_TBB=OFF -D WITH_IPP=OFF -D BUILD_NEW_PYTHON_SUPPORT=OFF -D WITH_V4L=OFF -D INSTALL_C_EXAMPLES=OFF -D INSTALL_PYTHON_EXAMPLES=OFF -D BUILD_EXAMPLES=OFF -D WITH_QT=OFF -D WITH_OPENGL=OFF -D WITH_OPENCL=OFF -DCPU_DISPATCH= ..
     make -j${NUM_JOBS}
-    sudo make install
+    make install
 
 	sudo sh -c 'echo "${INSTALL_DIR}/lib" > /etc/ld.so.conf.d/opencv.conf'
 	sudo ldconfig
@@ -218,22 +231,26 @@ build_and_install_open3d() {
     REPO_DIR=$1
     INSTALL_DIR=$2
     EXTRA_CMAKE_OPTIONS=$3
-    BUILD_DIR=${REPO_DIR}/build_3_1_0
+    LIB_BUILD_DIR=${REPO_DIR}/build_3_1_0
 
     chmod +x ${REPO_DIR}/util/scripts/install-deps-ubuntu.sh
     bash ${REPO_DIR}/util/scripts/install-deps-ubuntu.sh "assume-yes"
 
-    mkdir -p ${BUILD_DIR}
-    pushd ${BUILD_DIR}
+    mkdir -p ${LIB_BUILD_DIR}
+    pushd ${LIB_BUILD_DIR}
+     
     cmake -D CMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DBUILD_PYBIND11=off -DBUILD_PYTHON_MODULE=off -DGLIBCXX_USE_CXX11_ABI=on ..
     make -j${NUM_JOBS}
-    sudo make install
+     
+    make install
 }
 
 ############################################################################
 # Install the latest version of doxygen in the /deps folder
 ############################################################################
 install_doxygen() {
+    mkdir -p ${DEPS_DIR}
+    sudo apt-get install graphviz
     DOXYGEN_URL="wget https://sourceforge.net/projects/doxygen/files/rel-1.8.15/doxygen-1.8.15.src.tar.gz"
     pushd ${DEPS_DIR}
     [ -d "doxygen" ] || {
@@ -248,6 +265,8 @@ install_doxygen() {
     popd
 }
 
+
+
 ############################################################################
 # Get source code for dependencies: glog, protobuf, libwebsockets
 ############################################################################
@@ -261,20 +280,22 @@ get_deps_source_code() {
     fi
 
     [ -d "glog" ] || {
-       git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
+        git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
     }
+
     [ -d "protobuf" ] || {
-       git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
+        git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
     }
+
     [ -d "libwebsockets" ] || {
-       git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
+        git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
     }
-    if [[ ${CMAKE_OPTIONS} == *"WITH_OPENCV=on"* ]]; then
-        [ -d "opencv-${OPENCV}" ] || {
-            curl -sL https://github.com/Itseez/opencv/archive/${OPENCV}.zip > opencv.zip
-	        unzip -q opencv.zip
-        }
-    fi
+
+    [ -d "opencv-${OPENCV}" ] || {
+        curl -sL https://github.com/Itseez/opencv/archive/${OPENCV}.zip > opencv.zip
+        unzip -q opencv.zip
+    }
+
     if [[ ${CMAKE_OPTIONS} == *"WITH_OPEN3D=on"* ]]; then
         [ -d "Open3D" ] || {
             git clone --recursive --branch v0.9.0 --depth 1 https://github.com/intel-isl/Open3D.git
@@ -315,7 +336,15 @@ run_docker() {
     script=$2
     script_args=$3
 
-    docker run --rm --privileged multiarch/qemu-user-static:register --reset
+    sudo apt-get -qq update
+
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y qemu \
+        qemu binfmt-support qemu-user-static
+
+    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    
+    sudo service docker restart
+    sudo docker pull ${docker}
 
     sudo docker run --rm=true \
 			-v `pwd`:/aditof_sdk:rw \
