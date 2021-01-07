@@ -32,6 +32,7 @@
 #include "addi9036_sensor.h"
 #include "aditof/frame_operations.h"
 #include "target_definitions.h"
+#include "utils.h"
 
 extern "C" {
 #include "temp_sensor.h"
@@ -166,30 +167,26 @@ aditof::Status Addi9036Sensor::open() {
 
     const char *devName, *subDevName, *cardName;
 
-    std::vector<std::string> paths;
-    std::stringstream ss_dev(m_driverPath);
-    std::string token;
-    while (std::getline(ss_dev, token, '|')) {
-        std::stringstream dev_sub(token);
-        while (std::getline(dev_sub, token, ';')) {
-            paths.push_back(token);
-        }
-    }
+    std::vector<std::string> driverPaths;
+    Utils::splitIntoTokens(m_driverPath, '|', driverPaths);
+
+    std::vector<std::string> driverSubPaths;
+    Utils::splitIntoTokens(m_driverSubPath, '|', driverSubPaths);
 
     std::vector<std::string> cards;
-    std::stringstream ss_card(CAPTURE_DEVICE_NAME);
-    while (std::getline(ss_card, token, '|')) {
-        LOG(INFO) << token;
-        cards.push_back(token);
+    std::string captureDeviceName(CAPTURE_DEVICE_NAME);
+    Utils::splitIntoTokens(captureDeviceName, '|', cards);
+
+    LOG(INFO) << "Looking for the following cards:";
+    for (const auto card : cards) {
+        LOG(INFO) << card;
     }
 
     m_implData->videoDevs = new VideoDev[NUM_VIDEO_DEVS];
 
     for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
-        devName = paths.at(i * 2).c_str();
-        //TODO find a nicer way to do this
-        subDevName =
-            paths.at(i * 2 + (paths.size() > i * 2 + 1) ? 1 : 0).c_str();
+        devName = driverPaths.at(i).c_str();
+        subDevName = driverSubPaths.at(i).c_str();
         cardName = cards.at(i).c_str();
         dev = &m_implData->videoDevs[i];
 
