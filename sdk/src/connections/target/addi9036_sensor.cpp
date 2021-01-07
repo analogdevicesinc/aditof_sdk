@@ -167,7 +167,7 @@ aditof::Status Addi9036Sensor::open() {
     const char *devName, *subDevName, *cardName;
 
     std::vector<std::string> paths;
-    std::stringstream ss_dev(m_devData.driverPath);
+    std::stringstream ss_dev(m_driverPath);
     std::string token;
     while (std::getline(ss_dev, token, '|')) {
         std::stringstream dev_sub(token);
