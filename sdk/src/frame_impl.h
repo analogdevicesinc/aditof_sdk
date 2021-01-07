@@ -56,7 +56,7 @@ class FrameImpl {
     aditof::FrameDetails m_details;
     uint16_t *m_depthData;
     uint16_t *m_irData;
-    uint16_t *m_rawData;
+    uint16_t *m_fullData;
 };
 
 #endif // FRAME_IMPL

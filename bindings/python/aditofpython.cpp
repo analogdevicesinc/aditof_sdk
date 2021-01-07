@@ -55,7 +55,7 @@ PYBIND11_MODULE(aditofpython, m) {
     // Frame declarations
 
     py::enum_<aditof::FrameDataType>(m, "FrameDataType")
-        .value("Raw", aditof::FrameDataType::RAW)
+        .value("FullData", aditof::FrameDataType::FULL_DATA)
         .value("Depth", aditof::FrameDataType::DEPTH)
         .value("IR", aditof::FrameDataType::IR);
 

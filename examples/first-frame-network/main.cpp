@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
     }
 
     uint16_t *data1;
-    status = frame.getData(FrameDataType::RAW, &data1);
+    status = frame.getData(FrameDataType::FULL_DATA, &data1);
 
     if (status != Status::OK) {
         LOG(ERROR) << "Could not get frame data!";

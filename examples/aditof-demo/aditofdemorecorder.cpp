@@ -160,7 +160,7 @@ void AditofDemoRecorder::recordThread() {
         auto frame = m_recordQueue.dequeue();
 
         uint16_t *data;
-        frame->getData(aditof::FrameDataType::RAW, &data);
+        frame->getData(aditof::FrameDataType::FULL_DATA, &data);
 
         unsigned int width = m_frameDetails.width;
         unsigned int height = m_frameDetails.height;
@@ -192,7 +192,7 @@ void AditofDemoRecorder::playbackThread() {
         frame->setDetails(m_frameDetails);
 
         uint16_t *frameDataLocation;
-        frame->getData(aditof::FrameDataType::RAW, &frameDataLocation);
+        frame->getData(aditof::FrameDataType::FULL_DATA, &frameDataLocation);
 
         unsigned int width = m_frameDetails.width;
         unsigned int height = m_frameDetails.height;
