@@ -312,11 +312,6 @@ aditof::Status Addi9036Sensor::getAvailableFrameTypes(
     details.type = "ir_only";
     types.push_back(details);
 
-    details.width = 668;
-    details.height = 750;
-    details.type = "raw";
-    types.push_back(details);
-
     return status;
 }
 
