@@ -51,6 +51,7 @@ Status TargetSensorEnumerator::searchSensors() {
     SensorInfo sInfo;
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
     sInfo.driverPath = "/dev/video0";
+    sInfo.subDevPath = "/dev/video0";
     m_sensorsInfo.emplace_back(sInfo);
 
     return Status::OK;
