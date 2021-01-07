@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "device_enumerator_impl.h"
+#include "connections/target/target_sensor_enumerator.h"
 #include "target_definitions.h"
 
 #include <dirent.h>
@@ -41,33 +41,19 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-aditof::Status DeviceEnumeratorImpl::findDevices(
-    std::vector<aditof::DeviceConstructionData> &devices) {
-    using namespace aditof;
-    Status status = Status::OK;
+using namespace aditof;
 
-    LOG(INFO) << "Looking for devices on the target";
+Status TargetSensorEnumerator::searchSensors() {
+
+    LOG(INFO) << "Looking for devices on the target: Xavier NX";
 
     // TO DO: Don't guess the device, find a way to identify it so we are sure
     // we've got the right device and is compatible with the SDK
-    DeviceConstructionData devData;
-    devData.connectionType = ConnectionType::LOCAL;
-    devData.driverPath =
-        "/dev/video0;/dev/v4l-subdev1|/dev/video1;/dev/v4l-subdev2";
+    SensorInfo sInfo;
+    sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+    sInfo.driverPath = "/dev/video0|/dev/video1";
+    sInfo.subDevPath = "/dev/v4l-subdev1|/dev/v4l-subdev2";
+    m_sensorsInfo.emplace_back(sInfo);
 
-    // Check if EEPROM is available
-    struct stat st;
-    if (stat(EEPROM_DEV_PATH, &st) == 0) {
-        EepromConstructionData eData;
-        eData.driverName = EEPROM_NAME;
-        eData.driverPath = EEPROM_DEV_PATH;
-        devData.eeproms.emplace_back(eData);
-    }
-
-    devices.emplace_back(devData);
-
-    DLOG(INFO) << "Looking at: " << devData.driverPath
-               << " for an eligible TOF camera";
-
-    return status;
+    return Status::OK;
 }
