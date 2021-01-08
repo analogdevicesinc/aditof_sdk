@@ -381,8 +381,8 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer) {
 
     aditof::deinterleave(net->recv_buff.bytes_payload(0).c_str(), buffer,
                          net->recv_buff.bytes_payload(0).length(),
-                         m_implData->frameDetails_cache.width,
-                         m_implData->frameDetails_cache.height);
+                         m_implData->frameDetails_cache.fullDataWidth,
+                         m_implData->frameDetails_cache.fullDataHeight);
 
     return status;
 }
