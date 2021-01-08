@@ -29,25 +29,31 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef I2C_TEMPERATURE_SENSOR_H
-#define I2C_TEMPERATURE_SENSOR_H
+#ifndef AT24_H
+#define AT24_H
 
 #include <aditof/temperature_sensor_interface.h>
 #include <memory>
 
 namespace aditof {
 
-class I2CTemperatureSensor : public TemperatureSensorInterface {
+class AT24 : public TemperatureSensorInterface {
   public:
-    I2CTemperatureSensor(const std::string &name,
-                         const std::string &driver_path, int i2c_address);
-    ~I2CTemperatureSensor();
+    AT24(const std::string &name,
+         const std::string &driver_path, int i2c_address);
+    ~AT24();
 
     // Implements TemperatureSensorInterface
     virtual aditof::Status open(void *handle) override;
     virtual aditof::Status read(float &temperature) override;
     virtual aditof::Status close() override;
     virtual aditof::Status getName(std::string &name) const override;
+	
+  private:
+    int sensor_open(const char *dev_fqn, int addr, temp_sensor *t);
+    int sensor_read(temp_sensor *t, float *temp_val);
+    int read_byte_data(temp_sensor *t, __u16 addr_reg);
+    int sensor_close(temp_sensor *t);
 
   private:
     struct ImplData;
@@ -56,4 +62,4 @@ class I2CTemperatureSensor : public TemperatureSensorInterface {
 
 } // namespace aditof
 
-#endif /* I2C_TEMPERATURE_SENSOR_H */
+#endif /* AT24_H */

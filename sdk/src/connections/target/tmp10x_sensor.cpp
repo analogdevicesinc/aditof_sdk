@@ -29,10 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "i2c_temperature_sensor.h"
-extern "C" {
-#include "temp_sensor.h"
-}
+#include "tmp10x_sensor.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -44,59 +41,56 @@ extern "C" {
 
 using namespace aditof;
 
-struct I2CTemperatureSensor::ImplData {
-    temp_sensor tDev;
+struct TMP10x::ImplData {
+    int fd;
     std::string name;
     std::string driverPath;
     int i2c_address;
 };
 
-I2CTemperatureSensor::I2CTemperatureSensor(const std::string &name,
-                                           const std::string &driver_path,
-                                           int i2c_address)
+TMP10x::TMP10x(
+    const std::string &name, const std::string &driver_path)
     : m_implData(new ImplData) {
+    m_implData->fd = -1;
     m_implData->name = name;
     m_implData->driverPath = driver_path;
-    m_implData->i2c_address = i2c_address;
 }
 
-I2CTemperatureSensor::~I2CTemperatureSensor() = default;
+TMP10x::~TMP10x() = default;
 
-Status I2CTemperatureSensor::open(void *) {
-    if (temp_sensor_open(m_implData->driverPath.c_str(),
-                         m_implData->i2c_address, &m_implData->tDev) < 0) {
-        LOG(ERROR) << "Temperature sensor open error";
+Status TMP10x::open(void *) {
+    m_implData->fd = ::open(m_implData->driverPath.c_str(), O_RDONLY);
+    if (m_implData->fd <= 0) {
+        LOG(ERROR) << "Temp sensor open error";
         return Status::GENERIC_ERROR;
     }
 
     return Status::OK;
 }
 
-Status I2CTemperatureSensor::read(float &temperature) {
-    auto fd = m_implData->tDev.fd;
-
-    if (!fd) {
+Status TMP10x::read(float &temperature) {
+    if (!m_implData->fd) {
         LOG(ERROR) << "Cannot read! Temperature sensor is not opened.";
         return Status::GENERIC_ERROR;
     }
 
-    if (temp_sensor_read(&m_implData->tDev, &temperature) == -1) {
-        LOG(ERROR) << "temperature sensor read error";
-        return Status::GENERIC_ERROR;
+    char buf[6];
+    pread(m_implData->fd, buf, 6, 0);
+    temperature = atof(buf) / 1000.0f;
+
+    return Status::OK;
+}
+
+Status TMP10x::close() {
+    if (m_implData->fd >= 0) {
+        ::close(m_implData->fd);
+        m_implData->fd = -1;
     }
 
     return Status::OK;
 }
 
-Status I2CTemperatureSensor::close() {
-    if (m_implData->tDev.fd >= 0) {
-        temp_sensor_close(&m_implData->tDev);
-    }
-
-    return Status::OK;
-}
-
-Status I2CTemperatureSensor::getName(std::string &name) const {
+Status TMP10x::getName(std::string &name) const {
     name = m_implData->name;
     return Status::OK;
 }

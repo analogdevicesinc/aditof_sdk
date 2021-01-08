@@ -29,68 +29,31 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "chicony_temperature_sensor.h"
+#ifndef TMP10X_H
+#define TMP10X_H
 
-#include <errno.h>
-#include <fcntl.h>
-#include <glog/logging.h>
-#include <linux/fs.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
+#include <aditof/temperature_sensor_interface.h>
+#include <memory>
 
-using namespace aditof;
+namespace aditof {
 
-struct ChiconyTemperatureSensor::ImplData {
-    int fd;
-    std::string name;
-    std::string driverPath;
-    int i2c_address;
+class TMP10x : public TemperatureSensorInterface {
+  public:
+    TMP10x(const std::string &name,
+                             const std::string &driver_path);
+    ~TMP10x();
+
+    // Implements TemperatureSensorInterface
+    virtual aditof::Status open(void *handle) override;
+    virtual aditof::Status read(float &temperature) override;
+    virtual aditof::Status close() override;
+    virtual aditof::Status getName(std::string &name) const override;
+
+  private:
+    struct ImplData;
+    std::unique_ptr<ImplData> m_implData;
 };
 
-ChiconyTemperatureSensor::ChiconyTemperatureSensor(
-    const std::string &name, const std::string &driver_path)
-    : m_implData(new ImplData) {
-    m_implData->fd = -1;
-    m_implData->name = name;
-    m_implData->driverPath = driver_path;
-}
+} // namespace aditof
 
-ChiconyTemperatureSensor::~ChiconyTemperatureSensor() = default;
-
-Status ChiconyTemperatureSensor::open(void *) {
-    m_implData->fd = ::open(m_implData->driverPath.c_str(), O_RDONLY);
-    if (m_implData->fd <= 0) {
-        LOG(ERROR) << "Temp sensor open error";
-        return Status::GENERIC_ERROR;
-    }
-
-    return Status::OK;
-}
-
-Status ChiconyTemperatureSensor::read(float &temperature) {
-    if (!m_implData->fd) {
-        LOG(ERROR) << "Cannot read! Temperature sensor is not opened.";
-        return Status::GENERIC_ERROR;
-    }
-
-    char buf[6];
-    pread(m_implData->fd, buf, 6, 0);
-    temperature = atof(buf) / 1000.0f;
-
-    return Status::OK;
-}
-
-Status ChiconyTemperatureSensor::close() {
-    if (m_implData->fd >= 0) {
-        ::close(m_implData->fd);
-        m_implData->fd = -1;
-    }
-
-    return Status::OK;
-}
-
-Status ChiconyTemperatureSensor::getName(std::string &name) const {
-    name = m_implData->name;
-    return Status::OK;
-}
+#endif /* TMP10X_H */
