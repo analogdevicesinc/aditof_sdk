@@ -32,7 +32,7 @@
 #ifndef ADITOF_OPEN3D_H
 #define ADITOF_OPEN3D_H
 
-#include <Open3D/Open3D.h>
+#include <open3D/Open3D.h>
 #include <aditof/frame.h>
 #include <aditof/status_definitions.h>
 
@@ -44,7 +44,7 @@ Status fromFrameToDepthImg(Frame &frame, int camera_rangeMin,
     FrameDetails frameDetails;
     frame.getDetails(frameDetails);
 
-    const int frameHeight = static_cast<int>(frameDetails.height) / 2;
+    const int frameHeight = static_cast<int>(frameDetails.height);
     const int frameWidth = static_cast<int>(frameDetails.width);
 
     uint16_t *depthData;
@@ -74,7 +74,7 @@ Status fromFrameTo16bitsDepth(Frame &frame, geometry::Image &image) {
     FrameDetails frameDetails;
     frame.getDetails(frameDetails);
 
-    const int frameHeight = static_cast<int>(frameDetails.height) / 2;
+    const int frameHeight = static_cast<int>(frameDetails.height);
     const int frameWidth = static_cast<int>(frameDetails.width);
 
     uint16_t *depthData;
@@ -97,7 +97,7 @@ Status fromFrameToIRImg(Frame &frame, int bitCount, geometry::Image &image) {
     FrameDetails frameDetails;
     frame.getDetails(frameDetails);
 
-    const int frameHeight = static_cast<int>(frameDetails.height) / 2;
+    const int frameHeight = static_cast<int>(frameDetails.height);
     const int frameWidth = static_cast<int>(frameDetails.width);
     int max_value_of_IR_pixel = (1 << bitCount) - 1;
 

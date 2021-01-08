@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
     }
     aditof::FrameDetails frameDetails;
     frame.getDetails(frameDetails);
-    int frameHeight = static_cast<int>(frameDetails.height) / 2;
+    int frameHeight = static_cast<int>(frameDetails.height);
     int frameWidth = static_cast<int>(frameDetails.width);
 
     /* Create visualizer for depth and IR images */
