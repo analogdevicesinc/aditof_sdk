@@ -29,33 +29,99 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "temp_sensor.h"
+#include "at24_sensor.h"
+#include "i2_common.h"
 
 #include <errno.h>
 #include <fcntl.h>
+#include <glog/logging.h>
+#include <linux/fs.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
-int temp_sensor_read(temp_sensor *t, float *temp_val) {
+#define TEMPERATURE_MSB_REG 0x0
+#define TEMPERATURE_LSB_REG 0x1
+#define CONFIGURATION_REG 0x3
+
+using namespace aditof;
+
+struct AT24::ImplData {
+    temp_sensor tDev;
+    std::string name;
+    std::string driverPath;
+    int i2c_address;
+};
+
+AT24::AT24(const std::string &name,
+                                           const std::string &driver_path,
+                                           int i2c_address)
+    : m_implData(new ImplData) {
+    m_implData->name = name;
+    m_implData->driverPath = driver_path;
+    m_implData->i2c_address = i2c_address;
+}
+
+AT24::~AT24() = default;
+
+Status AT24::open(void *) {
+    if (sensor_open(m_implData->driverPath.c_str(),
+                         m_implData->i2c_address, &m_implData->tDev) < 0) {
+        LOG(ERROR) << "Temperature sensor open error";
+        return Status::GENERIC_ERROR;
+    }
+
+    return Status::OK;
+}
+
+Status AT24::read(float &temperature) {
+    auto fd = m_implData->tDev.fd;
+
+    if (!fd) {
+        LOG(ERROR) << "Cannot read! Temperature sensor is not opened.";
+        return Status::GENERIC_ERROR;
+    }
+
+    if (sensor_read(&m_implData->tDev, &temperature) == -1) {
+        LOG(ERROR) << "temperature sensor read error";
+        return Status::GENERIC_ERROR;
+    }
+
+    return Status::OK;
+}
+
+Status AT24::close() {
+    if (m_implData->tDev.fd >= 0) {
+        sensor_close(&m_implData->tDev);
+    }
+
+    return Status::OK;
+}
+
+Status AT24::getName(std::string &name) const {
+    name = m_implData->name;
+    return Status::OK;
+}
+
+int AT24::sensor_read(temp_sensor *t, float *temp_val) {
     short temp_reg_val, conf_reg_val;
     int ret;
 
     /* Read the configuration register*/
-    conf_reg_val = temp_read_byte_data(t, CONFIGURATION_REG);
+    conf_reg_val = read_byte_data(t, CONFIGURATION_REG);
     if (conf_reg_val < 0) {
         return -1;
     }
 
     /* Read the temperature value MSB register*/
-    ret = temp_read_byte_data(t, TEMPERATURE_MSB_REG);
+    ret = read_byte_data(t, TEMPERATURE_MSB_REG);
     if (ret < 0) {
         return -1;
     }
     temp_reg_val = ret << 8;
 
     /* Read the temperature LSB register */
-    ret = temp_read_byte_data(t, TEMPERATURE_LSB_REG);
+    ret = read_byte_data(t, TEMPERATURE_LSB_REG);
     if (ret < 0) {
         return -1;
     }
@@ -80,7 +146,7 @@ int temp_sensor_read(temp_sensor *t, float *temp_val) {
     return 0;
 }
 
-int temp_sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
+int AT24::sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
     int funcs, fd, r;
     t->fd = t->addr = 0;
     t->dev = NULL;
@@ -91,16 +157,6 @@ int temp_sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
                 strerror(errno));
         return -1;
     }
-
-//IOCTL not valid for NVIDIA
-#if !defined XAVIER && !defined XAVIERNX && !defined JETSON
-    // get funcs list
-    if ((r = ioctl(fd, I2C_FUNCS, &funcs)) < 0) {
-        fprintf(stderr, "Error in temperature sensor open: %s\n",
-                strerror(errno));
-        return -1;
-    }
-#endif
 
     // set working device
     if ((r = ioctl(fd, I2C_SLAVE, addr)) < 0) {
@@ -114,7 +170,7 @@ int temp_sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
     return 0;
 }
 
-int temp_sensor_close(temp_sensor *t) {
+int AT24::sensor_close(temp_sensor *t) {
     close(t->fd);
     t->fd = -1;
     t->dev = NULL;
@@ -122,21 +178,12 @@ int temp_sensor_close(temp_sensor *t) {
     return 0;
 }
 
-int temp_read_byte_data(temp_sensor *t, __u16 addr_reg) {
+int AT24::read_byte_data(temp_sensor *t, __u16 addr_reg) {
     int val;
     val = i2c_smbus_read_byte_data(t->fd, addr_reg);
 
     return val;
 }
 
-int temp_write_byte(temp_sensor *t, __u16 mem_addr, __u8 data) {
-    int r;
-    __u8 buf[2] = {(__u8)(mem_addr & 0x00ff), data};
-    r = i2c_smbus_write_byte_data(t->fd, buf[0], buf[1]);
-    if (r < 0) {
-        fprintf(stderr, "Error i2c_smbus_write_byte_data: %s\n",
-                strerror(errno));
-    }
 
-    return r;
-}
+
