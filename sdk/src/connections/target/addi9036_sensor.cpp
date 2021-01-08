@@ -812,7 +812,7 @@ aditof::Status Addi9036Sensor::waitForBufferPrivate(struct VideoDev *dev) {
     int r;
 
     if (dev == nullptr)
-        struct VideoDev *dev = &m_implData->videoDevs[0];
+        dev = &m_implData->videoDevs[0];
 
     FD_ZERO(&fds);
     FD_SET(dev->fd, &fds);
@@ -841,7 +841,7 @@ Addi9036Sensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
     Status status = Status::OK;
 
     if (dev == nullptr)
-        struct VideoDev *dev = &m_implData->videoDevs[0];
+        dev = &m_implData->videoDevs[0];
 
     CLEAR(buf);
     buf.type = dev->videoBuffersType;
@@ -873,7 +873,7 @@ aditof::Status Addi9036Sensor::getInternalBufferPrivate(
     uint8_t **buffer, uint32_t &buf_data_len, const struct v4l2_buffer &buf,
     struct VideoDev *dev) {
     if (dev == nullptr)
-        struct VideoDev *dev = &m_implData->videoDevs[0];
+        dev = &m_implData->videoDevs[0];
 
     *buffer = static_cast<uint8_t *>(dev->videoBuffers[buf.index].start);
     buf_data_len =
@@ -886,7 +886,7 @@ aditof::Status
 Addi9036Sensor::enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
                                              struct VideoDev *dev) {
     if (dev == nullptr)
-        struct VideoDev *dev = &m_implData->videoDevs[0];
+        dev = &m_implData->videoDevs[0];
 
     if (xioctl(dev->fd, VIDIOC_QBUF, &buf) == -1) {
         LOG(WARNING) << "VIDIOC_QBUF error "
