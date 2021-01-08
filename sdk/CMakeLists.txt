@@ -65,7 +65,7 @@ if ( USE_CHICONY AND (RASPBERRYPI OR TOYBRICK) )
 	set(CHICONY_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h)
 endif()
 
-if ( USE_FXTOF1 AND TOYBRICK )
+if ( USE_FXTOF1 )
 	set(FXTOF1_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.cpp)
 	set(FXTOF1_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.h)
 endif()
