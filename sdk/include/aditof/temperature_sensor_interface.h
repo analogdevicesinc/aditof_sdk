@@ -69,13 +69,6 @@ class SDK_API TemperatureSensorInterface {
      * @return Status
      */
     virtual aditof::Status close() = 0;
-
-    /**
-     * @brief Retrieves the name of the temperature sensor
-     * @param[out] name - This gets set with the name of the temperature sensor
-     * @return Status
-     */
-    virtual aditof::Status getName(std::string &name) const = 0;
 };
 
 } // namespace aditof

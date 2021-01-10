@@ -192,7 +192,32 @@ Status TargetSensorEnumerator::searchSensors() {
         sInfo.sensorType = SensorType::SENSOR_ADDI9036;
         sInfo.driverPath = devPath;
         sInfo.subDevPath = subdevPath;
+        sInfo.captureDev = CAPTURE_DEVICE_NAME;
         m_sensorsInfo.emplace_back(sInfo);
+    }
+    
+    // Check if EEPROM is available
+    struct stat st;
+    if (stat(EEPROM_DEV_PATH, &st) == 0) {
+        StorageInfo eepromInfo;
+        eepromInfo.driverName = EEPROM_NAME;
+        eepromInfo.driverPath = EEPROM_DEV_PATH;
+        m_storagesInfo.emplace_back(eepromInfo);
+    }
+    
+    // Check if the temperature sensors are available
+    if (stat(TEMP_SENSOR_DEV_PATH, &st) == 0) {
+        TemperatureSensorInfo temperatureSensorsInfo;
+        
+        temperatureSensorsInfo.sensorType = SensorType::SENSOR_ADT7410;
+        temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
+        temperatureSensorsInfo.i2c_address = LASER_TEMP_SENSOR_I2C_ADDR;
+        m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
+
+        temperatureSensorsInfo.sensorType = SensorType::SENSOR_ADT7410;
+        temperatureSensorsInfo.driverPath = AFE_SENSOR_DEV_PATH;
+        temperatureSensorsInfo.i2c_address = AFE_TEMP_SENSOR_I2C_ADDR;
+        m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
     }
 
     return status;

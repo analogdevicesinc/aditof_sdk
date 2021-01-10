@@ -43,33 +43,27 @@
 
 using namespace aditof;
 
-aditof::Status TargetSensorEnumerator::searchSensors() {
-    Status status = Status::OK;
+Status TargetSensorEnumerator::searchSensors() {
 
-    LOG(INFO) << "Looking for sensors on the target";
+    LOG(INFO) << "Looking for devices on the target: Xavier";
 
-    // TO DO: Do we still need to do this?
-    // Find all media device paths
-    std::vector<std::string> videoPaths;
-    const std::string videoDirPath("/dev/");
-    const std::string videoBaseName("video");
-
-    DIR *dirp = opendir(videoDirPath.c_str());
-    struct dirent *dp;
-    while ((dp = readdir(dirp))) {
-        if (!strncmp(dp->d_name, videoBaseName.c_str(),
-                     videoBaseName.length())) {
-            std::string fullvideoPath = videoDirPath + std::string(dp->d_name);
-            videoPaths.emplace_back(fullvideoPath);
-        }
-    }
-    closedir(dirp);
-
+    // TO DO: Don't guess the device, find a way to identify it so we are sure
+    // we've got the right device and is compatible with the SDK
     SensorInfo sInfo;
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
-    sInfo.driverPath = "/dev/video2";
-    sInfo.subDevPath = "/dev/v4l-subdev0";
+    sInfo.driverPath = "/dev/video0|/dev/video1";
+    sInfo.subDevPath = "/dev/v4l-subdev0|/dev/v4l-subdev2";
     m_sensorsInfo.emplace_back(sInfo);
+    
+    StorageInfo eepromInfo;
+    eepromInfo.driverName = EEPROM_NAME;
+    eepromInfo.driverPath = EEPROM_DEV_PATH;
+    m_storagesInfo.emplace_back(eepromInfo);
+    
+    TemperatureSensorInfo temperatureSensorsInfo;    
+    temperatureSensorsInfo.sensorType = SensorType::SENSOR_TMP10X;
+    temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
+    m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
 
-    return status;
+    return Status::OK;
 }

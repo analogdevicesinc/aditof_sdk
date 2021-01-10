@@ -46,7 +46,8 @@ class Addi9036Sensor : public aditof::DepthSensorInterface,
                        public aditof::V4lBufferAccessInterface {
   public:
     Addi9036Sensor(const std::string &driverPath,
-                   const std::string &driverSubPath);
+                   const std::string &driverSubPath,
+                   const std::string &captureDev);
     ~Addi9036Sensor();
 
   public: // implements DepthSensorInterface
@@ -100,6 +101,7 @@ class Addi9036Sensor : public aditof::DepthSensorInterface,
     aditof::SensorDetails m_sensorDetails;
     std::string m_driverPath;
     std::string m_driverSubPath;
+    std::string m_captureDev;
     std::unique_ptr<ImplData> m_implData;
 };
 

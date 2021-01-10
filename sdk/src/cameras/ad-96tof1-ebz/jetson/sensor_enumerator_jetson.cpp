@@ -29,24 +29,46 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TARGET_DEFINITIONS_H
-#define TARGET_DEFINITIONS_H
+#include "connections/target/target_sensor_enumerator.h"
+#include "target_definitions.h"
 
-static const char *EEPROM_NAME = "24c1024";
+#include <dirent.h>
+#include <glog/logging.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <sys/stat.h>
+#include <unistd.h>
 
-#ifdef REVB
-static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/1-0056/eeprom";
-#elif CHICONY_006
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
-static const char *TEMP_SENSOR_DEV_PATH = "/sys/class/hwmon/hwmon2/temp1_input";
-#else
-static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-0";
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
-#endif
+using namespace aditof;
 
-static const char *CAPTURE_DEVICE_NAME = "unicam";
+Status TargetSensorEnumerator::searchSensors() {
+    LOG(INFO) << "Looking for devices on the target: Jetson";
 
-static const int NUM_VIDEO_DEVS = 1;
+    // TO DO: Don't guess the device, find a way to identify it so we are sure
+    // we've got the right sensor and it's compatible with the SDK
+    SensorInfo sInfo;
+    sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+    sInfo.driverPath = "/dev/video0";
+    sInfo.subDevPath = "/dev/video0";
+    m_sensorsInfo.emplace_back(sInfo);
+    
+    StorageInfo eepromInfo;
+    eepromInfo.driverName = EEPROM_NAME;
+    eepromInfo.driverPath = EEPROM_DEV_PATH;
+    m_storagesInfo.emplace_back(eepromInfo);
+    
+    TemperatureSensorInfo temperatureSensorsInfo;    
+    temperatureSensorsInfo.sensorType = SensorType::SENSOR_ADT7410;
+    temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
+    temperatureSensorsInfo.i2c_address = LASER_TEMP_SENSOR_I2C_ADDR;
+    m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
 
-#endif // TARGET_DEFINITIONS_H
+    temperatureSensorsInfo.sensorType = SensorType::SENSOR_ADT7410;
+    temperatureSensorsInfo.driverPath = AFE_SENSOR_DEV_PATH;
+    temperatureSensorsInfo.i2c_address = AFE_TEMP_SENSOR_I2C_ADDR;
+    m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
+
+    return Status::OK;
+}

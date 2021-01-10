@@ -31,12 +31,7 @@
  */
 #include "addi9036_sensor.h"
 #include "aditof/frame_operations.h"
-#include "target_definitions.h"
 #include "utils.h"
-
-extern "C" {
-#include "temp_sensor.h"
-}
 
 #include <algorithm>
 #include <arm_neon.h>
@@ -56,19 +51,9 @@ extern "C" {
 #define V4L2_CID_AD_DEV_READ_REG 0xA00A01
 #define CTRL_PACKET_SIZE 4096
 
-#define LASER_TEMP_SENSOR_I2C_ADDR 0x49
-#define AFE_TEMP_SENSOR_I2C_ADDR 0x4b
-
 struct buffer {
     void *start;
     size_t length;
-};
-
-struct CalibrationData {
-    std::string mode;
-    float gain;
-    float offset;
-    uint16_t *cache;
 };
 
 struct VideoDev {
@@ -86,10 +71,11 @@ struct VideoDev {
 };
 
 struct Addi9036Sensor::ImplData {
+    uint8_t numVideoDevs;
     struct VideoDev *videoDevs;
     aditof::FrameDetails frameDetails;
-    std::unordered_map<std::string, CalibrationData> calibration_cache;
-    ImplData() : videoDevs(nullptr), frameDetails{0, 0, 0, 0, ""} {}
+    ImplData()
+        : numVideoDevs(1), videoDevs(nullptr), frameDetails{0, 0, 0, 0, ""} {}
 };
 
 // TO DO: This exists in linux_utils.h which is not included on Dragoboard.
@@ -105,32 +91,24 @@ static int xioctl(int fh, unsigned int request, void *arg) {
 }
 
 Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
-                               const std::string &driverSubPath)
+                               const std::string &driverSubPath,
+                               const std::string &captureDev)
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
-      m_implData(new Addi9036Sensor::ImplData) {
-    m_implData->calibration_cache =
-        std::unordered_map<std::string, CalibrationData>();
+      m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData) {
     m_sensorDetails.sensorType = aditof::SensorType::SENSOR_ADDI9036;
-    m_sensorDetails.connectionType = aditof::ConnectionType::ON_TARGET;
 }
 
 Addi9036Sensor::~Addi9036Sensor() {
     struct VideoDev *dev;
 
-    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
         if (dev->started) {
             stop();
         }
     }
 
-    for (auto it = m_implData->calibration_cache.begin();
-         it != m_implData->calibration_cache.begin(); ++it) {
-        delete[] it->second.cache;
-        it->second.cache = nullptr;
-    }
-
-    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
 
         for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
@@ -174,7 +152,7 @@ aditof::Status Addi9036Sensor::open() {
     Utils::splitIntoTokens(m_driverSubPath, '|', driverSubPaths);
 
     std::vector<std::string> cards;
-    std::string captureDeviceName(CAPTURE_DEVICE_NAME);
+    std::string captureDeviceName(m_captureDev);
     Utils::splitIntoTokens(captureDeviceName, '|', cards);
 
     LOG(INFO) << "Looking for the following cards:";
@@ -182,9 +160,10 @@ aditof::Status Addi9036Sensor::open() {
         LOG(INFO) << card;
     }
 
-    m_implData->videoDevs = new VideoDev[NUM_VIDEO_DEVS];
+    m_implData->numVideoDevs = driverSubPaths.size();
+    m_implData->videoDevs = new VideoDev[m_implData->numVideoDevs];
 
-    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         devName = driverPaths.at(i).c_str();
         subDevName = driverSubPaths.at(i).c_str();
         cardName = cards.at(i).c_str();
@@ -267,7 +246,7 @@ aditof::Status Addi9036Sensor::start() {
     struct VideoDev *dev;
     struct v4l2_buffer buf;
 
-    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
         if (dev->started) {
             LOG(INFO) << "Device already started";
@@ -308,7 +287,7 @@ aditof::Status Addi9036Sensor::stop() {
     Status status = Status::OK;
     struct VideoDev *dev;
 
-    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
 
         if (!dev->started) {
@@ -336,26 +315,27 @@ aditof::Status Addi9036Sensor::getAvailableFrameTypes(
 
     FrameDetails details;
 
-#ifndef JETSON
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
+    details.fullDataHeight =
+        details.height * ((m_implData->numVideoDevs == 2) ? 1 : 2);
     details.type = "depth_ir";
     types.push_back(details);
-#endif
 
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
+    details.fullDataHeight =
+        details.height * ((m_implData->numVideoDevs == 2) ? 1 : 2);
     details.type = "depth_only";
     types.push_back(details);
 
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-    details.fullDataHeight = details.height * ((NUM_VIDEO_DEVS == 2) ? 1 : 2);
+    details.fullDataHeight =
+        details.height * ((m_implData->numVideoDevs == 2) ? 1 : 2);
     details.type = "ir_only";
     types.push_back(details);
 
@@ -373,7 +353,7 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
     struct v4l2_buffer buf;
     size_t length, offset;
 
-    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
         if (details != m_implData->frameDetails) {
             for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
@@ -394,8 +374,7 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
         /* Set the frame format in the driver */
         CLEAR(fmt);
         fmt.type = dev->videoBuffersType;
-        
-#if defined TOYBRICK
+#if defined TOYBRICK //????
         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
 #endif
 
@@ -544,11 +523,11 @@ aditof::Status Addi9036Sensor::program(const uint8_t *firmware, size_t size) {
 
 aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
     using namespace aditof;
-    struct v4l2_buffer buf[NUM_VIDEO_DEVS];
+    struct v4l2_buffer buf[m_implData->numVideoDevs];
     struct VideoDev *dev;
     Status status;
 
-    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
         status = waitForBufferPrivate(dev);
         if (status != Status::OK) {
@@ -566,14 +545,14 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
     unsigned int fullDataWidth;
     unsigned int fullDataHeight;
     unsigned int buf_data_len;
-    uint8_t *pdata[NUM_VIDEO_DEVS];
+    uint8_t *pdata[m_implData->numVideoDevs];
 
     width = m_implData->frameDetails.width;
     height = m_implData->frameDetails.height;
     fullDataWidth = m_implData->frameDetails.fullDataWidth;
     fullDataHeight = m_implData->frameDetails.fullDataHeight;
 
-    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
         status = getInternalBufferPrivate(&pdata[i], buf_data_len, buf[i], dev);
         if (status != Status::OK) {
@@ -715,7 +694,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
         // clang-format on
     }
 
-    for (unsigned int i = 0; i < NUM_VIDEO_DEVS; i++) {
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
         status = enqueueInternalBufferPrivate(buf[i], dev);
         if (status != Status::OK) {

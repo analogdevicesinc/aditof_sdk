@@ -29,42 +29,41 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SENSOR_DEFINITIONS_H
-#define SENSOR_DEFINITIONS_H
+#include "connections/target/target_sensor_enumerator.h"
+#include "target_definitions.h"
 
+#include <dirent.h>
+#include <glog/logging.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <string>
+#include <sys/stat.h>
+#include <unistd.h>
 
-/**
- * @brief Namespace aditof
- */
-namespace aditof {
+using namespace aditof;
 
-/**
- * @enum SensorType
- * @brief Provides the types of sensor assosiated with the device
- */
-enum class SensorType {
-    SENSOR_ADDI9036, //!< ADDI9036 CCD sensor
-    SENSOR_ADT7410,  //!< ADT7410 temperature sensor
-    SENSOR_TMP10X,   //!< TMP101 / TMP102 temperature sensor
-};
+Status TargetSensorEnumerator::searchSensors() {
 
-/**
- * @struct SensorDetails
- * @brief Provides details about the device
- */
-struct SensorDetails {
-    /**
-     * @brief The type of sensor
-     */
-    SensorType sensorType;
+    LOG(INFO) << "Looking for devices on the target: Xavier NX";
 
-    /**
-     * @brief The sensor's name
-     */
-    std::string sensorName;
-};
+    // TO DO: Don't guess the device, find a way to identify it so we are sure
+    // we've got the right device and is compatible with the SDK
+    SensorInfo sInfo;
+    sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+    sInfo.driverPath = "/dev/video0|/dev/video1";
+    sInfo.subDevPath = "/dev/v4l-subdev1|/dev/v4l-subdev2";
+    m_sensorsInfo.emplace_back(sInfo);
+    
+    StorageInfo eepromInfo;
+    eepromInfo.driverName = EEPROM_NAME;
+    eepromInfo.driverPath = EEPROM_DEV_PATH;
+    m_storagesInfo.emplace_back(eepromInfo);
+    
+    TemperatureSensorInfo temperatureSensorsInfo;    
+    temperatureSensorsInfo.sensorType = SensorType::SENSOR_TMP10X;
+    temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
+    m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
 
-} // namespace aditof
-
-#endif // SENSOR_DEFINITIONS_H
+    return Status::OK;
+}

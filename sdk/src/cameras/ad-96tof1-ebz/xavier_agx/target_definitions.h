@@ -33,17 +33,13 @@
 #define TARGET_DEFINITIONS_H
 
 static const char *EEPROM_NAME = "24c1024";
-static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-9";
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/9-0056/eeprom";
+static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/1-0056/eeprom";
 
-static const char *EEPROM_REPLACEMENT_PATH =
-    "/home/analog/workspace/github/aditof_sdk/chicony_firmware.bin";
-
-static const char *TEMP_SENSOR_REPLACEMENT_DEV_PATH = "";
+static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
+static const char LASER_TEMP_SENSOR_I2C_ADDR = 0x49;
+static const char AFE_TEMP_SENSOR_I2C_ADDR = 0x4b;
 
 static const char *CAPTURE_DEVICE_NAME =
-    "vi-output, addi9036 9-0064|vi-output, addi9036 10-0064";
-
-static const int NUM_VIDEO_DEVS = 2;
+    "vi-output, addi9036 1-0064|vi-output, addi9036 7-0064";
 
 #endif // TARGET_DEFINITIONS_H

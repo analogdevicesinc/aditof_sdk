@@ -39,15 +39,13 @@ namespace aditof {
 
 class TMP10x : public TemperatureSensorInterface {
   public:
-    TMP10x(const std::string &name,
-                             const std::string &driver_path);
+    TMP10x(const std::string &driver_path);
     ~TMP10x();
 
     // Implements TemperatureSensorInterface
     virtual aditof::Status open(void *handle) override;
     virtual aditof::Status read(float &temperature) override;
     virtual aditof::Status close() override;
-    virtual aditof::Status getName(std::string &name) const override;
 
   private:
     struct ImplData;

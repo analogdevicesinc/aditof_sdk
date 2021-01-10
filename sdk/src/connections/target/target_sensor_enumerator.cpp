@@ -33,17 +33,7 @@
 #include "connections/target/addi9036_sensor.h"
 #include "connections/target/tmp10x_sensor.h"
 #include "connections/target/eeprom.h"
-#include "connections/target/at24_sensor.h"
-#include "target_definitions.h"
-
-#include <sys/stat.h>
-
-static const char *LASER_TEMP_SENSOR_NAME = "LaserTemperature";
-static const char *AFE_TEMP_SENSOR_NAME = "AfeTemperature";
-static const char *TMP10X_TEMPERATURE_SENSOR = "TMP10x Temperature Sensor";
-
-static const char LASER_TEMP_SENSOR_I2C_ADDR = 0x49;
-static const char AFE_TEMP_SENSOR_I2C_ADDR = 0x4b;
+#include "connections/target/adt7410_sensor.h"
 
 using namespace aditof;
 
@@ -56,11 +46,12 @@ Status TargetSensorEnumerator::getDepthSensors(
         switch (sInfo.sensorType) {
         case SensorType::SENSOR_ADDI9036: {
             auto sensor = std::make_shared<Addi9036Sensor>(sInfo.driverPath,
-                                                           sInfo.subDevPath);
+                                                           sInfo.subDevPath
+                                                           sInfo.captureDev);
             depthSensors.emplace_back(sensor);
             break;
         }
-        } //switch (sInfo.sensorType) {
+        }
     }
 
     return Status::OK;
@@ -68,15 +59,6 @@ Status TargetSensorEnumerator::getDepthSensors(
 
 Status TargetSensorEnumerator::getStorages(
     std::vector<std::shared_ptr<StorageInterface>> &storages) {
-
-    // Check if EEPROM is available
-    struct stat st;
-    if (stat(EEPROM_DEV_PATH, &st) == 0) {
-        StorageInfo eepromInfo;
-        eepromInfo.driverName = EEPROM_NAME;
-        eepromInfo.driverPath = EEPROM_DEV_PATH;
-        m_storagesInfo.emplace_back(eepromInfo);
-    }
 
     storages.clear();
 
@@ -94,33 +76,22 @@ Status TargetSensorEnumerator::getTemperatureSensors(
         &temperatureSensors) {
 
     temperatureSensors.clear();
-
-    // Check if laser temperature is available
-    struct stat st;
-    if (stat(TEMP_SENSOR_DEV_PATH, &st) == 0) {
-        // TO DO: Find a way to check if device is available at a given I2C address. Now we're just assuming they are available
-        auto laserSensor = std::make_shared<AT24>(
-            LASER_TEMP_SENSOR_NAME, TEMP_SENSOR_DEV_PATH,
-            LASER_TEMP_SENSOR_I2C_ADDR);
-        temperatureSensors.emplace_back(laserSensor);
-
-        auto afeSensor = std::make_shared<AT24>(
-            AFE_TEMP_SENSOR_NAME, TEMP_SENSOR_DEV_PATH,
-            AFE_TEMP_SENSOR_I2C_ADDR);
-        temperatureSensors.emplace_back(afeSensor);
+    
+    for (const auto &tInfo : m_temperatureSensorsInfo) {
+        switch (tInfo.sensorType) {
+        case SensorType::SENSOR_ADT7410: {
+            auto sensor = std::make_shared<ADT7410>(tInfo.driverPath,
+                                                    tInfo.i2c_address);
+            temperatureSensors.emplace_back(sensor);
+            break;
+        }
+        case SensorType::SENSOR_TMP10X: {
+            auto sensor = std::make_shared<TMP10x>(tInfo.driverPath);
+            temperatureSensors.emplace_back(sensor);
+            break;
+        }    
+        }
     }
-
-#ifdef CHICONY_006
-    auto sensor = std::make_shared<TMP10x>(
-        TMP10X_TEMPERATURE_SENSOR, TEMP_SENSOR_DEV_PATH);
-    temperatureSensors.emplace_back(sensor);
-#endif
-
-#ifdef FXTOF1
-    auto sensor = std::make_shared<TMP10x>(
-        TMP10X_TEMPERATURE_SENSOR, TEMP_SENSOR_DEV_PATH);
-    temperatureSensors.emplace_back(sensor);
-#endif
 
     return Status::OK;
 }

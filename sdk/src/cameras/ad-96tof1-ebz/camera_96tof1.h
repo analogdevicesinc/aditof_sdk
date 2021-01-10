@@ -45,9 +45,8 @@ class Camera96Tof1 : public aditof::Camera {
   public:
     Camera96Tof1(
         std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-        std::shared_ptr<aditof::StorageInterface> eeprom,
-        std::shared_ptr<aditof::TemperatureSensorInterface> afeTempSensor,
-        std::shared_ptr<aditof::TemperatureSensorInterface> laserTempSensor);
+        std::vector<std::shared_ptr<aditof::StorageInterface>> &eeprom,
+        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors);
     ~Camera96Tof1();
 
   public: // implements Camera

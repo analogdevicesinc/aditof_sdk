@@ -48,9 +48,11 @@ class SystemImpl {
     SystemImpl();
     ~SystemImpl();
 
-  public: // from System
-    aditof::Status getCameraList(
+  public:
+    aditof::Status
+    getCameraList(
         std::vector<std::shared_ptr<aditof::Camera>> &cameraList) const;
+    
     aditof::Status
     getCameraListAtIp(std::vector<std::shared_ptr<aditof::Camera>> &cameraList,
                       const std::string &ip) const;

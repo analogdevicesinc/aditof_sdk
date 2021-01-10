@@ -61,10 +61,11 @@ class TargetSensorEnumerator : public aditof::SensorEnumeratorInterface {
         aditof::SensorType sensorType;
         std::string driverPath;
         std::string subDevPath;
+        std::string captureDev;
     };
 
     struct TemperatureSensorInfo {
-        std::string name;
+        aditof::SensorType sensorType;
         std::string driverPath;
         int i2c_address;
     };
