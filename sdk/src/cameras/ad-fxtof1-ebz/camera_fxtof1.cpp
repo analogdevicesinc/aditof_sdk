@@ -62,10 +62,10 @@ static const std::vector<std::string> availableControls = {
 static const std::string skEepromName = "custom";
 CameraFxTof1::CameraFxTof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-    std::shared_ptr<aditof::StorageInterface> eeprom,
-    std::shared_ptr<aditof::TemperatureSensorInterface> temperatureSensor)
-    : m_depthSensor(depthSensor), m_eeprom(eeprom),
-      m_temperatureSensor(temperatureSensor), 
+    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeprom,
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensor)
+    : m_depthSensor(depthSensor), m_eeprom(eeprom.first()),
+      m_temperatureSensor(tSensor.first()), 
       m_devStarted(false), m_eepromInitialized(false),
       m_tempSensorsInitialized(false), m_availableControls(availableControls),
       m_revision("RevA") {}

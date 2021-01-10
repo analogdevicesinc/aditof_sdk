@@ -29,37 +29,47 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef AT24_H
-#define AT24_H
+#include "connections/target/target_sensor_enumerator.h"
+#include "target_definitions.h"
 
-#include <aditof/temperature_sensor_interface.h>
-#include <memory>
+#include <dirent.h>
+#include <glog/logging.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <sys/stat.h>
+#include <unistd.h>
 
-namespace aditof {
+using namespace aditof;
 
-class AT24 : public TemperatureSensorInterface {
-  public:
-    AT24(const std::string &name,
-         const std::string &driver_path, int i2c_address);
-    ~AT24();
+Status TargetSensorEnumerator::searchSensors() {
 
-    // Implements TemperatureSensorInterface
-    virtual aditof::Status open(void *handle) override;
-    virtual aditof::Status read(float &temperature) override;
-    virtual aditof::Status close() override;
-    virtual aditof::Status getName(std::string &name) const override;
-	
-  private:
-    int sensor_open(const char *dev_fqn, int addr, temp_sensor *t);
-    int sensor_read(temp_sensor *t, float *temp_val);
-    int read_byte_data(temp_sensor *t, __u16 addr_reg);
-    int sensor_close(temp_sensor *t);
+    LOG(INFO) << "Looking for devices on the target: Xavier";
 
-  private:
-    struct ImplData;
-    std::unique_ptr<ImplData> m_implData;
-};
+    // TO DO: Don't guess the device, find a way to identify it so we are sure
+    // we've got the right device and is compatible with the SDK
+    SensorInfo sInfo;
+    sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+    sInfo.driverPath = "/dev/video0|/dev/video1";
+    sInfo.subDevPath = "/dev/v4l-subdev0|/dev/v4l-subdev2";
+    m_sensorsInfo.emplace_back(sInfo);
+    
+    StorageInfo eepromInfo;
+    eepromInfo.driverName = EEPROM_NAME;
+    eepromInfo.driverPath = EEPROM_DEV_PATH;
+    m_storagesInfo.emplace_back(eepromInfo);
+    
+    TemperatureSensorInfo temperatureSensorsInfo;
+    temperatureSensorsInfo.sensorType = SensorType::SENSOR_ADT7410;
+    temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
+    temperatureSensorsInfo.i2c_address = LASER_TEMP_SENSOR_I2C_ADDR;
+    m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
 
-} // namespace aditof
+    temperatureSensorsInfo.sensorType = SensorType::SENSOR_ADT7410;
+    temperatureSensorsInfo.driverPath = AFE_SENSOR_DEV_PATH;
+    temperatureSensorsInfo.i2c_address = AFE_TEMP_SENSOR_I2C_ADDR;
+    m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
 
-#endif /* AT24_H */
+    return Status::OK;
+}

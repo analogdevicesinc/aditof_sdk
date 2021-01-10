@@ -43,17 +43,43 @@
 
 using namespace aditof;
 
-Status TargetSensorEnumerator::searchSensors() {
+aditof::Status TargetSensorEnumerator::searchSensors() {
+    Status status = Status::OK;
 
-    LOG(INFO) << "Looking for sensors on the target: Raspberry PI";
+    LOG(INFO) << "Looking for sensors on the target";
 
-    // TO DO: Don't guess the device, find a way to identify it so we are sure
-    // we've got the right sensor and it's compatible with the SDK
+    // TO DO: Do we still need to do this?
+    // Find all media device paths
+    std::vector<std::string> videoPaths;
+    const std::string videoDirPath("/dev/");
+    const std::string videoBaseName("video");
+
+    DIR *dirp = opendir(videoDirPath.c_str());
+    struct dirent *dp;
+    while ((dp = readdir(dirp))) {
+        if (!strncmp(dp->d_name, videoBaseName.c_str(),
+                     videoBaseName.length())) {
+            std::string fullvideoPath = videoDirPath + std::string(dp->d_name);
+            videoPaths.emplace_back(fullvideoPath);
+        }
+    }
+    closedir(dirp);
+
     SensorInfo sInfo;
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
-    sInfo.driverPath = "/dev/video0";
-    sInfo.subDevPath = "/dev/video0";
+    sInfo.driverPath = "/dev/video2";
+    sInfo.subDevPath = "/dev/v4l-subdev0";
     m_sensorsInfo.emplace_back(sInfo);
+    
+    StorageInfo eepromInfo;
+    eepromInfo.driverName = EEPROM_NAME;
+    eepromInfo.driverPath = EEPROM_DEV_PATH;
+    m_storagesInfo.emplace_back(eepromInfo);
+    
+    TemperatureSensorInfo temperatureSensorsInfo;    
+    temperatureSensorsInfo.sensorType = SensorType::SENSOR_TMP10X;
+    temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
+    m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
 
-    return Status::OK;
+    return status;
 }

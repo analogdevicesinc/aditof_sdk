@@ -29,42 +29,16 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SENSOR_DEFINITIONS_H
-#define SENSOR_DEFINITIONS_H
+#ifndef TARGET_DEFINITIONS_H
+#define TARGET_DEFINITIONS_H
 
-#include <string>
+static const char *EEPROM_NAME = "24c1024";
+static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
 
-/**
- * @brief Namespace aditof
- */
-namespace aditof {
+static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
+static const char LASER_TEMP_SENSOR_I2C_ADDR = 0x49;
+static const char AFE_TEMP_SENSOR_I2C_ADDR = 0x4b;
 
-/**
- * @enum SensorType
- * @brief Provides the types of sensor assosiated with the device
- */
-enum class SensorType {
-    SENSOR_ADDI9036, //!< ADDI9036 CCD sensor
-    SENSOR_ADT7410,  //!< ADT7410 temperature sensor
-    SENSOR_TMP10X,   //!< TMP101 / TMP102 temperature sensor
-};
+static const char *CAPTURE_DEVICE_NAME = "Qualcomm Camera Subsystem";
 
-/**
- * @struct SensorDetails
- * @brief Provides details about the device
- */
-struct SensorDetails {
-    /**
-     * @brief The type of sensor
-     */
-    SensorType sensorType;
-
-    /**
-     * @brief The sensor's name
-     */
-    std::string sensorName;
-};
-
-} // namespace aditof
-
-#endif // SENSOR_DEFINITIONS_H
+#endif // TARGET_DEFINITIONS_H

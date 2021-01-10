@@ -29,7 +29,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "at24_sensor.h"
+#include "adt7410_sensor.h"
 #include "i2_common.h"
 
 #include <errno.h>
@@ -46,25 +46,21 @@
 
 using namespace aditof;
 
-struct AT24::ImplData {
+struct ADT7410::ImplData {
     temp_sensor tDev;
-    std::string name;
     std::string driverPath;
     int i2c_address;
 };
 
-AT24::AT24(const std::string &name,
-                                           const std::string &driver_path,
-                                           int i2c_address)
+ADT7410::ADT7410(const std::string &driver_path, int i2c_address)
     : m_implData(new ImplData) {
-    m_implData->name = name;
     m_implData->driverPath = driver_path;
     m_implData->i2c_address = i2c_address;
 }
 
-AT24::~AT24() = default;
+ADT7410::~ADT7410() = default;
 
-Status AT24::open(void *) {
+Status ADT7410::open(void *) {
     if (sensor_open(m_implData->driverPath.c_str(),
                          m_implData->i2c_address, &m_implData->tDev) < 0) {
         LOG(ERROR) << "Temperature sensor open error";
@@ -74,7 +70,7 @@ Status AT24::open(void *) {
     return Status::OK;
 }
 
-Status AT24::read(float &temperature) {
+Status ADT7410::read(float &temperature) {
     auto fd = m_implData->tDev.fd;
 
     if (!fd) {
@@ -90,7 +86,7 @@ Status AT24::read(float &temperature) {
     return Status::OK;
 }
 
-Status AT24::close() {
+Status ADT7410::close() {
     if (m_implData->tDev.fd >= 0) {
         sensor_close(&m_implData->tDev);
     }
@@ -98,12 +94,7 @@ Status AT24::close() {
     return Status::OK;
 }
 
-Status AT24::getName(std::string &name) const {
-    name = m_implData->name;
-    return Status::OK;
-}
-
-int AT24::sensor_read(temp_sensor *t, float *temp_val) {
+int ADT7410::sensor_read(temp_sensor *t, float *temp_val) {
     short temp_reg_val, conf_reg_val;
     int ret;
 
@@ -146,7 +137,7 @@ int AT24::sensor_read(temp_sensor *t, float *temp_val) {
     return 0;
 }
 
-int AT24::sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
+int ADT7410::sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
     int funcs, fd, r;
     t->fd = t->addr = 0;
     t->dev = NULL;
@@ -170,7 +161,7 @@ int AT24::sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
     return 0;
 }
 
-int AT24::sensor_close(temp_sensor *t) {
+int ADT7410::sensor_close(temp_sensor *t) {
     close(t->fd);
     t->fd = -1;
     t->dev = NULL;
@@ -178,7 +169,7 @@ int AT24::sensor_close(temp_sensor *t) {
     return 0;
 }
 
-int AT24::read_byte_data(temp_sensor *t, __u16 addr_reg) {
+int ADT7410::read_byte_data(temp_sensor *t, __u16 addr_reg) {
     int val;
     val = i2c_smbus_read_byte_data(t->fd, addr_reg);
 

@@ -29,30 +29,21 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "connections/target/target_sensor_enumerator.h"
-#include "target_definitions.h"
+#ifndef TARGET_DEFINITIONS_H
+#define TARGET_DEFINITIONS_H
 
-#include <dirent.h>
-#include <glog/logging.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <sys/stat.h>
-#include <unistd.h>
+static const char *EEPROM_NAME = "24c1024";
 
-using namespace aditof;
+#ifdef REVB
+static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
+static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/1-0056/eeprom";
+#else
+static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-0";
+static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/0-0056/eeprom";
+#endif
+static const char LASER_TEMP_SENSOR_I2C_ADDR = 0x49;
+static const char AFE_TEMP_SENSOR_I2C_ADDR = 0x4b;
 
-Status TargetSensorEnumerator::searchSensors() {
-    LOG(INFO) << "Looking for devices on the target: Jetson";
+static const char *CAPTURE_DEVICE_NAME = "unicam";
 
-    // TO DO: Don't guess the device, find a way to identify it so we are sure
-    // we've got the right sensor and it's compatible with the SDK
-    SensorInfo sInfo;
-    sInfo.sensorType = SensorType::SENSOR_ADDI9036;
-    sInfo.driverPath = "/dev/video0";
-    sInfo.subDevPath = "/dev/video0";
-    m_sensorsInfo.emplace_back(sInfo);
-
-    return Status::OK;
-}
+#endif // TARGET_DEFINITIONS_H

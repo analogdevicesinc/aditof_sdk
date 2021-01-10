@@ -61,16 +61,12 @@ static const std::string skCustomMode = "custom";
 static const std::vector<std::string> availableControls = {
     "noise_reduction_threshold", "ir_gamma_correction", "revision"};
 
-// The driver name of the EEPROM that belongs to this camera
-static const std::string skEepromName = "24c1024";
-
 Camera96Tof1::Camera96Tof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-    std::shared_ptr<aditof::StorageInterface> eeprom,
-    std::shared_ptr<aditof::TemperatureSensorInterface> afeTempSensor,
-    std::shared_ptr<aditof::TemperatureSensorInterface> laserTempSensor)
-    : m_depthSensor(depthSensor), m_eeprom(eeprom),
-      m_afeTempSensor(afeTempSensor), m_laserTempSensor(laserTempSensor),
+    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeprom,
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
+    : m_depthSensor(depthSensor), m_eeprom(eeprom.first()),
+      m_afeTempSensor(tSensors.first()), m_laserTempSensor(tSensors.last()),
       m_devStarted(false), m_eepromInitialized(false),
       m_tempSensorsInitialized(false), m_availableControls(availableControls),
       m_revision("RevC") {}

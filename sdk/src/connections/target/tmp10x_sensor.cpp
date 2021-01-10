@@ -43,13 +43,11 @@ using namespace aditof;
 
 struct TMP10x::ImplData {
     int fd;
-    std::string name;
     std::string driverPath;
     int i2c_address;
 };
 
-TMP10x::TMP10x(
-    const std::string &name, const std::string &driver_path)
+TMP10x::TMP10x(const std::string &driver_path)
     : m_implData(new ImplData) {
     m_implData->fd = -1;
     m_implData->name = name;
@@ -87,10 +85,5 @@ Status TMP10x::close() {
         m_implData->fd = -1;
     }
 
-    return Status::OK;
-}
-
-Status TMP10x::getName(std::string &name) const {
-    name = m_implData->name;
     return Status::OK;
 }

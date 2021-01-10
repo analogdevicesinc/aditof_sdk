@@ -57,9 +57,9 @@ static const std::string skCustomMode = "custom";
 
 CameraChicony::CameraChicony(
     std::shared_ptr<aditof::DepthSensorInterface> sensor,
-    std::shared_ptr<aditof::StorageInterface> eeprom,
-    std::shared_ptr<aditof::TemperatureSensorInterface> temperatureSensor)
-    : m_sensor(sensor), m_eeprom(eeprom), m_tempSensor(temperatureSensor),
+    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeprom,
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensor)
+    : m_sensor(sensor), m_eeprom(eeprom.first()), m_tempSensor(tSensor.first()),
       m_availableControls({"noise_reduction_threshold", "ir_gamma_correction"}),
       m_sensorStarted(false), m_eepromInitialized(false) {}
 

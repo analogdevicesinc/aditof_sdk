@@ -29,31 +29,35 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "connections/target/target_sensor_enumerator.h"
-#include "target_definitions.h"
+#ifndef ADT7410_H
+#define ADT7410_H
 
-#include <dirent.h>
-#include <glog/logging.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <aditof/temperature_sensor_interface.h>
+#include <memory>
 
-using namespace aditof;
+namespace aditof {
 
-Status TargetSensorEnumerator::searchSensors() {
+class ADT7410 : public TemperatureSensorInterface {
+  public:
+    ADT7410(const std::string &driver_path, int i2c_address);
+    ~ADT7410();
 
-    LOG(INFO) << "Looking for devices on the target: Xavier NX";
+    // Implements TemperatureSensorInterface
+    virtual aditof::Status open(void *handle) override;
+    virtual aditof::Status read(float &temperature) override;
+    virtual aditof::Status close() override;
+	
+  private:
+    int sensor_open(const char *dev_fqn, int addr, temp_sensor *t);
+    int sensor_read(temp_sensor *t, float *temp_val);
+    int read_byte_data(temp_sensor *t, __u16 addr_reg);
+    int sensor_close(temp_sensor *t);
 
-    // TO DO: Don't guess the device, find a way to identify it so we are sure
-    // we've got the right device and is compatible with the SDK
-    SensorInfo sInfo;
-    sInfo.sensorType = SensorType::SENSOR_ADDI9036;
-    sInfo.driverPath = "/dev/video0|/dev/video1";
-    sInfo.subDevPath = "/dev/v4l-subdev1|/dev/v4l-subdev2";
-    m_sensorsInfo.emplace_back(sInfo);
+  private:
+    struct ImplData;
+    std::unique_ptr<ImplData> m_implData;
+};
 
-    return Status::OK;
-}
+} // namespace aditof
+
+#endif /* ADT7410_H */

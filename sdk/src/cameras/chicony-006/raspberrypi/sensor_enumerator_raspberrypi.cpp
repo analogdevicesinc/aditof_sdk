@@ -29,14 +29,41 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <aditof/variance_filter.h>
+#include "connections/target/target_sensor_enumerator.h"
+#include "target_definitions.h"
+
+#include <dirent.h>
+#include <glog/logging.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <sys/stat.h>
+#include <unistd.h>
 
 using namespace aditof;
 
-Status VarianceFilter::processFrame(const Frame & /*inFrame*/,
-                                    Frame & /*outFrame*/) {
+Status TargetSensorEnumerator::searchSensors() {
 
-    // TO DO: implement this
+    LOG(INFO) << "Looking for sensors on the target: Raspberry PI";
+
+    // TO DO: Don't guess the device, find a way to identify it so we are sure
+    // we've got the right sensor and it's compatible with the SDK
+    SensorInfo sInfo;
+    sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+    sInfo.driverPath = "/dev/video0";
+    sInfo.subDevPath = "/dev/video0";
+    m_sensorsInfo.emplace_back(sInfo);
+    
+    StorageInfo eepromInfo;
+    eepromInfo.driverName = EEPROM_NAME;
+    eepromInfo.driverPath = EEPROM_DEV_PATH;
+    m_storagesInfo.emplace_back(eepromInfo);
+    
+    TemperatureSensorInfo temperatureSensorsInfo;    
+    temperatureSensorsInfo.sensorType = SensorType::SENSOR_TMP10X;
+    temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
+    m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
 
     return Status::OK;
 }
