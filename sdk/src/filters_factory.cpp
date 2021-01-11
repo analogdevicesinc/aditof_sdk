@@ -30,17 +30,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <aditof/filters_factory.h>
-#include <aditof/variance_filter.h>
+#include <aditof/frame_processor.h>
 
 using namespace aditof;
 
 std::unique_ptr<FrameProcessor>
-FiltersFactory::createFrameProcessor(FrameProcessorType type) const {
-    switch (type) {
-
-    case FrameProcessorType::VARIANCE_FILTER:
-        return std::unique_ptr<FrameProcessor>(new VarianceFilter());
-    }
+FiltersFactory::createFrameProcessor(FrameProcessorType /*type*/) const {
 
     return nullptr;
 }
