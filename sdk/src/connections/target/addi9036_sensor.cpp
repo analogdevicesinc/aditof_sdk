@@ -374,10 +374,9 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
         /* Set the frame format in the driver */
         CLEAR(fmt);
         fmt.type = dev->videoBuffersType;
-#if defined TOYBRICK //????
+        //#if defined TOYBRICK //????
         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
-#endif
-
+        //#endif
         fmt.fmt.pix.width = details.fullDataWidth;
         fmt.fmt.pix.height = details.fullDataHeight;
 

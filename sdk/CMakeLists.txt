@@ -20,7 +20,13 @@ file(GLOB HEADERS
     ${CMAKE_SOURCE_DIR}/sdk/include/aditof/*.h
 )
 
-set(TARGET_STRING "connections/target")
+if (USE_CHICONY)
+    set(TARGET_STRING "cameras/chicony-006")
+elseif(USE_FXTOF1)
+    set(TARGET_STRING "cameras/ad-fxtof1-ebz")
+else ()
+    set(TARGET_STRING "cameras/ad-96tof1-ebz")
+endif()    
 
 if( WIN32 )
         set(OS_SPECIFIC_DIR "connections/usb/windows")
