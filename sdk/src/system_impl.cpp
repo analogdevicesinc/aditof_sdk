@@ -138,10 +138,9 @@ buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
 #ifdef CHICONY_006
             std::shared_ptr<Camera> camera =
                 std::make_shared<CameraChicony>(dSensor, eeprom, tempSensor);
-#endif
-#ifdef FXTOF1
-	    std::shared_ptr<Camera> camera = std::make_shared<CameraFxTof1>(
-		dSensor, eeprom, tempSensor);
+#elif defined FXTOF1
+            std::shared_ptr<Camera> camera =
+                std::make_shared<CameraFxTof1>(dSensor, eeprom, tempSensor);
 #endif
 #else
             std::shared_ptr<Camera> camera = std::make_shared<Camera96Tof1>(

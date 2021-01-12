@@ -60,6 +60,10 @@ if (NOT APPLE AND NOT WIN32)
     option(RUN_LDCONFIG "Run ldconfig after install." ON)
 endif()
 
+if ( USE_CHICONY AND USE_FXTOF1)
+    message( FATAL_ERROR "USE_CHICONY and USE_FXTOF1 are both selected. \nPlease select a single camera. CMake will exit." )
+endif()
+
 if ( USE_CHICONY AND (RASPBERRYPI OR TOYBRICK) )
 	set(CHICONY_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.cpp)
 	set(CHICONY_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h)
