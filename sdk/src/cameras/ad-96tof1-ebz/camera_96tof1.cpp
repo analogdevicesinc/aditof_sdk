@@ -76,7 +76,11 @@ Camera96Tof1::Camera96Tof1(
     // Check Depth Sensor
     if (!depthSensor) {
         LOG(WARNING) << "Invalid instance of a depth sensor";
+        return;
     }
+    aditof::SensorDetails sDetails;
+    m_depthSensor->getDetails(sDetails);
+    m_details.connection = sDetails.connectionType;
 
     // Look for EEPROM
     auto eeprom_iter =
