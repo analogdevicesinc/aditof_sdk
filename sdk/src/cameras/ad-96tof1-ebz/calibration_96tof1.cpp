@@ -361,7 +361,7 @@ setMode - Sets the mode to be used for depth calibration
 */
 aditof::Status Calibration96Tof1::setMode(const std::string &mode, int range,
                                           unsigned int frameWidth,
-                                          unsigned int frameheight) {
+                                          unsigned int frameHeight) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -392,7 +392,7 @@ aditof::Status Calibration96Tof1::setMode(const std::string &mode, int range,
                   << "    cx: " << cameraMatrix[2] << "\n"
                   << "    cy: " << cameraMatrix[5];
     }
-    buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
+    buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameHeight);
 
     return status;
 }
