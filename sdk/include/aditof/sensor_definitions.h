@@ -32,6 +32,8 @@
 #ifndef SENSOR_DEFINITIONS_H
 #define SENSOR_DEFINITIONS_H
 
+#include "aditof/connections.h"
+
 #include <string>
 
 /**
@@ -48,8 +50,8 @@ enum class SensorType {
     SENSOR_ADDI9036, //!< ADDI9036 CCD sensor
 
     /* Temperature sensors */
-    SENSOR_ADT7410,  //!< ADT7410 temperature sensor
-    SENSOR_TMP10X    //!< TMP101 / TMP102 temperature sensor
+    SENSOR_ADT7410, //!< ADT7410 temperature sensor
+    SENSOR_TMP10X   //!< TMP101 / TMP102 temperature sensor
 };
 
 /**
@@ -66,6 +68,11 @@ struct SensorDetails {
      * @brief The sensor's name
      */
     std::string sensorName;
+
+    /**
+     * @brief The type of connection with the sensor
+     */
+    ConnectionType connectionType;
 };
 
 } // namespace aditof
