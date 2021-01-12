@@ -42,6 +42,10 @@
 #include <map>
 #include <math.h>
 
+static const std::string skEeprom_24c1024 = "24c1024";
+static const std::string skAfeTempSensor = "AfeTemperature";
+static const std::string skLaserTempSensor = "LaserTemperature";
+
 struct rangeStruct {
     std::string mode;
     int minDepth;
@@ -63,13 +67,58 @@ static const std::vector<std::string> availableControls = {
 
 Camera96Tof1::Camera96Tof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeprom,
+    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms,
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
-    : m_depthSensor(depthSensor), m_eeprom(eeprom.first()),
-      m_afeTempSensor(tSensors.first()), m_laserTempSensor(tSensors.last()),
-      m_devStarted(false), m_eepromInitialized(false),
-      m_tempSensorsInitialized(false), m_availableControls(availableControls),
-      m_revision("RevC") {}
+    : m_depthSensor(depthSensor), m_devStarted(false),
+      m_eepromInitialized(false), m_tempSensorsInitialized(false),
+      m_availableControls(availableControls), m_revision("RevC") {
+
+    // Check Depth Sensor
+    if (!depthSensor) {
+        LOG(WARNING) << "Invalid instance of a depth sensor";
+    }
+
+    // Look for EEPROM
+    auto eeprom_iter =
+        std::find_if(eeproms.begin(), eeproms.end(),
+                     [](std::shared_ptr<aditof::StorageInterface> e) {
+                         std::string name;
+                         e->getName(name);
+                         return name == skEeprom_24c1024;
+                     });
+    if (eeprom_iter == eeproms.end()) {
+        LOG(WARNING) << "Could not find " << skEeprom_24c1024
+                     << " while looking for storage for camera AD-96TOF1-EBZ";
+    }
+
+    // Look for AFE temperature sensor
+    auto afeTempSensorIter =
+        std::find_if(tSensors.begin(), tSensors.end(),
+                     [](std::shared_ptr<aditof::TemperatureSensorInterface> s) {
+                         std::string name;
+                         s->getName(name);
+                         return name == skAfeTempSensor;
+                     });
+    if (afeTempSensorIter == tSensors.end()) {
+        LOG(WARNING) << "Could not find " << skAfeTempSensor
+                     << " while looking for temperature sensors for "
+                        "camera AD-96TOF1-EBZ";
+    }
+
+    // Look for laser temperature sensor
+    auto laserTempSensorIter =
+        std::find_if(tSensors.begin(), tSensors.end(),
+                     [](std::shared_ptr<aditof::TemperatureSensorInterface> s) {
+                         std::string name;
+                         s->getName(name);
+                         return name == skAfeTempSensor;
+                     });
+    if (laserTempSensorIter == tSensors.end()) {
+        LOG(WARNING) << "Could not find " << skLaserTempSensor
+                     << " while looking for temperature sensors for "
+                        "camera AD-96TOF1-EBZ";
+    }
+}
 
 Camera96Tof1::~Camera96Tof1() {
     if (m_eepromInitialized) {
@@ -86,6 +135,11 @@ aditof::Status Camera96Tof1::initialize() {
     Status status;
 
     LOG(INFO) << "Initializing camera";
+
+    if (!m_depthSensor || !m_eeprom || !m_afeTempSensor || !m_laserTempSensor) {
+        LOG(WARNING) << "Failed to initialize! Not all sensors are available";
+        return Status::GENERIC_ERROR;
+    }
 
     // Open communication with the depth sensor
     status = m_depthSensor->open();
