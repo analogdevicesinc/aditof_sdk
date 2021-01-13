@@ -83,7 +83,6 @@ endif()
 # Platform specific sources and headers
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.cpp
@@ -97,14 +96,6 @@ file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
     ${CHICONY_H}
     ${FXTOF1_H}
-)
-
-file(GLOB NETWORK_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.c
-)
-file(GLOB NETWORK_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/network/*.h
 )
 
 file(GLOB NETWORK_SOURCES
