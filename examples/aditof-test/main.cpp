@@ -51,7 +51,7 @@
    
 using namespace aditof;
 
-int _DisplayIR(cv::Mat *irMat);
+int _DisplayIR(cv::Mat *irMat, int *distanceVal);
 
 int main(int argc, char *argv[]) {
 
@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
     frame = cv::Scalar(49, 52, 49);
     
     cv::Mat irMat;
+    int distanceVal;
     const cv::_InputArray convertedMat;
     std::vector<cv::Point2f> corners;
     int flags=cv::CALIB_CB_ADAPTIVE_THRESH+cv::CALIB_CB_NORMALIZE_IMAGE;
@@ -96,7 +97,7 @@ int main(int argc, char *argv[]) {
     	
     	if (captureStatus && !frameReceived) {
     		
-    		if (_DisplayIR (&irMat)) {
+    		if (_DisplayIR (&irMat, &distanceVal)) {
     			cv::resize(irMat, irMat, cv::Size(irMat.cols * 0.7,irMat.rows * 0.7), 0, 0, CV_INTER_LINEAR);
     			frameReceived = true;
     			testPassed = findChessboardCorners(irMat, cv::Size(7,7) , corners, flags);
@@ -130,6 +131,7 @@ int main(int argc, char *argv[]) {
     	if (frameReceived && !testPassed) {
     		cvui::printf(frame,30,230,1,0xff0000,"TEST FAILED:");
     		cvui::printf(frame,40,260,0.7,0xff0000,"INVALID FRAME!");
+    		//cvui::printf(frame, 90, 50, "value = %d", distanceVal);
     		}
     	
     	if (!frameReceived && !testPassed) {
@@ -151,7 +153,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-int _DisplayIR(cv::Mat *irMat){
+int _DisplayIR(cv::Mat *irMat, int *distanceVal){
     
     Status status = Status::OK;
 
@@ -196,12 +198,16 @@ int _DisplayIR(cv::Mat *irMat){
         LOG(ERROR) << "Could not set camera mode!";
         return 0;
     }
-
+    
+    aditof::Frame frame;
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
+    aditof::FrameDetails frameDetails;
+   
+    int frameHeight = static_cast<int>(frameDetails.height);
+    int frameWidth = static_cast<int>(frameDetails.width);
     int bitCount = cameraDetails.bitCount;
-    aditof::Frame frame;
-
+    
     const int smallSignalThreshold = 50;
     camera->setControl("noise_reduction_threshold",
                        std::to_string(smallSignalThreshold));
@@ -214,13 +220,19 @@ int _DisplayIR(cv::Mat *irMat){
     	    return 0;
     	}
 
-    	/* Obtain the ir mat from the frame */
+	/* Get distance from center point */
+	uint16_t *data;	
+	frame.getData(aditof::FrameDataType::DEPTH, &data);
+
+        *distanceVal = static_cast<int>(data[240 * 640 + 320]);
+
+	/* Convert frame to IR mat */
     	status = fromFrameToIrMat(frame, *irMat);
     	if (status != Status::OK) {
     	    LOG(ERROR) << "Could not convert from frame to mat!";
     	    return 0;
     	}
-
+	 
     	int max_value_of_IR_pixel = (1 << bitCount) - 1;
 	
     	/* Distance factor IR */
