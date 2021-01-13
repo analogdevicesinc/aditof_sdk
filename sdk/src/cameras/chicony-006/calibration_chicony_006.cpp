@@ -106,7 +106,7 @@ aditof::Status CalibrationChicony006::initialize(
     aditof::Status status = Status::OK;
 
     m_sensor = device;
-    m_eeprom = m_eeprom;
+    m_eeprom = eeprom;
 
     CEEPROM.ReadEEPROMVersion(EEPROM_V_data, EEPROM_V_size);
 
