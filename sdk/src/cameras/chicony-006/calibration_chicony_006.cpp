@@ -99,13 +99,14 @@ aditof::Status CalibrationChicony006::SetEEPROMData_1(uint16_t Gdata[][2],
 }
 
 aditof::Status CalibrationChicony006::initialize(
-    std::shared_ptr<aditof::DepthSensorInterface> device,
+    std::shared_ptr<aditof::DepthSensorInterface> sensor,
+
     std::shared_ptr<aditof::StorageInterface> eeprom) {
     using namespace aditof;
 
     aditof::Status status = Status::OK;
 
-    m_sensor = device;
+    m_sensor = sensor;
     m_eeprom = eeprom;
 
     CEEPROM.ReadEEPROMVersion(EEPROM_V_data, EEPROM_V_size);
@@ -199,7 +200,6 @@ aditof::Status CalibrationChicony006::close() {
     sensorPowerDown();
 
     return Status::OK;
-    ;
 }
 
 //! setMode - Sets the mode to be used for depth calibration
