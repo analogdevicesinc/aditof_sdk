@@ -30,6 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "camera_96tof1.h"
+#include "sensor_names.h"
 
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
@@ -41,10 +42,6 @@
 #include <iterator>
 #include <map>
 #include <math.h>
-
-static const std::string skEeprom_24c1024 = "24c1024";
-static const std::string skAfeTempSensor = "AfeTemperature";
-static const std::string skLaserTempSensor = "LaserTemperature";
 
 struct rangeStruct {
     std::string mode;
@@ -88,10 +85,10 @@ Camera96Tof1::Camera96Tof1(
                      [](std::shared_ptr<aditof::StorageInterface> e) {
                          std::string name;
                          e->getName(name);
-                         return name == skEeprom_24c1024;
+                         return name == EEPROM_NAME;
                      });
     if (eeprom_iter == eeproms.end()) {
-        LOG(WARNING) << "Could not find " << skEeprom_24c1024
+        LOG(WARNING) << "Could not find " << EEPROM_NAME
                      << " while looking for storage for camera AD-96TOF1-EBZ";
     }
 
@@ -101,10 +98,10 @@ Camera96Tof1::Camera96Tof1(
                      [](std::shared_ptr<aditof::TemperatureSensorInterface> s) {
                          std::string name;
                          s->getName(name);
-                         return name == skAfeTempSensor;
+                         return name == AFE_TEMPERATURE_SENSOR_NAME;
                      });
     if (afeTempSensorIter == tSensors.end()) {
-        LOG(WARNING) << "Could not find " << skAfeTempSensor
+        LOG(WARNING) << "Could not find " << AFE_TEMPERATURE_SENSOR_NAME
                      << " while looking for temperature sensors for "
                         "camera AD-96TOF1-EBZ";
     }
@@ -115,10 +112,10 @@ Camera96Tof1::Camera96Tof1(
                      [](std::shared_ptr<aditof::TemperatureSensorInterface> s) {
                          std::string name;
                          s->getName(name);
-                         return name == skAfeTempSensor;
+                         return name == LASER_TEMPERATURE_SENSOR_NAME;
                      });
     if (laserTempSensorIter == tSensors.end()) {
-        LOG(WARNING) << "Could not find " << skLaserTempSensor
+        LOG(WARNING) << "Could not find " << LASER_TEMPERATURE_SENSOR_NAME
                      << " while looking for temperature sensors for "
                         "camera AD-96TOF1-EBZ";
     }

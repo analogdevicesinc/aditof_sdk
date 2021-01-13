@@ -48,10 +48,6 @@ namespace aditof {
 enum class SensorType {
     /* Depth sensors */
     SENSOR_ADDI9036, //!< ADDI9036 CCD sensor
-
-    /* Temperature sensors */
-    SENSOR_ADT7410, //!< ADT7410 temperature sensor
-    SENSOR_TMP10X   //!< TMP101 / TMP102 temperature sensor
 };
 
 /**

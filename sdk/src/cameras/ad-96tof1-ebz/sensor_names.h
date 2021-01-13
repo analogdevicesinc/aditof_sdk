@@ -29,16 +29,12 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TARGET_DEFINITIONS_H
-#define TARGET_DEFINITIONS_H
+#ifndef SENSOR_NAMES_H
+#define SENSOR_NAMES_H
 
-static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/9-0056/eeprom";
+#define EEPROM_NAME "24c1024"
 
-static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-9";
-static const char LASER_TEMP_SENSOR_I2C_ADDR = 0x49;
-static const char AFE_TEMP_SENSOR_I2C_ADDR = 0x4b;
+#define AFE_TEMPERATURE_SENSOR_NAME "AfeTemperature"
+#define LASER_TEMPERATURE_SENSOR_NAME "LaserTemperature"
 
-static const char *CAPTURE_DEVICE_NAME =
-    "vi-output, addi9036 9-0064|vi-output, addi9036 10-0064";
-
-#endif // TARGET_DEFINITIONS_H
+#endif // SENSOR_NAMES_H
