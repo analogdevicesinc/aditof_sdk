@@ -30,7 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "adt7410_sensor.h"
-#include "i2_common.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -52,8 +51,9 @@ struct ADT7410::ImplData {
     int i2c_address;
 };
 
-ADT7410::ADT7410(const std::string &driver_path, int i2c_address)
-    : m_implData(new ImplData) {
+ADT7410::ADT7410(const std::string &name, const std::string &driver_path,
+                 int i2c_address)
+    : m_implData(new ImplData), m_name(name) {
     m_implData->driverPath = driver_path;
     m_implData->i2c_address = i2c_address;
 }
@@ -61,8 +61,8 @@ ADT7410::ADT7410(const std::string &driver_path, int i2c_address)
 ADT7410::~ADT7410() = default;
 
 Status ADT7410::open(void *) {
-    if (sensor_open(m_implData->driverPath.c_str(),
-                         m_implData->i2c_address, &m_implData->tDev) < 0) {
+    if (sensor_open(m_implData->driverPath.c_str(), m_implData->i2c_address,
+                    &m_implData->tDev) < 0) {
         LOG(ERROR) << "Temperature sensor open error";
         return Status::GENERIC_ERROR;
     }
@@ -90,6 +90,12 @@ Status ADT7410::close() {
     if (m_implData->tDev.fd >= 0) {
         sensor_close(&m_implData->tDev);
     }
+
+    return Status::OK;
+}
+
+Status ADT7410::getName(std::string &name) const {
+    name = m_name;
 
     return Status::OK;
 }
@@ -138,11 +144,11 @@ int ADT7410::sensor_read(temp_sensor *t, float *temp_val) {
 }
 
 int ADT7410::sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
-    int funcs, fd, r;
+    int fd, r;
     t->fd = t->addr = 0;
     t->dev = NULL;
 
-    fd = open(dev_fqn, O_RDWR);
+    fd = ::open(dev_fqn, O_RDWR);
     if (fd <= 0) {
         fprintf(stderr, "Error in temperature sensor open: %s\n",
                 strerror(errno));
@@ -162,7 +168,7 @@ int ADT7410::sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
 }
 
 int ADT7410::sensor_close(temp_sensor *t) {
-    close(t->fd);
+    ::close(t->fd);
     t->fd = -1;
     t->dev = NULL;
 
@@ -175,6 +181,3 @@ int ADT7410::read_byte_data(temp_sensor *t, __u16 addr_reg) {
 
     return val;
 }
-
-
-

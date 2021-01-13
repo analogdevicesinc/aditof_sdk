@@ -46,7 +46,7 @@ Status TargetSensorEnumerator::getDepthSensors(
         switch (sInfo.sensorType) {
         case SensorType::SENSOR_ADDI9036: {
             auto sensor = std::make_shared<Addi9036Sensor>(
-                sInfo.driverPath, sInfo.subDevPath sInfo.captureDev);
+                sInfo.driverPath, sInfo.subDevPath, sInfo.captureDev);
             depthSensors.emplace_back(sensor);
             break;
         }
@@ -79,13 +79,14 @@ Status TargetSensorEnumerator::getTemperatureSensors(
     for (const auto &tInfo : m_temperatureSensorsInfo) {
         switch (tInfo.sensorType) {
         case TempSensorType::SENSOR_ADT7410: {
-            auto sensor =
-                std::make_shared<ADT7410>(tInfo.driverPath, tInfo.i2c_address);
+            auto sensor = std::make_shared<ADT7410>(
+                tInfo.name, tInfo.driverPath, tInfo.i2c_address);
             temperatureSensors.emplace_back(sensor);
             break;
         }
         case TempSensorType::SENSOR_TMP10X: {
-            auto sensor = std::make_shared<TMP10x>(tInfo.driverPath);
+            auto sensor =
+                std::make_shared<TMP10x>(tInfo.name, tInfo.driverPath);
             temperatureSensors.emplace_back(sensor);
             break;
         }
