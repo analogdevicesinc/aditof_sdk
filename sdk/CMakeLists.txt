@@ -21,11 +21,11 @@ file(GLOB HEADERS
 )
 
 if (USE_CHICONY)
-    set(TARGET_STRING "cameras/chicony-006")
+    set(CAMERA_DIR "cameras/chicony-006")
 elseif(USE_FXTOF1)
-    set(TARGET_STRING "cameras/ad-fxtof1-ebz")
+    set(CAMERA_DIR "cameras/ad-fxtof1-ebz")
 else ()
-    set(TARGET_STRING "cameras/ad-96tof1-ebz")
+    set(CAMERA_DIR "cameras/ad-96tof1-ebz")
 endif()    
 
 if( WIN32 )
@@ -33,27 +33,27 @@ if( WIN32 )
 elseif( APPLE )
         set(OS_SPECIFIC_DIR "connections/usb/macos")
 elseif( DRAGONBOARD )
-        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(OS_SPECIFIC_DIR "connections/target")
         set(TARGET_SPECIFIC_DIR dragonboard)
 	add_definitions(-DDRAGONBOARD)
 elseif ( RASPBERRYPI )
-        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(OS_SPECIFIC_DIR "connections/target")
         set(TARGET_SPECIFIC_DIR raspberrypi)
 	add_definitions(-DRASPBERRYPI)
 elseif( JETSON )
-        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(OS_SPECIFIC_DIR "connections/target")
         set(TARGET_SPECIFIC_DIR jetson)
         add_definitions(-DJETSON)
 elseif( XAVIER )
-        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(OS_SPECIFIC_DIR "connections/target")
         set(TARGET_SPECIFIC_DIR xavier)
 	    add_definitions(-DXAVIER)
 elseif( XAVIERNX )
-        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(OS_SPECIFIC_DIR "connections/target")
         set(TARGET_SPECIFIC_DIR xaviernx)
 	    add_definitions(-DXAVIERNX)
 elseif( TOYBRICK )
-        set(OS_SPECIFIC_DIR ${TARGET_STRING})
+        set(OS_SPECIFIC_DIR "connections/target")
         set(TARGET_SPECIFIC_DIR toybrick)
 	    add_definitions(-DTOYBRICK)
 elseif ( UNIX )
@@ -84,7 +84,7 @@ endif()
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.cpp
     ${CHICONY_SRC}
@@ -93,7 +93,7 @@ file(GLOB PLATFORM_SOURCES
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
     ${CHICONY_H}
     ${FXTOF1_H}
