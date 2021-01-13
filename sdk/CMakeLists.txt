@@ -143,7 +143,7 @@ endif()
 
 if (USE_CHICONY AND RASPBERRYPI)
     if (NOT DEFINED CHICONY_EEPROM_SO)
-        set(CHICONY_EEPROM_SO "/home/analog/workspace/github/aditof_sdk/misc/chicony/libChicony_EEPROM.so")
+        set(CHICONY_EEPROM_SO "${CMAKE_SOURCE_DIR}/misc/chicony/libChicony_EEPROM.so")
     endif()
 
     add_library(chicony-eeprom SHARED IMPORTED)
