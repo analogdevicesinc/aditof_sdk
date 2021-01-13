@@ -79,42 +79,8 @@ buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
                     << " while looking for storage for camera AD-96TOF1-EBZ";
                 break;
             }
-
-            // Look for AFE temperature sensor
-            auto afeTempSensorIter = std::find_if(
-                temperatureSensors.begin(), temperatureSensors.end(),
-                [](std::shared_ptr<TemperatureSensorInterface> tSensor) {
-                    std::string name;
-                    tSensor->getName(name);
-                    return name == skAfeTempSensor;
-                });
-            if (afeTempSensorIter == temperatureSensors.end()) {
-                DLOG(INFO) << "Could not find " << skAfeTempSensor
-                           << " while looking for temperature sensors for "
-                              "camera AD-96TOF1-EBZ";
-                break;
-            }
-
-            // Look for laser temperature sensor
-            auto laserTempSensorIter = std::find_if(
-                temperatureSensors.begin(), temperatureSensors.end(),
-                [](std::shared_ptr<TemperatureSensorInterface> tSensor) {
-                    std::string name;
-                    tSensor->getName(name);
-                    return name == skLaserTempSensor;
-                });
-            if (laserTempSensorIter == temperatureSensors.end()) {
-                DLOG(INFO) << "Could not find " << skLaserTempSensor
-                           << " while looking for temperature sensors for "
-                              "camera AD-96TOF1-EBZ";
-                break;
-            }
-
             std::shared_ptr<StorageInterface> eeprom = *eeprom_iter;
-            std::shared_ptr<TemperatureSensorInterface> afeTempSensor =
-                *afeTempSensorIter;
-            std::shared_ptr<TemperatureSensorInterface> laserTempSensor =
-                *laserTempSensorIter;
+
 #if defined CHICONY_006 || defined FXTOF1
 
             // Look for temperature sensor
@@ -143,6 +109,40 @@ buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
                 std::make_shared<CameraFxTof1>(dSensor, eeprom, tempSensor);
 #endif
 #else
+            // Look for AFE temperature sensor
+            auto afeTempSensorIter = std::find_if(
+                temperatureSensors.begin(), temperatureSensors.end(),
+                [](std::shared_ptr<TemperatureSensorInterface> tSensor) {
+                    std::string name;
+                    tSensor->getName(name);
+                    return name == skAfeTempSensor;
+                });
+            if (afeTempSensorIter == temperatureSensors.end()) {
+                DLOG(INFO) << "Could not find " << skAfeTempSensor
+                           << " while looking for temperature sensors for "
+                              "camera AD-96TOF1-EBZ";
+                break;
+            }
+            std::shared_ptr<TemperatureSensorInterface> afeTempSensor =
+                *afeTempSensorIter;
+
+            // Look for laser temperature sensor
+            auto laserTempSensorIter = std::find_if(
+                temperatureSensors.begin(), temperatureSensors.end(),
+                [](std::shared_ptr<TemperatureSensorInterface> tSensor) {
+                    std::string name;
+                    tSensor->getName(name);
+                    return name == skLaserTempSensor;
+                });
+            if (laserTempSensorIter == temperatureSensors.end()) {
+                DLOG(INFO) << "Could not find " << skLaserTempSensor
+                           << " while looking for temperature sensors for "
+                              "camera AD-96TOF1-EBZ";
+                break;
+            }
+            std::shared_ptr<TemperatureSensorInterface> laserTempSensor =
+                *laserTempSensorIter;
+
             std::shared_ptr<Camera> camera = std::make_shared<Camera96Tof1>(
                 dSensor, eeprom, afeTempSensor, laserTempSensor);
 #endif
