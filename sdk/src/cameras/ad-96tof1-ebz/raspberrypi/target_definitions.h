@@ -32,8 +32,6 @@
 #ifndef TARGET_DEFINITIONS_H
 #define TARGET_DEFINITIONS_H
 
-static const char *EEPROM_NAME = "24c1024";
-
 #ifdef REVB
 static const char *TEMP_SENSOR_DEV_PATH = "/dev/i2c-1";
 static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/1-0056/eeprom";

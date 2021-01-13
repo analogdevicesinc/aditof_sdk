@@ -52,6 +52,11 @@ class TargetSensorEnumerator : public aditof::SensorEnumeratorInterface {
             &temperatureSensors) override;
 
   private:
+    enum class TempSensorType {
+        SENSOR_ADT7410, //!< ADT7410 temperature sensor
+        SENSOR_TMP10X   //!< TMP101 / TMP102 temperature sensor
+    };
+
     struct StorageInfo {
         std::string driverName;
         std::string driverPath;
@@ -65,9 +70,10 @@ class TargetSensorEnumerator : public aditof::SensorEnumeratorInterface {
     };
 
     struct TemperatureSensorInfo {
-        aditof::SensorType sensorType;
+        TempSensorType sensorType;
         std::string driverPath;
         int i2c_address;
+        std::string name;
     };
 
     std::vector<SensorInfo> m_sensorsInfo;

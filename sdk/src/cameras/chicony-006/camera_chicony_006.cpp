@@ -44,6 +44,9 @@
 
 using namespace std;
 
+static const std::string skEeprom_24c1024 = "24c1024";
+static const std::string skTempSensor = "Chicony Temperature Sensor";
+
 struct rangeStruct {
     std::string mode;
     int minDepth;
@@ -57,11 +60,27 @@ static const std::string skCustomMode = "custom";
 
 CameraChicony::CameraChicony(
     std::shared_ptr<aditof::DepthSensorInterface> sensor,
-    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeprom,
-    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensor)
-    : m_sensor(sensor), m_eeprom(eeprom.first()), m_tempSensor(tSensor.first()),
+    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms,
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
+    : m_sensor(sensor),
       m_availableControls({"noise_reduction_threshold", "ir_gamma_correction"}),
-      m_sensorStarted(false), m_eepromInitialized(false) {}
+      m_sensorStarted(false), m_eepromInitialized(false) {
+
+    // Look for the temperature sensor
+    auto tempSensorIter = std::find_if(
+        tSensors.begin(), tSensors.end(),
+        [](std::shared_ptr<aditof::TemperatureSensorInterface> tSensor) {
+            std::string name;
+            tSensor->getName(name);
+            return name == skChiconyTempSensor;
+        });
+    if (tempSensorIter == tSensors.end()) {
+        DLOG(INFO) << "Could not find " << skTempSensor
+                   << " while looking for temperature sensors for "
+                      "camera Chicony";
+        break;
+    }
+}
 
 CameraChicony::~CameraChicony() {
     if (m_eepromInitialized) {

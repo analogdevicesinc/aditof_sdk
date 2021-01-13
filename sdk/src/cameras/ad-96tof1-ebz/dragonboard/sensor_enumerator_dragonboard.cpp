@@ -30,6 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "connections/target/target_sensor_enumerator.h"
+#include "sensor_names.h"
 #include "target_definitions.h"
 
 #include <dirent.h>
@@ -195,7 +196,7 @@ Status TargetSensorEnumerator::searchSensors() {
         sInfo.captureDev = CAPTURE_DEVICE_NAME;
         m_sensorsInfo.emplace_back(sInfo);
     }
-    
+
     // Check if EEPROM is available
     struct stat st;
     if (stat(EEPROM_DEV_PATH, &st) == 0) {
@@ -204,19 +205,21 @@ Status TargetSensorEnumerator::searchSensors() {
         eepromInfo.driverPath = EEPROM_DEV_PATH;
         m_storagesInfo.emplace_back(eepromInfo);
     }
-    
+
     // Check if the temperature sensors are available
     if (stat(TEMP_SENSOR_DEV_PATH, &st) == 0) {
         TemperatureSensorInfo temperatureSensorsInfo;
-        
-        temperatureSensorsInfo.sensorType = SensorType::SENSOR_ADT7410;
+
+        temperatureSensorsInfo.sensorType = TempSensorType::SENSOR_ADT7410;
         temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
         temperatureSensorsInfo.i2c_address = LASER_TEMP_SENSOR_I2C_ADDR;
+        temperatureSensorsInfo.name = AFE_TEMPERATURE_SENSOR_NAME;
         m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
 
-        temperatureSensorsInfo.sensorType = SensorType::SENSOR_ADT7410;
-        temperatureSensorsInfo.driverPath = AFE_SENSOR_DEV_PATH;
+        temperatureSensorsInfo.sensorType = TempSensorType::SENSOR_ADT7410;
+        temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
         temperatureSensorsInfo.i2c_address = AFE_TEMP_SENSOR_I2C_ADDR;
+        temperatureSensorsInfo.name = LASER_TEMPERATURE_SENSOR_NAME;
         m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
     }
 

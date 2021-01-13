@@ -31,9 +31,9 @@
  */
 #include "connections/target/target_sensor_enumerator.h"
 #include "connections/target/addi9036_sensor.h"
-#include "connections/target/tmp10x_sensor.h"
-#include "connections/target/eeprom.h"
 #include "connections/target/adt7410_sensor.h"
+#include "connections/target/eeprom.h"
+#include "connections/target/tmp10x_sensor.h"
 
 using namespace aditof;
 
@@ -45,9 +45,8 @@ Status TargetSensorEnumerator::getDepthSensors(
     for (const auto &sInfo : m_sensorsInfo) {
         switch (sInfo.sensorType) {
         case SensorType::SENSOR_ADDI9036: {
-            auto sensor = std::make_shared<Addi9036Sensor>(sInfo.driverPath,
-                                                           sInfo.subDevPath
-                                                           sInfo.captureDev);
+            auto sensor = std::make_shared<Addi9036Sensor>(
+                sInfo.driverPath, sInfo.subDevPath sInfo.captureDev);
             depthSensors.emplace_back(sensor);
             break;
         }
@@ -76,20 +75,20 @@ Status TargetSensorEnumerator::getTemperatureSensors(
         &temperatureSensors) {
 
     temperatureSensors.clear();
-    
+
     for (const auto &tInfo : m_temperatureSensorsInfo) {
         switch (tInfo.sensorType) {
-        case SensorType::SENSOR_ADT7410: {
-            auto sensor = std::make_shared<ADT7410>(tInfo.driverPath,
-                                                    tInfo.i2c_address);
+        case TempSensorType::SENSOR_ADT7410: {
+            auto sensor =
+                std::make_shared<ADT7410>(tInfo.driverPath, tInfo.i2c_address);
             temperatureSensors.emplace_back(sensor);
             break;
         }
-        case SensorType::SENSOR_TMP10X: {
+        case TempSensorType::SENSOR_TMP10X: {
             auto sensor = std::make_shared<TMP10x>(tInfo.driverPath);
             temperatureSensors.emplace_back(sensor);
             break;
-        }    
+        }
         }
     }
 
