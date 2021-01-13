@@ -29,8 +29,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TMP10X_H
-#define TMP10X_H
+#ifndef TMP10X_SENSOR_H
+#define TMP10X_SENSOR_H
 
 #include <aditof/temperature_sensor_interface.h>
 #include <memory>
@@ -39,19 +39,21 @@ namespace aditof {
 
 class TMP10x : public TemperatureSensorInterface {
   public:
-    TMP10x(const std::string &driver_path);
+    TMP10x(const std::string &name, const std::string &driver_path);
     ~TMP10x();
 
     // Implements TemperatureSensorInterface
     virtual aditof::Status open(void *handle) override;
     virtual aditof::Status read(float &temperature) override;
     virtual aditof::Status close() override;
+    virtual aditof::Status getName(std::string &name) const override;
 
   private:
     struct ImplData;
     std::unique_ptr<ImplData> m_implData;
+    std::string m_name;
 };
 
 } // namespace aditof
 
-#endif /* TMP10X_H */
+#endif /* TMP10X_SENSOR_H */

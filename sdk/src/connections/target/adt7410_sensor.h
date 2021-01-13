@@ -29,9 +29,10 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef ADT7410_H
-#define ADT7410_H
+#ifndef ADT7410_SENSOR_H
+#define ADT7410_SENSOR_H
 
+#include "i2c_common.h"
 #include <aditof/temperature_sensor_interface.h>
 #include <memory>
 
@@ -39,14 +40,16 @@ namespace aditof {
 
 class ADT7410 : public TemperatureSensorInterface {
   public:
-    ADT7410(const std::string &driver_path, int i2c_address);
+    ADT7410(const std::string &name, const std::string &driver_path,
+            int i2c_address);
     ~ADT7410();
 
     // Implements TemperatureSensorInterface
     virtual aditof::Status open(void *handle) override;
     virtual aditof::Status read(float &temperature) override;
     virtual aditof::Status close() override;
-	
+    virtual aditof::Status getName(std::string &name) const override;
+
   private:
     int sensor_open(const char *dev_fqn, int addr, temp_sensor *t);
     int sensor_read(temp_sensor *t, float *temp_val);
@@ -56,8 +59,9 @@ class ADT7410 : public TemperatureSensorInterface {
   private:
     struct ImplData;
     std::unique_ptr<ImplData> m_implData;
+    std::string m_name;
 };
 
 } // namespace aditof
 
-#endif /* ADT7410_H */
+#endif /* ADT7410_SENSOR_H */
