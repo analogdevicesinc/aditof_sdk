@@ -30,9 +30,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "camera_chicony_006.h"
+#include "sensor_names.h"
 
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
+#include <aditof/temperature_sensor_interface.h>
 
 #include <algorithm>
 #include <array>
@@ -43,9 +45,6 @@
 #include <math.h>
 
 using namespace std;
-
-static const std::string skEeprom_24c1024 = "24c1024";
-static const std::string skTempSensor = "Chicony Temperature Sensor";
 
 struct rangeStruct {
     std::string mode;
@@ -66,20 +65,45 @@ CameraChicony::CameraChicony(
       m_availableControls({"noise_reduction_threshold", "ir_gamma_correction"}),
       m_sensorStarted(false), m_eepromInitialized(false) {
 
+    // Check Depth Sensor
+    if (!sensor) {
+        LOG(WARNING) << "Invalid instance of a depth sensor";
+        return;
+    }
+    aditof::SensorDetails sDetails;
+    m_sensor->getDetails(sDetails);
+    m_details.connection = sDetails.connectionType;
+
+    // Look for EEPROM
+    auto eeprom_iter =
+        std::find_if(eeproms.begin(), eeproms.end(),
+                     [](std::shared_ptr<aditof::StorageInterface> e) {
+                         std::string name;
+                         e->getName(name);
+                         return name == EEPROM_NAME;
+                     });
+    if (eeprom_iter == eeproms.end()) {
+        LOG(WARNING) << "Could not find " << EEPROM_NAME
+                     << " while looking for storage for camera Chicony";
+        return;
+    }
+    m_eeprom = *eeprom_iter;
+
     // Look for the temperature sensor
     auto tempSensorIter = std::find_if(
         tSensors.begin(), tSensors.end(),
         [](std::shared_ptr<aditof::TemperatureSensorInterface> tSensor) {
             std::string name;
             tSensor->getName(name);
-            return name == skChiconyTempSensor;
+            return name == TEMPERATURE_SENSOR_NAME;
         });
     if (tempSensorIter == tSensors.end()) {
-        DLOG(INFO) << "Could not find " << skTempSensor
-                   << " while looking for temperature sensors for "
-                      "camera Chicony";
-        break;
+        LOG(WARNING) << "Could not find " << TEMPERATURE_SENSOR_NAME
+                     << " while looking for temperature sensors for "
+                        "camera Chicony";
+        return;
     }
+    m_tempSensor = *tempSensorIter;
 }
 
 CameraChicony::~CameraChicony() {
@@ -92,6 +116,11 @@ aditof::Status CameraChicony::initialize() {
     using namespace aditof;
 
     LOG(INFO) << "Initializing camera";
+
+    if (!m_sensor || !m_eeprom || !m_tempSensor) {
+        LOG(WARNING) << "Failed to initialize! Not all sensors are available";
+        return Status::GENERIC_ERROR;
+    }
 
     // Open communication with the depth sensor
     Status status = m_sensor->open();
