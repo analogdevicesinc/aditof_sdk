@@ -32,9 +32,13 @@
 #include "system_impl.h"
 #include "aditof/sensor_enumerator_factory.h"
 #include "aditof/sensor_enumerator_interface.h"
-#include "camera_96tof1.h"
+#if defined(CHICONY_006)
 #include "camera_chicony_006.h"
+#elif defined(FXTOF1)
 #include "camera_fxtof1.h"
+#else
+#include "camera_96tof1.h"
+#endif
 
 #include <aditof/camera.h>
 #include <algorithm>

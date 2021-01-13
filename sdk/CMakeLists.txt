@@ -84,7 +84,6 @@ endif()
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.cpp
     ${CHICONY_SRC}
     ${FXTOF1_SRC}
@@ -93,7 +92,6 @@ file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
     ${CHICONY_H}
     ${FXTOF1_H}
 )
@@ -126,9 +124,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         src/
         src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
-        src/cameras/ad-96tof1-ebz/
-        src/cameras/chicony-006/
-        src/cameras/ad-fxtof1-ebz/
+        src/${CAMERA_DIR}/
         ${Protobuf_INCLUDE_DIRS}
         ${GENERATED_PROTO_FILES_DIR}
         ${LIBWEBSOCKETS_INCLUDE_DIRS}
