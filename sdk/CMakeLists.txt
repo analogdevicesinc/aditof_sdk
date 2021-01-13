@@ -21,6 +21,9 @@ file(GLOB HEADERS
 )
 
 if (USE_CHICONY)
+    if (NOT RASPBERRYPI)
+        message( FATAL_ERROR "USE_CHICONY only works when on RaspberryPI. CMake will exit." )
+    endif()
     set(CAMERA_DIR "cameras/chicony-006")
 elseif(USE_FXTOF1)
     set(CAMERA_DIR "cameras/ad-fxtof1-ebz")
@@ -70,30 +73,16 @@ if ( USE_CHICONY AND USE_FXTOF1)
     message( FATAL_ERROR "USE_CHICONY and USE_FXTOF1 are both selected. \nPlease select a single camera. CMake will exit." )
 endif()
 
-if ( USE_CHICONY AND (RASPBERRYPI OR TOYBRICK) )
-	set(CHICONY_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.cpp)
-	set(CHICONY_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h)
-endif()
-
-if ( USE_FXTOF1 )
-	set(FXTOF1_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.cpp)
-	set(FXTOF1_H ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.h)
-endif()
-
 # Platform specific sources and headers
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.cpp
-    ${CHICONY_SRC}
-    ${FXTOF1_SRC}
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.h
-    ${CHICONY_H}
-    ${FXTOF1_H}
 )
 
 file(GLOB NETWORK_SOURCES
@@ -152,7 +141,7 @@ else()
     )
 endif()
 
-if (USE_CHICONY AND (RASPBERRYPI OR TOYBRICK))
+if (USE_CHICONY AND RASPBERRYPI)
     if (NOT DEFINED CHICONY_EEPROM_SO)
         set(CHICONY_EEPROM_SO "/home/analog/workspace/github/aditof_sdk/misc/chicony/libChicony_EEPROM.so")
     endif()
