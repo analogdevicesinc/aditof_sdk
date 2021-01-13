@@ -36,6 +36,7 @@
 #include <iostream>
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/mat.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc_c.h>
 #ifdef OPENCV2
@@ -64,7 +65,11 @@ int main(int argc, char *argv[]) {
     cvui::init(WINDOW_NAME);
     cv::Mat frame = cv::Mat(cv::Size(800, 480), CV_8UC3);
     frame = cv::Scalar(49, 52, 49);
+    
     cv::Mat irMat;
+    const cv::_InputArray convertedMat;
+    std::vector<cv::Point2f> corners;
+    int flags=cv::CALIB_CB_ADAPTIVE_THRESH+cv::CALIB_CB_NORMALIZE_IMAGE;
     
     while(true){
     	
@@ -94,7 +99,7 @@ int main(int argc, char *argv[]) {
     		if (_DisplayIR (&irMat)) {
     			cv::resize(irMat, irMat, cv::Size(irMat.cols * 0.7,irMat.rows * 0.7), 0, 0, CV_INTER_LINEAR);
     			frameReceived = true;
-    			testPassed = true;
+    			testPassed = findChessboardCorners(irMat, cv::Size(7,7) , corners, flags);
     			captureStatus = false;
     			} 
     		else {
@@ -105,6 +110,10 @@ int main(int argc, char *argv[]) {
     		}
     		
     	if(frameReceived && testPassed) {
+		cv::drawChessboardCorners(irMat, cv::Size(7,7), corners, testPassed);
+    	 }
+    	 
+    	if(frameReceived) {
     		cvui::image(frame,260,30, irMat);
     		}
     	
@@ -118,8 +127,14 @@ int main(int argc, char *argv[]) {
     		cvui::printf(frame,30,230,1,0x00ff00,"TEST PASSED");
     	}
     	
+    	if (frameReceived && !testPassed) {
+    		cvui::printf(frame,30,230,1,0xff0000,"TEST FAILED:");
+    		cvui::printf(frame,40,260,0.7,0xff0000,"INVALID FRAME!");
+    		}
+    	
     	if (!frameReceived && !testPassed) {
-    		cvui::printf(frame,30,230,1,0xff0000,"TEST FAILED");
+    		cvui::printf(frame,30,230,1,0xff0000,"TEST FAILED:");
+    		cvui::printf(frame,15,260,0.7,0xff0000,"NO FRAME RECEIVED!");
     		}
     	
     	cvui::endColumn();
@@ -190,28 +205,29 @@ int _DisplayIR(cv::Mat *irMat){
     const int smallSignalThreshold = 50;
     camera->setControl("noise_reduction_threshold",
                        std::to_string(smallSignalThreshold));
-                       
-    /* Request frame from camera */
-    status = camera->requestFrame(&frame);
-    if (status != Status::OK) {
-        LOG(ERROR) << "Could not request frame!";
-        return 0;
+    
+    for(int i = 0; i < 5; i++){          
+    	/* Request frame from camera */
+    	status = camera->requestFrame(&frame);
+    	if (status != Status::OK) {
+    	    LOG(ERROR) << "Could not request frame!";
+    	    return 0;
+    	}
+
+    	/* Obtain the ir mat from the frame */
+    	status = fromFrameToIrMat(frame, *irMat);
+    	if (status != Status::OK) {
+    	    LOG(ERROR) << "Could not convert from frame to mat!";
+    	    return 0;
+    	}
+
+    	int max_value_of_IR_pixel = (1 << bitCount) - 1;
+	
+    	/* Distance factor IR */
+    	double distance_scale_ir = 255.0 / max_value_of_IR_pixel;
+	
+	irMat->convertTo(*irMat, CV_8U, distance_scale_ir);
+	cv::cvtColor(*irMat, *irMat, cv::COLOR_GRAY2RGB);
     }
-
-    /* Obtain the ir mat from the frame */
-    status = fromFrameToIrMat(frame, *irMat);
-    if (status != Status::OK) {
-        LOG(ERROR) << "Could not convert from frame to mat!";
-        return 0;
-    }
-
-    int max_value_of_IR_pixel = (1 << bitCount) - 1;
-
-    /* Distance factor IR */
-    double distance_scale_ir = 255.0 / max_value_of_IR_pixel;
-
-    irMat->convertTo(*irMat, CV_8U, distance_scale_ir);
-    cv::cvtColor(*irMat, *irMat, cv::COLOR_GRAY2RGB);
-
     return 1;
 }
