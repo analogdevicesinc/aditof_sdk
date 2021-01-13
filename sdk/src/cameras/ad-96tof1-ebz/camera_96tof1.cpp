@@ -90,7 +90,9 @@ Camera96Tof1::Camera96Tof1(
     if (eeprom_iter == eeproms.end()) {
         LOG(WARNING) << "Could not find " << EEPROM_NAME
                      << " while looking for storage for camera AD-96TOF1-EBZ";
+        return;
     }
+    m_eeprom = *eeprom_iter;
 
     // Look for AFE temperature sensor
     auto afeTempSensorIter =
@@ -104,7 +106,9 @@ Camera96Tof1::Camera96Tof1(
         LOG(WARNING) << "Could not find " << AFE_TEMPERATURE_SENSOR_NAME
                      << " while looking for temperature sensors for "
                         "camera AD-96TOF1-EBZ";
+        return;
     }
+    m_afeTempSensor = *afeTempSensorIter;
 
     // Look for laser temperature sensor
     auto laserTempSensorIter =
@@ -118,7 +122,9 @@ Camera96Tof1::Camera96Tof1(
         LOG(WARNING) << "Could not find " << LASER_TEMPERATURE_SENSOR_NAME
                      << " while looking for temperature sensors for "
                         "camera AD-96TOF1-EBZ";
+        return;
     }
+    m_laserTempSensor = *laserTempSensorIter;
 }
 
 Camera96Tof1::~Camera96Tof1() {
