@@ -54,7 +54,7 @@ aditof::Status findDevicePathsAtMedia(const std::string &media,
 
     char *buf;
     int size = 0;
-    int idx = 0;
+    size_t idx = 0;
 
     /* Run media-ctl to get the video processing pipes */
     char cmd[64];
