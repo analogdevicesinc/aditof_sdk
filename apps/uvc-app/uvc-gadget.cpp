@@ -209,7 +209,7 @@ struct uvc_device {
     int uvc_fd;
     int is_streaming;
     int run_standalone;
-    char *uvc_devname;
+    const char *uvc_devname;
 
     /* uvc control request specific */
 
@@ -487,7 +487,7 @@ static int uvc_uninit_device(struct uvc_device *dev) {
 
     return 0;
 }
-static int uvc_open(struct uvc_device **uvc, char *devname) {
+static int uvc_open(struct uvc_device **uvc, const char *devname) {
     struct uvc_device *dev;
     struct v4l2_capability cap;
     int fd;
@@ -1625,57 +1625,57 @@ static void uvc_events_process_setup(struct uvc_device *dev,
     }
 }
 
-static int uvc_events_process_control_data(struct uvc_device *dev, uint8_t cs,
-                                           uint8_t entity_id,
-                                           struct uvc_request_data *data) {
-    switch (entity_id) {
-    /* Processing unit 'UVC_VC_PROCESSING_UNIT'. */
-    case 2:
-        switch (cs) {
-        /*
-         * We support only 'UVC_PU_BRIGHTNESS_CONTROL' for Processing
-         * Unit, as our bmControls[0] = 1 for PU.
-         */
-        case UVC_PU_BRIGHTNESS_CONTROL:
-            memcpy(&dev->brightness_val, data->data, data->length);
-            /* UVC - V4L2 integrated path. */
-            if (!dev->run_standalone)
-                /*
-                 * Try to change the Brightness attribute on
-                 * Video capture device. Note that this try may
-                 * succeed or end up with some error on the
-                 * video capture side. By default to keep tools
-                 * like USBCV's UVC test suite happy, we are
-                 * maintaining a local copy of the current
-                 * brightness value in 'dev->brightness_val'
-                 * variable and we return the same value to the
-                 * Host on receiving a GET_CUR(BRIGHTNESS)
-                 * control request.
-                 *
-                 * FIXME: Keeping in view the point discussed
-                 * above, notice that we ignore the return value
-                 * from the function call below. To be strictly
-                 * compliant, we should return the same value
-                 * accordingly.
-                 */
-                // v4l2_set_ctrl(dev->vdev, dev->brightness_val,
-                //   V4L2_CID_BRIGHTNESS);
-                break;
+//static int uvc_events_process_control_data(struct uvc_device *dev, uint8_t cs,
+//                                           uint8_t entity_id,
+//                                           struct uvc_request_data *data) {
+//    switch (entity_id) {
+//    /* Processing unit 'UVC_VC_PROCESSING_UNIT'. */
+//    case 2:
+//        switch (cs) {
+//        /*
+//         * We support only 'UVC_PU_BRIGHTNESS_CONTROL' for Processing
+//         * Unit, as our bmControls[0] = 1 for PU.
+//         */
+//        case UVC_PU_BRIGHTNESS_CONTROL:
+//            memcpy(&dev->brightness_val, data->data, data->length);
+//            /* UVC - V4L2 integrated path. */
+//            if (!dev->run_standalone)
+//                /*
+//                 * Try to change the Brightness attribute on
+//                 * Video capture device. Note that this try may
+//                 * succeed or end up with some error on the
+//                 * video capture side. By default to keep tools
+//                 * like USBCV's UVC test suite happy, we are
+//                 * maintaining a local copy of the current
+//                 * brightness value in 'dev->brightness_val'
+//                 * variable and we return the same value to the
+//                 * Host on receiving a GET_CUR(BRIGHTNESS)
+//                 * control request.
+//                 *
+//                 * FIXME: Keeping in view the point discussed
+//                 * above, notice that we ignore the return value
+//                 * from the function call below. To be strictly
+//                 * compliant, we should return the same value
+//                 * accordingly.
+//                 */
+//                // v4l2_set_ctrl(dev->vdev, dev->brightness_val,
+//                //   V4L2_CID_BRIGHTNESS);
+//                break;
 
-        default:
-            break;
-        }
+//        default:
+//            break;
+//        }
 
-        break;
+//        break;
 
-    default:
-        break;
-    }
+//    default:
+//        break;
+//    }
 
-    printf("Control Request data phase (cs %02x entity %02x)\n", cs, entity_id);
+//    printf("Control Request data phase (cs %02x entity %02x)\n", cs, entity_id);
 
-    return 0;
-}
+//    return 0;
+//}
 
 static int uvc_events_process_data(struct uvc_device *dev,
                                    struct uvc_request_data *data) {
@@ -1686,7 +1686,6 @@ static int uvc_events_process_data(struct uvc_device *dev,
     const unsigned int *interval;
     unsigned int iformat, iframe;
     unsigned int nframes;
-    int ret;
 
     switch (dev->control) {
     case UVC_VS_PROBE_CONTROL:
@@ -1841,9 +1840,6 @@ static int uvc_events_process_data(struct uvc_device *dev,
     }
 
     return 0;
-
-err:
-    return ret;
 }
 
 static void uvc_events_process(struct uvc_device *dev) {
@@ -2007,11 +2003,9 @@ int main(int argc, char *argv[]) {
     signal(SIGQUIT, stopHandler);
 
     struct uvc_device *udev;
-    struct v4l2_device *vdev;
     struct timeval tv;
     struct v4l2_format fmt;
-    char *uvc_devname = "/dev/video6";
-    char *v4l2_devname = "/dev/video0";
+    const char *uvc_devname = "/dev/video6";
     char *mjpeg_image = NULL;
 
     fd_set fdsv, fdsu;
@@ -2178,7 +2172,6 @@ int main(int argc, char *argv[]) {
             break;
 
         case 'v':
-            v4l2_devname = optarg;
             break;
 
         case 'p':
