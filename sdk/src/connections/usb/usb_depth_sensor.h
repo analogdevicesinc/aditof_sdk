@@ -44,8 +44,7 @@ static const unsigned int USB_FRAME_HEIGHT = 480;
 
 class UsbDepthSensor : public aditof::DepthSensorInterface {
   public:
-    UsbDepthSensor(aditof::SensorType sensorType,
-                   const std::string &driverPath);
+    UsbDepthSensor(const std::string &driverPath);
     ~UsbDepthSensor();
 
   public: // implements DepthSensorInterface

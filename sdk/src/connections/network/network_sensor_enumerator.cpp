@@ -78,8 +78,6 @@ Status NetworkSensorEnumerator::searchSensors() {
     const payload::ServerResponse &msg = net->recv_buff;
     const payload::SensorsInfo &pbSensorsInfo = msg.sensors_info();
 
-    m_sensorType = static_cast<aditof::SensorType>(pbSensorsInfo.sensor_type());
-
     for (int i = 0; i < pbSensorsInfo.storages().size(); ++i) {
         std::string name = pbSensorsInfo.storages(i).name();
         unsigned int id = pbSensorsInfo.storages(i).id();
@@ -104,7 +102,7 @@ Status NetworkSensorEnumerator::getDepthSensors(
 
     depthSensors.clear();
 
-    auto sensor = std::make_shared<NetworkDepthSensor>(m_ip, m_sensorType);
+    auto sensor = std::make_shared<NetworkDepthSensor>(m_ip);
     depthSensors.emplace_back(sensor);
 
     return Status::OK;

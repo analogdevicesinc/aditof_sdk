@@ -44,13 +44,6 @@
 #include <ios>
 #include <iostream>
 
-#ifdef CHICONY_006
-#error CHICONY_006 not yet supported
-const aditof::SensorType sensorType = aditof::SensorType::SENSOR_CHICONY;
-#else
-const aditof::SensorType sensorType = aditof::SensorType::SENSOR_ADDI9036;
-#endif
-
 const std::string connectionTypeMapStr[] = {"ON_TARGET", "USB", "NETWORK"};
 
 EepromTool::EepromTool() {

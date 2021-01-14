@@ -36,18 +36,6 @@
 using namespace std;
 using namespace aditof;
 
-int UsbUtils::getDepthSensoType(const std::vector<std::string> &tokens) {
-    for (const auto &t : tokens) {
-        vector<string> keyValueStr;
-        Utils::splitIntoTokens(t, '=', keyValueStr);
-        if (keyValueStr[0] == "DEPTH_SENSOR_TYPE") {
-            return std::stoi(keyValueStr[1]);
-        }
-    }
-
-    return -1;
-}
-
 std::vector<std::pair<std::string, unsigned int>>
 UsbUtils::getStorageNamesAndIds(const std::vector<std::string> &tokens) {
     std::vector<std::pair<std::string, unsigned int>> v;

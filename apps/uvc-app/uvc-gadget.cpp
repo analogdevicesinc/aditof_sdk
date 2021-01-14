@@ -2057,9 +2057,7 @@ int main(int argc, char *argv[]) {
     // Build a message about available sensors types to be sent to the UVC client
     aditof::SensorDetails camSensorDetails;
     camDepthSensor->getDetails(camSensorDetails);
-    availableSensorsBlob +=
-        "DEPTH_SENSOR_TYPE=" +
-        std::to_string(static_cast<int>(camSensorDetails.sensorType)) + ";";
+
     int storage_id = 0;
     for (const auto &storage : storages) {
         std::string name;

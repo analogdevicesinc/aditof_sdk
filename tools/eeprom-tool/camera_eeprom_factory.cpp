@@ -33,12 +33,7 @@
 #include "cam96tof1_eeprom.h"
 
 std::unique_ptr<CameraEepromInterface> CameraEepromFactory::buildEeprom(
-    aditof::SensorType sensorType,
     std::shared_ptr<aditof::StorageInterface> eeprom) {
-    switch (sensorType) {
-    case aditof::SensorType::SENSOR_ADDI9036:
-        return std::unique_ptr<CameraEepromInterface>(
-            new Camera96Tof1Eeprom(eeprom));
-    }
-    return nullptr;
+    return std::unique_ptr<CameraEepromInterface>(
+        new Camera96Tof1Eeprom(eeprom));
 }
