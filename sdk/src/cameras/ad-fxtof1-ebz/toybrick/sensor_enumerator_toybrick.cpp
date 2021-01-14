@@ -30,6 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "connections/target/target_sensor_enumerator.h"
+#include "sensor_names.h"
 #include "target_definitions.h"
 
 #include <dirent.h>
@@ -70,15 +71,16 @@ aditof::Status TargetSensorEnumerator::searchSensors() {
     sInfo.driverPath = "/dev/video2";
     sInfo.subDevPath = "/dev/v4l-subdev0";
     m_sensorsInfo.emplace_back(sInfo);
-    
+
     StorageInfo eepromInfo;
     eepromInfo.driverName = EEPROM_NAME;
     eepromInfo.driverPath = EEPROM_DEV_PATH;
     m_storagesInfo.emplace_back(eepromInfo);
-    
-    TemperatureSensorInfo temperatureSensorsInfo;    
-    temperatureSensorsInfo.sensorType = SensorType::SENSOR_TMP10X;
+
+    TemperatureSensorInfo temperatureSensorsInfo;
+    temperatureSensorsInfo.sensorType = TempSensorType::SENSOR_TMP10X;
     temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
+    temperatureSensorsInfo.name = TEMPERATURE_SENSOR_NAME;
     m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
 
     return status;

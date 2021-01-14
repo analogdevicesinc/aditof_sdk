@@ -29,43 +29,11 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "connections/target/target_sensor_enumerator.h"
-#include "sensor_names.h"
-#include "target_definitions.h"
+#ifndef SENSOR_NAMES_H
+#define SENSOR_NAMES_H
 
-#include <dirent.h>
-#include <glog/logging.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <sys/stat.h>
-#include <unistd.h>
+#define EEPROM_NAME "24c1024"
 
-using namespace aditof;
+#define TEMPERATURE_SENSOR_NAME "TMP10X"
 
-Status TargetSensorEnumerator::searchSensors() {
-
-    LOG(INFO) << "Looking for devices on the target: Xavier";
-
-    // TO DO: Don't guess the device, find a way to identify it so we are sure
-    // we've got the right device and is compatible with the SDK
-    SensorInfo sInfo;
-    sInfo.sensorType = SensorType::SENSOR_ADDI9036;
-    sInfo.driverPath = "/dev/video0|/dev/video1";
-    sInfo.subDevPath = "/dev/v4l-subdev0|/dev/v4l-subdev2";
-    m_sensorsInfo.emplace_back(sInfo);
-
-    StorageInfo eepromInfo;
-    eepromInfo.driverName = EEPROM_NAME;
-    eepromInfo.driverPath = EEPROM_DEV_PATH;
-    m_storagesInfo.emplace_back(eepromInfo);
-
-    TemperatureSensorInfo temperatureSensorsInfo;
-    temperatureSensorsInfo.sensorType = TempSensorType::SENSOR_TMP10X;
-    temperatureSensorsInfo.driverPath = TEMP_SENSOR_DEV_PATH;
-    temperatureSensorsInfo.name = TEMPERATURE_SENSOR_NAME;
-    m_temperatureSensorsInfo.emplace_back(temperatureSensorsInfo);
-
-    return Status::OK;
-}
+#endif // SENSOR_NAMES_H
