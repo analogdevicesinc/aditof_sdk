@@ -540,15 +540,11 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
 
     unsigned int width;
     unsigned int height;
-    unsigned int fullDataWidth;
-    unsigned int fullDataHeight;
     unsigned int buf_data_len;
     uint8_t *pdata[m_implData->numVideoDevs];
 
     width = m_implData->frameDetails.width;
     height = m_implData->frameDetails.height;
-    fullDataWidth = m_implData->frameDetails.fullDataWidth;
-    fullDataHeight = m_implData->frameDetails.fullDataHeight;
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
@@ -595,6 +591,9 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
             memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
         } else {
 #ifdef TOYBRICK
+            unsigned int fullDataWidth = m_implData->frameDetails.fullDataWidth;
+            unsigned int fullDataHeight =
+                m_implData->frameDetails.fullDataHeight;
             uint32_t j = 0, j1 = width * height;
             for (uint32_t i = 0; i < fullDataHeight; i += 2) {
                 memcpy(buffer + j, pdata[0] + i * width * 2, width * 2);
