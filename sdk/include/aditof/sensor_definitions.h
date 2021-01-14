@@ -42,24 +42,10 @@
 namespace aditof {
 
 /**
- * @enum SensorType
- * @brief Provides the types of sensor assosiated with the device
- */
-enum class SensorType {
-    /* Depth sensors */
-    SENSOR_ADDI9036, //!< ADDI9036 CCD sensor
-};
-
-/**
  * @struct SensorDetails
  * @brief Provides details about the device
  */
 struct SensorDetails {
-    /**
-     * @brief The type of sensor
-     */
-    SensorType sensorType;
-
     /**
      * @brief The sensor's name
      */

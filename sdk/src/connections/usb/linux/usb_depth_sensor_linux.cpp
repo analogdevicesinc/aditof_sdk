@@ -66,15 +66,13 @@ struct UsbDepthSensor::ImplData {
     std::unordered_map<std::string, CalibrationData> calibration_cache;
 };
 
-UsbDepthSensor::UsbDepthSensor(aditof::SensorType sensorType,
-                               const std::string &driverPath)
+UsbDepthSensor::UsbDepthSensor(const std::string &driverPath)
     : m_driverPath(driverPath), m_implData(new UsbDepthSensor::ImplData) {
     m_implData->fd = 0;
     m_implData->opened = false;
     m_implData->started = false;
     m_implData->buffers = nullptr;
     m_implData->buffersCount = 0;
-    m_sensorDetails.sensorType = sensorType;
     m_sensorDetails.connectionType = aditof::ConnectionType::USB;
 }
 

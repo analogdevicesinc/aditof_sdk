@@ -38,14 +38,6 @@
 class UsbUtils {
   public:
     /**
-     * @brief Parses sensor tokens which are strings containing a key-value pair and finds
-     * the type of the sensor which can take values starting from 0.
-     * @param tokens - The tokens to be parsed.
-     * @return int
-     */
-    static int getDepthSensoType(const std::vector<std::string> &tokens);
-
-    /**
      * @brief Parses sensor tokens which are strings containing a key-value pair
      * (e.g. "EEPROM_NAME=eeprom1") and returns the names and IDs of the storages.
      * @param tokens - The tokens to be parsed.

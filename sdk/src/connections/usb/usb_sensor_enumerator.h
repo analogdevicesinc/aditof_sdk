@@ -52,7 +52,6 @@ class UsbSensorEnumerator : public aditof::SensorEnumeratorInterface {
 
   private:
     struct SensorInfo {
-        aditof::SensorType sensorType;
         std::string driverPath;
     };
 

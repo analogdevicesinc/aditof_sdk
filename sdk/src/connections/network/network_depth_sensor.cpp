@@ -50,15 +50,13 @@ struct NetworkDepthSensor::ImplData {
     bool opened;
 };
 
-NetworkDepthSensor::NetworkDepthSensor(const std::string &ip,
-                                       aditof::SensorType sensorType)
+NetworkDepthSensor::NetworkDepthSensor(const std::string &ip)
     : m_implData(new NetworkDepthSensor::ImplData) {
 
     Network *net = new Network();
     m_implData->handle.net = net;
     m_implData->ip = ip;
     m_implData->opened = false;
-    m_sensorDetails.sensorType = sensorType;
 }
 
 NetworkDepthSensor::~NetworkDepthSensor() {

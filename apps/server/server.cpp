@@ -315,9 +315,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         aditof::SensorDetails depthSensorDetails;
         camDepthSensor->getDetails(depthSensorDetails);
         auto pbSensorsInfo = buff_send.mutable_sensors_info();
-        pbSensorsInfo->set_sensor_type(
-            static_cast<::payload::SensorType>(depthSensorDetails.sensorType));
-
         sensorV4lBufAccess =
             std::dynamic_pointer_cast<aditof::V4lBufferAccessInterface>(
                 camDepthSensor);

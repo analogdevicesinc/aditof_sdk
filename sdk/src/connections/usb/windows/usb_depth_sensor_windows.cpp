@@ -219,13 +219,11 @@ static void destroyGraph(IGraphBuilder *pGraph) {
     return;
 }
 
-UsbDepthSensor::UsbDepthSensor(aditof::SensorType sensorType,
-                               const std::string &driverPath)
+UsbDepthSensor::UsbDepthSensor(const std::string &driverPath)
     : m_driverPath(driverPath), m_implData(new UsbDepthSensor::ImplData) {
     m_implData->handle.pMediaEvent = nullptr;
     m_implData->opened = false;
 
-    m_sensorDetails.sensorType = sensorType;
     m_sensorDetails.connectionType = aditof::ConnectionType::USB;
 }
 

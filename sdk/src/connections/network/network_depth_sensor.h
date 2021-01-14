@@ -38,7 +38,7 @@
 
 class NetworkDepthSensor : public aditof::DepthSensorInterface {
   public:
-    NetworkDepthSensor(const std::string &ip, aditof::SensorType sensorType);
+    NetworkDepthSensor(const std::string &ip);
     ~NetworkDepthSensor();
 
   public: // implements DepthSensorInterface

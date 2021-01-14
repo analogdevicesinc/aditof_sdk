@@ -169,21 +169,6 @@ Status UsbSensorEnumerator::searchSensors() {
 
         SensorInfo sInfo;
         sInfo.driverPath = driverPath;
-        int sensorType = UsbUtils::getDepthSensoType(sensorsPaths);
-        switch (sensorType) {
-        case 0: {
-            sInfo.sensorType = SensorType::SENSOR_ADDI9036;
-            break;
-        }
-        default: {
-            if (sensorType == -1) {
-                LOG(WARNING) << "Failed to indetify sensorType";
-            } else {
-                LOG(WARNING) << "Unkown sensorType";
-            }
-        }
-        } //switch (sensorType)
-
         m_sensorsInfo.emplace_back(sInfo);
 
         m_storagesInfo = UsbUtils::getStorageNamesAndIds(sensorsPaths);
@@ -202,8 +187,7 @@ Status UsbSensorEnumerator::getDepthSensors(
     depthSensors.clear();
 
     for (const auto &sInfo : m_sensorsInfo) {
-        auto sensor = std::make_shared<UsbDepthSensor>(sInfo.sensorType,
-                                                       sInfo.driverPath);
+        auto sensor = std::make_shared<UsbDepthSensor>(sInfo.driverPath);
         depthSensors.emplace_back(sensor);
     }
 

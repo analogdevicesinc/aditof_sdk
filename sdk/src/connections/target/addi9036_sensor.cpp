@@ -95,9 +95,7 @@ Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
                                const std::string &driverSubPath,
                                const std::string &captureDev)
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
-      m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData) {
-    m_sensorDetails.sensorType = aditof::SensorType::SENSOR_ADDI9036;
-}
+      m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData) {}
 
 Addi9036Sensor::~Addi9036Sensor() {
     struct VideoDev *dev;

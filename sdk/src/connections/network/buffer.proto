@@ -18,11 +18,6 @@ enum ServerStatus
   REQUEST_UNKNOWN = 1;
 }
 
-enum SensorType   // This must match precisely the sensr types from sensor_definitions.h
-{
-    SENSOR_ADDI9036 = 0;
-}
-
 message StorageInfo
 {
   string name = 10;
@@ -37,9 +32,8 @@ message TemperatureSensorInfo
 
 message SensorsInfo
 {
-  SensorType sensor_type = 10;                      // The type of a depth sensor
-  repeated StorageInfo storages = 20;               // Information about available storages
-  repeated TemperatureSensorInfo temp_sensors = 30; // Information about available temperature sensors
+  repeated StorageInfo storages = 10;               // Information about available storages
+  repeated TemperatureSensorInfo temp_sensors = 20; // Information about available temperature sensors
 }
 
 message FrameDetails
