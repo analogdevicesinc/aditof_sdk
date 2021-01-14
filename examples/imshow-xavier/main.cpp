@@ -31,7 +31,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <aditof/camera.h>
-#include <aditof/device_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
 #include <glog/logging.h>
@@ -87,13 +86,7 @@ int main(int argc, char *argv[]) {
     FLAGS_alsologtostderr = 1;
 
     Status status = Status::OK;
-
     System system;
-    status = system.initialize();
-    if (status != Status::OK) {
-        LOG(ERROR) << "Could not initialize system!";
-        return 0;
-    }
 
     std::vector<std::shared_ptr<Camera>> cameras;
     system.getCameraList(cameras);
@@ -185,7 +178,7 @@ int main(int argc, char *argv[]) {
 
         /* Display the image */
         imshow("Display Depth", mat_depth);
-	imshow("Display Ir", mat_ir);
+        imshow("Display Ir", mat_ir);
     }
 
     return 0;
