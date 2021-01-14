@@ -34,6 +34,7 @@
 #include "aditof/depth_sensor_interface.h"
 #include "aditof/storage_interface.h"
 #include "aditof/temperature_sensor_interface.h"
+#include "sensor_names.h"
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
 
@@ -62,13 +63,52 @@ static const std::vector<std::string> availableControls = {
 static const std::string skEepromName = "custom";
 CameraFxTof1::CameraFxTof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeprom,
-    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensor)
-    : m_depthSensor(depthSensor), m_eeprom(eeprom.first()),
-      m_temperatureSensor(tSensor.first()), 
-      m_devStarted(false), m_eepromInitialized(false),
-      m_tempSensorsInitialized(false), m_availableControls(availableControls),
-      m_revision("RevA") {}
+    std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms,
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
+    : m_depthSensor(depthSensor), m_devStarted(false),
+      m_eepromInitialized(false), m_tempSensorsInitialized(false),
+      m_availableControls(availableControls), m_revision("RevA") {
+
+    // Check Depth Sensor
+    if (!depthSensor) {
+        LOG(WARNING) << "Invalid instance of a depth sensor";
+        return;
+    }
+    aditof::SensorDetails sDetails;
+    m_depthSensor->getDetails(sDetails);
+    m_details.connection = sDetails.connectionType;
+
+    // Look for EEPROM
+    auto eeprom_iter =
+        std::find_if(eeproms.begin(), eeproms.end(),
+                     [](std::shared_ptr<aditof::StorageInterface> e) {
+                         std::string name;
+                         e->getName(name);
+                         return name == EEPROM_NAME;
+                     });
+    if (eeprom_iter == eeproms.end()) {
+        LOG(WARNING) << "Could not find " << EEPROM_NAME
+                     << " while looking for storage for camera FXTOF1";
+        return;
+    }
+    m_eeprom = *eeprom_iter;
+
+    // Look for the temperature sensor
+    auto tempSensorIter = std::find_if(
+        tSensors.begin(), tSensors.end(),
+        [](std::shared_ptr<aditof::TemperatureSensorInterface> tSensor) {
+            std::string name;
+            tSensor->getName(name);
+            return name == TEMPERATURE_SENSOR_NAME;
+        });
+    if (tempSensorIter == tSensors.end()) {
+        LOG(WARNING) << "Could not find " << TEMPERATURE_SENSOR_NAME
+                     << " while looking for temperature sensors for "
+                        "camera FXTOF1";
+        return;
+    }
+    m_temperatureSensor = *tempSensorIter;
+}
 
 CameraFxTof1::~CameraFxTof1() {
     if (m_eepromInitialized) {
@@ -83,6 +123,11 @@ aditof::Status CameraFxTof1::initialize() {
     using namespace aditof;
 
     LOG(INFO) << "Initializing camera";
+
+    if (!m_depthSensor || !m_eeprom || !m_temperatureSensor) {
+        LOG(WARNING) << "Failed to initialize! Not all sensors are available";
+        return Status::GENERIC_ERROR;
+    }
 
     // Open communication with the depth sensor
     Status status = m_depthSensor->open();
@@ -119,7 +164,7 @@ aditof::Status CameraFxTof1::initialize() {
         LOG(ERROR) << "Failed to open temperature sensor with name " << name;
         return status;
     }
-    
+
     m_tempSensorsInitialized = true;
 
     status = m_calibration.readCalMap(m_eeprom);
