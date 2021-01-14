@@ -34,7 +34,6 @@
 #include "camera_eeprom_factory.h"
 #include "camera_eeprom_interface.h"
 #include <aditof/connections.h>
-#include <aditof/eeprom_construction_data.h>
 #include <aditof/sensor_enumerator_factory.h>
 #include <aditof/sensor_enumerator_interface.h>
 
@@ -143,7 +142,7 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
         return status;
     }
 
-    m_camera_eeprom = CameraEepromFactory::buildEeprom(sensorType, m_storage);
+    m_camera_eeprom = CameraEepromFactory::buildEeprom(m_storage);
 
     LOG(INFO) << "Successfully created connection to EEPROM";
 
