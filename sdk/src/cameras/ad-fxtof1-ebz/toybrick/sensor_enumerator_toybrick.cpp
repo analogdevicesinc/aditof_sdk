@@ -70,6 +70,7 @@ aditof::Status TargetSensorEnumerator::searchSensors() {
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
     sInfo.driverPath = "/dev/video2";
     sInfo.subDevPath = "/dev/v4l-subdev0";
+    sInfo.captureDev = CAPTURE_DEVICE_NAME;
     m_sensorsInfo.emplace_back(sInfo);
 
     StorageInfo eepromInfo;
