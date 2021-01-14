@@ -566,7 +566,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
         return bytesused == (width * height * 3);
     };
 
-    if ((width == 668)) {
+    if (width == 668) {
         unsigned int j = 0;
         for (unsigned int i = 0; i < (buf_data_len); i += 3) {
             if ((i != 0) && (i % (336 * 3) == 0)) {
