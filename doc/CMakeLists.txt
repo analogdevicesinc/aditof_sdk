@@ -30,7 +30,6 @@ set(DOCUMENTED_FILES "${SOURCES_DIR}/frame.h \\
                       ${SOURCES_DIR}/sensor_enumerator_interface.h \\
                       ${SOURCES_DIR}/sensor_enumerator_factory.h \\
                       ${SOURCES_DIR}/filters_factory.h \\
-                      ${SOURCES_DIR}/variance_filter.h \\
                       ${CMAKE_CURRENT_SOURCE_DIR}/mainpage.dox
                       "
 )
