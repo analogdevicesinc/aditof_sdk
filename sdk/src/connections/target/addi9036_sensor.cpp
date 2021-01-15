@@ -607,7 +607,6 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
                 buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
                                 ((buffer[i + 1]) & 0xF000) >> 12;
             }
-            memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
 #else
             // Not Packed and type == "depth_ir"
             uint16_t *ptr_depth = (uint16_t *)pdata[0];
