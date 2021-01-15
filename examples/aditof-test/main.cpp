@@ -32,13 +32,11 @@
 #include <aditof/camera.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
-#include <glog/logging.h>
-#include <string.h>
-#include <iostream>
 #include <filesystem>
-
-#include <bits/stdc++.h>
+#include <glog/logging.h>
 #include <iostream>
+#include <string.h>
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -56,13 +54,14 @@
 #define CVUI_IMPLEMENTATION
 #include "cvui.h"
 
-#define WINDOW_NAME "ADITOF TEST"
+#define WINDOW_NAME "ADITOF-TEST"
 
 using namespace aditof;
 
-int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance, float *precision);
-void saveData(cv::Mat irMat, cv::Mat depthMath, std::string eepromID);
-void moveData(std::string eepromID);
+int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
+               float *precision);
+//void saveData(cv::Mat irMat, cv::Mat depthMath, std::string eepromID);
+//void moveData(std::string eepromID);
 
 int main(int argc, char *argv[]) {
 
@@ -72,6 +71,8 @@ int main(int argc, char *argv[]) {
     bool captureStatus = false;
     bool frameReceived = false;
     bool testPassed = true;
+
+    bool fullScreen = false;
 
     cvui::init(WINDOW_NAME);
     cv::Mat frame = cv::Mat(cv::Size(800, 480), CV_8UC3);
@@ -97,6 +98,10 @@ int main(int argc, char *argv[]) {
             break;
         }
 
+        if (cvui::button(frame, 710, 100, 70, 200, "PowerOff")) {
+            system("shutdown -P now");
+        }
+
         if (cvui::button(frame, 30, 30, 200, 75, "Start")) {
             captureStatus = true;
         }
@@ -113,7 +118,8 @@ int main(int argc, char *argv[]) {
 
         if (captureStatus && !frameReceived) {
 
-            if (_DisplayIR(&irMat, &measuredDistance, targetDistance, &precision)) {
+            if (_DisplayIR(&irMat, &measuredDistance, targetDistance,
+                           &precision)) {
                 cv::resize(irMat, irMat,
                            cv::Size(irMat.cols * 0.65, irMat.rows * 0.65), 0, 0,
                            CV_INTER_LINEAR);
@@ -158,7 +164,8 @@ int main(int argc, char *argv[]) {
         }
 
         cvui::trackbar(frame, 30, 340, 750, &targetDistance, (int)300,
-                       (int)4500, 1, "%.0Lf", cvui::TRACKBAR_HIDE_VALUE_LABEL, 100);
+                       (int)4500, 1, "%.0Lf", cvui::TRACKBAR_HIDE_VALUE_LABEL,
+                       100);
         targetDistance = (targetDistance / 10) * 10;
 
         cvui::printf(frame, 30, 400, 0.5, 0xffffff, "Target distance:");
@@ -189,6 +196,15 @@ int main(int argc, char *argv[]) {
         cvui::update();
         cvui::imshow(WINDOW_NAME, frame);
 
+        cv::waitKey(20);
+
+	//For the application to start in fullscreen mode the following if must be uncommented
+
+       /* if (!fullScreen) {
+            system("wmctrl -r 'ADITOF-TEST' -b toggle,fullscreen");
+            fullScreen = true;
+        } */
+
         if (cv::waitKey(20) == 27) {
             break;
         }
@@ -197,7 +213,8 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance, float *precision) { 
+int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
+               float *precision) {
 
     Status status = Status::OK;
 
@@ -269,33 +286,34 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance, float 
         uint16_t *data;
         frame.getData(aditof::FrameDataType::DEPTH, &data);
 
-        *measuredDistance += static_cast<int>(data[240 * 640 + 320]);
+        *measuredDistance += static_cast<int>(
+            data[frameHeight * frameWidth / 2 + frameWidth / 2]);
     }
 
-    	/* Convert frame to IR mat */
-    	status = fromFrameToIrMat(frame, *irMat);
-    	if (status != Status::OK) {
-    	    LOG(ERROR) << "Could not convert from frame to mat!";
-    	    return 0;
-    	}
+    /* Convert frame to IR mat */
+    status = fromFrameToIrMat(frame, *irMat);
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not convert from frame to mat!";
+        return 0;
+    }
 
- 	/* Convert from frame to depth mat */
-        cv::Mat depthMat;
-        status = fromFrameToDepthMat(frame, depthMat);
-        if (status != Status::OK) {
-            LOG(ERROR) << "Could not convert from frame to mat!";
-            return 0;
-        }
+    /* Convert from frame to depth mat */
+    cv::Mat depthMat;
+    status = fromFrameToDepthMat(frame, depthMat);
+    if (status != Status::OK) {
+        LOG(ERROR) << "Could not convert from frame to mat!";
+        return 0;
+    }
 
-	/* Distance factor */
-        double distance_scale = 255.0 / cameraRange;
+    /* Distance factor */
+    double distance_scale = 255.0 / cameraRange;
 
-        /* Convert from raw values to values that opencv can understand */
-        depthMat.convertTo(depthMat, CV_8U, distance_scale);
+    /* Convert from raw values to values that opencv can understand */
+    depthMat.convertTo(depthMat, CV_8U, distance_scale);
 
-        /* Apply a rainbow color map to the mat to better visualize the
+    /* Apply a rainbow color map to the mat to better visualize the
          * depth data */
-        applyColorMap(depthMat, depthMat, cv::COLORMAP_RAINBOW);
+    applyColorMap(depthMat, depthMat, cv::COLORMAP_RAINBOW);
 
     int max_value_of_IR_pixel = (1 << bitCount) - 1;
 
@@ -306,57 +324,61 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance, float 
     cv::cvtColor(*irMat, *irMat, cv::COLOR_GRAY2RGB);
 
     *measuredDistance = *measuredDistance / 30;
-	
+
     if (*measuredDistance != 0) {
-            if (*measuredDistance < targetDistance) {
-                *precision = (*measuredDistance / (float)targetDistance) * 100;
-            } else {
-                *precision = ((float)targetDistance / (float)*measuredDistance) * 100;
-            }
+        if (*measuredDistance < targetDistance) {
+            *precision = (*measuredDistance / (float)targetDistance) * 100;
+        } else {
+            *precision =
+                ((float)targetDistance / (float)*measuredDistance) * 100;
         }
-	
-	std::ofstream MyFile("MeasuredResults.txt");
-	MyFile << "Targed set at distance: " << targetDistance << std::endl;
-	MyFile << "Camera measured: " << measuredDistance << std::endl;
-	MyFile << "Precision: " << *precision;
-	MyFile.close();
-	
-	std::string eepromID = "DUMMYVAL"; //to be read from eeprom for each camera
-	
-	saveData(*irMat,depthMat, eepromID);
-    	moveData(eepromID);
-    
+    }
+
+    std::ofstream MyFile("MeasuredResults.txt");
+    MyFile << "Targed set at distance: " << targetDistance << std::endl;
+    MyFile << "Camera measured: " << *measuredDistance << std::endl;
+    MyFile << "Precision: " << *precision;
+    MyFile.close();
+
+    std::string eepromID = "DUMMYVAL"; //to be read from eeprom for each camera
+
+    //saveData(*irMat, depthMat, eepromID);
+    //moveData(eepromID);
+
     return 1;
 }
+/*
+void saveData(cv::Mat irMat, cv::Mat depthMat, std::string eepromID) {
 
-void saveData(cv::Mat irMat, cv::Mat depthMat, std::string eepromID){
-	
     std::vector<int> compression_params;
     compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
     compression_params.push_back(9);
-    
+
     bool result = false;
     result = cv::imwrite("irImage.png", irMat, compression_params);
     result = cv::imwrite("depthImage.png", depthMat, compression_params);
 }
 
-void moveData(std::string eepromID){
+void moveData(std::string eepromID) {
 
-	std::string filename = "savedResults/";	
-	filename = filename + eepromID;
-	int status;
-	
-	status = mkdir(filename.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    std::string filename = "savedResults/";
+    int status;
 
-	char irImage[100] = " sudo mv irImage.png ";
-	char depthImage[100] = " sudo mv depthImage.png ";
-	char measuredResults[100] = " sudo mv MeasuredResults.txt ";
+    status = mkdir(filename.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-	strcat(irImage,filename.c_str());
-	strcat(depthImage,filename.c_str());
-	strcat(measuredResults,filename.c_str());
-	
-	system(irImage);
-	system(depthImage);
-	system(measuredResults);
-}
+    filename = filename + eepromID;
+
+    status = mkdir(filename.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+    char irImage[100] = " sudo mv irImage.png ";
+    char depthImage[100] = " sudo mv depthImage.png ";
+    char measuredResults[100] = " sudo mv MeasuredResults.txt ";
+
+    strcat(irImage, filename.c_str());
+    strcat(depthImage, filename.c_str());
+    strcat(measuredResults, filename.c_str());
+
+    system(irImage);
+    system(depthImage);
+    system(measuredResults);
+}*/

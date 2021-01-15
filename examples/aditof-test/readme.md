@@ -1,5 +1,5 @@
-# first-frame sample code
+# aditof-test sample code
 
 ## Overview
 
-The first-frame is a cross platform sample code that shows how to use the aditof sdk to configure a camera so that frames can be captured from it.
+aditof-test is an example that can detect an 8X8 checkerboard image and display the results using openCV libraries.
