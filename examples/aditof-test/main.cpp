@@ -60,8 +60,12 @@ using namespace aditof;
 
 int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
                float *precision);
-//void saveData(cv::Mat irMat, cv::Mat depthMath, std::string eepromID);
-//void moveData(std::string eepromID);
+
+#ifdef DATA_HANDLING
+void saveData(cv::Mat irMat, cv::Mat depthMath, std::string eepromID);
+void moveData(std::string eepromID);
+#endif
+
 
 int main(int argc, char *argv[]) {
 
@@ -347,7 +351,8 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
 
     return 1;
 }
-/*
+
+#ifdef DATA_HANDLING
 void saveData(cv::Mat irMat, cv::Mat depthMat, std::string eepromID) {
 
     std::vector<int> compression_params;
@@ -381,4 +386,5 @@ void moveData(std::string eepromID) {
     system(irImage);
     system(depthImage);
     system(measuredResults);
-}*/
+}
+#endif
