@@ -346,8 +346,10 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
 
     std::string eepromID = "DUMMYVAL"; //to be read from eeprom for each camera
 
-    //saveData(*irMat, depthMat, eepromID);
-    //moveData(eepromID);
+#ifdef DATA_HANDLING
+    saveData(*irMat, depthMat, eepromID);
+    moveData(eepromID);
+#endif
 
     return 1;
 }
