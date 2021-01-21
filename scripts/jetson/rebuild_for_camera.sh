@@ -15,10 +15,10 @@ mkdir build
 cd build
 
 if [ "$#" -eq 1 ]; then
-	cmake "$1" -DJETSON=1 -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="~/workspace/github/aditof_sdk/deps/installed/glog;~/workspace/github/aditof_sdk/deps/installed/protobuf;~/workspace/github/aditof_sdk/deps/installed/websockets" ..
+	cmake "$1" -DJETSON=1 -DWITH_EXAMPLES=off -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
 
 else
-	cmake -DJETSON=1 -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="~/workspace/github/aditof_sdk/deps/installed/glog;~/workspace/github/aditof_sdk/deps/installed/protobuf;~/workspace/github/aditof_sdk/deps/installed/websockets" ..
+	cmake -DJETSON=1 -DWITH_EXAMPLES=off -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
 fi
 
 sudo cmake --build . --target install

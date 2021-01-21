@@ -8,9 +8,9 @@
 #The implicit build, if no parameters are passed is for AD-96TOF1-EBZ.
 
 
-cd $(dirname $(realpath $0))/../..
+cd $(dirname $(dirname $(dirname $(realpath $0))))
 git pull
-sudo rm -r build
+sudo rm -r -f build
 mkdir build
 cd build
 
