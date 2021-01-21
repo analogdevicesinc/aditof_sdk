@@ -8,17 +8,17 @@
 #The implicit build, if no parameters are passed is for AD-96TOF1-EBZ.
 
 
-cd $(dirname $(dirname $(dirname $(realpath $0)))) 
+cd $(dirname $(realpath $0))/../..
 git pull
-sudo rm -r -f build
+sudo rm -r build
 mkdir build
 cd build
 
 if [ "$#" -eq 1 ]; then
-	cmake "$1" -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH=“/opt/glog;/opt/protobuf;/opt/websockets” ..
+	cmake "$1" -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
 
 else
-	cmake -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH=“/opt/glog;/opt/protobuf;/opt/websockets” ..
+	cmake -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
 fi
 
 sudo cmake --build . --target install

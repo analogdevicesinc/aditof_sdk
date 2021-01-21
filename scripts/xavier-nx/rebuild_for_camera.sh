@@ -15,10 +15,10 @@ mkdir build
 cd build
 
 if [ "$#" -eq 1 ]; then
-	cmake "$1" -DXAVIERNX=1 -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH=“~/workspace/github/aditof_sdk/deps/installed/glog;~/workspace/github/aditof_sdk/deps/installed/protobuf;~/workspace/github/aditof_sdk/deps/installed/websockets” ..
+	cmake "$1" -DXAVIERNX=1 -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="~/workspace/github/aditof_sdk/deps/installed/glog;~/workspace/github/aditof_sdk/deps/installed/protobuf;~/workspace/github/aditof_sdk/deps/installed/websockets" ..
 
 else
-	cmake -DXAVIERNX=1 -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH=“~/workspace/github/aditof_sdk/deps/installed/glog;~/workspace/github/aditof_sdk/deps/installed/protobuf;~/workspace/github/aditof_sdk/deps/installed/websockets” ..
+	cmake -DXAVIERNX=1 -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="~/workspace/github/aditof_sdk/deps/installed/glog;~/workspace/github/aditof_sdk/deps/installed/protobuf;~/workspace/github/aditof_sdk/deps/installed/websockets" ..
 fi
 
 sudo cmake --build . --target install
