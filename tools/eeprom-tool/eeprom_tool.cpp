@@ -90,6 +90,18 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
     enumerator->getStorages(m_storages);
     enumerator->getDepthSensors(depthSensors);
 
+    if (depthSensors.size() == 0) {
+        LOG(ERROR) << "Cannot find any camera depth sensor";
+        return aditof::Status::GENERIC_ERROR;
+    }
+
+    if (usedDepthSensorIndex >= depthSensors.size()) {
+        LOG(ERROR) << "Depth sensor index to use is out of bounds";
+        return aditof::Status::GENERIC_ERROR;
+    }
+
+    m_depthSensor = depthSensors[usedDepthSensorIndex];
+
     if (m_storages.size() == 0) {
         LOG(ERROR) << "Cannot find any storages";
         return aditof::Status::GENERIC_ERROR;
@@ -123,13 +135,13 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
     m_storage = *iter;
 
     //get handle
-    status = depthSensors[usedDepthSensorIndex]->open();
+    status = m_depthSensor->open();
     if (status != aditof::Status::OK) {
-        LOG(WARNING) << "Failed to open device";
+        LOG(WARNING) << "Failed to open depth sensor";
         return status;
     }
 
-    status = depthSensors[usedDepthSensorIndex]->getHandle(&handle);
+    status = m_depthSensor->getHandle(&handle);
     if (status != aditof::Status::OK) {
         LOG(ERROR) << "Failed to obtain the handle";
         return status;
@@ -248,5 +260,6 @@ EepromTool::~EepromTool() {
     if (m_storage) {
         m_storage->close();
     }
+
     LOG(INFO) << "Destroyed connection";
 }
