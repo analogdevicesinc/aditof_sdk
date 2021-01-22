@@ -34,7 +34,7 @@
 const char *helpString = R"V0G0N(
    Usage: eeprom-tool [(-u | -m | -e <ip>)] [-n <eeprom_name>]  (-h | -l | -w <file_path> | -r <file_path>) 
    
-   Reads or writes the contents of the eeprom memory to / from a file. The connection interface may be mipi, local or network. 
+   Reads or writes the contents of the eeprom memory to or from a file. The connection interface may be mipi, local or network.
    If none is specified the tool tries usb and local.
    Also, if multiple memories are available the target should be specified by name. All memories available can be listed.
    
@@ -45,7 +45,7 @@ const char *helpString = R"V0G0N(
 
    -e, --eeprom   specifies the name of eeprom on the target.
 
-   -r, --read     reads the contnets of the eeprom memory and writes it into the specified file
+   -r, --read     reads the contents of the eeprom memory and writes it into the specified file
    -w, --write    reads the contents of the specified file and writes is into the eeprom memory 
    -l, --list     list all the available memories
    -h, --help     prints this message 
