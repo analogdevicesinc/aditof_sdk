@@ -73,6 +73,7 @@ class EepromTool {
     std::shared_ptr<aditof::DepthSensorInterface> m_depthSensor;
     std::shared_ptr<aditof::StorageInterface> m_storage;
     std::vector<std::shared_ptr<aditof::StorageInterface>> m_storages;
+    bool m_storageOpened;
 };
 
 #endif // EEPROM_TOOL_H

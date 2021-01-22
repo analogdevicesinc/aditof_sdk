@@ -45,7 +45,7 @@
 
 const std::string connectionTypeMapStr[] = {"ON_TARGET", "USB", "NETWORK"};
 
-EepromTool::EepromTool() {
+EepromTool::EepromTool() : m_storageOpened(false) {
     //TODO ??
 }
 
@@ -153,6 +153,7 @@ aditof::Status EepromTool::setConnection(aditof::ConnectionType connectionType,
         LOG(ERROR) << "Failed to open storage";
         return status;
     }
+    m_storageOpened = true;
 
     m_camera_eeprom = CameraEepromFactory::buildEeprom(m_storage);
 
@@ -257,7 +258,7 @@ aditof::Status EepromTool::writeFile(char const *filename,
 }
 
 EepromTool::~EepromTool() {
-    if (m_storage) {
+    if (m_storageOpened) {
         m_storage->close();
     }
 
