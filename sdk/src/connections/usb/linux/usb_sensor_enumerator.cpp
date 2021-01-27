@@ -160,8 +160,14 @@ Status UsbSensorEnumerator::searchSensors() {
             close(fd);
             continue;
         }
+
+        DLOG(INFO) << "Found USB capture device at: " << driverPath;
+
         string advertisedSensorData;
         getAvailableSensors(fd, advertisedSensorData);
+        DLOG(INFO) << "Received the following buffer with available sensors "
+                      "from target: "
+                   << advertisedSensorData;
         close(fd);
 
         vector<string> sensorsPaths;
