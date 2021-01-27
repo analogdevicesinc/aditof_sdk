@@ -25,6 +25,7 @@
 #include <aditof/sensor_enumerator_interface.h>
 #include <aditof/storage_interface.h>
 #include <aditof/temperature_sensor_interface.h>
+#include <aditof/version.h>
 #include <atomic>
 #include <errno.h>
 #include <fcntl.h>
@@ -2022,6 +2023,9 @@ int main(int argc, char *argv[]) {
     enum usb_device_speed speed = USB_SPEED_HIGH; /* High-Speed */
     enum io_method uvc_io_method = IO_METHOD_USERPTR;
 
+    DLOG(INFO) << "This UVC instance is using aditof sdk version: "
+               << ADITOF_API_VERSION;
+
     auto sensorsEnumerator =
         aditof::SensorEnumeratorFactory::buildTargetSensorEnumerator();
     if (!sensorsEnumerator) {
@@ -2052,6 +2056,7 @@ int main(int argc, char *argv[]) {
     aditof::SensorDetails camSensorDetails;
     camDepthSensor->getDetails(camSensorDetails);
 
+    DLOG(INFO) << "Storages found:";
     int storage_id = 0;
     for (const auto &storage : storages) {
         std::string name;
@@ -2060,7 +2065,10 @@ int main(int argc, char *argv[]) {
         availableSensorsBlob +=
             "STORAGE_ID=" + std::to_string(storage_id) + ";";
         ++storage_id;
+        DLOG(INFO) << name;
     }
+
+    DLOG(INFO) << "Temperature sensors found:";
     int temp_sensor_id = 0;
     for (const auto &sensor : temperatureSensors) {
         std::string name;
@@ -2069,7 +2077,11 @@ int main(int argc, char *argv[]) {
         availableSensorsBlob +=
             "TEMP_SENSOR_ID=" + std::to_string(temp_sensor_id) + ";";
         ++temp_sensor_id;
+        DLOG(INFO) << name;
     }
+
+    DLOG(INFO) << "Message blob about available sensors to be sent to remote:";
+    DLOG(INFO) << availableSensorsBlob;
 
     const uint32_t buffLen = availableSensorsBlob.length();
     sensorsInfoBuffer = new char[buffLen + sizeof(uint16_t)];
