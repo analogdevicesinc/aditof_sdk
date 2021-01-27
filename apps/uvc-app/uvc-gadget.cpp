@@ -1998,6 +1998,9 @@ int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
 
+    DLOG(INFO) << argv[0] << " "
+               << "has started";
+
     signal(SIGINT, stopHandler);
     signal(SIGKILL, stopHandler);
     signal(SIGTERM, stopHandler);
@@ -2428,6 +2431,9 @@ int main(int argc, char *argv[]) {
         delete[] sensorsInfoBuffer;
         sensorsInfoBuffer = nullptr;
     }
+
+    DLOG(INFO) << argv[0] << " "
+               << "is now closing gracefully";
 
     return 0;
 }
