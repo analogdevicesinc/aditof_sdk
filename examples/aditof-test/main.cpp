@@ -32,7 +32,9 @@
 #include <aditof/camera.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
+#if DATA_HANDLING
 #include <filesystem>
+#endif
 #include <glog/logging.h>
 #include <iostream>
 #include <string.h>
@@ -65,7 +67,6 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
 void saveData(cv::Mat irMat, cv::Mat depthMath, std::string eepromID);
 void moveData(std::string eepromID);
 #endif
-
 
 int main(int argc, char *argv[]) {
 
@@ -202,9 +203,9 @@ int main(int argc, char *argv[]) {
 
         cv::waitKey(20);
 
-	//For the application to start in fullscreen mode the following if must be uncommented
+        //For the application to start in fullscreen mode the following if must be uncommented
 
-       /* if (!fullScreen) {
+        /* if (!fullScreen) {
             system("wmctrl -r 'ADITOF-TEST' -b toggle,fullscreen");
             fullScreen = true;
         } */
