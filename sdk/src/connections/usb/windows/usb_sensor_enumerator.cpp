@@ -139,8 +139,14 @@ Status UsbSensorEnumerator::searchSensors() {
                     SensorInfo sInfo;
                     sInfo.driverPath = str;
 
+                    DLOG(INFO) << "Found USB capture device: " << str;
+
                     std::string advertisedSensorData;
                     status = getAvailableSensors(Moniker, advertisedSensorData);
+                    DLOG(INFO) << "Received the following buffer with "
+                                  "available sensors "
+                                  "from target: "
+                               << advertisedSensorData;
                     if (status == Status::OK) {
                         vector<string> sensorsPaths;
                         Utils::splitIntoTokens(advertisedSensorData, ';',
