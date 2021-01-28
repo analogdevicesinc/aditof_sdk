@@ -32,7 +32,7 @@
 #include <aditof/camera.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
-#if DATA_HANDLING
+#ifdef DATA_HANDLING
 #include <filesystem>
 #endif
 #include <glog/logging.h>
