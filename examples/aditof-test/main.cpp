@@ -33,6 +33,7 @@
 #include <aditof/frame.h>
 #include <aditof/system.h>
 #include <aditof/temperature_sensor_interface.h>
+#include <aditof/storage_interface.h>
 #ifdef DATA_HANDLING
 #include <filesystem>
 #endif
@@ -199,7 +200,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (temperature != 0) {
-            cvui::printf(frame, 475, 420, "Value = %.2f", temperature);
+            cvui::printf(frame, 465, 420, "Value = %.2f", temperature);
         }
 
         cvui::endColumn();
@@ -210,7 +211,7 @@ int main(int argc, char *argv[]) {
 
         cv::waitKey(20);
 
-        //For the application to start in fullscreen mode the following if must be uncommented
+        /* For the application to start in fullscreen mode the following if must be uncommented */
 
         /* if (!fullScreen) {
             system("wmctrl -r 'ADITOF-TEST' -b toggle,fullscreen");
@@ -346,31 +347,32 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
         }
     }
 
+    /* Read the camera temperature */
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
         tempSensors;
     camera->getTemperatureSensors(tempSensors);
-
     tempSensors[0]->read(*temperature);
 
+
+    /* Save measured results in a file */
     std::ofstream MyFile("MeasuredResults.txt");
-    MyFile << "Targed set at distance: " << targetDistance << std::endl;
-    MyFile << "Camera measured: " << *measuredDistance << std::endl;
-    MyFile << "Precision: " << *precision;
+    MyFile << "Targed set at distance: " << targetDistance;
+    MyFile << "\nCamera measured: " << *measuredDistance;
+    MyFile << "\nPrecision: " << *precision;
+    MyFile << "\nTemperature: " << *temperature;
     MyFile.close();
-/*
+
+    /* Read the camera serial from EEPROM */
     uint8_t eepromName[12];
     std::vector<std::shared_ptr<aditof::StorageInterface>> eeprom;
     camera->getEeproms(eeprom);
-    
-    std::ostringstream convert;
-    for (uint8_t i = 0x0016; i < 12; i++) {
-        convert << eeprom[i];
-    }
+    eeprom[0]->read(0x0016, eepromName, 12);
 
-    std::string eepromID = convert.str();
-*/
+    std::string eepromID = "";
 
-    std::string eepromID = "DUMMY";
+    for(int i = 0; i < 12; i++){
+    eepromID.push_back(eepromName[i]);
+	}
 
 #ifdef DATA_HANDLING
     saveData(*irMat, depthMat, eepromID);
