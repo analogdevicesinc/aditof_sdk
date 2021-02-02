@@ -158,8 +158,6 @@ aditof::Status Calibration96Tof1::readCalMap(
     uint32_t j = 0;
     float key;
 
-    eeprom->write(EEPROM_SIZE - 5, (uint8_t *)&read_size, 4);
-
     eeprom->read(0, (uint8_t *)&read_size, 4);
     LOG(INFO) << "EEPROM calibration data size " << read_size << " bytes";
 
@@ -312,8 +310,8 @@ aditof::Status Calibration96Tof1::getGainOffset(const std::string &mode,
 //! getIntrinsic - Get the geometric camera calibration
 /*!
 getIntrinsic - Get the geometric camera clibration
-\param key - Specifies which calibration values to get: 
-             intrinsincs or distortion coefficients 
+\param key - Specifies which calibration values to get:
+             intrinsincs or distortion coefficients
 \param data - Buffer to store the returned data
 */
 aditof::Status Calibration96Tof1::getIntrinsic(float key,

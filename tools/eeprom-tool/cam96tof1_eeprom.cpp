@@ -51,9 +51,6 @@ aditof::Status Camera96Tof1Eeprom::read(std::vector<uint8_t> &data) {
     m_eeprom->getName(eepromName);
     eepromSize = EEPROMS.at(eepromName).size;
 
-    //mistery
-    m_eeprom->write(eepromSize - 5, (uint8_t *)&read_size, 4);
-
     //read size
     m_eeprom->read((uint32_t)0, (uint8_t *)&read_size, (size_t)4);
     LOG(INFO) << "EEPROM calibration data size " << read_size << " bytes";
