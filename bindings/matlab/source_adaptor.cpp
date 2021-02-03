@@ -339,7 +339,8 @@ std::shared_ptr<aditof::Frame> SourceAdaptor::getFrameFromHwDevice() {
 
 std::string SourceAdaptor::readTemp() const {
     if (m_camera) {
-        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> tempSensors;
+        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+            tempSensors;
         m_camera->getTemperatureSensors(tempSensors);
 
         std::string temperature;
@@ -574,8 +575,8 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::DEPTH, &data);
                 for (int i = 0; i < imageHeight * imageWidth; ++i) {
-                    int value =
-                        ((static_cast<double>(data[i]) - minDepth) / (maxDepth - minDepth) * 255.0);
+                    int value = ((static_cast<double>(data[i]) - minDepth) /
+                                 (maxDepth - minDepth) * 255.0);
                     value = value < 0 ? 0 : value;
                     imBuffer[i] =
                         static_cast<uint8_t>(value <= 255 ? value : 255);

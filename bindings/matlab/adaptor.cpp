@@ -47,9 +47,7 @@ aditof::System *m_system = nullptr;
  * any adaptor object is created.
  */
 
-void initializeAdaptor() {
-    m_system = new aditof::System();
-}
+void initializeAdaptor() { m_system = new aditof::System(); }
 
 /**
  * uninitializeAdaptor: Exported function to uninitialize the adaptor.
