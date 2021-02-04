@@ -59,9 +59,10 @@ int main(int argc, char *argv[]) {
                                      cliArguments.ip, cliArguments.eepromName);
     }
     //if none is specified try local and usb
-    else if (aditof::Status::OK == (status = controller.setConnection(
-                                        ConnectionType::ON_TARGET, cliArguments.ip,
-                                        cliArguments.eepromName))) {
+    else if (aditof::Status::OK ==
+             (status = controller.setConnection(ConnectionType::ON_TARGET,
+                                                cliArguments.ip,
+                                                cliArguments.eepromName))) {
     } else if (aditof::Status::OK == (status = controller.setConnection(
                                           ConnectionType::USB, cliArguments.ip,
                                           cliArguments.eepromName))) {

@@ -59,16 +59,15 @@
 #define _CVUI_H_
 
 #include <iostream>
-#include <vector>
 #include <map>
 #include <stdarg.h>
+#include <vector>
 
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
-namespace cvui
-{
+namespace cvui {
 /**
  Initializes cvui. You must provide the name of the window where
  components will be added. It is also possible to tell cvui to handle
@@ -85,7 +84,8 @@ namespace cvui
  \sa watch()
  \sa context()
 */
-void init(const cv::String& theWindowName, int theDelayWaitKey = -1, bool theCreateNamedWindow = true);
+void init(const cv::String &theWindowName, int theDelayWaitKey = -1,
+          bool theCreateNamedWindow = true);
 
 /**
  Initialize cvui using a list of names of windows where components will be added.
@@ -103,7 +103,8 @@ void init(const cv::String& theWindowName, int theDelayWaitKey = -1, bool theCre
  \sa watch()
  \sa context()
 */
-void init(const cv::String theWindowNames[], size_t theHowManyWindows, int theDelayWaitKey = -1, bool theCreateNamedWindows = true);
+void init(const cv::String theWindowNames[], size_t theHowManyWindows,
+          int theDelayWaitKey = -1, bool theCreateNamedWindows = true);
 
 /**
  Track UI interactions of a particular window. This function must be invoked
@@ -119,7 +120,7 @@ void init(const cv::String theWindowNames[], size_t theHowManyWindows, int theDe
  \sa init()
  \sa context()
 */
-void watch(const cv::String& theWindowName, bool theCreateNamedWindow = true);
+void watch(const cv::String &theWindowName, bool theCreateNamedWindow = true);
 
 /**
  Inform cvui that all subsequent component calls belong to a window in particular.
@@ -180,7 +181,7 @@ void watch(const cv::String& theWindowName, bool theCreateNamedWindow = true);
  \sa init()
  \sa watch()
 */
-void context(const cv::String& theWindowName);
+void context(const cv::String &theWindowName);
 
 /**
  Display an image in the specified window and update the internal structures of cvui.
@@ -199,7 +200,7 @@ void context(const cv::String& theWindowName);
  \sa context()
  \sa watch()
 */
-void imshow(const cv::String& theWindowName, cv::InputArray theFrame);
+void imshow(const cv::String &theWindowName, cv::InputArray theFrame);
 
 /**
  Return the last key that was pressed. This function will only
@@ -216,7 +217,7 @@ int lastKeyPressed();
  \param theWindowName name of the window whose mouse cursor will be used. If nothing is informed (default), the function will return the position of the mouse cursor for the default window (the one informed in `cvui::init()`).
  \return a point containing the position of the mouse cursor in the speficied window.
 */
-cv::Point mouse(const cv::String& theWindowName = "");
+cv::Point mouse(const cv::String &theWindowName = "");
 
 /**
  Query the mouse for events, e.g. "is any button down now?". Available queries are:
@@ -259,7 +260,7 @@ bool mouse(int theQuery);
  \sa mouse(int, int)
  \sa mouse(int)
 */
-bool mouse(const cv::String& theWindowName, int theQuery);
+bool mouse(const cv::String &theWindowName, int theQuery);
 
 /**
  Query the mouse for events in a particular button. This function behave exactly like `cvui::mouse(int theQuery)`,
@@ -283,7 +284,7 @@ bool mouse(int theButton, int theQuery);
  \param theButton integer describing the mouse button to be queried. Possible values are `cvui::LEFT_BUTTON`, `cvui::MIDDLE_BUTTON` and `cvui::LEFT_BUTTON`.
  \param theQuery integer describing the intended mouse query. Available queries are `cvui::DOWN`, `cvui::UP`, `cvui::CLICK`, and `cvui::IS_DOWN`.
 */
-bool mouse(const cv::String& theWindowName, int theButton, int theQuery);
+bool mouse(const cv::String &theWindowName, int theButton, int theQuery);
 
 /**
  Display a button. The size of the button will be automatically adjusted to
@@ -295,7 +296,7 @@ bool mouse(const cv::String& theWindowName, int theButton, int theQuery);
  \param theLabel text displayed inside the button.
  \return `true` everytime the user clicks the button.
 */
-bool button(cv::Mat& theWhere, int theX, int theY, const cv::String& theLabel);
+bool button(cv::Mat &theWhere, int theX, int theY, const cv::String &theLabel);
 
 /**
  Display a button. The button size will be defined by the width and height parameters,
@@ -309,7 +310,8 @@ bool button(cv::Mat& theWhere, int theX, int theY, const cv::String& theLabel);
  \param theLabel text displayed inside the button.
  \return `true` everytime the user clicks the button.
 */
-bool button(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, const cv::String& theLabel);
+bool button(cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight,
+            const cv::String &theLabel);
 
 /**
  Display a button whose graphics are images (cv::Mat). The button accepts three images to describe its states,
@@ -328,7 +330,8 @@ bool button(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, 
  \sa image()
  \sa iarea()
 */
-bool button(cv::Mat& theWhere, int theX, int theY, cv::Mat& theIdle, cv::Mat& theOver, cv::Mat& theDown);
+bool button(cv::Mat &theWhere, int theX, int theY, cv::Mat &theIdle,
+            cv::Mat &theOver, cv::Mat &theDown);
 
 /**
  Display an image (cv::Mat). 
@@ -341,7 +344,7 @@ bool button(cv::Mat& theWhere, int theX, int theY, cv::Mat& theIdle, cv::Mat& th
  \sa button()
  \sa iarea()
 */
-void image(cv::Mat& theWhere, int theX, int theY, cv::Mat& theImage);
+void image(cv::Mat &theWhere, int theX, int theY, cv::Mat &theImage);
 
 /**
  Display a checkbox. You can use the state parameter to monitor if the
@@ -355,7 +358,8 @@ void image(cv::Mat& theWhere, int theX, int theY, cv::Mat& theImage);
  \param theColor color of the label in the format `0xRRGGBB`, e.g. `0xff0000` for red.
  \return a boolean value that indicates the current state of the checkbox, `true` if it is checked.
 */
-bool checkbox(cv::Mat& theWhere, int theX, int theY, const cv::String& theLabel, bool *theState, unsigned int theColor = 0xCECECE);
+bool checkbox(cv::Mat &theWhere, int theX, int theY, const cv::String &theLabel,
+              bool *theState, unsigned int theColor = 0xCECECE);
 
 /**
  Display a piece of text.
@@ -369,7 +373,8 @@ bool checkbox(cv::Mat& theWhere, int theX, int theY, const cv::String& theLabel,
 
  \sa printf()
 */
-void text(cv::Mat& theWhere, int theX, int theY, const cv::String& theText, double theFontScale = 0.4, unsigned int theColor = 0xCECECE);
+void text(cv::Mat &theWhere, int theX, int theY, const cv::String &theText,
+          double theFontScale = 0.4, unsigned int theColor = 0xCECECE);
 
 /**
  Display a piece of text that can be formated using `stdio's printf()` style. For instance
@@ -388,7 +393,8 @@ void text(cv::Mat& theWhere, int theX, int theY, const cv::String& theText, doub
  
  \sa text()
 */
-void printf(cv::Mat& theWhere, int theX, int theY, double theFontScale, unsigned int theColor, const char *theFmt, ...);
+void printf(cv::Mat &theWhere, int theX, int theY, double theFontScale,
+            unsigned int theColor, const char *theFmt, ...);
 
 /**
  Display a piece of text that can be formated using `stdio's printf()` style. For instance
@@ -407,7 +413,7 @@ void printf(cv::Mat& theWhere, int theX, int theY, double theFontScale, unsigned
 
  \sa text()
 */
-void printf(cv::Mat& theWhere, int theX, int theY, const char *theFmt, ...);
+void printf(cv::Mat &theWhere, int theX, int theY, const char *theFmt, ...);
 
 /**
  Display a counter for integer values that the user can increase/descrease
@@ -421,7 +427,8 @@ void printf(cv::Mat& theWhere, int theX, int theY, const char *theFmt, ...);
  \param theFormat how the value of the counter should be presented, as it was printed by `stdio's printf()`. E.g. `"%d"` means the value will be displayed as an integer, `"%0d"` integer with one leading zero, etc.
  \return integer that corresponds to the current value of the counter.
 */
-int counter(cv::Mat& theWhere, int theX, int theY, int *theValue, int theStep = 1, const char *theFormat = "%d");
+int counter(cv::Mat &theWhere, int theX, int theY, int *theValue,
+            int theStep = 1, const char *theFormat = "%d");
 
 /**
  Display a counter for float values that the user can increase/descrease
@@ -435,7 +442,8 @@ int counter(cv::Mat& theWhere, int theX, int theY, int *theValue, int theStep = 
  \param theFormat how the value of the counter should be presented, as it was printed by `stdio's printf()`. E.g. `"%f"` means the value will be displayed as a regular float, `"%.2f"` float with two digits after the point, etc.
  \return a float that corresponds to the current value of the counter.
 */
-double counter(cv::Mat& theWhere, int theX, int theY, double *theValue, double theStep = 0.5, const char *theFormat = "%.2f");
+double counter(cv::Mat &theWhere, int theX, int theY, double *theValue,
+               double theStep = 0.5, const char *theFormat = "%.2f");
 
 /**
  Display a trackbar for numeric values that the user can increase/decrease
@@ -472,7 +480,10 @@ double counter(cv::Mat& theWhere, int theX, int theY, double *theValue, double t
  \sa counter()
 */
 template <typename T>
-bool trackbar(cv::Mat& theWhere, int theX, int theY, int theWidth, T *theValue, T theMin, T theMax, int theSegments = 1, const char *theLabelFormat = "%.1Lf", unsigned int theOptions = 0, T theDiscreteStep = 1);
+bool trackbar(cv::Mat &theWhere, int theX, int theY, int theWidth, T *theValue,
+              T theMin, T theMax, int theSegments = 1,
+              const char *theLabelFormat = "%.1Lf", unsigned int theOptions = 0,
+              T theDiscreteStep = 1);
 
 /**
  Display a window (a block with a title and a body).
@@ -486,7 +497,8 @@ bool trackbar(cv::Mat& theWhere, int theX, int theY, int theWidth, T *theValue, 
 
  \sa rect()
 */
-void window(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, const cv::String& theTitle);
+void window(cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight,
+            const cv::String &theTitle);
 
 /**
  Display a filled rectangle.
@@ -501,7 +513,9 @@ void window(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, 
 
  \sa image()
 */
-void rect(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor = 0xff000000);
+void rect(cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight,
+          unsigned int theBorderColor,
+          unsigned int theFillingColor = 0xff000000);
 
 /**
  Display the values of a vector as a sparkline.
@@ -516,7 +530,9 @@ void rect(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, un
 
  \sa trackbar()
 */
-void sparkline(cv::Mat& theWhere, std::vector<double>& theValues, int theX, int theY, int theWidth, int theHeight, unsigned int theColor = 0x00FF00);
+void sparkline(cv::Mat &theWhere, std::vector<double> &theValues, int theX,
+               int theY, int theWidth, int theHeight,
+               unsigned int theColor = 0x00FF00);
 
 /**
  Create an interaction area that reports activity with the mouse cursor.
@@ -602,7 +618,8 @@ int iarea(int theX, int theY, int theWidth, int theHeight);
  \sa endRow()
  \sa endColumn()
 */
-void beginRow(cv::Mat &theWhere, int theX, int theY, int theWidth = -1, int theHeight = -1, int thePadding = 0);
+void beginRow(cv::Mat &theWhere, int theX, int theY, int theWidth = -1,
+              int theHeight = -1, int thePadding = 0);
 
 /**
  Ends a row. You must call this function only if you have previously called
@@ -675,7 +692,8 @@ Don't forget to call `endColumn()` to finish the column, otherwise cvui will thr
 \sa endColumn()
 \sa endRow()
 */
-void beginColumn(cv::Mat &theWhere, int theX, int theY, int theWidth = -1, int theHeight = -1, int thePadding = 0);
+void beginColumn(cv::Mat &theWhere, int theX, int theY, int theWidth = -1,
+                 int theHeight = -1, int thePadding = 0);
 
 /**
  End a column. You must call this function only if you have previously called
@@ -753,7 +771,8 @@ void space(int theValue = 5);
  \sa endRow()
  \sa endColumn()
 */
-void text(const cv::String& theText, double theFontScale = 0.4, unsigned int theColor = 0xCECECE);
+void text(const cv::String &theText, double theFontScale = 0.4,
+          unsigned int theColor = 0xCECECE);
 
 /**
  Display a button within a `begin*()` and `end*()` block.
@@ -772,7 +791,7 @@ void text(const cv::String& theText, double theFontScale = 0.4, unsigned int the
  \sa endRow()
  \sa endColumn()
 */
-bool button(int theWidth, int theHeight, const cv::String& theLabel);
+bool button(int theWidth, int theHeight, const cv::String &theLabel);
 
 /**
  Display a button within a `begin*()` and `end*()` block. The size of the button will be
@@ -788,7 +807,7 @@ bool button(int theWidth, int theHeight, const cv::String& theLabel);
  \sa endRow()
  \sa endColumn()
 */
-bool button(const cv::String& theLabel);
+bool button(const cv::String &theLabel);
 
 /**
  Display a button whose graphics are images (cv::Mat).
@@ -812,7 +831,7 @@ bool button(const cv::String& theLabel);
  \sa endRow()
  \sa endColumn()
 */
-bool button(cv::Mat& theIdle, cv::Mat& theOver, cv::Mat& theDown);
+bool button(cv::Mat &theIdle, cv::Mat &theOver, cv::Mat &theDown);
 
 /**
  Display an image (cv::Mat) within a `begin*()` and `end*()` block
@@ -828,7 +847,7 @@ bool button(cv::Mat& theIdle, cv::Mat& theOver, cv::Mat& theDown);
  \sa endRow()
  \sa endColumn()
 */
-void image(cv::Mat& theImage);
+void image(cv::Mat &theImage);
 
 /**
  Display a checkbox within a `begin*()` and `end*()` block. You can use the state parameter
@@ -846,7 +865,8 @@ void image(cv::Mat& theImage);
  \sa endRow()
  \sa endColumn()
 */
-bool checkbox(const cv::String& theLabel, bool *theState, unsigned int theColor = 0xCECECE);
+bool checkbox(const cv::String &theLabel, bool *theState,
+              unsigned int theColor = 0xCECECE);
 
 /**
  Display a piece of text within a `begin*()` and `end*()` block.
@@ -870,7 +890,8 @@ bool checkbox(const cv::String& theLabel, bool *theState, unsigned int theColor 
 \sa endRow()
 \sa endColumn()
 */
-void printf(double theFontScale, unsigned int theColor, const char *theFmt, ...);
+void printf(double theFontScale, unsigned int theColor, const char *theFmt,
+            ...);
 
 /**
  Display a piece of text that can be formated using `stdio's printf()` style.
@@ -931,7 +952,8 @@ int counter(int *theValue, int theStep = 1, const char *theFormat = "%d");
  \sa endRow()
  \sa endColumn()
 */
-double counter(double *theValue, double theStep = 0.5, const char *theFormat = "%.2f");
+double counter(double *theValue, double theStep = 0.5,
+               const char *theFormat = "%.2f");
 
 /**
  Display a trackbar for numeric values that the user can increase/decrease
@@ -973,7 +995,9 @@ double counter(double *theValue, double theStep = 0.5, const char *theFormat = "
  \sa endColumn()
 */
 template <typename T> // T can be any float type (float, double, long double)
-bool trackbar(int theWidth, T *theValue, T theMin, T theMax, int theSegments = 1, const char *theLabelFormat = "%.1Lf", unsigned int theOptions = 0, T theDiscreteStep = 1);
+bool trackbar(int theWidth, T *theValue, T theMin, T theMax,
+              int theSegments = 1, const char *theLabelFormat = "%.1Lf",
+              unsigned int theOptions = 0, T theDiscreteStep = 1);
 
 /**
  Display a window (a block with a title and a body) within a `begin*()` and `end*()` block.
@@ -990,7 +1014,7 @@ bool trackbar(int theWidth, T *theValue, T theMin, T theMax, int theSegments = 1
  \sa endRow()
  \sa endColumn()
 */
-void window(int theWidth, int theHeight, const cv::String& theTitle);
+void window(int theWidth, int theHeight, const cv::String &theTitle);
 
 /**
  Display a rectangle within a `begin*()` and `end*()` block.
@@ -1008,7 +1032,8 @@ void window(int theWidth, int theHeight, const cv::String& theTitle);
  \sa endRow()
  \sa endColumn()
 */
-void rect(int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor = 0xff000000);
+void rect(int theWidth, int theHeight, unsigned int theBorderColor,
+          unsigned int theFillingColor = 0xff000000);
 
 /**
  Display the values of a vector as a sparkline within a `begin*()` and `end*()` block.
@@ -1025,7 +1050,8 @@ void rect(int theWidth, int theHeight, unsigned int theBorderColor, unsigned int
  \sa endRow()
  \sa endColumn()
 */
-void sparkline(std::vector<double>& theValues, int theWidth, int theHeight, unsigned int theColor = 0x00FF00);
+void sparkline(std::vector<double> &theValues, int theWidth, int theHeight,
+               unsigned int theColor = 0x00FF00);
 
 /**
  Update the library internal things. You need to call this function **AFTER** you are done adding/manipulating
@@ -1037,49 +1063,54 @@ void sparkline(std::vector<double>& theValues, int theWidth, int theHeight, unsi
  \sa watch()
  \sa context()
 */
-void update(const cv::String& theWindowName = "");
+void update(const cv::String &theWindowName = "");
 
 // Internally used to handle mouse events
-void handleMouse(int theEvent, int theX, int theY, int theFlags, void* theData);
+void handleMouse(int theEvent, int theX, int theY, int theFlags, void *theData);
 
 // Compatibility macros to allow compilation with either OpenCV 2.x or OpenCV 3.x
 #if (CV_MAJOR_VERSION < 3)
-	#define CVUI_ANTIALISED CV_AA
+#define CVUI_ANTIALISED CV_AA
 #else
-	#define CVUI_ANTIALISED cv::LINE_AA
+#define CVUI_ANTIALISED cv::LINE_AA
 #endif
 #define CVUI_FILLED -1
 
 // If we are not in a Windows-based environment, replace Windows-specific functions with
 // their POSIX equivalents.
 #if !defined(_MSC_VER)
-	#define vsprintf_s vsprintf
-	#define sprintf_s sprintf
+#define vsprintf_s vsprintf
+#define sprintf_s sprintf
 #endif
 
 // Adjust things accoridng to platform
 #ifdef _MSC_VER
-	#define _CVUI_COMPILE_MESSAGE(x) message(x)
+#define _CVUI_COMPILE_MESSAGE(x) message(x)
 
-	// If windows.h has already been included, min() and max() will be defined.
-	// In such case, a shit storm will rain on us, producing all kinds of
-	// compilation problems with cvui. If min/max are already defined,
-	// let's undef them for now and redef them at the end of this file.
-	#ifdef min
-		#define __cvui_min min
-		#undef min
-	#endif
-	#ifdef max
-		#define __cvui_max max
-		#undef max
-	#endif
+// If windows.h has already been included, min() and max() will be defined.
+// In such case, a shit storm will rain on us, producing all kinds of
+// compilation problems with cvui. If min/max are already defined,
+// let's undef them for now and redef them at the end of this file.
+#ifdef min
+#define __cvui_min min
+#undef min
+#endif
+#ifdef max
+#define __cvui_max max
+#undef max
+#endif
 #elif __GNUC__
-	#define _CVUI_COMPILE_MESSAGE(x) message x
+#define _CVUI_COMPILE_MESSAGE(x) message x
 #endif
 
 // Some compilation messages
-#define _CVUI_IMPLEMENTATION_NOTICE "cvui.h: compiling implementation because of CVUI_IMPLEMENTATION. See: https://dovyski.github.io/cvui/usage/"
-#define _CVUI_NO_IMPLEMENTATION_NOTICE "cvui.h: implementation skipped. Ensure one of your C++ files included cvui.h after a #define CVUI_IMPLEMENTATION. See: https://dovyski.github.io/cvui/usage/"
+#define _CVUI_IMPLEMENTATION_NOTICE                                            \
+    "cvui.h: compiling implementation because of CVUI_IMPLEMENTATION. See: "   \
+    "https://dovyski.github.io/cvui/usage/"
+#define _CVUI_NO_IMPLEMENTATION_NOTICE                                         \
+    "cvui.h: implementation skipped. Ensure one of your C++ files included "   \
+    "cvui.h after a #define CVUI_IMPLEMENTATION. See: "                        \
+    "https://dovyski.github.io/cvui/usage/"
 
 // Below is paranoic, dramatic bug-fixing action to ensure no evil macro
 // have already defined our names. For some bizarre reason, cvui did not
@@ -1099,9 +1130,9 @@ void handleMouse(int theEvent, int theX, int theY, int theFlags, void* theData);
 
 // Check for Unix stuff
 #ifdef __GNUC__
-	// just to remove the warning under gcc that is introduced by the VERSION variable below
-	// (needed for those who compile with -Werror (make warning as errors)
-	#pragma GCC diagnostic ignored "-Wunused-variable"
+// just to remove the warning under gcc that is introduced by the VERSION variable below
+// (needed for those who compile with -Werror (make warning as errors)
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
 // Lib version
@@ -1131,12 +1162,14 @@ const unsigned int TRACKBAR_HIDE_LABELS = 32;
 
 // Describes the block structure used by the lib to handle `begin*()` and `end*()` calls.
 typedef struct {
-	cv::Mat where;			// where the block should be rendered to.
-	cv::Rect rect;			// the size and position of the block.
-	cv::Rect fill;			// the filled area occuppied by the block as it gets modified by its inner components.
-	cv::Point anchor;		// the point where the next component of the block should be rendered.
-	int padding;			// padding among components within this block.
-	int type;				// type of the block, e.g. ROW or COLUMN.
+    cv::Mat where; // where the block should be rendered to.
+    cv::Rect rect; // the size and position of the block.
+    cv::Rect
+        fill; // the filled area occuppied by the block as it gets modified by its inner components.
+    cv::Point
+        anchor; // the point where the next component of the block should be rendered.
+    int padding; // padding among components within this block.
+    int type;    // type of the block, e.g. ROW or COLUMN.
 } cvui_block_t;
 
 // Describes a component label, including info about a shortcut.
@@ -1146,181 +1179,244 @@ typedef struct {
 // - textBeforeShortcut will be "Re"
 // - textAfterShortcut will be "tart"
 typedef struct {
-	bool hasShortcut;
-	char shortcut;
-	std::string textBeforeShortcut;
-	std::string textAfterShortcut;
+    bool hasShortcut;
+    char shortcut;
+    std::string textBeforeShortcut;
+    std::string textAfterShortcut;
 } cvui_label_t;
 
 // Describe a mouse button
 typedef struct {
-	bool justReleased;          // if the mouse button was released, i.e. click event.
-	bool justPressed;           // if the mouse button was just pressed, i.e. true for a frame when a button is down.
-	bool pressed;               // if the mouse button is pressed or not.
+    bool justReleased; // if the mouse button was released, i.e. click event.
+    bool
+        justPressed; // if the mouse button was just pressed, i.e. true for a frame when a button is down.
+    bool pressed;    // if the mouse button is pressed or not.
 } cvui_mouse_btn_t;
 
 // Describe the information of the mouse cursor
 typedef struct {
-	cvui_mouse_btn_t buttons[3]; // status of each button. Use cvui::{RIGHT,LEFT,MIDDLE}_BUTTON to access the buttons.
-	cvui_mouse_btn_t anyButton;  // represent the behavior of all mouse buttons combined
-	cv::Point position;          // x and y coordinates of the mouse at the moment.
+    cvui_mouse_btn_t buttons
+        [3]; // status of each button. Use cvui::{RIGHT,LEFT,MIDDLE}_BUTTON to access the buttons.
+    cvui_mouse_btn_t
+        anyButton;      // represent the behavior of all mouse buttons combined
+    cv::Point position; // x and y coordinates of the mouse at the moment.
 } cvui_mouse_t;
 
 // Describes a (window) context.
 typedef struct {
-	cv::String windowName;       // name of the window related to this context.
-	cvui_mouse_t mouse;          // the mouse cursor related to this context.
+    cv::String windowName; // name of the window related to this context.
+    cvui_mouse_t mouse;    // the mouse cursor related to this context.
 } cvui_context_t;
 
 // Internal namespace with all code that is shared among components/functions.
 // You should probably not be using anything from here.
-namespace internal
-{
-	static cv::String gDefaultContext;
-	static cv::String gCurrentContext;
-	static std::map<cv::String, cvui_context_t> gContexts; // indexed by the window name.
-	static char gBuffer[1024];
-	static int gLastKeyPressed; // TODO: collect it per window
-	static int gDelayWaitKey;
-	static cvui_block_t gScreen;
+namespace internal {
+static cv::String gDefaultContext;
+static cv::String gCurrentContext;
+static std::map<cv::String, cvui_context_t>
+    gContexts; // indexed by the window name.
+static char gBuffer[1024];
+static int gLastKeyPressed; // TODO: collect it per window
+static int gDelayWaitKey;
+static cvui_block_t gScreen;
 
-	struct TrackbarParams {
-		long double min;
-		long double max;
-		long double step;
-		int segments;
-		unsigned int options;
-		std::string labelFormat;
+struct TrackbarParams {
+    long double min;
+    long double max;
+    long double step;
+    int segments;
+    unsigned int options;
+    std::string labelFormat;
 
-		inline TrackbarParams()
-			: min(0.)
-			, max(25.)
-			, step(1.)
-			, segments(0)
-			, options(0)
-			, labelFormat("%.0Lf")
-		{}
-	};
+    inline TrackbarParams()
+        : min(0.), max(25.), step(1.), segments(0), options(0),
+          labelFormat("%.0Lf") {}
+};
 
-	static cvui_block_t gStack[100]; // TODO: make it dynamic?
-	static int gStackCount = -1;
-	static const int gTrackbarMarginX = 14;
+static cvui_block_t gStack[100]; // TODO: make it dynamic?
+static int gStackCount = -1;
+static const int gTrackbarMarginX = 14;
 
-	bool isMouseButton(cvui_mouse_btn_t& theButton, int theQuery);
-	void resetMouseButton(cvui_mouse_btn_t& theButton);
-	void init(const cv::String& theWindowName, int theDelayWaitKey);
-	cvui_context_t& getContext(const cv::String& theWindowName = "");
-	bool bitsetHas(unsigned int theBitset, unsigned int theValue);
-	void error(int theId, std::string theMessage);
-	void updateLayoutFlow(cvui_block_t& theBlock, cv::Size theSize);
-	bool blockStackEmpty();
-	cvui_block_t& topBlock();
-	cvui_block_t& pushBlock();
-	cvui_block_t& popBlock();
-	void begin(int theType, cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight, int thePadding);
-	void end(int theType);
-	cvui_label_t createLabel(const std::string &theLabel);
-	int iarea(int theX, int theY, int theWidth, int theHeight);
-	bool button(cvui_block_t& theBlock, int theX, int theY, int theWidth, int theHeight, const cv::String& theLabel, bool theUpdateLayout);
-	bool button(cvui_block_t& theBlock, int theX, int theY, const cv::String& theLabel);
-	bool button(cvui_block_t& theBlock, int theX, int theY, cv::Mat& theIdle, cv::Mat& theOver, cv::Mat& theDown, bool theUpdateLayout);
-	void image(cvui_block_t& theBlock, int theX, int theY, cv::Mat& theImage);
-	bool checkbox(cvui_block_t& theBlock, int theX, int theY, const cv::String& theLabel, bool *theState, unsigned int theColor);
-	void text(cvui_block_t& theBlock, int theX, int theY, const cv::String& theText, double theFontScale, unsigned int theColor, bool theUpdateLayout);
-	int counter(cvui_block_t& theBlock, int theX, int theY, int *theValue, int theStep, const char *theFormat);
-	double counter(cvui_block_t& theBlock, int theX, int theY, double *theValue, double theStep, const char *theFormat);
-	void window(cvui_block_t& theBlock, int theX, int theY, int theWidth, int theHeight, const cv::String& theTitle);
-	void rect(cvui_block_t& theBlock, int theX, int theY, int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor);
-	void sparkline(cvui_block_t& theBlock, std::vector<double>& theValues, int theX, int theY, int theWidth, int theHeight, unsigned int theColor);
-	bool trackbar(cvui_block_t &theBlock, int theX, int theY, int theWidth, long double *theValue, const TrackbarParams& theParams);
-	inline void trackbarForceValuesAsMultiplesOfSmallStep(const TrackbarParams & theParams, long double *theValue);
-	inline long double trackbarXPixelToValue(const TrackbarParams & theParams, cv::Rect & theBounding, int thePixelX);
-	inline int trackbarValueToXPixel(const TrackbarParams & theParams, cv::Rect & theBounding, long double theValue);
-	inline double clamp01(double value);
-	void findMinMax(std::vector<double>& theValues, double *theMin, double *theMax);
-	cv::Scalar hexToScalar(unsigned int theColor);
-	void resetRenderingBuffer(cvui_block_t& theScreen);
+bool isMouseButton(cvui_mouse_btn_t &theButton, int theQuery);
+void resetMouseButton(cvui_mouse_btn_t &theButton);
+void init(const cv::String &theWindowName, int theDelayWaitKey);
+cvui_context_t &getContext(const cv::String &theWindowName = "");
+bool bitsetHas(unsigned int theBitset, unsigned int theValue);
+void error(int theId, std::string theMessage);
+void updateLayoutFlow(cvui_block_t &theBlock, cv::Size theSize);
+bool blockStackEmpty();
+cvui_block_t &topBlock();
+cvui_block_t &pushBlock();
+cvui_block_t &popBlock();
+void begin(int theType, cv::Mat &theWhere, int theX, int theY, int theWidth,
+           int theHeight, int thePadding);
+void end(int theType);
+cvui_label_t createLabel(const std::string &theLabel);
+int iarea(int theX, int theY, int theWidth, int theHeight);
+bool button(cvui_block_t &theBlock, int theX, int theY, int theWidth,
+            int theHeight, const cv::String &theLabel, bool theUpdateLayout);
+bool button(cvui_block_t &theBlock, int theX, int theY,
+            const cv::String &theLabel);
+bool button(cvui_block_t &theBlock, int theX, int theY, cv::Mat &theIdle,
+            cv::Mat &theOver, cv::Mat &theDown, bool theUpdateLayout);
+void image(cvui_block_t &theBlock, int theX, int theY, cv::Mat &theImage);
+bool checkbox(cvui_block_t &theBlock, int theX, int theY,
+              const cv::String &theLabel, bool *theState,
+              unsigned int theColor);
+void text(cvui_block_t &theBlock, int theX, int theY, const cv::String &theText,
+          double theFontScale, unsigned int theColor, bool theUpdateLayout);
+int counter(cvui_block_t &theBlock, int theX, int theY, int *theValue,
+            int theStep, const char *theFormat);
+double counter(cvui_block_t &theBlock, int theX, int theY, double *theValue,
+               double theStep, const char *theFormat);
+void window(cvui_block_t &theBlock, int theX, int theY, int theWidth,
+            int theHeight, const cv::String &theTitle);
+void rect(cvui_block_t &theBlock, int theX, int theY, int theWidth,
+          int theHeight, unsigned int theBorderColor,
+          unsigned int theFillingColor);
+void sparkline(cvui_block_t &theBlock, std::vector<double> &theValues, int theX,
+               int theY, int theWidth, int theHeight, unsigned int theColor);
+bool trackbar(cvui_block_t &theBlock, int theX, int theY, int theWidth,
+              long double *theValue, const TrackbarParams &theParams);
+inline void
+trackbarForceValuesAsMultiplesOfSmallStep(const TrackbarParams &theParams,
+                                          long double *theValue);
+inline long double trackbarXPixelToValue(const TrackbarParams &theParams,
+                                         cv::Rect &theBounding, int thePixelX);
+inline int trackbarValueToXPixel(const TrackbarParams &theParams,
+                                 cv::Rect &theBounding, long double theValue);
+inline double clamp01(double value);
+void findMinMax(std::vector<double> &theValues, double *theMin, double *theMax);
+cv::Scalar hexToScalar(unsigned int theColor);
+void resetRenderingBuffer(cvui_block_t &theScreen);
 
-	template <typename T> // T can be any floating point type (float, double, long double)
-	TrackbarParams makeTrackbarParams(T min, T max, int theDecimals = 1, int theSegments = 1, T theStep = -1., unsigned int theOptions = 0, const char *theFormat = "%.1Lf");
+template <
+    typename T> // T can be any floating point type (float, double, long double)
+TrackbarParams
+makeTrackbarParams(T min, T max, int theDecimals = 1, int theSegments = 1,
+                   T theStep = -1., unsigned int theOptions = 0,
+                   const char *theFormat = "%.1Lf");
 
-	template<typename T>
-	bool trackbar(T *theValue, const TrackbarParams& theParams);
+template <typename T>
+bool trackbar(T *theValue, const TrackbarParams &theParams);
 
-	template <typename T> // T can be any numeric type (int, double, unsigned int, etc)
-	bool trackbar(cv::Mat& theWhere, int theX, int theY, int theWidth, T *theValue, const TrackbarParams& theParams);
+template <typename T> // T can be any numeric type (int, double, unsigned int, etc)
+bool trackbar(cv::Mat &theWhere, int theX, int theY, int theWidth, T *theValue,
+              const TrackbarParams &theParams);
 
-	template<typename num_type>
-	TrackbarParams makeTrackbarParams(num_type theMin, num_type theMax, num_type theStep, int theSegments, const char *theLabelFormat, unsigned int theOptions) {
-		TrackbarParams aParams;
+template <typename num_type>
+TrackbarParams makeTrackbarParams(num_type theMin, num_type theMax,
+                                  num_type theStep, int theSegments,
+                                  const char *theLabelFormat,
+                                  unsigned int theOptions) {
+    TrackbarParams aParams;
 
-		aParams.min = (long double)theMin;
-		aParams.max = (long double)theMax;
-		aParams.step = (long double)theStep;
-		aParams.options = theOptions;
-		aParams.segments = theSegments;
-		aParams.labelFormat = theLabelFormat;
-	
-		return aParams;
-	}
+    aParams.min = (long double)theMin;
+    aParams.max = (long double)theMax;
+    aParams.step = (long double)theStep;
+    aParams.options = theOptions;
+    aParams.segments = theSegments;
+    aParams.labelFormat = theLabelFormat;
 
-	template <typename num_type>
-	bool trackbar(int theWidth, num_type *theValue, const TrackbarParams& theParams) {
-		cvui_block_t& aBlock = internal::topBlock();
-
-		long double aValueAsDouble = static_cast<long double>(*theValue);
-		bool aResult = internal::trackbar(aBlock, aBlock.anchor.x, aBlock.anchor.y, theWidth, &aValueAsDouble, theParams);
-		*theValue = static_cast<num_type>(aValueAsDouble);
-
-		return aResult;
-	}
-
-	template <typename num_type>
-	bool trackbar(cv::Mat& theWhere, int theX, int theY, int theWidth, num_type *theValue, const TrackbarParams& theParams) {
-		gScreen.where = theWhere;
-
-		long double aValueAsDouble = static_cast<long double>(*theValue);
-		bool aResult = internal::trackbar(gScreen, theX, theY, theWidth, &aValueAsDouble, theParams);
-		*theValue = static_cast<num_type>(aValueAsDouble);
-		
-		return aResult;
-	}
+    return aParams;
 }
+
+template <typename num_type>
+bool trackbar(int theWidth, num_type *theValue,
+              const TrackbarParams &theParams) {
+    cvui_block_t &aBlock = internal::topBlock();
+
+    long double aValueAsDouble = static_cast<long double>(*theValue);
+    bool aResult = internal::trackbar(aBlock, aBlock.anchor.x, aBlock.anchor.y,
+                                      theWidth, &aValueAsDouble, theParams);
+    *theValue = static_cast<num_type>(aValueAsDouble);
+
+    return aResult;
+}
+
+template <typename num_type>
+bool trackbar(cv::Mat &theWhere, int theX, int theY, int theWidth,
+              num_type *theValue, const TrackbarParams &theParams) {
+    gScreen.where = theWhere;
+
+    long double aValueAsDouble = static_cast<long double>(*theValue);
+    bool aResult = internal::trackbar(gScreen, theX, theY, theWidth,
+                                      &aValueAsDouble, theParams);
+    *theValue = static_cast<num_type>(aValueAsDouble);
+
+    return aResult;
+}
+} // namespace internal
 
 // Internal namespace that contains all rendering functions.
 namespace render {
-	void text(cvui_block_t& theBlock, const cv::String& theText, cv::Point& thePos, double theFontScale, unsigned int theColor);
-	void button(cvui_block_t& theBlock, int theState, cv::Rect& theShape, const cv::String& theLabel);
-	void buttonLabel(cvui_block_t& theBlock, int theState, cv::Rect theRect, const cv::String& theLabel, cv::Size& theTextSize);
-	void image(cvui_block_t& theBlock, cv::Rect& theRect, cv::Mat& theImage);
-	void counter(cvui_block_t& theBlock, cv::Rect& theShape, const cv::String& theValue);
-	void trackbarHandle(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams, cv::Rect& theWorkingArea);
-	void trackbarPath(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams, cv::Rect& theWorkingArea);
-	void trackbarSteps(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams, cv::Rect& theWorkingArea);
-	void trackbarSegmentLabel(cvui_block_t& theBlock, cv::Rect& theShape, const internal::TrackbarParams &theParams, long double theValue, cv::Rect& theWorkingArea, bool theShowLabel);
-	void trackbarSegments(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams, cv::Rect& theWorkingArea);
-	void trackbar(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams);
-	void checkbox(cvui_block_t& theBlock, int theState, cv::Rect& theShape);
-	void checkboxLabel(cvui_block_t& theBlock, cv::Rect& theRect, const cv::String& theLabel, cv::Size& theTextSize, unsigned int theColor);
-	void checkboxCheck(cvui_block_t& theBlock, cv::Rect& theShape);
-	void window(cvui_block_t& theBlock, cv::Rect& theTitleBar, cv::Rect& theContent, const cv::String& theTitle);
-	void rect(cvui_block_t& theBlock, cv::Rect& thePos, unsigned int theBorderColor, unsigned int theFillingColor);
-	void sparkline(cvui_block_t& theBlock, std::vector<double>& theValues, cv::Rect &theRect, double theMin, double theMax, unsigned int theColor);
+void text(cvui_block_t &theBlock, const cv::String &theText, cv::Point &thePos,
+          double theFontScale, unsigned int theColor);
+void button(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+            const cv::String &theLabel);
+void buttonLabel(cvui_block_t &theBlock, int theState, cv::Rect theRect,
+                 const cv::String &theLabel, cv::Size &theTextSize);
+void image(cvui_block_t &theBlock, cv::Rect &theRect, cv::Mat &theImage);
+void counter(cvui_block_t &theBlock, cv::Rect &theShape,
+             const cv::String &theValue);
+void trackbarHandle(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+                    double theValue, const internal::TrackbarParams &theParams,
+                    cv::Rect &theWorkingArea);
+void trackbarPath(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+                  double theValue, const internal::TrackbarParams &theParams,
+                  cv::Rect &theWorkingArea);
+void trackbarSteps(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+                   double theValue, const internal::TrackbarParams &theParams,
+                   cv::Rect &theWorkingArea);
+void trackbarSegmentLabel(cvui_block_t &theBlock, cv::Rect &theShape,
+                          const internal::TrackbarParams &theParams,
+                          long double theValue, cv::Rect &theWorkingArea,
+                          bool theShowLabel);
+void trackbarSegments(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+                      double theValue,
+                      const internal::TrackbarParams &theParams,
+                      cv::Rect &theWorkingArea);
+void trackbar(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+              double theValue, const internal::TrackbarParams &theParams);
+void checkbox(cvui_block_t &theBlock, int theState, cv::Rect &theShape);
+void checkboxLabel(cvui_block_t &theBlock, cv::Rect &theRect,
+                   const cv::String &theLabel, cv::Size &theTextSize,
+                   unsigned int theColor);
+void checkboxCheck(cvui_block_t &theBlock, cv::Rect &theShape);
+void window(cvui_block_t &theBlock, cv::Rect &theTitleBar, cv::Rect &theContent,
+            const cv::String &theTitle);
+void rect(cvui_block_t &theBlock, cv::Rect &thePos, unsigned int theBorderColor,
+          unsigned int theFillingColor);
+void sparkline(cvui_block_t &theBlock, std::vector<double> &theValues,
+               cv::Rect &theRect, double theMin, double theMax,
+               unsigned int theColor);
 
-	int putText(cvui_block_t& theBlock, int theState, cv::Scalar aColor, const std::string& theText, const cv::Point & thePosition);
-	int putTextCentered(cvui_block_t& theBlock, const cv::Point & position, const std::string &text);
+int putText(cvui_block_t &theBlock, int theState, cv::Scalar aColor,
+            const std::string &theText, const cv::Point &thePosition);
+int putTextCentered(cvui_block_t &theBlock, const cv::Point &position,
+                    const std::string &text);
+} // namespace render
+
+template <typename num_type>
+bool trackbar(cv::Mat &theWhere, int theX, int theY, int theWidth,
+              num_type *theValue, num_type theMin, num_type theMax,
+              int theSegments, const char *theLabelFormat,
+              unsigned int theOptions, num_type theDiscreteStep) {
+    internal::TrackbarParams aParams =
+        internal::makeTrackbarParams(theMin, theMax, theDiscreteStep,
+                                     theSegments, theLabelFormat, theOptions);
+    return trackbar<num_type>(theWhere, theX, theY, theWidth, theValue,
+                              aParams);
 }
 
 template <typename num_type>
-bool trackbar(cv::Mat& theWhere, int theX, int theY, int theWidth, num_type *theValue, num_type theMin, num_type theMax, int theSegments, const char *theLabelFormat, unsigned int theOptions, num_type theDiscreteStep) {
-	internal::TrackbarParams aParams = internal::makeTrackbarParams(theMin, theMax, theDiscreteStep, theSegments, theLabelFormat, theOptions);
-	return trackbar<num_type>(theWhere, theX, theY, theWidth, theValue, aParams);
-}
-
-template <typename num_type>
-bool trackbar(int theWidth, num_type *theValue, num_type theMin, num_type theMax, int theSegments, const char *theLabelFormat, unsigned int theOptions, num_type theDiscreteStep) {
-	internal::TrackbarParams aParams = internal::makeTrackbarParams(theMin, theMax, theDiscreteStep, theSegments, theLabelFormat, theOptions);
-	return trackbar<num_type>(theWidth, theValue, aParams);
+bool trackbar(int theWidth, num_type *theValue, num_type theMin,
+              num_type theMax, int theSegments, const char *theLabelFormat,
+              unsigned int theOptions, num_type theDiscreteStep) {
+    internal::TrackbarParams aParams =
+        internal::makeTrackbarParams(theMin, theMax, theDiscreteStep,
+                                     theSegments, theLabelFormat, theOptions);
+    return trackbar<num_type>(theWidth, theValue, aParams);
 }
 
 } // namespace cvui
@@ -1330,1173 +1426,1386 @@ bool trackbar(int theWidth, num_type *theValue, num_type theMin, num_type theMax
 // Below this line is the implementation of all functions declared above.
 
 #if !defined(CVUI_IMPLEMENTATION) && !defined(CVUI_DISABLE_COMPILATION_NOTICES)
-	// cvui.h is being included without CVUI_IMEPLEMENTATION. Let's output a compile notice about it
-	// to help those trying to debug possible cvui compilation errors.
-	#pragma _CVUI_COMPILE_MESSAGE(_CVUI_NO_IMPLEMENTATION_NOTICE)
+// cvui.h is being included without CVUI_IMEPLEMENTATION. Let's output a compile notice about it
+// to help those trying to debug possible cvui compilation errors.
+#pragma _CVUI_COMPILE_MESSAGE(_CVUI_NO_IMPLEMENTATION_NOTICE)
 #endif
 
 #ifdef CVUI_IMPLEMENTATION
 
 // Show some helping hand in case cvui.h does not compile because of inclusion in multiple files.
 #ifndef CVUI_DISABLE_COMPILATION_NOTICES
-	#pragma _CVUI_COMPILE_MESSAGE(_CVUI_IMPLEMENTATION_NOTICE)
+#pragma _CVUI_COMPILE_MESSAGE(_CVUI_IMPLEMENTATION_NOTICE)
 #endif
 
-namespace cvui
-{
+namespace cvui {
 
 // This is an internal namespace with all code
 // that is shared among components/functions
-namespace internal
-{
-	bool isMouseButton(cvui_mouse_btn_t& theButton, int theQuery) {
-		bool aRet = false;
-
-		switch (theQuery) {
-			case cvui::CLICK:
-			case cvui::UP:
-				aRet = theButton.justReleased; break;
-			case cvui::DOWN:
-				aRet = theButton.justPressed; break;
-			case cvui::IS_DOWN:
-				aRet = theButton.pressed; break;
-		}
-
-		return aRet;
-	}
-
-	void resetMouseButton(cvui_mouse_btn_t& theButton) {
-		theButton.justPressed = false;
-		theButton.justReleased = false;
-		theButton.pressed = false;
-	}
-
-	void init(const cv::String& theWindowName, int theDelayWaitKey) {
-		internal::gDefaultContext = theWindowName;
-		internal::gCurrentContext = theWindowName;
-		internal::gDelayWaitKey = theDelayWaitKey;
-		internal::gLastKeyPressed = -1;
-	}
-
-	cvui_context_t& getContext(const cv::String& theWindowName) {
-		if (!theWindowName.empty()) {
-			// Get context in particular
-			return internal::gContexts[theWindowName];
-
-		} else if (!internal::gCurrentContext.empty()) {
-			// No window provided, return currently active context.
-			return internal::gContexts[internal::gCurrentContext];
-
-		} else if (!internal::gDefaultContext.empty()) {
-			// We have no active context, so let's use the default one.
-			return internal::gContexts[internal::gDefaultContext];
-
-		} else {
-			// Apparently we have no window at all! <o>
-			// This should not happen. Probably cvui::init() was never called.
-			internal::error(5, "Unable to read context. Did you forget to call cvui::init()?");
-			return internal::gContexts["first"]; // return to make the compiler happy.
-		}
-	}
-
-	bool bitsetHas(unsigned int theBitset, unsigned int theValue) {
-		return (theBitset & theValue) != 0;
-	}
-
-	void error(int theId, std::string theMessage) {
-		std::cout << "[CVUI] Fatal error (code " << theId << "): " << theMessage << "\n";
-		cv::waitKey(100000);
-		exit(-1);
-	}
-
-	void updateLayoutFlow(cvui_block_t& theBlock, cv::Size theSize) {
-		int aValue;
-
-		if (theBlock.type == ROW) {
-			aValue = theSize.width + theBlock.padding;
-
-			theBlock.anchor.x += aValue;
-			theBlock.fill.width += aValue;
-			theBlock.fill.height = std::max(theSize.height, theBlock.fill.height);
-
-		}
-		else if (theBlock.type == COLUMN) {
-			aValue = theSize.height + theBlock.padding;
-
-			theBlock.anchor.y += aValue;
-			theBlock.fill.height += aValue;
-			theBlock.fill.width = std::max(theSize.width, theBlock.fill.width);
-		}
-	}
-
-	bool blockStackEmpty() {
-		return gStackCount == -1;
-	}
-
-	cvui_block_t& topBlock() {
-		if (gStackCount < 0) {
-			error(3, "You are using a function that should be enclosed by begin*() and end*(), but you probably forgot to call begin*().");
-		}
-
-		return gStack[gStackCount];
-	}
-
-	cvui_block_t& pushBlock() {
-		return gStack[++gStackCount];
-	}
-
-	cvui_block_t& popBlock() {
-		// Check if there is anything to be popped out from the stack.
-		if (gStackCount < 0) {
-			error(1, "Mismatch in the number of begin*()/end*() calls. You are calling one more than the other.");
-		}
-
-		return gStack[gStackCount--];
-	}
-
-	void begin(int theType, cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight, int thePadding) {
-		cvui_block_t& aBlock = internal::pushBlock();
-
-		aBlock.where = theWhere;
-
-		aBlock.rect.x = theX;
-		aBlock.rect.y = theY;
-		aBlock.rect.width = theWidth;
-		aBlock.rect.height = theHeight;
-
-		aBlock.fill = aBlock.rect;
-		aBlock.fill.width = 0;
-		aBlock.fill.height = 0;
-
-		aBlock.anchor.x = theX;
-		aBlock.anchor.y = theY;
-
-		aBlock.padding = thePadding;
-		aBlock.type = theType;
-	}
-
-	void end(int theType) {
-		cvui_block_t& aBlock = popBlock();
-
-		if (aBlock.type != theType) {
-			error(4, "Calling wrong type of end*(). E.g. endColumn() instead of endRow(). Check if your begin*() calls are matched with their appropriate end*() calls.");
-		}
-
-		// If we still have blocks in the stack, we must update
-		// the current top with the dimensions that were filled by
-		// the newly popped block.
-
-		if (!blockStackEmpty()) {
-			cvui_block_t& aTop = topBlock();
-			cv::Size aSize;
-
-			// If the block has rect.width < 0 or rect.heigth < 0, it means the
-			// user don't want to calculate the block's width/height. It's up to
-			// us do to the math. In that case, we use the block's fill rect to find
-			// out the occupied space. If the block's width/height is greater than
-			// zero, then the user is very specific about the desired size. In that
-			// case, we use the provided width/height, no matter what the fill rect
-			// actually is.
-			aSize.width = aBlock.rect.width < 0 ? aBlock.fill.width : aBlock.rect.width;
-			aSize.height = aBlock.rect.height < 0 ? aBlock.fill.height : aBlock.rect.height;
-
-			updateLayoutFlow(aTop, aSize);
-		}
-	}
-
-	// Find the min and max values of a vector
-	void findMinMax(std::vector<double>& theValues, double *theMin, double *theMax) {
-		std::vector<double>::size_type aSize = theValues.size(), i;
-		double aMin = theValues[0], aMax = theValues[0];
-
-		for (i = 0; i < aSize; i++) {
-			if (theValues[i] < aMin) {
-				aMin = theValues[i];
-			}
-
-			if (theValues[i] > aMax) {
-				aMax = theValues[i];
-			}
-		}
-
-		*theMin = aMin;
-		*theMax = aMax;
-	}
-
-	cvui_label_t createLabel(const std::string &theLabel) {
-		cvui_label_t aLabel;
-		std::stringstream aBefore, aAfter;
-
-		aLabel.hasShortcut = false;
-		aLabel.shortcut = 0;
-		aLabel.textBeforeShortcut = "";
-		aLabel.textAfterShortcut = "";
-
-		for (size_t i = 0; i < theLabel.size(); i++) {
-			char c = theLabel[i];
-			if ((c == '&') && (i < theLabel.size() - 1)) {
-				aLabel.hasShortcut = true;
-				aLabel.shortcut = theLabel[i + 1];
-				++i;
-			}
-			else if (!aLabel.hasShortcut) {
-				aBefore << c;
-			}
-			else {
-				aAfter << c;
-			}
-		}
-
-		aLabel.textBeforeShortcut = aBefore.str();
-		aLabel.textAfterShortcut = aAfter.str();
-
-		return aLabel;
-	}
-
-	cv::Scalar hexToScalar(unsigned int theColor) {
-		int aAlpha = (theColor >> 24) & 0xff;
-		int aRed = (theColor >> 16) & 0xff;
-		int aGreen = (theColor >> 8) & 0xff;
-		int aBlue = theColor & 0xff;
-
-		return cv::Scalar(aBlue, aGreen, aRed, aAlpha);
-	}
-
-	void resetRenderingBuffer(cvui_block_t& theScreen) {
-		theScreen.rect.x = 0;
-		theScreen.rect.y = 0;
-		theScreen.rect.width = 0;
-		theScreen.rect.height = 0;
-
-		theScreen.fill = theScreen.rect;
-		theScreen.fill.width = 0;
-		theScreen.fill.height = 0;
-
-		theScreen.anchor.x = 0;
-		theScreen.anchor.y = 0;
-
-		theScreen.padding = 0;
-	}
-
-
-	inline double clamp01(double value)
-	{
-		value = value > 1. ? 1. : value;
-		value = value < 0. ? 0. : value;
-		return value;
-	}
-
-	inline void trackbarForceValuesAsMultiplesOfSmallStep(const TrackbarParams & theParams, long double *theValue)
-	{
-		if (bitsetHas(theParams.options, TRACKBAR_DISCRETE) && theParams.step != 0.) {
-			long double k = (*theValue - theParams.min) / theParams.step;
-			k = (long double)cvRound((double)k);
-			*theValue = theParams.min + theParams.step * k;
-		}
-	}
-
-	inline long double trackbarXPixelToValue(const TrackbarParams & theParams, cv::Rect & theBounding, int thePixelX)
-	{
-		long double ratio = (thePixelX - (long double)(theBounding.x + gTrackbarMarginX)) / (long double)(theBounding.width - 2 * gTrackbarMarginX);
-		ratio = clamp01(ratio);
-		long double value = theParams.min + ratio * (theParams.max - theParams.min);
-		return value;
-	}
-
-	inline int trackbarValueToXPixel(const TrackbarParams & theParams, cv::Rect & theBounding, long double theValue)
-	{
-		long double aRatio = (theValue - theParams.min) / (theParams.max - theParams.min);
-		aRatio = clamp01(aRatio);
-		long double thePixelsX = (long double)theBounding.x + gTrackbarMarginX + aRatio * (long double)(theBounding.width - 2 * gTrackbarMarginX);
-		return (int)thePixelsX;
-	}
-
-	int iarea(int theX, int theY, int theWidth, int theHeight) {
-		cvui_mouse_t& aMouse = internal::getContext().mouse;
-
-		// By default, return that the mouse is out of the interaction area.
-		int aRet = cvui::OUT;
-
-		// Check if the mouse is over the interaction area.
-		bool aMouseIsOver = cv::Rect(theX, theY, theWidth, theHeight).contains(aMouse.position);
-
-		if (aMouseIsOver) {
-			if (aMouse.anyButton.pressed) {
-				aRet = cvui::DOWN;
-			} else {
-				aRet = cvui::OVER;
-			}
-		}
-
-		// Tell if the button was clicked or not
-		if (aMouseIsOver && aMouse.anyButton.justReleased) {
-			aRet = cvui::CLICK;
-		}
-
-		return aRet;
-	}
-
-	bool button(cvui_block_t& theBlock, int theX, int theY, int theWidth, int theHeight, const cv::String& theLabel, bool theUpdateLayout) {
-		// Calculate the space that the label will fill
-		cv::Size aTextSize = getTextSize(theLabel, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, nullptr);
-
-		// Make the button bit enough to house the label
-		cv::Rect aRect(theX, theY, theWidth, theHeight);
-
-		// Render the button according to mouse interaction, e.g. OVER, DOWN, OUT.
-		int aStatus = cvui::iarea(theX, theY, aRect.width, aRect.height);
-		render::button(theBlock, aStatus, aRect, theLabel);
-		render::buttonLabel(theBlock, aStatus, aRect, theLabel, aTextSize);
-
-		// Update the layout flow according to button size
-		// if we were told to update.
-		if (theUpdateLayout) {
-			cv::Size aSize(theWidth, theHeight);
-			updateLayoutFlow(theBlock, aSize);
-		}
-
-		bool aWasShortcutPressed = false;
-
-		//Handle keyboard shortcuts
-		if (internal::gLastKeyPressed != -1) {
-			// TODO: replace with something like strpos(). I think it has better performance.
-			auto aLabel = internal::createLabel(theLabel);
-			if (aLabel.hasShortcut && (tolower(aLabel.shortcut) == tolower((char)internal::gLastKeyPressed))) {
-				aWasShortcutPressed = true;
-			}
-		}
-
-		// Return true if the button was clicked
-		return aStatus == cvui::CLICK || aWasShortcutPressed;
-	}
-
-	bool button(cvui_block_t& theBlock, int theX, int theY, const cv::String& theLabel) {
-		// Calculate the space that the label will fill
-		cv::Size aTextSize = getTextSize(theLabel, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, nullptr);
-
-		// Create a button based on the size of the text
-		return internal::button(theBlock, theX, theY, aTextSize.width + 30, aTextSize.height + 18, theLabel, true);
-	}
-
-	bool button(cvui_block_t& theBlock, int theX, int theY, cv::Mat& theIdle, cv::Mat& theOver, cv::Mat& theDown, bool theUpdateLayout) {
-		cv::Rect aRect(theX, theY, theIdle.cols, theIdle.rows);
-		int aStatus = cvui::iarea(theX, theY, aRect.width, aRect.height);
-
-		switch (aStatus) {
-			case cvui::OUT: render::image(theBlock, aRect, theIdle); break;
-			case cvui::OVER: render::image(theBlock, aRect, theOver); break;
-			case cvui::DOWN: render::image(theBlock, aRect, theDown); break;
-		}
-
-		// Update the layout flow according to button size
-		// if we were told to update.
-		if (theUpdateLayout) {
-			cv::Size aSize(aRect.width, aRect.height);
-			updateLayoutFlow(theBlock, aSize);
-		}
-
-		// Return true if the button was clicked
-		return aStatus == cvui::CLICK;
-	}
-
-	void image(cvui_block_t& theBlock, int theX, int theY, cv::Mat& theImage) {
-		cv::Rect aRect(theX, theY, theImage.cols, theImage.rows);
-
-		// TODO: check for render outside the frame area
-		render::image(theBlock, aRect, theImage);
-
-		// Update the layout flow according to image size
-		cv::Size aSize(theImage.cols, theImage.rows);
-		updateLayoutFlow(theBlock, aSize);
-	}
-
-	bool checkbox(cvui_block_t& theBlock, int theX, int theY, const cv::String& theLabel, bool *theState, unsigned int theColor) {
-		cvui_mouse_t& aMouse = internal::getContext().mouse;
-		cv::Rect aRect(theX, theY, 15, 15);
-		cv::Size aTextSize = getTextSize(theLabel, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, nullptr);
-		cv::Rect aHitArea(theX, theY, aRect.width + aTextSize.width + 6, aRect.height);
-		bool aMouseIsOver = aHitArea.contains(aMouse.position);
-
-		if (aMouseIsOver) {
-			render::checkbox(theBlock, cvui::OVER, aRect);
-
-			if (aMouse.anyButton.justReleased) {
-				*theState = !(*theState);
-			}
-		} else {
-			render::checkbox(theBlock, cvui::OUT, aRect);
-		}
-
-		render::checkboxLabel(theBlock, aRect, theLabel, aTextSize, theColor);
-
-		if (*theState) {
-			render::checkboxCheck(theBlock, aRect);
-		}
-
-		// Update the layout flow
-		cv::Size aSize(aHitArea.width, aHitArea.height);
-		updateLayoutFlow(theBlock, aSize);
-
-		return *theState;
-	}
-
-	void text(cvui_block_t& theBlock, int theX, int theY, const cv::String& theText, double theFontScale, unsigned int theColor, bool theUpdateLayout) {
-		cv::Size aTextSize = cv::getTextSize(theText, cv::FONT_HERSHEY_SIMPLEX, theFontScale, 1, nullptr);
-		cv::Point aPos(theX, theY + aTextSize.height);
-
-		render::text(theBlock, theText, aPos, theFontScale, theColor);
-
-		if (theUpdateLayout) {
-			// Add an extra pixel to the height to overcome OpenCV font size problems.
-			aTextSize.height += 1;
-
-			updateLayoutFlow(theBlock, aTextSize);
-		}
-	}
-
-	int counter(cvui_block_t& theBlock, int theX, int theY, int *theValue, int theStep, const char *theFormat) {
-		cv::Rect aContentArea(theX + 22, theY, 48, 22);
-
-		if (internal::button(theBlock, theX, theY, 22, 22, "-", false)) {
-			*theValue -= theStep;
-		}
-
-		sprintf_s(internal::gBuffer, theFormat, *theValue);
-		render::counter(theBlock, aContentArea, internal::gBuffer);
-
-		if (internal::button(theBlock, aContentArea.x + aContentArea.width, theY, 22, 22, "+", false)) {
-			*theValue += theStep;
-		}
-
-		// Update the layout flow
-		cv::Size aSize(22 * 2 + aContentArea.width, aContentArea.height);
-		updateLayoutFlow(theBlock, aSize);
-
-		return *theValue;
-	}
-
-	double counter(cvui_block_t& theBlock, int theX, int theY, double *theValue, double theStep, const char *theFormat) {
-		cv::Rect aContentArea(theX + 22, theY, 48, 22);
-
-		if (internal::button(theBlock, theX, theY, 22, 22, "-", false)) {
-			*theValue -= theStep;
-		}
-
-		sprintf_s(internal::gBuffer, theFormat, *theValue);
-		render::counter(theBlock, aContentArea, internal::gBuffer);
-
-		if (internal::button(theBlock, aContentArea.x + aContentArea.width, theY, 22, 22, "+", false)) {
-			*theValue += theStep;
-		}
-
-		// Update the layout flow
-		cv::Size aSize(22 * 2 + aContentArea.width, aContentArea.height);
-		updateLayoutFlow(theBlock, aSize);
-
-		return *theValue;
-	}
-
-	bool trackbar(cvui_block_t& theBlock, int theX, int theY, int theWidth, long double *theValue, const TrackbarParams & theParams) {
-		cvui_mouse_t& aMouse = internal::getContext().mouse;
-		cv::Rect aContentArea(theX, theY, theWidth, 45);
-		long double aValue = *theValue;
-		bool aMouseIsOver = aContentArea.contains(aMouse.position);
-
-		render::trackbar(theBlock, aMouseIsOver ? OVER : OUT, aContentArea, *theValue, theParams);
-
-		if (aMouse.anyButton.pressed && aMouseIsOver) {
-			*theValue = internal::trackbarXPixelToValue(theParams, aContentArea, aMouse.position.x);
-
-			if (bitsetHas(theParams.options, TRACKBAR_DISCRETE)) {
-				internal::trackbarForceValuesAsMultiplesOfSmallStep(theParams, theValue);
-			}
-		}
-
-		// Update the layout flow
-		cv::Size aSize = aContentArea.size();
-		updateLayoutFlow(theBlock, aSize);
-
-		return (*theValue != aValue);
-	}
-
-
-	void window(cvui_block_t& theBlock, int theX, int theY, int theWidth, int theHeight, const cv::String& theTitle) {
-		cv::Rect aTitleBar(theX, theY, theWidth, 20);
-		cv::Rect aContent(theX, theY + aTitleBar.height, theWidth, theHeight - aTitleBar.height);
-
-		render::window(theBlock, aTitleBar, aContent, theTitle);
-
-		// Update the layout flow
-		cv::Size aSize(theWidth, theHeight);
-		updateLayoutFlow(theBlock, aSize);
-	}
-
-	void rect(cvui_block_t& theBlock, int theX, int theY, int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor) {
-		cv::Point aAnchor(theX, theY);
-		cv::Rect aRect(theX, theY, theWidth, theHeight);
-		
-		aRect.x = aRect.width < 0 ? aAnchor.x + aRect.width : aAnchor.x;
-		aRect.y = aRect.height < 0 ? aAnchor.y + aRect.height : aAnchor.y;
-		aRect.width = std::abs(aRect.width);
-		aRect.height = std::abs(aRect.height);
-
-		render::rect(theBlock, aRect, theBorderColor, theFillingColor);
-
-		// Update the layout flow
-		cv::Size aSize(aRect.width, aRect.height);
-		updateLayoutFlow(theBlock, aSize);
-	}
-
-	void sparkline(cvui_block_t& theBlock, std::vector<double>& theValues, int theX, int theY, int theWidth, int theHeight, unsigned int theColor) {
-		double aMin, aMax;
-		cv::Rect aRect(theX, theY, theWidth, theHeight);
-		std::vector<double>::size_type aHowManyValues = theValues.size();
-
-		if (aHowManyValues >= 2) {
-			internal::findMinMax(theValues, &aMin, &aMax);
-			render::sparkline(theBlock, theValues, aRect, aMin, aMax, theColor);
-		} else {
-			internal::text(theBlock, theX, theY, aHowManyValues == 0 ? "No data." : "Insufficient data points.", 0.4, 0xCECECE, false);
-		}
-
-		// Update the layout flow
-		cv::Size aSize(theWidth, theHeight);
-		updateLayoutFlow(theBlock, aSize);
-	}
+namespace internal {
+bool isMouseButton(cvui_mouse_btn_t &theButton, int theQuery) {
+    bool aRet = false;
+
+    switch (theQuery) {
+    case cvui::CLICK:
+    case cvui::UP:
+        aRet = theButton.justReleased;
+        break;
+    case cvui::DOWN:
+        aRet = theButton.justPressed;
+        break;
+    case cvui::IS_DOWN:
+        aRet = theButton.pressed;
+        break;
+    }
+
+    return aRet;
+}
+
+void resetMouseButton(cvui_mouse_btn_t &theButton) {
+    theButton.justPressed = false;
+    theButton.justReleased = false;
+    theButton.pressed = false;
+}
+
+void init(const cv::String &theWindowName, int theDelayWaitKey) {
+    internal::gDefaultContext = theWindowName;
+    internal::gCurrentContext = theWindowName;
+    internal::gDelayWaitKey = theDelayWaitKey;
+    internal::gLastKeyPressed = -1;
+}
+
+cvui_context_t &getContext(const cv::String &theWindowName) {
+    if (!theWindowName.empty()) {
+        // Get context in particular
+        return internal::gContexts[theWindowName];
+
+    } else if (!internal::gCurrentContext.empty()) {
+        // No window provided, return currently active context.
+        return internal::gContexts[internal::gCurrentContext];
+
+    } else if (!internal::gDefaultContext.empty()) {
+        // We have no active context, so let's use the default one.
+        return internal::gContexts[internal::gDefaultContext];
+
+    } else {
+        // Apparently we have no window at all! <o>
+        // This should not happen. Probably cvui::init() was never called.
+        internal::error(
+            5, "Unable to read context. Did you forget to call cvui::init()?");
+        return internal::gContexts
+            ["first"]; // return to make the compiler happy.
+    }
+}
+
+bool bitsetHas(unsigned int theBitset, unsigned int theValue) {
+    return (theBitset & theValue) != 0;
+}
+
+void error(int theId, std::string theMessage) {
+    std::cout << "[CVUI] Fatal error (code " << theId << "): " << theMessage
+              << "\n";
+    cv::waitKey(100000);
+    exit(-1);
+}
+
+void updateLayoutFlow(cvui_block_t &theBlock, cv::Size theSize) {
+    int aValue;
+
+    if (theBlock.type == ROW) {
+        aValue = theSize.width + theBlock.padding;
+
+        theBlock.anchor.x += aValue;
+        theBlock.fill.width += aValue;
+        theBlock.fill.height = std::max(theSize.height, theBlock.fill.height);
+
+    } else if (theBlock.type == COLUMN) {
+        aValue = theSize.height + theBlock.padding;
+
+        theBlock.anchor.y += aValue;
+        theBlock.fill.height += aValue;
+        theBlock.fill.width = std::max(theSize.width, theBlock.fill.width);
+    }
+}
+
+bool blockStackEmpty() { return gStackCount == -1; }
+
+cvui_block_t &topBlock() {
+    if (gStackCount < 0) {
+        error(3, "You are using a function that should be enclosed by begin*() "
+                 "and end*(), but you probably forgot to call begin*().");
+    }
+
+    return gStack[gStackCount];
+}
+
+cvui_block_t &pushBlock() { return gStack[++gStackCount]; }
+
+cvui_block_t &popBlock() {
+    // Check if there is anything to be popped out from the stack.
+    if (gStackCount < 0) {
+        error(1, "Mismatch in the number of begin*()/end*() calls. You are "
+                 "calling one more than the other.");
+    }
+
+    return gStack[gStackCount--];
+}
+
+void begin(int theType, cv::Mat &theWhere, int theX, int theY, int theWidth,
+           int theHeight, int thePadding) {
+    cvui_block_t &aBlock = internal::pushBlock();
+
+    aBlock.where = theWhere;
+
+    aBlock.rect.x = theX;
+    aBlock.rect.y = theY;
+    aBlock.rect.width = theWidth;
+    aBlock.rect.height = theHeight;
+
+    aBlock.fill = aBlock.rect;
+    aBlock.fill.width = 0;
+    aBlock.fill.height = 0;
+
+    aBlock.anchor.x = theX;
+    aBlock.anchor.y = theY;
+
+    aBlock.padding = thePadding;
+    aBlock.type = theType;
+}
+
+void end(int theType) {
+    cvui_block_t &aBlock = popBlock();
+
+    if (aBlock.type != theType) {
+        error(4, "Calling wrong type of end*(). E.g. endColumn() instead of "
+                 "endRow(). Check if your begin*() calls are matched with "
+                 "their appropriate end*() calls.");
+    }
+
+    // If we still have blocks in the stack, we must update
+    // the current top with the dimensions that were filled by
+    // the newly popped block.
+
+    if (!blockStackEmpty()) {
+        cvui_block_t &aTop = topBlock();
+        cv::Size aSize;
+
+        // If the block has rect.width < 0 or rect.heigth < 0, it means the
+        // user don't want to calculate the block's width/height. It's up to
+        // us do to the math. In that case, we use the block's fill rect to find
+        // out the occupied space. If the block's width/height is greater than
+        // zero, then the user is very specific about the desired size. In that
+        // case, we use the provided width/height, no matter what the fill rect
+        // actually is.
+        aSize.width =
+            aBlock.rect.width < 0 ? aBlock.fill.width : aBlock.rect.width;
+        aSize.height =
+            aBlock.rect.height < 0 ? aBlock.fill.height : aBlock.rect.height;
+
+        updateLayoutFlow(aTop, aSize);
+    }
+}
+
+// Find the min and max values of a vector
+void findMinMax(std::vector<double> &theValues, double *theMin,
+                double *theMax) {
+    std::vector<double>::size_type aSize = theValues.size(), i;
+    double aMin = theValues[0], aMax = theValues[0];
+
+    for (i = 0; i < aSize; i++) {
+        if (theValues[i] < aMin) {
+            aMin = theValues[i];
+        }
+
+        if (theValues[i] > aMax) {
+            aMax = theValues[i];
+        }
+    }
+
+    *theMin = aMin;
+    *theMax = aMax;
+}
+
+cvui_label_t createLabel(const std::string &theLabel) {
+    cvui_label_t aLabel;
+    std::stringstream aBefore, aAfter;
+
+    aLabel.hasShortcut = false;
+    aLabel.shortcut = 0;
+    aLabel.textBeforeShortcut = "";
+    aLabel.textAfterShortcut = "";
+
+    for (size_t i = 0; i < theLabel.size(); i++) {
+        char c = theLabel[i];
+        if ((c == '&') && (i < theLabel.size() - 1)) {
+            aLabel.hasShortcut = true;
+            aLabel.shortcut = theLabel[i + 1];
+            ++i;
+        } else if (!aLabel.hasShortcut) {
+            aBefore << c;
+        } else {
+            aAfter << c;
+        }
+    }
+
+    aLabel.textBeforeShortcut = aBefore.str();
+    aLabel.textAfterShortcut = aAfter.str();
+
+    return aLabel;
+}
+
+cv::Scalar hexToScalar(unsigned int theColor) {
+    int aAlpha = (theColor >> 24) & 0xff;
+    int aRed = (theColor >> 16) & 0xff;
+    int aGreen = (theColor >> 8) & 0xff;
+    int aBlue = theColor & 0xff;
+
+    return cv::Scalar(aBlue, aGreen, aRed, aAlpha);
+}
+
+void resetRenderingBuffer(cvui_block_t &theScreen) {
+    theScreen.rect.x = 0;
+    theScreen.rect.y = 0;
+    theScreen.rect.width = 0;
+    theScreen.rect.height = 0;
+
+    theScreen.fill = theScreen.rect;
+    theScreen.fill.width = 0;
+    theScreen.fill.height = 0;
+
+    theScreen.anchor.x = 0;
+    theScreen.anchor.y = 0;
+
+    theScreen.padding = 0;
+}
+
+inline double clamp01(double value) {
+    value = value > 1. ? 1. : value;
+    value = value < 0. ? 0. : value;
+    return value;
+}
+
+inline void
+trackbarForceValuesAsMultiplesOfSmallStep(const TrackbarParams &theParams,
+                                          long double *theValue) {
+    if (bitsetHas(theParams.options, TRACKBAR_DISCRETE) &&
+        theParams.step != 0.) {
+        long double k = (*theValue - theParams.min) / theParams.step;
+        k = (long double)cvRound((double)k);
+        *theValue = theParams.min + theParams.step * k;
+    }
+}
+
+inline long double trackbarXPixelToValue(const TrackbarParams &theParams,
+                                         cv::Rect &theBounding, int thePixelX) {
+    long double ratio =
+        (thePixelX - (long double)(theBounding.x + gTrackbarMarginX)) /
+        (long double)(theBounding.width - 2 * gTrackbarMarginX);
+    ratio = clamp01(ratio);
+    long double value = theParams.min + ratio * (theParams.max - theParams.min);
+    return value;
+}
+
+inline int trackbarValueToXPixel(const TrackbarParams &theParams,
+                                 cv::Rect &theBounding, long double theValue) {
+    long double aRatio =
+        (theValue - theParams.min) / (theParams.max - theParams.min);
+    aRatio = clamp01(aRatio);
+    long double thePixelsX =
+        (long double)theBounding.x + gTrackbarMarginX +
+        aRatio * (long double)(theBounding.width - 2 * gTrackbarMarginX);
+    return (int)thePixelsX;
+}
+
+int iarea(int theX, int theY, int theWidth, int theHeight) {
+    cvui_mouse_t &aMouse = internal::getContext().mouse;
+
+    // By default, return that the mouse is out of the interaction area.
+    int aRet = cvui::OUT;
+
+    // Check if the mouse is over the interaction area.
+    bool aMouseIsOver =
+        cv::Rect(theX, theY, theWidth, theHeight).contains(aMouse.position);
+
+    if (aMouseIsOver) {
+        if (aMouse.anyButton.pressed) {
+            aRet = cvui::DOWN;
+        } else {
+            aRet = cvui::OVER;
+        }
+    }
+
+    // Tell if the button was clicked or not
+    if (aMouseIsOver && aMouse.anyButton.justReleased) {
+        aRet = cvui::CLICK;
+    }
+
+    return aRet;
+}
+
+bool button(cvui_block_t &theBlock, int theX, int theY, int theWidth,
+            int theHeight, const cv::String &theLabel, bool theUpdateLayout) {
+    // Calculate the space that the label will fill
+    cv::Size aTextSize =
+        getTextSize(theLabel, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, nullptr);
+
+    // Make the button bit enough to house the label
+    cv::Rect aRect(theX, theY, theWidth, theHeight);
+
+    // Render the button according to mouse interaction, e.g. OVER, DOWN, OUT.
+    int aStatus = cvui::iarea(theX, theY, aRect.width, aRect.height);
+    render::button(theBlock, aStatus, aRect, theLabel);
+    render::buttonLabel(theBlock, aStatus, aRect, theLabel, aTextSize);
+
+    // Update the layout flow according to button size
+    // if we were told to update.
+    if (theUpdateLayout) {
+        cv::Size aSize(theWidth, theHeight);
+        updateLayoutFlow(theBlock, aSize);
+    }
+
+    bool aWasShortcutPressed = false;
+
+    //Handle keyboard shortcuts
+    if (internal::gLastKeyPressed != -1) {
+        // TODO: replace with something like strpos(). I think it has better performance.
+        auto aLabel = internal::createLabel(theLabel);
+        if (aLabel.hasShortcut && (tolower(aLabel.shortcut) ==
+                                   tolower((char)internal::gLastKeyPressed))) {
+            aWasShortcutPressed = true;
+        }
+    }
+
+    // Return true if the button was clicked
+    return aStatus == cvui::CLICK || aWasShortcutPressed;
+}
+
+bool button(cvui_block_t &theBlock, int theX, int theY,
+            const cv::String &theLabel) {
+    // Calculate the space that the label will fill
+    cv::Size aTextSize =
+        getTextSize(theLabel, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, nullptr);
+
+    // Create a button based on the size of the text
+    return internal::button(theBlock, theX, theY, aTextSize.width + 30,
+                            aTextSize.height + 18, theLabel, true);
+}
+
+bool button(cvui_block_t &theBlock, int theX, int theY, cv::Mat &theIdle,
+            cv::Mat &theOver, cv::Mat &theDown, bool theUpdateLayout) {
+    cv::Rect aRect(theX, theY, theIdle.cols, theIdle.rows);
+    int aStatus = cvui::iarea(theX, theY, aRect.width, aRect.height);
+
+    switch (aStatus) {
+    case cvui::OUT:
+        render::image(theBlock, aRect, theIdle);
+        break;
+    case cvui::OVER:
+        render::image(theBlock, aRect, theOver);
+        break;
+    case cvui::DOWN:
+        render::image(theBlock, aRect, theDown);
+        break;
+    }
+
+    // Update the layout flow according to button size
+    // if we were told to update.
+    if (theUpdateLayout) {
+        cv::Size aSize(aRect.width, aRect.height);
+        updateLayoutFlow(theBlock, aSize);
+    }
+
+    // Return true if the button was clicked
+    return aStatus == cvui::CLICK;
+}
+
+void image(cvui_block_t &theBlock, int theX, int theY, cv::Mat &theImage) {
+    cv::Rect aRect(theX, theY, theImage.cols, theImage.rows);
+
+    // TODO: check for render outside the frame area
+    render::image(theBlock, aRect, theImage);
+
+    // Update the layout flow according to image size
+    cv::Size aSize(theImage.cols, theImage.rows);
+    updateLayoutFlow(theBlock, aSize);
+}
+
+bool checkbox(cvui_block_t &theBlock, int theX, int theY,
+              const cv::String &theLabel, bool *theState,
+              unsigned int theColor) {
+    cvui_mouse_t &aMouse = internal::getContext().mouse;
+    cv::Rect aRect(theX, theY, 15, 15);
+    cv::Size aTextSize =
+        getTextSize(theLabel, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, nullptr);
+    cv::Rect aHitArea(theX, theY, aRect.width + aTextSize.width + 6,
+                      aRect.height);
+    bool aMouseIsOver = aHitArea.contains(aMouse.position);
+
+    if (aMouseIsOver) {
+        render::checkbox(theBlock, cvui::OVER, aRect);
+
+        if (aMouse.anyButton.justReleased) {
+            *theState = !(*theState);
+        }
+    } else {
+        render::checkbox(theBlock, cvui::OUT, aRect);
+    }
+
+    render::checkboxLabel(theBlock, aRect, theLabel, aTextSize, theColor);
+
+    if (*theState) {
+        render::checkboxCheck(theBlock, aRect);
+    }
+
+    // Update the layout flow
+    cv::Size aSize(aHitArea.width, aHitArea.height);
+    updateLayoutFlow(theBlock, aSize);
+
+    return *theState;
+}
+
+void text(cvui_block_t &theBlock, int theX, int theY, const cv::String &theText,
+          double theFontScale, unsigned int theColor, bool theUpdateLayout) {
+    cv::Size aTextSize = cv::getTextSize(theText, cv::FONT_HERSHEY_SIMPLEX,
+                                         theFontScale, 1, nullptr);
+    cv::Point aPos(theX, theY + aTextSize.height);
+
+    render::text(theBlock, theText, aPos, theFontScale, theColor);
+
+    if (theUpdateLayout) {
+        // Add an extra pixel to the height to overcome OpenCV font size problems.
+        aTextSize.height += 1;
+
+        updateLayoutFlow(theBlock, aTextSize);
+    }
+}
+
+int counter(cvui_block_t &theBlock, int theX, int theY, int *theValue,
+            int theStep, const char *theFormat) {
+    cv::Rect aContentArea(theX + 22, theY, 48, 22);
+
+    if (internal::button(theBlock, theX, theY, 22, 22, "-", false)) {
+        *theValue -= theStep;
+    }
+
+    sprintf_s(internal::gBuffer, theFormat, *theValue);
+    render::counter(theBlock, aContentArea, internal::gBuffer);
+
+    if (internal::button(theBlock, aContentArea.x + aContentArea.width, theY,
+                         22, 22, "+", false)) {
+        *theValue += theStep;
+    }
+
+    // Update the layout flow
+    cv::Size aSize(22 * 2 + aContentArea.width, aContentArea.height);
+    updateLayoutFlow(theBlock, aSize);
+
+    return *theValue;
+}
+
+double counter(cvui_block_t &theBlock, int theX, int theY, double *theValue,
+               double theStep, const char *theFormat) {
+    cv::Rect aContentArea(theX + 22, theY, 48, 22);
+
+    if (internal::button(theBlock, theX, theY, 22, 22, "-", false)) {
+        *theValue -= theStep;
+    }
+
+    sprintf_s(internal::gBuffer, theFormat, *theValue);
+    render::counter(theBlock, aContentArea, internal::gBuffer);
+
+    if (internal::button(theBlock, aContentArea.x + aContentArea.width, theY,
+                         22, 22, "+", false)) {
+        *theValue += theStep;
+    }
+
+    // Update the layout flow
+    cv::Size aSize(22 * 2 + aContentArea.width, aContentArea.height);
+    updateLayoutFlow(theBlock, aSize);
+
+    return *theValue;
+}
+
+bool trackbar(cvui_block_t &theBlock, int theX, int theY, int theWidth,
+              long double *theValue, const TrackbarParams &theParams) {
+    cvui_mouse_t &aMouse = internal::getContext().mouse;
+    cv::Rect aContentArea(theX, theY, theWidth, 45);
+    long double aValue = *theValue;
+    bool aMouseIsOver = aContentArea.contains(aMouse.position);
+
+    render::trackbar(theBlock, aMouseIsOver ? OVER : OUT, aContentArea,
+                     *theValue, theParams);
+
+    if (aMouse.anyButton.pressed && aMouseIsOver) {
+        *theValue = internal::trackbarXPixelToValue(theParams, aContentArea,
+                                                    aMouse.position.x);
+
+        if (bitsetHas(theParams.options, TRACKBAR_DISCRETE)) {
+            internal::trackbarForceValuesAsMultiplesOfSmallStep(theParams,
+                                                                theValue);
+        }
+    }
+
+    // Update the layout flow
+    cv::Size aSize = aContentArea.size();
+    updateLayoutFlow(theBlock, aSize);
+
+    return (*theValue != aValue);
+}
+
+void window(cvui_block_t &theBlock, int theX, int theY, int theWidth,
+            int theHeight, const cv::String &theTitle) {
+    cv::Rect aTitleBar(theX, theY, theWidth, 20);
+    cv::Rect aContent(theX, theY + aTitleBar.height, theWidth,
+                      theHeight - aTitleBar.height);
+
+    render::window(theBlock, aTitleBar, aContent, theTitle);
+
+    // Update the layout flow
+    cv::Size aSize(theWidth, theHeight);
+    updateLayoutFlow(theBlock, aSize);
+}
+
+void rect(cvui_block_t &theBlock, int theX, int theY, int theWidth,
+          int theHeight, unsigned int theBorderColor,
+          unsigned int theFillingColor) {
+    cv::Point aAnchor(theX, theY);
+    cv::Rect aRect(theX, theY, theWidth, theHeight);
+
+    aRect.x = aRect.width < 0 ? aAnchor.x + aRect.width : aAnchor.x;
+    aRect.y = aRect.height < 0 ? aAnchor.y + aRect.height : aAnchor.y;
+    aRect.width = std::abs(aRect.width);
+    aRect.height = std::abs(aRect.height);
+
+    render::rect(theBlock, aRect, theBorderColor, theFillingColor);
+
+    // Update the layout flow
+    cv::Size aSize(aRect.width, aRect.height);
+    updateLayoutFlow(theBlock, aSize);
+}
+
+void sparkline(cvui_block_t &theBlock, std::vector<double> &theValues, int theX,
+               int theY, int theWidth, int theHeight, unsigned int theColor) {
+    double aMin, aMax;
+    cv::Rect aRect(theX, theY, theWidth, theHeight);
+    std::vector<double>::size_type aHowManyValues = theValues.size();
+
+    if (aHowManyValues >= 2) {
+        internal::findMinMax(theValues, &aMin, &aMax);
+        render::sparkline(theBlock, theValues, aRect, aMin, aMax, theColor);
+    } else {
+        internal::text(theBlock, theX, theY,
+                       aHowManyValues == 0 ? "No data."
+                                           : "Insufficient data points.",
+                       0.4, 0xCECECE, false);
+    }
+
+    // Update the layout flow
+    cv::Size aSize(theWidth, theHeight);
+    updateLayoutFlow(theBlock, aSize);
+}
 } // namespace internal
 
 // This is an internal namespace with all functions
 // that actually render each one of the UI components
-namespace render
-{
-	void text(cvui_block_t& theBlock, const cv::String& theText, cv::Point& thePos, double theFontScale, unsigned int theColor) {
-		cv::putText(theBlock.where, theText, thePos, cv::FONT_HERSHEY_SIMPLEX, theFontScale, internal::hexToScalar(theColor), 1, CVUI_ANTIALISED);
-	}
-
-	void button(cvui_block_t& theBlock, int theState, cv::Rect& theShape, const cv::String& theLabel) {
-		// Outline
-		cv::rectangle(theBlock.where, theShape, cv::Scalar(0x29, 0x29, 0x29));
-
-		// Border
-		theShape.x++; theShape.y++; theShape.width -= 2; theShape.height -= 2;
-		cv::rectangle(theBlock.where, theShape, cv::Scalar(0x4A, 0x4A, 0x4A));
-
-		// Inside
-		theShape.x++; theShape.y++; theShape.width -= 2; theShape.height -= 2;
-		cv::rectangle(theBlock.where, theShape, theState == OUT ? cv::Scalar(0x42, 0x42, 0x42) : (theState == OVER ? cv::Scalar(0x52, 0x52, 0x52) : cv::Scalar(0x32, 0x32, 0x32)), CVUI_FILLED);
-	}
-
-	int putText(cvui_block_t& theBlock, int theState, cv::Scalar aColor, const std::string& theText, const cv::Point & thePosition) {
-		double aFontSize = theState == cvui::DOWN ? 0.39 : 0.4;
-		cv::Size aSize;
-
-		if (theText != "") {
-			cv::putText(theBlock.where, theText, thePosition, cv::FONT_HERSHEY_SIMPLEX, aFontSize, aColor, 1, CVUI_ANTIALISED);
-			aSize = cv::getTextSize(theText, cv::FONT_HERSHEY_SIMPLEX, aFontSize, 1, nullptr);
-		}
-
-		return aSize.width;
-	}
-
-	int putTextCentered(cvui_block_t& theBlock, const cv::Point & position, const std::string &text) {
-		double aFontScale = 0.3;
-
-		auto size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, aFontScale, 1, nullptr);
-		cv::Point positionDecentered(position.x - size.width / 2, position.y);
-		cv::putText(theBlock.where, text, positionDecentered, cv::FONT_HERSHEY_SIMPLEX, aFontScale, cv::Scalar(0xCE, 0xCE, 0xCE), 1, CVUI_ANTIALISED);
-
-		return size.width;
-	};
-
-	void buttonLabel(cvui_block_t& theBlock, int theState, cv::Rect theRect, const cv::String& theLabel, cv::Size& theTextSize) {
-		cv::Point aPos(theRect.x + theRect.width / 2 - theTextSize.width / 2, theRect.y + theRect.height / 2 + theTextSize.height / 2);
-		cv::Scalar aColor = cv::Scalar(0xCE, 0xCE, 0xCE);
-
-		auto aLabel = internal::createLabel(theLabel);
-
-		if (!aLabel.hasShortcut) {
-			putText(theBlock, theState, aColor, theLabel, aPos);
-		}
-		else {
-			int aWidth = putText(theBlock, theState, aColor, aLabel.textBeforeShortcut, aPos);
-			int aStart = aPos.x + aWidth;
-			aPos.x += aWidth;
-
-			std::string aShortcut;
-			aShortcut.push_back(aLabel.shortcut);
-
-			aWidth = putText(theBlock, theState, aColor, aShortcut, aPos);
-			int aEnd = aStart + aWidth;
-			aPos.x += aWidth;
-
-			putText(theBlock, theState, aColor, aLabel.textAfterShortcut, aPos);
-			cv::line(theBlock.where, cv::Point(aStart, aPos.y + 3), cv::Point(aEnd, aPos.y + 3), aColor, 1, CVUI_ANTIALISED);
-		}
-	}
-
-	void image(cvui_block_t& theBlock, cv::Rect& theRect, cv::Mat& theImage) {
-		theImage.copyTo(theBlock.where(theRect));
-	}
-
-	void counter(cvui_block_t& theBlock, cv::Rect& theShape, const cv::String& theValue) {
-		cv::rectangle(theBlock.where, theShape, cv::Scalar(0x29, 0x29, 0x29), CVUI_FILLED); // fill
-		cv::rectangle(theBlock.where, theShape, cv::Scalar(0x45, 0x45, 0x45)); // border
-
-		cv::Size aTextSize = getTextSize(theValue, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, nullptr);
-
-		cv::Point aPos(theShape.x + theShape.width / 2 - aTextSize.width / 2, theShape.y + aTextSize.height / 2 + theShape.height / 2);
-		cv::putText(theBlock.where, theValue, aPos, cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(0xCE, 0xCE, 0xCE), 1, CVUI_ANTIALISED);
-	}
-
-	void trackbarHandle(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams, cv::Rect& theWorkingArea) {
-		cv::Point aBarTopLeft(theWorkingArea.x, theWorkingArea.y + theWorkingArea.height / 2);
-		int aBarHeight = 7;
-
-		// Draw the rectangle representing the handle
-		int aPixelX = internal::trackbarValueToXPixel(theParams, theShape, theValue);
-		int aIndicatorWidth = 3;
-		int aIndicatorHeight = 4;
-		cv::Point aPoint1(aPixelX - aIndicatorWidth, aBarTopLeft.y - aIndicatorHeight);
-		cv::Point aPoint2(aPixelX + aIndicatorWidth, aBarTopLeft.y + aBarHeight + aIndicatorHeight);
-		cv::Rect aRect(aPoint1, aPoint2);
-
-		int aFillColor = theState == OVER ? 0x525252 : 0x424242;
-
-		rect(theBlock, aRect, 0x212121, 0x212121);
-		aRect.x += 1; aRect.y += 1; aRect.width -= 2; aRect.height -= 2;
-		rect(theBlock, aRect, 0x515151, aFillColor);
-
-		bool aShowLabel = internal::bitsetHas(theParams.options, cvui::TRACKBAR_HIDE_VALUE_LABEL) == false;
-
-		// Draw the handle label
-		if (aShowLabel) {
-			cv::Point aTextPos(aPixelX, aPoint2.y + 11);
-			sprintf_s(internal::gBuffer, theParams.labelFormat.c_str(), static_cast<long double>(theValue));
-			putTextCentered(theBlock, aTextPos, internal::gBuffer);
-		}
-	}
-
-	void trackbarPath(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams, cv::Rect& theWorkingArea) {
-		int aBarHeight = 7;
-		cv::Point aBarTopLeft(theWorkingArea.x, theWorkingArea.y + theWorkingArea.height / 2);
-		cv::Rect aRect(aBarTopLeft, cv::Size(theWorkingArea.width, aBarHeight));
-
-		int aBorderColor = theState == OVER ? 0x4e4e4e : 0x3e3e3e;
-
-		rect(theBlock, aRect, aBorderColor, 0x292929);
-		cv::line(theBlock.where, cv::Point(aRect.x + 1, aRect.y + aBarHeight - 2), cv::Point(aRect.x + aRect.width - 2, aRect.y + aBarHeight - 2), cv::Scalar(0x0e, 0x0e, 0x0e));
-	}
-
-	void trackbarSteps(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams, cv::Rect& theWorkingArea) {
-		cv::Point aBarTopLeft(theWorkingArea.x, theWorkingArea.y + theWorkingArea.height / 2);
-		cv::Scalar aColor(0x51, 0x51, 0x51);
-
-		bool aDiscrete = internal::bitsetHas(theParams.options, cvui::TRACKBAR_DISCRETE);
-		long double aFixedStep = aDiscrete ? theParams.step : (theParams.max - theParams.min) / 20;
-
-		// TODO: check min, max and step to prevent infinite loop.
-		for (long double aValue = theParams.min; aValue <= theParams.max; aValue += aFixedStep) {
-			int aPixelX = internal::trackbarValueToXPixel(theParams, theShape, aValue);
-			cv::Point aPoint1(aPixelX, aBarTopLeft.y);
-			cv::Point aPoint2(aPixelX, aBarTopLeft.y - 3);
-			cv::line(theBlock.where, aPoint1, aPoint2, aColor);
-		}
-	}
-
-	void trackbarSegmentLabel(cvui_block_t& theBlock, cv::Rect& theShape, const internal::TrackbarParams &theParams, long double theValue, cv::Rect& theWorkingArea, bool theShowLabel) {
-		cv::Scalar aColor(0x51, 0x51, 0x51);
-		cv::Point aBarTopLeft(theWorkingArea.x, theWorkingArea.y + theWorkingArea.height / 2);
-
-		int aPixelX = internal::trackbarValueToXPixel(theParams, theShape, theValue);
-
-		cv::Point aPoint1(aPixelX, aBarTopLeft.y);
-		cv::Point aPoint2(aPixelX, aBarTopLeft.y - 8);
-		cv::line(theBlock.where, aPoint1, aPoint2, aColor);
-
-		if (theShowLabel)
-		{
-			sprintf_s(internal::gBuffer, theParams.labelFormat.c_str(), theValue);
-			cv::Point aTextPos(aPixelX, aBarTopLeft.y - 11);
-			putTextCentered(theBlock, aTextPos, internal::gBuffer);
-		}
-  }
-
-	void trackbarSegments(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams, cv::Rect& theWorkingArea) {
-		int aSegments = theParams.segments < 1 ? 1 : theParams.segments;
-		long double aSegmentLength = (long double)(theParams.max - theParams.min) / (long double)aSegments;
-
-		bool aHasMinMaxLabels = internal::bitsetHas(theParams.options, TRACKBAR_HIDE_MIN_MAX_LABELS) == false;
-
-		// Render the min value label
-		trackbarSegmentLabel(theBlock, theShape, theParams, theParams.min, theWorkingArea, aHasMinMaxLabels);
-
-		//Draw large steps and labels
-		bool aHasSegmentLabels = internal::bitsetHas(theParams.options, TRACKBAR_HIDE_SEGMENT_LABELS) == false;
-		// TODO: check min, max and step to prevent infinite loop.
-		for (long double aValue = theParams.min; aValue <= theParams.max; aValue += aSegmentLength) {
-			trackbarSegmentLabel(theBlock, theShape, theParams, aValue, theWorkingArea, aHasSegmentLabels);
-		}
-
-		// Render the max value label
-		trackbarSegmentLabel(theBlock, theShape, theParams, theParams.max, theWorkingArea, aHasMinMaxLabels);
-	}
-
-	void trackbar(cvui_block_t& theBlock, int theState, cv::Rect& theShape, double theValue, const internal::TrackbarParams &theParams) {
-		cv::Rect aWorkingArea(theShape.x + internal::gTrackbarMarginX, theShape.y, theShape.width - 2 * internal::gTrackbarMarginX, theShape.height);
-
-		trackbarPath(theBlock, theState, theShape, theValue, theParams, aWorkingArea);
-
-		bool aHideAllLabels = internal::bitsetHas(theParams.options, cvui::TRACKBAR_HIDE_LABELS);
-		bool aShowSteps = internal::bitsetHas(theParams.options, cvui::TRACKBAR_HIDE_STEP_SCALE) == false;
-
-		if (aShowSteps && !aHideAllLabels) {
-			trackbarSteps(theBlock, theState, theShape, theValue, theParams, aWorkingArea);
-		}
-
-		if (!aHideAllLabels) {
-			trackbarSegments(theBlock, theState, theShape, theValue, theParams, aWorkingArea);
-		}
-
-		trackbarHandle(theBlock, theState, theShape, theValue, theParams, aWorkingArea);
-	}
-
-	void checkbox(cvui_block_t& theBlock, int theState, cv::Rect& theShape) {
-		// Outline
-		cv::rectangle(theBlock.where, theShape, theState == OUT ? cv::Scalar(0x63, 0x63, 0x63) : cv::Scalar(0x80, 0x80, 0x80));
-
-		// Border
-		theShape.x++; theShape.y++; theShape.width -= 2; theShape.height -= 2;
-		cv::rectangle(theBlock.where, theShape, cv::Scalar(0x17, 0x17, 0x17));
-
-		// Inside
-		theShape.x++; theShape.y++; theShape.width -= 2; theShape.height -= 2;
-		cv::rectangle(theBlock.where, theShape, cv::Scalar(0x29, 0x29, 0x29), CVUI_FILLED);
-	}
-
-	void checkboxLabel(cvui_block_t& theBlock, cv::Rect& theRect, const cv::String& theLabel, cv::Size& theTextSize, unsigned int theColor) {
-		cv::Point aPos(theRect.x + theRect.width + 6, theRect.y + theTextSize.height + theRect.height / 2 - theTextSize.height / 2 - 1);
-		text(theBlock, theLabel, aPos, 0.4, theColor);
-	}
-
-	void checkboxCheck(cvui_block_t& theBlock, cv::Rect& theShape) {
-		theShape.x++; theShape.y++; theShape.width -= 2; theShape.height -= 2;
-		cv::rectangle(theBlock.where, theShape, cv::Scalar(0xFF, 0xBF, 0x75), CVUI_FILLED);
-	}
-
-	void window(cvui_block_t& theBlock, cv::Rect& theTitleBar, cv::Rect& theContent, const cv::String& theTitle) {
-		bool aTransparecy = false;
-		double aAlpha = 0.3;
-		cv::Mat aOverlay;
-
-		// Render the title bar.
-		// First the border
-		cv::rectangle(theBlock.where, theTitleBar, cv::Scalar(0x4A, 0x4A, 0x4A));
-		// then the inside
-		theTitleBar.x++; theTitleBar.y++; theTitleBar.width -= 2; theTitleBar.height -= 2;
-		cv::rectangle(theBlock.where, theTitleBar, cv::Scalar(0x21, 0x21, 0x21), CVUI_FILLED);
-
-		// Render title text.
-		cv::Point aPos(theTitleBar.x + 5, theTitleBar.y + 12);
-		cv::putText(theBlock.where, theTitle, aPos, cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(0xCE, 0xCE, 0xCE), 1, CVUI_ANTIALISED);
-
-		// Render the body.
-		// First the border.
-		cv::rectangle(theBlock.where, theContent, cv::Scalar(0x4A, 0x4A, 0x4A));
-
-		// Then the filling.
-		theContent.x++; theContent.y++; theContent.width -= 2; theContent.height -= 2;
-		cv::rectangle(aOverlay, theContent, cv::Scalar(0x31, 0x31, 0x31), CVUI_FILLED);
-
-		if (aTransparecy) {
-			theBlock.where.copyTo(aOverlay);
-			cv::rectangle(aOverlay, theContent, cv::Scalar(0x31, 0x31, 0x31), CVUI_FILLED);
-			cv::addWeighted(aOverlay, aAlpha, theBlock.where, 1.0 - aAlpha, 0.0, theBlock.where);
-
-		}
-		else {
-			cv::rectangle(theBlock.where, theContent, cv::Scalar(0x31, 0x31, 0x31), CVUI_FILLED);
-		}
-	}
-
-	void rect(cvui_block_t& theBlock, cv::Rect& thePos, unsigned int theBorderColor, unsigned int theFillingColor) {
-		cv::Scalar aBorder = internal::hexToScalar(theBorderColor);
-		cv::Scalar aFilling = internal::hexToScalar(theFillingColor);
-
-		bool aHasFilling = aFilling[3] != 0xff;
-
-		if (aHasFilling) {
-			if (aFilling[3] == 0x00) {
-				// full opacity
-				cv::rectangle(theBlock.where, thePos, aFilling, CVUI_FILLED, CVUI_ANTIALISED);
-			}
-			else {
-				cv::Rect aClippedRect = thePos & cv::Rect(cv::Point(0, 0), theBlock.where.size());
-				double aAlpha = 1.00 - static_cast<double>(aFilling[3]) / 255;
-				cv::Mat aOverlay(aClippedRect.size(), theBlock.where.type(), aFilling);
-				cv::addWeighted(aOverlay, aAlpha, theBlock.where(aClippedRect), 1.00 - aAlpha, 0.0, theBlock.where(aClippedRect));
-			}
-		}
-
-		// Render the border
-		cv::rectangle(theBlock.where, thePos, aBorder, 1, CVUI_ANTIALISED);
-	}
-
-	void sparkline(cvui_block_t& theBlock, std::vector<double>& theValues, cv::Rect &theRect, double theMin, double theMax, unsigned int theColor) {
-		std::vector<double>::size_type aSize = theValues.size(), i;
-		double aGap, aPosX, aScale = 0, x, y;
-
-		aScale = theMax - theMin;
-		aGap = (double)theRect.width / aSize;
-		aPosX = theRect.x;
-
-		for (i = 0; i <= aSize - 2; i++) {
-			x = aPosX;
-			y = (theValues[i] - theMin) / aScale * -(theRect.height - 5) + theRect.y + theRect.height - 5;
-			cv::Point aPoint1((int)x, (int)y);
-
-			x = aPosX + aGap;
-			y = (theValues[i + 1] - theMin) / aScale * -(theRect.height - 5) + theRect.y + theRect.height - 5;
-			cv::Point aPoint2((int)x, (int)y);
-
-			cv::line(theBlock.where, aPoint1, aPoint2, internal::hexToScalar(theColor));
-			aPosX += aGap;
-		}
-	}
+namespace render {
+void text(cvui_block_t &theBlock, const cv::String &theText, cv::Point &thePos,
+          double theFontScale, unsigned int theColor) {
+    cv::putText(theBlock.where, theText, thePos, cv::FONT_HERSHEY_SIMPLEX,
+                theFontScale, internal::hexToScalar(theColor), 1,
+                CVUI_ANTIALISED);
+}
+
+void button(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+            const cv::String &theLabel) {
+    // Outline
+    cv::rectangle(theBlock.where, theShape, cv::Scalar(0x29, 0x29, 0x29));
+
+    // Border
+    theShape.x++;
+    theShape.y++;
+    theShape.width -= 2;
+    theShape.height -= 2;
+    cv::rectangle(theBlock.where, theShape, cv::Scalar(0x4A, 0x4A, 0x4A));
+
+    // Inside
+    theShape.x++;
+    theShape.y++;
+    theShape.width -= 2;
+    theShape.height -= 2;
+    cv::rectangle(theBlock.where, theShape,
+                  theState == OUT
+                      ? cv::Scalar(0x42, 0x42, 0x42)
+                      : (theState == OVER ? cv::Scalar(0x52, 0x52, 0x52)
+                                          : cv::Scalar(0x32, 0x32, 0x32)),
+                  CVUI_FILLED);
+}
+
+int putText(cvui_block_t &theBlock, int theState, cv::Scalar aColor,
+            const std::string &theText, const cv::Point &thePosition) {
+    double aFontSize = theState == cvui::DOWN ? 0.39 : 0.4;
+    cv::Size aSize;
+
+    if (theText != "") {
+        cv::putText(theBlock.where, theText, thePosition,
+                    cv::FONT_HERSHEY_SIMPLEX, aFontSize, aColor, 1,
+                    CVUI_ANTIALISED);
+        aSize = cv::getTextSize(theText, cv::FONT_HERSHEY_SIMPLEX, aFontSize, 1,
+                                nullptr);
+    }
+
+    return aSize.width;
+}
+
+int putTextCentered(cvui_block_t &theBlock, const cv::Point &position,
+                    const std::string &text) {
+    double aFontScale = 0.3;
+
+    auto size =
+        cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, aFontScale, 1, nullptr);
+    cv::Point positionDecentered(position.x - size.width / 2, position.y);
+    cv::putText(theBlock.where, text, positionDecentered,
+                cv::FONT_HERSHEY_SIMPLEX, aFontScale,
+                cv::Scalar(0xCE, 0xCE, 0xCE), 1, CVUI_ANTIALISED);
+
+    return size.width;
+};
+
+void buttonLabel(cvui_block_t &theBlock, int theState, cv::Rect theRect,
+                 const cv::String &theLabel, cv::Size &theTextSize) {
+    cv::Point aPos(theRect.x + theRect.width / 2 - theTextSize.width / 2,
+                   theRect.y + theRect.height / 2 + theTextSize.height / 2);
+    cv::Scalar aColor = cv::Scalar(0xCE, 0xCE, 0xCE);
+
+    auto aLabel = internal::createLabel(theLabel);
+
+    if (!aLabel.hasShortcut) {
+        putText(theBlock, theState, aColor, theLabel, aPos);
+    } else {
+        int aWidth = putText(theBlock, theState, aColor,
+                             aLabel.textBeforeShortcut, aPos);
+        int aStart = aPos.x + aWidth;
+        aPos.x += aWidth;
+
+        std::string aShortcut;
+        aShortcut.push_back(aLabel.shortcut);
+
+        aWidth = putText(theBlock, theState, aColor, aShortcut, aPos);
+        int aEnd = aStart + aWidth;
+        aPos.x += aWidth;
+
+        putText(theBlock, theState, aColor, aLabel.textAfterShortcut, aPos);
+        cv::line(theBlock.where, cv::Point(aStart, aPos.y + 3),
+                 cv::Point(aEnd, aPos.y + 3), aColor, 1, CVUI_ANTIALISED);
+    }
+}
+
+void image(cvui_block_t &theBlock, cv::Rect &theRect, cv::Mat &theImage) {
+    theImage.copyTo(theBlock.where(theRect));
+}
+
+void counter(cvui_block_t &theBlock, cv::Rect &theShape,
+             const cv::String &theValue) {
+    cv::rectangle(theBlock.where, theShape, cv::Scalar(0x29, 0x29, 0x29),
+                  CVUI_FILLED); // fill
+    cv::rectangle(theBlock.where, theShape,
+                  cv::Scalar(0x45, 0x45, 0x45)); // border
+
+    cv::Size aTextSize =
+        getTextSize(theValue, cv::FONT_HERSHEY_SIMPLEX, 0.4, 1, nullptr);
+
+    cv::Point aPos(theShape.x + theShape.width / 2 - aTextSize.width / 2,
+                   theShape.y + aTextSize.height / 2 + theShape.height / 2);
+    cv::putText(theBlock.where, theValue, aPos, cv::FONT_HERSHEY_SIMPLEX, 0.4,
+                cv::Scalar(0xCE, 0xCE, 0xCE), 1, CVUI_ANTIALISED);
+}
+
+void trackbarHandle(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+                    double theValue, const internal::TrackbarParams &theParams,
+                    cv::Rect &theWorkingArea) {
+    cv::Point aBarTopLeft(theWorkingArea.x,
+                          theWorkingArea.y + theWorkingArea.height / 2);
+    int aBarHeight = 7;
+
+    // Draw the rectangle representing the handle
+    int aPixelX =
+        internal::trackbarValueToXPixel(theParams, theShape, theValue);
+    int aIndicatorWidth = 3;
+    int aIndicatorHeight = 4;
+    cv::Point aPoint1(aPixelX - aIndicatorWidth,
+                      aBarTopLeft.y - aIndicatorHeight);
+    cv::Point aPoint2(aPixelX + aIndicatorWidth,
+                      aBarTopLeft.y + aBarHeight + aIndicatorHeight);
+    cv::Rect aRect(aPoint1, aPoint2);
+
+    int aFillColor = theState == OVER ? 0x525252 : 0x424242;
+
+    rect(theBlock, aRect, 0x212121, 0x212121);
+    aRect.x += 1;
+    aRect.y += 1;
+    aRect.width -= 2;
+    aRect.height -= 2;
+    rect(theBlock, aRect, 0x515151, aFillColor);
+
+    bool aShowLabel =
+        internal::bitsetHas(theParams.options,
+                            cvui::TRACKBAR_HIDE_VALUE_LABEL) == false;
+
+    // Draw the handle label
+    if (aShowLabel) {
+        cv::Point aTextPos(aPixelX, aPoint2.y + 11);
+        sprintf_s(internal::gBuffer, theParams.labelFormat.c_str(),
+                  static_cast<long double>(theValue));
+        putTextCentered(theBlock, aTextPos, internal::gBuffer);
+    }
+}
+
+void trackbarPath(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+                  double theValue, const internal::TrackbarParams &theParams,
+                  cv::Rect &theWorkingArea) {
+    int aBarHeight = 7;
+    cv::Point aBarTopLeft(theWorkingArea.x,
+                          theWorkingArea.y + theWorkingArea.height / 2);
+    cv::Rect aRect(aBarTopLeft, cv::Size(theWorkingArea.width, aBarHeight));
+
+    int aBorderColor = theState == OVER ? 0x4e4e4e : 0x3e3e3e;
+
+    rect(theBlock, aRect, aBorderColor, 0x292929);
+    cv::line(theBlock.where, cv::Point(aRect.x + 1, aRect.y + aBarHeight - 2),
+             cv::Point(aRect.x + aRect.width - 2, aRect.y + aBarHeight - 2),
+             cv::Scalar(0x0e, 0x0e, 0x0e));
+}
+
+void trackbarSteps(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+                   double theValue, const internal::TrackbarParams &theParams,
+                   cv::Rect &theWorkingArea) {
+    cv::Point aBarTopLeft(theWorkingArea.x,
+                          theWorkingArea.y + theWorkingArea.height / 2);
+    cv::Scalar aColor(0x51, 0x51, 0x51);
+
+    bool aDiscrete =
+        internal::bitsetHas(theParams.options, cvui::TRACKBAR_DISCRETE);
+    long double aFixedStep =
+        aDiscrete ? theParams.step : (theParams.max - theParams.min) / 20;
+
+    // TODO: check min, max and step to prevent infinite loop.
+    for (long double aValue = theParams.min; aValue <= theParams.max;
+         aValue += aFixedStep) {
+        int aPixelX =
+            internal::trackbarValueToXPixel(theParams, theShape, aValue);
+        cv::Point aPoint1(aPixelX, aBarTopLeft.y);
+        cv::Point aPoint2(aPixelX, aBarTopLeft.y - 3);
+        cv::line(theBlock.where, aPoint1, aPoint2, aColor);
+    }
+}
+
+void trackbarSegmentLabel(cvui_block_t &theBlock, cv::Rect &theShape,
+                          const internal::TrackbarParams &theParams,
+                          long double theValue, cv::Rect &theWorkingArea,
+                          bool theShowLabel) {
+    cv::Scalar aColor(0x51, 0x51, 0x51);
+    cv::Point aBarTopLeft(theWorkingArea.x,
+                          theWorkingArea.y + theWorkingArea.height / 2);
+
+    int aPixelX =
+        internal::trackbarValueToXPixel(theParams, theShape, theValue);
+
+    cv::Point aPoint1(aPixelX, aBarTopLeft.y);
+    cv::Point aPoint2(aPixelX, aBarTopLeft.y - 8);
+    cv::line(theBlock.where, aPoint1, aPoint2, aColor);
+
+    if (theShowLabel) {
+        sprintf_s(internal::gBuffer, theParams.labelFormat.c_str(), theValue);
+        cv::Point aTextPos(aPixelX, aBarTopLeft.y - 11);
+        putTextCentered(theBlock, aTextPos, internal::gBuffer);
+    }
+}
+
+void trackbarSegments(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+                      double theValue,
+                      const internal::TrackbarParams &theParams,
+                      cv::Rect &theWorkingArea) {
+    int aSegments = theParams.segments < 1 ? 1 : theParams.segments;
+    long double aSegmentLength =
+        (long double)(theParams.max - theParams.min) / (long double)aSegments;
+
+    bool aHasMinMaxLabels =
+        internal::bitsetHas(theParams.options, TRACKBAR_HIDE_MIN_MAX_LABELS) ==
+        false;
+
+    // Render the min value label
+    trackbarSegmentLabel(theBlock, theShape, theParams, theParams.min,
+                         theWorkingArea, aHasMinMaxLabels);
+
+    //Draw large steps and labels
+    bool aHasSegmentLabels =
+        internal::bitsetHas(theParams.options, TRACKBAR_HIDE_SEGMENT_LABELS) ==
+        false;
+    // TODO: check min, max and step to prevent infinite loop.
+    for (long double aValue = theParams.min; aValue <= theParams.max;
+         aValue += aSegmentLength) {
+        trackbarSegmentLabel(theBlock, theShape, theParams, aValue,
+                             theWorkingArea, aHasSegmentLabels);
+    }
+
+    // Render the max value label
+    trackbarSegmentLabel(theBlock, theShape, theParams, theParams.max,
+                         theWorkingArea, aHasMinMaxLabels);
+}
+
+void trackbar(cvui_block_t &theBlock, int theState, cv::Rect &theShape,
+              double theValue, const internal::TrackbarParams &theParams) {
+    cv::Rect aWorkingArea(theShape.x + internal::gTrackbarMarginX, theShape.y,
+                          theShape.width - 2 * internal::gTrackbarMarginX,
+                          theShape.height);
+
+    trackbarPath(theBlock, theState, theShape, theValue, theParams,
+                 aWorkingArea);
+
+    bool aHideAllLabels =
+        internal::bitsetHas(theParams.options, cvui::TRACKBAR_HIDE_LABELS);
+    bool aShowSteps =
+        internal::bitsetHas(theParams.options,
+                            cvui::TRACKBAR_HIDE_STEP_SCALE) == false;
+
+    if (aShowSteps && !aHideAllLabels) {
+        trackbarSteps(theBlock, theState, theShape, theValue, theParams,
+                      aWorkingArea);
+    }
+
+    if (!aHideAllLabels) {
+        trackbarSegments(theBlock, theState, theShape, theValue, theParams,
+                         aWorkingArea);
+    }
+
+    trackbarHandle(theBlock, theState, theShape, theValue, theParams,
+                   aWorkingArea);
+}
+
+void checkbox(cvui_block_t &theBlock, int theState, cv::Rect &theShape) {
+    // Outline
+    cv::rectangle(theBlock.where, theShape,
+                  theState == OUT ? cv::Scalar(0x63, 0x63, 0x63)
+                                  : cv::Scalar(0x80, 0x80, 0x80));
+
+    // Border
+    theShape.x++;
+    theShape.y++;
+    theShape.width -= 2;
+    theShape.height -= 2;
+    cv::rectangle(theBlock.where, theShape, cv::Scalar(0x17, 0x17, 0x17));
+
+    // Inside
+    theShape.x++;
+    theShape.y++;
+    theShape.width -= 2;
+    theShape.height -= 2;
+    cv::rectangle(theBlock.where, theShape, cv::Scalar(0x29, 0x29, 0x29),
+                  CVUI_FILLED);
+}
+
+void checkboxLabel(cvui_block_t &theBlock, cv::Rect &theRect,
+                   const cv::String &theLabel, cv::Size &theTextSize,
+                   unsigned int theColor) {
+    cv::Point aPos(theRect.x + theRect.width + 6,
+                   theRect.y + theTextSize.height + theRect.height / 2 -
+                       theTextSize.height / 2 - 1);
+    text(theBlock, theLabel, aPos, 0.4, theColor);
+}
+
+void checkboxCheck(cvui_block_t &theBlock, cv::Rect &theShape) {
+    theShape.x++;
+    theShape.y++;
+    theShape.width -= 2;
+    theShape.height -= 2;
+    cv::rectangle(theBlock.where, theShape, cv::Scalar(0xFF, 0xBF, 0x75),
+                  CVUI_FILLED);
+}
+
+void window(cvui_block_t &theBlock, cv::Rect &theTitleBar, cv::Rect &theContent,
+            const cv::String &theTitle) {
+    bool aTransparecy = false;
+    double aAlpha = 0.3;
+    cv::Mat aOverlay;
+
+    // Render the title bar.
+    // First the border
+    cv::rectangle(theBlock.where, theTitleBar, cv::Scalar(0x4A, 0x4A, 0x4A));
+    // then the inside
+    theTitleBar.x++;
+    theTitleBar.y++;
+    theTitleBar.width -= 2;
+    theTitleBar.height -= 2;
+    cv::rectangle(theBlock.where, theTitleBar, cv::Scalar(0x21, 0x21, 0x21),
+                  CVUI_FILLED);
+
+    // Render title text.
+    cv::Point aPos(theTitleBar.x + 5, theTitleBar.y + 12);
+    cv::putText(theBlock.where, theTitle, aPos, cv::FONT_HERSHEY_SIMPLEX, 0.4,
+                cv::Scalar(0xCE, 0xCE, 0xCE), 1, CVUI_ANTIALISED);
+
+    // Render the body.
+    // First the border.
+    cv::rectangle(theBlock.where, theContent, cv::Scalar(0x4A, 0x4A, 0x4A));
+
+    // Then the filling.
+    theContent.x++;
+    theContent.y++;
+    theContent.width -= 2;
+    theContent.height -= 2;
+    cv::rectangle(aOverlay, theContent, cv::Scalar(0x31, 0x31, 0x31),
+                  CVUI_FILLED);
+
+    if (aTransparecy) {
+        theBlock.where.copyTo(aOverlay);
+        cv::rectangle(aOverlay, theContent, cv::Scalar(0x31, 0x31, 0x31),
+                      CVUI_FILLED);
+        cv::addWeighted(aOverlay, aAlpha, theBlock.where, 1.0 - aAlpha, 0.0,
+                        theBlock.where);
+
+    } else {
+        cv::rectangle(theBlock.where, theContent, cv::Scalar(0x31, 0x31, 0x31),
+                      CVUI_FILLED);
+    }
+}
+
+void rect(cvui_block_t &theBlock, cv::Rect &thePos, unsigned int theBorderColor,
+          unsigned int theFillingColor) {
+    cv::Scalar aBorder = internal::hexToScalar(theBorderColor);
+    cv::Scalar aFilling = internal::hexToScalar(theFillingColor);
+
+    bool aHasFilling = aFilling[3] != 0xff;
+
+    if (aHasFilling) {
+        if (aFilling[3] == 0x00) {
+            // full opacity
+            cv::rectangle(theBlock.where, thePos, aFilling, CVUI_FILLED,
+                          CVUI_ANTIALISED);
+        } else {
+            cv::Rect aClippedRect =
+                thePos & cv::Rect(cv::Point(0, 0), theBlock.where.size());
+            double aAlpha = 1.00 - static_cast<double>(aFilling[3]) / 255;
+            cv::Mat aOverlay(aClippedRect.size(), theBlock.where.type(),
+                             aFilling);
+            cv::addWeighted(aOverlay, aAlpha, theBlock.where(aClippedRect),
+                            1.00 - aAlpha, 0.0, theBlock.where(aClippedRect));
+        }
+    }
+
+    // Render the border
+    cv::rectangle(theBlock.where, thePos, aBorder, 1, CVUI_ANTIALISED);
+}
+
+void sparkline(cvui_block_t &theBlock, std::vector<double> &theValues,
+               cv::Rect &theRect, double theMin, double theMax,
+               unsigned int theColor) {
+    std::vector<double>::size_type aSize = theValues.size(), i;
+    double aGap, aPosX, aScale = 0, x, y;
+
+    aScale = theMax - theMin;
+    aGap = (double)theRect.width / aSize;
+    aPosX = theRect.x;
+
+    for (i = 0; i <= aSize - 2; i++) {
+        x = aPosX;
+        y = (theValues[i] - theMin) / aScale * -(theRect.height - 5) +
+            theRect.y + theRect.height - 5;
+        cv::Point aPoint1((int)x, (int)y);
+
+        x = aPosX + aGap;
+        y = (theValues[i + 1] - theMin) / aScale * -(theRect.height - 5) +
+            theRect.y + theRect.height - 5;
+        cv::Point aPoint2((int)x, (int)y);
+
+        cv::line(theBlock.where, aPoint1, aPoint2,
+                 internal::hexToScalar(theColor));
+        aPosX += aGap;
+    }
+}
 } // namespace render
 
-void init(const cv::String& theWindowName, int theDelayWaitKey, bool theCreateNamedWindow) {
-	internal::init(theWindowName, theDelayWaitKey);
-	watch(theWindowName, theCreateNamedWindow);
+void init(const cv::String &theWindowName, int theDelayWaitKey,
+          bool theCreateNamedWindow) {
+    internal::init(theWindowName, theDelayWaitKey);
+    watch(theWindowName, theCreateNamedWindow);
 }
 
-void init(const cv::String theWindowNames[], size_t theHowManyWindows, int theDelayWaitKey, bool theCreateNamedWindows) {
-	internal::init(theWindowNames[0], theDelayWaitKey);
+void init(const cv::String theWindowNames[], size_t theHowManyWindows,
+          int theDelayWaitKey, bool theCreateNamedWindows) {
+    internal::init(theWindowNames[0], theDelayWaitKey);
 
-	for (size_t i = 0; i < theHowManyWindows; i++) {
-		watch(theWindowNames[i], theCreateNamedWindows);
-	}
+    for (size_t i = 0; i < theHowManyWindows; i++) {
+        watch(theWindowNames[i], theCreateNamedWindows);
+    }
 }
 
-void watch(const cv::String& theWindowName, bool theCreateNamedWindow) {
-	cvui_context_t aContex;
+void watch(const cv::String &theWindowName, bool theCreateNamedWindow) {
+    cvui_context_t aContex;
 
-	if (theCreateNamedWindow) {
-		cv::namedWindow(theWindowName);
-	}
+    if (theCreateNamedWindow) {
+        cv::namedWindow(theWindowName);
+    }
 
-	aContex.windowName = theWindowName;
-	aContex.mouse.position.x = 0;
-	aContex.mouse.position.y = 0;
-	
-	internal::resetMouseButton(aContex.mouse.anyButton);
-	internal::resetMouseButton(aContex.mouse.buttons[RIGHT_BUTTON]);
-	internal::resetMouseButton(aContex.mouse.buttons[MIDDLE_BUTTON]);
-	internal::resetMouseButton(aContex.mouse.buttons[LEFT_BUTTON]);
+    aContex.windowName = theWindowName;
+    aContex.mouse.position.x = 0;
+    aContex.mouse.position.y = 0;
 
-	internal::gContexts[theWindowName] = aContex;
-	cv::setMouseCallback(theWindowName, handleMouse, &internal::gContexts[theWindowName]);
+    internal::resetMouseButton(aContex.mouse.anyButton);
+    internal::resetMouseButton(aContex.mouse.buttons[RIGHT_BUTTON]);
+    internal::resetMouseButton(aContex.mouse.buttons[MIDDLE_BUTTON]);
+    internal::resetMouseButton(aContex.mouse.buttons[LEFT_BUTTON]);
+
+    internal::gContexts[theWindowName] = aContex;
+    cv::setMouseCallback(theWindowName, handleMouse,
+                         &internal::gContexts[theWindowName]);
 }
 
-void context(const cv::String& theWindowName) {
-	internal::gCurrentContext = theWindowName;
+void context(const cv::String &theWindowName) {
+    internal::gCurrentContext = theWindowName;
 }
 
-void imshow(const cv::String& theWindowName, cv::InputArray theFrame) {
-	cvui::update(theWindowName);
-	cv::imshow(theWindowName, theFrame);
+void imshow(const cv::String &theWindowName, cv::InputArray theFrame) {
+    cvui::update(theWindowName);
+    cv::imshow(theWindowName, theFrame);
 }
 
-int lastKeyPressed() {
-	return internal::gLastKeyPressed;
+int lastKeyPressed() { return internal::gLastKeyPressed; }
+
+cv::Point mouse(const cv::String &theWindowName) {
+    return internal::getContext(theWindowName).mouse.position;
 }
 
-cv::Point mouse(const cv::String& theWindowName) {
-	return internal::getContext(theWindowName).mouse.position;
-}
+bool mouse(int theQuery) { return mouse("", theQuery); }
 
-bool mouse(int theQuery) {
-	return mouse("", theQuery);
-}
+bool mouse(const cv::String &theWindowName, int theQuery) {
+    cvui_mouse_btn_t &aButton =
+        internal::getContext(theWindowName).mouse.anyButton;
+    bool aRet = internal::isMouseButton(aButton, theQuery);
 
-bool mouse(const cv::String& theWindowName, int theQuery) {
-	cvui_mouse_btn_t& aButton = internal::getContext(theWindowName).mouse.anyButton;
-	bool aRet = internal::isMouseButton(aButton, theQuery);
-
-	return aRet;
+    return aRet;
 }
 
 bool mouse(int theButton, int theQuery) {
-	return mouse("", theButton, theQuery);
+    return mouse("", theButton, theQuery);
 }
 
-bool mouse(const cv::String& theWindowName, int theButton, int theQuery) {
-	if (theButton != RIGHT_BUTTON && theButton != MIDDLE_BUTTON && theButton != LEFT_BUTTON) {
-		internal::error(6, "Invalid mouse button. Are you using one of the available: cvui::{RIGHT,MIDDLE,LEFT}_BUTTON ?");
-	}
+bool mouse(const cv::String &theWindowName, int theButton, int theQuery) {
+    if (theButton != RIGHT_BUTTON && theButton != MIDDLE_BUTTON &&
+        theButton != LEFT_BUTTON) {
+        internal::error(6, "Invalid mouse button. Are you using one of the "
+                           "available: cvui::{RIGHT,MIDDLE,LEFT}_BUTTON ?");
+    }
 
-	cvui_mouse_btn_t& aButton = internal::getContext(theWindowName).mouse.buttons[theButton];
-	bool aRet = internal::isMouseButton(aButton, theQuery);
+    cvui_mouse_btn_t &aButton =
+        internal::getContext(theWindowName).mouse.buttons[theButton];
+    bool aRet = internal::isMouseButton(aButton, theQuery);
 
-	return aRet;
+    return aRet;
 }
 
-bool button(cv::Mat& theWhere, int theX, int theY, const cv::String& theLabel) {
-	internal::gScreen.where = theWhere;
-	return internal::button(internal::gScreen, theX, theY, theLabel);
+bool button(cv::Mat &theWhere, int theX, int theY, const cv::String &theLabel) {
+    internal::gScreen.where = theWhere;
+    return internal::button(internal::gScreen, theX, theY, theLabel);
 }
 
-bool button(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, const cv::String& theLabel) {
-	internal::gScreen.where = theWhere;
-	return internal::button(internal::gScreen, theX, theY, theWidth, theHeight, theLabel, true);
+bool button(cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight,
+            const cv::String &theLabel) {
+    internal::gScreen.where = theWhere;
+    return internal::button(internal::gScreen, theX, theY, theWidth, theHeight,
+                            theLabel, true);
 }
 
-bool button(cv::Mat& theWhere, int theX, int theY, cv::Mat& theIdle, cv::Mat& theOver, cv::Mat& theDown) {
-	internal::gScreen.where = theWhere;
-	return internal::button(internal::gScreen, theX, theY, theIdle, theOver, theDown, true);
+bool button(cv::Mat &theWhere, int theX, int theY, cv::Mat &theIdle,
+            cv::Mat &theOver, cv::Mat &theDown) {
+    internal::gScreen.where = theWhere;
+    return internal::button(internal::gScreen, theX, theY, theIdle, theOver,
+                            theDown, true);
 }
 
-void image(cv::Mat& theWhere, int theX, int theY, cv::Mat& theImage) {
-	internal::gScreen.where = theWhere;
-	return internal::image(internal::gScreen, theX, theY, theImage);
+void image(cv::Mat &theWhere, int theX, int theY, cv::Mat &theImage) {
+    internal::gScreen.where = theWhere;
+    return internal::image(internal::gScreen, theX, theY, theImage);
 }
 
-bool checkbox(cv::Mat& theWhere, int theX, int theY, const cv::String& theLabel, bool *theState, unsigned int theColor) {
-	internal::gScreen.where = theWhere;
-	return internal::checkbox(internal::gScreen, theX, theY, theLabel, theState, theColor);
+bool checkbox(cv::Mat &theWhere, int theX, int theY, const cv::String &theLabel,
+              bool *theState, unsigned int theColor) {
+    internal::gScreen.where = theWhere;
+    return internal::checkbox(internal::gScreen, theX, theY, theLabel, theState,
+                              theColor);
 }
 
-void text(cv::Mat& theWhere, int theX, int theY, const cv::String& theText, double theFontScale, unsigned int theColor) {
-	internal::gScreen.where = theWhere;
-	internal::text(internal::gScreen, theX, theY, theText, theFontScale, theColor, true);
+void text(cv::Mat &theWhere, int theX, int theY, const cv::String &theText,
+          double theFontScale, unsigned int theColor) {
+    internal::gScreen.where = theWhere;
+    internal::text(internal::gScreen, theX, theY, theText, theFontScale,
+                   theColor, true);
 }
 
-void printf(cv::Mat& theWhere, int theX, int theY, double theFontScale, unsigned int theColor, const char *theFmt, ...) {
-	va_list aArgs;
+void printf(cv::Mat &theWhere, int theX, int theY, double theFontScale,
+            unsigned int theColor, const char *theFmt, ...) {
+    va_list aArgs;
 
-	va_start(aArgs, theFmt);
-	vsprintf_s(internal::gBuffer, theFmt, aArgs);
-	va_end(aArgs);
+    va_start(aArgs, theFmt);
+    vsprintf_s(internal::gBuffer, theFmt, aArgs);
+    va_end(aArgs);
 
-	internal::gScreen.where = theWhere;
-	internal::text(internal::gScreen, theX, theY, internal::gBuffer, theFontScale, theColor, true);
+    internal::gScreen.where = theWhere;
+    internal::text(internal::gScreen, theX, theY, internal::gBuffer,
+                   theFontScale, theColor, true);
 }
 
-void printf(cv::Mat& theWhere, int theX, int theY, const char *theFmt, ...) {
-	va_list aArgs;
+void printf(cv::Mat &theWhere, int theX, int theY, const char *theFmt, ...) {
+    va_list aArgs;
 
-	va_start(aArgs, theFmt);
-	vsprintf_s(internal::gBuffer, theFmt, aArgs);
-	va_end(aArgs);
+    va_start(aArgs, theFmt);
+    vsprintf_s(internal::gBuffer, theFmt, aArgs);
+    va_end(aArgs);
 
-	internal::gScreen.where = theWhere;
-	internal::text(internal::gScreen, theX, theY, internal::gBuffer, 0.4, 0xCECECE, true);
+    internal::gScreen.where = theWhere;
+    internal::text(internal::gScreen, theX, theY, internal::gBuffer, 0.4,
+                   0xCECECE, true);
 }
 
-int counter(cv::Mat& theWhere, int theX, int theY, int *theValue, int theStep, const char *theFormat) {
-	internal::gScreen.where = theWhere;
-	return internal::counter(internal::gScreen, theX, theY, theValue, theStep, theFormat);
+int counter(cv::Mat &theWhere, int theX, int theY, int *theValue, int theStep,
+            const char *theFormat) {
+    internal::gScreen.where = theWhere;
+    return internal::counter(internal::gScreen, theX, theY, theValue, theStep,
+                             theFormat);
 }
 
-double counter(cv::Mat& theWhere, int theX, int theY, double *theValue, double theStep, const char *theFormat) {
-	internal::gScreen.where = theWhere;
-	return internal::counter(internal::gScreen, theX, theY, theValue, theStep, theFormat);
+double counter(cv::Mat &theWhere, int theX, int theY, double *theValue,
+               double theStep, const char *theFormat) {
+    internal::gScreen.where = theWhere;
+    return internal::counter(internal::gScreen, theX, theY, theValue, theStep,
+                             theFormat);
 }
 
-void window(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, const cv::String& theTitle) {
-	internal::gScreen.where = theWhere;
-	internal::window(internal::gScreen, theX, theY, theWidth, theHeight, theTitle);
+void window(cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight,
+            const cv::String &theTitle) {
+    internal::gScreen.where = theWhere;
+    internal::window(internal::gScreen, theX, theY, theWidth, theHeight,
+                     theTitle);
 }
 
-void rect(cv::Mat& theWhere, int theX, int theY, int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor) {
-	internal::gScreen.where = theWhere;
-	internal::rect(internal::gScreen, theX, theY, theWidth, theHeight, theBorderColor, theFillingColor);
+void rect(cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight,
+          unsigned int theBorderColor, unsigned int theFillingColor) {
+    internal::gScreen.where = theWhere;
+    internal::rect(internal::gScreen, theX, theY, theWidth, theHeight,
+                   theBorderColor, theFillingColor);
 }
 
-void sparkline(cv::Mat& theWhere, std::vector<double>& theValues, int theX, int theY, int theWidth, int theHeight, unsigned int theColor) {
-	internal::gScreen.where = theWhere;
-	internal::sparkline(internal::gScreen, theValues, theX, theY, theWidth, theHeight, theColor);
+void sparkline(cv::Mat &theWhere, std::vector<double> &theValues, int theX,
+               int theY, int theWidth, int theHeight, unsigned int theColor) {
+    internal::gScreen.where = theWhere;
+    internal::sparkline(internal::gScreen, theValues, theX, theY, theWidth,
+                        theHeight, theColor);
 }
 
 int iarea(int theX, int theY, int theWidth, int theHeight) {
-	return internal::iarea(theX, theY, theWidth, theHeight);
+    return internal::iarea(theX, theY, theWidth, theHeight);
 }
 
-void beginRow(cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight, int thePadding) {
-	internal::begin(ROW, theWhere, theX, theY, theWidth, theHeight, thePadding);
+void beginRow(cv::Mat &theWhere, int theX, int theY, int theWidth,
+              int theHeight, int thePadding) {
+    internal::begin(ROW, theWhere, theX, theY, theWidth, theHeight, thePadding);
 }
 
-void endRow() {
-	internal::end(ROW);
+void endRow() { internal::end(ROW); }
+
+void beginColumn(cv::Mat &theWhere, int theX, int theY, int theWidth,
+                 int theHeight, int thePadding) {
+    internal::begin(COLUMN, theWhere, theX, theY, theWidth, theHeight,
+                    thePadding);
 }
 
-void beginColumn(cv::Mat &theWhere, int theX, int theY, int theWidth, int theHeight, int thePadding) {
-	internal::begin(COLUMN, theWhere, theX, theY, theWidth, theHeight, thePadding);
-}
-
-void endColumn() {
-	internal::end(COLUMN);
-}
+void endColumn() { internal::end(COLUMN); }
 
 void beginRow(int theWidth, int theHeight, int thePadding) {
-	cvui_block_t& aBlock = internal::topBlock();
-	internal::begin(ROW, aBlock.where, aBlock.anchor.x, aBlock.anchor.y, theWidth, theHeight, thePadding);
+    cvui_block_t &aBlock = internal::topBlock();
+    internal::begin(ROW, aBlock.where, aBlock.anchor.x, aBlock.anchor.y,
+                    theWidth, theHeight, thePadding);
 }
 
 void beginColumn(int theWidth, int theHeight, int thePadding) {
-	cvui_block_t& aBlock = internal::topBlock();
-	internal::begin(COLUMN, aBlock.where, aBlock.anchor.x, aBlock.anchor.y, theWidth, theHeight, thePadding);
+    cvui_block_t &aBlock = internal::topBlock();
+    internal::begin(COLUMN, aBlock.where, aBlock.anchor.x, aBlock.anchor.y,
+                    theWidth, theHeight, thePadding);
 }
 
 void space(int theValue) {
-	cvui_block_t& aBlock = internal::topBlock();
-	cv::Size aSize(theValue, theValue);
+    cvui_block_t &aBlock = internal::topBlock();
+    cv::Size aSize(theValue, theValue);
 
-	internal::updateLayoutFlow(aBlock, aSize);
+    internal::updateLayoutFlow(aBlock, aSize);
 }
 
-bool button(const cv::String& theLabel) {
-	cvui_block_t& aBlock = internal::topBlock();
-	return internal::button(aBlock, aBlock.anchor.x, aBlock.anchor.y, theLabel);
+bool button(const cv::String &theLabel) {
+    cvui_block_t &aBlock = internal::topBlock();
+    return internal::button(aBlock, aBlock.anchor.x, aBlock.anchor.y, theLabel);
 }
 
-bool button(int theWidth, int theHeight, const cv::String& theLabel) {
-	cvui_block_t& aBlock = internal::topBlock();
-	return internal::button(aBlock, aBlock.anchor.x, aBlock.anchor.y, theWidth, theHeight, theLabel, true);
+bool button(int theWidth, int theHeight, const cv::String &theLabel) {
+    cvui_block_t &aBlock = internal::topBlock();
+    return internal::button(aBlock, aBlock.anchor.x, aBlock.anchor.y, theWidth,
+                            theHeight, theLabel, true);
 }
 
-bool button(cv::Mat& theIdle, cv::Mat& theOver, cv::Mat& theDown) {
-	cvui_block_t& aBlock = internal::topBlock();
-	return internal::button(aBlock, aBlock.anchor.x, aBlock.anchor.y, theIdle, theOver, theDown, true);
+bool button(cv::Mat &theIdle, cv::Mat &theOver, cv::Mat &theDown) {
+    cvui_block_t &aBlock = internal::topBlock();
+    return internal::button(aBlock, aBlock.anchor.x, aBlock.anchor.y, theIdle,
+                            theOver, theDown, true);
 }
 
-void image(cv::Mat& theImage) {
-	cvui_block_t& aBlock = internal::topBlock();
-	return internal::image(aBlock, aBlock.anchor.x, aBlock.anchor.y, theImage);
+void image(cv::Mat &theImage) {
+    cvui_block_t &aBlock = internal::topBlock();
+    return internal::image(aBlock, aBlock.anchor.x, aBlock.anchor.y, theImage);
 }
 
-bool checkbox(const cv::String& theLabel, bool *theState, unsigned int theColor) {
-	cvui_block_t& aBlock = internal::topBlock();
-	return internal::checkbox(aBlock, aBlock.anchor.x, aBlock.anchor.y, theLabel, theState, theColor);
+bool checkbox(const cv::String &theLabel, bool *theState,
+              unsigned int theColor) {
+    cvui_block_t &aBlock = internal::topBlock();
+    return internal::checkbox(aBlock, aBlock.anchor.x, aBlock.anchor.y,
+                              theLabel, theState, theColor);
 }
 
-void text(const cv::String& theText, double theFontScale, unsigned int theColor) {
-	cvui_block_t& aBlock = internal::topBlock();
-	internal::text(aBlock, aBlock.anchor.x, aBlock.anchor.y, theText, theFontScale, theColor, true);
+void text(const cv::String &theText, double theFontScale,
+          unsigned int theColor) {
+    cvui_block_t &aBlock = internal::topBlock();
+    internal::text(aBlock, aBlock.anchor.x, aBlock.anchor.y, theText,
+                   theFontScale, theColor, true);
 }
 
-void printf(double theFontScale, unsigned int theColor, const char *theFmt, ...) {
-	cvui_block_t& aBlock = internal::topBlock();
-	va_list aArgs;
+void printf(double theFontScale, unsigned int theColor, const char *theFmt,
+            ...) {
+    cvui_block_t &aBlock = internal::topBlock();
+    va_list aArgs;
 
-	va_start(aArgs, theFmt);
-	vsprintf_s(internal::gBuffer, theFmt, aArgs);
-	va_end(aArgs);
+    va_start(aArgs, theFmt);
+    vsprintf_s(internal::gBuffer, theFmt, aArgs);
+    va_end(aArgs);
 
-	internal::text(aBlock, aBlock.anchor.x, aBlock.anchor.y, internal::gBuffer, theFontScale, theColor, true);
+    internal::text(aBlock, aBlock.anchor.x, aBlock.anchor.y, internal::gBuffer,
+                   theFontScale, theColor, true);
 }
 
 void printf(const char *theFmt, ...) {
-	cvui_block_t& aBlock = internal::topBlock();
-	va_list aArgs;
+    cvui_block_t &aBlock = internal::topBlock();
+    va_list aArgs;
 
-	va_start(aArgs, theFmt);
-	vsprintf_s(internal::gBuffer, theFmt, aArgs);
-	va_end(aArgs);
+    va_start(aArgs, theFmt);
+    vsprintf_s(internal::gBuffer, theFmt, aArgs);
+    va_end(aArgs);
 
-	internal::text(aBlock, aBlock.anchor.x, aBlock.anchor.y, internal::gBuffer, 0.4, 0xCECECE, true);
+    internal::text(aBlock, aBlock.anchor.x, aBlock.anchor.y, internal::gBuffer,
+                   0.4, 0xCECECE, true);
 }
 
 int counter(int *theValue, int theStep, const char *theFormat) {
-	cvui_block_t& aBlock = internal::topBlock();
-	return internal::counter(aBlock, aBlock.anchor.x, aBlock.anchor.y, theValue, theStep, theFormat);
+    cvui_block_t &aBlock = internal::topBlock();
+    return internal::counter(aBlock, aBlock.anchor.x, aBlock.anchor.y, theValue,
+                             theStep, theFormat);
 }
 
 double counter(double *theValue, double theStep, const char *theFormat) {
-	cvui_block_t& aBlock = internal::topBlock();
-	return internal::counter(aBlock, aBlock.anchor.x, aBlock.anchor.y, theValue, theStep, theFormat);
+    cvui_block_t &aBlock = internal::topBlock();
+    return internal::counter(aBlock, aBlock.anchor.x, aBlock.anchor.y, theValue,
+                             theStep, theFormat);
 }
 
-void window(int theWidth, int theHeight, const cv::String& theTitle) {
-	cvui_block_t& aBlock = internal::topBlock();
-	internal::window(aBlock, aBlock.anchor.x, aBlock.anchor.y, theWidth, theHeight, theTitle);
+void window(int theWidth, int theHeight, const cv::String &theTitle) {
+    cvui_block_t &aBlock = internal::topBlock();
+    internal::window(aBlock, aBlock.anchor.x, aBlock.anchor.y, theWidth,
+                     theHeight, theTitle);
 }
 
-void rect(int theWidth, int theHeight, unsigned int theBorderColor, unsigned int theFillingColor) {
-	cvui_block_t& aBlock = internal::topBlock();
-	internal::rect(aBlock, aBlock.anchor.x, aBlock.anchor.y, theWidth, theHeight, theBorderColor, theFillingColor);
+void rect(int theWidth, int theHeight, unsigned int theBorderColor,
+          unsigned int theFillingColor) {
+    cvui_block_t &aBlock = internal::topBlock();
+    internal::rect(aBlock, aBlock.anchor.x, aBlock.anchor.y, theWidth,
+                   theHeight, theBorderColor, theFillingColor);
 }
 
-void sparkline(std::vector<double>& theValues, int theWidth, int theHeight, unsigned int theColor) {
-	cvui_block_t& aBlock = internal::topBlock();
-	internal::sparkline(aBlock, theValues, aBlock.anchor.x, aBlock.anchor.y, theWidth, theHeight, theColor);
+void sparkline(std::vector<double> &theValues, int theWidth, int theHeight,
+               unsigned int theColor) {
+    cvui_block_t &aBlock = internal::topBlock();
+    internal::sparkline(aBlock, theValues, aBlock.anchor.x, aBlock.anchor.y,
+                        theWidth, theHeight, theColor);
 }
 
-void update(const cv::String& theWindowName) {
-	cvui_context_t& aContext = internal::getContext(theWindowName);
+void update(const cv::String &theWindowName) {
+    cvui_context_t &aContext = internal::getContext(theWindowName);
 
-	aContext.mouse.anyButton.justReleased = false;
-	aContext.mouse.anyButton.justPressed = false;
+    aContext.mouse.anyButton.justReleased = false;
+    aContext.mouse.anyButton.justPressed = false;
 
-	for (int i = cvui::LEFT_BUTTON; i <= cvui::RIGHT_BUTTON; i++) {
-		aContext.mouse.buttons[i].justReleased = false;
-		aContext.mouse.buttons[i].justPressed = false;
-	}
-	
-	internal::resetRenderingBuffer(internal::gScreen);
+    for (int i = cvui::LEFT_BUTTON; i <= cvui::RIGHT_BUTTON; i++) {
+        aContext.mouse.buttons[i].justReleased = false;
+        aContext.mouse.buttons[i].justPressed = false;
+    }
 
-	// If we were told to keep track of the keyboard shortcuts, we
-	// proceed to handle opencv event queue.
-	if (internal::gDelayWaitKey > 0) {
-		internal::gLastKeyPressed = cv::waitKey(internal::gDelayWaitKey);
-	}
+    internal::resetRenderingBuffer(internal::gScreen);
 
-	if (!internal::blockStackEmpty()) {
-		internal::error(2, "Calling update() before finishing all begin*()/end*() calls. Did you forget to call a begin*() or an end*()? Check if every begin*() has an appropriate end*() call before you call update().");
-	}
+    // If we were told to keep track of the keyboard shortcuts, we
+    // proceed to handle opencv event queue.
+    if (internal::gDelayWaitKey > 0) {
+        internal::gLastKeyPressed = cv::waitKey(internal::gDelayWaitKey);
+    }
+
+    if (!internal::blockStackEmpty()) {
+        internal::error(2,
+                        "Calling update() before finishing all begin*()/end*() "
+                        "calls. Did you forget to call a begin*() or an "
+                        "end*()? Check if every begin*() has an appropriate "
+                        "end*() call before you call update().");
+    }
 }
 
-void handleMouse(int theEvent, int theX, int theY, int theFlags, void* theData) {
-	int aButtons[3] = { cvui::LEFT_BUTTON, cvui::MIDDLE_BUTTON, cvui::RIGHT_BUTTON };
-	int aEventsDown[3] = { cv::EVENT_LBUTTONDOWN, cv::EVENT_MBUTTONDOWN, cv::EVENT_RBUTTONDOWN };
-	int aEventsUp[3] = { cv::EVENT_LBUTTONUP, cv::EVENT_MBUTTONUP, cv::EVENT_RBUTTONUP };
-	
-	cvui_context_t *aContext = (cvui_context_t *)theData;
-	
-	for (int i = 0; i < 3; i++) {
-		int aBtn = aButtons[i];
+void handleMouse(int theEvent, int theX, int theY, int theFlags,
+                 void *theData) {
+    int aButtons[3] = {cvui::LEFT_BUTTON, cvui::MIDDLE_BUTTON,
+                       cvui::RIGHT_BUTTON};
+    int aEventsDown[3] = {cv::EVENT_LBUTTONDOWN, cv::EVENT_MBUTTONDOWN,
+                          cv::EVENT_RBUTTONDOWN};
+    int aEventsUp[3] = {cv::EVENT_LBUTTONUP, cv::EVENT_MBUTTONUP,
+                        cv::EVENT_RBUTTONUP};
 
-		if (theEvent == aEventsDown[i]) {
-			aContext->mouse.anyButton.justPressed = true;
-			aContext->mouse.anyButton.pressed = true;
-			aContext->mouse.buttons[aBtn].justPressed = true;
-			aContext->mouse.buttons[aBtn].pressed = true;
+    cvui_context_t *aContext = (cvui_context_t *)theData;
 
-		} else if (theEvent == aEventsUp[i]) {
-			aContext->mouse.anyButton.justReleased = true;
-			aContext->mouse.anyButton.pressed = false;
-			aContext->mouse.buttons[aBtn].justReleased = true;
-			aContext->mouse.buttons[aBtn].pressed = false;
-		}
-	}
-	
-	aContext->mouse.position.x = theX;
-	aContext->mouse.position.y = theY;
+    for (int i = 0; i < 3; i++) {
+        int aBtn = aButtons[i];
+
+        if (theEvent == aEventsDown[i]) {
+            aContext->mouse.anyButton.justPressed = true;
+            aContext->mouse.anyButton.pressed = true;
+            aContext->mouse.buttons[aBtn].justPressed = true;
+            aContext->mouse.buttons[aBtn].pressed = true;
+
+        } else if (theEvent == aEventsUp[i]) {
+            aContext->mouse.anyButton.justReleased = true;
+            aContext->mouse.anyButton.pressed = false;
+            aContext->mouse.buttons[aBtn].justReleased = true;
+            aContext->mouse.buttons[aBtn].pressed = false;
+        }
+    }
+
+    aContext->mouse.position.x = theX;
+    aContext->mouse.position.y = theY;
 }
 
 } // namespace cvui
 
 // Final adjustments that are platform-dependent
 #ifdef _MSC_VER
-	// Check if we salved the definitions of min and max, which could have
-	// been defined by windows.h. If that is the case, we have undef'd
-	// them at the begining of this file, so we need to restore the existing
-	// macros now. We want to do good, not make world burn. You're welcome.
-	#ifdef __cvui_min
-		#define min __cvui_min
-	#endif
-	#ifdef __cvui_max
-		#define max __cvui_max
-	#endif
+// Check if we salved the definitions of min and max, which could have
+// been defined by windows.h. If that is the case, we have undef'd
+// them at the begining of this file, so we need to restore the existing
+// macros now. We want to do good, not make world burn. You're welcome.
+#ifdef __cvui_min
+#define min __cvui_min
+#endif
+#ifdef __cvui_max
+#define max __cvui_max
+#endif
 #endif
 
 #endif // CVUI_IMPLEMENTATION

@@ -136,11 +136,10 @@ int main(int argc, char *argv[]) {
     cv::namedWindow("Display Objects Depth", cv::WINDOW_AUTOSIZE);
 
     cv::Size cropSize;
-    if ((float)frameDetails.width / (float)(frameDetails.height) >
-        WHRatio) {
-        cropSize = cv::Size(
-            static_cast<int>((float)(frameDetails.height) * WHRatio),
-            (frameDetails.height));
+    if ((float)frameDetails.width / (float)(frameDetails.height) > WHRatio) {
+        cropSize =
+            cv::Size(static_cast<int>((float)(frameDetails.height) * WHRatio),
+                     (frameDetails.height));
     } else {
         cropSize =
             cv::Size(frameDetails.width,

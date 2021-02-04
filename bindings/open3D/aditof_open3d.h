@@ -32,9 +32,9 @@
 #ifndef ADITOF_OPEN3D_H
 #define ADITOF_OPEN3D_H
 
-#include <open3D/Open3D.h>
 #include <aditof/frame.h>
 #include <aditof/status_definitions.h>
+#include <open3D/Open3D.h>
 
 using namespace open3d;
 
