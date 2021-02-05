@@ -14,7 +14,7 @@ if [[ "${OPENCV}" == "" ]]; then
         export OPENCV="3.4.1"
 fi
 
+build_and_install_opencv "opencv-${OPENCV}" ${OPENCV_INSTALL_DIR}
 build_and_install_glog "glog" ${GLOG_INSTALL_DIR}
 build_and_install_protobuf "protobuf" ${PROTOBUF_INSTALL_DIR}
 build_and_install_websockets "libwebsockets" ${WEBSOCKETS_INSTALL_DIR}
-build_and_install_opencv "opencv-${OPENCV}" ${OPENCV_INSTALL_DIR}

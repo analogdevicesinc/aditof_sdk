@@ -1,0 +1,139 @@
+trigger:
+  branches: 
+    exclude:
+    - no_ci_*
+
+variables:
+  WORK_DIR: "$(Agent.BuildDirectory)/s"  
+  BUILD_DIR:  "$(WORK_DIR)/build"
+  DEPS_DIR: "$(BUILD_DIR)/deps"
+  DEFAULT_CMAKE_FLAGS: "-DWITH_NETWORK=1 \
+                        -DWITH_PYTHON=1 \
+                        -DWITH_ROS=1 \
+                        -DWITH_OPENCV=1 \ 
+                        -DWITH_EXAMPLES=1 \
+                        -DWITH_DOC=0 \
+                        -DWITH_OPEN3D=0"
+  NUM_JOBS: 4
+  IS_PULL_REQUEST: ${{ eq('$(Build.Reason)', 'PullRequest') }}
+  BRANCH_NAME: $(Build.SourceBranchName)
+  REPO_SLUG: $(Build.Repository.Name)
+  CURRENT_COMMIT: $(Build.SourceVersion)
+  
+
+jobs:
+- job: LinuxBuilds
+  strategy:
+    matrix:
+      
+      #PC
+      ubuntu_18_04_x86_64:
+        imageName: 'ubuntu-18.04'
+
+      ubuntu_20_04_x86_64:
+        imageName: 'ubuntu-20.04'
+      
+      #DB
+      Dragonboard:
+        imageName: 'ubuntu-20.04'
+        DOCKER: "danielguramulta/aditof-sdk-debian"
+        EXTRA_CMAKE_FLAGS: "-DDRAGONBOARD=1"
+      
+      #RP
+      Raspberry_96tof1:
+        imageName: 'ubuntu-20.04'
+        DOCKER: "danielguramulta/aditof-sdk-raspbian"
+        EXTRA_CMAKE_FLAGS: "-DRASPBERRY=1"
+
+      Raspberry_fxtof1:
+        imageName: 'ubuntu-20.04'
+        DOCKER: "danielguramulta/aditof-sdk-raspbian"
+        EXTRA_CMAKE_FLAGS: "-DRASPBERRY=1 -DUSE_FXTOF1=1"
+
+      #Jetson
+      ubuntu_18_Jetson_96tof1:
+        imageName: 'ubuntu-20.04'
+        DOCKER: "virgilix/nvidia-tegra"
+        EXTRA_CMAKE_FLAGS: "-DJETSON=1"
+
+      ubuntu_18_Jetson_fxtof1:
+        imageName: 'ubuntu-18.04'
+        DOCKER: "virgilix/nvidia-tegra"
+        EXTRA_CMAKE_FLAGS: "-DJETSON=1 -DUSE_FXTOF1=1"
+
+      #Xavier AGX
+      ubuntu_18_Xavier_AGX_96tof1:
+        imageName: 'ubuntu-18.04'
+        DOCKER: "virgilix/nvidia-tegra"
+        EXTRA_CMAKE_FLAGS: "-DXAVIER=1"
+
+      ubuntu_18_Xavier_AGX_fxtof1:
+        imageName: 'ubuntu-18.04'
+        DOCKER: "virgilix/nvidia-tegra"
+        EXTRA_CMAKE_FLAGS: "-DXAVIER=1 -DUSE_FXTOF1=1"
+
+      #Xavier NX
+      ubuntu_18_Xavier_NX_96tof1:
+        imageName: 'ubuntu-18.04'
+        DOCKER: "virgilix/nvidia-tegra"
+        EXTRA_CMAKE_FLAGS: "-DXAVIERNX=1"
+
+      ubuntu_18_Xavier_NX_fxtof1:
+        imageName: 'ubuntu-18.04'
+        DOCKER: "virgilix/nvidia-tegra"
+        EXTRA_CMAKE_FLAGS: "-DXAVIERNX=1 -DUSE_FXTOF1=1"
+
+      #TOYBRICK
+      ubuntu_18_Toybrick_fxtof1:
+        imageName: 'ubuntu-18.04'
+        DOCKER: "virgilix/toybrick"
+        EXTRA_CMAKE_FLAGS: "-DTOYBRICK=1 -DUSE_FXTOF1=1"
+
+      #code quality
+      clang_format:
+        imageName: 'ubuntu-20.04'
+        BUILD_TYPE: "clang_format"
+
+      cppcheck:
+        imageName: 'ubuntu-20.04'
+        BUILD_TYPE: "cppcheck"
+
+      deploy_doxygen:
+        imageName: 'ubuntu-20.04'
+        BUILD_TYPE: "deploy_doxygen"
+
+  pool:
+    vmImage: $(imageName)
+  steps:
+  - checkout: self
+    fetchDepth: 1
+    clean: true
+    persistCredentials: true
+
+  - task: Cache@2
+    condition: and(
+      eq(variables['DOCKER'], ''),
+      ne(variables['BUILD_TYPE'], 'clang_format'),
+      ne(variables['BUILD_TYPE'], 'cppcheck'),
+      ne(variables['BUILD_TYPE'], 'deploy_doxygen')
+      )
+
+    inputs:
+      key: mykeyx | "$(imageName)" 
+      restoreKeys: mykeyx | "$(imageName)"
+      path: $(DEPS_DIR)
+      cacheHitVar: CACHE_RESTORED
+    
+  - script: ./ci/azure/deps.sh
+    condition: or(
+      eq(variables.CACHE_RESTORED, 'false'), 
+      eq(variables['BUILD_TYPE'], 'clang_format'),
+      eq(variables['BUILD_TYPE'], 'cppcheck'),
+      eq(variables['BUILD_TYPE'], 'deploy_doxygen')
+      )
+      
+    displayName: "Install Dependencies"
+
+  - script: ./ci/azure/run_build.sh
+    displayName: "Build"
+    
