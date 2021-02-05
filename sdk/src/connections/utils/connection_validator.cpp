@@ -51,7 +51,7 @@ const std::string getConnectionString(ConnectionType connectionType){
     return connectionString;
 }
 
-const bool validateConnection(ConnectionType connectionType,
+const bool isValidConnection(ConnectionType connectionType,
                                 const std::string targetConnectionString){
     #ifndef IGNORE_TARGET_VERSION
         std::string remoteConnectionString = getConnectionString(connectionType);

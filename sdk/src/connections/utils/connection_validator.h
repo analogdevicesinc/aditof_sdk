@@ -37,7 +37,7 @@
 
 namespace aditof {
     const std::string getConnectionString(aditof::ConnectionType connectionType);
-    const bool validateConnection(aditof::ConnectionType connectionType,
+    const bool isValidConnection(aditof::ConnectionType connectionType,
                                             const std::string targetConnectionString);
 }
 
