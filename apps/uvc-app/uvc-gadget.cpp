@@ -25,6 +25,7 @@
 #include <aditof/sensor_enumerator_interface.h>
 #include <aditof/storage_interface.h>
 #include <aditof/temperature_sensor_interface.h>
+#include <connection_validator.h>
 #include <aditof/version.h>
 #include <atomic>
 #include <errno.h>
@@ -2082,6 +2083,8 @@ int main(int argc, char *argv[]) {
         ++temp_sensor_id;
         DLOG(INFO) << name;
     }
+
+    availableSensorsBlob += "CONNECTION_STRING=" + aditof::getConnectionString(aditof::ConnectionType::USB) + ";";
 
     DLOG(INFO) << "Message blob about available sensors to be sent to remote:";
     DLOG(INFO) << availableSensorsBlob;
