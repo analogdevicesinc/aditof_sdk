@@ -73,6 +73,10 @@ if ( USE_CHICONY AND USE_FXTOF1)
     message( FATAL_ERROR "USE_CHICONY and USE_FXTOF1 are both selected. \nPlease select a single camera. CMake will exit." )
 endif()
 
+if(IGNORE_TARGET_VERSION)
+    add_definitions(-DIGNORE_TARGET_VERSION)
+endif()
+
 # Platform specific sources and headers
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
