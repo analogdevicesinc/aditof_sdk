@@ -6,12 +6,21 @@
 #define ADITOF_API_VERSION_MAJOR "@ADITOF_VERSION_MAJOR@"
 #define ADITOF_API_VERSION_MINOR "@ADITOF_VERSION_MINOR@"
 #define ADITOF_API_VERSION_PATCH "@ADITOF_VERSION_PATCH@"
-#define ADITOF_API_VERSION                                                     \
-    (ADITOF_API_VERSION_MAJOR "." ADITOF_API_VERSION_MINOR                     \
-                              "." ADITOF_API_VERSION_PATCH)
+#define ADITOF_API_VERSION       "@VERSION@"                     
+
+#define UVC_GADGET_VERSION_MAJOR "@ADITOF_VERSION_UVC_MAJOR@"
+#define UVC_GADGET_VERSION_MINOR "@ADITOF_VERSION_UVC_MINOR@"
+#define UVC_GADGET_VERSION       "@VERSION_UVC@"                                   
+
+#define SERVER_VERSION_MAJOR "@ADITOF_VERSION_SERVER_MAJOR@"
+#define SERVER_VERSION_MINOR "@ADITOF_VERSION_SERVER_MINOR@"
+#define SERVER_VERSION       "@VERSION_SERVER@"   
 
 namespace aditof {
 const std::string getApiVersion() { return std::string(ADITOF_API_VERSION); }
+const std::string getUvcVersion() { return std::string(UVC_GADGET_VERSION); }
+const std::string getServerVersion() { return std::string(SERVER_VERSION); }
+
 } // namespace aditof
 
 #endif // VERSION_H
