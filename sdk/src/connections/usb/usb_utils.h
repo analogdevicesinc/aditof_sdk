@@ -54,6 +54,15 @@ class UsbUtils {
      */
     static std::vector<std::pair<std::string, unsigned int>>
     getTemperatureSensorNamesAndIds(const std::vector<std::string> &tokens);
+
+      /**
+     * @brief Parses sensor tokens which are strings containing a key-value pair
+     * and returns the connection string.
+     * @param tokens - The tokens to be parsed.
+     * return std::string
+     */
+    static std::string
+    getConnectionString(const std::vector<std::string> &tokens);
 };
 
 #endif // USB_UTILS_H

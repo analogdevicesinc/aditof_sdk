@@ -35,6 +35,7 @@
 #include "connections/usb/usb_storage.h"
 #include "connections/usb/usb_temperature_sensor.h"
 #include "connections/usb/usb_utils.h"
+#include "connections/utils/connection_validator.h"
 #include "utils.h"
 
 #include <dirent.h>
@@ -176,6 +177,12 @@ Status UsbSensorEnumerator::searchSensors() {
         SensorInfo sInfo;
         sInfo.driverPath = driverPath;
         m_sensorsInfo.emplace_back(sInfo);
+
+        std::string connectionString = UsbUtils::getConnectionString(sensorsPaths);
+        if(!isValidConnection(aditof::ConnectionType::USB, connectionString)){
+            LOG(ERROR)<<"invalid connection string: " << connectionString;
+            status = Status::GENERIC_ERROR;
+        }
 
         m_storagesInfo = UsbUtils::getStorageNamesAndIds(sensorsPaths);
         m_temperatureSensorsInfo =

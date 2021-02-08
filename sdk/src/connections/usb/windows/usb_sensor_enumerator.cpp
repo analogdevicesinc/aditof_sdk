@@ -35,6 +35,7 @@
 #include "connections/usb/usb_temperature_sensor.h"
 #include "connections/usb/usb_utils.h"
 #include "connections/usb/windows/usb_windows_utils.h"
+#include "connections/utils/connection_validator.h"
 #include "utils.h"
 
 #include <glog/logging.h>
@@ -152,6 +153,12 @@ Status UsbSensorEnumerator::searchSensors() {
                         Utils::splitIntoTokens(advertisedSensorData, ';',
                                                sensorsPaths);
                         m_sensorsInfo.emplace_back(sInfo);
+
+                        std::string connectionString = UsbUtils::getConnectionString(sensorsPaths);
+                        if(!isValidConnection(aditof::ConnectionType::USB, connectionString)){
+                            LOG(ERROR)<<"invalid connection string: " << connectionString;
+                            status = Status::GENERIC_ERROR;
+                        }
 
                         m_storagesInfo =
                             UsbUtils::getStorageNamesAndIds(sensorsPaths);
