@@ -81,7 +81,7 @@ SystemImpl::~SystemImpl() = default;
 
 Status SystemImpl::getCameraList(
     std::vector<std::shared_ptr<Camera>> &cameraList) const {
-
+    Status status;
     cameraList.clear();
 
     // At first, assume SDK is running on target
@@ -97,8 +97,10 @@ Status SystemImpl::getCameraList(
             return Status::GENERIC_ERROR;
         }
     }
-    sensorEnumerator->searchSensors();
-    cameraList = buildCameras(std::move(sensorEnumerator));
+    status = sensorEnumerator->searchSensors();
+    if (status == Status::OK){
+        cameraList = buildCameras(std::move(sensorEnumerator));
+    }
 
     return Status::OK;
 }
