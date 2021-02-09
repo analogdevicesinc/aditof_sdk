@@ -98,7 +98,7 @@ Status SystemImpl::getCameraList(
         }
     }
     status = sensorEnumerator->searchSensors();
-    if (status == Status::OK){
+    if (status == Status::OK) {
         cameraList = buildCameras(std::move(sensorEnumerator));
     }
 

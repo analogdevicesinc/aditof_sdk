@@ -75,9 +75,7 @@ UsbUtils::getTemperatureSensorNamesAndIds(
     return v;
 }
 
-std::string
-UsbUtils::getVersionString(
-    const std::vector<std::string> &tokens) {
+std::string UsbUtils::getVersionString(const std::vector<std::string> &tokens) {
     std::string versionString = "";
 
     for (const auto &t : tokens) {
@@ -90,5 +88,3 @@ UsbUtils::getVersionString(
 
     return versionString;
 }
-
-

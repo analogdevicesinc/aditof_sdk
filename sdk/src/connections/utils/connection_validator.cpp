@@ -35,16 +35,20 @@
 
 #include <string>
 
-namespace aditof{
+namespace aditof {
 
-const std::string getVersionString(ConnectionType connectionType){
+const std::string getVersionString(ConnectionType connectionType) {
     std::string connectionString;
 
-    switch(connectionType){
-        case ConnectionType::USB: connectionString = getUvcVersion(); break;
-        case ConnectionType::NETWORK: connectionString = getServerVersion(); break;
-        default:
-            connectionString = "";
+    switch (connectionType) {
+    case ConnectionType::USB:
+        connectionString = getUvcVersion();
+        break;
+    case ConnectionType::NETWORK:
+        connectionString = getServerVersion();
+        break;
+    default:
+        connectionString = "";
     }
 
     connectionString += "_" + getApiVersion();
@@ -53,13 +57,13 @@ const std::string getVersionString(ConnectionType connectionType){
 }
 
 const bool isValidConnection(ConnectionType connectionType,
-                                const std::string targetVersionString){
-    #ifndef IGNORE_TARGET_VERSION
-        std::string remoteConnectionString = getVersionString(connectionType);
-        return remoteConnectionString.compare(targetVersionString) == 0;
-    #else
-        return true;
-    #endif
+                             const std::string targetVersionString) {
+#ifndef IGNORE_TARGET_VERSION
+    std::string remoteConnectionString = getVersionString(connectionType);
+    return remoteConnectionString.compare(targetVersionString) == 0;
+#else
+    return true;
+#endif
 }
 
-}
+} // namespace aditof

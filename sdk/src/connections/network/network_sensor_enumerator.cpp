@@ -45,8 +45,8 @@ NetworkSensorEnumerator::NetworkSensorEnumerator(const std::string &ip)
 
 NetworkSensorEnumerator::~NetworkSensorEnumerator() = default;
 
-
-aditof::Status getVersionString(std::unique_ptr<Network>& net, std::string& connectionString){
+aditof::Status getVersionString(std::unique_ptr<Network> &net,
+                                std::string &connectionString) {
 
     net->send_buff.set_func_name("GetVersionString");
     net->send_buff.set_expect_reply(true);
@@ -90,9 +90,9 @@ Status NetworkSensorEnumerator::searchSensors() {
     }
 
     getVersionString(net, connectionString);
-    
-    if (!isValidConnection(aditof::ConnectionType::NETWORK, connectionString)){
-        LOG(ERROR)<<"invalid connection string: " << connectionString;
+
+    if (!isValidConnection(aditof::ConnectionType::NETWORK, connectionString)) {
+        LOG(ERROR) << "invalid connection string: " << connectionString;
         return Status::GENERIC_ERROR;
     }
 

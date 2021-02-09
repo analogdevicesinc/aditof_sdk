@@ -36,9 +36,9 @@
 #include <string>
 
 namespace aditof {
-    const std::string getVersionString(aditof::ConnectionType connectionType);
-    const bool isValidConnection(aditof::ConnectionType connectionType,
-                                            const std::string targetVersionString);
-}
+const std::string getVersionString(aditof::ConnectionType connectionType);
+const bool isValidConnection(aditof::ConnectionType connectionType,
+                             const std::string targetVersionString);
+} // namespace aditof
 
 #endif // CONNECTION_VALIDATOR_H

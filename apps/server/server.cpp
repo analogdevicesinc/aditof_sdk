@@ -622,8 +622,10 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case GET_CONNECTION_STRING: {
-        buff_send.set_message(aditof::getVersionString(aditof::ConnectionType::NETWORK));
-        buff_send.set_status(static_cast<::payload::Status>(aditof::Status::OK));
+        buff_send.set_message(
+            aditof::getVersionString(aditof::ConnectionType::NETWORK));
+        buff_send.set_status(
+            static_cast<::payload::Status>(aditof::Status::OK));
         break;
     }
 

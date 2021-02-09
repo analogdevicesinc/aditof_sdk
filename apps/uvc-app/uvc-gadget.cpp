@@ -2084,7 +2084,9 @@ int main(int argc, char *argv[]) {
         DLOG(INFO) << name;
     }
 
-    availableSensorsBlob += "VERSION_STRING=" + aditof::getVersionString(aditof::ConnectionType::USB) + ";";
+    availableSensorsBlob +=
+        "VERSION_STRING=" +
+        aditof::getVersionString(aditof::ConnectionType::USB) + ";";
 
     DLOG(INFO) << "Message blob about available sensors to be sent to remote:";
     DLOG(INFO) << availableSensorsBlob;
