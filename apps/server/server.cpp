@@ -33,7 +33,6 @@
 #include "aditof/aditof.h"
 #include "aditof/sensor_enumerator_factory.h"
 #include "aditof/sensor_enumerator_interface.h"
-#include <connection_validator.h>
 #include "buffer.pb.h"
 
 #include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
@@ -622,7 +621,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         break;
     }
 
-    case GET_VERSION_STRING: {
+    case GET_CONNECTION_STRING: {
         buff_send.set_message(aditof::getVersionString(aditof::ConnectionType::NETWORK));
         buff_send.set_status(static_cast<::payload::Status>(aditof::Status::OK));
         break;

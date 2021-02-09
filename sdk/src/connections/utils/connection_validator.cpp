@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "connections/utils/connection_validator.h"
+#include "connection_validator.h"
 #include "aditof/version.h"
 
 #include <string>
