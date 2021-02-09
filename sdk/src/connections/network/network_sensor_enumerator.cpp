@@ -34,7 +34,7 @@
 #include "connections/network/network_depth_sensor.h"
 #include "connections/network/network_storage.h"
 #include "connections/network/network_temperature_sensor.h"
-#include "aditof/connection_validator.h"
+#include "connections/utils/connection_validator.h"
 
 #include <glog/logging.h>
 

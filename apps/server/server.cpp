@@ -37,6 +37,7 @@
 #include "buffer.pb.h"
 
 #include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
+#include "../../sdk/src/connections/utils/connection_validator.h"
 
 #include <glog/logging.h>
 #include <iostream>

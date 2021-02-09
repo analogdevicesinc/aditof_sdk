@@ -31,7 +31,7 @@
  */
 #include "network_depth_sensor.h"
 #include "connections/network/network.h"
-#include "connection_validator.h"
+#include "connections/utils/connection_validator.h"
 #include "device_utils.h"
 
 #include <glog/logging.h>

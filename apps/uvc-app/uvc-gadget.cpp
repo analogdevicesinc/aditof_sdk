@@ -18,6 +18,7 @@
  */
 
 #include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
+#include "../../sdk/src/connections/utils/connection_validator.h"
 #include "uvc.h"
 
 #include <aditof/depth_sensor_interface.h>
@@ -25,7 +26,6 @@
 #include <aditof/sensor_enumerator_interface.h>
 #include <aditof/storage_interface.h>
 #include <aditof/temperature_sensor_interface.h>
-#include <connection_validator.h>
 #include <aditof/version.h>
 #include <atomic>
 #include <errno.h>
