@@ -36,7 +36,7 @@
 
 namespace aditof{
 
-const std::string getConnectionString(ConnectionType connectionType){
+const std::string getVersionString(ConnectionType connectionType){
     std::string connectionString;
 
     switch(connectionType){
@@ -52,10 +52,10 @@ const std::string getConnectionString(ConnectionType connectionType){
 }
 
 const bool isValidConnection(ConnectionType connectionType,
-                                const std::string targetConnectionString){
+                                const std::string targetVersionString){
     #ifndef IGNORE_TARGET_VERSION
-        std::string remoteConnectionString = getConnectionString(connectionType);
-        return remoteConnectionString.compare(targetConnectionString) == 0;
+        std::string remoteConnectionString = getVersionString(connectionType);
+        return remoteConnectionString.compare(targetVersionString) == 0;
     #else
         return true;
     #endif

@@ -62,7 +62,7 @@ class UsbUtils {
      * return std::string
      */
     static std::string
-    getConnectionString(const std::vector<std::string> &tokens);
+    getVersionString(const std::vector<std::string> &tokens);
 };
 
 #endif // USB_UTILS_H

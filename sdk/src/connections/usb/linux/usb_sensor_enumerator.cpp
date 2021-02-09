@@ -178,7 +178,7 @@ Status UsbSensorEnumerator::searchSensors() {
         sInfo.driverPath = driverPath;
         m_sensorsInfo.emplace_back(sInfo);
 
-        std::string connectionString = UsbUtils::getConnectionString(sensorsPaths);
+        std::string connectionString = UsbUtils::getVersionString(sensorsPaths);
         if(!isValidConnection(aditof::ConnectionType::USB, connectionString)){
             LOG(ERROR)<<"invalid connection string: " << connectionString;
             status = Status::GENERIC_ERROR;

@@ -622,8 +622,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         break;
     }
 
-    case GET_CONNECTION_STRING: {
-        buff_send.set_message(aditof::getConnectionString(aditof::ConnectionType::NETWORK));
+    case GET_VERSION_STRING: {
+        buff_send.set_message(aditof::getVersionString(aditof::ConnectionType::NETWORK));
         buff_send.set_status(static_cast<::payload::Status>(aditof::Status::OK));
         break;
     }
@@ -660,5 +660,5 @@ void Initialize() {
     s_map_api_Values["TemperatureSensorRead"] = TEMPERATURE_SENSOR_READ;
     s_map_api_Values["TemperatureSensorClose"] = TEMPERATURE_SENSOR_CLOSE;
     s_map_api_Values["HangUp"] = HANG_UP;
-    s_map_api_Values["GetConnectionString"] = GET_CONNECTION_STRING;
+    s_map_api_Values["GetVersionString"] = GET_CONNECTION_STRING;
 }

@@ -76,19 +76,19 @@ UsbUtils::getTemperatureSensorNamesAndIds(
 }
 
 std::string
-UsbUtils::getConnectionString(
+UsbUtils::getVersionString(
     const std::vector<std::string> &tokens) {
-    std::string connectionString = "";
+    std::string versionString = "";
 
     for (const auto &t : tokens) {
         vector<string> keyValueStr;
         Utils::splitIntoTokens(t, '=', keyValueStr);
-        if (keyValueStr[0] == "CONNECTION_STRING") {
-            connectionString = keyValueStr[1];
+        if (keyValueStr[0] == "VERSION_STRING") {
+            versionString = keyValueStr[1];
         }
     }
 
-    return connectionString;
+    return versionString;
 }
 
 
