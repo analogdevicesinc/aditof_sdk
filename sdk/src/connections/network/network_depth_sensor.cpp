@@ -31,7 +31,6 @@
  */
 #include "network_depth_sensor.h"
 #include "connections/network/network.h"
-#include "connections/utils/connection_validator.h"
 #include "device_utils.h"
 
 #include <glog/logging.h>
@@ -86,7 +85,6 @@ NetworkDepthSensor::~NetworkDepthSensor() {
 aditof::Status NetworkDepthSensor::open() {
     using namespace aditof;
 
-    std::string connectionString;
     Network *net = m_implData->handle.net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
