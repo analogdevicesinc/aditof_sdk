@@ -58,12 +58,13 @@ For more details about the SDK check the links below:
 | aditof-demo | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/aditof-demo"> C++ </a> | An application that displays the infrared and depth images. |
 | first-frame | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/first-frame"> C++ </a> <br> <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/first_frame"> Python </a> | An example code that shows the steps required to get to the point where camera frames can be captured. |
 | first-frame-network | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/examples/first-frame-network"> C++ </a> | An application that shows how to use the aditof sdk to talk to a remote ToF camera over the network. |
-| device_example | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/device_example"> Python</a> | A simple example of how to get access to the low-level API of the camera. |
+| low_level_example | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/low_level_example"> Python</a> | A simple example of how to get access to the low-level API of the camera. |
 | dnn | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/dnn"> Python with OpenCV</a> <br> <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/dnn"> C++ with OpenCV </a> | A simple object detection example. |
 | imshow | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/opencv/imshow"> C++ with OpenCV </a> | A basic example that displays data provided by the Aditof SDK. |
 | Image Acquisition Toolbox | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/matlab"> MATLAB </a> | Examples of how to use the AD-96TOF1-EBZ camera in MATLAB over USB and Network. |
 | Hand Gesture Detection | <a href="https://github.com/mathworks/MATLAB-Demo-ADI-ToF"> MATLAB </a> | Detecting hand signs to play Rock, Paper and Scissors. |
 | showPointCloud | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/python/examples/showPointCloud"> Python with Open3D </a> <br> <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/open3D/showPointCloud"> C++ with Open3D </a> | A basic example that displays a pointcloud built using the Open3D library and the data provided by the Aditof SDK. |
+| showPointCloud <br> camera node | <a href="https://github.com/analogdevicesinc/aditof_sdk/tree/master/bindings/ros"> C++ with ROS </a> | A simple example of how to use AD-96TOF1-EBZ with the ROS distribution. |
 
 ## Directory Structure
 | Directory | Description |
@@ -73,6 +74,9 @@ For more details about the SDK check the links below:
 | ci | Useful scripts for continuous integration |
 | doc | Documentation |
 | examples | Example code for the supported programming languages |
+| misc | Calibration and kernel files |
 | scripts | Useful development scripts |
 | sdk | SDK source code |
+| tools | Camera calibration tools |
+| utils | Various utils for the embedded platforms |
 
