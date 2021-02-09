@@ -32,8 +32,8 @@
 #ifndef CONNECTION_VALIDATOR_H
 #define CONNECTION_VALIDATOR_H
 
-#include "aditof/version.h"
 #include "aditof/connections.h"
+#include <string>
 
 namespace aditof {
     const std::string getVersionString(aditof::ConnectionType connectionType);

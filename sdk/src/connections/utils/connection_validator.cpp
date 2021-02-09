@@ -31,6 +31,7 @@
  */
 
 #include "connections/utils/connection_validator.h"
+#include "aditof/version.h"
 
 #include <string>
 
