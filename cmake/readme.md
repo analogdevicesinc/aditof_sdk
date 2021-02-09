@@ -27,7 +27,7 @@ which will generate all the necessary recipes for building and installing. Usefu
 | CMAKE_INSTALL_PREFIX | \<path\> |  /usr/local on UNIX, c:/Program Files on Windows | Installation directory used by `cmake install` |
 | PYTHON_EXECUTABLE | \<path\> | Path to default python executable used | Specify which python executable should be used for building the python bindings |
 | WITH_REVB | on/off | off | When building for raspberry pi platforms, specify WITH_REVB if you are using hardware revision B, else leave it off |
-
+| IGNORE_TARGET_VERSION | on/off | off | Specifies if the client sdk should ignore the sdk version installed on the target |
 
 #### Building and Installing 
 

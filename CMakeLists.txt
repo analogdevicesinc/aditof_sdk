@@ -35,6 +35,7 @@ option(WITH_NETWORK "Build network interface?" ON)
 option(USE_CHICONY "Use Chicony 006 camera?" OFF)
 option(USE_FXTOF1 "Use FXTOF1 camera?" OFF)
 option(WITH_TOOLS "Build tools?" OFF)
+option(IGNORE_TARGET_VERSION "Ignore sdk version on target?" OFF)
 
 if (WITH_NETWORK)
         add_definitions(-DHAS_NETWORK)
