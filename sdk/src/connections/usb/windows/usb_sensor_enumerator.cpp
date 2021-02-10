@@ -70,7 +70,6 @@ static aditof::Status getAvailableSensors(IMoniker *Moniker,
             << hr;
         return Status::GENERIC_ERROR;
     }
-
     std::unique_ptr<uint8_t[]> data(new uint8_t[bufferLength + 1]);
     hr = UsbWindowsUtils::UvcExUnitReadBuffer(pVideoInputFilter, 4, -1,
                                               sizeof(bufferLength), data.get(),
@@ -154,12 +153,12 @@ Status UsbSensorEnumerator::searchSensors() {
                                                sensorsPaths);
                         m_sensorsInfo.emplace_back(sInfo);
 
-                        std::string connectionString =
-                            UsbUtils::getConnectionString(sensorsPaths);
+                        std::string versionString =
+                            UsbUtils::getVersionString(sensorsPaths);
                         if (!isValidConnection(aditof::ConnectionType::USB,
-                                               connectionString)) {
+                                               versionString)) {
                             LOG(ERROR) << "invalid connection string: "
-                                       << connectionString;
+                                       << versionString;
                             status = Status::GENERIC_ERROR;
                         }
 
