@@ -13,8 +13,15 @@ endif()
 set(ADITOF_VERSION_MAJOR 2)
 set(ADITOF_VERSION_MINOR 0)
 set(ADITOF_VERSION_PATCH 0)
-
 set(VERSION "${ADITOF_VERSION_MAJOR}.${ADITOF_VERSION_MINOR}.${ADITOF_VERSION_PATCH}")
+
+set(ADITOF_VERSION_UVC_MAJOR 2)
+set(ADITOF_VERSION_UVC_MINOR 0)
+set(VERSION_UVC "${ADITOF_VERSION_UVC_MAJOR}.${ADITOF_VERSION_UVC_MINOR}")
+
+set(ADITOF_VERSION_SERVER_MAJOR 2)
+set(ADITOF_VERSION_SERVER_MINOR 0)
+set(VERSION_SERVER "${ADITOF_VERSION_SERVER_MAJOR}.${ADITOF_VERSION_SERVER_MINOR}")
 
 ############################### Options #######################################
 option(WITH_EXAMPLES "Build examples?" ON)
@@ -28,6 +35,7 @@ option(WITH_NETWORK "Build network interface?" ON)
 option(USE_CHICONY "Use Chicony 006 camera?" OFF)
 option(USE_FXTOF1 "Use FXTOF1 camera?" OFF)
 option(WITH_TOOLS "Build tools?" OFF)
+option(IGNORE_TARGET_VERSION "Ignore sdk version on target?" OFF)
 
 if (WITH_NETWORK)
         add_definitions(-DHAS_NETWORK)

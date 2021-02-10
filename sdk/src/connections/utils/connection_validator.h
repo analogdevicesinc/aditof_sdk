@@ -29,39 +29,16 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef USB_UTILS_H
-#define USB_UTILS_H
+#ifndef CONNECTION_VALIDATOR_H
+#define CONNECTION_VALIDATOR_H
 
+#include "aditof/connections.h"
 #include <string>
-#include <vector>
 
-class UsbUtils {
-  public:
-    /**
-     * @brief Parses sensor tokens which are strings containing a key-value pair
-     * (e.g. "EEPROM_NAME=eeprom1") and returns the names and IDs of the storages.
-     * @param tokens - The tokens to be parsed.
-     * return std::vector<std::string>
-     */
-    static std::vector<std::pair<std::string, unsigned int>>
-    getStorageNamesAndIds(const std::vector<std::string> &tokens);
+namespace aditof {
+const std::string getVersionString(aditof::ConnectionType connectionType);
+const bool isValidConnection(aditof::ConnectionType connectionType,
+                             const std::string targetVersionString);
+} // namespace aditof
 
-    /**
-     * @brief Parses sensor tokens which are strings containing a key-value pair
-     * and returns the names and IDs of the temperature sensors.
-     * @param tokens - The tokens to be parsed.
-     * return std::vector<std::string>
-     */
-    static std::vector<std::pair<std::string, unsigned int>>
-    getTemperatureSensorNamesAndIds(const std::vector<std::string> &tokens);
-
-    /**
-     * @brief Parses sensor tokens which are strings containing a key-value pair
-     * and returns the connection string.
-     * @param tokens - The tokens to be parsed.
-     * return std::string
-     */
-    static std::string getVersionString(const std::vector<std::string> &tokens);
-};
-
-#endif // USB_UTILS_H
+#endif // CONNECTION_VALIDATOR_H

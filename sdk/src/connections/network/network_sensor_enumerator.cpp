@@ -34,6 +34,7 @@
 #include "connections/network/network_depth_sensor.h"
 #include "connections/network/network_storage.h"
 #include "connections/network/network_temperature_sensor.h"
+#include "connections/utils/connection_validator.h"
 
 #include <glog/logging.h>
 
@@ -44,16 +45,55 @@ NetworkSensorEnumerator::NetworkSensorEnumerator(const std::string &ip)
 
 NetworkSensorEnumerator::~NetworkSensorEnumerator() = default;
 
+aditof::Status getVersionString(std::unique_ptr<Network> &net,
+                                std::string &connectionString) {
+
+    net->send_buff.set_func_name("GetVersionString");
+    net->send_buff.set_expect_reply(true);
+
+    if (net->SendCommand() != 0) {
+        LOG(WARNING) << "Send Command Failed";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (net->recv_server_data() != 0) {
+        LOG(WARNING) << "Receive Data Failed";
+        return Status::GENERIC_ERROR;
+    }
+
+    if (net->recv_buff.server_status() !=
+        payload::ServerStatus::REQUEST_ACCEPTED) {
+        LOG(WARNING) << "API execution on Target Failed";
+        return Status::GENERIC_ERROR;
+    }
+
+    Status status = static_cast<Status>(net->recv_buff.status());
+
+    if (status == Status::OK) {
+        connectionString = net->recv_buff.message();
+    }
+
+    return status;
+}
+
 Status NetworkSensorEnumerator::searchSensors() {
     Status status = Status::OK;
 
     LOG(INFO) << "Looking for sensors over network";
 
     std::unique_ptr<Network> net(new Network());
+    std::string connectionString;
 
     if (net->ServerConnect(m_ip) != 0) {
         LOG(WARNING) << "Server Connect Failed";
         return Status::UNREACHABLE;
+    }
+
+    getVersionString(net, connectionString);
+
+    if (!isValidConnection(aditof::ConnectionType::NETWORK, connectionString)) {
+        LOG(ERROR) << "invalid connection string: " << connectionString;
+        return Status::GENERIC_ERROR;
     }
 
     net->send_buff.set_func_name("FindSensors");

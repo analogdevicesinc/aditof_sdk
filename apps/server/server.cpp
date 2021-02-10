@@ -36,6 +36,7 @@
 #include "buffer.pb.h"
 
 #include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
+#include "../../sdk/src/connections/utils/connection_validator.h"
 
 #include <glog/logging.h>
 #include <iostream>
@@ -620,6 +621,14 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         break;
     }
 
+    case GET_CONNECTION_STRING: {
+        buff_send.set_message(
+            aditof::getVersionString(aditof::ConnectionType::NETWORK));
+        buff_send.set_status(
+            static_cast<::payload::Status>(aditof::Status::OK));
+        break;
+    }
+
     default: {
         std::string msgErr = "Function not found";
         std::cout << msgErr << "\n";
@@ -652,4 +661,5 @@ void Initialize() {
     s_map_api_Values["TemperatureSensorRead"] = TEMPERATURE_SENSOR_READ;
     s_map_api_Values["TemperatureSensorClose"] = TEMPERATURE_SENSOR_CLOSE;
     s_map_api_Values["HangUp"] = HANG_UP;
+    s_map_api_Values["GetVersionString"] = GET_CONNECTION_STRING;
 }

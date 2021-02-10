@@ -35,6 +35,7 @@
 #include "connections/usb/usb_temperature_sensor.h"
 #include "connections/usb/usb_utils.h"
 #include "connections/usb/windows/usb_windows_utils.h"
+#include "connections/utils/connection_validator.h"
 #include "utils.h"
 
 #include <glog/logging.h>
@@ -69,7 +70,6 @@ static aditof::Status getAvailableSensors(IMoniker *Moniker,
             << hr;
         return Status::GENERIC_ERROR;
     }
-
     std::unique_ptr<uint8_t[]> data(new uint8_t[bufferLength + 1]);
     hr = UsbWindowsUtils::UvcExUnitReadBuffer(pVideoInputFilter, 4, -1,
                                               sizeof(bufferLength), data.get(),
@@ -152,6 +152,15 @@ Status UsbSensorEnumerator::searchSensors() {
                         Utils::splitIntoTokens(advertisedSensorData, ';',
                                                sensorsPaths);
                         m_sensorsInfo.emplace_back(sInfo);
+
+                        std::string versionString =
+                            UsbUtils::getVersionString(sensorsPaths);
+                        if (!isValidConnection(aditof::ConnectionType::USB,
+                                               versionString)) {
+                            LOG(ERROR) << "invalid connection string: "
+                                       << versionString;
+                            status = Status::GENERIC_ERROR;
+                        }
 
                         m_storagesInfo =
                             UsbUtils::getStorageNamesAndIds(sensorsPaths);

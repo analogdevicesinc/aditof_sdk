@@ -18,6 +18,7 @@
  */
 
 #include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
+#include "../../sdk/src/connections/utils/connection_validator.h"
 #include "uvc.h"
 
 #include <aditof/depth_sensor_interface.h>
@@ -2082,6 +2083,10 @@ int main(int argc, char *argv[]) {
         ++temp_sensor_id;
         DLOG(INFO) << name;
     }
+
+    availableSensorsBlob +=
+        "VERSION_STRING=" +
+        aditof::getVersionString(aditof::ConnectionType::USB) + ";";
 
     DLOG(INFO) << "Message blob about available sensors to be sent to remote:";
     DLOG(INFO) << availableSensorsBlob;
