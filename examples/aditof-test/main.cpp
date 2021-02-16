@@ -213,10 +213,10 @@ int main(int argc, char *argv[]) {
 
         /* For the application to start in fullscreen mode the following if must be uncommented */
 
-        /* if (!fullScreen) {
+         if (!fullScreen) {
             system("wmctrl -r 'ADITOF-TEST' -b toggle,fullscreen");
             fullScreen = true;
-        } */
+        } 
 
         if (cv::waitKey(20) == 27) {
             break;
@@ -366,7 +366,7 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
     uint8_t eepromName[12];
     std::vector<std::shared_ptr<aditof::StorageInterface>> eeprom;
     camera->getEeproms(eeprom);
-    eeprom[0]->read(0x0016, eepromName, 12);
+    eeprom[0]->read(0x00010016, eepromName, 12);
 
     std::string eepromID = "";
 
