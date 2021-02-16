@@ -38,6 +38,7 @@
 #include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
 #include "../../sdk/src/connections/utils/connection_validator.h"
 
+#include <csignal>
 #include <glog/logging.h>
 #include <iostream>
 #include <linux/videodev2.h>
