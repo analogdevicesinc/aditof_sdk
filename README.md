@@ -80,3 +80,12 @@ For more details about the SDK check the links below:
 | tools | Camera calibration tools |
 | utils | Various utils for the embedded platforms |
 
+## Contributing to the SDK
+
+### Formating
+
+The SDK is formated using <a href="https://packages.ubuntu.com/search?keywords=clang-format-6.0">clang-format 6.0</a>.
+
+Before creating a PR please run `./scrips/format.sh` from the root of the project.
+
+In order to prevent a file from being formated add it to `.clangformatignore`
