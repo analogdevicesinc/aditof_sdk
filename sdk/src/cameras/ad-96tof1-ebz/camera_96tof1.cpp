@@ -547,11 +547,11 @@ aditof::Status Camera96Tof1::getControl(const std::string &control,
     }
 
     if (control == "depth_correction") {
-        value = m_depthCorrection? "1": "0";
+        value = m_depthCorrection ? "1": "0";
     }
     
     if (control == "camera_geometry_correction") {
-        value = m_cameraGeometryCorrection? "1": "0";
+        value = m_cameraGeometryCorrection ? "1": "0";
     }
 
     if (control == "revision") {

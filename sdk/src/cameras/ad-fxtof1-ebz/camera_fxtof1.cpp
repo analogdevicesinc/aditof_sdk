@@ -463,7 +463,7 @@ aditof::Status CameraFxTof1::getControl(const std::string &control,
     }
 
     if (control == "camera_geometry_correction") {
-        value = m_cameraGeometryCorrection? "1": "0";
+        value = m_cameraGeometryCorrection ? "1": "0";
     }
 
     return status;
