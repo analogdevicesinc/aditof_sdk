@@ -59,7 +59,8 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 
 static const std::string skCustomMode = "custom";
 static const std::vector<std::string> availableControls = {
-    "noise_reduction_threshold", "ir_gamma_correction", "camera_geometry_correction"};
+    "noise_reduction_threshold", "ir_gamma_correction",
+    "camera_geometry_correction"};
 static const std::string skEepromName = "custom";
 CameraFxTof1::CameraFxTof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
@@ -243,9 +244,9 @@ aditof::Status CameraFxTof1::setMode(const std::string &mode,
         m_devProgrammed = true;
     }
 
-    status = m_calibration.setMode(m_depthSensor, mode, m_details.depthParameters.maxDepth,
-                                   m_details.frameType.width,
-                                   m_details.frameType.height);
+    status = m_calibration.setMode(
+        m_depthSensor, mode, m_details.depthParameters.maxDepth,
+        m_details.frameType.width, m_details.frameType.height);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to set calibration mode";
         return status;
@@ -366,8 +367,9 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
         return status;
     }
 
-    if (m_details.mode != skCustomMode && (m_details.frameType.type == "depth_ir" ||
-                                            m_details.frameType.type == "depth_only")) {
+    if (m_details.mode != skCustomMode &&
+        (m_details.frameType.type == "depth_ir" ||
+         m_details.frameType.type == "depth_only")) {
         if (m_cameraGeometryCorrection) {
             m_calibration.calibrateCameraGeometry(
                 frameDataLocation,
@@ -463,7 +465,7 @@ aditof::Status CameraFxTof1::getControl(const std::string &control,
     }
 
     if (control == "camera_geometry_correction") {
-        value = m_cameraGeometryCorrection ? "1": "0";
+        value = m_cameraGeometryCorrection ? "1" : "0";
     }
 
     return status;

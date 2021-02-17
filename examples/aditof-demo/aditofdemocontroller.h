@@ -64,7 +64,8 @@ class AdiTofDemoController {
                                    uint16_t noOfEntries = 1);
 
     void startRecording(const std::string &fileName,
-                    const aditof::FrameDetails &frameDetails, unsigned int fps);
+                        const aditof::FrameDetails &frameDetails,
+                        unsigned int fps);
     void stopRecording();
     int startPlayback(const std::string &fileName, int &fps);
     void stopPlayback();

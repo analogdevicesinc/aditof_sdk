@@ -311,7 +311,8 @@ std::pair<int, int> SourceAdaptor::getCurrentHwRange() const {
 
     m_camera->getDetails(cameraDetails);
 
-    return std::make_pair(cameraDetails.depthParameters.minDepth, cameraDetails.depthParameters.maxDepth);
+    return std::make_pair(cameraDetails.depthParameters.minDepth,
+                          cameraDetails.depthParameters.maxDepth);
 }
 
 int SourceAdaptor::getCurrentBitCount() const {

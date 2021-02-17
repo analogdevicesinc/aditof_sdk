@@ -97,7 +97,8 @@ PYBIND11_MODULE(aditofpython, m) {
         .def_readwrite("frameType", &aditof::CameraDetails::frameType)
         .def_readwrite("connection", &aditof::CameraDetails::connection)
         .def_readwrite("intrinsics", &aditof::CameraDetails::intrinsics)
-        .def_readwrite("depthParameters", &aditof::CameraDetails::depthParameters)
+        .def_readwrite("depthParameters",
+                       &aditof::CameraDetails::depthParameters)
         .def_readwrite("bitCount", &aditof::CameraDetails::bitCount);
 
     // Helpers

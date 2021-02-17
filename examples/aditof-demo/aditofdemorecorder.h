@@ -37,8 +37,8 @@
 #include <fstream>
 #include <thread>
 
-#include <aditof/frame.h>
 #include <aditof/camera_definitions.h>
+#include <aditof/frame.h>
 
 #include "safequeue.h"
 
@@ -48,8 +48,9 @@ class AditofDemoRecorder {
     ~AditofDemoRecorder();
 
     void startRecording(const std::string &fileName,
-                    const aditof::FrameDetails &frameDetails,
-                    const aditof::CameraDetails& cameraDetails, unsigned int fps);
+                        const aditof::FrameDetails &frameDetails,
+                        const aditof::CameraDetails &cameraDetails,
+                        unsigned int fps);
     void stopRecording();
 
     int startPlayback(const std::string &fileName, int &fps);

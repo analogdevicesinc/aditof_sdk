@@ -60,7 +60,8 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 static const std::string skCustomMode = "custom";
 
 static const std::vector<std::string> availableControls = {
-    "noise_reduction_threshold", "ir_gamma_correction", "depth_correction", "camera_geometry_correction", "revision"};
+    "noise_reduction_threshold", "ir_gamma_correction", "depth_correction",
+    "camera_geometry_correction", "revision"};
 
 Camera96Tof1::Camera96Tof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
@@ -68,8 +69,8 @@ Camera96Tof1::Camera96Tof1(
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
     : m_depthSensor(depthSensor), m_devStarted(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
-      m_availableControls(availableControls), m_depthCorrection(true), m_cameraGeometryCorrection(true),
-      m_revision("RevC") {
+      m_availableControls(availableControls), m_depthCorrection(true),
+      m_cameraGeometryCorrection(true), m_revision("RevC") {
 
     // Check Depth Sensor
     if (!depthSensor) {
@@ -304,8 +305,9 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
             LOG(WARNING) << "Failed to set calibration mode";
             return status;
         }
-        status = m_calibration.getGainOffset(mode, m_details.depthParameters.depthGain,
-                                        m_details.depthParameters.depthOffset);
+        status = m_calibration.getGainOffset(
+            mode, m_details.depthParameters.depthGain,
+            m_details.depthParameters.depthOffset);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to get depth parameters";
             return status;
@@ -434,17 +436,18 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
         return status;
     }
 
-    if (m_details.mode != skCustomMode && (m_details.frameType.type == "depth_ir"
-                                            || m_details.frameType.type == "depth_only")) {
+    if (m_details.mode != skCustomMode &&
+        (m_details.frameType.type == "depth_ir" ||
+         m_details.frameType.type == "depth_only")) {
         if (m_depthCorrection) {
             m_calibration.calibrateDepth(frameDataLocation,
-                                        m_details.frameType.width *
-                                            m_details.frameType.height);
+                                         m_details.frameType.width *
+                                             m_details.frameType.height);
         }
         if (m_cameraGeometryCorrection) {
-            m_calibration.calibrateCameraGeometry(frameDataLocation,
-                                                m_details.frameType.width *
-                                                    m_details.frameType.height);
+            m_calibration.calibrateCameraGeometry(
+                frameDataLocation,
+                m_details.frameType.width * m_details.frameType.height);
         }
     }
 
@@ -514,7 +517,7 @@ aditof::Status Camera96Tof1::setControl(const std::string &control,
     if (control == "depth_correction") {
         m_depthCorrection = std::stoi(value) != 0;
     }
-    
+
     if (control == "camera_geometry_correction") {
         m_cameraGeometryCorrection = std::stoi(value) != 0;
     }
@@ -547,11 +550,11 @@ aditof::Status Camera96Tof1::getControl(const std::string &control,
     }
 
     if (control == "depth_correction") {
-        value = m_depthCorrection ? "1": "0";
+        value = m_depthCorrection ? "1" : "0";
     }
-    
+
     if (control == "camera_geometry_correction") {
-        value = m_cameraGeometryCorrection ? "1": "0";
+        value = m_cameraGeometryCorrection ? "1" : "0";
     }
 
     if (control == "revision") {
