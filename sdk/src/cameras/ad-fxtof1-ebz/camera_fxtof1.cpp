@@ -59,7 +59,7 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 
 static const std::string skCustomMode = "custom";
 static const std::vector<std::string> availableControls = {
-    "noise_reduction_threshold", "ir_gamma_correction"};
+    "noise_reduction_threshold", "ir_gamma_correction", "camera_geometry_correction"};
 static const std::string skEepromName = "custom";
 CameraFxTof1::CameraFxTof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
@@ -67,7 +67,8 @@ CameraFxTof1::CameraFxTof1(
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
     : m_depthSensor(depthSensor), m_devStarted(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
-      m_availableControls(availableControls), m_revision("RevA") {
+      m_availableControls(availableControls), m_cameraGeometryCorrection(true),
+      m_revision("RevA") {
 
     // Check Depth Sensor
     if (!depthSensor) {
@@ -211,15 +212,15 @@ aditof::Status CameraFxTof1::setMode(const std::string &mode,
                                  return rangeMode.mode == mode;
                              });
     if (iter != rangeValues.end()) {
-        m_details.maxDepth = (*iter).maxDepth;
-        m_details.minDepth = (*iter).minDepth;
+        m_details.depthParameters.maxDepth = (*iter).maxDepth;
+        m_details.depthParameters.minDepth = (*iter).minDepth;
     } else {
-        m_details.maxDepth = 1;
+        m_details.depthParameters.maxDepth = 1;
     }
 
     LOG(INFO) << "Camera range for mode: " << mode
-              << " is: " << m_details.minDepth << " mm and "
-              << m_details.maxDepth << " mm";
+              << " is: " << m_details.depthParameters.minDepth << " mm and "
+              << m_details.depthParameters.maxDepth << " mm";
 
     if (!m_devProgrammed) {
         std::vector<uint16_t> firmwareData;
@@ -242,7 +243,7 @@ aditof::Status CameraFxTof1::setMode(const std::string &mode,
         m_devProgrammed = true;
     }
 
-    status = m_calibration.setMode(m_depthSensor, mode, m_details.maxDepth,
+    status = m_calibration.setMode(m_depthSensor, mode, m_details.depthParameters.maxDepth,
                                    m_details.frameType.width,
                                    m_details.frameType.height);
     if (status != Status::OK) {
@@ -263,6 +264,9 @@ aditof::Status CameraFxTof1::setMode(const std::string &mode,
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x05, 0x0007, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
+
+    m_details.depthParameters.depthGain = 1.0f;
+    m_details.depthParameters.depthOffset = 0.0f;
 
     m_details.mode = mode;
 
@@ -362,13 +366,13 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
         return status;
     }
 
-    if (m_details.mode != skCustomMode &&
-        (m_details.frameType.type == "depth_ir" ||
-         m_details.frameType.type == "depth_only")) {
-
-        m_calibration.calibrateCameraGeometry(
-            frameDataLocation,
-            m_details.frameType.width * m_details.frameType.height / 2);
+    if (m_details.mode != skCustomMode && (m_details.frameType.type == "depth_ir" ||
+                                            m_details.frameType.type == "depth_only")) {
+        if (m_cameraGeometryCorrection) {
+            m_calibration.calibrateCameraGeometry(
+                frameDataLocation,
+                m_details.frameType.width * m_details.frameType.height / 2);
+        }
     }
     return Status::OK;
 }
@@ -431,6 +435,10 @@ aditof::Status CameraFxTof1::setControl(const std::string &control,
         return setIrGammaCorrection(std::stof(value));
     }
 
+    if (control == "camera_geometry_correction") {
+        m_cameraGeometryCorrection = std::stoi(value) != 0;
+    }
+
     return status;
 }
 
@@ -452,6 +460,10 @@ aditof::Status CameraFxTof1::getControl(const std::string &control,
 
     if (control == "ir_gamma_correction") {
         value = std::to_string(m_irGammaCorrection);
+    }
+
+    if (control == "camera_geometry_correction") {
+        value = m_cameraGeometryCorrection? "1": "0";
     }
 
     return status;

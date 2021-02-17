@@ -228,10 +228,11 @@ aditof::Status AdiTofDemoController::readAFEregister(uint16_t *address,
 }
 
 void AdiTofDemoController::startRecording(const std::string &fileName,
-                                          unsigned int height,
-                                          unsigned int width,
+                                          const aditof::FrameDetails &frameDetails,
                                           unsigned int fps) {
-    m_recorder->startRecording(fileName, height, width, fps);
+    aditof::CameraDetails cameraDetails;
+    m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(cameraDetails);
+    m_recorder->startRecording(fileName, frameDetails, cameraDetails, fps);
 }
 
 void AdiTofDemoController::stopRecording() { m_recorder->stopRecording(); }
@@ -296,14 +297,14 @@ int AdiTofDemoController::getRangeMax() const {
     aditof::CameraDetails cameraDetails;
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
         cameraDetails);
-    return cameraDetails.maxDepth;
+    return cameraDetails.depthParameters.maxDepth;
 }
 
 int AdiTofDemoController::getRangeMin() const {
     aditof::CameraDetails cameraDetails;
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
         cameraDetails);
-    return cameraDetails.minDepth;
+    return cameraDetails.depthParameters.minDepth;
 }
 
 int AdiTofDemoController::getbitCount() const {

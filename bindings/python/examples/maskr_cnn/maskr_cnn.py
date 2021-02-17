@@ -138,7 +138,7 @@ def apply_maskrcnn_algorithm(distance_map, image, imageH, imageW):
     cv.waitKey(1)
 
 def get_scaling_values(cameraDetails):
-    camera_range = cameraDetails.maxDepth
+    camera_range = cameraDetails.depthParameters.maxDepth
     bit_count = cameraDetails.bitCount
     max_value_of_IR_pixel = 2 ** bit_count - 1
     distance_scale_ir = 255.0 / max_value_of_IR_pixel

@@ -204,13 +204,13 @@ IntrinsicParameters getIntrinsics(const std::shared_ptr<Camera> &camera) {
 int getRangeMax(const std::shared_ptr<Camera> &camera) {
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
-    return cameraDetails.maxDepth;
+    return cameraDetails.depthParameters.maxDepth;
 }
 
 int getRangeMin(const std::shared_ptr<Camera> &camera) {
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
-    return cameraDetails.minDepth;
+    return cameraDetails.depthParameters.minDepth;
 }
 
 void irTo16bitGrayscale(uint16_t *frameData, int width, int height) {
