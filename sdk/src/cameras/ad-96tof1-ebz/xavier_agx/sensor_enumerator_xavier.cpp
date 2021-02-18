@@ -53,7 +53,7 @@ Status TargetSensorEnumerator::searchSensors() {
     SensorInfo sInfo;
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
     sInfo.driverPath = "/dev/video0|/dev/video1";
-    sInfo.subDevPath = "/dev/v4l-subdev0|/dev/v4l-subdev2";
+    sInfo.subDevPath = "/dev/v4l-subdev2|/dev/v4l-subdev3";
     sInfo.captureDev = CAPTURE_DEVICE_NAME;
     m_sensorsInfo.emplace_back(sInfo);
 
