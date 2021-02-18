@@ -48,19 +48,69 @@ AditofDemoRecorder::~AditofDemoRecorder() {
     }
 }
 
-void AditofDemoRecorder::startRecording(const std::string &fileName,
-                                        unsigned int height, unsigned int width,
-                                        unsigned int fps) {
+void AditofDemoRecorder::startRecording(
+    const std::string &fileName, const aditof::FrameDetails &frameDetails,
+    const aditof::CameraDetails &cameraDetails, unsigned int fps) {
     m_recordFile.open(fileName, std::ios::binary);
-    m_recordFile.write(reinterpret_cast<const char *>(&height),
+
+    /* Header version */
+    unsigned char version = FILE_HEADER_VERSION;
+    m_recordFile.write(reinterpret_cast<const char *>(&version),
+                       sizeof(unsigned char));
+    /* Frame Height, Width and FPS */
+    m_recordFile.write(reinterpret_cast<const char *>(&m_frameDetails.height),
                        sizeof(unsigned int));
-    m_recordFile.write(reinterpret_cast<const char *>(&width),
+    m_recordFile.write(reinterpret_cast<const char *>(&m_frameDetails.width),
                        sizeof(unsigned int));
     m_recordFile.write(reinterpret_cast<const char *>(&fps),
                        sizeof(unsigned int));
+    /* Depth gain and offset */
+    m_recordFile.write(reinterpret_cast<const char *>(
+                           &cameraDetails.depthParameters.depthGain),
+                       sizeof(float));
+    m_recordFile.write(reinterpret_cast<const char *>(
+                           &cameraDetails.depthParameters.depthOffset),
+                       sizeof(float));
+    /* bit count */
+    m_recordFile.write(reinterpret_cast<const char *>(&cameraDetails.bitCount),
+                       sizeof(int));
+    /* min and max depth */
+    m_recordFile.write(
+        reinterpret_cast<const char *>(&cameraDetails.depthParameters.minDepth),
+        sizeof(int));
+    m_recordFile.write(
+        reinterpret_cast<const char *>(&cameraDetails.depthParameters.maxDepth),
+        sizeof(int));
+    /* intrinsics pixel height and width */
+    m_recordFile.write(
+        reinterpret_cast<const char *>(&cameraDetails.intrinsics.pixelHeight),
+        sizeof(float));
+    m_recordFile.write(
+        reinterpret_cast<const char *>(&cameraDetails.intrinsics.pixelWidth),
+        sizeof(float));
+    /* intrinsics fx, fy, cx and cy */
+    float fx = cameraDetails.intrinsics.cameraMatrix.at(0);
+    m_recordFile.write(reinterpret_cast<const char *>(&fx), sizeof(float));
+    float fy = cameraDetails.intrinsics.cameraMatrix.at(4);
+    m_recordFile.write(reinterpret_cast<const char *>(&fy), sizeof(float));
+    float cx = cameraDetails.intrinsics.cameraMatrix.at(2);
+    m_recordFile.write(reinterpret_cast<const char *>(&cx), sizeof(float));
+    float cy = cameraDetails.intrinsics.cameraMatrix.at(5);
+    m_recordFile.write(reinterpret_cast<const char *>(&cy), sizeof(float));
+    /* intrinsics distorsion coefs k1, k2, p1, p2, k3 */
+    float k1 = cameraDetails.intrinsics.distCoeffs.at(0);
+    m_recordFile.write(reinterpret_cast<const char *>(&k1), sizeof(float));
+    float k2 = cameraDetails.intrinsics.distCoeffs.at(1);
+    m_recordFile.write(reinterpret_cast<const char *>(&k2), sizeof(float));
+    float p1 = cameraDetails.intrinsics.distCoeffs.at(2);
+    m_recordFile.write(reinterpret_cast<const char *>(&p1), sizeof(float));
+    float p2 = cameraDetails.intrinsics.distCoeffs.at(3);
+    m_recordFile.write(reinterpret_cast<const char *>(&p2), sizeof(float));
+    float k3 = cameraDetails.intrinsics.distCoeffs.at(4);
+    m_recordFile.write(reinterpret_cast<const char *>(&k3), sizeof(float));
 
-    m_frameDetails.height = height;
-    m_frameDetails.width = width;
+    m_frameDetails.height = static_cast<int>(frameDetails.height);
+    m_frameDetails.width = static_cast<int>(frameDetails.width);
 
     m_recordTreadStop = false;
     m_recordThread =
@@ -76,26 +126,73 @@ void AditofDemoRecorder::stopRecording() {
 }
 
 int AditofDemoRecorder::startPlayback(const std::string &fileName, int &fps) {
-    unsigned int height = 0;
-    unsigned int width = 0;
-
     m_playbackFile.open(fileName, std::ios::binary);
 
     m_playbackFile.seekg(0, std::ios_base::end);
     int fileSize = m_playbackFile.tellg();
     m_playbackFile.seekg(0, std::ios_base::beg);
 
-    m_playbackFile.read(reinterpret_cast<char *>(&height), sizeof(int));
-    m_playbackFile.read(reinterpret_cast<char *>(&width), sizeof(int));
-    m_playbackFile.read(reinterpret_cast<char *>(&fps), sizeof(int));
+    /* Header version */
+    unsigned char version;
+    m_playbackFile.read(reinterpret_cast<char *>(&version),
+                        sizeof(unsigned char));
+    if (version > FILE_HEADER_VERSION) {
+        return 0;
+    }
+    /* Frame Height, Width and FPS */
+    int frameHeight;
+    m_playbackFile.read(reinterpret_cast<char *>(&frameHeight),
+                        sizeof(unsigned int));
+    int frameWidth;
+    m_playbackFile.read(reinterpret_cast<char *>(&frameWidth),
+                        sizeof(unsigned int));
+    m_playbackFile.read(reinterpret_cast<char *>(&fps), sizeof(unsigned int));
+    /* Depth gain and offset */
+    float depthGain;
+    m_playbackFile.read(reinterpret_cast<char *>(&depthGain), sizeof(float));
+    float depthOffset;
+    m_playbackFile.read(reinterpret_cast<char *>(&depthOffset), sizeof(float));
+    /* bit count */
+    int bitCount;
+    m_playbackFile.read(reinterpret_cast<char *>(&bitCount), sizeof(int));
+    /* min and max depth */
+    int minDepth;
+    m_playbackFile.read(reinterpret_cast<char *>(&minDepth), sizeof(int));
+    int maxDepth;
+    m_playbackFile.read(reinterpret_cast<char *>(&maxDepth), sizeof(int));
+    /* intrinsics pixel height and width */
+    float pixelHeight;
+    m_playbackFile.read(reinterpret_cast<char *>(&pixelHeight), sizeof(float));
+    float pixelWidth;
+    m_playbackFile.read(reinterpret_cast<char *>(&pixelWidth), sizeof(float));
+    /* intrinsics fx, fy, cx and cy */
+    float fx;
+    m_playbackFile.read(reinterpret_cast<char *>(&fx), sizeof(float));
+    float fy;
+    m_playbackFile.read(reinterpret_cast<char *>(&fy), sizeof(float));
+    float cx;
+    m_playbackFile.read(reinterpret_cast<char *>(&cx), sizeof(float));
+    float cy;
+    m_playbackFile.read(reinterpret_cast<char *>(&cy), sizeof(float));
+    /* intrinsics distorsion coefs k1, k2, p1, p2, k3 */
+    float k1;
+    m_playbackFile.read(reinterpret_cast<char *>(&k1), sizeof(float));
+    float k2;
+    m_playbackFile.read(reinterpret_cast<char *>(&k2), sizeof(float));
+    float p1;
+    m_playbackFile.read(reinterpret_cast<char *>(&p1), sizeof(float));
+    float p2;
+    m_playbackFile.read(reinterpret_cast<char *>(&p2), sizeof(float));
+    float k3;
+    m_playbackFile.read(reinterpret_cast<char *>(&k3), sizeof(float));
 
-    int sizeOfHeader = 3 * sizeof(int);
-    int sizeOfFrame = sizeof(uint16_t) * height * width;
+    int sizeOfHeader = m_playbackFile.tellg();
+    int sizeOfFrame = sizeof(uint16_t) * frameHeight * frameWidth;
 
     m_numberOfFrames = (fileSize - sizeOfHeader) / sizeOfFrame;
 
-    m_frameDetails.height = height;
-    m_frameDetails.width = width;
+    m_frameDetails.height = frameHeight;
+    m_frameDetails.width = frameWidth;
 
     m_playbackThreadStop = false;
     m_playBackEofReached = false;

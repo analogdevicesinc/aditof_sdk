@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
     camera->getDetails(cameraDetails);
 
     /* Distance factor */
-    int cameraRange = cameraDetails.maxDepth;
+    int cameraRange = cameraDetails.depthParameters.maxDepth;
     double distance_scale = 255.0 / cameraRange;
 
     /* Distance factor IR */

@@ -227,11 +227,13 @@ aditof::Status AdiTofDemoController::readAFEregister(uint16_t *address,
     return camSensor->readAfeRegisters(address, data, noOfEntries);
 }
 
-void AdiTofDemoController::startRecording(const std::string &fileName,
-                                          unsigned int height,
-                                          unsigned int width,
-                                          unsigned int fps) {
-    m_recorder->startRecording(fileName, height, width, fps);
+void AdiTofDemoController::startRecording(
+    const std::string &fileName, const aditof::FrameDetails &frameDetails,
+    unsigned int fps) {
+    aditof::CameraDetails cameraDetails;
+    m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
+        cameraDetails);
+    m_recorder->startRecording(fileName, frameDetails, cameraDetails, fps);
 }
 
 void AdiTofDemoController::stopRecording() { m_recorder->stopRecording(); }
@@ -296,14 +298,14 @@ int AdiTofDemoController::getRangeMax() const {
     aditof::CameraDetails cameraDetails;
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
         cameraDetails);
-    return cameraDetails.maxDepth;
+    return cameraDetails.depthParameters.maxDepth;
 }
 
 int AdiTofDemoController::getRangeMin() const {
     aditof::CameraDetails cameraDetails;
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
         cameraDetails);
-    return cameraDetails.minDepth;
+    return cameraDetails.depthParameters.minDepth;
 }
 
 int AdiTofDemoController::getbitCount() const {

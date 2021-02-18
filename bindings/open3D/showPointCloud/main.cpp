@@ -95,8 +95,8 @@ int main(int argc, char *argv[]) {
     /* Get the camera details */
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
-    int camera_rangeMax = cameraDetails.maxDepth;
-    int camera_rangeMin = cameraDetails.minDepth;
+    int camera_rangeMax = cameraDetails.depthParameters.maxDepth;
+    int camera_rangeMin = cameraDetails.depthParameters.minDepth;
     int bitCount = cameraDetails.bitCount;
 
     aditof::IntrinsicParameters intrinsics = cameraDetails.intrinsics;

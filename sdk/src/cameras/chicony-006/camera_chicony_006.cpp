@@ -192,10 +192,10 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
                                  return rangeMode.mode == mode;
                              });
     if (iter != rangeValues.end()) {
-        m_details.maxDepth = (*iter).maxDepth;
-        m_details.minDepth = (*iter).minDepth;
+        m_details.depthParameters.maxDepth = (*iter).maxDepth;
+        m_details.depthParameters.minDepth = (*iter).minDepth;
     } else {
-        m_details.maxDepth = 4096;
+        m_details.depthParameters.maxDepth = 4096;
     }
 
     if (!modeFilename.empty()) {
@@ -224,8 +224,8 @@ aditof::Status CameraChicony::setMode(const std::string &mode,
         }
 
         LOG(INFO) << "Camera range for mode: " << mode
-                  << " is: " << m_details.minDepth << " mm and "
-                  << m_details.maxDepth << " mm";
+                  << " is: " << m_details.depthParameters.minDepth << " mm and "
+                  << m_details.depthParameters.maxDepth << " mm";
 
         m_calibration.setMode(mode);
     }

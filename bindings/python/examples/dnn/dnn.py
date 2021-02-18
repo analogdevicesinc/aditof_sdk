@@ -115,7 +115,7 @@ if __name__ == "__main__":
     smallSignalThreshold = 100
     cameras[0].setControl("noise_reduction_threshold", str(smallSignalThreshold))
 
-    camera_range = camDetails.maxDepth
+    camera_range = camDetails.depthParameters.maxDepth
     bitCount = camDetails.bitCount
     frame = tof.Frame()
 

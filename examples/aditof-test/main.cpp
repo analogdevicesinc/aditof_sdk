@@ -272,7 +272,7 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
 
     int frameHeight = static_cast<int>(frameDetails.height);
     int frameWidth = static_cast<int>(frameDetails.width);
-    int cameraRange = cameraDetails.maxDepth;
+    int cameraRange = cameraDetails.depthParameters.maxDepth;
     int bitCount = cameraDetails.bitCount;
 
     const int smallSignalThreshold = 50;

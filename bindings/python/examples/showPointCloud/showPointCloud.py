@@ -105,7 +105,7 @@ if __name__ == "__main__":
     cameraIntrinsics = o3d.camera.PinholeCameraIntrinsic(width, height, fx, fy, cx, cy)
 
     # Get camera details for frame correction
-    camera_range = camDetails.maxDepth
+    camera_range = camDetails.depthParameters.maxDepth
     bitCount = camDetails.bitCount
     max_value_of_IR_pixel = 2 ** bitCount - 1
     distance_scale_ir = 255.0 / max_value_of_IR_pixel

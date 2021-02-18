@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
 
     aditof::CameraDetails cameraDetails;
     camera->getDetails(cameraDetails);
-    int cameraRange = cameraDetails.maxDepth;
+    int cameraRange = cameraDetails.depthParameters.maxDepth;
     aditof::Frame frame;
 
     const int smallSignalThreshold = 50;

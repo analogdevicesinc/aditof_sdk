@@ -95,6 +95,7 @@ class CameraFxTof1 : public aditof::Camera {
     CalibrationFxTof1 m_calibration;
     uint16_t m_noiseReductionThreshold;
     float m_irGammaCorrection;
+    bool m_cameraGeometryCorrection;
     std::string m_revision;
 };
 

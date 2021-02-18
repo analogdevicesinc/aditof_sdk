@@ -83,6 +83,13 @@ PYBIND11_MODULE(aditofpython, m) {
         .def_readwrite("pixelHeight",
                        &aditof::IntrinsicParameters::pixelHeight);
 
+    py::class_<aditof::DepthParameters>(m, "DepthParameters")
+        .def(py::init<>())
+        .def_readwrite("depthGain", &aditof::DepthParameters::depthGain)
+        .def_readwrite("depthOffset", &aditof::DepthParameters::depthOffset)
+        .def_readwrite("minDepth", &aditof::DepthParameters::minDepth)
+        .def_readwrite("maxDepth", &aditof::DepthParameters::maxDepth);
+
     py::class_<aditof::CameraDetails>(m, "CameraDetails")
         .def(py::init<>())
         .def_readwrite("cameraId", &aditof::CameraDetails::cameraId)
@@ -90,8 +97,8 @@ PYBIND11_MODULE(aditofpython, m) {
         .def_readwrite("frameType", &aditof::CameraDetails::frameType)
         .def_readwrite("connection", &aditof::CameraDetails::connection)
         .def_readwrite("intrinsics", &aditof::CameraDetails::intrinsics)
-        .def_readwrite("minDepth", &aditof::CameraDetails::minDepth)
-        .def_readwrite("maxDepth", &aditof::CameraDetails::maxDepth)
+        .def_readwrite("depthParameters",
+                       &aditof::CameraDetails::depthParameters)
         .def_readwrite("bitCount", &aditof::CameraDetails::bitCount);
 
     // Helpers

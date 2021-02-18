@@ -81,6 +81,34 @@ struct IntrinsicParameters {
 };
 
 /**
+ * @struct DepthParameters
+ * @brief Describes the depth parameters of a camera.
+ */
+struct DepthParameters {
+    /**
+     * @brief Depth gain value.
+     */
+    float depthGain;
+
+    /**
+     * @brief Depth offset value.
+     */
+    float depthOffset;
+
+    /**
+     * @brief The maximum distance (in millimeters) the camera can measure in
+     * the current operating mode.
+     */
+    int maxDepth;
+
+    /**
+     * @brief The minimum distance (in millimeters) the camera can measure in
+     * the current operating mode.
+     */
+    int minDepth;
+};
+
+/**
  * @struct CameraDetails
  * @brief Describes the properties of a camera.
  */
@@ -111,16 +139,9 @@ struct CameraDetails {
     IntrinsicParameters intrinsics;
 
     /**
-     * @brief The maximum distance (in millimeters) the camera can measure in
-     * the current operating mode.
+     * @brief Details about the depth parameters of the camera
      */
-    int maxDepth;
-
-    /**
-     * @brief The minimum distance (in millimeters) the camera can measure in
-     * the current operating mode.
-     */
-    int minDepth;
+    DepthParameters depthParameters;
 
     /**
      * @brief The number of bits used for representing one pixel data.
