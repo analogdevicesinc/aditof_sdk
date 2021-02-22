@@ -370,10 +370,14 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
     if (m_details.mode != skCustomMode &&
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
+
         if (m_cameraGeometryCorrection) {
+	    m_calibration.calibrateDepth(frameDataLocation,
+                                     m_details.frameType.width *
+                                         m_details.frameType.height);
             m_calibration.calibrateCameraGeometry(
                 frameDataLocation,
-                m_details.frameType.width * m_details.frameType.height / 2);
+                m_details.frameType.width * m_details.frameType.height);
         }
     }
     return Status::OK;

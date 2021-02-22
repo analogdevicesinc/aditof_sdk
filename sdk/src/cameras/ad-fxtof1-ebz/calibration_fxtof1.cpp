@@ -38,7 +38,7 @@
 #include <math.h>
 
 #define MODE_CFG_SIZE 256
-static const uint16_t ROMADDR_CFG_BASE[] = {0x100, 0x200};
+static const uint32_t ROMADDR_CFG_BASE[] = {0x00010200, 0x00010100};
 #define PULSE_CNT_OFFSET 0
 #define DEPTH_PWR_OFFSET 2
 #define DEPTH_X0_OFFSET 50
@@ -47,7 +47,7 @@ static const uint16_t ROMADDR_CFG_BASE[] = {0x100, 0x200};
 #define DEPTH_2_OFFSET 254
 
 #define COMMON_SIZE 255
-#define ROMADDR_COMMOM_BASE 0x300
+#define ROMADDR_COMMOM_BASE 0x00010300
 #define COMMON_BASE_OFFSET 227
 
 static const uint16_t MODE_REG_BASE_ADDR[] = {0x6B80, 0x6BC0};
@@ -93,7 +93,7 @@ aditof::Status CalibrationFxTof1::readCalMap(
 
     Status status = Status::OK;
     uint8_t mode_data[MODE_CFG_SIZE];
-    float intrinsic_data[COMMON_SIZE / sizeof(float)];
+    float intrinsic_data[(COMMON_SIZE + 1) / sizeof(float)];
 
     /*Read the mode data*/
     for (int i = 0; i < 2; i++) {
@@ -108,7 +108,6 @@ aditof::Status CalibrationFxTof1::readCalMap(
         m_mode_settings[i].pulse_cnt =
             (uint16_t)mode_data[PULSE_CNT_OFFSET] |
             ((uint16_t)mode_data[PULSE_CNT_OFFSET + 1] << 8);
-
         memcpy(m_mode_settings[i].depth_pwr, &mode_data[DEPTH_PWR_OFFSET],
                DEPTH_PWR_CNT);
 
@@ -117,8 +116,8 @@ aditof::Status CalibrationFxTof1::readCalMap(
             ((uint16_t)mode_data[DEPTH_X0_OFFSET + 1] << 8);
 
         for (int j = DEPTH_OFFSET_OFFSET;
-             j < DEPTH_OFFSET_OFFSET + DEPTH_OFST_CNT; j += 2) {
-            m_mode_settings[i].depth_offset[j - DEPTH_OFFSET_OFFSET] =
+             j < DEPTH_OFFSET_OFFSET + DEPTH_OFST_CNT*2; j += 2) {
+            m_mode_settings[i].depth_offset[(j - DEPTH_OFFSET_OFFSET)/2] =
                 (uint16_t)mode_data[j] | ((uint16_t)mode_data[j + 1] << 8);
         }
 
@@ -139,8 +138,7 @@ aditof::Status CalibrationFxTof1::readCalMap(
             LOG(WARNING) << "Could not find R_MODE_PSPACE";
             return Status::INVALID_ARGUMENT;
         }
-
-        uint16_t pulse_space = *(it++);
+        uint16_t pulse_space = *(it+1);
         uint16_t pulse_cnt = m_mode_settings[i].pulse_cnt;
         uint16_t pulse_hd =
             (((pulse_cnt - 1) * pulse_space + 90) / 928 + 3) * 36 + 57;
@@ -151,7 +149,6 @@ aditof::Status CalibrationFxTof1::readCalMap(
             return Status::INVALID_ARGUMENT;
         }
         *(it + 1) = pulse_cnt;
-
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
                        MODE_REG_BASE_ADDR[i] + R_PULSEHD);
         if (it == m_afe_code.end()) {
@@ -159,7 +156,6 @@ aditof::Status CalibrationFxTof1::readCalMap(
             return Status::INVALID_ARGUMENT;
         }
         *(it + 1) = pulse_hd;
-
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
                        MODE_LCORR_BASE_ADDR[i] + R_DEPTH_2);
         if (it == m_afe_code.end()) {
@@ -167,7 +163,6 @@ aditof::Status CalibrationFxTof1::readCalMap(
             return Status::INVALID_ARGUMENT;
         }
         *(it + 1) = m_mode_settings[i].depth2;
-
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
                        MODE_LCORR_BASE_ADDR[i] + R_DEPTH_3);
         if (it == m_afe_code.end()) {
@@ -175,7 +170,6 @@ aditof::Status CalibrationFxTof1::readCalMap(
             return Status::INVALID_ARGUMENT;
         }
         *(it + 1) = m_mode_settings[i].depth3;
-
         it = std::find(m_afe_code.begin(), m_afe_code.end(),
                        MODE_LCORR_BASE_ADDR[i] + R_DEPTH_OFST) +
              1;
@@ -192,10 +186,9 @@ aditof::Status CalibrationFxTof1::readCalMap(
     /*Read the intrinsics and distortion params*/
     eeprom->read(ROMADDR_COMMOM_BASE + COMMON_BASE_OFFSET,
                  (uint8_t *)intrinsic_data, MODE_CFG_SIZE - COMMON_BASE_OFFSET);
-    m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0],
-                        &intrinsic_data[ARRAY_SIZE(intrinsic_data)]);
 
-    m_cal_valid = true;
+   m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0],
+                        &intrinsic_data[ARRAY_SIZE(intrinsic_data)]); m_cal_valid = true;
 
     return status;
 }
@@ -260,7 +253,11 @@ aditof::Status CalibrationFxTof1::setMode(
     Status status = Status::OK;
     std::vector<float> cameraMatrix;
     uint16_t mode_id = (mode == "near" ? 0 : 1);
+    const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
+    float gain = (mode == "near" ? 0.5 : 1.0);
+    float offset=0.0;
 
+    buildDepthCalibrationCache(gain, offset, pixelMaxValue, range);
     m_range = range;
 
     status = getIntrinsic(INTRINSIC, cameraMatrix);
@@ -283,6 +280,42 @@ aditof::Status CalibrationFxTof1::setMode(
     return Status::OK;
 }
 
+//! calibrateDepth - Calibrate the depth data
+/*!
+calibrateDepth - Calibrate the depth data using the gain and offset
+\param frame - Buffer with the depth data, used to return the calibrated data
+\param frame_size - Number of samples in the frame data
+*/
+aditof::Status CalibrationFxTof1::calibrateDepth(uint16_t *frame,
+                                                 uint32_t frame_size) {
+    using namespace aditof;
+
+    uint16_t *cache = m_depth_cache;
+
+    uint16_t *end = frame + (frame_size - frame_size % 8);
+    uint16_t *framePtr = frame;
+
+    for (; framePtr < end; framePtr += 8) {
+        *framePtr = *(cache + *framePtr);
+        *(framePtr + 1) = *(cache + *(framePtr + 1));
+        *(framePtr + 2) = *(cache + *(framePtr + 2));
+        *(framePtr + 3) = *(cache + *(framePtr + 3));
+        *(framePtr + 4) = *(cache + *(framePtr + 4));
+        *(framePtr + 5) = *(cache + *(framePtr + 5));
+        *(framePtr + 6) = *(cache + *(framePtr + 6));
+        *(framePtr + 7) = *(cache + *(framePtr + 7));
+    }
+
+    end += (frame_size % 8);
+
+    for (; framePtr < end; framePtr++) {
+        *framePtr = *(cache + *framePtr);
+    }
+
+    return Status::OK;
+}
+
+
 //! calibrateCameraGeometry - Compensate for lens distorsion in the depth data
 /*!
 calibrateCameraGeometry - Compensate for lens distorsion in the depth data
@@ -304,9 +337,25 @@ aditof::Status CalibrationFxTof1::calibrateCameraGeometry(uint16_t *frame,
         if (frame[i] > m_range) {
             frame[i] = m_range;
         }
-    }
+}
 
     return Status::OK;
+}
+
+// Create a cache to speed up depth calibration computation
+void CalibrationFxTof1::buildDepthCalibrationCache(float gain, float offset,
+                                                   int16_t maxPixelValue,
+                                                   int range) {
+    if (m_depth_cache) {
+        delete[] m_depth_cache;
+    }
+
+    m_depth_cache = new uint16_t[maxPixelValue + 1];
+    for (int16_t current = 0; current <= maxPixelValue; ++current) {
+        int16_t currentValue =
+            static_cast<int16_t>(static_cast<float>(current) * gain + offset);
+        m_depth_cache[current] = currentValue <= range ? currentValue : range;
+    }
 }
 
 // Create a cache to speed up depth geometric camera calibration computation
