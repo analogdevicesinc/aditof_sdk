@@ -80,7 +80,7 @@ class CalibrationFxTof1 {
 
   private:
     void buildDepthCalibrationCache(float gain, float offset,
-                                        int16_t maxPixelValue, int range);
+                                    int16_t maxPixelValue, int range);
     void buildGeometryCalibrationCache(const std::vector<float> &cameraMatrix,
                                        unsigned int width, unsigned int height);
 

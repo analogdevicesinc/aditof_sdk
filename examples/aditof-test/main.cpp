@@ -31,9 +31,9 @@
  */
 #include <aditof/camera.h>
 #include <aditof/frame.h>
+#include <aditof/storage_interface.h>
 #include <aditof/system.h>
 #include <aditof/temperature_sensor_interface.h>
-#include <aditof/storage_interface.h>
 #ifdef DATA_HANDLING
 #include <filesystem>
 #endif
@@ -213,10 +213,10 @@ int main(int argc, char *argv[]) {
 
         /* For the application to start in fullscreen mode the following if must be uncommented */
 
-         if (!fullScreen) {
+        /* if (!fullScreen) {
             system("wmctrl -r 'ADITOF-TEST' -b toggle,fullscreen");
             fullScreen = true;
-        } 
+        } */
 
         if (cv::waitKey(20) == 27) {
             break;
@@ -353,7 +353,6 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
     camera->getTemperatureSensors(tempSensors);
     tempSensors[0]->read(*temperature);
 
-
     /* Save measured results in a file */
     std::ofstream MyFile("MeasuredResults.txt");
     MyFile << "Targed set at distance: " << targetDistance;
@@ -370,9 +369,9 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
 
     std::string eepromID = "";
 
-    for(int i = 0; i < 12; i++){
-    eepromID.push_back(eepromName[i]);
-	}
+    for (int i = 0; i < 12; i++) {
+        eepromID.push_back(eepromName[i]);
+    }
 
 #ifdef DATA_HANDLING
     saveData(*irMat, depthMat, eepromID);

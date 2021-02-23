@@ -372,9 +372,9 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
          m_details.frameType.type == "depth_only")) {
 
         if (m_cameraGeometryCorrection) {
-	    m_calibration.calibrateDepth(frameDataLocation,
-                                     m_details.frameType.width *
-                                         m_details.frameType.height);
+            m_calibration.calibrateDepth(frameDataLocation,
+                                         m_details.frameType.width *
+                                             m_details.frameType.height);
             m_calibration.calibrateCameraGeometry(
                 frameDataLocation,
                 m_details.frameType.width * m_details.frameType.height);

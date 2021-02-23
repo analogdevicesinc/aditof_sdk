@@ -47,7 +47,7 @@ static const uint32_t ROMADDR_CFG_BASE[] = {0x00010200, 0x00010100};
 #define DEPTH_2_OFFSET 254
 
 #define COMMON_SIZE 255
-#define ROMADDR_COMMOM_BASE 0x00010300
+#define ROMADDR_COMMOM_BASE 0x000103E4
 #define COMMON_BASE_OFFSET 227
 
 static const uint16_t MODE_REG_BASE_ADDR[] = {0x6B80, 0x6BC0};
@@ -116,8 +116,8 @@ aditof::Status CalibrationFxTof1::readCalMap(
             ((uint16_t)mode_data[DEPTH_X0_OFFSET + 1] << 8);
 
         for (int j = DEPTH_OFFSET_OFFSET;
-             j < DEPTH_OFFSET_OFFSET + DEPTH_OFST_CNT*2; j += 2) {
-            m_mode_settings[i].depth_offset[(j - DEPTH_OFFSET_OFFSET)/2] =
+             j < DEPTH_OFFSET_OFFSET + DEPTH_OFST_CNT * 2; j += 2) {
+            m_mode_settings[i].depth_offset[(j - DEPTH_OFFSET_OFFSET) / 2] =
                 (uint16_t)mode_data[j] | ((uint16_t)mode_data[j + 1] << 8);
         }
 
@@ -138,7 +138,7 @@ aditof::Status CalibrationFxTof1::readCalMap(
             LOG(WARNING) << "Could not find R_MODE_PSPACE";
             return Status::INVALID_ARGUMENT;
         }
-        uint16_t pulse_space = *(it+1);
+        uint16_t pulse_space = *(it + 1);
         uint16_t pulse_cnt = m_mode_settings[i].pulse_cnt;
         uint16_t pulse_hd =
             (((pulse_cnt - 1) * pulse_space + 90) / 928 + 3) * 36 + 57;
@@ -184,11 +184,22 @@ aditof::Status CalibrationFxTof1::readCalMap(
     }
 
     /*Read the intrinsics and distortion params*/
-    eeprom->read(ROMADDR_COMMOM_BASE + COMMON_BASE_OFFSET,
-                 (uint8_t *)intrinsic_data, MODE_CFG_SIZE - COMMON_BASE_OFFSET);
 
-   m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0],
-                        &intrinsic_data[ARRAY_SIZE(intrinsic_data)]); m_cal_valid = true;
+    uint8_t intrinsics_byte[28];
+    uint32_t intrinsics_full[7];
+
+    eeprom->read(ROMADDR_COMMOM_BASE, intrinsics_byte, 28);
+
+    for (int i = 0; i < 28; i = i + 4) {
+        intrinsics_full[i / 4] =
+            intrinsics_byte[i] | (intrinsics_byte[i + 1] << 8) |
+            (intrinsics_byte[i + 2] << 16) | (intrinsics_byte[i + 3] << 24);
+    }
+
+    memcpy(intrinsic_data, &intrinsics_full, 28);
+    m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0],
+                        &intrinsic_data[7]);
+    m_cal_valid = true;
 
     return status;
 }
@@ -255,7 +266,7 @@ aditof::Status CalibrationFxTof1::setMode(
     uint16_t mode_id = (mode == "near" ? 0 : 1);
     const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
     float gain = (mode == "near" ? 0.5 : 1.0);
-    float offset=0.0;
+    float offset = 0.0;
 
     buildDepthCalibrationCache(gain, offset, pixelMaxValue, range);
     m_range = range;
@@ -315,7 +326,6 @@ aditof::Status CalibrationFxTof1::calibrateDepth(uint16_t *frame,
     return Status::OK;
 }
 
-
 //! calibrateCameraGeometry - Compensate for lens distorsion in the depth data
 /*!
 calibrateCameraGeometry - Compensate for lens distorsion in the depth data
@@ -337,7 +347,7 @@ aditof::Status CalibrationFxTof1::calibrateCameraGeometry(uint16_t *frame,
         if (frame[i] > m_range) {
             frame[i] = m_range;
         }
-}
+    }
 
     return Status::OK;
 }
@@ -363,10 +373,12 @@ void CalibrationFxTof1::buildGeometryCalibrationCache(
     const std::vector<float> &cameraMatrix, unsigned int width,
     unsigned int height) {
 
-    float fx = cameraMatrix[0];
-    float fy = cameraMatrix[4];
-    float x0 = cameraMatrix[2];
-    float y0 = cameraMatrix[5];
+    float fx = cameraMatrix[2];
+    float fy = cameraMatrix[3];
+    float x0 = cameraMatrix[0];
+    float y0 = cameraMatrix[1];
+
+    const bool validParameters = (fx != 0 && fy != 0);
 
     if (m_geometry_cache) {
         delete[] m_geometry_cache;
@@ -376,11 +388,15 @@ void CalibrationFxTof1::buildGeometryCalibrationCache(
     for (uint16_t i = 0; i < height; i++) {
         for (uint16_t j = 0; j < width; j++) {
 
-            double tanXAngle = (x0 - j) / fx;
-            double tanYAngle = (y0 - i) / fy;
+            if (validParameters) {
+                double tanXAngle = (x0 - j) / fx;
+                double tanYAngle = (y0 - i) / fy;
 
-            m_geometry_cache[i * width + j] =
-                1.0 / sqrt(1 + tanXAngle * tanXAngle + tanYAngle * tanYAngle);
+                m_geometry_cache[i * width + j] =
+                    sqrt(1 + tanXAngle * tanXAngle + tanYAngle * tanYAngle);
+            } else {
+                m_geometry_cache[i * width + j] = 1;
+            }
         }
     }
 }
