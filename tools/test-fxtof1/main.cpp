@@ -372,10 +372,10 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
     std::vector<std::shared_ptr<aditof::StorageInterface>> eeproms;
     camera->getEeproms(eeproms);
 
-    if(eeproms.empty()) {
+    if (eeproms.empty()) {
         eepromSerialID = "InvalidEEPROM";
     } else {
-        eeproms[0]->read(0x00010016, eepromSerialID_short, 12);   
+        eeproms[0]->read(0x00010016, eepromSerialID_short, 12);
         for (int i = 0; i < 12; i++) {
             eepromSerialID.push_back(eepromSerialID_short[i]);
         }
