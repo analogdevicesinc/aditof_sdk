@@ -31,7 +31,9 @@
  */
 #include <aditof/camera.h>
 #include <aditof/frame.h>
+#include <aditof/storage_interface.h>
 #include <aditof/system.h>
+#include <aditof/temperature_sensor_interface.h>
 #ifdef DATA_HANDLING
 #include <filesystem>
 #endif
@@ -61,7 +63,7 @@
 using namespace aditof;
 
 int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
-               float *precision);
+               float *precision, float *temperature);
 
 #ifdef DATA_HANDLING
 void saveData(cv::Mat irMat, cv::Mat depthMath, std::string eepromID);
@@ -92,6 +94,7 @@ int main(int argc, char *argv[]) {
     int measuredDistance = 0;
     int targetDistance = 500;
     float precision;
+    float temperature = 0;
 
     while (true) {
 
@@ -124,7 +127,7 @@ int main(int argc, char *argv[]) {
         if (captureStatus && !frameReceived) {
 
             if (_DisplayIR(&irMat, &measuredDistance, targetDistance,
-                           &precision)) {
+                           &precision, &temperature)) {
                 cv::resize(irMat, irMat,
                            cv::Size(irMat.cols * 0.65, irMat.rows * 0.65), 0, 0,
                            CV_INTER_LINEAR);
@@ -190,9 +193,14 @@ int main(int argc, char *argv[]) {
         }
 
         cvui::printf(frame, 360, 400, 0.5, 0xffffff, "Precision:");
+        cvui::printf(frame, 460, 400, 0.5, 0xffffff, "Temperature:");
 
         if (measuredDistance != 0) {
             cvui::printf(frame, 355, 420, "Value = %.2f", precision);
+        }
+
+        if (temperature != 0) {
+            cvui::printf(frame, 465, 420, "Value = %.2f", temperature);
         }
 
         cvui::endColumn();
@@ -203,7 +211,7 @@ int main(int argc, char *argv[]) {
 
         cv::waitKey(20);
 
-        //For the application to start in fullscreen mode the following if must be uncommented
+        /* For the application to start in fullscreen mode the following if must be uncommented */
 
         /* if (!fullScreen) {
             system("wmctrl -r 'ADITOF-TEST' -b toggle,fullscreen");
@@ -219,7 +227,7 @@ int main(int argc, char *argv[]) {
 }
 
 int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
-               float *precision) {
+               float *precision, float *temperature) {
 
     Status status = Status::OK;
 
@@ -339,13 +347,39 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
         }
     }
 
+    /* Read the camera temperature */
+    std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+        tempSensors;
+    camera->getTemperatureSensors(tempSensors);
+
+    if (tempSensors.empty()) {
+        *temperature = 0;
+    } else {
+        tempSensors[0]->read(*temperature);
+    }
+
+    /* Save measured results in a file */
     std::ofstream MyFile("MeasuredResults.txt");
-    MyFile << "Targed set at distance: " << targetDistance << std::endl;
-    MyFile << "Camera measured: " << *measuredDistance << std::endl;
-    MyFile << "Precision: " << *precision;
+    MyFile << "Target set at distance: " << targetDistance;
+    MyFile << "\nCamera measured: " << *measuredDistance;
+    MyFile << "\nPrecision: " << *precision;
+    MyFile << "\nTemperature: " << *temperature;
     MyFile.close();
 
-    std::string eepromID = "DUMMYVAL"; //to be read from eeprom for each camera
+    /* Read the camera serial from EEPROM */
+    uint8_t eepromSerialID_short[12];
+    std::string eepromSerialID = "";
+    std::vector<std::shared_ptr<aditof::StorageInterface>> eeproms;
+    camera->getEeproms(eeproms);
+
+    if (eeproms.empty()) {
+        eepromSerialID = "InvalidEEPROM";
+    } else {
+        eeproms[0]->read(0x00010016, eepromSerialID_short, 12);
+        for (int i = 0; i < 12; i++) {
+            eepromSerialID.push_back(eepromSerialID_short[i]);
+        }
+    }
 
 #ifdef DATA_HANDLING
     saveData(*irMat, depthMat, eepromID);

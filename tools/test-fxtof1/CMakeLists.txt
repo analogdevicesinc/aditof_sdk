@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(aditof-test)
+project(test-fxtof1)
 
 find_package(OpenCV)
 if(OPENCV_FOUND OR

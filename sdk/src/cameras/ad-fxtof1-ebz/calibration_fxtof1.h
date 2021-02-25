@@ -74,10 +74,13 @@ class CalibrationFxTof1 {
     aditof::Status setMode(std::shared_ptr<aditof::DepthSensorInterface> sensor,
                            const std::string &mode, int range,
                            unsigned int frameWidth, unsigned int frameheight);
+    aditof::Status calibrateDepth(uint16_t *frame, uint32_t frame_size);
     aditof::Status calibrateCameraGeometry(uint16_t *frame,
                                            uint32_t frame_size);
 
   private:
+    void buildDepthCalibrationCache(float gain, float offset,
+                                    int16_t maxPixelValue, int range);
     void buildGeometryCalibrationCache(const std::vector<float> &cameraMatrix,
                                        unsigned int width, unsigned int height);
 
