@@ -351,26 +351,34 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
         tempSensors;
     camera->getTemperatureSensors(tempSensors);
-    tempSensors[0]->read(*temperature);
+
+    if (tempSensors.empty()) {
+        *temperature = 0;
+    } else {
+        tempSensors[0]->read(*temperature);
+    }
 
     /* Save measured results in a file */
     std::ofstream MyFile("MeasuredResults.txt");
-    MyFile << "Targed set at distance: " << targetDistance;
+    MyFile << "Target set at distance: " << targetDistance;
     MyFile << "\nCamera measured: " << *measuredDistance;
     MyFile << "\nPrecision: " << *precision;
     MyFile << "\nTemperature: " << *temperature;
     MyFile.close();
 
     /* Read the camera serial from EEPROM */
-    uint8_t eepromName[12];
-    std::vector<std::shared_ptr<aditof::StorageInterface>> eeprom;
-    camera->getEeproms(eeprom);
-    eeprom[0]->read(0x00010016, eepromName, 12);
+    uint8_t eepromSerialID_short[12];
+    std::string eepromSerialID = "";
+    std::vector<std::shared_ptr<aditof::StorageInterface>> eeproms;
+    camera->getEeproms(eeproms);
 
-    std::string eepromID = "";
-
-    for (int i = 0; i < 12; i++) {
-        eepromID.push_back(eepromName[i]);
+    if(eeproms.empty()) {
+        eepromSerialID = "InvalidEEPROM";
+    } else {
+        eeproms[0]->read(0x00010016, eepromSerialID_short, 12);   
+        for (int i = 0; i < 12; i++) {
+            eepromSerialID.push_back(eepromSerialID_short[i]);
+        }
     }
 
 #ifdef DATA_HANDLING
