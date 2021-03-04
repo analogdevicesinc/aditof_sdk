@@ -4,6 +4,10 @@ project(aditof)
 add_definitions(-DSDK_EXPORTS)
 find_package(glog 0.3.5 REQUIRED)
 
+if ( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
+	add_definitions(-DNDEBUG)
+endif()
+
 if ( WITH_NETWORK )
     find_package(Protobuf 3.9.0 REQUIRED)
     find_package(Libwebsockets REQUIRED)
