@@ -32,6 +32,7 @@
 #ifndef DEVICE_UTILS_H
 #define DEVICE_UTILS_H
 
+#include <assert.h>
 #include <cstddef>
 #include <inttypes.h>
 
@@ -39,6 +40,9 @@ namespace aditof {
 static void deinterleave(const char *source, uint16_t *destination,
                          size_t source_len, size_t dest_width,
                          size_t dest_height) {
+
+    assert(source != nullptr);
+    assert(source_len > 0);
 
     size_t offset[2] = {0, dest_height * dest_width / 2};
     size_t offset_idx = 0;

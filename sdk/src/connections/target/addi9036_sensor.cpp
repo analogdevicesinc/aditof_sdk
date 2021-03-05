@@ -35,6 +35,7 @@
 
 #include <algorithm>
 #include <arm_neon.h>
+#include <assert.h>
 #include <cmath>
 #include <fcntl.h>
 #include <fstream>
@@ -160,6 +161,8 @@ aditof::Status Addi9036Sensor::open() {
     }
 
     m_implData->numVideoDevs = driverSubPaths.size();
+
+    assert(m_implData->numVideoDevs > 0);
     m_implData->videoDevs = new VideoDev[m_implData->numVideoDevs];
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
@@ -704,6 +707,10 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
 aditof::Status Addi9036Sensor::readAfeRegisters(const uint16_t *address,
                                                 uint16_t *data, size_t length) {
     using namespace aditof;
+
+    assert(address != nullptr);
+    assert(length > 0);
+
     struct VideoDev *dev = &m_implData->videoDevs[0];
     Status status = Status::OK;
 
@@ -736,6 +743,9 @@ aditof::Status Addi9036Sensor::writeAfeRegisters(const uint16_t *address,
                                                  size_t length) {
     using namespace aditof;
     Status status = Status::OK;
+
+    assert(address != nullptr);
+    assert(length > 0);
 
     static struct v4l2_ext_control extCtrl;
     static struct v4l2_ext_controls extCtrls;

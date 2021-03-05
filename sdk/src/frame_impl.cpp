@@ -53,6 +53,7 @@ FrameImpl::FrameImpl(const FrameImpl &op) {
     memcpy(m_fullData, op.m_fullData,
            sizeof(uint16_t) * op.m_details.fullDataWidth *
                op.m_details.fullDataHeight);
+
     m_details = op.m_details;
 }
 
