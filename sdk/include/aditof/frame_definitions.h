@@ -33,6 +33,7 @@
 #define FRAME_DEFINITIONS_H
 
 #include <string>
+#include <vector>
 
 /**
  * @brief Namespace aditof
@@ -40,13 +41,25 @@
 namespace aditof {
 
 /**
- * @enum FrameDataType
- * @brief Types of data that a frame can contain
+ * @struct FrameDataDetails
+ * @brief Describes the properties of a data that embedded within the frame
  */
-enum class FrameDataType {
-    FULL_DATA, //!< Raw information
-    DEPTH,     //!< Depth information
-    IR,        //!< Infrared information
+struct FrameDataDetails {
+    /**
+     * @brief The type of data that can be found in a frame. For example it
+     * could be depth data or IR data, etc.
+     */
+    std::string type;
+
+    /**
+     * @brief The width of the frame data
+     */
+    unsigned int width;
+
+    /**
+     * @brief The height of the frame data
+     */
+    unsigned int height;
 };
 
 /**
@@ -55,30 +68,31 @@ enum class FrameDataType {
  */
 struct FrameDetails {
     /**
-     * @brief The width of the frame.
-     */
-    unsigned int width;
-
-    /**
-     * @brief The height of the frame.
-     */
-    unsigned int height;
-
-    /**
-     * @brief The width of the actual full frame.
-     */
-    unsigned int fullDataWidth;
-
-    /**
-     * @brief The height of the actual full frame.
-     */
-    unsigned int fullDataHeight;
-
-    /**
      * @brief The type of the frame. Can be one of the types provided by the
      * camera.
      */
     std::string type;
+
+    /**
+     * @brief A frame can have multiple types of data. For example it could
+     * hold data about depth and/or data about IR.
+     */
+    std::vector<FrameDataDetails> dataDetails;
+
+    /**
+     * @brief The width of the entire frame
+     */
+    unsigned int width;
+
+    /**
+     * @brief The height of the entire frame
+     */
+    unsigned int height;
+
+    /**
+     * @brief The mode the camera was set when the frame was captured.
+     */
+    std::string cameraMode;
 };
 
 } // namespace aditof

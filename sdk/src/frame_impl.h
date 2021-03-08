@@ -36,6 +36,7 @@
 #include <aditof/status_definitions.h>
 
 #include <stdint.h>
+#include <unordered_map>
 
 class FrameImpl {
   public:
@@ -47,16 +48,23 @@ class FrameImpl {
   public: // from TofFrame
     aditof::Status setDetails(const aditof::FrameDetails &details);
     aditof::Status getDetails(aditof::FrameDetails &details) const;
-    aditof::Status getData(aditof::FrameDataType dataType, uint16_t **dataPtr);
+    aditof::Status getDataDetails(const std::string dataType,
+                                  aditof::FrameDataDetails &details) const;
+    aditof::Status getData(const std::string &dataType, uint16_t **dataPtr);
+    aditof::Status
+    getAvailableAttributes(std::vector<std::string> &attributes) const;
+    aditof::Status setAttribute(const std::string &attribute,
+                                const std::string &value);
+    aditof::Status getAttribute(const std::string &attribute,
+                                std::string &value) const;
 
   private:
     void allocFrameData(const aditof::FrameDetails &details);
 
   private:
     aditof::FrameDetails m_details;
-    uint16_t *m_depthData;
-    uint16_t *m_irData;
-    uint16_t *m_fullData;
+    uint16_t *m_allData;
+    std::unordered_map<std::string, uint16_t *> m_dataLocations;
 };
 
 #endif // FRAME_IMPL

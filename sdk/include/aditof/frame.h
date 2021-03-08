@@ -93,12 +93,47 @@ class SDK_API Frame {
     Status getDetails(FrameDetails &details) const;
 
     /**
+     * @brief Gets details of a type of data within the frame
+     * @param dataType
+     * @param[out] details
+     * @return Status
+     */
+    Status getDataDetails(const std::string &dataType,
+                          FrameDataDetails &details) const;
+
+    /**
      * @brief Gets the address where the specified data is being stored
      * @param dataType
      * @param[out] dataPtr
      * @return Status
      */
-    Status getData(FrameDataType dataType, uint16_t **dataPtr);
+    Status getData(const std::string &dataType, uint16_t **dataPtr);
+
+    /**
+     * @brief Gets the frames's list of attributes
+     * @param[out] attributes
+     * @return Status
+     */
+    virtual Status
+    getAvailableAttributes(std::vector<std::string> &attributes) const = 0;
+
+    /**
+     * @brief Sets a specific frame attribute
+     * @param[in] attribute - Attribute name
+     * @param[in] value - Attribute value
+     * @return Status
+     */
+    virtual Status setAttribute(const std::string &attribute,
+                                const std::string &value) = 0;
+
+    /**
+     * @brief Gets the value of a specific frame attribute
+     * @param[in] attribute - Attribute name
+     * @param[out] value - Attribute value
+     * @return Status
+     */
+    virtual Status getAttribute(const std::string &attribute,
+                                std::string &value) const = 0;
 
   private:
     std::unique_ptr<FrameImpl> m_impl;

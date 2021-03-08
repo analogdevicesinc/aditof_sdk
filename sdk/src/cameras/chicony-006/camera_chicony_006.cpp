@@ -336,7 +336,7 @@ aditof::Status CameraChicony::requestFrame(aditof::Frame *frame,
     }
 
     uint16_t *frameDataLocation;
-    frame->getData(FrameDataType::FULL_DATA, &frameDataLocation);
+    frame->getData(allData, &frameDataLocation);
 
     status = m_sensor->getFrame(frameDataLocation);
     if (status != Status::OK) {
