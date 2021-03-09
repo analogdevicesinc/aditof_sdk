@@ -461,6 +461,11 @@ aditof::Status Addi9036Sensor::program(const uint8_t *firmware, size_t size) {
     static unsigned char buf[CTRL_PACKET_SIZE];
     size_t readBytes = 0;
 
+    if (firmware == nullptr) {
+        LOG(WARNING) << "Invalid firmware";
+        return Status::INVALID_ARGUMENT;
+    }
+
     if (size <= CTRL_PACKET_SIZE) {
         memset(buf + size, 0, CTRL_PACKET_SIZE);
         memcpy(buf, firmware, size);
@@ -708,7 +713,11 @@ aditof::Status Addi9036Sensor::readAfeRegisters(const uint16_t *address,
                                                 uint16_t *data, size_t length) {
     using namespace aditof;
 
-    assert(address != nullptr);
+    if (address == nullptr) {
+        LOG(WARNING) << "Invalid AfeRegisters address";
+        return Status::INVALID_ARGUMENT;
+    }
+
     assert(length > 0);
 
     struct VideoDev *dev = &m_implData->videoDevs[0];
@@ -744,7 +753,16 @@ aditof::Status Addi9036Sensor::writeAfeRegisters(const uint16_t *address,
     using namespace aditof;
     Status status = Status::OK;
 
-    assert(address != nullptr);
+    if (address == nullptr) {
+        LOG(WARNING) << "Invalid AfeRegisters address";
+        return Status::GENERIC_ERROR;
+    }
+
+    if (data == nullptr) {
+        LOG(WARNING) << "Invalid AfeRegisters data";
+        return Status::GENERIC_ERROR;
+    }
+
     assert(length > 0);
 
     static struct v4l2_ext_control extCtrl;

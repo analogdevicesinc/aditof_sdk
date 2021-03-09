@@ -102,6 +102,11 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
                                   uint16_t **dataPtr) {
     using namespace aditof;
 
+    if (dataPtr == nullptr) {
+        LOG(WARNING) << "Invalid frame dataPtr";
+        return aditof::Status::GENERIC_ERROR;
+    }
+
     switch (dataType) {
     case FrameDataType::FULL_DATA: {
         *dataPtr = m_fullData;

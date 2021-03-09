@@ -338,6 +338,11 @@ aditof::Status CameraChicony::requestFrame(aditof::Frame *frame,
     uint16_t *frameDataLocation;
     frame->getData(FrameDataType::FULL_DATA, &frameDataLocation);
 
+    if (frameDataLocation == nullptr){
+        LOG(WARNING) << "Failed to open frameDataLocation";
+        return aditof::Status::GENERIC_ERROR;
+    }
+
     status = m_sensor->getFrame(frameDataLocation);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from device";

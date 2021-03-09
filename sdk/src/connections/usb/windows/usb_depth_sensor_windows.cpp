@@ -560,6 +560,13 @@ aditof::Status UsbDepthSensor::program(const uint8_t *firmware, size_t size) {
 
     ExUnitHandle handle;
 
+    if (firmware == nullptr) {
+        LOG(WARNING) << "Invalid firmware";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(size > 0);
+
     HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
         &handle, &m_implData->handle.pVideoInputFilter);
     if (hr != S_OK) {
@@ -662,6 +669,13 @@ aditof::Status UsbDepthSensor::readAfeRegisters(const uint16_t *address,
                                                 uint16_t *data, size_t length) {
     using namespace aditof;
 
+    if (address == nullptr) {
+        LOG(WARNING) << "Invalid AfeRegisters address";
+        return Status::GENERIC_ERROR;
+    }
+
+    assert(length > 0);
+
     ExUnitHandle handle;
     ULONG pageSize = 60;
 
@@ -703,6 +717,18 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
     using namespace aditof;
 
     ExUnitHandle handle;
+
+    if (address == nullptr) {
+        LOG(WARNING) << "Invalid AfeRegisters address";
+        return Status::GENERIC_ERROR;
+    }
+
+    if (data == nullptr) {
+        LOG(WARNING) << "Invalid AfeRegisters data";
+        return Status::GENERIC_ERROR;
+    }
+
+    assert(length > 0);
 
     HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
         &handle, &m_implData->handle.pVideoInputFilter);

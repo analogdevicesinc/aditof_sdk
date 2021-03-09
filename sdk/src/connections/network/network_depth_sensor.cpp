@@ -390,6 +390,13 @@ aditof::Status NetworkDepthSensor::readAfeRegisters(const uint16_t *address,
                                                     size_t length) {
     using namespace aditof;
 
+    if (address == nullptr) {
+        LOG(WARNING) << "Invalid AfeRegisters address";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(length > 0);
+
     Network *net = m_implData->handle.net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
@@ -434,6 +441,18 @@ aditof::Status NetworkDepthSensor::writeAfeRegisters(const uint16_t *address,
                                                      const uint16_t *data,
                                                      size_t length) {
     using namespace aditof;
+
+    if (address == nullptr) {
+        LOG(WARNING) << "Invalid AfeRegisters address";
+        return Status::GENERIC_ERROR;
+    }
+
+    if (data == nullptr) {
+        LOG(WARNING) << "Invalid AfeRegisters data";
+        return Status::GENERIC_ERROR;
+    }
+
+    assert(length > 0);
 
     Network *net = m_implData->handle.net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
