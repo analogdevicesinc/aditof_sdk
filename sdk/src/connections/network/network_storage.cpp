@@ -92,6 +92,12 @@ Status NetworkStorage::open(void *handle) {
 
 Status NetworkStorage::read(const uint32_t address, uint8_t *data,
                             const size_t bytesCount) {
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received data null pointer";
+        return aditof::Status::INVALID_ARGUMENT;
+    }
+
     Network *net = m_implData->handle->net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
@@ -135,6 +141,12 @@ Status NetworkStorage::read(const uint32_t address, uint8_t *data,
 
 Status NetworkStorage::write(const uint32_t address, const uint8_t *data,
                              const size_t bytesCount) {
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received data null pointer";
+        return aditof::Status::INVALID_ARGUMENT;
+    }
+
     Network *net = m_implData->handle->net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 

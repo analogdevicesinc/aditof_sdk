@@ -4,6 +4,7 @@ project(aditof)
 add_definitions(-DSDK_EXPORTS)
 find_package(glog 0.3.5 REQUIRED)
 
+#Enables the use of assert() from <assert.h> only in Debug mode.
 if ( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
 	add_definitions(-DNDEBUG)
 endif()

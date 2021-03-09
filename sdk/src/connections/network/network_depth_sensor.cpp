@@ -303,6 +303,13 @@ aditof::Status NetworkDepthSensor::program(const uint8_t *firmware,
                                            size_t size) {
     using namespace aditof;
 
+    if (firmware == nullptr) {
+        LOG(ERROR) << "Received firmware null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(size > 0);
+
     Network *net = m_implData->handle.net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
 
@@ -339,6 +346,11 @@ aditof::Status NetworkDepthSensor::program(const uint8_t *firmware,
 
 aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer) {
     using namespace aditof;
+
+    if (buffer == nullptr) {
+        LOG(ERROR) << "Received buffer null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
 
     Network *net = m_implData->handle.net;
     std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
@@ -391,7 +403,12 @@ aditof::Status NetworkDepthSensor::readAfeRegisters(const uint16_t *address,
     using namespace aditof;
 
     if (address == nullptr) {
-        LOG(WARNING) << "Invalid AfeRegisters address";
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
         return Status::INVALID_ARGUMENT;
     }
 
@@ -443,13 +460,13 @@ aditof::Status NetworkDepthSensor::writeAfeRegisters(const uint16_t *address,
     using namespace aditof;
 
     if (address == nullptr) {
-        LOG(WARNING) << "Invalid AfeRegisters address";
-        return Status::GENERIC_ERROR;
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
     }
 
     if (data == nullptr) {
-        LOG(WARNING) << "Invalid AfeRegisters data";
-        return Status::GENERIC_ERROR;
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
     }
 
     assert(length > 0);

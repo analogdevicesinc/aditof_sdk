@@ -561,7 +561,7 @@ aditof::Status UsbDepthSensor::program(const uint8_t *firmware, size_t size) {
     ExUnitHandle handle;
 
     if (firmware == nullptr) {
-        LOG(WARNING) << "Invalid firmware";
+        LOG(ERROR) << "Received firmware null pointer";
         return Status::INVALID_ARGUMENT;
     }
 
@@ -619,6 +619,11 @@ aditof::Status UsbDepthSensor::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
 
+    if (buffer == nullptr) {
+        LOG(ERROR) << "Received buffer null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
     int retryCount = 0;
     HRESULT hr;
     int i, j;
@@ -670,8 +675,13 @@ aditof::Status UsbDepthSensor::readAfeRegisters(const uint16_t *address,
     using namespace aditof;
 
     if (address == nullptr) {
-        LOG(WARNING) << "Invalid AfeRegisters address";
-        return Status::GENERIC_ERROR;
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
     }
 
     assert(length > 0);
@@ -719,13 +729,13 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
     ExUnitHandle handle;
 
     if (address == nullptr) {
-        LOG(WARNING) << "Invalid AfeRegisters address";
-        return Status::GENERIC_ERROR;
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
     }
 
     if (data == nullptr) {
-        LOG(WARNING) << "Invalid AfeRegisters data";
-        return Status::GENERIC_ERROR;
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
     }
 
     assert(length > 0);

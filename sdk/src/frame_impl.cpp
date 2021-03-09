@@ -103,8 +103,8 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
     using namespace aditof;
 
     if (dataPtr == nullptr) {
-        LOG(WARNING) << "Invalid frame dataPtr";
-        return aditof::Status::GENERIC_ERROR;
+        LOG(ERROR) << "Received dataPtr null pointer";
+        return aditof::Status::INVALID_ARGUMENT;
     }
 
     switch (dataType) {

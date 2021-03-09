@@ -447,8 +447,13 @@ aditof::Status UsbDepthSensor::readAfeRegisters(const uint16_t *address,
     int ret;
 
     if (address == nullptr) {
-        LOG(WARNING) << "Invalid AfeRegisters address";
-        return Status::GENERIC_ERROR;
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
     }
 
     assert(length > 0);
@@ -475,13 +480,13 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
     Status status = Status::OK;
 
     if (address == nullptr) {
-        LOG(WARNING) << "Invalid AfeRegisters address";
-        return Status::GENERIC_ERROR;
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
     }
 
     if (data == nullptr) {
-        LOG(WARNING) << "Invalid AfeRegisters data";
-        return Status::GENERIC_ERROR;
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
     }
 
     assert(length > 0);

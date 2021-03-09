@@ -101,6 +101,17 @@ Status ADT7410::getName(std::string &name) const {
 }
 
 int ADT7410::sensor_read(temp_sensor *t, float *temp_val) {
+
+    if (t == nullptr) {
+        LOG(ERROR) << "Received temp_sensor t null pointer";
+        return -1;
+    }
+
+    if (temp_val == nullptr) {
+        LOG(ERROR) << "Received temp_val null pointer";
+        return -1;
+    }
+
     short temp_reg_val, conf_reg_val;
     int ret;
 
@@ -144,6 +155,17 @@ int ADT7410::sensor_read(temp_sensor *t, float *temp_val) {
 }
 
 int ADT7410::sensor_open(const char *dev_fqn, int addr, temp_sensor *t) {
+
+    if (dev_fqn == nullptr) {
+        LOG(ERROR) << "Received dev_fqn null pointer";
+        return -1;
+    }
+
+    if (t == nullptr) {
+        LOG(ERROR) << "Received temp_sensor t null pointer";
+        return -1;
+    }
+
     int fd, r;
     t->fd = t->addr = 0;
     t->dev = NULL;

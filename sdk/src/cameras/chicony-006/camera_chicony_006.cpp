@@ -338,9 +338,9 @@ aditof::Status CameraChicony::requestFrame(aditof::Frame *frame,
     uint16_t *frameDataLocation;
     frame->getData(FrameDataType::FULL_DATA, &frameDataLocation);
 
-    if (frameDataLocation == nullptr){
-        LOG(WARNING) << "Failed to open frameDataLocation";
-        return aditof::Status::GENERIC_ERROR;
+    if (frame == nullptr){
+        LOG(ERROR) << "Received frame null pointer";
+        return aditof::Status::INVALID_ARGUMENT;
     }
 
     status = m_sensor->getFrame(frameDataLocation);
