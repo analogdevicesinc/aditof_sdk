@@ -446,6 +446,18 @@ aditof::Status UsbDepthSensor::readAfeRegisters(const uint16_t *address,
     using namespace aditof;
     int ret;
 
+    if (address == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(length > 0);
+
     for (size_t i = 0; i < length; ++i) {
         ret = UsbLinuxUtils::uvcExUnitReadOnePacket(
             m_implData->fd, 2, reinterpret_cast<uint8_t *>(address[i]), 0,
@@ -466,6 +478,18 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
                                                  size_t length) {
     using namespace aditof;
     Status status = Status::OK;
+
+    if (address == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(length > 0);
 
     struct uvc_xu_control_query cq;
     unsigned char buf[MAX_BUF_SIZE];

@@ -560,6 +560,13 @@ aditof::Status UsbDepthSensor::program(const uint8_t *firmware, size_t size) {
 
     ExUnitHandle handle;
 
+    if (firmware == nullptr) {
+        LOG(ERROR) << "Received firmware null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(size > 0);
+
     HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
         &handle, &m_implData->handle.pVideoInputFilter);
     if (hr != S_OK) {
@@ -612,6 +619,11 @@ aditof::Status UsbDepthSensor::getFrame(uint16_t *buffer) {
     using namespace aditof;
     Status status = Status::OK;
 
+    if (buffer == nullptr) {
+        LOG(ERROR) << "Received buffer null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
     int retryCount = 0;
     HRESULT hr;
     int i, j;
@@ -662,6 +674,18 @@ aditof::Status UsbDepthSensor::readAfeRegisters(const uint16_t *address,
                                                 uint16_t *data, size_t length) {
     using namespace aditof;
 
+    if (address == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(length > 0);
+
     ExUnitHandle handle;
     ULONG pageSize = 60;
 
@@ -703,6 +727,18 @@ aditof::Status UsbDepthSensor::writeAfeRegisters(const uint16_t *address,
     using namespace aditof;
 
     ExUnitHandle handle;
+
+    if (address == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(length > 0);
 
     HRESULT hr = UsbWindowsUtils::UvcFindNodeAndGetControl(
         &handle, &m_implData->handle.pVideoInputFilter);

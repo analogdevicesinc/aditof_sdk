@@ -328,6 +328,11 @@ aditof::Status CameraChicony::requestFrame(aditof::Frame *frame,
     using namespace aditof;
     Status status = Status::OK;
 
+    if (frame == nullptr){
+        LOG(ERROR) << "Received frame null pointer";
+        return aditof::Status::INVALID_ARGUMENT;
+    }
+
     FrameDetails frameDetails;
     frame->getDetails(frameDetails);
 

@@ -53,6 +53,7 @@ FrameImpl::FrameImpl(const FrameImpl &op) {
     memcpy(m_fullData, op.m_fullData,
            sizeof(uint16_t) * op.m_details.fullDataWidth *
                op.m_details.fullDataHeight);
+
     m_details = op.m_details;
 }
 
@@ -100,6 +101,11 @@ aditof::Status FrameImpl::getDetails(aditof::FrameDetails &details) const {
 aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
                                   uint16_t **dataPtr) {
     using namespace aditof;
+
+    if (dataPtr == nullptr) {
+        LOG(ERROR) << "Received dataPtr null pointer";
+        return aditof::Status::INVALID_ARGUMENT;
+    }
 
     switch (dataType) {
     case FrameDataType::FULL_DATA: {

@@ -35,6 +35,7 @@
 
 #include <algorithm>
 #include <arm_neon.h>
+#include <assert.h>
 #include <cmath>
 #include <fcntl.h>
 #include <fstream>
@@ -160,6 +161,8 @@ aditof::Status Addi9036Sensor::open() {
     }
 
     m_implData->numVideoDevs = driverSubPaths.size();
+
+    assert(m_implData->numVideoDevs > 0);
     m_implData->videoDevs = new VideoDev[m_implData->numVideoDevs];
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
@@ -458,6 +461,11 @@ aditof::Status Addi9036Sensor::program(const uint8_t *firmware, size_t size) {
     static unsigned char buf[CTRL_PACKET_SIZE];
     size_t readBytes = 0;
 
+    if (firmware == nullptr) {
+        LOG(ERROR) << "Received firmware null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
     if (size <= CTRL_PACKET_SIZE) {
         memset(buf + size, 0, CTRL_PACKET_SIZE);
         memcpy(buf, firmware, size);
@@ -524,6 +532,11 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
     struct v4l2_buffer buf[m_implData->numVideoDevs];
     struct VideoDev *dev;
     Status status;
+
+    if (buffer == nullptr) {
+        LOG(ERROR) << "Received buffer null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
@@ -704,6 +717,19 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
 aditof::Status Addi9036Sensor::readAfeRegisters(const uint16_t *address,
                                                 uint16_t *data, size_t length) {
     using namespace aditof;
+
+    if (address == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(length > 0);
+
     struct VideoDev *dev = &m_implData->videoDevs[0];
     Status status = Status::OK;
 
@@ -736,6 +762,18 @@ aditof::Status Addi9036Sensor::writeAfeRegisters(const uint16_t *address,
                                                  size_t length) {
     using namespace aditof;
     Status status = Status::OK;
+
+    if (address == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters address null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (data == nullptr) {
+        LOG(ERROR) << "Received AfeRegisters data null pointer";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    assert(length > 0);
 
     static struct v4l2_ext_control extCtrl;
     static struct v4l2_ext_controls extCtrls;
