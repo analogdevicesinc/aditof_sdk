@@ -420,6 +420,11 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
     using namespace aditof;
     Status status = Status::OK;
 
+    if (frame == nullptr) {
+        LOG(ERROR) << "Received pointer frame is null";
+        return aditof::Status::INVALID_ARGUMENT;
+    }
+
     FrameDetails frameDetails;
     frame->getDetails(frameDetails);
 
@@ -429,11 +434,6 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
 
     uint16_t *frameDataLocation;
     frame->getData(FrameDataType::FULL_DATA, &frameDataLocation);
-
-    if (frame == nullptr) {
-        LOG(ERROR) << "Received pointer frame is null";
-        return aditof::Status::INVALID_ARGUMENT;
-    }
 
     status = m_depthSensor->getFrame(frameDataLocation);
     if (status != Status::OK) {
