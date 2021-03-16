@@ -4,17 +4,15 @@ project(aditof)
 add_definitions(-DSDK_EXPORTS)
 find_package(glog 0.3.5 REQUIRED)
 
-#Enables the use of assert() from <assert.h> only in Debug mode.
-if ( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
-	add_definitions(-DNDEBUG)
-endif()
+find_package(Protobuf 3.9.0 REQUIRED)
+# src/connections/network/buffer.proto
+# protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS  src/connections/usb/usb_buffer.proto)
+# get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
 
 if ( WITH_NETWORK )
-    find_package(Protobuf 3.9.0 REQUIRED)
     find_package(Libwebsockets REQUIRED)
 
-    protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/connections/network/buffer.proto)
-    get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
+   
 endif()
 
 file(GLOB SOURCES
@@ -32,6 +30,8 @@ if (USE_CHICONY)
     set(CAMERA_DIR "cameras/chicony-006")
 elseif(USE_FXTOF1)
     set(CAMERA_DIR "cameras/ad-fxtof1-ebz")
+elseif(USE_CMOS)
+    set(CAMERA_DIR "cameras/cmos-camera")
 else ()
     set(CAMERA_DIR "cameras/ad-96tof1-ebz")
 endif()    
@@ -78,23 +78,16 @@ if ( USE_CHICONY AND USE_FXTOF1)
     message( FATAL_ERROR "USE_CHICONY and USE_FXTOF1 are both selected. \nPlease select a single camera. CMake will exit." )
 endif()
 
-if(IGNORE_TARGET_VERSION)
-    add_definitions(-DIGNORE_TARGET_VERSION)
-endif()
-
 # Platform specific sources and headers
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/utils/*.cpp
-
 )
 file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/utils/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.h
 )
@@ -113,8 +106,10 @@ add_library(${PROJECT_NAME} SHARED
     ${PLATFORM_HEADERS}
     $<$<BOOL:${WITH_NETWORK}>:${NETWORK_SOURCES}>
     $<$<BOOL:${WITH_NETWORK}>:${NETWORK_HEADERS}>
-    $<$<BOOL:${WITH_NETWORK}>:${PROTO_SRCS}>
-    $<$<BOOL:${WITH_NETWORK}>:${PROTO_HDRS}>
+    # $<$<BOOL:${WITH_NETWORK}>:${PROTO_SRCS}>
+    # $<$<BOOL:${WITH_NETWORK}>:${PROTO_HDRS}> 
+    ${PROTO_SRCS}
+    ${PROTO_HDRS}
 )
 
 # Add alias to aditof as aditof::aditof
@@ -151,6 +146,7 @@ if ( WITH_NETWORK )
 else()
     target_link_libraries( ${PROJECT_NAME}
         PUBLIC
+            ${Protobuf_LIBRARIES}
             glog::glog
     )
 endif()
@@ -167,6 +163,28 @@ if (USE_CHICONY AND RASPBERRYPI)
     )
 
     target_link_libraries(${PROJECT_NAME} PRIVATE chicony-eeprom)
+endif()
+
+
+#LIBTOFI_LIBDIR_PATH - path to libtofi_config.so and libtofi_compute.so folder
+
+if (USE_CMOS)
+    if (NOT LIBTOFI_LIBDIR_PATH)
+        set(LIBTOFI_LIBDIR_PATH "${CMAKE_SOURCE_DIR}/../libs")
+    endif()
+    add_library(libtofi_compute SHARED IMPORTED)
+    set_target_properties(libtofi_compute PROPERTIES
+         IMPORTED_LOCATION "${LIBTOFI_LIBDIR_PATH}/libtofi_compute.so"
+         IMPORTED_NO_SONAME 1
+    )
+    target_link_libraries(${PROJECT_NAME} PRIVATE libtofi_compute)
+
+    add_library(libtofi_config SHARED IMPORTED)
+    set_target_properties(libtofi_config PROPERTIES
+             IMPORTED_LOCATION "${LIBTOFI_LIBDIR_PATH}/libtofi_config.so"
+             IMPORTED_NO_SONAME 1
+         )
+    target_link_libraries(${PROJECT_NAME} PRIVATE libtofi_config)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)

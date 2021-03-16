@@ -18,7 +18,6 @@
  */
 
 #include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
-#include "../../sdk/src/connections/utils/connection_validator.h"
 #include "uvc.h"
 
 #include <aditof/depth_sensor_interface.h>
@@ -47,8 +46,11 @@
 #include <sys/types.h>
 #include <thread>
 #include <unistd.h>
+#include "uvc_buffer.pb.h"
 
 #define MAX_PACKET_SIZE 60
+
+using namespace google::protobuf::io;
 
 /* Enable debug prints. */
 //#define ENABLE_BUFFER_DEBUG
@@ -987,6 +989,36 @@ static void uvc_events_process_standard(struct uvc_device *dev,
     (void)resp;
 }
 
+void getAvailableFrameTypesStr(uint8_t * buff, int& len){
+    //assert(buff != nullptr);
+    
+    std::vector<aditof::FrameDetails> frameDetailsVector;
+    std::string availableFrameTypesBlob = "";
+    payload::FrameDetails frameDetailsPayload;
+    size_t i;
+    camDepthSensor->getAvailableFrameTypes(frameDetailsVector);
+
+    frameDetailsPayload.set_type(frameDetailsVector.front().type);
+    //frameDetailsPayload.set_cameraMode(frameDetailsVector.front().cameraMode);
+    frameDetailsPayload.set_width(frameDetailsVector.front().width);
+    frameDetailsPayload.set_height(frameDetailsVector.front().height);
+    //for (FrameDataDetails dataDetails : frameDetailsVector.front().dataDetails){
+    for (i = 0; i < 3; i++){
+	payload::FrameDataDetails* dataDetailsPayload = frameDetailsPayload.add_datadetails();
+	dataDetailsPayload->set_type("x");
+	dataDetailsPayload->set_width(i * 2);
+	dataDetailsPayload->set_height(i + 2);
+    }
+
+
+    frameDetailsPayload.SerializeToString(&availableFrameTypesBlob);
+
+    len = availableFrameTypesBlob.length();
+    memcpy(buff, availableFrameTypesBlob.c_str(), len);
+}
+
+
+
 static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
                                        uint8_t cs, uint8_t entity_id,
                                        uint8_t len,
@@ -1466,7 +1498,7 @@ static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
                 break;
 
             case UVC_GET_LEN:
-                resp->data[0] = 0x01; // 1 byte
+                resp->data[0] = MAX_PACKET_SIZE; // 1 byte
                 resp->data[1] = 0x00;
                 resp->length = 2;
                 break;
@@ -1496,7 +1528,58 @@ static void uvc_events_process_control(struct uvc_device *dev, uint8_t req,
                 break;
             }
             break;
+        case 8:/* Get available frame types */
+        switch (req) {
+            case UVC_SET_CUR:
+                dev->set_cur_cs = cs;
+                resp->data[0] = 0x0;
+                resp->length = len;
+                break;
 
+            case UVC_GET_CUR:
+                getAvailableFrameTypesStr(resp->data, resp->length);
+                break;
+
+            case UVC_GET_INFO:
+                /*
+                 * We support Set and Get requests and don't
+                 * support async updates on an interrupt endpt
+                 */
+                resp->data[0] = 0x03;
+                resp->length = 1;
+                break;
+
+            case UVC_GET_LEN:
+                resp->data[0] = MAX_PACKET_SIZE; // 1 byte
+                resp->data[1] = 0x00;
+                resp->length = 2;
+                break;
+
+            case UVC_GET_MIN:
+            case UVC_GET_MAX:
+            case UVC_GET_DEF:
+            case UVC_GET_RES:
+                resp->data[0] = 0xff;
+                resp->length = 1;
+                break;
+
+            default:
+                printf("Unsupported bRequest: Received bRequest %x on cs %d\n",
+                       req, cs);
+                /*
+                 * We don't support this control, so STALL the
+                 * default control ep.
+                 */
+                resp->length = -EL2HLT;
+                /*
+                 * For every unsupported control request
+                 * set the request error code to appropriate
+                 * code.
+                 */
+                SET_REQ_ERROR_CODE(0x07, 1);
+                break;
+            }
+        break;
         default:
             printf("Unsupported cs: Received cs %d \n", cs);
             /*
@@ -2083,10 +2166,6 @@ int main(int argc, char *argv[]) {
         ++temp_sensor_id;
         DLOG(INFO) << name;
     }
-
-    availableSensorsBlob +=
-        "VERSION_STRING=" +
-        aditof::getVersionString(aditof::ConnectionType::USB) + ";";
 
     DLOG(INFO) << "Message blob about available sensors to be sent to remote:";
     DLOG(INFO) << availableSensorsBlob;
