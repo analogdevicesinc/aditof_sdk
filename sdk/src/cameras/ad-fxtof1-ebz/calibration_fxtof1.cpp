@@ -265,7 +265,7 @@ aditof::Status CalibrationFxTof1::setMode(
     std::vector<float> cameraMatrix;
     uint16_t mode_id = (mode == "near" ? 0 : 1);
     const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
-    float gain = (mode == "near" ? 0.5 : 1.0);
+    float gain = (mode == "near" ? 0.5 : 1.15);
     float offset = 0.0;
 
     buildDepthCalibrationCache(gain, offset, pixelMaxValue, range);
