@@ -278,8 +278,6 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
     camera->getDetails(cameraDetails);
     aditof::FrameDetails frameDetails;
 
-    int frameHeight = static_cast<int>(frameDetails.height);
-    int frameWidth = static_cast<int>(frameDetails.width);
     int cameraRange = cameraDetails.depthParameters.maxDepth;
     int bitCount = cameraDetails.bitCount;
 
@@ -294,6 +292,16 @@ int _DisplayIR(cv::Mat *irMat, int *measuredDistance, int targetDistance,
             LOG(ERROR) << "Could not request frame!";
             return 0;
         }
+
+        /* Get frame details */
+        status = frame.getDetails(frameDetails);
+        if (status != Status::OK) {
+            LOG(ERROR) << "Could not acquire frame details!";
+            return 0;
+        }
+
+        int frameHeight = static_cast<int>(frameDetails.height);
+        int frameWidth = static_cast<int>(frameDetails.width);
 
         /* Get distance from center point */
         uint16_t *data;
