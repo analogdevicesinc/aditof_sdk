@@ -497,7 +497,7 @@ void Calibration96Tof1::buildGeometryCalibrationCache(
                 double tanYAngle = (y0 - i) / fy;
 
                 m_geometry_cache[i * width + j] =
-                    sqrt(1 + tanXAngle * tanXAngle + tanYAngle * tanYAngle);
+                1.0 / sqrt(1 + tanXAngle * tanXAngle + tanYAngle * tanYAngle);
             } else {
                 m_geometry_cache[i * width + j] = 1;
             }
