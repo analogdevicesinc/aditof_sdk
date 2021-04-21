@@ -393,6 +393,7 @@ void CalibrationFxTof1::buildGeometryCalibrationCache(
                 double tanYAngle = (y0 - i) / fy;
 
                 m_geometry_cache[i * width + j] =
+                    1.0 /
                     sqrt(1 + tanXAngle * tanXAngle + tanYAngle * tanYAngle);
             } else {
                 m_geometry_cache[i * width + j] = 1;
