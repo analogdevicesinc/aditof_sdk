@@ -34,7 +34,7 @@
 
 static const char *EEPROM_DEV_PATH = "/sys/bus/i2c/devices/9-0056/eeprom";
 
-static const char *TEMP_SENSOR_DEV_PATH = "/sys/class/hwmon/hwmon0/temp1_input";
+static const char *TEMP_SENSOR_DEV_PATH = "/sys/class/hwmon/hwmon4/temp1_input";
 
 static const char *CAPTURE_DEVICE_NAME =
     "vi-output, addi9036 9-0064|vi-output, addi9036 10-0064";
