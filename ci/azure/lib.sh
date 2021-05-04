@@ -334,7 +334,7 @@ pull_docker() {
 run_docker() {
     docker=$1
     script=$2
-    script_args=$3
+    script_args="$3"
 
     sudo apt-get -qq update
 
@@ -349,5 +349,5 @@ run_docker() {
     sudo docker run --rm=true \
 			-v `pwd`:/aditof_sdk:rw \
 			${docker} \
-            /bin/bash -xe ${script} /aditof_sdk ${script_args}
+            /bin/bash -xe ${script} /aditof_sdk "${script_args}"
 }
