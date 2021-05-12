@@ -29,6 +29,11 @@
 				reg = <0x56>;
 				pagesize = <32>;
 			};
+			
+			tmp103: tmp103@73 {
+				compatible = "ti,tmp103";
+				reg = <0x73>;
+			};
 		};
 	};
 };
