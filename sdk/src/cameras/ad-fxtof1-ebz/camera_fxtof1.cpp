@@ -59,7 +59,7 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 
 static const std::string skCustomMode = "custom";
 static const std::vector<std::string> availableControls = {
-    "noise_reduction_threshold", "ir_gamma_correction",
+    "noise_reduction_threshold", "ir_gamma_correction", "depth_correction",
     "camera_geometry_correction"};
 static const std::string skEepromName = "custom";
 CameraFxTof1::CameraFxTof1(
@@ -68,8 +68,8 @@ CameraFxTof1::CameraFxTof1(
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
     : m_depthSensor(depthSensor), m_devStarted(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
-      m_availableControls(availableControls), m_cameraGeometryCorrection(true),
-      m_revision("RevA") {
+      m_availableControls(availableControls), m_depthCorrection(true),
+      m_cameraGeometryCorrection(true), m_revision("RevA") {
 
     // Check Depth Sensor
     if (!depthSensor) {
@@ -376,10 +376,12 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
 
-        if (m_cameraGeometryCorrection) {
+        if (m_depthCorrection) {
             m_calibration.calibrateDepth(frameDataLocation,
                                          m_details.frameType.width *
                                              m_details.frameType.height);
+        }
+        if (m_cameraGeometryCorrection) {
             m_calibration.calibrateCameraGeometry(
                 frameDataLocation,
                 m_details.frameType.width * m_details.frameType.height);
@@ -446,6 +448,10 @@ aditof::Status CameraFxTof1::setControl(const std::string &control,
         return setIrGammaCorrection(std::stof(value));
     }
 
+    if (control == "depth_correction") {
+        m_depthCorrection = std::stoi(value) != 0;
+    }
+
     if (control == "camera_geometry_correction") {
         m_cameraGeometryCorrection = std::stoi(value) != 0;
     }
@@ -471,6 +477,10 @@ aditof::Status CameraFxTof1::getControl(const std::string &control,
 
     if (control == "ir_gamma_correction") {
         value = std::to_string(m_irGammaCorrection);
+    }
+
+    if (control == "depth_correction") {
+        value = m_depthCorrection ? "1" : "0";
     }
 
     if (control == "camera_geometry_correction") {
