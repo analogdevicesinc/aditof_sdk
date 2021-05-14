@@ -309,9 +309,10 @@ aditof::Status Calibration96Tof1::getGainOffset(const std::string &mode,
 
 //! getIntrinsic - Get the geometric camera calibration
 /*!
-getIntrinsic - Get the geometric camera clibration
+getIntrinsic - Get the geometric camera calibration
 \param key - Specifies which calibration values to get:
-             intrinsincs or distortion coefficients
+             INTRINSIC for [fx, 0, cx, 0, fy, cy, 0, 0, 1]
+             DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
 \param data - Buffer to store the returned data
 */
 aditof::Status Calibration96Tof1::getIntrinsic(float key,
