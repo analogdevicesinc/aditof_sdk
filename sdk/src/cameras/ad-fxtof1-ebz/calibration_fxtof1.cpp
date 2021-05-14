@@ -224,8 +224,8 @@ CalibrationFxTof1::getAfeFirmware(const std::string &mode,
 /*!
 getIntrinsic - Get the geometric camera calibration
 \param key - Specifies which calibration values to get:
-             INTRINSIC for [cx, cy, fx, fy]
-             DISTORTION_COEFFICIENTS for [k1, k2, k3]
+             INTRINSIC for [fx, 0, cx, 0, fy, cy, 0, 0, 1]
+             DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
 \param data - Buffer to store the returned data
 */
 aditof::Status CalibrationFxTof1::getIntrinsic(float key,
@@ -240,9 +240,11 @@ aditof::Status CalibrationFxTof1::getIntrinsic(float key,
     }
 
     if (key == INTRINSIC) {
-        data.insert(data.end(), m_intrinsics.begin(), m_intrinsics.end() - 3);
+        std::vector<float> intrinsic{m_intrinsics[2], 0, m_intrinsics[0], 0, m_intrinsics[3], m_intrinsics[1], 0, 0, 1};
+        data.insert(data.end(), intrinsic.begin(), intrinsic.end());
     } else {
-        data.insert(data.end(), m_intrinsics.end() - 3, m_intrinsics.end());
+        std::vector<float> dist_coeff{m_intrinsics[4], m_intrinsics[5], 0, 0, m_intrinsics[6]};
+        data.insert(data.end(), dist_coeff.begin(), dist_coeff.end());
     }
 
     return Status::OK;
