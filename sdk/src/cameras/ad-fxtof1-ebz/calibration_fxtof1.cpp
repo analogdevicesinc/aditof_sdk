@@ -240,10 +240,12 @@ aditof::Status CalibrationFxTof1::getIntrinsic(float key,
     }
 
     if (key == INTRINSIC) {
-        std::vector<float> intrinsic{m_intrinsics[2], 0, m_intrinsics[0], 0, m_intrinsics[3], m_intrinsics[1], 0, 0, 1};
+        std::vector<float> intrinsic{m_intrinsics[2], 0, m_intrinsics[0], 0, 
+                                     m_intrinsics[3], m_intrinsics[1], 0, 0, 1};
         data.insert(data.end(), intrinsic.begin(), intrinsic.end());
     } else {
-        std::vector<float> dist_coeff{m_intrinsics[4], m_intrinsics[5], 0, 0, m_intrinsics[6]};
+        std::vector<float> dist_coeff{m_intrinsics[4], m_intrinsics[5], 0, 0, 
+                                      m_intrinsics[6]};
         data.insert(data.end(), dist_coeff.begin(), dist_coeff.end());
     }
 
