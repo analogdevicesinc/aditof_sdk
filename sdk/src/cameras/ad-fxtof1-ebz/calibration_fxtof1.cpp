@@ -225,7 +225,7 @@ CalibrationFxTof1::getAfeFirmware(const std::string &mode,
 getIntrinsic - Get the geometric camera calibration
 \param key - Specifies which calibration values to get:
              INTRINSIC for [cx, cy, fx, fy]
-             DISTORTION for [k1, k2, k3]
+             DISTORTION_COEFFICIENTS for [k1, k2, k3]
 \param data - Buffer to store the returned data
 */
 aditof::Status CalibrationFxTof1::getIntrinsic(float key,
