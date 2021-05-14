@@ -59,8 +59,8 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 
 static const std::string skCustomMode = "custom";
 static const std::vector<std::string> availableControls = {
-    "noise_reduction_threshold", "ir_gamma_correction",
-    "depth_correction", "camera_geometry_correction"};
+    "noise_reduction_threshold", "ir_gamma_correction", "depth_correction",
+    "camera_geometry_correction"};
 static const std::string skEepromName = "custom";
 CameraFxTof1::CameraFxTof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
