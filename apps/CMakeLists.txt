@@ -9,7 +9,7 @@ if (DRAGONBOARD)
         add_subdirectory(daemon)
 endif()
 
-if (RASPBERRYPI)
+if (RASPBERRYPI OR JETSON)
         if (WITH_NETWORK)
                 add_subdirectory(server)
         endif()
