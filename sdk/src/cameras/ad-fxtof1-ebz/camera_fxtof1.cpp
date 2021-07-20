@@ -69,7 +69,7 @@ CameraFxTof1::CameraFxTof1(
     : m_depthSensor(depthSensor), m_devStarted(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
       m_availableControls(availableControls), m_depthCorrection(true),
-      m_cameraGeometryCorrection(true), m_revision("RevA") {
+      m_cameraGeometryCorrection(true), m_revision("RevA"), m_devProgrammed(false) {
 
     // Check Depth Sensor
     if (!depthSensor) {
