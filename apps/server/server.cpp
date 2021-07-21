@@ -58,8 +58,6 @@ bool sensors_are_created = false;
 
 /* Server only works with one depth sensor */
 std::vector<std::shared_ptr<aditof::DepthSensorInterface>> camDepthSensor;
-std::vector<std::shared_ptr<aditof::V4lBufferAccessInterface>>
-    sensorV4lBufAccess;
 aditof::FrameDetails frameDetailsCache[2];
 std::vector<uint16_t *> sensorsFrameBuffers;
 
@@ -100,11 +98,6 @@ static void cleanup_sensors() {
         depthSensor.reset();
     }
     camDepthSensor.clear();
-    for (auto &depthSensor : sensorV4lBufAccess) {
-        depthSensor.reset();
-    }
-    sensorV4lBufAccess.clear();
-
     for (int i = 0; i < sensorsFrameBuffers.size(); ++i) {
         if (sensorsFrameBuffers[i]) {
             delete[] sensorsFrameBuffers[i];
@@ -340,9 +333,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         int depth_sensor_id = 0;
         for (const auto &depthSensor : depthSensors) {
             camDepthSensor.emplace_back(depthSensor);
-            sensorV4lBufAccess.emplace_back(
-                std::dynamic_pointer_cast<aditof::V4lBufferAccessInterface>(
-                    depthSensor));
             std::string name;
             depthSensor->getName(name);
             auto pbImagerInfo = pbSensorsInfo->add_image_sensors();
@@ -372,7 +362,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             pbTempSensorInfo->set_id(temp_sensor_id);
             ++temp_sensor_id;
         }
-
         buff_send.set_status(
             static_cast<::payload::Status>(aditof::Status::OK));
         break;
