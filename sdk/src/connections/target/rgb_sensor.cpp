@@ -143,7 +143,7 @@ aditof::Status RgbSensor::open() {
     struct v4l2_capability cap;
     struct VideoDev *dev;
 
-    const char *devName, *subDevName, *cardName;
+    const char *devName;
 
     std::vector<std::string> driverPaths;
     Utils::splitIntoTokens(m_driverPath, '|', driverPaths);
@@ -167,8 +167,6 @@ aditof::Status RgbSensor::open() {
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         devName = driverPaths.at(i).c_str();
-        subDevName = driverSubPaths.at(i).c_str();
-        cardName = cards.at(i).c_str();
         dev = &m_implData->videoDevs[i];
 
         /* Open V4L2 device */
@@ -299,7 +297,6 @@ aditof::Status RgbSensor::stop() {
     Status status = Status::OK;
     struct VideoDev *dev;
     enum v4l2_buf_type type;
-    struct v4l2_buffer buf;
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
@@ -339,9 +336,7 @@ aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
     struct VideoDev *dev;
 
     struct v4l2_requestbuffers req;
-    struct v4l2_format fmt;
     struct v4l2_buffer buf;
-    size_t length, offset;
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
@@ -514,7 +509,6 @@ aditof::Status RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
                                                        struct VideoDev *dev) {
     using namespace aditof;
     Status status = Status::OK;
-    enum v4l2_buf_type type;
 
     if (dev == nullptr)
         dev = &m_implData->videoDevs[0];
