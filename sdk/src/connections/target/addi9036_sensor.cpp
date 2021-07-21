@@ -106,14 +106,16 @@ Addi9036Sensor::~Addi9036Sensor() {
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
-        if (dev->started) {
+        if (dev && dev->started) {
             stop();
         }
     }
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
-
+        if (!dev) {
+            continue;
+        }
         for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
             if (munmap(dev->videoBuffers[i].start,
                        dev->videoBuffers[i].length) == -1) {
@@ -122,16 +124,20 @@ Addi9036Sensor::~Addi9036Sensor() {
                     << "errno: " << errno << " error: " << strerror(errno);
             }
         }
-        free(dev->videoBuffers);
+        if (dev) {
+            free(dev->videoBuffers);
 
-        if (close(dev->fd) == -1) {
-            LOG(WARNING) << "close m_implData->fd error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-        }
+            if (close(dev->fd) == -1) {
+                LOG(WARNING)
+                    << "close m_implData->fd error "
+                    << "errno: " << errno << " error: " << strerror(errno);
+            }
 
-        if (close(dev->sfd) == -1) {
-            LOG(WARNING) << "close m_implData->sfd error "
-                         << "errno: " << errno << " error: " << strerror(errno);
+            if (close(dev->sfd) == -1) {
+                LOG(WARNING)
+                    << "close m_implData->sfd error "
+                    << "errno: " << errno << " error: " << strerror(errno);
+            }
         }
     }
 }
