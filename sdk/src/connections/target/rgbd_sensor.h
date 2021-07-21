@@ -34,7 +34,6 @@
 
 #include "addi9036_sensor.h"
 #include "aditof/depth_sensor_interface.h"
-#include "connections/target/v4l_buffer_access_interface.h"
 #include "rgb_sensor.h"
 #include <mutex>
 
