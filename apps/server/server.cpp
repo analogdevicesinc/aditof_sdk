@@ -447,6 +447,11 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         aditof::BufferInfo bufferInfo;
         aditof::Status status = camDepthSensor[index]->getFrame(
             sensorsFrameBuffers[index], &bufferInfo);
+        if (status != aditof::Status::OK) {
+            buff_send.set_message("Failed to get frame");
+            buff_send.set_status(static_cast<::payload::Status>(status));
+            break;
+        }
 
 #ifdef JETSON
         buff_send.add_int32_payload(0);
