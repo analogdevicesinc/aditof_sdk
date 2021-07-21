@@ -35,7 +35,6 @@
 #include "aditof/sensor_enumerator_interface.h"
 #include "buffer.pb.h"
 
-#include "../../sdk/src/connections/target/v4l_buffer_access_interface.h"
 #include "../../sdk/src/connections/utils/connection_validator.h"
 
 #include <csignal>
