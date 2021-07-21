@@ -67,15 +67,6 @@ struct VideoDev {
           started(false) {}
 };
 
-struct RgbdSensor::ImplData {
-    uint8_t numVideoDevs;
-    struct VideoDev *videoDevs;
-    aditof::FrameDetails frameDetails;
-    ImplData()
-        : numVideoDevs(1),
-          videoDevs(nullptr), frameDetails{0, 0, 0, 0, 0, 0, ""} {}
-};
-
 RgbdSensor::RgbdSensor(std::shared_ptr<DepthSensorInterface> depthSensor,
                        std::shared_ptr<DepthSensorInterface> rgbSensor)
     : m_depthSensor(depthSensor), m_rgbSensor(rgbSensor) {
