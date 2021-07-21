@@ -55,7 +55,6 @@ static std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
     temperatureSensors;
 bool sensors_are_created = false;
 
-/* Server only works with one depth sensor */
 std::vector<std::shared_ptr<aditof::DepthSensorInterface>> camDepthSensor;
 aditof::FrameDetails frameDetailsCache[2];
 std::vector<uint16_t *> sensorsFrameBuffers;
