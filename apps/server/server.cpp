@@ -96,7 +96,7 @@ static void cleanup_sensors() {
         depthSensor.reset();
     }
     camDepthSensor.clear();
-    for (int i = 0; i < sensorsFrameBuffers.size(); ++i) {
+    for (size_t i = 0; i < sensorsFrameBuffers.size(); ++i) {
         if (sensorsFrameBuffers[i]) {
             delete[] sensorsFrameBuffers[i];
         }
@@ -313,7 +313,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
             // Create buffers to be used by depth sensors when reuqesting frame from them
             sensorsFrameBuffers.resize(depthSensors.size());
-            for (int i = 0; i < sensorsFrameBuffers.size(); ++i) {
+            for (size_t i = 0; i < sensorsFrameBuffers.size(); ++i) {
                 sensorsFrameBuffers[i] = nullptr;
             }
         }

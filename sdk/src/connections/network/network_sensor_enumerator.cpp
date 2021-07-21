@@ -212,7 +212,7 @@ Status NetworkSensorEnumerator::getDepthSensors(
             return status;
         }
 
-        for (int i = 1; i < m_imageSensorsInfo.size(); ++i) {
+        for (size_t i = 1; i < m_imageSensorsInfo.size(); ++i) {
             auto info = m_imageSensorsInfo.at(i);
             auto sensor = std::make_shared<NetworkDepthSensor>(
                 info.first, info.second, communicationHandle);
