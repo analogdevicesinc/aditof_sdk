@@ -82,10 +82,7 @@ RgbdSensor::RgbdSensor(std::shared_ptr<DepthSensorInterface> depthSensor,
     m_sensorName = "rgbd";
 }
 
-RgbdSensor::~RgbdSensor() {
-    m_depthSensor->~DepthSensorInterface();
-    m_rgbSensor->~DepthSensorInterface();
-}
+RgbdSensor::~RgbdSensor() = default;
 
 aditof::Status RgbdSensor::open() {
     using namespace aditof;
