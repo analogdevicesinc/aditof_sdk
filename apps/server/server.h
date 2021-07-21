@@ -33,7 +33,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <libwebsockets.h>
 
-#define RX_BUFFER_BYTES (4147900)
+#define RX_BUFFER_BYTES (4147900 * 2)
 
 enum api_Values {
     API_NOT_DEFINED,
