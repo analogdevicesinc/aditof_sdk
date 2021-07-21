@@ -67,11 +67,10 @@ Camera3D_Smart::Camera3D_Smart(
     std::shared_ptr<aditof::DepthSensorInterface> rgbdSensor,
     std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms,
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
-    : m_rgbdSensor(rgbdSensor), m_devStarted(false), m_eepromInitialized(false),
-      m_tempSensorsInitialized(false), m_availableControls(availableControls),
-      m_depthCorrection(true), m_cameraGeometryCorrection(true),
-
-      m_revision("RevA"), m_devProgrammed(false) {
+    : m_rgbdSensor(rgbdSensor), m_devStarted(false), m_devProgrammed(false),
+      m_eepromInitialized(false), m_tempSensorsInitialized(false),
+      m_availableControls(availableControls), m_depthCorrection(true),
+      m_cameraGeometryCorrection(true), m_revision("RevA") {
 
     m_Rw = 255.0 * 0.25;
     m_Gw = 255.0 * 0.35;
