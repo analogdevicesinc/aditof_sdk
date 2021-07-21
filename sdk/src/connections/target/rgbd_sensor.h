@@ -69,12 +69,10 @@ class RgbdSensor : public aditof::DepthSensorInterface {
     virtual aditof::Status getName(std::string &sensorName) const override;
 
   private:
-    struct ImplData;
     std::string m_sensorName;
     int m_id;
     aditof::FrameDetails m_details;
     aditof::SensorDetails m_sensorDetails;
-    std::unique_ptr<ImplData> m_implData;
     std::shared_ptr<DepthSensorInterface> m_depthSensor;
     std::shared_ptr<DepthSensorInterface> m_rgbSensor;
     std::mutex m_mtxDepth;
