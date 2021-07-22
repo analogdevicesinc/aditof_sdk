@@ -17,7 +17,7 @@ endif()
 
 if (JETSON)
         if (WITH_NETWORK)
-                add_subdirectory(server)
                 add_definitions(-DJETSON)
+                add_subdirectory(server)
         endif()
 endif()

@@ -123,6 +123,11 @@ void AdiTofDemoView::render() {
     bool farModeChecked = false;
     int modeCurrentValue = 4; // 4 = near(default); 2 = medium; 1 = far
 
+    bool depthIrChecked = true;
+    bool depthOnlyChecked = false;
+    bool irOnlyChecked = false;
+    int frameTypeCurrentValue = 4; // 4 = depthIr(default); 2 = depthOnly; 1 = irOnly
+
     bool lowLevelChecked = false;
     bool mediumLevelChecked = false;
     bool highLevelChecked = false;
@@ -193,7 +198,7 @@ void AdiTofDemoView::render() {
     bool fileNameFieldSelected = false;
 
     const cv::String windows[] = {m_viewName, "Depth Image", "IR Image",
-                                  "Blended Image"};
+                                  "Blended Image", "Depth/Ir Only Image"};
     cvui::init(windows, 1);
 
     int frameCount = 0;
@@ -208,6 +213,7 @@ void AdiTofDemoView::render() {
     int numberOfFrames = 0;
 
     std::string modes[3] = {"near", "medium", "far"};
+    std::string frameTypes[3] = {"depth_ir", "depth_only", "ir_only"};
 
     char afe_temp_str[32] = "AFE TEMP:";
     char laser_temp_str[32] = "LASER TEMP:";
@@ -228,6 +234,7 @@ void AdiTofDemoView::render() {
         }
 
         bool checkboxChanged = false;
+        bool frameTypeCheckboxChanged = false;
 
         // Mode checkbox group
         int btnGroupMode =
@@ -239,6 +246,17 @@ void AdiTofDemoView::render() {
             mediumModeChecked = xorValue & (1 << 1);
             farModeChecked = xorValue & 1;
             checkboxChanged = true;
+        }
+
+        int btnGroupFrameType =
+            depthIrChecked << 2 | depthOnlyChecked << 1 | irOnlyChecked;
+        if (frameTypeCurrentValue != btnGroupFrameType) {
+            int xorValue = frameTypeCurrentValue ^ btnGroupFrameType;
+            frameTypeCurrentValue = xorValue;
+            depthIrChecked = xorValue & (1 << 2);
+            depthOnlyChecked = xorValue & (1 << 1);
+            irOnlyChecked = xorValue & 1;
+            frameTypeCheckboxChanged = true;
         }
 
         // Level checkbox group
@@ -298,12 +316,18 @@ void AdiTofDemoView::render() {
         }
 
         // TODO: set camera mode here
-        if (checkboxChanged) {
+        if (checkboxChanged || frameTypeCheckboxChanged) {
+            int selectedFrameType =
+                (2 - static_cast<int>(std::log2(frameTypeCurrentValue)));
+            m_ctrl->setFrameType(frameTypes[selectedFrameType]);
+            //status = "Frame type set: " + frameTypes[selectedFrameType];
+
             int selectedMode =
                 (2 - static_cast<int>(std::log2(modeCurrentValue)));
-            m_ctrl->setMode(modes[selectedMode]);
+            //m_ctrl->setMode(modes[selectedMode]);
             status = "Mode set: " + modes[selectedMode];
             m_crtSmallSignalState = false;
+
         }
 
         // Connection mode checkbox group
@@ -345,6 +369,13 @@ void AdiTofDemoView::render() {
                     bool connectionResult =
                         m_ctrl->setNetworkConnection(ipvalue);
                     if (connectionResult == true) {
+                        int selectedFrameType =
+                            (2 - static_cast<int>(
+                                     std::log2(frameTypeCurrentValue)));
+                        m_ctrl->setFrameType(frameTypes[selectedFrameType]);
+                        status =
+                            "Frame type set: " + frameTypes[selectedFrameType];
+
                         int selectedMode =
                             (2 - static_cast<int>(std::log2(modeCurrentValue)));
                         m_ctrl->setMode(modes[selectedMode]);
@@ -385,13 +416,28 @@ void AdiTofDemoView::render() {
         cvui::endRow();
         cvui::endColumn();
 
+        cvui::beginColumn(frame, 265, 105);
+        cvui::space(10);
+        cvui::text("Frame type: ", 0.6);
+        cvui::space(10);
+        cvui::beginRow(frame, 265, 140);
+        cvui::checkbox("depth_ir", &depthIrChecked);
+        cvui::endRow();
+        cvui::beginRow(frame, 265, 170);
+        cvui::checkbox("depth_only", &depthOnlyChecked);
+        cvui::endRow();
+        cvui::beginRow(frame, 265, 200);
+        cvui::checkbox("ir_only", &irOnlyChecked);
+        cvui::endRow();
+        cvui::endColumn();
+
         cvui::text(frame, 50, 160, "Video: ", 0.6);
 
         if (cvui::button(
                 frame, 50, 185, 90, 30,
                 (captureEnabled || captureBlendedEnabled ? "Stop" : "Play"))) {
             if (livePlayChecked) {
-                if (separatedViewChecked) {
+                if (separatedViewChecked && depthIrChecked) {
                     if (m_ctrl->hasCamera()) {
                         captureEnabled = !captureEnabled;
                         if (captureEnabled) {
@@ -407,7 +453,7 @@ void AdiTofDemoView::render() {
                     } else {
                         status = "No cameras connected!";
                     }
-                } else {
+                } else if (captureBlendedEnabled && depthIrChecked){
                     if (m_ctrl->hasCamera()) {
                         captureBlendedEnabled = !captureBlendedEnabled;
                         if (captureBlendedEnabled) {
@@ -416,6 +462,22 @@ void AdiTofDemoView::render() {
                             status = "Playing from device!";
                         } else {
                             cv::destroyWindow(windows[3]);
+                            m_ctrl->stopCapture();
+                            status = "";
+                        }
+                    } else {
+                        status = "No cameras connected!";
+                    }
+                } else if (separatedViewChecked &&
+                           (depthOnlyChecked || irOnlyChecked)) {
+                    if (m_ctrl->hasCamera()) {
+                        captureEnabled = !captureEnabled;
+                        if (captureEnabled) {
+                            m_ctrl->startCapture();
+                            m_ctrl->requestFrame();
+                            status = "Playing from device!";
+                        } else {
+                            cv::destroyWindow(windows[4]);
                             m_ctrl->stopCapture();
                             status = "";
                         }
@@ -761,7 +823,7 @@ void AdiTofDemoView::render() {
 
         cvui::imshow(m_viewName, frame);
 
-        if (captureEnabled) {
+        if (captureEnabled && depthIrChecked) {
             if (playbackEnabled) {
                 std::this_thread::sleep_for(
                     std::chrono::milliseconds(1000 / displayFps));
@@ -791,7 +853,7 @@ void AdiTofDemoView::render() {
         }
 
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
-        if (captureEnabled && !captureBlendedEnabled) {
+        if (captureEnabled && !captureBlendedEnabled && depthIrChecked) {
             m_barrierCv.wait(imshow_lock,
                              [&]() { return m_waitKeyBarrier == 2; });
             m_waitKeyBarrier = 0;
@@ -806,6 +868,22 @@ void AdiTofDemoView::render() {
             _displayBlendedImage();
             cvui::imshow("Blended Image", m_blendedImage);
             m_blendedImage.release();
+        }
+
+        if (captureEnabled && depthOnlyChecked) {
+            m_ctrl->requestFrame();
+            m_capturedFrame = m_ctrl->getFrame();
+            _displayDepthImageOnly();
+            cvui::imshow("Depth/Ir Only Image",m_depthImage);
+            m_depthImage.release();
+        }
+
+        if (captureEnabled && irOnlyChecked) {
+            m_ctrl->requestFrame();
+            m_capturedFrame = m_ctrl->getFrame();
+            _displayIrImageOnly();
+            cvui::imshow("Depth/Ir Only Image", m_irImage);
+            m_irImage.release();
         }
 
         int key = cv::waitKey(10);
@@ -882,111 +960,116 @@ void AdiTofDemoView::render() {
 
 void AdiTofDemoView::_displayDepthImage() {
     while (!m_stopWorkersFlag) {
-        std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
-        m_frameCapturedCv.wait(
-            lock, [&]() { return m_depthFrameAvailable || m_stopWorkersFlag; });
+            std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
+            m_frameCapturedCv.wait(lock, [&]() {
+                return m_depthFrameAvailable || m_stopWorkersFlag;
+            });
 
-        if (m_stopWorkersFlag) {
-            break;
-        }
+            if (m_stopWorkersFlag) {
+                break;
+            }
 
-        m_depthFrameAvailable = false;
+            m_depthFrameAvailable = false;
 
-        std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
-        lock.unlock(); // Lock is no longer needed
+            std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
+            lock.unlock(); // Lock is no longer needed
 
-        uint16_t *data;
-        localFrame->getData(aditof::FrameDataType::DEPTH, &data);
+            uint16_t *data;
+            localFrame->getData(aditof::FrameDataType::DEPTH, &data);
 
-        aditof::FrameDetails frameDetails;
-        localFrame->getDetails(frameDetails);
+            aditof::FrameDetails frameDetails;
+            localFrame->getDetails(frameDetails);
 
-        int frameHeight = static_cast<int>(frameDetails.height);
-        int frameWidth = static_cast<int>(frameDetails.width);
+            int frameHeight = static_cast<int>(frameDetails.height);
+            int frameWidth = static_cast<int>(frameDetails.width);
 
-        m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
-        cv::Mat m_distanceImage =
-            cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
-        cv::Point2d pointxy(320, 240);
-        m_distanceVal = static_cast<int>(
-            m_distanceVal * 0.7 + m_distanceImage.at<ushort>(pointxy) * 0.3);
-        char text[20];
-        sprintf(text, "%dmm", m_distanceVal);
-        m_depthImage.convertTo(
-            m_depthImage, CV_8U,
-            (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
-            (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
-             m_ctrl->getRangeMin()));
-        applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
-        flip(m_depthImage, m_depthImage, 1);
-        int color;
-        if (m_distanceVal > 2500)
-            color = 0;
-        else
-            color = 4096;
+            m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
+            cv::Mat m_distanceImage =
+                cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
+            cv::Point2d pointxy(320, 240);
+            m_distanceVal =
+                static_cast<int>(m_distanceVal * 0.7 +
+                                 m_distanceImage.at<ushort>(pointxy) * 0.3);
+            char text[20];
+            sprintf(text, "%dmm", m_distanceVal);
+            m_depthImage.convertTo(
+                m_depthImage, CV_8U,
+                (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
+                (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
+                 m_ctrl->getRangeMin()));
+            applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
+            flip(m_depthImage, m_depthImage, 1);
+            int color;
+            if (m_distanceVal > 2500)
+                color = 0;
+            else
+                color = 4096;
 
-        std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
-        if (m_center) {
+            std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
+            if (m_center) {
 #ifndef OPENCV2
-            cv::drawMarker(m_depthImage, pointxy,
-                           cv::Scalar(color, color, color), cv::MARKER_CROSS);
+                cv::drawMarker(m_depthImage, pointxy,
+                               cv::Scalar(color, color, color),
+                               cv::MARKER_CROSS);
 #else
-            cv::line(m_depthImage, cv::Point(pointxy.x - 10, pointxy.y),
-                     cv::Point(pointxy.x + 10, pointxy.y),
-                     cv::Scalar(color, color, color));
-            cv::line(m_depthImage, cv::Point(pointxy.x, pointxy.y - 10),
-                     cv::Point(pointxy.x, pointxy.y + 10),
-                     cv::Scalar(color, color, color));
+                cv::line(m_depthImage, cv::Point(pointxy.x - 10, pointxy.y),
+                         cv::Point(pointxy.x + 10, pointxy.y),
+                         cv::Scalar(color, color, color));
+                cv::line(m_depthImage, cv::Point(pointxy.x, pointxy.y - 10),
+                         cv::Point(pointxy.x, pointxy.y + 10),
+                         cv::Scalar(color, color, color));
 #endif
-            cv::circle(m_depthImage, pointxy, 8,
-                       cv::Scalar(color, color, color));
-            cv::putText(m_depthImage, text, pointxy + cv::Point2d(10, 20),
-                        cv::FONT_HERSHEY_DUPLEX, 2,
-                        cv::Scalar(color, color, color));
-        }
-        m_waitKeyBarrier += 1;
-        if (m_waitKeyBarrier == 2) {
-            imshow_lock.unlock();
-            m_barrierCv.notify_one();
-        }
+                cv::circle(m_depthImage, pointxy, 8,
+                           cv::Scalar(color, color, color));
+                cv::putText(m_depthImage, text, pointxy + cv::Point2d(10, 20),
+                            cv::FONT_HERSHEY_DUPLEX, 2,
+                            cv::Scalar(color, color, color));
+            }
+            m_waitKeyBarrier += 1;
+            if (m_waitKeyBarrier == 2) {
+                imshow_lock.unlock();
+                m_barrierCv.notify_one();
+            }
     }
 }
 
 void AdiTofDemoView::_displayIrImage() {
     while (!m_stopWorkersFlag) {
-        std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
-        m_frameCapturedCv.wait(
-            lock, [&]() { return m_irFrameAvailable || m_stopWorkersFlag; });
+            std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
+            m_frameCapturedCv.wait(lock, [&]() {
+                return m_irFrameAvailable || m_stopWorkersFlag;
+            });
 
-        if (m_stopWorkersFlag) {
-            break;
-        }
+            if (m_stopWorkersFlag) {
+                break;
+            }
 
-        m_irFrameAvailable = false;
+            m_irFrameAvailable = false;
 
-        std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
-        lock.unlock(); // Lock is no longer needed
+            std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
+            lock.unlock(); // Lock is no longer needed
 
-        uint16_t *irData;
-        localFrame->getData(aditof::FrameDataType::IR, &irData);
+            uint16_t *irData;
+            localFrame->getData(aditof::FrameDataType::IR, &irData);
 
-        aditof::FrameDetails frameDetails;
-        localFrame->getDetails(frameDetails);
+            aditof::FrameDetails frameDetails;
+            localFrame->getDetails(frameDetails);
 
-        int frameHeight = static_cast<int>(frameDetails.height);
-        int frameWidth = static_cast<int>(frameDetails.width);
-        int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
+            int frameHeight = static_cast<int>(frameDetails.height);
+            int frameWidth = static_cast<int>(frameDetails.width);
+            int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
 
-        m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
-        m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
-        flip(m_irImage, m_irImage, 1);
+            m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
+            m_irImage.convertTo(m_irImage, CV_8U,
+                                255.0 / max_value_of_IR_pixel);
+            flip(m_irImage, m_irImage, 1);
 
-        std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
-        m_waitKeyBarrier += 1;
-        if (m_waitKeyBarrier == 2) {
-            imshow_lock.unlock();
-            m_barrierCv.notify_one();
-        }
+            std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
+            m_waitKeyBarrier += 1;
+            if (m_waitKeyBarrier == 2) {
+                imshow_lock.unlock();
+                m_barrierCv.notify_one();
+            }
     }
 }
 
@@ -1022,4 +1105,44 @@ void AdiTofDemoView::_displayBlendedImage() {
 
     cv::addWeighted(m_depthImage, m_blendValue, m_irImage, 1.0F - m_blendValue,
                     0, m_blendedImage);
+}
+
+void AdiTofDemoView::_displayDepthImageOnly() {
+    std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
+
+    uint16_t *data;
+    localFrame->getData(aditof::FrameDataType::FULL_DATA, &data);
+
+    aditof::FrameDetails frameDetails;
+    localFrame->getDetails(frameDetails);
+
+    int frameHeight = static_cast<int>(frameDetails.height);
+    int frameWidth = static_cast<int>(frameDetails.width);
+
+    m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
+    m_depthImage.convertTo(
+        m_depthImage, CV_8U,
+        (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
+        (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
+         m_ctrl->getRangeMin()));
+    flip(m_depthImage, m_depthImage, 1);
+    applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
+}
+
+void AdiTofDemoView::_displayIrImageOnly() {
+    std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
+
+    uint16_t *irData;
+    localFrame->getData(aditof::FrameDataType::FULL_DATA, &irData);
+
+    aditof::FrameDetails frameDetails;
+    localFrame->getDetails(frameDetails);
+
+    int frameHeight = static_cast<int>(frameDetails.height);
+    int frameWidth = static_cast<int>(frameDetails.width);
+    int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
+
+    m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
+    m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
+    flip(m_irImage, m_irImage, 1);
 }

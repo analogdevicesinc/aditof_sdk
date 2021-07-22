@@ -56,6 +56,8 @@ class AdiTofDemoView {
     void _displayDepthImage();
     void _displayIrImage();
     void _displayBlendedImage();
+    void _displayDepthImageOnly();
+    void _displayIrImageOnly();
 
   private:
     std::shared_ptr<AdiTofDemoController> m_ctrl;
