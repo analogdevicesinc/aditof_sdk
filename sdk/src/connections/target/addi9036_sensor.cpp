@@ -369,6 +369,16 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
             }
             free(dev->videoBuffers);
             dev->nVideoBuffers = 0;
+            CLEAR(req);
+	        req.count = 0;
+	        req.type = dev->videoBuffersType;
+	        req.memory = V4L2_MEMORY_MMAP;
+
+	        if (xioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1) {
+	            LOG(WARNING) << "VIDIOC_REQBUFS error "
+	                         << "errno: " << errno << " error: " << strerror(errno);
+	            return Status::GENERIC_ERROR;
+                
         } else if (dev->nVideoBuffers) {
             return status;
         }

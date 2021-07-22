@@ -189,13 +189,13 @@ aditof::Status CameraFxTof1::initialize() {
 }
 
 aditof::Status CameraFxTof1::start() {
-    // return m_depthSensor->start(); // For now we keep the device open all the time
-    return aditof::Status::OK;
+     return m_depthSensor->start(); // For now we keep the device open all the time
+    //return aditof::Status::OK;
 }
 
 aditof::Status CameraFxTof1::stop() {
-    // return m_depthSensor->stop(); // For now we keep the device open all the time
-    return aditof::Status::OK;
+     return m_depthSensor->stop(); // For now we keep the device open all the time
+    //return aditof::Status::OK;
 }
 
 aditof::Status CameraFxTof1::setMode(const std::string &mode,
@@ -291,6 +291,14 @@ aditof::Status CameraFxTof1::setFrameType(const std::string &frameType) {
     using namespace aditof;
     Status status = Status::OK;
 
+    if (m_devStarted) {
+        status = m_depthSensor->stop();
+        if (status != Status::OK) {
+            return status;
+        }
+        m_devStarted = false;
+    }
+
     std::vector<FrameDetails> detailsList;
     status = m_depthSensor->getAvailableFrameTypes(detailsList);
     if (status != Status::OK) {
@@ -309,12 +317,18 @@ aditof::Status CameraFxTof1::setFrameType(const std::string &frameType) {
     }
 
     if (m_details.frameType != *frameDetailsIt) {
+        uint16_t afeRegsAddr[2] = {0x4001, 0x7c22};
+        uint16_t afeRegsVal[2] = {0x0006, 0x0004};
+        m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 2);
         status = m_depthSensor->setFrameType(*frameDetailsIt);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to set frame type";
             return status;
         }
         m_details.frameType = *frameDetailsIt;
+        uint16_t afeRegsAddress[2] = {0x4001, 0x7c22};
+        uint16_t afeRegsValue[2] = {0x0007, 0x0004};
+        m_depthSensor->writeAfeRegisters(afeRegsAddress, afeRegsValue, 2);
     }
 
     if (!m_devStarted) {

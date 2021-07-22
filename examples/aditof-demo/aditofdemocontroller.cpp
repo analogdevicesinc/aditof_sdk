@@ -52,7 +52,6 @@ AdiTofDemoController::AdiTofDemoController()
             LOG(WARNING) << "no frame type available!";
             return;
         }
-        camera->setFrameType(frameTypes.front());
 
         std::vector<std::string> modes;
         camera->getAvailableModes(modes);
@@ -84,7 +83,6 @@ bool AdiTofDemoController::setRegularConnection() {
             LOG(WARNING) << "no frame type available!";
             return false;
         }
-        camera->setFrameType(frameTypes.front());
 
         std::vector<std::string> modes;
         camera->getAvailableModes(modes);
@@ -122,7 +120,8 @@ bool AdiTofDemoController::setNetworkConnection(const std::string &ip) {
             LOG(WARNING) << "no frame type available!";
             return false;
         }
-        camera->setFrameType(frameTypes.front());
+        //setFrameType("depth_only");
+        //setMode("near");
 
         std::vector<std::string> modes;
         camera->getAvailableModes(modes);
@@ -181,6 +180,14 @@ void AdiTofDemoController::setMode(const std::string &mode) {
     }
     auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
     camera->setMode(mode);
+}
+
+void AdiTofDemoController::setFrameType(const std::string &frameType) {
+    if (m_cameraInUse == -1) {
+        return;
+    }
+    auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
+    camera->setFrameType(frameType);
 }
 
 std::pair<float, float> AdiTofDemoController::getTemperature() {

@@ -55,6 +55,7 @@ class AdiTofDemoController {
 
     std::string getMode() const;
     void setMode(const std::string &mode);
+    void setFrameType(const std::string &frameType);
 
     std::pair<float, float> getTemperature();
 
@@ -111,6 +112,11 @@ class AdiTofDemoController {
     std::unique_ptr<AditofDemoRecorder> m_recorder;
 
     bool m_IsNetworkConnection = false;
+
+    bool depthIrChecked = true;
+    bool depthOnlyChecked = false;
+    bool irOnlyChecked = false;
+    int frameTypeCurrentValue = 4; // 4 = depthIr; 2 = depthOnly(default); 1 = irOnly
 };
 
 #endif
