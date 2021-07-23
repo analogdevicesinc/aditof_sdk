@@ -18,7 +18,7 @@ endif()
 
 if( APPLE )
     add_definitions(-DDEVICETYPE="ETH")
-elseif( DRAGONBOARD OR RASPBERRYPI )
+elseif( DRAGONBOARD OR RASPBERRYPI OR JETSON )
     add_definitions(-DDEVICETYPE="Local")
 elseif( WIN32 OR UNIX )
      add_definitions(-DDEVICETYPE="USB ETH")
