@@ -189,12 +189,14 @@ aditof::Status CameraFxTof1::initialize() {
 }
 
 aditof::Status CameraFxTof1::start() {
-     return m_depthSensor->start(); // For now we keep the device open all the time
+    return m_depthSensor
+        ->start(); // For now we keep the device open all the time
     //return aditof::Status::OK;
 }
 
 aditof::Status CameraFxTof1::stop() {
-     return m_depthSensor->stop(); // For now we keep the device open all the time
+    return m_depthSensor
+        ->stop(); // For now we keep the device open all the time
     //return aditof::Status::OK;
 }
 
