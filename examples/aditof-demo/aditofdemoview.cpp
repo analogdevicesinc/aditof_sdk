@@ -1136,6 +1136,13 @@ void AdiTofDemoView::_displayDepthImageOnly() {
     int frameWidth = static_cast<int>(frameDetails.width);
 
     m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
+
+    cv::Point2d pointxy(320, 240);
+    m_distanceVal = static_cast<int>(m_distanceVal * 0.7 +
+                                 m_depthImage.at<ushort>(pointxy) * 0.3);
+    char text[20];
+    sprintf(text, "%dmm", m_distanceVal);
+
     m_depthImage.convertTo(
         m_depthImage, CV_8U,
         (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
@@ -1143,6 +1150,32 @@ void AdiTofDemoView::_displayDepthImageOnly() {
          m_ctrl->getRangeMin()));
     flip(m_depthImage, m_depthImage, 1);
     applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
+
+    int color;
+            if (m_distanceVal > 2500)
+                color = 0;
+            else
+                color = 4096;
+
+            if (m_center) {
+#ifndef OPENCV2
+                cv::drawMarker(m_depthImage, pointxy,
+                               cv::Scalar(color, color, color),
+                               cv::MARKER_CROSS);
+#else
+                cv::line(m_depthImage, cv::Point(pointxy.x - 10, pointxy.y),
+                         cv::Point(pointxy.x + 10, pointxy.y),
+                         cv::Scalar(color, color, color));
+                cv::line(m_depthImage, cv::Point(pointxy.x, pointxy.y - 10),
+                         cv::Point(pointxy.x, pointxy.y + 10),
+                         cv::Scalar(color, color, color));
+#endif
+                cv::circle(m_depthImage, pointxy, 8,
+                           cv::Scalar(color, color, color));
+                cv::putText(m_depthImage, text, pointxy + cv::Point2d(10, 20),
+                            cv::FONT_HERSHEY_DUPLEX, 2,
+                            cv::Scalar(color, color, color));
+            }
 }
 
 void AdiTofDemoView::_displayIrImageOnly() {
