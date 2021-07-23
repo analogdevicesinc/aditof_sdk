@@ -52,6 +52,7 @@ AdiTofDemoController::AdiTofDemoController()
             LOG(WARNING) << "no frame type available!";
             return;
         }
+        camera->setFrameType(frameTypes.front());
 
         std::vector<std::string> modes;
         camera->getAvailableModes(modes);
@@ -59,7 +60,8 @@ AdiTofDemoController::AdiTofDemoController()
             LOG(WARNING) << "no camera modes available!";
             return;
         }
-
+        camera->setMode(modes.front());
+        
     } else {
         LOG(WARNING) << "No cameras found!";
     }
@@ -90,6 +92,7 @@ bool AdiTofDemoController::setRegularConnection() {
             LOG(WARNING) << "no camera modes available!";
             return false;
         }
+
         return true;
 
     } else {
@@ -120,8 +123,7 @@ bool AdiTofDemoController::setNetworkConnection(const std::string &ip) {
             LOG(WARNING) << "no frame type available!";
             return false;
         }
-        //setFrameType("depth_only");
-        //setMode("near");
+        camera->setFrameType(frameTypes.front());
 
         std::vector<std::string> modes;
         camera->getAvailableModes(modes);
@@ -129,6 +131,8 @@ bool AdiTofDemoController::setNetworkConnection(const std::string &ip) {
             LOG(WARNING) << "no camera modes available!";
             return false;
         }
+        camera->setMode(modes.front());
+
         return true;
 
     } else {
