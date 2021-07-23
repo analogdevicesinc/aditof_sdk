@@ -116,6 +116,11 @@ AdiTofDemoView::~AdiTofDemoView() {
     m_irImageWorker.join();
 }
 
+bool USBModeChecked = false;
+bool localModeChecked = false;
+bool ethModeChecked = false;
+int connectionCurrentValue = 4;
+
 void AdiTofDemoView::render() {
 
     bool nearModeChecked = true;
@@ -146,11 +151,6 @@ void AdiTofDemoView::render() {
     std::string typeUSBDevice = "USB";
     std::string typeLocalDevice = "Local";
     std::string typeEthDevice = "ETH";
-
-    bool USBModeChecked = false;
-    bool localModeChecked = false;
-    bool ethModeChecked = false;
-    int connectionCurrentValue = 4;
 
     bool revBChecked = false;
     bool revCChecked = true;
@@ -322,6 +322,7 @@ void AdiTofDemoView::render() {
                 (2 - static_cast<int>(std::log2(frameTypeCurrentValue)));
             m_ctrl->setFrameType(frameTypes[selectedFrameType]);
             status = "Frame type set: " + frameTypes[selectedFrameType];
+            frameTypeCheckboxChanged = false;
 
             int selectedMode =
                 (2 - static_cast<int>(std::log2(modeCurrentValue)));
@@ -337,6 +338,7 @@ void AdiTofDemoView::render() {
             m_ctrl->setMode(modes[selectedMode]);
             status = "Mode set: " + modes[selectedMode];
             m_crtSmallSignalState = false;
+            checkboxChanged = false;
         }
 
         // Connection mode checkbox group
@@ -1176,7 +1178,12 @@ void AdiTofDemoView::_displayIrImageOnly() {
     std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
 
     uint16_t *irData;
-    localFrame->getData(aditof::FrameDataType::FULL_DATA, &irData);
+
+    if (localModeChecked) {
+        localFrame->getData(aditof::FrameDataType::IR, &irData);
+    } else {
+        localFrame->getData(aditof::FrameDataType::FULL_DATA, &irData);
+    }
 
     aditof::FrameDetails frameDetails;
     localFrame->getDetails(frameDetails);

@@ -86,6 +86,11 @@ class AdiTofDemoView {
 
     bool m_crtSmallSignalState;
     bool m_crtIRGamma;
+
+    bool USBModeChecked = false;
+    bool localModeChecked = false;
+    bool ethModeChecked = false;
+    int connectionCurrentValue = 4;
 };
 
 #endif
