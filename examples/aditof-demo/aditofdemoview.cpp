@@ -316,18 +316,26 @@ void AdiTofDemoView::render() {
         }
 
         // TODO: set camera mode here
-        if (checkboxChanged || frameTypeCheckboxChanged) {
+        if (frameTypeCheckboxChanged) {
             int selectedFrameType =
                 (2 - static_cast<int>(std::log2(frameTypeCurrentValue)));
             m_ctrl->setFrameType(frameTypes[selectedFrameType]);
-            //status = "Frame type set: " + frameTypes[selectedFrameType];
+            status = "Frame type set: " + frameTypes[selectedFrameType];
 
             int selectedMode =
                 (2 - static_cast<int>(std::log2(modeCurrentValue)));
-            //m_ctrl->setMode(modes[selectedMode]);
+            m_ctrl->setMode(modes[selectedMode]);
             status = "Mode set: " + modes[selectedMode];
             m_crtSmallSignalState = false;
+            checkboxChanged = false;
+        }
 
+        if (checkboxChanged ) { 
+            int selectedMode =
+                (2 - static_cast<int>(std::log2(modeCurrentValue)));
+            m_ctrl->setMode(modes[selectedMode]);
+            status = "Mode set: " + modes[selectedMode];
+            m_crtSmallSignalState = false;
         }
 
         // Connection mode checkbox group
@@ -373,8 +381,6 @@ void AdiTofDemoView::render() {
                             (2 - static_cast<int>(
                                      std::log2(frameTypeCurrentValue)));
                         m_ctrl->setFrameType(frameTypes[selectedFrameType]);
-                        status =
-                            "Frame type set: " + frameTypes[selectedFrameType];
 
                         int selectedMode =
                             (2 - static_cast<int>(std::log2(modeCurrentValue)));
@@ -387,6 +393,11 @@ void AdiTofDemoView::render() {
             if (USBModeChecked) {
                 bool connectionResult = m_ctrl->setRegularConnection();
                 if (connectionResult == true) {
+                    int selectedFrameType =
+                            (2 - static_cast<int>(
+                                     std::log2(frameTypeCurrentValue)));
+                        m_ctrl->setFrameType(frameTypes[selectedFrameType]);
+
                     int selectedMode =
                         (2 - static_cast<int>(std::log2(modeCurrentValue)));
                     m_ctrl->setMode(modes[selectedMode]);
@@ -396,6 +407,11 @@ void AdiTofDemoView::render() {
             if (localModeChecked) {
                 bool connectionResult = m_ctrl->setRegularConnection();
                 if (connectionResult == true) {
+                    int selectedFrameType =
+                            (2 - static_cast<int>(
+                                     std::log2(frameTypeCurrentValue)));
+                        m_ctrl->setFrameType(frameTypes[selectedFrameType]);
+
                     int selectedMode =
                         (2 - static_cast<int>(std::log2(modeCurrentValue)));
                     m_ctrl->setMode(modes[selectedMode]);
