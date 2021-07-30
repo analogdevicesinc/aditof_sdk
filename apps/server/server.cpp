@@ -389,7 +389,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         details.height = buff_recv.frame_type().height();
         details.type = buff_recv.frame_type().type();
         details.fullDataWidth = buff_recv.frame_type().full_data_width();
-        details.fullDataWidth = buff_recv.frame_type().full_data_height();
+        details.fullDataHeight = buff_recv.frame_type().full_data_height();
         aditof::Status status = camDepthSensor->setFrameType(details);
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
