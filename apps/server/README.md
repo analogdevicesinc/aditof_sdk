@@ -13,3 +13,19 @@ Limitations:
 To start the server on the target run the following command:
 
     ./aditof-server
+
+## Troubleshooting
+
+### Port error:
+
+`[2021/07/29 01:23:08:8024] NOTICE: Creating Vhost 'default' port 5000, 1 protocols, IPv6 off`
+
+`[2021/07/29 01:23:08:8027] ERR: ERROR on binding fd 6 to port 5000 (-1 98)`
+
+`[2021/07/29 01:23:08:8028] ERR: init server failed`
+
+`[2021/07/29 01:23:08:8029] ERR: Failed to create default vhost`
+
+If this error occurs please modify the port value from the following locations:
+* apps/server/server.cpp
+* sdk/src/connections/network/network.cpp
