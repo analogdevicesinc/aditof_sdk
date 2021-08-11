@@ -8,17 +8,23 @@ imaqhwinfo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Connect to the camera using either USB or Network
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 %% USB connection
 vid = videoinput('aditofadapter');
 %% Network connection
-%vid = videoinput('aditofadapter', 1, "<ip>"); % replace <ip> with the IP of the camera device 
+%ip = "<ip>";% replace <ip> with the IP of the camera device and uncomment the following block of code
+%fileID = fopen('ipAddr.txt','w');
+%fprintf(fileID,ip);
+%fclose(fileID);
+%vid = videoinput('aditofadapter', 1, ip); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Set the camera to output Depth and the mode to Near range
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 src = getselectedsource(vid); 
-src.FrameType = ‘Depth’;
-src.CameraMode = ‘Near’;
+src.FrameType = 'Depth';
+src.CameraMode = 'Near';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Play the depth video stream for a number of frames
@@ -35,8 +41,8 @@ stop(vid);
 %%% Set the camera to output IR and the mode to Medium range
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 src = getselectedsource(vid); 
-src.FrameType = ‘Ir’;
-src.CameraMode = ‘Medium’;
+src.FrameType = 'Ir';
+src.CameraMode = 'Medium';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Play the IR video stream for number of frames
