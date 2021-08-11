@@ -391,9 +391,9 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer) {
 
     // net->recv_buff.bytes_payload(0).c_str() is 1 if deinterleaving is needed
     // or 0 if not.
-    if(net->recv_buff.int32_payload(0) == 0) {
+    if (net->recv_buff.int32_payload(0) == 0) {
         memcpy(buffer, net->recv_buff.bytes_payload(0).c_str(),
-                net->recv_buff.bytes_payload(0).length());
+               net->recv_buff.bytes_payload(0).length());
     } else {
         aditof::deinterleave(net->recv_buff.bytes_payload(0).c_str(), buffer,
                              net->recv_buff.bytes_payload(0).length(),

@@ -428,10 +428,11 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
         }
-        
+
 #ifdef JETSON
         buff_send.add_int32_payload(0);
-        buff_send.add_bytes_payload(buffer, buf_data_len * sizeof(uint16_t) / 3);
+        buff_send.add_bytes_payload(buffer,
+                                    buf_data_len * sizeof(uint16_t) / 3);
 #else
         buff_send.add_int32_payload(1);
         buff_send.add_bytes_payload(buffer, buf_data_len * sizeof(uint8_t));
