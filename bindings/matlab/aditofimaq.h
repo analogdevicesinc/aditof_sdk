@@ -101,7 +101,7 @@ const char *const FRAME_TYPE_STR = "FrameType";
 const char *const FRAME_TYPE_DEPTH_STR = "Depth";
 const char *const FRAME_TYPE_IR_STR = "Ir";
 
-enum { FRAME_TYPE_DEPTH_ID = 1, FRAME_TYPE_IR_ID = 2 };
+enum { FRAME_TYPE_DEPTH_ID = 1, FRAME_TYPE_IR_ID = 2, FRAME_TYPE_RAW_DEPTH_ID = 3 };
 
 const char *const SMALL_SIGNAL_STR = "SmallSignalRemoval";
 const int64_t SMALL_SIGNAL_LOWER_LIMIT = 0;
