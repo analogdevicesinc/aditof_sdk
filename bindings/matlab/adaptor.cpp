@@ -128,6 +128,20 @@ void getAvailHW(imaqkit::IHardwareInfo *hardwareContainer) {
 
         deviceInfo->addDeviceFormat(deviceFormat);
 
+        deviceFormat = deviceInfo->createDeviceFormat(aditof::MONO_FORMAT_ID,
+                                                      aditof::MONO_FORMAT_STR);
+
+        DeviceFormat *mono16FormatInfo = new DeviceFormat();
+
+        mono16FormatInfo->setFormatWidth(aditof::MONO_FORMAT_WIDTH);
+        mono16FormatInfo->setFormatHeight(aditof::MONO_FORMAT_WIDTH);
+        mono16FormatInfo->setFormatNumBands(aditof::MONO_FORMAT_BANDS);
+        mono16FormatInfo->setFormatFrameType(imaqkit::frametypes::MONO16);
+
+        deviceFormat->setAdaptorData(mono16FormatInfo);
+
+        deviceInfo->addDeviceFormat(deviceFormat);
+
         hardwareContainer->addDevice(deviceInfo);
 
         currentCount++;
@@ -152,6 +166,20 @@ void getAvailHW(imaqkit::IHardwareInfo *hardwareContainer) {
     deviceFormat->setAdaptorData(bgrFormatInfo);
 
     deviceInfo->addDeviceFormat(deviceFormat, true);
+
+    deviceFormat = deviceInfo->createDeviceFormat(aditof::MONO_FORMAT_ID,
+                                                  aditof::MONO_FORMAT_STR);
+
+    DeviceFormat *mono16FormatInfo = new DeviceFormat();
+
+    mono16FormatInfo->setFormatWidth(aditof::MONO_FORMAT_WIDTH);
+    mono16FormatInfo->setFormatHeight(aditof::MONO_FORMAT_WIDTH);
+    mono16FormatInfo->setFormatNumBands(aditof::MONO_FORMAT_BANDS);
+    mono16FormatInfo->setFormatFrameType(imaqkit::frametypes::MONO16);
+
+    deviceFormat->setAdaptorData(mono16FormatInfo);
+
+    deviceInfo->addDeviceFormat(deviceFormat);
 
     hardwareContainer->addDevice(deviceInfo);
 }
