@@ -274,7 +274,7 @@ void SourceAdaptor::setDisplayedFrameType(int16_t type) {
     if (m_currentDisplayedType == type) {
         return;
     }
-
+    //Do we still ned to keep this?
     switch (type) {
     case aditof::FRAME_TYPE_DEPTH_ID:
         break;
@@ -564,6 +564,7 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
 
         if (frame) {
             if (adaptor->m_currentDisplayedType == aditof::FRAME_TYPE_IR_ID) {
+
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::IR, &data);
                 for (int i = 0; i < imageHeight * imageWidth; ++i) {
@@ -572,7 +573,9 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
                 }
 
                 frameType = imaqkit::frametypes::MONO8;
-            } else if(adaptor->m_currentDisplayedType == aditof::FRAME_TYPE_DEPTH_ID) {
+            } else if (adaptor->m_currentDisplayedType ==
+                       aditof::FRAME_TYPE_DEPTH_ID) {
+
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::DEPTH, &data);
                 for (int i = 0; i < imageHeight * imageWidth; ++i) {
@@ -601,17 +604,14 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
 
                 frameType = imaqkit::frametypes::BGR24_PACKED;
             } else if (adaptor->m_currentDisplayedType ==
-                aditof::FRAME_TYPE_RAW_DEPTH_ID) {
+                       aditof::FRAME_TYPE_RAW_DEPTH_ID) {
+
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::DEPTH, &data);
-                for (int i = 0; i < imageHeight * imageWidth; ++i) {
-                    int value = ((static_cast<double>(data[i]) - minDepth) /
-                                 (maxDepth - minDepth) * 255.0);
-                    value = value < 0 ? 0 : value;
-                    imBuffer[i] =
-                        static_cast<uint8_t>(value <= 255 ? value : 255);
-                }
-
+                uint8_t *displayedImage = new uint8_t[2 * bufferSize];
+                memcpy(displayedImage, data, bufferSize * 2);
+                delete[] imBuffer;
+                imBuffer = displayedImage;
                 frameType = imaqkit::frametypes::MONO16;
             }
         } else {

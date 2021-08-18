@@ -128,14 +128,14 @@ void getAvailHW(imaqkit::IHardwareInfo *hardwareContainer) {
 
         deviceInfo->addDeviceFormat(deviceFormat);
 
-        deviceFormat = deviceInfo->createDeviceFormat(aditof::MONO_FORMAT_ID,
-                                                      aditof::MONO_FORMAT_STR);
+        deviceFormat = deviceInfo->createDeviceFormat(
+            aditof::MONO16_FORMAT_ID, aditof::MONO16_FORMAT_STR);
 
         DeviceFormat *mono16FormatInfo = new DeviceFormat();
 
-        mono16FormatInfo->setFormatWidth(aditof::MONO_FORMAT_WIDTH);
-        mono16FormatInfo->setFormatHeight(aditof::MONO_FORMAT_WIDTH);
-        mono16FormatInfo->setFormatNumBands(aditof::MONO_FORMAT_BANDS);
+        mono16FormatInfo->setFormatWidth(aditof::MONO16_FORMAT_WIDTH);
+        mono16FormatInfo->setFormatHeight(aditof::MONO16_FORMAT_WIDTH);
+        mono16FormatInfo->setFormatNumBands(aditof::MONO16_FORMAT_BANDS);
         mono16FormatInfo->setFormatFrameType(imaqkit::frametypes::MONO16);
 
         deviceFormat->setAdaptorData(mono16FormatInfo);
@@ -167,14 +167,14 @@ void getAvailHW(imaqkit::IHardwareInfo *hardwareContainer) {
 
     deviceInfo->addDeviceFormat(deviceFormat, true);
 
-    deviceFormat = deviceInfo->createDeviceFormat(aditof::MONO_FORMAT_ID,
-                                                  aditof::MONO_FORMAT_STR);
+    deviceFormat = deviceInfo->createDeviceFormat(aditof::MONO16_FORMAT_ID,
+                                                  aditof::MONO16_FORMAT_STR);
 
     DeviceFormat *mono16FormatInfo = new DeviceFormat();
 
-    mono16FormatInfo->setFormatWidth(aditof::MONO_FORMAT_WIDTH);
-    mono16FormatInfo->setFormatHeight(aditof::MONO_FORMAT_WIDTH);
-    mono16FormatInfo->setFormatNumBands(aditof::MONO_FORMAT_BANDS);
+    mono16FormatInfo->setFormatWidth(aditof::MONO16_FORMAT_WIDTH);
+    mono16FormatInfo->setFormatHeight(aditof::MONO16_FORMAT_WIDTH);
+    mono16FormatInfo->setFormatNumBands(aditof::MONO16_FORMAT_BANDS);
     mono16FormatInfo->setFormatFrameType(imaqkit::frametypes::MONO16);
 
     deviceFormat->setAdaptorData(mono16FormatInfo);
@@ -271,6 +271,8 @@ void getDeviceAttributes(const imaqkit::IDeviceInfo *deviceInfo,
                                                    aditof::FRAME_TYPE_DEPTH_ID);
         devicePropFact->addEnumValue(hProp, aditof::FRAME_TYPE_IR_STR,
                                      aditof::FRAME_TYPE_IR_ID);
+        devicePropFact->addEnumValue(hProp, aditof::FRAME_TYPE_RAW_DEPTH_STR,
+                                     aditof::FRAME_TYPE_RAW_DEPTH_ID);
 
         devicePropFact->setPropReadOnly(hProp,
                                         imaqkit::propreadonly::WHILE_RUNNING);
