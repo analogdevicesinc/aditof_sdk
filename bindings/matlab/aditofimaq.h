@@ -82,6 +82,12 @@ const int MONO_FORMAT_WIDTH = 640;
 const int MONO_FORMAT_HEIGHT = 480;
 const int MONO_FORMAT_BANDS = 1;
 
+const char *const MONO16_FORMAT_STR = "MONO16";
+const int MONO16_FORMAT_ID = 2;
+const int MONO16_FORMAT_WIDTH = 640;
+const int MONO16_FORMAT_HEIGHT = 480;
+const int MONO16_FORMAT_BANDS = 1;
+
 enum {
     ADITOF_PROPERTY_MODE = 1,
     ADITOF_PROPERTY_FRAME_TYPE = 2,
@@ -100,8 +106,13 @@ enum { MODE_NEAR_ID = 1, MODE_MEDIUM_ID = 2, MODE_FAR_ID = 3 };
 const char *const FRAME_TYPE_STR = "FrameType";
 const char *const FRAME_TYPE_DEPTH_STR = "Depth";
 const char *const FRAME_TYPE_IR_STR = "Ir";
+const char *const FRAME_TYPE_RAW_DEPTH_STR = "RawDepth";
 
-enum { FRAME_TYPE_DEPTH_ID = 1, FRAME_TYPE_IR_ID = 2, FRAME_TYPE_RAW_DEPTH_ID = 3 };
+enum {
+    FRAME_TYPE_DEPTH_ID = 1,
+    FRAME_TYPE_IR_ID = 2,
+    FRAME_TYPE_RAW_DEPTH_ID = 3
+};
 
 const char *const SMALL_SIGNAL_STR = "SmallSignalRemoval";
 const int64_t SMALL_SIGNAL_LOWER_LIMIT = 0;
