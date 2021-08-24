@@ -176,6 +176,20 @@ aditof::Status UsbDepthSensor::getAvailableFrameTypes(
     details.type = "depth_ir";
     types.push_back(details);
 
+    details.width = aditof::USB_FRAME_WIDTH;
+    details.height = aditof::USB_FRAME_HEIGHT;
+    details.fullDataWidth = details.width;
+    details.fullDataHeight = details.height; //TODO
+    details.type = "depth_only";
+    types.push_back(details);
+
+    details.width = aditof::USB_FRAME_WIDTH;
+    details.height = aditof::USB_FRAME_HEIGHT;
+    details.fullDataWidth = details.width;
+    details.fullDataHeight = details.height; //TODO
+    details.type = "ir_only";
+    types.push_back(details);
+
     // TO DO: Should get these details from the hardware/firmware
 
     return status;
