@@ -32,27 +32,77 @@
 #include "connections/target/target_sensor_enumerator.h"
 #include "sensor_names.h"
 #include "target_definitions.h"
-
-#include <dirent.h>
 #include <glog/logging.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>
 
 using namespace aditof;
 
+aditof::Status findDevicePathsAtMedia(std::string &dev_name,
+                                      std::string &subdev_name) {
+    using namespace aditof;
+    using namespace std;
+
+    char *buf;
+    int size = 0;
+
+    /* Checking for available devices */
+    char cmd[96];
+    sprintf(cmd, "v4l2-ctl --list-devices | grep addi9036 -A 2 | sed '1d' | "
+                 "sed 's/^[[:space:]]*//g' | sed '2d'");
+    FILE *fp = popen(cmd, "r");
+    if (!fp) {
+        LOG(WARNING) << "Error running v4l2-ctl";
+        return Status::GENERIC_ERROR;
+    }
+
+    /* Read the media-ctl output stream */
+    buf = (char *)malloc(128 * 1024);
+    while (!feof(fp)) {
+        fread(&buf[size], 1, 1, fp);
+        size++;
+    }
+    pclose(fp);
+    std::string str(buf);
+    str.resize(size - 2);
+
+    /*Check if the obtained file has content dev and vide in it*/
+    if (str.find("dev") == string::npos || str.find("video") == string::npos) {
+        LOG(WARNING) << "Generic error";
+        return Status::GENERIC_ERROR;
+    }
+    std::cout << "The result:" << str << "| \n";
+    dev_name = str;
+    subdev_name = str;
+    return Status::OK;
+}
+
 Status TargetSensorEnumerator::searchSensors() {
+    Status status = Status::OK;
     LOG(INFO) << "Looking for devices on the target: Jetson";
 
     // TO DO: Don't guess the device, find a way to identify it so we are sure
     // we've got the right sensor and it's compatible with the SDK
     SensorInfo sInfo;
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
-    sInfo.driverPath = "/dev/video0";
-    sInfo.subDevPath = "/dev/video0";
+
+    std::string devPath;
+    std::string subdevPath;
+
+    status = findDevicePathsAtMedia(devPath, subdevPath);
+    if (status != Status::OK) {
+        LOG(WARNING) << "failed to find device paths";
+        return status;
+    }
+
+    if (devPath.empty() || subdevPath.empty()) {
+        return Status::GENERIC_ERROR;
+    }
+
+    sInfo.driverPath = devPath;
+    sInfo.subDevPath = subdevPath;
     sInfo.captureDev = CAPTURE_DEVICE_NAME;
     m_sensorsInfo.emplace_back(sInfo);
 
