@@ -53,6 +53,9 @@ void AditofDemoRecorder::startRecording(
     const aditof::CameraDetails &cameraDetails, unsigned int fps) {
     m_recordFile.open(fileName, std::ios::binary);
 
+    m_frameDetails.height = static_cast<int>(frameDetails.height);
+    m_frameDetails.width = static_cast<int>(frameDetails.width);
+
     /* Header version */
     unsigned char version = FILE_HEADER_VERSION;
     m_recordFile.write(reinterpret_cast<const char *>(&version),
@@ -108,9 +111,6 @@ void AditofDemoRecorder::startRecording(
     m_recordFile.write(reinterpret_cast<const char *>(&p2), sizeof(float));
     float k3 = cameraDetails.intrinsics.distCoeffs.at(4);
     m_recordFile.write(reinterpret_cast<const char *>(&k3), sizeof(float));
-
-    m_frameDetails.height = static_cast<int>(frameDetails.height);
-    m_frameDetails.width = static_cast<int>(frameDetails.width);
 
     m_recordTreadStop = false;
     m_recordThread =
@@ -262,7 +262,7 @@ void AditofDemoRecorder::recordThread() {
         unsigned int width = m_frameDetails.width;
         unsigned int height = m_frameDetails.height;
 
-        int size = static_cast<int>(sizeof(uint16_t) * width * height);
+        int size = static_cast<int>(sizeof(uint16_t) * width * height * 2);
 
         m_recordFile.write(reinterpret_cast<const char *>(data), size);
     }
@@ -295,10 +295,10 @@ void AditofDemoRecorder::playbackThread() {
         unsigned int height = m_frameDetails.height;
 
         if (m_playbackFile.eof()) {
-            memset(frameDataLocation, 0, sizeof(uint16_t) * width * height);
+            memset(frameDataLocation, 0, sizeof(uint16_t) * width * height * 2);
             m_playBackEofReached = true;
         } else {
-            int size = static_cast<int>(sizeof(uint16_t) * width * height);
+            int size = static_cast<int>(sizeof(uint16_t) * width * height * 2);
             m_playbackFile.read(reinterpret_cast<char *>(frameDataLocation),
                                 size);
         }
