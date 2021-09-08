@@ -434,22 +434,24 @@ void AdiTofDemoView::render() {
         cvui::checkbox("Far", &farModeChecked);
         cvui::endRow();
         cvui::endColumn();
-
-        cvui::beginColumn(frame, 265, 105);
-        cvui::space(10);
-        cvui::text("Frame type: ", 0.6);
-        cvui::space(10);
-        cvui::beginRow(frame, 265, 140);
-        cvui::checkbox("depth_ir", &depthIrChecked);
-        cvui::endRow();
-        cvui::beginRow(frame, 265, 170);
-        cvui::checkbox("depth_only", &depthOnlyChecked);
-        cvui::endRow();
-        cvui::beginRow(frame, 265, 200);
-        cvui::checkbox("ir_only", &irOnlyChecked);
-        cvui::endRow();
-        cvui::endColumn();
-
+#ifdef FXTOF1
+        if (!USBModeChecked) {
+            cvui::beginColumn(frame, 265, 105);
+            cvui::space(10);
+            cvui::text("Frame type: ", 0.6);
+            cvui::space(10);
+            cvui::beginRow(frame, 265, 140);
+            cvui::checkbox("depth_ir", &depthIrChecked);
+            cvui::endRow();
+            cvui::beginRow(frame, 265, 170);
+            cvui::checkbox("depth_only", &depthOnlyChecked);
+            cvui::endRow();
+            cvui::beginRow(frame, 265, 200);
+            cvui::checkbox("ir_only", &irOnlyChecked);
+            cvui::endRow();
+            cvui::endColumn();
+        }
+#endif
         cvui::text(frame, 50, 160, "Video: ", 0.6);
 
         if (cvui::button(
