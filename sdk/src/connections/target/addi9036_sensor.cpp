@@ -367,6 +367,7 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
             }
             free(dev->videoBuffers);
             dev->nVideoBuffers = 0;
+            //Clear the video buffers from the driver.
             CLEAR(req);
             req.count = 0;
             req.type = dev->videoBuffersType;
