@@ -188,17 +188,9 @@ aditof::Status CameraFxTof1::initialize() {
     return Status::OK;
 }
 
-aditof::Status CameraFxTof1::start() {
-    return m_depthSensor
-        ->start(); // For now we keep the device open all the time
-    //return aditof::Status::OK;
-}
+aditof::Status CameraFxTof1::start() { return m_depthSensor->start(); }
 
-aditof::Status CameraFxTof1::stop() {
-    return m_depthSensor
-        ->stop(); // For now we keep the device open all the time
-    //return aditof::Status::OK;
-}
+aditof::Status CameraFxTof1::stop() { return m_depthSensor->stop(); }
 
 aditof::Status CameraFxTof1::setMode(const std::string &mode,
                                      const std::string &modeFilename) {
@@ -323,6 +315,7 @@ aditof::Status CameraFxTof1::setFrameType(const std::string &frameType) {
     }
 
     if (m_details.frameType != *frameDetailsIt) {
+        //Turn off the streaming of data to modify parameters in the driver.
         uint16_t afeRegsAddr[2] = {0x4001, 0x7c22};
         uint16_t afeRegsVal[2] = {0x0006, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 2);
@@ -332,6 +325,7 @@ aditof::Status CameraFxTof1::setFrameType(const std::string &frameType) {
             return status;
         }
         m_details.frameType = *frameDetailsIt;
+        //Turn on the streaming of data.
         uint16_t afeRegsAddress[2] = {0x4001, 0x7c22};
         uint16_t afeRegsValue[2] = {0x0007, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddress, afeRegsValue, 2);
