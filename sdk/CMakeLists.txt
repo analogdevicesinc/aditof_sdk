@@ -76,10 +76,6 @@ if (NOT APPLE AND NOT WIN32)
     option(RUN_LDCONFIG "Run ldconfig after install." ON)
 endif()
 
-if ( USE_CHICONY AND USE_FXTOF1)
-    message( FATAL_ERROR "USE_CHICONY and USE_FXTOF1 are both selected. \nPlease select a single camera. CMake will exit." )
-endif()
-
 if(IGNORE_TARGET_VERSION)
     add_definitions(-DIGNORE_TARGET_VERSION)
 endif()
