@@ -47,6 +47,7 @@ enum class FrameDataType {
     FULL_DATA, //!< Raw information
     DEPTH,     //!< Depth information
     IR,        //!< Infrared information
+    RGB        //!< RGB information
 };
 
 /**
@@ -73,6 +74,16 @@ struct FrameDetails {
      * @brief The height of the actual full frame.
      */
     unsigned int fullDataHeight;
+
+    /**
+     * @brief The width of the rgb frame.
+     */
+    unsigned int rgbWidth;
+
+    /**
+     * @brief The height of the rgb frame.
+     */
+    unsigned int rgbHeight;
 
     /**
      * @brief The type of the frame. Can be one of the types provided by the
