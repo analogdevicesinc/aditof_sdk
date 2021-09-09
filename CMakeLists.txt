@@ -38,6 +38,23 @@ option(USE_3D_SMART "Use 3D Smart camera?" OFF)
 option(WITH_TOOLS "Build tools?" OFF)
 option(IGNORE_TARGET_VERSION "Ignore sdk version on target?" OFF)
 
+# Throw error if more than one camera is selected
+if ( USE_CHICONY AND USE_FXTOF1)
+    message( FATAL_ERROR "USE_CHICONY and USE_FXTOF1 are both selected. \nPlease select a single camera. CMake will exit." )
+endif()
+set(SELECTED_CAMERAS 0)
+set(ALL_CAM_OPTIONS USE_CHICONY;USE_FXTOF1;USE_3D_SMART)
+foreach(option IN LISTS ALL_CAM_OPTIONS)
+    if(${option})
+        math(EXPR SELECTED_CAMERAS "${SELECTED_CAMERAS}+1")
+    endif()
+endforeach()
+
+if(${SELECTED_CAMERAS} GREATER 1)
+    message("More than one camera was selected. \nPlease select a single camera. CMake will exit.")
+endif()
+
+
 if (WITH_NETWORK)
         add_definitions(-DHAS_NETWORK)
 endif()
