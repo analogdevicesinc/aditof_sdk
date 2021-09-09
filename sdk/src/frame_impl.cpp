@@ -38,8 +38,8 @@
 #include <glog/logging.h>
 
 FrameImpl::FrameImpl()
-    : m_details{0, 0, 0, 0, ""}, m_depthData(nullptr), m_irData(nullptr),
-      m_fullData(nullptr) {}
+    : m_details{0, 0, 0, 0, 0, 0, ""}, m_depthData(nullptr), m_irData(nullptr),
+      m_rgbData(nullptr), m_fullData(nullptr) {}
 
 FrameImpl::~FrameImpl() {
     if (m_fullData) {
@@ -120,13 +120,19 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
         *dataPtr = m_depthData;
         break;
     }
+    case FrameDataType::RGB: {
+        *dataPtr = m_rgbData;
+        break;
+    }
     }
 
     return Status::OK;
 }
 
 void FrameImpl::allocFrameData(const aditof::FrameDetails &details) {
-    m_fullData = new uint16_t[details.width * details.height * 2];
+    m_fullData = new uint16_t[details.width * details.height * 2 +
+                              details.rgbWidth * details.rgbHeight];
     m_depthData = m_fullData;
     m_irData = m_fullData + (details.width * details.height);
+    m_rgbData = m_fullData + (details.width * details.height * 2);
 }
