@@ -135,8 +135,6 @@ aditof::Status CameraFxTof1::initialize() {
     // Open communication with the depth sensor
     Status status = m_depthSensor->open();
 
-    m_details.bitCount = 12;
-
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to open device";
         return status;
@@ -148,6 +146,8 @@ aditof::Status CameraFxTof1::initialize() {
         LOG(ERROR) << "Failed to obtain the handle";
         return status;
     }
+
+    m_details.bitCount = 12;
 
     // Open communication with EEPROM
     status = m_eeprom->open(handle);
