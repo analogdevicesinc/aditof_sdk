@@ -34,6 +34,7 @@ option(WITH_ROS "Build ros bindings?" OFF)
 option(WITH_NETWORK "Build network interface?" ON)
 option(USE_CHICONY "Use Chicony 006 camera?" OFF)
 option(USE_FXTOF1 "Use FXTOF1 camera?" OFF)
+option(USE_3D_SMART "Use 3D Smart camera?" OFF)
 option(WITH_TOOLS "Build tools?" OFF)
 option(IGNORE_TARGET_VERSION "Ignore sdk version on target?" OFF)
 
@@ -47,6 +48,10 @@ endif()
 
 if (USE_FXTOF1)
         add_definitions(-DFXTOF1)
+endif()
+
+if (USE_3D_SMART)
+        add_definitions(-DSMART_3D)
 endif()
 
 add_subdirectory(sdk)
