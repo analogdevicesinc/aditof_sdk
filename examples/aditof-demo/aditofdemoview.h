@@ -56,8 +56,6 @@ class AdiTofDemoView {
     void _displayDepthImage();
     void _displayIrImage();
     void _displayBlendedImage();
-    void _displayDepthImageOnly();
-    void _displayIrImageOnly();
 
   private:
     std::shared_ptr<AdiTofDemoController> m_ctrl;
@@ -80,7 +78,7 @@ class AdiTofDemoView {
 
     std::mutex m_imshowMutex;
     int m_waitKeyBarrier;
-
+    int threadNum;
     std::condition_variable m_barrierCv;
     int m_distanceVal;
 
@@ -91,6 +89,12 @@ class AdiTofDemoView {
     bool localModeChecked = false;
     bool ethModeChecked = false;
     int connectionCurrentValue = 4;
+
+    bool depthIrChecked = true;
+    bool depthOnlyChecked = false;
+    bool irOnlyChecked = false;
+    int frameTypeCurrentValue = 4;
+    // 4 = depthIr(default); 2 = depthOnly; 1 = irOnly
 };
 
 #endif
