@@ -97,12 +97,6 @@ void AdiTofDemoView::render() {
     bool farModeChecked = false;
     int modeCurrentValue = 4; // 4 = near(default); 2 = medium; 1 = far
 
-    bool depthIrChecked = true;
-    bool depthOnlyChecked = false;
-    bool irOnlyChecked = false;
-    int frameTypeCurrentValue =
-        4; // 4 = depthIr(default); 2 = depthOnly; 1 = irOnly
-
     bool lowLevelChecked = false;
     bool mediumLevelChecked = false;
     bool highLevelChecked = false;
@@ -300,6 +294,16 @@ void AdiTofDemoView::render() {
             m_crtSmallSignalState = false;
             checkboxChanged = false;
         }
+
+        if (depthIrChecked) {
+            threadNum = 2;
+        } else {
+            threadNum = 1;
+        }
+
+#ifdef SMART_3D
+        threadNum++;
+#endif
 
         if (checkboxChanged) {
             int selectedMode =
@@ -813,7 +817,7 @@ void AdiTofDemoView::render() {
 
         cvui::imshow(m_viewName, frame);
 
-        if (captureEnabled && depthIrChecked) {
+        if (captureEnabled) {
             if (playbackEnabled) {
                 std::this_thread::sleep_for(
                     std::chrono::milliseconds(1000 / displayFps));
@@ -829,8 +833,16 @@ void AdiTofDemoView::render() {
             } else if (!captureBlendedEnabled) {
                 m_capturedFrame = m_ctrl->getFrame();
                 std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
-                m_depthFrameAvailable = true;
-                m_irFrameAvailable = true;
+                if (depthOnlyChecked) {
+                    m_depthFrameAvailable = true;
+                    m_irFrameAvailable = false;
+                } else if (irOnlyChecked) {
+                    m_irFrameAvailable = true;
+                    m_depthFrameAvailable = false;
+                } else {
+                    m_depthFrameAvailable = true;
+                    m_irFrameAvailable = true;
+                }
                 lock.unlock();
                 m_frameCapturedCv.notify_all();
                 m_ctrl->requestFrame();
@@ -845,7 +857,7 @@ void AdiTofDemoView::render() {
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         if (captureEnabled && !captureBlendedEnabled && depthIrChecked) {
             m_barrierCv.wait(imshow_lock,
-                             [&]() { return m_waitKeyBarrier == 2; });
+                             [&]() { return m_waitKeyBarrier == threadNum; });
             m_waitKeyBarrier = 0;
 
             cvui::imshow("Depth Image", m_depthImage);
@@ -861,18 +873,18 @@ void AdiTofDemoView::render() {
         }
 
         if (captureEnabled && depthOnlyChecked) {
-            m_ctrl->requestFrame();
-            m_capturedFrame = m_ctrl->getFrame();
-            _displayDepthImageOnly();
+            m_barrierCv.wait(imshow_lock,
+                             [&]() { return m_waitKeyBarrier == threadNum; });
+            m_waitKeyBarrier = 0;
             cvui::imshow("Depth/Ir Only Image", m_depthImage);
             m_depthImage.release();
         }
 
         if (captureEnabled && irOnlyChecked) {
-            m_ctrl->requestFrame();
-            m_capturedFrame = m_ctrl->getFrame();
-            _displayIrImageOnly();
-            cvui::imshow("Depth/Ir Only Image", m_irImage);
+            m_barrierCv.wait(imshow_lock,
+                             [&]() { return m_waitKeyBarrier == threadNum; });
+            m_waitKeyBarrier = 0;
+            cvui::imshow("Depth/Ir Only Image", m_depthImage);
             m_irImage.release();
         }
 
@@ -962,7 +974,6 @@ void AdiTofDemoView::_displayDepthImage() {
 
         std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
         lock.unlock(); // Lock is no longer needed
-
         uint16_t *data;
         localFrame->getData(aditof::FrameDataType::DEPTH, &data);
 
@@ -1013,9 +1024,9 @@ void AdiTofDemoView::_displayDepthImage() {
                         cv::Scalar(color, color, color));
         }
         m_waitKeyBarrier += 1;
-        if (m_waitKeyBarrier == 2) {
+        if (m_waitKeyBarrier == threadNum) {
             imshow_lock.unlock();
-            m_barrierCv.notify_one();
+            m_barrierCv.notify_all();
         }
     }
 }
@@ -1034,7 +1045,6 @@ void AdiTofDemoView::_displayIrImage() {
 
         std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
         lock.unlock(); // Lock is no longer needed
-
         uint16_t *irData;
         localFrame->getData(aditof::FrameDataType::IR, &irData);
 
@@ -1048,10 +1058,9 @@ void AdiTofDemoView::_displayIrImage() {
         m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
         m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
         flip(m_irImage, m_irImage, 1);
-
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         m_waitKeyBarrier += 1;
-        if (m_waitKeyBarrier == 2) {
+        if (m_waitKeyBarrier == threadNum) {
             imshow_lock.unlock();
             m_barrierCv.notify_one();
         }
@@ -1090,80 +1099,4 @@ void AdiTofDemoView::_displayBlendedImage() {
 
     cv::addWeighted(m_depthImage, m_blendValue, m_irImage, 1.0F - m_blendValue,
                     0, m_blendedImage);
-}
-
-void AdiTofDemoView::_displayDepthImageOnly() {
-    std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
-
-    uint16_t *data;
-    localFrame->getData(aditof::FrameDataType::FULL_DATA, &data);
-
-    aditof::FrameDetails frameDetails;
-    localFrame->getDetails(frameDetails);
-
-    int frameHeight = static_cast<int>(frameDetails.height);
-    int frameWidth = static_cast<int>(frameDetails.width);
-
-    m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
-
-    cv::Point2d pointxy(320, 240);
-    m_distanceVal = static_cast<int>(m_distanceVal * 0.7 +
-                                     m_depthImage.at<ushort>(pointxy) * 0.3);
-    char text[20];
-    sprintf(text, "%dmm", m_distanceVal);
-
-    m_depthImage.convertTo(
-        m_depthImage, CV_8U,
-        (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
-        (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
-         m_ctrl->getRangeMin()));
-    flip(m_depthImage, m_depthImage, 1);
-    applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
-
-    int color;
-    if (m_distanceVal > 2500)
-        color = 0;
-    else
-        color = 4096;
-
-    if (m_center) {
-#ifndef OPENCV2
-        cv::drawMarker(m_depthImage, pointxy, cv::Scalar(color, color, color),
-                       cv::MARKER_CROSS);
-#else
-        cv::line(m_depthImage, cv::Point(pointxy.x - 10, pointxy.y),
-                 cv::Point(pointxy.x + 10, pointxy.y),
-                 cv::Scalar(color, color, color));
-        cv::line(m_depthImage, cv::Point(pointxy.x, pointxy.y - 10),
-                 cv::Point(pointxy.x, pointxy.y + 10),
-                 cv::Scalar(color, color, color));
-#endif
-        cv::circle(m_depthImage, pointxy, 8, cv::Scalar(color, color, color));
-        cv::putText(m_depthImage, text, pointxy + cv::Point2d(10, 20),
-                    cv::FONT_HERSHEY_DUPLEX, 2,
-                    cv::Scalar(color, color, color));
-    }
-}
-
-void AdiTofDemoView::_displayIrImageOnly() {
-    std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
-
-    uint16_t *irData;
-
-    if (localModeChecked) {
-        localFrame->getData(aditof::FrameDataType::IR, &irData);
-    } else {
-        localFrame->getData(aditof::FrameDataType::FULL_DATA, &irData);
-    }
-
-    aditof::FrameDetails frameDetails;
-    localFrame->getDetails(frameDetails);
-
-    int frameHeight = static_cast<int>(frameDetails.height);
-    int frameWidth = static_cast<int>(frameDetails.width);
-    int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
-
-    m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
-    m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
-    flip(m_irImage, m_irImage, 1);
 }
