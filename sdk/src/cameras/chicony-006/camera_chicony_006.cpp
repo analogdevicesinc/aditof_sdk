@@ -328,7 +328,7 @@ aditof::Status CameraChicony::requestFrame(aditof::Frame *frame,
     using namespace aditof;
     Status status = Status::OK;
 
-    if (frame == nullptr){
+    if (frame == nullptr) {
         LOG(ERROR) << "Received frame null pointer";
         return aditof::Status::INVALID_ARGUMENT;
     }
@@ -361,8 +361,11 @@ aditof::Status CameraChicony::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<aditof::DepthSensorInterface> CameraChicony::getSensor() {
-    return m_sensor;
+aditof::Status CameraChicony::getImageSensors(
+    std::vector<std::shared_ptr<aditof::DepthSensorInterface>> &sensors) {
+    sensors.clear();
+    sensors.emplace_back(m_depthSensor);
+    return aditof::Status::OK;
 }
 
 aditof::Status CameraChicony::getEeproms(

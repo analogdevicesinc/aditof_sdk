@@ -71,14 +71,16 @@ status = camera1.setMode(modes[0])
 print("camera1.setMode()", status)
 
 # Get access to the low-level API of the camera
-cam1Sensor = camera1.getSensor()
+image_sensors = []
+camera1.getImageSensor(image_sensors)
+cam1Sensor = image_sensors[0]
 
 eeproms = []
 status = camera1.getEeproms(eeproms)
 eeprom1 = eeproms[0]
 
 # Read a couple of bytes from EEPROM
-eeprom_read_address = 0x0000;
+eeprom_read_address = 0x0000
 eeprom_read_data = np.array([0, 0, 0, 0], dtype=np.uint8)
 status = eeprom1.read(eeprom_read_address, eeprom_read_data, len(eeprom_read_data))
 print("eeprom.read()", status)

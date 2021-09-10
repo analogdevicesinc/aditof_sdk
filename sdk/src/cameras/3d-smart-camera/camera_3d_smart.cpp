@@ -38,6 +38,7 @@
 
 #include <array>
 #include <glog/logging.h>
+#include <map>
 
 static const std::string skCameraName = "3D-Smart-Camera";
 
@@ -320,7 +321,7 @@ aditof::Status Camera3D_Smart::setMode(const std::string &mode,
 
 aditof::Status Camera3D_Smart::getAvailableModes(
     std::vector<std::string> &availableModes) const {
-using namespace aditof;
+    using namespace aditof;
     Status status = Status::OK;
 
     // Dummy data. To remove when implementig this method
@@ -461,8 +462,13 @@ Camera3D_Smart::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<aditof::DepthSensorInterface> Camera3D_Smart::getSensor() {
-    return m_depthSensor;
+aditof::Status Camera3D_Smart::getImageSensors(
+    std::vector<std::shared_ptr<aditof::DepthSensorInterface>> &sensors) {
+    sensors.clear();
+    sensors.emplace_back(m_depthSensor);
+    sensors.emplace_back(m_rgbSensor);
+
+    return aditof::Status::OK;
 }
 
 aditof::Status Camera3D_Smart::getEeproms(

@@ -200,7 +200,18 @@ PYBIND11_MODULE(aditofpython, m) {
              py::arg("value"))
         .def("getControl", &aditof::Camera::getControl, py::arg("control"),
              py::arg("value"))
-        .def("getSensor", &aditof::Camera::getSensor)
+        .def("getImageSensors",
+             [](aditof::Camera &camera, py::list sensors) {
+                 std::vector<std::shared_ptr<aditof::DepthSensorInterface>>
+                     sensorList;
+                 aditof::Status status = camera.getImageSensors(sensorList);
+
+                 for (const auto &sensor : sensorList)
+                     sensors.append(sensor);
+
+                 return status;
+             },
+             py::arg("eeproms"))
         .def("getEeproms",
              [](aditof::Camera &camera, py::list eeproms) {
                  std::vector<std::shared_ptr<aditof::StorageInterface>>

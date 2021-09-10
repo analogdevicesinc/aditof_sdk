@@ -429,8 +429,12 @@ aditof::Status CameraFxTof1::getTemperatureSensors(
     return aditof::Status::OK;
 }
 
-std::shared_ptr<aditof::DepthSensorInterface> CameraFxTof1::getSensor() {
-    return m_depthSensor;
+aditof::Status CameraFxTof1::getImageSensors(
+    std::vector<std::shared_ptr<aditof::DepthSensorInterface>> &sensors) {
+    sensors.clear();
+    sensors.emplace_back(m_depthSensor);
+
+    return aditof::Status::OK;
 }
 
 aditof::Status

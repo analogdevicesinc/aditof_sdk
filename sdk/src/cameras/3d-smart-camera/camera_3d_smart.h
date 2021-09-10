@@ -71,8 +71,9 @@ class Camera3D_Smart : public aditof::Camera {
                               const std::string &value) override;
     aditof::Status getControl(const std::string &control,
                               std::string &value) const override;
-    // TO DO: with this API we can't get the RBG sensor
-    std::shared_ptr<aditof::DepthSensorInterface> getSensor() override;
+    aditof::Status getImageSensors(
+        std::vector<std::shared_ptr<aditof::DepthSensorInterface>> &sensors)
+        override;
     aditof::Status
     getEeproms(std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms)
         override;
