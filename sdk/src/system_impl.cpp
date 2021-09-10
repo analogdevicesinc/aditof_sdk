@@ -36,6 +36,8 @@
 #include "camera_chicony_006.h"
 #elif defined(FXTOF1)
 #include "camera_fxtof1.h"
+#elif defined(SMART_3D)
+#include "camera_3d_smart.h"
 #else
 #include "camera_96tof1.h"
 #endif
@@ -46,10 +48,10 @@
 
 using namespace aditof;
 
-static std::vector<std::shared_ptr<Camera>>
-buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
-
-    std::vector<std::shared_ptr<Camera>> cameras;
+/* Constructs a camera based on the sensors & other devices provided
+   found by the sensor enumerator. */
+static std::shared_ptr<Camera>
+buildCamera(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
     std::vector<std::shared_ptr<DepthSensorInterface>> depthSensors;
     std::vector<std::shared_ptr<StorageInterface>> storages;
     std::vector<std::shared_ptr<TemperatureSensorInterface>> temperatureSensors;
@@ -58,21 +60,27 @@ buildCameras(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
     enumerator->getStorages(storages);
     enumerator->getTemperatureSensors(temperatureSensors);
 
-    for (const auto &dSensor : depthSensors) {
+    std::shared_ptr<Camera> camera;
+    if (depthSensors.size() > 0) {
 #if defined(CHICONY_006)
-        std::shared_ptr<Camera> camera = std::make_shared<CameraChicony>(
-            dSensor, storages, temperatureSensors);
+        camera = std::make_shared<CameraChicony>(depthSensors[0], storages,
+                                                 temperatureSensors);
 #elif defined(FXTOF1)
-        std::shared_ptr<Camera> camera = std::make_shared<CameraFxTof1>(
-            dSensor, storages, temperatureSensors);
+        camera = std::make_shared<CameraFxTof1>(depthSensors[0], storages,
+                                                temperatureSensors);
+#elif defined(SMART_3D)
+        if (depthSensors.size() != 2)
+            return nullptr;
+        // TO DO: find a way to differentiate the DEPTH and RBG sensors
+        camera = std::make_shared<Camera3D_Smart>(
+            depthSensors[0], depthSensors[1], storages, temperatureSensors);
 #else
-        std::shared_ptr<Camera> camera = std::make_shared<Camera96Tof1>(
-            dSensor, storages, temperatureSensors);
+        camera = std::make_shared<Camera96Tof1>(depthSensors[0], storages,
+                                                temperatureSensors);
 #endif
-        cameras.emplace_back(camera);
     }
 
-    return cameras;
+    return camera;
 }
 
 SystemImpl::SystemImpl() {}
@@ -81,7 +89,6 @@ SystemImpl::~SystemImpl() = default;
 
 Status SystemImpl::getCameraList(
     std::vector<std::shared_ptr<Camera>> &cameraList) const {
-    Status status;
     cameraList.clear();
 
     // At first, assume SDK is running on target
@@ -97,9 +104,10 @@ Status SystemImpl::getCameraList(
             return Status::GENERIC_ERROR;
         }
     }
-    status = sensorEnumerator->searchSensors();
+    Status status = sensorEnumerator->searchSensors();
     if (status == Status::OK) {
-        cameraList = buildCameras(std::move(sensorEnumerator));
+        auto camera = buildCamera(std::move(sensorEnumerator));
+        cameraList.emplace_back(camera);
     }
 
     return Status::OK;
@@ -108,7 +116,6 @@ Status SystemImpl::getCameraList(
 Status
 SystemImpl::getCameraListAtIp(std::vector<std::shared_ptr<Camera>> &cameraList,
                               const std::string &ip) const {
-
     cameraList.clear();
 
     std::unique_ptr<SensorEnumeratorInterface> sensorEnumerator =
@@ -120,8 +127,11 @@ SystemImpl::getCameraListAtIp(std::vector<std::shared_ptr<Camera>> &cameraList,
                       "with the option WITH_NETWORK=on";
         return Status::GENERIC_ERROR;
     }
-    sensorEnumerator->searchSensors();
-    cameraList = buildCameras(std::move(sensorEnumerator));
+    Status status = sensorEnumerator->searchSensors();
+    if (status == Status::OK) {
+        auto camera = buildCamera(std::move(sensorEnumerator));
+        cameraList.emplace_back(camera);
+    }
 
     return Status::OK;
 }
