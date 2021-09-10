@@ -298,7 +298,10 @@ void SourceAdaptor::setSmallSignalValue(int16_t value) {
     // TO DO: This breaks things over USB. Works well on the target and
     // over network.
     if (m_camera) {
-        m_camera->getSensor()->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+        std::vector <
+            std::shared_ptr<aditof::DepthSensorInterface> imageSensors;
+        m_camera->getImageSensors(imageSensors);
+        imageSensors[0]->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
 }
 

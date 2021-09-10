@@ -468,8 +468,13 @@ aditof::Status Camera96Tof1::getDetails(aditof::CameraDetails &details) const {
     return status;
 }
 
-std::shared_ptr<aditof::DepthSensorInterface> Camera96Tof1::getSensor() {
-    return m_depthSensor;
+aditof::Status Camera96Tof1::getImageSensors(
+    std::vector<std::shared_ptr<aditof::DepthSensorInterface>> &sensors) {
+
+    sensors.clear();
+    sensors.emplace_back(m_depthSensor);
+
+    return aditof::Status::OK;
 }
 
 aditof::Status Camera96Tof1::getEeproms(

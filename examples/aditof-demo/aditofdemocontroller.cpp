@@ -221,8 +221,11 @@ aditof::Status AdiTofDemoController::writeAFEregister(uint16_t *address,
         return aditof::Status::GENERIC_ERROR;
     }
 
-    auto camSensor =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSensor();
+    std::vector<std::shared_ptr<aditof::DepthSensorInterface>> imageSensors;
+    m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getImageSensors(
+        imageSensors);
+    auto camSensor = imageSensors[0];
+
     return camSensor->writeAfeRegisters(address, data, noOfEntries);
 }
 
@@ -230,8 +233,11 @@ aditof::Status AdiTofDemoController::readAFEregister(uint16_t *address,
                                                      uint16_t *data,
                                                      uint16_t noOfEntries) {
 
-    auto camSensor =
-        m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getSensor();
+    std::vector<std::shared_ptr<aditof::DepthSensorInterface>> imageSensors;
+    m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getImageSensors(
+        imageSensors);
+    auto camSensor = imageSensors[0];
+
     return camSensor->readAfeRegisters(address, data, noOfEntries);
 }
 

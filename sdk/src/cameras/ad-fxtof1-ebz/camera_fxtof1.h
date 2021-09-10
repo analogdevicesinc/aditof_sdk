@@ -64,7 +64,9 @@ class CameraFxTof1 : public aditof::Camera {
     aditof::Status requestFrame(aditof::Frame *frame,
                                 aditof::FrameUpdateCallback cb) override;
     aditof::Status getDetails(aditof::CameraDetails &details) const override;
-    std::shared_ptr<aditof::DepthSensorInterface> getSensor() override;
+    aditof::Status getImageSensors(
+        std::vector<std::shared_ptr<aditof::DepthSensorInterface>> &sensors)
+        override;
     aditof::Status
     getAvailableControls(std::vector<std::string> &controls) const override;
     aditof::Status setControl(const std::string &control,

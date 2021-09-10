@@ -159,11 +159,13 @@ class SDK_API Camera {
                               std::string &value) const = 0;
 
     /**
-     * @brief Gets the sensor of the camera. This gives direct access
-     * to low level configuration of the camera sensor.
-     * @return std::shared_ptr<DepthSensorInterface>
+     * @brief Gets the image sensor of the camera. This gives direct access
+     * to low level configuration of the camera sensor(s).
+     * @param[out] sensors - List of internal image sensors
+     * @return Status
      */
-    virtual std::shared_ptr<DepthSensorInterface> getSensor() = 0;
+    virtual Status getImageSensors(
+        std::vector<std::shared_ptr<DepthSensorInterface>> &sensors) = 0;
 
     /**
      * @brief Gets the eeprom(s) used internally by the camera. This gives
