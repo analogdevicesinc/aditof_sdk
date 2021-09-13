@@ -75,6 +75,10 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
     m_irImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayIrImage, this));
+#ifdef SMART_3D
+    m_rgbImageWorker =
+        std::thread(std::bind(&AdiTofDemoView::_displayRgbImage, this));
+#endif
 }
 AdiTofDemoView::~AdiTofDemoView() {
     std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
@@ -83,6 +87,9 @@ AdiTofDemoView::~AdiTofDemoView() {
     m_frameCapturedCv.notify_all();
     m_depthImageWorker.join();
     m_irImageWorker.join();
+#ifdef SMART_3D
+    m_rgbImageWorker.join();
+#endif
 }
 
 bool USBModeChecked = false;
@@ -161,8 +168,9 @@ void AdiTofDemoView::render() {
     bool valueFieldSelectedG = false;
     bool fileNameFieldSelected = false;
 
-    const cv::String windows[] = {m_viewName, "Depth Image", "IR Image",
-                                  "Blended Image", "Depth/Ir Only Image"};
+    const cv::String windows[] = {
+        m_viewName,      "Depth Image",         "IR Image",
+        "Blended Image", "Depth/Ir Only Image", "Rgb Image"};
     cvui::init(windows, 1);
 
     int frameCount = 0;
@@ -479,6 +487,13 @@ void AdiTofDemoView::render() {
                         status = "No cameras connected!";
                     }
                 }
+
+#ifdef SMART_3D
+                if (m_ctrl->hasCamera() && !captureEnabled) {
+                    cv::destroyWindow(windows[5]);
+                }
+#endif
+
             } else {
                 if (fileName.empty()) {
                     fieldColor = errorColor;
@@ -843,6 +858,9 @@ void AdiTofDemoView::render() {
                     m_depthFrameAvailable = true;
                     m_irFrameAvailable = true;
                 }
+#ifdef SMART_3D
+                m_rgbFrameAvailable = true;
+#endif
                 lock.unlock();
                 m_frameCapturedCv.notify_all();
                 m_ctrl->requestFrame();
@@ -864,6 +882,11 @@ void AdiTofDemoView::render() {
             cvui::imshow("IR Image", m_irImage);
             m_depthImage.release();
             m_irImage.release();
+
+#ifdef SMART_3D
+            cvui::imshow("Rgb Image", m_rgbImage);
+            m_rgbImage.release();
+#endif
         }
 
         if (captureBlendedEnabled) {
@@ -878,14 +901,24 @@ void AdiTofDemoView::render() {
             m_waitKeyBarrier = 0;
             cvui::imshow("Depth/Ir Only Image", m_depthImage);
             m_depthImage.release();
+
+#ifdef SMART_3D
+            cvui::imshow("Rgb Image", m_rgbImage);
+            m_rgbImage.release();
+#endif
         }
 
         if (captureEnabled && irOnlyChecked) {
             m_barrierCv.wait(imshow_lock,
                              [&]() { return m_waitKeyBarrier == threadNum; });
             m_waitKeyBarrier = 0;
-            cvui::imshow("Depth/Ir Only Image", m_depthImage);
+            cvui::imshow("Depth/Ir Only Image", m_irImage);
             m_irImage.release();
+
+#ifdef SMART_3D
+            cvui::imshow("Rgb Image", m_rgbImage);
+            m_rgbImage.release();
+#endif
         }
 
         int key = cv::waitKey(10);
@@ -1062,7 +1095,7 @@ void AdiTofDemoView::_displayIrImage() {
         m_waitKeyBarrier += 1;
         if (m_waitKeyBarrier == threadNum) {
             imshow_lock.unlock();
-            m_barrierCv.notify_one();
+            m_barrierCv.notify_all();
         }
     }
 }
@@ -1100,3 +1133,46 @@ void AdiTofDemoView::_displayBlendedImage() {
     cv::addWeighted(m_depthImage, m_blendValue, m_irImage, 1.0F - m_blendValue,
                     0, m_blendedImage);
 }
+
+#ifdef SMART_3D
+void AdiTofDemoView::_displayRgbImage() {
+    while (!m_stopWorkersFlag) {
+        std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
+        m_frameCapturedCv.wait(
+            lock, [&]() { return m_rgbFrameAvailable || m_stopWorkersFlag; });
+
+        if (m_stopWorkersFlag) {
+            break;
+        }
+
+        m_rgbFrameAvailable = false;
+
+        std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
+        lock.unlock(); // Lock is no longer needed
+
+        //To be modified when rgb is implemented
+
+        size_t width = 640;
+        size_t height = 480;
+        uint16_t *rgbData = new uint16_t[width * height];
+        memset(rgbData, 0, width * height);
+        //localFrame->getData(aditof::FrameDataType::RGB, &rgbData);
+
+        //aditof::FrameDetails frameDetails;
+        //localFrame->getDetails(frameDetails);
+
+        //int frameHeight = static_cast<int>(frameDetails.rgbHeight);
+        //int frameWidth = static_cast<int>(frameDetails.rgbWidth);
+        int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
+        m_rgbImage = cv::Mat(height, width, CV_16UC1, rgbData);
+        m_rgbImage.convertTo(m_rgbImage, CV_8U, 255.0 / max_value_of_IR_pixel);
+        //flip(m_rgbImage, m_rgbImage, 1);
+        std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
+        m_waitKeyBarrier += 1;
+        if (m_waitKeyBarrier == threadNum) {
+            imshow_lock.unlock();
+            m_barrierCv.notify_all();
+        }
+    }
+}
+#endif
