@@ -75,10 +75,8 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
     m_irImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayIrImage, this));
-#ifdef SMART_3D
     m_rgbImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayRgbImage, this));
-#endif
 }
 AdiTofDemoView::~AdiTofDemoView() {
     std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
@@ -87,9 +85,7 @@ AdiTofDemoView::~AdiTofDemoView() {
     m_frameCapturedCv.notify_all();
     m_depthImageWorker.join();
     m_irImageWorker.join();
-#ifdef SMART_3D
     m_rgbImageWorker.join();
-#endif
 }
 
 bool USBModeChecked = false;
@@ -303,16 +299,6 @@ void AdiTofDemoView::render() {
             checkboxChanged = false;
         }
 
-        if (depthIrChecked) {
-            threadNum = 2;
-        } else {
-            threadNum = 1;
-        }
-
-#ifdef SMART_3D
-        threadNum++;
-#endif
-
         if (checkboxChanged) {
             int selectedMode =
                 (2 - static_cast<int>(std::log2(modeCurrentValue)));
@@ -401,6 +387,15 @@ void AdiTofDemoView::render() {
                     m_ctrl->setMode(modes[selectedMode]);
                 }
             }
+
+            m_ctrl->getAvailableFrameTypes(availableFrameTypes);
+        }
+
+        if (find(availableFrameTypes.begin(), availableFrameTypes.end(),
+                 "rgb") != availableFrameTypes.end()) {
+            m_rgbCameraAvailable = true;
+        } else {
+            m_rgbCameraAvailable = false;
         }
 
         cvui::beginColumn(frame, 50, 105);
@@ -488,11 +483,10 @@ void AdiTofDemoView::render() {
                     }
                 }
 
-#ifdef SMART_3D
-                if (m_ctrl->hasCamera() && !captureEnabled) {
+                if (m_ctrl->hasCamera() && !captureEnabled &&
+                    m_rgbCameraAvailable) {
                     cv::destroyWindow(windows[5]);
                 }
-#endif
 
             } else {
                 if (fileName.empty()) {
@@ -537,6 +531,16 @@ void AdiTofDemoView::render() {
             } else {
                 status = "Start live playing before recording!";
             }
+        }
+
+        if (depthIrChecked) {
+            threadNum = 2;
+        } else {
+            threadNum = 1;
+        }
+
+        if (m_rgbCameraAvailable) {
+            threadNum++;
         }
 
         cvui::rect(frame, 50, 220, 190, 30, fieldColor);
@@ -858,9 +862,10 @@ void AdiTofDemoView::render() {
                     m_depthFrameAvailable = true;
                     m_irFrameAvailable = true;
                 }
-#ifdef SMART_3D
-                m_rgbFrameAvailable = true;
-#endif
+                if (m_rgbCameraAvailable) {
+                    m_rgbFrameAvailable = true;
+                }
+
                 lock.unlock();
                 m_frameCapturedCv.notify_all();
                 m_ctrl->requestFrame();
@@ -883,10 +888,10 @@ void AdiTofDemoView::render() {
             m_depthImage.release();
             m_irImage.release();
 
-#ifdef SMART_3D
-            cvui::imshow("Rgb Image", m_rgbImage);
-            m_rgbImage.release();
-#endif
+            if (m_rgbCameraAvailable) {
+                cvui::imshow("Rgb Image", m_rgbImage);
+                m_rgbImage.release();
+            }
         }
 
         if (captureBlendedEnabled) {
@@ -902,10 +907,10 @@ void AdiTofDemoView::render() {
             cvui::imshow("Depth/Ir Only Image", m_depthImage);
             m_depthImage.release();
 
-#ifdef SMART_3D
-            cvui::imshow("Rgb Image", m_rgbImage);
-            m_rgbImage.release();
-#endif
+            if (m_rgbCameraAvailable) {
+                cvui::imshow("Rgb Image", m_rgbImage);
+                m_rgbImage.release();
+            }
         }
 
         if (captureEnabled && irOnlyChecked) {
@@ -915,10 +920,10 @@ void AdiTofDemoView::render() {
             cvui::imshow("Depth/Ir Only Image", m_irImage);
             m_irImage.release();
 
-#ifdef SMART_3D
-            cvui::imshow("Rgb Image", m_rgbImage);
-            m_rgbImage.release();
-#endif
+            if (m_rgbCameraAvailable) {
+                cvui::imshow("Rgb Image", m_rgbImage);
+                m_rgbImage.release();
+            }
         }
 
         int key = cv::waitKey(10);
@@ -1134,7 +1139,6 @@ void AdiTofDemoView::_displayBlendedImage() {
                     0, m_blendedImage);
 }
 
-#ifdef SMART_3D
 void AdiTofDemoView::_displayRgbImage() {
     while (!m_stopWorkersFlag) {
         std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
@@ -1175,4 +1179,3 @@ void AdiTofDemoView::_displayRgbImage() {
         }
     }
 }
-#endif

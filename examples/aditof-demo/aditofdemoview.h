@@ -75,8 +75,10 @@ class AdiTofDemoView {
     bool m_depthFrameAvailable;
     bool m_irFrameAvailable;
     bool m_rgbFrameAvailable;
+    bool m_rgbCameraAvailable;
     std::shared_ptr<aditof::Frame> m_capturedFrame;
     std::condition_variable m_frameCapturedCv;
+    std::vector<std::string> availableFrameTypes;
     bool m_stopWorkersFlag;
     bool m_center;
 
