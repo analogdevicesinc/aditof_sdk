@@ -191,6 +191,15 @@ void AdiTofDemoController::setFrameType(const std::string &frameType) {
     camera->setFrameType(frameType);
 }
 
+void AdiTofDemoController::getAvailableFrameTypes(
+    std::vector<std::string> &availableFrameTypes) const {
+    if (m_cameraInUse == -1) {
+        return;
+    }
+    auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
+    camera->getAvailableFrameTypes(availableFrameTypes);
+}
+
 std::pair<float, float> AdiTofDemoController::getTemperature() {
     auto returnValue = std::make_pair<float, float>(0.0, 0.0);
 
