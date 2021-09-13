@@ -56,6 +56,7 @@ class AdiTofDemoView {
     void _displayDepthImage();
     void _displayIrImage();
     void _displayBlendedImage();
+    void _displayRgbImage();
 
   private:
     std::shared_ptr<AdiTofDemoController> m_ctrl;
@@ -64,13 +65,16 @@ class AdiTofDemoView {
     cv::Mat m_depthImage;
     cv::Mat m_irImage;
     cv::Mat m_blendedImage;
+    cv::Mat m_rgbImage;
     double m_blendValue = 0.5;
 
     std::thread m_depthImageWorker;
     std::thread m_irImageWorker;
+    std::thread m_rgbImageWorker;
     std::mutex m_frameCapturedMutex;
     bool m_depthFrameAvailable;
     bool m_irFrameAvailable;
+    bool m_rgbFrameAvailable;
     std::shared_ptr<aditof::Frame> m_capturedFrame;
     std::condition_variable m_frameCapturedCv;
     bool m_stopWorkersFlag;
@@ -93,8 +97,8 @@ class AdiTofDemoView {
     bool depthIrChecked = true;
     bool depthOnlyChecked = false;
     bool irOnlyChecked = false;
-    int frameTypeCurrentValue = 4;
     // 4 = depthIr(default); 2 = depthOnly; 1 = irOnly
+    int frameTypeCurrentValue = 4;
 };
 
 #endif
