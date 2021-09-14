@@ -425,14 +425,27 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
         frame->setDetails(m_details.frameType);
     }
 
-    uint16_t *frameDataLocation;
-    frame->getData(FrameDataType::FULL_DATA, &frameDataLocation);
+    // Get the frame from the Depth sensor
+    uint16_t *depthIrDataLocation;
+    frame->getData(FrameDataType::FULL_DATA, &depthIrDataLocation);
 
-    status = m_depthSensor->getFrame(frameDataLocation);
+    status = m_depthSensor->getFrame(depthIrDataLocation);
     if (status != Status::OK) {
-        LOG(WARNING) << "Failed to get frame from device";
+        LOG(WARNING) << "Failed to get frame from depth sensor";
         return status;
     }
+
+    // Get the frame from the RGB sensor
+    uint16_t *rgbDataLocation;
+    frame->getData(FrameDataType::RGB, &rgbDataLocation);
+
+    status = m_depthSensor->getFrame(rgbDataLocation);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to get frame from RGB sensor";
+        return status;
+    }
+
+    // TO DO: Synchronize the two sensors
 
     if (m_details.mode != skCustomMode &&
         (m_details.frameType.type == "depth_ir" ||
