@@ -46,6 +46,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unordered_map>
+#include <iostream>
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -137,7 +138,7 @@ RgbSensor::~RgbSensor() {
 aditof::Status RgbSensor::open() {
     using namespace aditof;
     Status status = Status::OK;
-
+    std::cout<<"RGB Camera open! ############\n";
     LOG(INFO) << "Opening device";
 
     struct stat st;
@@ -281,7 +282,7 @@ aditof::Status RgbSensor::start() {
 
         dev->started = true;
     }
-
+    std::cout<<"RGB Camera started! ############\n";
     return status;
 }
 

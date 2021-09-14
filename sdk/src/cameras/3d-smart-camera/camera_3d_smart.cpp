@@ -39,6 +39,8 @@
 #include <array>
 #include <glog/logging.h>
 #include <map>
+#include <algorithm>
+#include <math.h>
 
 static const std::string skCameraName = "3D-Smart-Camera";
 
@@ -462,13 +464,13 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
         if (m_depthCorrection) {
-            m_calibration.calibrateDepth(frameDataLocation,
+            m_calibration.calibrateDepth(depthIrDataLocation,
                                          m_details.frameType.width *
                                              m_details.frameType.height);
         }
         if (m_cameraGeometryCorrection) {
             m_calibration.calibrateCameraGeometry(
-                frameDataLocation,
+                depthIrDataLocation,
                 m_details.frameType.width * m_details.frameType.height);
         }
     }
