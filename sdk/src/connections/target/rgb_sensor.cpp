@@ -317,10 +317,10 @@ RgbSensor::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
 
     FrameDetails details;
 
-    details.width = aditof::FRAME_WIDTH;
-    details.height = aditof::FRAME_HEIGHT;
-    details.fullDataWidth = aditof::FRAME_WIDTH;
-    details.fullDataHeight = aditof::FRAME_HEIGHT;
+    details.width = aditof::RGB_FRAME_WIDTH;
+    details.height = aditof::RGB_FRAME_HEIGHT;
+    details.fullDataWidth = aditof::RGB_FRAME_WIDTH;
+    details.fullDataHeight = aditof::RGB_FRAME_HEIGHT;
     details.type = "rgb";
     types.push_back(details);
 

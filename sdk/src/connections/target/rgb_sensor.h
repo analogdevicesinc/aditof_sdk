@@ -38,8 +38,8 @@
 #include <memory>
 
 namespace aditof {
-static const unsigned int FRAME_WIDTH = 1920;
-static const unsigned int FRAME_HEIGHT = 1080;
+static const unsigned int RGB_FRAME_WIDTH = 1920;
+static const unsigned int RGB_FRAME_HEIGHT = 1080;
 } // namespace aditof
 
 class RgbSensor : public aditof::DepthSensorInterface,
