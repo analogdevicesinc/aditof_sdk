@@ -43,11 +43,10 @@ static const unsigned int FRAME_HEIGHT = 1080;
 } // namespace aditof
 
 class RgbSensor : public aditof::DepthSensorInterface,
-                       public aditof::V4lBufferAccessInterface {
+                  public aditof::V4lBufferAccessInterface {
   public:
-    RgbSensor(const std::string &driverPath,
-                   const std::string &driverSubPath,
-                   const std::string &captureDev);
+    RgbSensor(const std::string &driverPath, const std::string &driverSubPath,
+              const std::string &captureDev);
     ~RgbSensor();
 
   public: // implements DepthSensorInterface

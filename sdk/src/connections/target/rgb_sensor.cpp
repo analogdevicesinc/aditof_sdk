@@ -93,8 +93,8 @@ static int xioctl(int fh, unsigned int request, void *arg) {
 }
 
 RgbSensor::RgbSensor(const std::string &driverPath,
-                               const std::string &driverSubPath,
-                               const std::string &captureDev)
+                     const std::string &driverSubPath,
+                     const std::string &captureDev)
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
       m_captureDev(captureDev), m_implData(new RgbSensor::ImplData) {}
 
@@ -310,8 +310,8 @@ aditof::Status RgbSensor::stop() {
     return status;
 }
 
-aditof::Status RgbSensor::getAvailableFrameTypes(
-    std::vector<aditof::FrameDetails> &types) {
+aditof::Status
+RgbSensor::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -327,8 +327,7 @@ aditof::Status RgbSensor::getAvailableFrameTypes(
     return status;
 }
 
-aditof::Status
-RgbSensor::setFrameType(const aditof::FrameDetails &details) {
+aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
     Status status = Status::OK;
     struct VideoDev *dev;
@@ -363,7 +362,7 @@ RgbSensor::setFrameType(const aditof::FrameDetails &details) {
         fmt.fmt.pix.width = details.fullDataWidth;
         fmt.fmt.pix.height = details.fullDataHeight;
         fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
-        
+
         if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
             LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
                          << " error: " << strerror(errno);
@@ -566,7 +565,8 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer) {
         if (m_implData->frameDetails.type == "rgb") {
             memcpy(buffer, pdata[0], buf[0].bytesused);
             unsigned int fullDataWidth = m_implData->frameDetails.fullDataWidth;
-            unsigned int fullDataHeight = m_implData->frameDetails.fullDataHeight;
+            unsigned int fullDataHeight =
+                m_implData->frameDetails.fullDataHeight;
             uint32_t j = 0, j1 = width * height;
             for (uint32_t i = 0; i < fullDataHeight; i += 2) {
                 memcpy(buffer + j, pdata[0] + i * width * 2, width * 2);
@@ -594,7 +594,7 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer) {
 }
 
 aditof::Status RgbSensor::readAfeRegisters(const uint16_t *address,
-                                                uint16_t *data, size_t length) {
+                                           uint16_t *data, size_t length) {
     using namespace aditof;
 
     if (address == nullptr) {
@@ -637,8 +637,8 @@ aditof::Status RgbSensor::readAfeRegisters(const uint16_t *address,
 }
 
 aditof::Status RgbSensor::writeAfeRegisters(const uint16_t *address,
-                                                 const uint16_t *data,
-                                                 size_t length) {
+                                            const uint16_t *data,
+                                            size_t length) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -689,8 +689,7 @@ aditof::Status RgbSensor::writeAfeRegisters(const uint16_t *address,
     return status;
 }
 
-aditof::Status
-RgbSensor::getDetails(aditof::SensorDetails &details) const {
+aditof::Status RgbSensor::getDetails(aditof::SensorDetails &details) const {
     details = m_sensorDetails;
     return aditof::Status::OK;
 }
@@ -728,9 +727,8 @@ aditof::Status RgbSensor::waitForBufferPrivate(struct VideoDev *dev) {
     return aditof ::Status::OK;
 }
 
-aditof::Status
-RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
-                                             struct VideoDev *dev) {
+aditof::Status RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
+                                                       struct VideoDev *dev) {
     using namespace aditof;
     Status status = Status::OK;
 
@@ -763,9 +761,10 @@ RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
     return status;
 }
 
-aditof::Status RgbSensor::getInternalBufferPrivate(
-    uint8_t **buffer, uint32_t &buf_data_len, const struct v4l2_buffer &buf,
-    struct VideoDev *dev) {
+aditof::Status
+RgbSensor::getInternalBufferPrivate(uint8_t **buffer, uint32_t &buf_data_len,
+                                    const struct v4l2_buffer &buf,
+                                    struct VideoDev *dev) {
     if (dev == nullptr)
         dev = &m_implData->videoDevs[0];
 
@@ -776,9 +775,8 @@ aditof::Status RgbSensor::getInternalBufferPrivate(
     return aditof::Status::OK;
 }
 
-aditof::Status
-RgbSensor::enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
-                                             struct VideoDev *dev) {
+aditof::Status RgbSensor::enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
+                                                       struct VideoDev *dev) {
     if (dev == nullptr)
         dev = &m_implData->videoDevs[0];
 
@@ -803,17 +801,15 @@ aditof::Status RgbSensor::getDeviceFileDescriptor(int &fileDescriptor) {
     return Status::INVALID_ARGUMENT;
 }
 
-aditof::Status RgbSensor::waitForBuffer() {
-    return waitForBufferPrivate();
-}
+aditof::Status RgbSensor::waitForBuffer() { return waitForBufferPrivate(); }
 
 aditof::Status RgbSensor::dequeueInternalBuffer(struct v4l2_buffer &buf) {
     return dequeueInternalBufferPrivate(buf);
 }
 
-aditof::Status
-RgbSensor::getInternalBuffer(uint8_t **buffer, uint32_t &buf_data_len,
-                                  const struct v4l2_buffer &buf) {
+aditof::Status RgbSensor::getInternalBuffer(uint8_t **buffer,
+                                            uint32_t &buf_data_len,
+                                            const struct v4l2_buffer &buf) {
     return getInternalBufferPrivate(buffer, buf_data_len, buf);
 }
 
