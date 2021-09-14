@@ -34,6 +34,7 @@
 #include "connections/target/adt7410_sensor.h"
 #include "connections/target/eeprom.h"
 #include "connections/target/tmp10x_sensor.h"
+#include "connections/target/rgb_sensor.h"
 
 using namespace aditof;
 
@@ -46,6 +47,12 @@ Status TargetSensorEnumerator::getDepthSensors(
         switch (sInfo.sensorType) {
         case SensorType::SENSOR_ADDI9036: {
             auto sensor = std::make_shared<Addi9036Sensor>(
+                sInfo.driverPath, sInfo.subDevPath, sInfo.captureDev);
+            depthSensors.emplace_back(sensor);
+            break;
+        }
+        case SensorType::SENSOR_OV2735: {
+            auto sensor = std::make_shared<RgbSensor>(
                 sInfo.driverPath, sInfo.subDevPath, sInfo.captureDev);
             depthSensors.emplace_back(sensor);
             break;
