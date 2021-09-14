@@ -33,8 +33,8 @@
 #include "connections/target/addi9036_sensor.h"
 #include "connections/target/adt7410_sensor.h"
 #include "connections/target/eeprom.h"
-#include "connections/target/tmp10x_sensor.h"
 #include "connections/target/rgb_sensor.h"
+#include "connections/target/tmp10x_sensor.h"
 
 using namespace aditof;
 

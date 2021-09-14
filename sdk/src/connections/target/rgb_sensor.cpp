@@ -77,7 +77,8 @@ struct RgbSensor::ImplData {
     struct VideoDev *videoDevs;
     aditof::FrameDetails frameDetails;
     ImplData()
-        : numVideoDevs(1), videoDevs(nullptr), frameDetails{0, 0, 0, 0, ""} {}
+        : numVideoDevs(1),
+          videoDevs(nullptr), frameDetails{0, 0, 0, 0, 0, 0, ""} {}
 };
 
 // TO DO: This exists in linux_utils.h which is not included on Dragoboard.
