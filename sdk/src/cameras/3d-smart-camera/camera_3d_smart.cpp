@@ -404,6 +404,16 @@ aditof::Status Camera3D_Smart::getAvailableFrameTypes(
         availableFrameTypes.emplace_back(item.type);
     }
 
+    status = m_rgbSensor->getAvailableFrameTypes(frameDetailsList);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to get available frame types";
+        return status;
+    }
+
+    for (const auto &item : frameDetailsList) {
+        availableFrameTypes.emplace_back(item.type);
+    }
+
     return status;
 }
 
