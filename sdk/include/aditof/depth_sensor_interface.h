@@ -105,6 +105,14 @@ class DepthSensorInterface {
     virtual aditof::Status getFrame(uint16_t *buffer) = 0;
 
     /**
+     * @brief Request timestamp of the requested frame
+     * @param timestamp - a valid location where the new timestamp should be stored.
+     * @return Status
+     */
+
+    virtual aditof::Status getFrameTimestamp(long long &timestamp) = 0;
+
+    /**
      * @brief Read multiple registers from AFE.
      * @param address - memory location pointing to addresses of registers to be
      * read
@@ -113,6 +121,7 @@ class DepthSensorInterface {
      * @param length - the number of registers to read
      * @return Status
      */
+
     virtual aditof::Status readAfeRegisters(const uint16_t *address,
                                             uint16_t *data, size_t length) = 0;
 

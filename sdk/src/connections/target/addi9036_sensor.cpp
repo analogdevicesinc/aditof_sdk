@@ -97,7 +97,8 @@ Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
                                const std::string &driverSubPath,
                                const std::string &captureDev)
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
-      m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData) {}
+      m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData),
+      m_frameTimestamp(0) {}
 
 Addi9036Sensor::~Addi9036Sensor() {
     struct VideoDev *dev;
@@ -892,6 +893,8 @@ Addi9036Sensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
         return Status::GENERIC_ERROR;
     }
 
+    m_frameTimestamp = buf.timestamp.tv_sec * 1000000 + buf.timestamp.tv_usec;
+
     return status;
 }
 
@@ -933,6 +936,17 @@ aditof::Status Addi9036Sensor::getDeviceFileDescriptor(int &fileDescriptor) {
     }
 
     return Status::INVALID_ARGUMENT;
+}
+
+aditof::Status Addi9036Sensor::getFrameTimestamp(long long &timestamp) {
+    using namespace aditof;
+    if (m_frameTimestamp == 0) {
+        LOG(WARNING) << "No frameTimeStamp available";
+        return Status::GENERIC_ERROR;
+    }
+
+    timestamp = m_frameTimestamp;
+    return Status::OK;
 }
 
 aditof::Status Addi9036Sensor::waitForBuffer() {

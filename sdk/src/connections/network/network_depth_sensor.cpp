@@ -404,6 +404,47 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer) {
     return status;
 }
 
+aditof::Status NetworkDepthSensor::getFrameTimestamp(long long &timestamp) {
+    using namespace aditof;
+
+    Network *net = m_implData->handle.net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+
+    if (!net->isServer_Connected()) {
+        LOG(WARNING) << "Not connected to server";
+        return Status::UNREACHABLE;
+    }
+
+    net->send_buff.set_func_name("GetFrameTimestamp");
+    net->send_buff.set_expect_reply(true);
+
+    if (net->SendCommand() != 0) {
+        LOG(WARNING) << "Send Command Failed";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (net->recv_server_data() != 0) {
+        LOG(WARNING) << "Receive Data Failed";
+        return Status::GENERIC_ERROR;
+    }
+
+    if (net->recv_buff.server_status() !=
+        payload::ServerStatus::REQUEST_ACCEPTED) {
+        LOG(WARNING) << "API execution on Target Failed";
+        return Status::GENERIC_ERROR;
+    }
+
+    Status status = static_cast<Status>(net->recv_buff.status());
+    if (status != Status::OK) {
+        LOG(WARNING) << "getFrameTimestamp() failed on target";
+        return status;
+    }
+    memcpy(&timestamp, net->recv_buff.bytes_payload(0).c_str(),
+           net->recv_buff.bytes_payload(0).length());
+
+    return status;
+}
+
 aditof::Status NetworkDepthSensor::readAfeRegisters(const uint16_t *address,
                                                     uint16_t *data,
                                                     size_t length) {

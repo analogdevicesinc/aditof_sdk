@@ -52,6 +52,7 @@ class NetworkDepthSensor : public aditof::DepthSensorInterface {
     virtual aditof::Status program(const uint8_t *firmware,
                                    size_t size) override;
     virtual aditof::Status getFrame(uint16_t *buffer) override;
+    virtual aditof::Status getFrameTimestamp(long long &timestamp) override;
     virtual aditof::Status readAfeRegisters(const uint16_t *address,
                                             uint16_t *data,
                                             size_t length) override;
@@ -67,6 +68,7 @@ class NetworkDepthSensor : public aditof::DepthSensorInterface {
 
     aditof::SensorDetails m_sensorDetails;
     std::unique_ptr<ImplData> m_implData;
+    long long m_frameTimestamp;
 };
 
 #endif // NETWORK_DEPTH_SENSOR_H
