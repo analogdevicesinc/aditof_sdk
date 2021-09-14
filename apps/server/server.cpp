@@ -59,6 +59,7 @@ bool sensors_are_created = false;
 /* Server only works with one depth sensor */
 std::shared_ptr<aditof::DepthSensorInterface> camDepthSensor;
 std::shared_ptr<aditof::V4lBufferAccessInterface> sensorV4lBufAccess;
+unsigned long long depthSensorTimestamp;
 
 static payload::ClientRequest buff_recv;
 static payload::ServerResponse buff_send;
@@ -429,6 +430,9 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             break;
         }
 
+        depthSensorTimestamp =
+            buf.timestamp.tv_sec * 1000000 + buf.timestamp.tv_usec;
+
 #ifdef JETSON
         buff_send.add_int32_payload(0);
         buff_send.add_bytes_payload(buffer,
@@ -444,6 +448,20 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             break;
         }
 
+        buff_send.set_status(payload::Status::OK);
+        break;
+    }
+
+    case GET_FRAME_TIMESTAMP: {
+        long long timestamp;
+        aditof::Status status = camDepthSensor->getFrameTimestamp(timestamp);
+
+        if (status != aditof::Status::OK) {
+            buff_send.set_status(static_cast<::payload::Status>(status));
+            break;
+        }
+
+        buff_send.add_bytes_payload(&timestamp, sizeof(long long));
         buff_send.set_status(payload::Status::OK);
         break;
     }
@@ -659,6 +677,7 @@ void Initialize() {
     s_map_api_Values["SetFrameType"] = SET_FRAME_TYPE;
     s_map_api_Values["Program"] = PROGRAM;
     s_map_api_Values["GetFrame"] = GET_FRAME;
+    s_map_api_Values["GetFrameTimestamp"] = GET_FRAME_TIMESTAMP;
     s_map_api_Values["ReadAfeRegisters"] = READ_AFE_REGISTERS;
     s_map_api_Values["WriteAfeRegisters"] = WRITE_AFE_REGISTERS;
     s_map_api_Values["StorageOpen"] = STORAGE_OPEN;

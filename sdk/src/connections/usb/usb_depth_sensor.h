@@ -58,6 +58,7 @@ class UsbDepthSensor : public aditof::DepthSensorInterface {
     virtual aditof::Status program(const uint8_t *firmware,
                                    size_t size) override;
     virtual aditof::Status getFrame(uint16_t *buffer) override;
+    virtual aditof::Status getFrameTimestamp(long long &timestamp) override;
     virtual aditof::Status readAfeRegisters(const uint16_t *address,
                                             uint16_t *data,
                                             size_t length) override;
