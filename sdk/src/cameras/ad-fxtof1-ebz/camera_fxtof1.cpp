@@ -388,7 +388,7 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
         LOG(WARNING) << "Failed to get frame from device";
         return status;
     }
-    LOG(INFO) << "TIMESTAMP: " << bufferInfo.timestamp;
+
     if (m_details.mode != skCustomMode &&
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
