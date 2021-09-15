@@ -61,7 +61,7 @@ struct BufferInfo {
     /**
      * @brief Timestamp of the data within the buffer
      */
-    long long timestamp;
+    long long unsigned int timestamp;
 };
 
 } // namespace aditof
