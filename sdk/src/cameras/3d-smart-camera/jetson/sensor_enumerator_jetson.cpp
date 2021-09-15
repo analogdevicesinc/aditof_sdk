@@ -86,7 +86,7 @@ Status TargetSensorEnumerator::searchSensors() {
     // TO DO: Don't guess the device, find a way to identify it so we are sure
     // we've got the right sensor and it's compatible with the SDK
     SensorInfo sInfo;
-    sInfo.sensorType = SensorType::SENSOR_ADDI9036;
+    sInfo.sensorType = SensorType::SENSOR_OV2735;
 
     std::string devPath;
     std::string subdevPath;
