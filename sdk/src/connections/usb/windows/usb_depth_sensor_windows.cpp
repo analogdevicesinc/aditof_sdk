@@ -629,7 +629,8 @@ aditof::Status UsbDepthSensor::program(const uint8_t *firmware, size_t size) {
     return Status::OK;
 }
 
-aditof::Status UsbDepthSensor::getFrame(uint16_t *buffer) {
+aditof::Status UsbDepthSensor::getFrame(uint16_t *buffer,
+                                        aditof::BufferInfo *bufferInfo) {
     using namespace aditof;
     Status status = Status::OK;
 

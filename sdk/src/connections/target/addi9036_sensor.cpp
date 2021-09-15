@@ -538,7 +538,8 @@ aditof::Status Addi9036Sensor::program(const uint8_t *firmware, size_t size) {
     return status;
 }
 
-aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
+aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
+                                        aditof::BufferInfo *bufferInfo) {
     using namespace aditof;
     struct v4l2_buffer buf[m_implData->numVideoDevs];
     struct VideoDev *dev;
@@ -720,6 +721,8 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
         if (status != Status::OK) {
             return status;
         }
+        bufferInfo->timestamp =
+            buf[i].timestamp.tv_sec * 1000000 + buf[i].timestamp.tv_usec;
     }
 
     return status;
@@ -891,9 +894,6 @@ Addi9036Sensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
         LOG(WARNING) << "Not enough buffers avaialable";
         return Status::GENERIC_ERROR;
     }
-
-    m_bufferInfo.timestamp =
-        buf.timestamp.tv_sec * 1000000 + buf.timestamp.tv_usec;
 
     return status;
 }

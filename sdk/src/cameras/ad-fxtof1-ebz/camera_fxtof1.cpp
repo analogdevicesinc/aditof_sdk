@@ -37,6 +37,7 @@
 #include "sensor_names.h"
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
+#include <aditof/sensor_definitions.h>
 
 #include <algorithm>
 #include <array>
@@ -381,12 +382,13 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
     uint16_t *frameDataLocation;
     frame->getData(FrameDataType::FULL_DATA, &frameDataLocation);
 
-    status = m_depthSensor->getFrame(frameDataLocation);
+    aditof::BufferInfo bufferInfo;
+    status = m_depthSensor->getFrame(frameDataLocation, &bufferInfo);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from device";
         return status;
     }
-
+    LOG(INFO) << "TIMESTAMP: " << bufferInfo.timestamp;
     if (m_details.mode != skCustomMode &&
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
