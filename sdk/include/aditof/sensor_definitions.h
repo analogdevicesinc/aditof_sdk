@@ -57,6 +57,13 @@ struct SensorDetails {
     ConnectionType connectionType;
 };
 
+struct BufferInfo {
+    /**
+     * @brief Timestamp of the last requested frame
+     */
+    long long timestamp;
+};
+
 } // namespace aditof
 
 #endif // SENSOR_DEFINITIONS_H

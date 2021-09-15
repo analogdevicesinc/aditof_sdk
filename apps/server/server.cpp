@@ -370,6 +370,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
     case GET_AVAILABLE_FRAME_TYPES: {
         std::vector<aditof::FrameDetails> frameDetails;
+
         aditof::Status status =
             camDepthSensor->getAvailableFrameTypes(frameDetails);
         for (auto detail : frameDetails) {
@@ -430,9 +431,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             break;
         }
 
-        depthSensorTimestamp =
-            buf.timestamp.tv_sec * 1000000 + buf.timestamp.tv_usec;
-
 #ifdef JETSON
         buff_send.add_int32_payload(0);
         buff_send.add_bytes_payload(buffer,
@@ -442,26 +440,15 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         buff_send.add_bytes_payload(buffer, buf_data_len * sizeof(uint8_t));
 #endif
 
+        buff_send.add_buffer_details() buff_send.set_timestamp =
+            buf.timestamp.tv_sec * 1000000 + buf.timestamp.tv_usec;
+
         status = sensorV4lBufAccess->enqueueInternalBuffer(buf);
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
         }
 
-        buff_send.set_status(payload::Status::OK);
-        break;
-    }
-
-    case GET_FRAME_TIMESTAMP: {
-        long long timestamp;
-        aditof::Status status = camDepthSensor->getFrameTimestamp(timestamp);
-
-        if (status != aditof::Status::OK) {
-            buff_send.set_status(static_cast<::payload::Status>(status));
-            break;
-        }
-
-        buff_send.add_bytes_payload(&timestamp, sizeof(long long));
         buff_send.set_status(payload::Status::OK);
         break;
     }
@@ -677,7 +664,6 @@ void Initialize() {
     s_map_api_Values["SetFrameType"] = SET_FRAME_TYPE;
     s_map_api_Values["Program"] = PROGRAM;
     s_map_api_Values["GetFrame"] = GET_FRAME;
-    s_map_api_Values["GetFrameTimestamp"] = GET_FRAME_TIMESTAMP;
     s_map_api_Values["ReadAfeRegisters"] = READ_AFE_REGISTERS;
     s_map_api_Values["WriteAfeRegisters"] = WRITE_AFE_REGISTERS;
     s_map_api_Values["StorageOpen"] = STORAGE_OPEN;
