@@ -104,6 +104,7 @@ class Addi9036Sensor : public aditof::DepthSensorInterface,
     std::string m_driverSubPath;
     std::string m_captureDev;
     std::unique_ptr<ImplData> m_implData;
+    long long timestamp;
 };
 
 #endif // ADDI9036_SENSOR_H
