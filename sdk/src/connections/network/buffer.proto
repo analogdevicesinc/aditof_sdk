@@ -36,6 +36,11 @@ message SensorsInfo
   repeated TemperatureSensorInfo temp_sensors = 20; // Information about available temperature sensors
 }
 
+message BufferInfo
+{
+  fixed64 timestamp = 10;  //The timestamp of the sent frame
+}
+
 message FrameDetails
 {
   uint32 width = 10;   // The width of the frame
@@ -66,4 +71,5 @@ message ServerResponse
   repeated FrameDetails available_frame_types = 70;  // List of supported frame types
   SensorsInfo sensors_info = 80;                     // List of information about existing devices on the same platform as the server
   string message = 90;                               // Additional message (if any)
+  BufferInfo buffer_details = 100;                     // Buffer details
 }

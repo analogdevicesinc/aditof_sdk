@@ -61,7 +61,6 @@ class Addi9036Sensor : public aditof::DepthSensorInterface,
     virtual aditof::Status program(const uint8_t *firmware,
                                    size_t size) override;
     virtual aditof::Status getFrame(uint16_t *buffer) override;
-    virtual aditof::Status getFrameTimestamp(long long &timestamp) override;
     virtual aditof::Status readAfeRegisters(const uint16_t *address,
                                             uint16_t *data,
                                             size_t length) override;
@@ -100,11 +99,11 @@ class Addi9036Sensor : public aditof::DepthSensorInterface,
   private:
     struct ImplData;
     aditof::SensorDetails m_sensorDetails;
+    aditof::BufferInfo m_bufferInfo;
     std::string m_driverPath;
     std::string m_driverSubPath;
     std::string m_captureDev;
     std::unique_ptr<ImplData> m_implData;
-    long long m_frameTimestamp;
 };
 
 #endif // ADDI9036_SENSOR_H

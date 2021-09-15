@@ -455,13 +455,6 @@ aditof::Status UsbDepthSensor::getFrame(uint16_t *buffer) {
     return status;
 }
 
-aditof::Status UsbDepthSensor::getFrameTimestamp(long long &timestamp) {
-
-    //TO DO: to be implemented
-
-    return aditof::Status::UNAVAILABLE;
-}
-
 aditof::Status UsbDepthSensor::readAfeRegisters(const uint16_t *address,
                                                 uint16_t *data, size_t length) {
     using namespace aditof;
