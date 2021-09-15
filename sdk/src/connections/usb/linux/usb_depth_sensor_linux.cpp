@@ -32,6 +32,7 @@
 #include "connections/usb/usb_depth_sensor.h"
 #include "usb_linux_utils.h"
 #include "utils.h"
+#include <aditof/sensor_definitions.h>
 
 #include "device_utils.h"
 
@@ -373,7 +374,8 @@ aditof::Status UsbDepthSensor::program(const uint8_t *firmware, size_t size) {
     return Status::OK;
 }
 
-aditof::Status UsbDepthSensor::getFrame(uint16_t *buffer) {
+aditof::Status UsbDepthSensor::getFrame(uint16_t *buffer,
+                                        aditof::BufferInfo *bufferInfo) {
     using namespace aditof;
     Status status = Status::OK;
 

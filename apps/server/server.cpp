@@ -440,8 +440,9 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         buff_send.add_bytes_payload(buffer, buf_data_len * sizeof(uint8_t));
 #endif
 
-        buff_send.add_buffer_details() buff_send.set_timestamp =
-            buf.timestamp.tv_sec * 1000000 + buf.timestamp.tv_usec;
+        auto bufDetails = buff_send.mutable_buffer_details();
+        +bufDetails->set_timestamp(buf.timestamp.tv_sec * 1000000 +
+                                   buf.timestamp.tv_usec);
 
         status = sensorV4lBufAccess->enqueueInternalBuffer(buf);
         if (status != aditof::Status::OK) {

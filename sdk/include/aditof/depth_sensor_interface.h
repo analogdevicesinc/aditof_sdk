@@ -100,9 +100,11 @@ class DepthSensorInterface {
      * @param buffer - a valid location where the new frame should be stored.
      * The size of the frame is known (cached) internally and gets updated each
      * time setFrameType() is called.
+     * @param bufferInfo - a struct containing extended frame details
      * @return Status
      */
-    virtual aditof::Status getFrame(uint16_t *buffer) = 0;
+    virtual aditof::Status
+    getFrame(uint16_t *buffer, aditof::BufferInfo *bufferInfo = nullptr) = 0;
 
     /**
      * @brief Read multiple registers from AFE.
@@ -113,7 +115,6 @@ class DepthSensorInterface {
      * @param length - the number of registers to read
      * @return Status
      */
-
     virtual aditof::Status readAfeRegisters(const uint16_t *address,
                                             uint16_t *data, size_t length) = 0;
 

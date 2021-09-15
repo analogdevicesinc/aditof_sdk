@@ -59,7 +59,7 @@ struct SensorDetails {
 
 struct BufferInfo {
     /**
-     * @brief Timestamp of the last requested frame
+     * @brief Timestamp of the data within the buffer
      */
     long long timestamp;
 };
