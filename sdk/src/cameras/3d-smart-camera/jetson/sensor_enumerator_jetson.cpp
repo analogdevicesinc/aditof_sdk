@@ -105,7 +105,7 @@ Status TargetSensorEnumerator::searchSensors() {
 
     sInfo.driverPath = devPath;
     sInfo.subDevPath = subdevPath;
-    sInfo.captureDev = CAPTURE_DEVICE_NAME;
+    sInfo.captureDev = DEPTH_CAPTURE_DEVICE_NAME;
     m_sensorsInfo.emplace_back(sInfo);
 
     //RGB Camera
@@ -123,7 +123,7 @@ Status TargetSensorEnumerator::searchSensors() {
 
     sInfo.driverPath = devPath;
     sInfo.subDevPath = subdevPath;
-    sInfo.captureDev = CAPTURE_DEVICE_NAME;
+    sInfo.captureDev = RGB_CAPTURE_DEVICE_NAME;
     m_sensorsInfo.emplace_back(sInfo);
 
 
