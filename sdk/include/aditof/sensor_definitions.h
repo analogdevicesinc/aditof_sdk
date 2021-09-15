@@ -57,6 +57,10 @@ struct SensorDetails {
     ConnectionType connectionType;
 };
 
+/**
+ * @struct BufferInfo
+ * @brief Provides extra details for the frame buffer
+ */
 struct BufferInfo {
     /**
      * @brief Timestamp of the data within the buffer
