@@ -429,7 +429,8 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
     uint16_t *depthIrDataLocation;
     frame->getData(FrameDataType::FULL_DATA, &depthIrDataLocation);
 
-    status = m_depthSensor->getFrame(depthIrDataLocation);
+    aditof::BufferInfo bufferInfo;
+    status = m_depthSensor->getFrame(depthIrDataLocation, &bufferInfo);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from depth sensor";
         return status;
