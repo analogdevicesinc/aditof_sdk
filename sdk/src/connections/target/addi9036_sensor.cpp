@@ -723,7 +723,9 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
         }
     }
 
-    bufferInfo->timestamp = timestamp;
+    bufferInfo->timestamp =
+        buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
+
     return status;
 }
 
@@ -893,8 +895,6 @@ Addi9036Sensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
         LOG(WARNING) << "Not enough buffers avaialable";
         return Status::GENERIC_ERROR;
     }
-
-    timestamp = buf.timestamp.tv_sec * 1000000 + buf.timestamp.tv_usec;
 
     return status;
 }

@@ -32,7 +32,6 @@
 #include "connections/usb/usb_depth_sensor.h"
 #include "usb_linux_utils.h"
 #include "utils.h"
-#include <aditof/sensor_definitions.h>
 
 #include "device_utils.h"
 
