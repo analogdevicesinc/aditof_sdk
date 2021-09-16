@@ -347,6 +347,7 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
     std::vector<FrameDetails> detailsList;
     status = m_depthSensor->getAvailableFrameTypes(detailsList);
+    status = m_rgbSensor->getAvailableFrameTypes(detailsList);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get available frame types";
         return status;
@@ -401,15 +402,11 @@ aditof::Status Camera3D_Smart::getAvailableFrameTypes(
         LOG(WARNING) << "Failed to get available frame types";
         return status;
     }
-
-    status = m_rgbSensor->getAvailableFrameTypes(frameDetailsList);
-    if (status != Status::OK) {
-        LOG(WARNING) << "Failed to get available frame types";
-        return status;
-    }
-
+    //combining the frame-types
+    std::string aux = "";
     for (const auto &item : frameDetailsList) {
-        availableFrameTypes.emplace_back(item.type);
+        aux = item.type + "-rgb";
+        availableFrameTypes.emplace_back(aux);
     }
 
     return status;
