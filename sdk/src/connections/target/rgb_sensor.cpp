@@ -138,7 +138,6 @@ RgbSensor::~RgbSensor() {
 aditof::Status RgbSensor::open() {
     using namespace aditof;
     Status status = Status::OK;
-    std::cout<<"RGB Camera open! ############\n";
     LOG(INFO) << "Opening device";
 
     struct stat st;
