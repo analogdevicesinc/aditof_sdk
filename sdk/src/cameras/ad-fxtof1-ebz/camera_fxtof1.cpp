@@ -37,7 +37,6 @@
 #include "sensor_names.h"
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
-#include <aditof/sensor_definitions.h>
 
 #include <algorithm>
 #include <array>

@@ -402,7 +402,7 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer,
                              m_implData->frameDetails_cache.fullDataHeight);
     }
 
-    if (bufferInfo != nullptr) {
+    if (bufferInfo) {
         bufferInfo->timestamp = net->recv_buff.buffer_details().timestamp();
     }
     return status;
