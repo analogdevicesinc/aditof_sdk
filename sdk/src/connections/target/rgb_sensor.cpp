@@ -315,13 +315,9 @@ aditof::Status
 RgbSensor::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     using namespace aditof;
     Status status = Status::OK;
-
     FrameDetails details;
-
-    details.width = aditof::RGB_FRAME_WIDTH;
-    details.height = aditof::RGB_FRAME_HEIGHT;
-    details.fullDataWidth = aditof::RGB_FRAME_WIDTH;
-    details.fullDataHeight = aditof::RGB_FRAME_HEIGHT;
+    details.rgbWidth = aditof::RGB_FRAME_WIDTH;
+    details.rgbHeight = aditof::RGB_FRAME_HEIGHT;
     details.type = "rgb";
     types.push_back(details);
 
@@ -360,8 +356,8 @@ aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
         CLEAR(fmt);
         fmt.type = dev->videoBuffersType;
         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
-        fmt.fmt.pix.width = details.fullDataWidth;
-        fmt.fmt.pix.height = details.fullDataHeight;
+        fmt.fmt.pix.width = details.rgbWidth;
+        fmt.fmt.pix.height = details.rgbHeight;
         fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
         if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
