@@ -355,7 +355,7 @@ aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
         /* Set the frame format in the driver */
         CLEAR(fmt);
         fmt.type = dev->videoBuffersType;
-        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
+        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SRGGB12;
         fmt.fmt.pix.width = details.rgbWidth;
         fmt.fmt.pix.height = details.rgbHeight;
         fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
@@ -735,8 +735,8 @@ aditof::Status RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
     CLEAR(buf);
     buf.type = dev->videoBuffersType;
     buf.memory = V4L2_MEMORY_MMAP;
-    buf.length = 1;
-    buf.m.planes = dev->planes;
+    //buf.length = 1;
+    //buf.m.planes = dev->planes;
 
     if (xioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1) {
         LOG(WARNING) << "VIDIOC_DQBUF error "

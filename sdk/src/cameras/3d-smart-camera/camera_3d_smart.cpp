@@ -479,7 +479,7 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
     uint16_t *rgbDataLocation;
     frame->getData(FrameDataType::RGB, &rgbDataLocation);
 
-    status = m_depthSensor->getFrame(rgbDataLocation);
+    status = m_rgbSensor->getFrame(rgbDataLocation);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from RGB sensor";
         return status;
