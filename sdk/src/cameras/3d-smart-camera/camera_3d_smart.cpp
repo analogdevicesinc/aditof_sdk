@@ -86,6 +86,9 @@ Camera3D_Smart::Camera3D_Smart(
         LOG(WARNING) << "Invalid instance of a RGB sensor";
         return;
     }
+    //aditof::SensorDetails sDetails;
+    //m_rgbSensor->getDetails(sDetails);
+    //m_details.connection = sDetails.connectionType;
 
     // Look for EEPROM
     auto eeprom_iter =
@@ -343,6 +346,7 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
     if (m_devStarted) {
         status = m_depthSensor->stop();
+        status = m_rgbSensor->stop();
         if (status != Status::OK) {
             return status;
         }
@@ -416,6 +420,7 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
     if (!m_devStarted) {
         status = m_depthSensor->start();
+        status = m_rgbSensor->start();
         if (status != Status::OK) {
             return status;
         }
