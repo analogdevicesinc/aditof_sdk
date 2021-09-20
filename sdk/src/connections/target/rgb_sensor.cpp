@@ -593,43 +593,7 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer) {
 aditof::Status RgbSensor::readAfeRegisters(const uint16_t *address,
                                            uint16_t *data, size_t length) {
     using namespace aditof;
-
-    if (address == nullptr) {
-        LOG(ERROR) << "Received AfeRegisters address null pointer";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    if (data == nullptr) {
-        LOG(ERROR) << "Received AfeRegisters data null pointer";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    assert(length > 0);
-
-    struct VideoDev *dev = &m_implData->videoDevs[0];
     Status status = Status::OK;
-
-    static struct v4l2_ext_control extCtrl;
-    static struct v4l2_ext_controls extCtrls;
-
-    extCtrl.size = 2048 * sizeof(unsigned short);
-
-    for (size_t i = 0; i < length; i++) {
-        uint16_t aux_address = address[i];
-        extCtrl.p_u16 = const_cast<uint16_t *>(&aux_address);
-        extCtrl.id = V4L2_CID_AD_DEV_READ_REG;
-        memset(&extCtrls, 0, sizeof(struct v4l2_ext_controls));
-        extCtrls.controls = &extCtrl;
-        extCtrls.count = 1;
-
-        if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
-            LOG(WARNING) << "Programming AFE error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-            return Status::GENERIC_ERROR;
-        }
-        data[i] = *extCtrl.p_u16;
-    }
-
     return status;
 }
 
@@ -638,51 +602,6 @@ aditof::Status RgbSensor::writeAfeRegisters(const uint16_t *address,
                                             size_t length) {
     using namespace aditof;
     Status status = Status::OK;
-
-    if (address == nullptr) {
-        LOG(ERROR) << "Received AfeRegisters address null pointer";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    if (data == nullptr) {
-        LOG(ERROR) << "Received AfeRegisters data null pointer";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    assert(length > 0);
-
-    static struct v4l2_ext_control extCtrl;
-    static struct v4l2_ext_controls extCtrls;
-    struct VideoDev *dev = &m_implData->videoDevs[0];
-    static unsigned char buf[CTRL_PACKET_SIZE];
-    unsigned short sampleCnt = 0;
-
-    length *= 2 * sizeof(unsigned short);
-    while (length) {
-        memset(buf, 0, CTRL_PACKET_SIZE);
-        size_t maxBytesToSend =
-            length > CTRL_PACKET_SIZE ? CTRL_PACKET_SIZE : length;
-        for (size_t i = 0; i < maxBytesToSend; i += 4) {
-            *(unsigned short *)(buf + i) = address[sampleCnt];
-            *(unsigned short *)(buf + i + 2) = data[sampleCnt];
-            sampleCnt++;
-        }
-        length -= maxBytesToSend;
-
-        extCtrl.size = 2048 * sizeof(unsigned short);
-        extCtrl.p_u16 = (unsigned short *)buf;
-        extCtrl.id = V4L2_CID_AD_DEV_SET_CHIP_CONFIG;
-        memset(&extCtrls, 0, sizeof(struct v4l2_ext_controls));
-        extCtrls.controls = &extCtrl;
-        extCtrls.count = 1;
-
-        if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
-            LOG(WARNING) << "Programming AFE error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-            return Status::GENERIC_ERROR;
-        }
-    }
-
     return status;
 }
 
@@ -735,8 +654,8 @@ aditof::Status RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
     CLEAR(buf);
     buf.type = dev->videoBuffersType;
     buf.memory = V4L2_MEMORY_MMAP;
-    //buf.length = 1;
-    //buf.m.planes = dev->planes;
+    buf.length = 1;
+    buf.m.planes = dev->planes;
 
     if (xioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1) {
         LOG(WARNING) << "VIDIOC_DQBUF error "
