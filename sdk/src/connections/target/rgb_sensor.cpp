@@ -281,7 +281,6 @@ aditof::Status RgbSensor::start() {
 
         dev->started = true;
     }
-    std::cout<<"RGB Camera started! ############\n";
     return status;
 }
 

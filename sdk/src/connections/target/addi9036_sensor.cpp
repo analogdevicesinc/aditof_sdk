@@ -609,9 +609,9 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
     } else if (!isBufferPacked(buf[0], width, height)) {
         // TODO: investigate optimizations for this (arm neon / 1024 bytes
         // chunks)
-        if (m_implData->frameDetails.type == "depth_only") {
+        if (m_implData->frameDetails.type.find("depth_only") != std::string::npos) {
             memcpy(buffer, pdata[0], buf[0].bytesused);
-        } else if (m_implData->frameDetails.type == "ir_only") {
+        } else if (m_implData->frameDetails.type.find("ir_only") != std::string::npos) {
 
             memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
         } else {
