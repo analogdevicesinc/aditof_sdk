@@ -339,9 +339,9 @@ aditof::Status Camera3D_Smart::getAvailableModes(
 aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
     using namespace aditof;
     Status status = Status::OK;
-    int poz = frameType.find('-');
-    std::string leftFrameType = frameType.substr(0, poz);
-    std::string rightFrameType = frameType.substr(poz+1, frameType.size()-poz-1);
+    //int poz = frameType.find('-');
+    //std::string leftFrameType = frameType.substr(0, poz);
+    //std::string rightFrameType = frameType.substr(poz+1, frameType.size()-poz-1);
     
 
     if (m_devStarted) {
@@ -356,6 +356,7 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
     std::vector<FrameDetails> detailsList;
     status = m_depthSensor->getAvailableFrameTypes(detailsList);
+    status = m_rgbSensor->getAvailableFrameTypes(detailsList);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get available frame types";
         return status;
@@ -363,10 +364,10 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
     auto frameDetailsIt = std::find_if(
         detailsList.begin(), detailsList.end(),
-        [&leftFrameType](const FrameDetails &d) { return (d.type == leftFrameType); });
+        [&frameType](const FrameDetails &d) { return (d.type == frameType); });
 
     if (frameDetailsIt == detailsList.end()) {
-        LOG(WARNING) << "Frame type: " << leftFrameType
+        LOG(WARNING) << "Frame type: " << frameType
                      << " not supported by camera";
         return Status::INVALID_ARGUMENT;
     }
@@ -377,6 +378,7 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
         uint16_t afeRegsVal[2] = {0x0006, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 2);
         status = m_depthSensor->setFrameType(*frameDetailsIt);
+        status = m_rgbSensor->setFrameType(*frameDetailsIt);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to set frame type";
             return status;
@@ -387,36 +389,6 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
         uint16_t afeRegsValue[2] = {0x0007, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddress, afeRegsValue, 2);
     }
-
-    //rgb
-    
-    std::vector<FrameDetails> detailsList2;
-    status = m_rgbSensor->getAvailableFrameTypes(detailsList2);
-    if (status != Status::OK) {
-        LOG(WARNING) << "Failed to get available frame types";
-        return status;
-    }
-
-    auto frameDetailsIt2 = std::find_if(
-        detailsList2.begin(), detailsList2.end(),
-        [&rightFrameType](const FrameDetails &d) { return (d.type == rightFrameType); });
-
-    if (frameDetailsIt2 == detailsList2.end()) {
-        LOG(WARNING) << "Frame type: " << rightFrameType
-                     << " not supported by camera";
-        return Status::INVALID_ARGUMENT;
-    }
-
- //   if (m_details.frameType != *frameDetailsIt2) { //not needed in case of rgb sensor
-    status = m_rgbSensor->setFrameType(*frameDetailsIt2);
-    if (status != Status::OK) {
-        LOG(WARNING) << "Failed to set frame type";
-        return status;
-    }
-    m_details.frameType.rgbWidth = detailsList2.front().rgbWidth;
-    m_details.frameType.rgbHeight = detailsList2.front().rgbHeight;
-    m_details.frameType.type = frameType;
- // }
 
     if (!m_devStarted) {
         status = m_depthSensor->start();
@@ -437,17 +409,15 @@ aditof::Status Camera3D_Smart::getAvailableFrameTypes(
 
     std::vector<FrameDetails> frameDetailsList;
     status = m_depthSensor->getAvailableFrameTypes(frameDetailsList);
+    status = m_rgbSensor->getAvailableFrameTypes(frameDetailsList);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get available frame types";
         return status;
     }
-    //combining the frame-types
-    std::string aux = "";
-    for (const auto &item : frameDetailsList) {
-        aux = item.type + "-rgb";
-        availableFrameTypes.emplace_back(aux);
-    }
 
+    for (const auto &item : frameDetailsList) {
+        availableFrameTypes.emplace_back(item.type);
+    }
     return status;
 }
 

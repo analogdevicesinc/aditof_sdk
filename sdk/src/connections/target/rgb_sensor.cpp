@@ -315,12 +315,12 @@ aditof::Status
 RgbSensor::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
     using namespace aditof;
     Status status = Status::OK;
-    FrameDetails details;
-    details.rgbWidth = aditof::RGB_FRAME_WIDTH;
-    details.rgbHeight = aditof::RGB_FRAME_HEIGHT;
-    details.type = "rgb";
-    types.push_back(details);
-
+    for (int i=0;i<types.size();i++)
+    {
+        types.at(i).rgbHeight = aditof::RGB_FRAME_HEIGHT;
+        types.at(i).rgbWidth = aditof::RGB_FRAME_WIDTH;
+        types.at(i).type = types.at(i).type + ("-rgb");
+    }
     return status;
 }
 
