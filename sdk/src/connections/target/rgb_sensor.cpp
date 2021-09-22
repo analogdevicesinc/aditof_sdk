@@ -128,10 +128,10 @@ RgbSensor::~RgbSensor() {
                          << "errno: " << errno << " error: " << strerror(errno);
         }
 
-        if (close(dev->sfd) == -1) {
+        /*if (close(dev->sfd) == -1) {
             LOG(WARNING) << "close m_implData->sfd error "
                          << "errno: " << errno << " error: " << strerror(errno);
-        }
+        }*/
     }
 }
 
@@ -196,48 +196,62 @@ aditof::Status RgbSensor::open() {
             return Status::GENERIC_ERROR;
         }
 
-        if (strcmp((char *)cap.card, cardName)) {
-            LOG(WARNING) << "CAPTURE Device " << cap.card;
-            LOG(WARNING) << "Read " << cardName;
+        if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
+            LOG(WARNING) << devName << " device is not able to capture";
             return Status::GENERIC_ERROR;
-        }
-
-        if (!(cap.capabilities &
-              (V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_VIDEO_CAPTURE_MPLANE))) {
-            LOG(WARNING) << devName << " is not a video capture device";
-            return Status::GENERIC_ERROR;
-        }
-
-        if (cap.capabilities & V4L2_CAP_VIDEO_CAPTURE_MPLANE) {
-            dev->videoBuffersType = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
-        } else {
-            dev->videoBuffersType = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         }
 
         if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
-            LOG(WARNING) << devName << " does not support streaming i/o";
+            LOG(WARNING) << devName << " device is not able to stream";
             return Status::GENERIC_ERROR;
         }
+                
+        struct v4l2_cropcap cropcap;
+        struct v4l2_crop crop;
+        struct v4l2_format fmt;
+        unsigned int min;
+        CLEAR(cropcap);
 
-        /* Open V4L2 subdevice */
-        if (stat(subDevName, &st) == -1) {
-            LOG(WARNING) << "Cannot identify " << subDevName
-                         << " errno: " << errno
+        cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+        if (0 == xioctl(dev->fd, VIDIOC_CROPCAP, &cropcap)) {
+                crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                crop.c = cropcap.defrect; /* reset to default */
+
+                if (-1 == xioctl(dev->fd, VIDIOC_S_CROP, &crop)) {
+                        switch (errno) {
+                        case EINVAL:
+                                break;
+                        default:
+                                break;
+                        }
+                }
+        } else {
+                /* Error ignored */
+        }
+
+
+        /* Set the frame format in the driver */
+        CLEAR(fmt);
+        fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        fmt.fmt.pix.width       = 1920;
+        fmt.fmt.pix.height      = 1080;
+        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SRGGB10;
+        fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
+
+        if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
+            LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
                          << " error: " << strerror(errno);
             return Status::GENERIC_ERROR;
         }
 
-        if (!S_ISCHR(st.st_mode)) {
-            LOG(WARNING) << subDevName << " is not a valid device";
-            return Status::GENERIC_ERROR;
-        }
-
-        dev->sfd = ::open(subDevName, O_RDWR | O_NONBLOCK, 0);
-        if (dev->sfd == -1) {
-            LOG(WARNING) << "Cannot open " << subDevName << " errno: " << errno
-                         << " error: " << strerror(errno);
-            return Status::GENERIC_ERROR;
-        }
+        /* Buggy driver paranoia. */
+        min = fmt.fmt.pix.width * 2;
+        if (fmt.fmt.pix.bytesperline < min)
+                fmt.fmt.pix.bytesperline = min;
+        min = fmt.fmt.pix.bytesperline * fmt.fmt.pix.height;
+        if (fmt.fmt.pix.sizeimage < min)
+                fmt.fmt.pix.sizeimage = min;
     }
 
     return status;
@@ -259,11 +273,9 @@ aditof::Status RgbSensor::start() {
 
         for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
             CLEAR(buf);
-            buf.type = dev->videoBuffersType;
+            buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             buf.memory = V4L2_MEMORY_MMAP;
             buf.index = i;
-            buf.m.planes = dev->planes;
-            buf.length = 1;
 
             if (xioctl(dev->fd, VIDIOC_QBUF, &buf) == -1) {
                 LOG(WARNING)
@@ -272,7 +284,7 @@ aditof::Status RgbSensor::start() {
                 return Status::GENERIC_ERROR;
             }
         }
-
+        dev->videoBuffersType = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if (xioctl(dev->fd, VIDIOC_STREAMON, &dev->videoBuffersType) != 0) {
             LOG(WARNING) << "VIDIOC_STREAMON error "
                          << "errno: " << errno << " error: " << strerror(errno);
@@ -288,25 +300,15 @@ aditof::Status RgbSensor::stop() {
     using namespace aditof;
     Status status = Status::OK;
     struct VideoDev *dev;
+    enum v4l2_buf_type type;
+    struct v4l2_buffer buf;
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
-
-        if (!dev->started) {
-            LOG(INFO) << "Device " << i << " already stopped";
-            return Status::BUSY;
-        }
-        LOG(INFO) << "Stopping device";
-
-        if (xioctl(dev->fd, VIDIOC_STREAMOFF, &dev->videoBuffersType) != 0) {
-            LOG(WARNING) << "VIDIOC_STREAMOFF error "
-                         << "errno: " << errno << " error: " << strerror(errno);
+        type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        if (-1 == xioctl(dev->fd, VIDIOC_STREAMOFF, &type))
             return Status::GENERIC_ERROR;
-        }
-
-        dev->started = false;
     }
-
     return status;
 }
 
@@ -351,24 +353,10 @@ aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
             return status;
         }
 
-        /* Set the frame format in the driver */
-        CLEAR(fmt);
-        fmt.type = dev->videoBuffersType;
-        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SRGGB12;
-        fmt.fmt.pix.width = details.rgbWidth;
-        fmt.fmt.pix.height = details.rgbHeight;
-        fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
-
-        if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
-            LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
-                         << " error: " << strerror(errno);
-            return Status::GENERIC_ERROR;
-        }
-
         /* Allocate the video buffers in the driver */
         CLEAR(req);
         req.count = 4;
-        req.type = dev->videoBuffersType;
+        req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         req.memory = V4L2_MEMORY_MMAP;
 
         if (xioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1) {
@@ -387,11 +375,9 @@ aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
         for (dev->nVideoBuffers = 0; dev->nVideoBuffers < req.count;
              dev->nVideoBuffers++) {
             CLEAR(buf);
-            buf.type = dev->videoBuffersType;
+            buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             buf.memory = V4L2_MEMORY_MMAP;
             buf.index = dev->nVideoBuffers;
-            buf.m.planes = dev->planes;
-            buf.length = 1;
 
             if (xioctl(dev->fd, VIDIOC_QUERYBUF, &buf) == -1) {
                 LOG(WARNING)
@@ -400,26 +386,16 @@ aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
                 return Status::GENERIC_ERROR;
             }
 
-            if (dev->videoBuffersType == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
-                length = buf.length;
-                offset = buf.m.offset;
-            } else {
-                length = buf.m.planes[0].length;
-                offset = buf.m.planes[0].m.mem_offset;
-            }
-
+            dev->videoBuffers[dev->nVideoBuffers].length = buf.length;
             dev->videoBuffers[dev->nVideoBuffers].start =
-                mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED, dev->fd,
-                     offset);
+                mmap(NULL /* start anywhere */,
+                    buf.length,
+                    PROT_READ | PROT_WRITE /* required */,
+                    MAP_SHARED /* recommended */,
+                    dev->fd, buf.m.offset);
 
-            if (dev->videoBuffers[dev->nVideoBuffers].start == MAP_FAILED) {
-                LOG(WARNING)
-                    << "mmap error "
-                    << "errno: " << errno << " error: " << strerror(errno);
+            if (MAP_FAILED == dev->videoBuffers[dev->nVideoBuffers].start)
                 return Status::GENERIC_ERROR;
-            }
-
-            dev->videoBuffers[dev->nVideoBuffers].length = length;
         }
     }
 
@@ -526,66 +502,26 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer) {
         if (status != Status::OK) {
             return status;
         }
-    }
-
-    unsigned int width;
-    unsigned int height;
-    unsigned int buf_data_len;
-    uint8_t *pdata[m_implData->numVideoDevs];
-
-    width = m_implData->frameDetails.width;
-    height = m_implData->frameDetails.height;
-
-    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
-        dev = &m_implData->videoDevs[i];
+        unsigned int buf_data_len;
+        uint8_t *pdata[m_implData->numVideoDevs];
         status = getInternalBufferPrivate(&pdata[i], buf_data_len, buf[i], dev);
         if (status != Status::OK) {
             return status;
         }
-    }
-
-    auto isBufferPacked = [](const struct v4l2_buffer &buf, unsigned int width,
-                             unsigned int height) {
-        unsigned int bytesused = 0;
-        if (buf.type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
-            bytesused = buf.m.planes[0].bytesused;
-        } else {
-            bytesused = buf.bytesused;
+        
+        int k = 0;
+        for (unsigned int j = 0; j < (buf_data_len); j=j+2) {
+            buffer[k++] = (pdata[i][j+1]<<8) + pdata[i][j];
         }
-        return bytesused == (width * height * 3);
-    };
+        //memcpy(buffer, pdata[i], sizeof(buffer));
 
-    if (!isBufferPacked(buf[0], width, height)) {
-        // TODO: investigate optimizations for this (arm neon / 1024 bytes
-        // chunks)
-        if (m_implData->frameDetails.type == "rgb") {
-            memcpy(buffer, pdata[0], buf[0].bytesused);
-            unsigned int fullDataWidth = m_implData->frameDetails.fullDataWidth;
-            unsigned int fullDataHeight =
-                m_implData->frameDetails.fullDataHeight;
-            uint32_t j = 0, j1 = width * height;
-            for (uint32_t i = 0; i < fullDataHeight; i += 2) {
-                memcpy(buffer + j, pdata[0] + i * width * 2, width * 2);
-                j += width;
-                memcpy(buffer + j1, pdata[0] + (i + 1) * width * 2, width * 2);
-                j1 += width;
-            }
-            for (uint32_t i = 0; i < fullDataWidth * fullDataHeight; i += 2) {
-                buffer[i] =
-                    ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
-                buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
-                                ((buffer[i + 1]) & 0xF000) >> 12;
-            }
-        }
-    }
-
-    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
-        dev = &m_implData->videoDevs[i];
         status = enqueueInternalBufferPrivate(buf[i], dev);
         if (status != Status::OK) {
             return status;
         }
+
     }
+    //memcpy(buffer, pdata[0], sizeof(pdata[0]));
     return status;
 }
 
@@ -646,19 +582,15 @@ aditof::Status RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
                                                        struct VideoDev *dev) {
     using namespace aditof;
     Status status = Status::OK;
-
-    if (dev == nullptr)
-        dev = &m_implData->videoDevs[0];
+    enum v4l2_buf_type type;
 
     CLEAR(buf);
-    buf.type = dev->videoBuffersType;
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
-    buf.length = 1;
-    buf.m.planes = dev->planes;
 
     if (xioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1) {
         LOG(WARNING) << "VIDIOC_DQBUF error "
-                     << "errno: " << errno << " error: " << strerror(errno);
+                    << "errno: " << errno << " error: " << strerror(errno);
         switch (errno) {
         case EAGAIN:
         case EIO:
@@ -672,7 +604,7 @@ aditof::Status RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
         LOG(WARNING) << "Not enough buffers avaialable";
         return Status::GENERIC_ERROR;
     }
-
+    
     return status;
 }
 
@@ -685,7 +617,7 @@ RgbSensor::getInternalBufferPrivate(uint8_t **buffer, uint32_t &buf_data_len,
 
     *buffer = static_cast<uint8_t *>(dev->videoBuffers[buf.index].start);
     buf_data_len =
-        m_implData->frameDetails.width * m_implData->frameDetails.height * 3;
+        m_implData->frameDetails.rgbWidth * m_implData->frameDetails.rgbHeight * 2;
 
     return aditof::Status::OK;
 }
