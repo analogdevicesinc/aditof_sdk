@@ -57,6 +57,10 @@ NetworkDepthSensor::NetworkDepthSensor(const std::string &ip)
     m_implData->handle.net = net;
     m_implData->ip = ip;
     m_implData->opened = false;
+
+    static int idCount = 0;
+    id = idCount;
+    idCount++;
 }
 
 NetworkDepthSensor::~NetworkDepthSensor() {
@@ -99,6 +103,7 @@ aditof::Status NetworkDepthSensor::open() {
     }
 
     net->send_buff.set_func_name("Open");
+    net->send_buff.add_func_int32_param(id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -138,6 +143,7 @@ aditof::Status NetworkDepthSensor::start() {
     }
 
     net->send_buff.set_func_name("Start");
+    net->send_buff.add_func_int32_param(id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -175,6 +181,7 @@ aditof::Status NetworkDepthSensor::stop() {
     }
 
     net->send_buff.set_func_name("Stop");
+    net->send_buff.add_func_int32_param(id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -211,6 +218,7 @@ aditof::Status NetworkDepthSensor::getAvailableFrameTypes(
     }
 
     net->send_buff.set_func_name("GetAvailableFrameTypes");
+    net->send_buff.add_func_int32_param(id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -265,6 +273,7 @@ NetworkDepthSensor::setFrameType(const aditof::FrameDetails &details) {
     }
 
     net->send_buff.set_func_name("SetFrameType");
+    net->send_buff.add_func_int32_param(id);
     net->send_buff.mutable_frame_type()->set_width(details.width);
     net->send_buff.mutable_frame_type()->set_height(details.height);
     net->send_buff.mutable_frame_type()->set_type(details.type);
@@ -362,6 +371,7 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer,
     }
 
     net->send_buff.set_func_name("GetFrame");
+    net->send_buff.add_func_int32_param(id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {

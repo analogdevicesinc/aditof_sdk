@@ -69,6 +69,7 @@ class NetworkDepthSensor : public aditof::DepthSensorInterface {
     aditof::SensorDetails m_sensorDetails;
     aditof::BufferInfo m_bufferInfo;
     std::unique_ptr<ImplData> m_implData;
+    int id;
 };
 
 #endif // NETWORK_DEPTH_SENSOR_H
