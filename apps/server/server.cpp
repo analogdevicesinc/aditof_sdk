@@ -57,9 +57,9 @@ static std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
 bool sensors_are_created = false;
 
 /* Server only works with one depth sensor */
-std::shared_ptr<aditof::DepthSensorInterface> camDepthSensor;
-std::shared_ptr<aditof::V4lBufferAccessInterface> sensorV4lBufAccess;
-unsigned long long depthSensorTimestamp;
+std::vector<std::shared_ptr<aditof::DepthSensorInterface>> camDepthSensor;
+std::vector<std::shared_ptr<aditof::V4lBufferAccessInterface>>
+    sensorV4lBufAccess;
 
 static payload::ClientRequest buff_recv;
 static payload::ServerResponse buff_send;
@@ -94,8 +94,14 @@ static void cleanup_sensors() {
         sensor->close();
     }
     temperatureSensors.clear();
-    sensorV4lBufAccess.reset();
-    camDepthSensor.reset();
+    for (auto &depthSensor : camDepthSensor) {
+        depthSensor.reset();
+    }
+    camDepthSensor.clear();
+    for (auto &depthSensor : sensorV4lBufAccess) {
+        depthSensor.reset();
+    }
+    sensorV4lBufAccess.clear();
 
     sensors_are_created = false;
 }
@@ -314,13 +320,16 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             buff_send.set_status(::payload::Status::UNREACHABLE);
             break;
         }
-        camDepthSensor = depthSensors.front();
-        aditof::SensorDetails depthSensorDetails;
-        camDepthSensor->getDetails(depthSensorDetails);
+
+        int depth_sensor_id = 0;
         auto pbSensorsInfo = buff_send.mutable_sensors_info();
-        sensorV4lBufAccess =
-            std::dynamic_pointer_cast<aditof::V4lBufferAccessInterface>(
-                camDepthSensor);
+        for (const auto &depthSensor : depthSensors) {
+            camDepthSensor[depth_sensor_id] = depthSensor;
+            pbSensorsInfo->set_id(depth_sensor_id);
+            sensorV4lBufAccess.at(depth_sensor_id) =
+                std::dynamic_pointer_cast<aditof::V4lBufferAccessInterface>(
+                    camDepthSensor.at(depth_sensor_id));
+        }
 
         // Storages
         int storage_id = 0;
@@ -350,19 +359,22 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case OPEN: {
-        aditof::Status status = camDepthSensor->open();
+        int index = buff_recv.id();
+        aditof::Status status = camDepthSensor[index]->open();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case START: {
-        aditof::Status status = camDepthSensor->start();
+        int index = buff_recv.id();
+        aditof::Status status = camDepthSensor[index]->start();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case STOP: {
-        aditof::Status status = camDepthSensor->stop();
+        int index = buff_recv.id();
+        aditof::Status status = camDepthSensor[index]->stop();
         buff_send.set_status(static_cast<::payload::Status>(status));
 
         break;
@@ -370,9 +382,9 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
     case GET_AVAILABLE_FRAME_TYPES: {
         std::vector<aditof::FrameDetails> frameDetails;
-
+        int index = buff_recv.id();
         aditof::Status status =
-            camDepthSensor->getAvailableFrameTypes(frameDetails);
+            camDepthSensor[index]->getAvailableFrameTypes(frameDetails);
         for (auto detail : frameDetails) {
             auto type = buff_send.add_available_frame_types();
             type->set_width(detail.width);
@@ -387,12 +399,21 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
     case SET_FRAME_TYPE: {
         aditof::FrameDetails details;
-        details.width = buff_recv.frame_type().width();
-        details.height = buff_recv.frame_type().height();
-        details.type = buff_recv.frame_type().type();
-        details.fullDataWidth = buff_recv.frame_type().full_data_width();
-        details.fullDataHeight = buff_recv.frame_type().full_data_height();
-        aditof::Status status = camDepthSensor->setFrameType(details);
+        int index = buff_recv.id();
+        aditof::Status status;
+        if (!index) {
+            details.width = buff_recv.frame_type().width();
+            details.height = buff_recv.frame_type().height();
+            details.type = buff_recv.frame_type().type();
+            details.fullDataWidth = buff_recv.frame_type().full_data_width();
+            details.fullDataHeight = buff_recv.frame_type().full_data_height();
+            status = camDepthSensor[index]->setFrameType(details);
+        } else {
+            details.rgbWidth = buff_recv.frame_type().width();
+            details.rgbHeight = buff_recv.frame_type().height();
+            details.type = buff_recv.frame_type().type();
+            status = camDepthSensor[index]->setFrameType(details);
+        }
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
@@ -401,13 +422,14 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         size_t programSize = static_cast<size_t>(buff_recv.func_int32_param(0));
         const uint8_t *pdata = reinterpret_cast<const uint8_t *>(
             buff_recv.func_bytes_param(0).c_str());
-        aditof::Status status = camDepthSensor->program(pdata, programSize);
+        aditof::Status status = camDepthSensor[0]->program(pdata, programSize);
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case GET_FRAME: {
-        aditof::Status status = sensorV4lBufAccess->waitForBuffer();
+        int index = buff_recv.id();
+        aditof::Status status = sensorV4lBufAccess[index]->waitForBuffer();
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
@@ -415,7 +437,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
         struct v4l2_buffer buf;
 
-        status = sensorV4lBufAccess->dequeueInternalBuffer(buf);
+        status = sensorV4lBufAccess[index]->dequeueInternalBuffer(buf);
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
@@ -424,8 +446,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         unsigned int buf_data_len;
         uint8_t *buffer;
 
-        status =
-            sensorV4lBufAccess->getInternalBuffer(&buffer, buf_data_len, buf);
+        status = sensorV4lBufAccess[index]->getInternalBuffer(
+            &buffer, buf_data_len, buf);
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
@@ -444,7 +466,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         bufDetails->set_timestamp(buf.timestamp.tv_sec * 1000000 +
                                   buf.timestamp.tv_usec);
 
-        status = sensorV4lBufAccess->enqueueInternalBuffer(buf);
+        status = sensorV4lBufAccess[index]->enqueueInternalBuffer(buf);
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
             break;
@@ -460,7 +482,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             buff_recv.func_bytes_param(0).c_str());
         uint16_t *data = new uint16_t[length];
         aditof::Status status =
-            camDepthSensor->readAfeRegisters(address, data, length);
+            camDepthSensor[0]->readAfeRegisters(address, data, length);
         if (status == aditof::Status::OK) {
             buff_send.add_bytes_payload(data, length * sizeof(uint16_t));
         }
@@ -476,7 +498,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         const uint16_t *data = reinterpret_cast<const uint16_t *>(
             buff_recv.func_bytes_param(1).c_str());
         aditof::Status status =
-            camDepthSensor->writeAfeRegisters(address, data, length);
+            camDepthSensor[0]->writeAfeRegisters(address, data, length);
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
@@ -493,7 +515,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         }
 
         void *sensorHandle;
-        status = camDepthSensor->getHandle(&sensorHandle);
+        status = camDepthSensor[0]->getHandle(&sensorHandle);
         if (status != aditof::Status::OK) {
             buff_send.set_message("Failed to obtain handle from depth sensor "
                                   "needed to open storage");
@@ -578,7 +600,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         }
 
         void *sensorHandle;
-        aditof::Status status = camDepthSensor->getHandle(&sensorHandle);
+        aditof::Status status = camDepthSensor[0]->getHandle(&sensorHandle);
         if (status != aditof::Status::OK) {
             buff_send.set_message("Failed to obtain handle from depth sensor "
                                   "needed to open temperature sensor");
