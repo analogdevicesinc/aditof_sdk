@@ -288,10 +288,10 @@ aditof::Status CalibrationFxTof1::setMode(
         LOG(WARNING) << "Failed to read intrinsic from eeprom";
     } else {
         LOG(INFO) << "Camera intrinsic parameters:\n"
-                  << "    fx: " << cameraMatrix[2] << "\n"
-                  << "    fy: " << cameraMatrix[3] << "\n"
-                  << "    cx: " << cameraMatrix[0] << "\n"
-                  << "    cy: " << cameraMatrix[1];
+                  << "    fx: " << cameraMatrix[0] << "\n"
+                  << "    fy: " << cameraMatrix[4] << "\n"
+                  << "    cx: " << cameraMatrix[2] << "\n"
+                  << "    cy: " << cameraMatrix[5];
         buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
     }
 
@@ -385,10 +385,10 @@ void CalibrationFxTof1::buildGeometryCalibrationCache(
     const std::vector<float> &cameraMatrix, unsigned int width,
     unsigned int height) {
 
-    float fx = cameraMatrix[2];
-    float fy = cameraMatrix[3];
-    float x0 = cameraMatrix[0];
-    float y0 = cameraMatrix[1];
+    float fx = cameraMatrix[0];
+    float fy = cameraMatrix[4];
+    float x0 = cameraMatrix[2];
+    float y0 = cameraMatrix[5];
 
     const bool validParameters = (fx != 0 && fy != 0);
 
