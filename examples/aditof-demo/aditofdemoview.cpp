@@ -1084,7 +1084,11 @@ void AdiTofDemoView::_displayIrImage() {
         std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
         lock.unlock(); // Lock is no longer needed
         uint16_t *irData;
-        localFrame->getData(aditof::FrameDataType::IR, &irData);
+        if (ethModeChecked && irOnlyChecked) {
+            localFrame->getData(aditof::FrameDataType::FULL_DATA, &irData);
+        } else {
+            localFrame->getData(aditof::FrameDataType::IR, &irData);
+        }
 
         aditof::FrameDetails frameDetails;
         localFrame->getDetails(frameDetails);
