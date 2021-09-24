@@ -331,6 +331,14 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x05, 0x0007, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    } else if (m_details.frameType.type == "depth_ir") {
+        uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
+#if defined(JETSON)
+        uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
+#else
+        uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x07, 0x0007, 0x0004};
+#endif
+        m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
 
     m_details.mode = mode;
