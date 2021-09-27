@@ -325,10 +325,10 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         auto pbSensorsInfo = buff_send.mutable_sensors_info();
         for (const auto &depthSensor : depthSensors) {
             camDepthSensor[depth_sensor_id] = depthSensor;
-            pbSensorsInfo->set_id(depth_sensor_id);
             sensorV4lBufAccess.at(depth_sensor_id) =
                 std::dynamic_pointer_cast<aditof::V4lBufferAccessInterface>(
                     camDepthSensor.at(depth_sensor_id));
+            depth_sensor_id++;
         }
 
         // Storages
