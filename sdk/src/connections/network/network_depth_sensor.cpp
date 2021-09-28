@@ -59,7 +59,7 @@ NetworkDepthSensor::NetworkDepthSensor(const std::string &ip)
     m_implData->opened = false;
 
     static int idCount = 0;
-    id = idCount;
+    m_sensorInformations.id = idCount;
     idCount++;
 }
 
@@ -103,7 +103,10 @@ aditof::Status NetworkDepthSensor::open() {
     }
 
     net->send_buff.set_func_name("Open");
-    net->send_buff.add_func_int32_param(id);
+    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+        m_sensorInformations.id);
+    //net->send_buff.sensors_info().image_sensors()
+    // net->send_buff.add_func_int32_param(id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -143,7 +146,8 @@ aditof::Status NetworkDepthSensor::start() {
     }
 
     net->send_buff.set_func_name("Start");
-    net->send_buff.add_func_int32_param(id);
+    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+        m_sensorInformations.id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -181,7 +185,8 @@ aditof::Status NetworkDepthSensor::stop() {
     }
 
     net->send_buff.set_func_name("Stop");
-    net->send_buff.add_func_int32_param(id);
+    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+        m_sensorInformations.id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -218,7 +223,8 @@ aditof::Status NetworkDepthSensor::getAvailableFrameTypes(
     }
 
     net->send_buff.set_func_name("GetAvailableFrameTypes");
-    net->send_buff.add_func_int32_param(id);
+    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+        m_sensorInformations.id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -273,7 +279,8 @@ NetworkDepthSensor::setFrameType(const aditof::FrameDetails &details) {
     }
 
     net->send_buff.set_func_name("SetFrameType");
-    net->send_buff.add_func_int32_param(id);
+    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+        m_sensorInformations.id);
     net->send_buff.mutable_frame_type()->set_width(details.width);
     net->send_buff.mutable_frame_type()->set_height(details.height);
     net->send_buff.mutable_frame_type()->set_type(details.type);
@@ -371,7 +378,8 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer,
     }
 
     net->send_buff.set_func_name("GetFrame");
-    net->send_buff.add_func_int32_param(id);
+    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+        m_sensorInformations.id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -543,5 +551,11 @@ aditof::Status NetworkDepthSensor::getHandle(void **handle) {
         LOG(ERROR) << "Won't return the handle. Device hasn't been opened yet.";
         return aditof::Status::UNAVAILABLE;
     }
+    return aditof::Status::OK;
+}
+
+aditof::Status NetworkDepthSensor::getName(std::string &sensorName) {
+    sensorName = m_sensorInformations.sensorName;
+
     return aditof::Status::OK;
 }
