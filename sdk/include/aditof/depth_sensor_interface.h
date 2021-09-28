@@ -147,6 +147,13 @@ class DepthSensorInterface {
      * @return Status
      */
     virtual aditof::Status getHandle(void **handle) = 0;
+
+    /**
+     * @brief Get the name of the available image sensor.
+     * @param[out] sensorName - the location where to return the name.
+     * @return Status
+     */
+    virtual aditof::Status getName(std::string &sensorName) = 0;
 };
 
 } // namespace aditof

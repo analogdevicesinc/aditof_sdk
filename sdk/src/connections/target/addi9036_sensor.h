@@ -71,6 +71,7 @@ class Addi9036Sensor : public aditof::DepthSensorInterface,
     virtual aditof::Status
     getDetails(aditof::SensorDetails &details) const override;
     virtual aditof::Status getHandle(void **handle) override;
+    virtual aditof::Status getName(std::string &sensorName) override;
 
   public: // implements V4lBufferAccessInterface
     // Methods that give a finer control than getFrame()
@@ -99,6 +100,7 @@ class Addi9036Sensor : public aditof::DepthSensorInterface,
 
   private:
     struct ImplData;
+    aditof::SensorInformations m_sensorInformations;
     aditof::SensorDetails m_sensorDetails;
     std::string m_driverPath;
     std::string m_driverSubPath;

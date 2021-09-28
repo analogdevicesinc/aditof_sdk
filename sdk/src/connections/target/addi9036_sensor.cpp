@@ -97,7 +97,9 @@ Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
                                const std::string &driverSubPath,
                                const std::string &captureDev)
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
-      m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData) {}
+      m_captureDev(captureDev),
+      m_implData(new Addi9036Sensor::ImplData), m_sensorInformations.sensorName(
+                                                    "addi9036") {}
 
 Addi9036Sensor::~Addi9036Sensor() {
     struct VideoDev *dev;
@@ -867,6 +869,10 @@ Addi9036Sensor::getDetails(aditof::SensorDetails &details) const {
 aditof::Status Addi9036Sensor::getHandle(void **handle) {
     *handle = nullptr;
     return aditof::Status::OK;
+}
+
+aditof::Status Addi9036Sensor::getName(std::string &sensorName) {
+    sensorName = m_sensorInformation.sensorName;
 }
 
 aditof::Status Addi9036Sensor::waitForBufferPrivate(struct VideoDev *dev) {

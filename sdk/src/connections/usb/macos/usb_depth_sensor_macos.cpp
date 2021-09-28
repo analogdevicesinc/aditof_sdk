@@ -160,3 +160,12 @@ aditof::Status UsbDepthSensor::getHandle(void **handle) {
 
     return status;
 }
+
+aditof::Status UsbDepthSensor::getName(std::string &sensorName) {
+    using namespace aditof;
+    Status status = Status::OK;
+
+    // TO DO
+
+    return status;
+}

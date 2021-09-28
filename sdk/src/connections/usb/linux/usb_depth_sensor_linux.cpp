@@ -577,3 +577,9 @@ aditof::Status UsbDepthSensor::getHandle(void **handle) {
         return aditof::Status::UNAVAILABLE;
     }
 }
+
+aditof::Status UsbDepthSensor::getName(std::string &sensorName) {
+    sensorName = m_sensorInformations.sensorName;
+
+    return aditof::Status::OK;
+}
