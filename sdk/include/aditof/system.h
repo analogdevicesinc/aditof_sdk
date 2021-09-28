@@ -49,28 +49,28 @@ class Camera;
  * @class System
  * @brief The TOF system that manages the cameras.
  */
-class SDK_API System {
+class System {
   public:
     /**
      * @brief Constructor
      */
-    System();
+    SDK_API System();
 
     /**
      * @brief Destructor
      */
-    ~System();
+    SDK_API ~System();
 
     // Make System movable and non-copyable
     /**
      * @brief Move constructor
      */
-    System(System &&op) noexcept;
+    SDK_API System(System &&op) noexcept;
 
     /**
      * @brief Move assignment
      */
-    System &operator=(System &&op) noexcept;
+    SDK_API System &operator=(System &&op) noexcept;
 
   public:
     /**
@@ -79,7 +79,7 @@ class SDK_API System {
      * @param[out] cameraList - A container to be set with the available cameras
      * @return Status
      */
-    Status
+    SDK_API Status
     getCameraList(std::vector<std::shared_ptr<Camera>> &cameraList) const;
 
     /**
@@ -89,8 +89,9 @@ class SDK_API System {
      * @param ip - The IP of the remote target
      * @return Status
      */
-    Status getCameraListAtIp(std::vector<std::shared_ptr<Camera>> &cameraList,
-                             const std::string &ip) const;
+    SDK_API Status
+    getCameraListAtIp(std::vector<std::shared_ptr<Camera>> &cameraList,
+                      const std::string &ip) const;
 
   private:
     std::unique_ptr<SystemImpl> m_impl;
