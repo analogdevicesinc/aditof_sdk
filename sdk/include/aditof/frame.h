@@ -46,36 +46,37 @@ namespace aditof {
  * @class Frame
  * @brief Frame of a camera.
  */
-class SDK_API Frame {
+class Frame {
   public:
     /**
      * @brief Constructor
      */
-    Frame();
+    SDK_API Frame();
 
     /**
      * @brief Destructor
      */
-    ~Frame();
+    SDK_API ~Frame();
 
     /**
      * @brief Copy constructor
      */
-    Frame(const Frame &op);
+    SDK_API Frame(const Frame &op);
 
     /**
      * @brief Copy assignment
      */
-    Frame &operator=(const Frame &op);
+    SDK_API Frame &operator=(const Frame &op);
 
     /**
      * @brief Move constructor
      */
-    Frame(Frame &&) noexcept;
+    SDK_API Frame(Frame &&) noexcept;
+
     /**
      * @brief Move assignment
      */
-    Frame &operator=(Frame &&) noexcept;
+    SDK_API Frame &operator=(Frame &&) noexcept;
 
   public:
     /**
@@ -83,14 +84,14 @@ class SDK_API Frame {
      * @param details
      * @return Status
      */
-    Status setDetails(const FrameDetails &details);
+    SDK_API Status setDetails(const FrameDetails &details);
 
     /**
      * @brief Gets the current details of the frame
      * @param[out] details
      * @return Status
      */
-    Status getDetails(FrameDetails &details) const;
+    SDK_API Status getDetails(FrameDetails &details) const;
 
     /**
      * @brief Gets the address where the specified data is being stored
@@ -98,7 +99,7 @@ class SDK_API Frame {
      * @param[out] dataPtr
      * @return Status
      */
-    Status getData(FrameDataType dataType, uint16_t **dataPtr);
+    SDK_API Status getData(FrameDataType dataType, uint16_t **dataPtr);
 
   private:
     std::unique_ptr<FrameImpl> m_impl;
