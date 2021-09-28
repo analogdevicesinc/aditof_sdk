@@ -86,10 +86,6 @@ Camera3D_Smart::Camera3D_Smart(
         LOG(WARNING) << "Invalid instance of a RGB sensor";
         return;
     }
-    //aditof::SensorDetails sDetails;
-    //m_rgbSensor->getDetails(sDetails);
-    //m_details.connection = sDetails.connectionType;
-
     // Look for EEPROM
     auto eeprom_iter =
         std::find_if(eeproms.begin(), eeproms.end(),
@@ -378,7 +374,6 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
         uint16_t afeRegsVal[2] = {0x0006, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 2);
         status = m_depthSensor->setFrameType(*frameDetailsIt);
-        status = m_rgbSensor->setFrameType(*frameDetailsIt);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to set frame type";
             return status;

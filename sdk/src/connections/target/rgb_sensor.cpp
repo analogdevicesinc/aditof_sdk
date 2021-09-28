@@ -480,7 +480,7 @@ aditof::Status RgbSensor::program(const uint8_t *firmware, size_t size) {
     return status;
 }
 
-aditof::Status RgbSensor::getFrame(uint16_t *buffer) {
+aditof::Status RgbSensor::getFrame(uint16_t *buffer, aditof::BufferInfo *bufferInfo) {
     using namespace aditof;
     struct v4l2_buffer buf[m_implData->numVideoDevs];
     struct VideoDev *dev;
@@ -521,6 +521,7 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer) {
         }
 
     }
+    bufferInfo->timestamp = buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
     //memcpy(buffer, pdata[0], sizeof(pdata[0]));
     return status;
 }
