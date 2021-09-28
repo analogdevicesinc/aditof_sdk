@@ -308,279 +308,275 @@ aditof::Status RgbSensor::stop() {
 
 aditof::Status
 RgbSensor::getAvailableFrameTypes(std::vector<aditof::FrameDetails> &types) {
-    std::vector<aditof::FrameDetails> &types) {
-        using namespace aditof;
-        Status status = Status::OK;
+    using namespace aditof;
+    Status status = Status::OK;
 
-        FrameDetails details;
+    FrameDetails details;
 
-        details.rgbWidth = aditof::RGB_FRAME_WIDTH;
-        details.rgbHeight = aditof::RGB_FRAME_HEIGHT;
-        details.type = "rgb";
-        types.push_back(details);
+    details.rgbWidth = aditof::RGB_FRAME_WIDTH;
+    details.rgbHeight = aditof::RGB_FRAME_HEIGHT;
+    details.type = "rgb";
+    types.push_back(details);
 
-        return status;
-    }
+    return status;
+}
 
-    aditof::Status RgbSensor::setFrameType(
-        const aditof::FrameDetails &details) {
-        using namespace aditof;
-        Status status = Status::OK;
-        struct VideoDev *dev;
+aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
+    using namespace aditof;
+    Status status = Status::OK;
+    struct VideoDev *dev;
 
-        struct v4l2_requestbuffers req;
-        struct v4l2_format fmt;
-        struct v4l2_buffer buf;
-        size_t length, offset;
+    struct v4l2_requestbuffers req;
+    struct v4l2_format fmt;
+    struct v4l2_buffer buf;
+    size_t length, offset;
 
-        for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
-            dev = &m_implData->videoDevs[i];
-            if (details != m_implData->frameDetails) {
-                for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
-                    if (munmap(dev->videoBuffers[i].start,
-                               dev->videoBuffers[i].length) == -1) {
-                        LOG(WARNING) << "munmap error "
-                                     << "errno: " << errno
-                                     << " error: " << strerror(errno);
-                        return Status::GENERIC_ERROR;
-                    }
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
+        dev = &m_implData->videoDevs[i];
+        if (details != m_implData->frameDetails) {
+            for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
+                if (munmap(dev->videoBuffers[i].start,
+                           dev->videoBuffers[i].length) == -1) {
+                    LOG(WARNING)
+                        << "munmap error "
+                        << "errno: " << errno << " error: " << strerror(errno);
+                    return Status::GENERIC_ERROR;
                 }
-                free(dev->videoBuffers);
-                dev->nVideoBuffers = 0;
-            } else if (dev->nVideoBuffers) {
-                return status;
             }
+            free(dev->videoBuffers);
+            dev->nVideoBuffers = 0;
+        } else if (dev->nVideoBuffers) {
+            return status;
+        }
 
-            /* Allocate the video buffers in the driver */
-            CLEAR(req);
-            req.count = 4;
-            req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            req.memory = V4L2_MEMORY_MMAP;
+        /* Allocate the video buffers in the driver */
+        CLEAR(req);
+        req.count = 4;
+        req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        req.memory = V4L2_MEMORY_MMAP;
 
-            if (xioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1) {
+        if (xioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1) {
+            LOG(WARNING) << "VIDIOC_REQBUFS error "
+                         << "errno: " << errno << " error: " << strerror(errno);
+            return Status::GENERIC_ERROR;
+        }
+
+        dev->videoBuffers =
+            (buffer *)calloc(req.count, sizeof(*dev->videoBuffers));
+        if (!dev->videoBuffers) {
+            LOG(WARNING) << "Failed to allocate video m_implData->videoBuffers";
+            return Status::GENERIC_ERROR;
+        }
+
+        for (dev->nVideoBuffers = 0; dev->nVideoBuffers < req.count;
+             dev->nVideoBuffers++) {
+            CLEAR(buf);
+            buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            buf.memory = V4L2_MEMORY_MMAP;
+            buf.index = dev->nVideoBuffers;
+
+            if (xioctl(dev->fd, VIDIOC_QUERYBUF, &buf) == -1) {
                 LOG(WARNING)
-                    << "VIDIOC_REQBUFS error "
+                    << "VIDIOC_QUERYBUF error "
                     << "errno: " << errno << " error: " << strerror(errno);
                 return Status::GENERIC_ERROR;
             }
 
-            dev->videoBuffers =
-                (buffer *)calloc(req.count, sizeof(*dev->videoBuffers));
-            if (!dev->videoBuffers) {
-                LOG(WARNING)
-                    << "Failed to allocate video m_implData->videoBuffers";
+            dev->videoBuffers[dev->nVideoBuffers].length = buf.length;
+            dev->videoBuffers[dev->nVideoBuffers].start =
+                mmap(NULL /* start anywhere */, buf.length,
+                     PROT_READ | PROT_WRITE /* required */,
+                     MAP_SHARED /* recommended */, dev->fd, buf.m.offset);
+
+            if (MAP_FAILED == dev->videoBuffers[dev->nVideoBuffers].start)
                 return Status::GENERIC_ERROR;
-            }
-
-            for (dev->nVideoBuffers = 0; dev->nVideoBuffers < req.count;
-                 dev->nVideoBuffers++) {
-                CLEAR(buf);
-                buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-                buf.memory = V4L2_MEMORY_MMAP;
-                buf.index = dev->nVideoBuffers;
-
-                if (xioctl(dev->fd, VIDIOC_QUERYBUF, &buf) == -1) {
-                    LOG(WARNING)
-                        << "VIDIOC_QUERYBUF error "
-                        << "errno: " << errno << " error: " << strerror(errno);
-                    return Status::GENERIC_ERROR;
-                }
-
-                dev->videoBuffers[dev->nVideoBuffers].length = buf.length;
-                dev->videoBuffers[dev->nVideoBuffers].start =
-                    mmap(NULL /* start anywhere */, buf.length,
-                         PROT_READ | PROT_WRITE /* required */,
-                         MAP_SHARED /* recommended */, dev->fd, buf.m.offset);
-
-                if (MAP_FAILED == dev->videoBuffers[dev->nVideoBuffers].start)
-                    return Status::GENERIC_ERROR;
-            }
         }
-
-        m_implData->frameDetails = details;
-
-        return status;
     }
 
-    aditof::Status RgbSensor::program(const uint8_t *firmware, size_t size) {
-        return aditof::Status::UNAVAILABLE;
-    }
+    m_implData->frameDetails = details;
 
-    aditof::Status RgbSensor::getFrame(uint16_t * buffer,
-                                       aditof::BufferInfo * bufferInfo) {
-        using namespace aditof;
-        struct v4l2_buffer buf[m_implData->numVideoDevs];
-        struct VideoDev *dev;
-        Status status;
+    return status;
+}
 
-        if (buffer == nullptr) {
-            LOG(ERROR) << "Received buffer null pointer";
-            return Status::INVALID_ARGUMENT;
-        }
+aditof::Status RgbSensor::program(const uint8_t *firmware, size_t size) {
+    return aditof::Status::UNAVAILABLE;
+}
 
-        for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
-            dev = &m_implData->videoDevs[i];
-            status = waitForBufferPrivate(dev);
-            if (status != Status::OK) {
-                return status;
-            }
+aditof::Status RgbSensor::getFrame(uint16_t *buffer,
+                                   aditof::BufferInfo *bufferInfo) {
+    using namespace aditof;
+    struct v4l2_buffer buf[m_implData->numVideoDevs];
+    struct VideoDev *dev;
+    Status status;
 
-            status = dequeueInternalBufferPrivate(buf[i], dev);
-            if (status != Status::OK) {
-                return status;
-            }
-            unsigned int buf_data_len;
-            uint8_t *pdata[m_implData->numVideoDevs];
-            status =
-                getInternalBufferPrivate(&pdata[i], buf_data_len, buf[i], dev);
-            if (status != Status::OK) {
-                return status;
-            }
-
-            int k = 0;
-            for (unsigned int j = 0; j < buf_data_len; j = j + 2) {
-                buffer[k++] = (pdata[i][j + 1] << 8) + pdata[i][j];
-            }
-
-            status = enqueueInternalBufferPrivate(buf[i], dev);
-            if (status != Status::OK) {
-                return status;
-            }
-        }
-        bufferInfo->timestamp =
-            buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
-        return status;
-    }
-
-    aditof::Status RgbSensor::readAfeRegisters(const uint16_t *address,
-                                               uint16_t *data, size_t length) {
-        return aditof::Status::UNAVAILABLE;
-    }
-
-    aditof::Status RgbSensor::writeAfeRegisters(
-        const uint16_t *address, const uint16_t *data, size_t length) {
-        return aditof::Status::UNAVAILABLE;
-    }
-
-    aditof::Status RgbSensor::getDetails(aditof::SensorDetails & details)
-        const {
-        details = m_sensorDetails;
-        return aditof::Status::OK;
-    }
-
-    aditof::Status RgbSensor::getHandle(void **handle) {
-        return aditof::Status::UNAVAILABLE;
-    }
-
-    aditof::Status RgbSensor::waitForBufferPrivate(struct VideoDev * dev) {
-        fd_set fds;
-        struct timeval tv;
-        int r;
-
-        if (dev == nullptr)
-            dev = &m_implData->videoDevs[0];
-
-        FD_ZERO(&fds);
-        FD_SET(dev->fd, &fds);
-
-        tv.tv_sec = 20;
-        tv.tv_usec = 0;
-
-        r = select(dev->fd + 1, &fds, NULL, NULL, &tv);
-
-        if (r == -1) {
-            LOG(WARNING) << "select error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-            return aditof::Status::GENERIC_ERROR;
-        } else if (r == 0) {
-            LOG(WARNING) << "select timeout";
-            return aditof::Status::GENERIC_ERROR;
-        }
-
-        return aditof ::Status::OK;
-    }
-
-    aditof::Status RgbSensor::dequeueInternalBufferPrivate(
-        struct v4l2_buffer & buf, struct VideoDev * dev) {
-        using namespace aditof;
-        Status status = Status::OK;
-        enum v4l2_buf_type type;
-
-        CLEAR(buf);
-        buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
-
-        if (xioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1) {
-            LOG(WARNING) << "VIDIOC_DQBUF error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-            switch (errno) {
-            case EAGAIN:
-            case EIO:
-                break;
-            default:
-                return Status::GENERIC_ERROR;
-            }
-        }
-
-        if (buf.index >= dev->nVideoBuffers) {
-            LOG(WARNING) << "Not enough buffers avaialable";
-            return Status::GENERIC_ERROR;
-        }
-
-        return status;
-    }
-
-    aditof::Status RgbSensor::getInternalBufferPrivate(
-        uint8_t * *buffer, uint32_t & buf_data_len,
-        const struct v4l2_buffer &buf, struct VideoDev *dev) {
-        if (dev == nullptr)
-            dev = &m_implData->videoDevs[0];
-
-        *buffer = static_cast<uint8_t *>(dev->videoBuffers[buf.index].start);
-        buf_data_len = m_implData->frameDetails.rgbWidth *
-                       m_implData->frameDetails.rgbHeight * 2;
-
-        return aditof::Status::OK;
-    }
-
-    aditof::Status RgbSensor::enqueueInternalBufferPrivate(
-        struct v4l2_buffer & buf, struct VideoDev * dev) {
-        if (dev == nullptr)
-            dev = &m_implData->videoDevs[0];
-
-        if (xioctl(dev->fd, VIDIOC_QBUF, &buf) == -1) {
-            LOG(WARNING) << "VIDIOC_QBUF error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-            return aditof::Status::GENERIC_ERROR;
-        }
-
-        return aditof::Status::OK;
-    }
-
-    aditof::Status RgbSensor::getDeviceFileDescriptor(int &fileDescriptor) {
-        using namespace aditof;
-        struct VideoDev *dev = &m_implData->videoDevs[0];
-
-        if (dev->fd != -1) {
-            fileDescriptor = dev->fd;
-            return Status::OK;
-        }
-
+    if (buffer == nullptr) {
+        LOG(ERROR) << "Received buffer null pointer";
         return Status::INVALID_ARGUMENT;
     }
 
-    aditof::Status RgbSensor::waitForBuffer() { return waitForBufferPrivate(); }
+    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
+        dev = &m_implData->videoDevs[i];
+        status = waitForBufferPrivate(dev);
+        if (status != Status::OK) {
+            return status;
+        }
 
-    aditof::Status RgbSensor::dequeueInternalBuffer(struct v4l2_buffer & buf) {
-        return dequeueInternalBufferPrivate(buf);
+        status = dequeueInternalBufferPrivate(buf[i], dev);
+        if (status != Status::OK) {
+            return status;
+        }
+        unsigned int buf_data_len;
+        uint8_t *pdata[m_implData->numVideoDevs];
+        status = getInternalBufferPrivate(&pdata[i], buf_data_len, buf[i], dev);
+        if (status != Status::OK) {
+            return status;
+        }
+
+        int k = 0;
+        for (unsigned int j = 0; j < buf_data_len; j = j + 2) {
+            buffer[k++] = (pdata[i][j + 1] << 8) + pdata[i][j];
+        }
+
+        status = enqueueInternalBufferPrivate(buf[i], dev);
+        if (status != Status::OK) {
+            return status;
+        }
+    }
+    bufferInfo->timestamp =
+        buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
+    return status;
+}
+
+aditof::Status RgbSensor::readAfeRegisters(const uint16_t *address,
+                                           uint16_t *data, size_t length) {
+    return aditof::Status::UNAVAILABLE;
+}
+
+aditof::Status RgbSensor::writeAfeRegisters(const uint16_t *address,
+                                            const uint16_t *data,
+                                            size_t length) {
+    return aditof::Status::UNAVAILABLE;
+}
+
+aditof::Status RgbSensor::getDetails(aditof::SensorDetails &details) const {
+    details = m_sensorDetails;
+    return aditof::Status::OK;
+}
+
+aditof::Status RgbSensor::getHandle(void **handle) {
+    return aditof::Status::UNAVAILABLE;
+}
+
+aditof::Status RgbSensor::waitForBufferPrivate(struct VideoDev *dev) {
+    fd_set fds;
+    struct timeval tv;
+    int r;
+
+    if (dev == nullptr)
+        dev = &m_implData->videoDevs[0];
+
+    FD_ZERO(&fds);
+    FD_SET(dev->fd, &fds);
+
+    tv.tv_sec = 20;
+    tv.tv_usec = 0;
+
+    r = select(dev->fd + 1, &fds, NULL, NULL, &tv);
+
+    if (r == -1) {
+        LOG(WARNING) << "select error "
+                     << "errno: " << errno << " error: " << strerror(errno);
+        return aditof::Status::GENERIC_ERROR;
+    } else if (r == 0) {
+        LOG(WARNING) << "select timeout";
+        return aditof::Status::GENERIC_ERROR;
     }
 
-    aditof::Status RgbSensor::getInternalBuffer(uint8_t * *buffer,
-                                                uint32_t & buf_data_len,
-                                                const struct v4l2_buffer &buf) {
-        return getInternalBufferPrivate(buffer, buf_data_len, buf);
+    return aditof ::Status::OK;
+}
+
+aditof::Status RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
+                                                       struct VideoDev *dev) {
+    using namespace aditof;
+    Status status = Status::OK;
+    enum v4l2_buf_type type;
+
+    CLEAR(buf);
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory = V4L2_MEMORY_MMAP;
+
+    if (xioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1) {
+        LOG(WARNING) << "VIDIOC_DQBUF error "
+                     << "errno: " << errno << " error: " << strerror(errno);
+        switch (errno) {
+        case EAGAIN:
+        case EIO:
+            break;
+        default:
+            return Status::GENERIC_ERROR;
+        }
     }
 
-    aditof::Status RgbSensor::enqueueInternalBuffer(struct v4l2_buffer & buf) {
-        return enqueueInternalBufferPrivate(buf);
+    if (buf.index >= dev->nVideoBuffers) {
+        LOG(WARNING) << "Not enough buffers avaialable";
+        return Status::GENERIC_ERROR;
     }
+
+    return status;
+}
+
+aditof::Status
+RgbSensor::getInternalBufferPrivate(uint8_t **buffer, uint32_t &buf_data_len,
+                                    const struct v4l2_buffer &buf,
+                                    struct VideoDev *dev) {
+    if (dev == nullptr)
+        dev = &m_implData->videoDevs[0];
+
+    *buffer = static_cast<uint8_t *>(dev->videoBuffers[buf.index].start);
+    buf_data_len = m_implData->frameDetails.rgbWidth *
+                   m_implData->frameDetails.rgbHeight * 2;
+
+    return aditof::Status::OK;
+}
+
+aditof::Status RgbSensor::enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
+                                                       struct VideoDev *dev) {
+    if (dev == nullptr)
+        dev = &m_implData->videoDevs[0];
+
+    if (xioctl(dev->fd, VIDIOC_QBUF, &buf) == -1) {
+        LOG(WARNING) << "VIDIOC_QBUF error "
+                     << "errno: " << errno << " error: " << strerror(errno);
+        return aditof::Status::GENERIC_ERROR;
+    }
+
+    return aditof::Status::OK;
+}
+
+aditof::Status RgbSensor::getDeviceFileDescriptor(int &fileDescriptor) {
+    using namespace aditof;
+    struct VideoDev *dev = &m_implData->videoDevs[0];
+
+    if (dev->fd != -1) {
+        fileDescriptor = dev->fd;
+        return Status::OK;
+    }
+
+    return Status::INVALID_ARGUMENT;
+}
+
+aditof::Status RgbSensor::waitForBuffer() { return waitForBufferPrivate(); }
+
+aditof::Status RgbSensor::dequeueInternalBuffer(struct v4l2_buffer &buf) {
+    return dequeueInternalBufferPrivate(buf);
+}
+
+aditof::Status RgbSensor::getInternalBuffer(uint8_t **buffer,
+                                            uint32_t &buf_data_len,
+                                            const struct v4l2_buffer &buf) {
+    return getInternalBufferPrivate(buffer, buf_data_len, buf);
+}
+
+aditof::Status RgbSensor::enqueueInternalBuffer(struct v4l2_buffer &buf) {
+    return enqueueInternalBufferPrivate(buf);
+}
