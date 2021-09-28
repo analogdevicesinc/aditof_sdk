@@ -39,6 +39,7 @@
 #include <aditof/storage_interface.h>
 #include <aditof/temperature_sensor_interface.h>
 
+#include <map>
 #include <memory>
 
 class Camera3D_Smart : public aditof::Camera {
@@ -102,6 +103,10 @@ class Camera3D_Smart : public aditof::Camera {
     bool m_depthCorrection;
     bool m_cameraGeometryCorrection;
     std::string m_revision;
+    std::vector<aditof::FrameDetails> m_depthFrameTypes;
+    std::vector<aditof::FrameDetails> m_rgbFrameTypes;
+    std::map<std::string, std::pair<aditof::FrameDetails, aditof::FrameDetails>>
+        m_camFrameTypesMap;
 };
 
 #endif // CAMERA_3D_SMART_H
