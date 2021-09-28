@@ -59,7 +59,8 @@ class RgbSensor : public aditof::DepthSensorInterface,
     setFrameType(const aditof::FrameDetails &details) override;
     virtual aditof::Status program(const uint8_t *firmware,
                                    size_t size) override;
-    virtual aditof::Status getFrame(uint16_t *buffer, aditof::BufferInfo *bufferInfo) override;
+    virtual aditof::Status getFrame(uint16_t *buffer,
+                                    aditof::BufferInfo *bufferInfo) override;
     virtual aditof::Status readAfeRegisters(const uint16_t *address,
                                             uint16_t *data,
                                             size_t length) override;

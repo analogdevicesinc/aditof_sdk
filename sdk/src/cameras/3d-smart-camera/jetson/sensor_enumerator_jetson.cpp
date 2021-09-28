@@ -41,7 +41,8 @@
 using namespace aditof;
 
 aditof::Status findDevicePathsAtMedia(std::string &dev_name,
-                                      std::string &subdev_name, std::string sensorType) {
+                                      std::string &subdev_name,
+                                      std::string sensorType) {
 
     char *buf;
     int size = 0;
@@ -49,9 +50,11 @@ aditof::Status findDevicePathsAtMedia(std::string &dev_name,
     /* Checking for available devices */
     char cmd[96];
     if (sensorType == "addi9036")
-        sprintf(cmd, "v4l2-ctl --list-devices | grep addi9036 -A 2 | sed '1d' | sed 's/^[[:space:]]*//g' | sed '2d'");
+        sprintf(cmd, "v4l2-ctl --list-devices | grep addi9036 -A 2 | sed '1d' "
+                     "| sed 's/^[[:space:]]*//g' | sed '2d'");
     else if (sensorType == "ov2735")
-        sprintf(cmd, "v4l2-ctl --list-devices | grep ov2735 -A 2 | sed '1d' | sed 's/^[[:space:]]*//g' | sed '2d'");
+        sprintf(cmd, "v4l2-ctl --list-devices | grep ov2735 -A 2 | sed '1d' | "
+                     "sed 's/^[[:space:]]*//g' | sed '2d'");
     FILE *fp = popen(cmd, "r");
     if (!fp) {
         LOG(WARNING) << "Error running v4l2-ctl";
@@ -69,7 +72,8 @@ aditof::Status findDevicePathsAtMedia(std::string &dev_name,
     str.resize(size - 2);
 
     /*Check if the obtained file has content dev and vide in it*/
-    if (str.find("dev") == std::string::npos || str.find("video") == std::string::npos) {
+    if (str.find("dev") == std::string::npos ||
+        str.find("video") == std::string::npos) {
         LOG(WARNING) << "Generic error";
         return Status::GENERIC_ERROR;
     }
@@ -125,7 +129,6 @@ Status TargetSensorEnumerator::searchSensors() {
     sInfo.subDevPath = subdevPath;
     sInfo.captureDev = RGB_CAPTURE_DEVICE_NAME;
     m_sensorsInfo.emplace_back(sInfo);
-
 
     StorageInfo eepromInfo;
     eepromInfo.driverName = EEPROM_NAME;

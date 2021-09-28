@@ -36,10 +36,10 @@
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
 
+#include <algorithm>
 #include <array>
 #include <glog/logging.h>
 #include <map>
-#include <algorithm>
 #include <math.h>
 
 static const std::string skCameraName = "3D-Smart-Camera";
@@ -338,7 +338,6 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
     //int poz = frameType.find('-');
     //std::string leftFrameType = frameType.substr(0, poz);
     //std::string rightFrameType = frameType.substr(poz+1, frameType.size()-poz-1);
-    
 
     if (m_devStarted) {
         status = m_depthSensor->stop();
