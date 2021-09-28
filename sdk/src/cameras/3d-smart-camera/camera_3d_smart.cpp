@@ -335,9 +335,6 @@ aditof::Status Camera3D_Smart::getAvailableModes(
 aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
     using namespace aditof;
     Status status = Status::OK;
-    //int poz = frameType.find('-');
-    //std::string leftFrameType = frameType.substr(0, poz);
-    //std::string rightFrameType = frameType.substr(poz+1, frameType.size()-poz-1);
 
     if (m_devStarted) {
         status = m_depthSensor->stop();
@@ -347,7 +344,6 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
         }
         m_devStarted = false;
     }
-    //depth_only, ir_only and depth_ir
 
     std::vector<FrameDetails> detailsList;
     status = m_depthSensor->getAvailableFrameTypes(detailsList);

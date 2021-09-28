@@ -127,11 +127,6 @@ RgbSensor::~RgbSensor() {
             LOG(WARNING) << "close m_implData->fd error "
                          << "errno: " << errno << " error: " << strerror(errno);
         }
-
-        /*if (close(dev->sfd) == -1) {
-            LOG(WARNING) << "close m_implData->sfd error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-        }*/
     }
 }
 
@@ -233,8 +228,8 @@ aditof::Status RgbSensor::open() {
         /* Set the frame format in the driver */
         CLEAR(fmt);
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        fmt.fmt.pix.width = 1920;
-        fmt.fmt.pix.height = 1080;
+        fmt.fmt.pix.width = RGB_FRAME_WIDTH;
+        fmt.fmt.pix.height = RGB_FRAME_HEIGHT;
         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SRGGB10;
         fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
@@ -401,79 +396,7 @@ aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
 }
 
 aditof::Status RgbSensor::program(const uint8_t *firmware, size_t size) {
-    using namespace aditof;
-    Status status = Status::OK;
-    struct VideoDev *dev = &m_implData->videoDevs[0];
-
-    static struct v4l2_ext_control extCtrl;
-    static struct v4l2_ext_controls extCtrls;
-    static unsigned char buf[CTRL_PACKET_SIZE];
-    size_t readBytes = 0;
-
-    if (firmware == nullptr) {
-        LOG(ERROR) << "Received firmware null pointer";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    if (size <= CTRL_PACKET_SIZE) {
-        memset(buf + size, 0, CTRL_PACKET_SIZE);
-        memcpy(buf, firmware, size);
-        extCtrl.size = 2048 * sizeof(unsigned short);
-        extCtrl.p_u16 = (unsigned short *)buf;
-        extCtrl.id = V4L2_CID_AD_DEV_SET_CHIP_CONFIG;
-        memset(&extCtrls, 0, sizeof(struct v4l2_ext_controls));
-        extCtrls.controls = &extCtrl;
-        extCtrls.count = 1;
-
-        if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
-            LOG(WARNING) << "Programming AFE error "
-                         << "errno: " << errno << " error: " << strerror(errno);
-            return Status::GENERIC_ERROR;
-        }
-    } else {
-        while (readBytes < size) {
-
-            if ((size - readBytes) >= CTRL_PACKET_SIZE) {
-                extCtrl.size = 2048 * sizeof(unsigned short);
-                extCtrl.p_u16 =
-                    (unsigned short *)((char *)firmware + readBytes);
-                extCtrl.id = V4L2_CID_AD_DEV_SET_CHIP_CONFIG;
-                memset(&extCtrls, 0, sizeof(struct v4l2_ext_controls));
-                extCtrls.controls = &extCtrl;
-                extCtrls.count = 1;
-
-                if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
-                    LOG(WARNING)
-                        << "Programming AFE error "
-                        << "errno: " << errno << " error: " << strerror(errno);
-                    return Status::GENERIC_ERROR;
-                }
-                readBytes += CTRL_PACKET_SIZE;
-                usleep(100);
-            } else {
-                memset(buf, 0, CTRL_PACKET_SIZE);
-                memcpy(buf, ((const char *)firmware + readBytes),
-                       size - readBytes);
-                extCtrl.size = 2048 * sizeof(unsigned short);
-                extCtrl.p_u16 = (unsigned short *)buf;
-                extCtrl.id = V4L2_CID_AD_DEV_SET_CHIP_CONFIG;
-                memset(&extCtrls, 0, sizeof(struct v4l2_ext_controls));
-                extCtrls.controls = &extCtrl;
-                extCtrls.count = 1;
-
-                if (xioctl(dev->sfd, VIDIOC_S_EXT_CTRLS, &extCtrls) == -1) {
-                    LOG(WARNING)
-                        << "Programming AFE error "
-                        << "errno: " << errno << " error: " << strerror(errno);
-                    return Status::GENERIC_ERROR;
-                }
-                readBytes += CTRL_PACKET_SIZE;
-                usleep(100);
-            }
-        }
-    }
-
-    return status;
+    return aditof::Status::UNAVAILABLE;
 }
 
 aditof::Status RgbSensor::getFrame(uint16_t *buffer,
@@ -507,10 +430,9 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer,
         }
 
         int k = 0;
-        for (unsigned int j = 0; j < (buf_data_len); j = j + 2) {
+        for (unsigned int j = 0; j < buf_data_len; j = j + 2) {
             buffer[k++] = (pdata[i][j + 1] << 8) + pdata[i][j];
         }
-        //memcpy(buffer, pdata[i], sizeof(buffer));
 
         status = enqueueInternalBufferPrivate(buf[i], dev);
         if (status != Status::OK) {
@@ -519,23 +441,18 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer,
     }
     bufferInfo->timestamp =
         buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
-    //memcpy(buffer, pdata[0], sizeof(pdata[0]));
     return status;
 }
 
 aditof::Status RgbSensor::readAfeRegisters(const uint16_t *address,
                                            uint16_t *data, size_t length) {
-    using namespace aditof;
-    Status status = Status::OK;
-    return status;
+    return aditof::Status::UNAVAILABLE;
 }
 
 aditof::Status RgbSensor::writeAfeRegisters(const uint16_t *address,
                                             const uint16_t *data,
                                             size_t length) {
-    using namespace aditof;
-    Status status = Status::OK;
-    return status;
+    return aditof::Status::UNAVAILABLE;
 }
 
 aditof::Status RgbSensor::getDetails(aditof::SensorDetails &details) const {
@@ -544,8 +461,7 @@ aditof::Status RgbSensor::getDetails(aditof::SensorDetails &details) const {
 }
 
 aditof::Status RgbSensor::getHandle(void **handle) {
-    *handle = nullptr;
-    return aditof::Status::OK;
+    return aditof::Status::UNAVAILABLE;
 }
 
 aditof::Status RgbSensor::waitForBufferPrivate(struct VideoDev *dev) {

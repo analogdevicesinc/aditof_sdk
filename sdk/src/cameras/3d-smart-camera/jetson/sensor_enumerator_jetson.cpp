@@ -87,9 +87,6 @@ Status TargetSensorEnumerator::searchSensors() {
     Status status = Status::OK;
     LOG(INFO) << "Looking for devices on the target: Jetson";
 
-    // TO DO: Don't guess the device, find a way to identify it so we are sure
-    // we've got the right sensor and it's compatible with the SDK
-
     //Depth camera
     SensorInfo sInfo;
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
