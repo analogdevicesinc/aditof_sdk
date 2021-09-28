@@ -189,8 +189,6 @@ aditof::Status Camera3D_Smart::initialize() {
         return status;
     }
 
-    LOG(INFO) << "Camera initialized";
-
     m_calibration.getIntrinsic(INTRINSIC, m_details.intrinsics.cameraMatrix);
     m_calibration.getIntrinsic(DISTORTION_COEFFICIENTS,
                                m_details.intrinsics.distCoeffs);
@@ -198,6 +196,33 @@ aditof::Status Camera3D_Smart::initialize() {
     // For now we use the unit cell size values specified in the datasheet
     m_details.intrinsics.pixelWidth = 0.0056;
     m_details.intrinsics.pixelHeight = 0.0056;
+
+    // Cache the frame types provided by Depth and RGB sensors
+    status = m_depthSensor->getAvailableFrameTypes(m_depthFrameTypes);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to get the depth sensor frame types";
+        return status;
+    }
+
+    m_rgbSensor->getAvailableFrameTypes(m_rgbFrameTypes);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to get the RGB sensor frame types";
+        return status;
+    }
+
+    // TO DO: programatically combine the frame types from the 2 sensors (But first remove "only" word from addi9036 frame types)
+    // Until then, set the frame types manually. Here I assume depth_ir is 1st, depth is 2nd and ir is 3rd.
+
+    // Create the camera frame types and store them in a map so we can link then to
+    // the frame types of the depth & rgb sensors
+    m_camFrameTypesMap["depth_ir_rgb"] = {m_depthFrameTypes[0],
+                                          m_rgbFrameTypes[0]};
+    m_camFrameTypesMap["depth_rgb"] = {m_depthFrameTypes[1],
+                                       m_rgbFrameTypes[0]};
+    m_camFrameTypesMap["ir_rgb"] = {m_depthFrameTypes[2], m_rgbFrameTypes[0]};
+
+    LOG(INFO) << "Camera initialized";
+
     return Status::OK;
 }
 
@@ -298,15 +323,15 @@ aditof::Status Camera3D_Smart::setMode(const std::string &mode,
     // must be done here after programming the camera in order for them to
     // work properly. Setting the mode of the camera, programming it
     // with a different firmware would reset the value in the 0xc3da register
-    if (m_details.frameType.type == "depth_only") {
+    if (m_details.frameType.type == "depth_rgb") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
-    } else if (m_details.frameType.type == "ir_only") {
+    } else if (m_details.frameType.type == "ir_rgb") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x05, 0x0007, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
-    } else if (m_details.frameType.type == "depth_ir") {
+    } else if (m_details.frameType.type == "depth_ir_rgb") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x07, 0x0007, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
@@ -345,39 +370,49 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
         m_devStarted = false;
     }
 
-    std::vector<FrameDetails> detailsList;
-    status = m_depthSensor->getAvailableFrameTypes(detailsList);
-    status = m_rgbSensor->getAvailableFrameTypes(detailsList);
-    if (status != Status::OK) {
-        LOG(WARNING) << "Failed to get available frame types";
-        return status;
-    }
-
-    auto frameDetailsIt = std::find_if(
-        detailsList.begin(), detailsList.end(),
-        [&frameType](const FrameDetails &d) { return (d.type == frameType); });
-
-    if (frameDetailsIt == detailsList.end()) {
+    auto mapIterator = m_camFrameTypesMap.find(frameType);
+    if (mapIterator == m_camFrameTypesMap.end()) {
         LOG(WARNING) << "Frame type: " << frameType
                      << " not supported by camera";
         return Status::INVALID_ARGUMENT;
     }
 
-    if (m_details.frameType != *frameDetailsIt) {
+    auto frameTypePair = (*mapIterator).second;
+
+    if (m_details.frameType.type != frameType) {
+        // Set the depth sensor frame type
+
         //Turn off the streaming of data to modify parameters in the driver.
         uint16_t afeRegsAddr[2] = {0x4001, 0x7c22};
         uint16_t afeRegsVal[2] = {0x0006, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 2);
-        status = m_depthSensor->setFrameType(*frameDetailsIt);
+
+        auto depthFrameType = frameTypePair.first;
+        status = m_depthSensor->setFrameType(depthFrameType);
         if (status != Status::OK) {
-            LOG(WARNING) << "Failed to set frame type";
+            LOG(WARNING) << "Failed to set frame type of the depth sensor";
             return status;
         }
-        m_details.frameType = *frameDetailsIt;
+        m_details.frameType.type = frameType;
+        m_details.frameType.width = depthFrameType.width;
+        m_details.frameType.height = depthFrameType.height;
+        m_details.frameType.fullDataWidth = depthFrameType.fullDataWidth;
+        m_details.frameType.fullDataHeight = depthFrameType.fullDataHeight;
         //Turn on the streaming of data.
         uint16_t afeRegsAddress[2] = {0x4001, 0x7c22};
         uint16_t afeRegsValue[2] = {0x0007, 0x0004};
         m_depthSensor->writeAfeRegisters(afeRegsAddress, afeRegsValue, 2);
+
+        // Set the RGB sensor frame type
+
+        auto rgbFrameType = frameTypePair.first;
+        status = m_rgbSensor->setFrameType(rgbFrameType);
+        if (status != Status::OK) {
+            LOG(WARNING) << "Failed to set frame type of the rgb sensor";
+            return status;
+        }
+        m_details.frameType.rgbWidth = rgbFrameType.rgbWidth;
+        m_details.frameType.rgbHeight = rgbFrameType.rgbHeight;
     }
 
     if (!m_devStarted) {
@@ -394,21 +429,13 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
 aditof::Status Camera3D_Smart::getAvailableFrameTypes(
     std::vector<std::string> &availableFrameTypes) const {
-    using namespace aditof;
-    Status status = Status::OK;
 
-    std::vector<FrameDetails> frameDetailsList;
-    status = m_depthSensor->getAvailableFrameTypes(frameDetailsList);
-    status = m_rgbSensor->getAvailableFrameTypes(frameDetailsList);
-    if (status != Status::OK) {
-        LOG(WARNING) << "Failed to get available frame types";
-        return status;
+    availableFrameTypes.clear();
+    for (const auto &item : m_camFrameTypesMap) {
+        availableFrameTypes.emplace_back(item.first);
     }
 
-    for (const auto &item : frameDetailsList) {
-        availableFrameTypes.emplace_back(item.type);
-    }
-    return status;
+    return aditof::Status::OK;
 }
 
 aditof::Status
@@ -425,7 +452,7 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
     FrameDetails frameDetails;
     frame->getDetails(frameDetails);
 
-    if (m_details.frameType != frameDetails) {
+    if (m_details.frameType.type != frameDetails.type) {
         frame->setDetails(m_details.frameType);
     }
 
@@ -453,8 +480,8 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
     // TO DO: Synchronize the two sensors
 
     if (m_details.mode != skCustomMode &&
-        (m_details.frameType.type == "depth_ir" ||
-         m_details.frameType.type == "depth_only")) {
+        (m_details.frameType.type == "depth_ir_rgb" ||
+         m_details.frameType.type == "depth_rgb")) {
         if (m_depthCorrection) {
             m_calibration.calibrateDepth(depthIrDataLocation,
                                          m_details.frameType.width *
