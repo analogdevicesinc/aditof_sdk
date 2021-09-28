@@ -328,7 +328,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             sensorV4lBufAccess.at(depth_sensor_id) =
                 std::dynamic_pointer_cast<aditof::V4lBufferAccessInterface>(
                     camDepthSensor.at(depth_sensor_id));
-            auto pbImagerInfo = pbSensorsInfo->add_image_sensors();
+            auto pbImagerInfo = pbSensorsInfo->mutable_image_sensors();
             pbImagerInfo->set_id(depth_sensor_id);
             ++depth_sensor_id;
         }
@@ -361,21 +361,21 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case OPEN: {
-        int index = buff_recv.sensors_info().image_sensor().id();
+        int index = buff_recv.sensors_info().image_sensors().id();
         aditof::Status status = camDepthSensor[index]->open();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case START: {
-        int index = buff_recv.sensors_info().image_sensor().id();
+        int index = buff_recv.sensors_info().image_sensors().id();
         aditof::Status status = camDepthSensor[index]->start();
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
 
     case STOP: {
-        int index = buff_recv.sensors_info().image_sensor().id();
+        int index = buff_recv.sensors_info().image_sensors().id();
         aditof::Status status = camDepthSensor[index]->stop();
         buff_send.set_status(static_cast<::payload::Status>(status));
 
@@ -384,7 +384,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
     case GET_AVAILABLE_FRAME_TYPES: {
         std::vector<aditof::FrameDetails> frameDetails;
-        int index = buff_recv.sensors_info().image_sensor().id();
+        int index = buff_recv.sensors_info().image_sensors().id();
         aditof::Status status =
             camDepthSensor[index]->getAvailableFrameTypes(frameDetails);
         for (auto detail : frameDetails) {
@@ -401,7 +401,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
     case SET_FRAME_TYPE: {
         aditof::FrameDetails details;
-        int index = buff_recv.sensors_info().image_sensor().id();
+        int index = buff_recv.sensors_info().image_sensors().id();
         aditof::Status status;
         if (!index) {
             details.width = buff_recv.frame_type().width();
@@ -430,7 +430,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
 
     case GET_FRAME: {
-        int index = buff_recv.image_sensor().id();
+        int index = buff_recv.sensors_info().image_sensors().id();
         aditof::Status status = sensorV4lBufAccess[index]->waitForBuffer();
         if (status != aditof::Status::OK) {
             buff_send.set_status(static_cast<::payload::Status>(status));
