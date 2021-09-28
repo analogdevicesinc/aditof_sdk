@@ -62,14 +62,15 @@ class NetworkDepthSensor : public aditof::DepthSensorInterface {
     virtual aditof::Status
     getDetails(aditof::SensorDetails &details) const override;
     virtual aditof::Status getHandle(void **handle) override;
+    virtual aditof::Status getName(std::string &sensorName) override;
 
   private:
     struct ImplData;
 
+    aditof::SensorInformations m_sensorInformations;
     aditof::SensorDetails m_sensorDetails;
     aditof::BufferInfo m_bufferInfo;
     std::unique_ptr<ImplData> m_implData;
-    int id;
 };
 
 #endif // NETWORK_DEPTH_SENSOR_H
