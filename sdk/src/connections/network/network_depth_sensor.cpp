@@ -105,8 +105,6 @@ aditof::Status NetworkDepthSensor::open() {
     net->send_buff.set_func_name("Open");
     net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
         m_sensorInformations.id);
-    //net->send_buff.sensors_info().image_sensors()
-    // net->send_buff.add_func_int32_param(id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
