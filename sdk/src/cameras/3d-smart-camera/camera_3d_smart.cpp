@@ -36,9 +36,11 @@
 #include <aditof/frame.h>
 #include <aditof/frame_operations.h>
 
+#include <algorithm>
 #include <array>
 #include <glog/logging.h>
 #include <map>
+#include <math.h>
 
 static const std::string skCameraName = "3D-Smart-Camera";
 
@@ -84,7 +86,6 @@ Camera3D_Smart::Camera3D_Smart(
         LOG(WARNING) << "Invalid instance of a RGB sensor";
         return;
     }
-
     // Look for EEPROM
     auto eeprom_iter =
         std::find_if(eeproms.begin(), eeproms.end(),
@@ -337,6 +338,7 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
     if (m_devStarted) {
         status = m_depthSensor->stop();
+        status = m_rgbSensor->stop();
         if (status != Status::OK) {
             return status;
         }
@@ -345,6 +347,7 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
     std::vector<FrameDetails> detailsList;
     status = m_depthSensor->getAvailableFrameTypes(detailsList);
+    status = m_rgbSensor->getAvailableFrameTypes(detailsList);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get available frame types";
         return status;
@@ -379,6 +382,7 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
     if (!m_devStarted) {
         status = m_depthSensor->start();
+        status = m_rgbSensor->start();
         if (status != Status::OK) {
             return status;
         }
@@ -395,6 +399,7 @@ aditof::Status Camera3D_Smart::getAvailableFrameTypes(
 
     std::vector<FrameDetails> frameDetailsList;
     status = m_depthSensor->getAvailableFrameTypes(frameDetailsList);
+    status = m_rgbSensor->getAvailableFrameTypes(frameDetailsList);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get available frame types";
         return status;
@@ -403,7 +408,6 @@ aditof::Status Camera3D_Smart::getAvailableFrameTypes(
     for (const auto &item : frameDetailsList) {
         availableFrameTypes.emplace_back(item.type);
     }
-
     return status;
 }
 
@@ -440,7 +444,7 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
     uint16_t *rgbDataLocation;
     frame->getData(FrameDataType::RGB, &rgbDataLocation);
 
-    status = m_depthSensor->getFrame(rgbDataLocation);
+    status = m_rgbSensor->getFrame(rgbDataLocation);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from RGB sensor";
         return status;
@@ -452,13 +456,13 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth_only")) {
         if (m_depthCorrection) {
-            m_calibration.calibrateDepth(frameDataLocation,
+            m_calibration.calibrateDepth(depthIrDataLocation,
                                          m_details.frameType.width *
                                              m_details.frameType.height);
         }
         if (m_cameraGeometryCorrection) {
             m_calibration.calibrateCameraGeometry(
-                frameDataLocation,
+                depthIrDataLocation,
                 m_details.frameType.width * m_details.frameType.height);
         }
     }

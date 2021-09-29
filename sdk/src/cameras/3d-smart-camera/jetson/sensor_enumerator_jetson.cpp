@@ -41,17 +41,20 @@
 using namespace aditof;
 
 aditof::Status findDevicePathsAtMedia(std::string &dev_name,
-                                      std::string &subdev_name) {
-    using namespace aditof;
-    using namespace std;
+                                      std::string &subdev_name,
+                                      std::string sensorType) {
 
     char *buf;
     int size = 0;
 
     /* Checking for available devices */
     char cmd[96];
-    sprintf(cmd, "v4l2-ctl --list-devices | grep addi9036 -A 2 | sed '1d' | "
-                 "sed 's/^[[:space:]]*//g' | sed '2d'");
+    if (sensorType == "addi9036")
+        sprintf(cmd, "v4l2-ctl --list-devices | grep addi9036 -A 2 | sed '1d' "
+                     "| sed 's/^[[:space:]]*//g' | sed '2d'");
+    else if (sensorType == "ov2735")
+        sprintf(cmd, "v4l2-ctl --list-devices | grep ov2735 -A 2 | sed '1d' | "
+                     "sed 's/^[[:space:]]*//g' | sed '2d'");
     FILE *fp = popen(cmd, "r");
     if (!fp) {
         LOG(WARNING) << "Error running v4l2-ctl";
@@ -69,10 +72,12 @@ aditof::Status findDevicePathsAtMedia(std::string &dev_name,
     str.resize(size - 2);
 
     /*Check if the obtained file has content dev and vide in it*/
-    if (str.find("dev") == string::npos || str.find("video") == string::npos) {
+    if (str.find("dev") == std::string::npos ||
+        str.find("video") == std::string::npos) {
         LOG(WARNING) << "Generic error";
         return Status::GENERIC_ERROR;
     }
+
     dev_name = str;
     subdev_name = str;
     return Status::OK;
@@ -82,15 +87,14 @@ Status TargetSensorEnumerator::searchSensors() {
     Status status = Status::OK;
     LOG(INFO) << "Looking for devices on the target: Jetson";
 
-    // TO DO: Don't guess the device, find a way to identify it so we are sure
-    // we've got the right sensor and it's compatible with the SDK
+    //Depth camera
     SensorInfo sInfo;
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
 
     std::string devPath;
     std::string subdevPath;
 
-    status = findDevicePathsAtMedia(devPath, subdevPath);
+    status = findDevicePathsAtMedia(devPath, subdevPath, "addi9036");
     if (status != Status::OK) {
         LOG(WARNING) << "failed to find device paths";
         return status;
@@ -102,7 +106,25 @@ Status TargetSensorEnumerator::searchSensors() {
 
     sInfo.driverPath = devPath;
     sInfo.subDevPath = subdevPath;
-    sInfo.captureDev = CAPTURE_DEVICE_NAME;
+    sInfo.captureDev = DEPTH_CAPTURE_DEVICE_NAME;
+    m_sensorsInfo.emplace_back(sInfo);
+
+    //RGB Camera
+    sInfo.sensorType = SensorType::SENSOR_OV2735;
+
+    status = findDevicePathsAtMedia(devPath, subdevPath, "ov2735");
+    if (status != Status::OK) {
+        LOG(WARNING) << "failed to find device paths";
+        return status;
+    }
+
+    if (devPath.empty() || subdevPath.empty()) {
+        return Status::GENERIC_ERROR;
+    }
+
+    sInfo.driverPath = devPath;
+    sInfo.subDevPath = subdevPath;
+    sInfo.captureDev = RGB_CAPTURE_DEVICE_NAME;
     m_sensorsInfo.emplace_back(sInfo);
 
     StorageInfo eepromInfo;
