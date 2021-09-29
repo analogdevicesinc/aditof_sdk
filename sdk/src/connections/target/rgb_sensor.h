@@ -32,6 +32,13 @@
 #ifndef RGB_SENSOR_H
 #define RGB_SENSOR_H
 
+#define RED_START_POZ_X 1
+#define RED_START_POZ_Y 1
+
+#define RED 0
+#define GREEN 1
+#define BLUE 2
+
 #include "aditof/depth_sensor_interface.h"
 #include "connections/target/v4l_buffer_access_interface.h"
 
@@ -84,6 +91,9 @@ class RgbSensor : public aditof::DepthSensorInterface,
     enqueueInternalBuffer(struct v4l2_buffer &buf) override;
     virtual aditof::Status
     getDeviceFileDescriptor(int &fileDescriptor) override;
+    void setRw(int value);
+    void setGw(int value);
+    void setBw(int value);
 
   private:
     aditof::Status waitForBufferPrivate(struct VideoDev *dev = nullptr);
@@ -95,6 +105,16 @@ class RgbSensor : public aditof::DepthSensorInterface,
                                             struct VideoDev *dev = nullptr);
     aditof::Status enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
                                                 struct VideoDev *dev = nullptr);
+    uint16_t verticalKernel(uint8_t *pData, int x, int y, int width,
+                            int height);
+    uint16_t horizontalKernel(uint8_t *pData, int x, int y, int width,
+                              int height);
+    uint16_t plusKernel(uint8_t *pData, int x, int y, int width, int height);
+    uint16_t crossKernel(uint8_t *pData, int x, int y, int width, int height);
+    uint16_t directCopy(uint8_t *buffer, int x, int y, int width, int height);
+    uint16_t getValueFromData(uint8_t *pData, int x, int y, int width,
+                              int height);
+    void bayer2RGB(uint16_t *buffer, uint8_t *pData, int width, int height);
 
   private:
     struct ImplData;
@@ -103,6 +123,9 @@ class RgbSensor : public aditof::DepthSensorInterface,
     std::string m_driverSubPath;
     std::string m_captureDev;
     std::unique_ptr<ImplData> m_implData;
+    int Rw = 256; //scaling monitor: https://en.wikipedia.org/wiki/Color_balance
+    int Gw = 256;
+    int Bw = 256;
 };
 
 #endif // RGB_SENSOR_H
