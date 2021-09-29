@@ -40,7 +40,7 @@ message SensorsInfo
 {
   repeated StorageInfo storages = 10;               // Information about available storages
   repeated TemperatureSensorInfo temp_sensors = 20; // Information about available temperature sensors
-  ImagerInfo image_sensors = 30;                    // Information about available image sensors
+  repeated ImagerInfo image_sensors = 30;                    // Information about available image sensors
 }
 
 message BufferInfo

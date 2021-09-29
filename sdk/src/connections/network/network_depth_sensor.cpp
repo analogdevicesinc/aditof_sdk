@@ -103,7 +103,7 @@ aditof::Status NetworkDepthSensor::open() {
     }
 
     net->send_buff.set_func_name("Open");
-    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
         m_sensorInformations.id);
     net->send_buff.set_expect_reply(true);
 
@@ -144,7 +144,7 @@ aditof::Status NetworkDepthSensor::start() {
     }
 
     net->send_buff.set_func_name("Start");
-    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
         m_sensorInformations.id);
     net->send_buff.set_expect_reply(true);
 
@@ -183,7 +183,7 @@ aditof::Status NetworkDepthSensor::stop() {
     }
 
     net->send_buff.set_func_name("Stop");
-    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
         m_sensorInformations.id);
     net->send_buff.set_expect_reply(true);
 
@@ -221,7 +221,7 @@ aditof::Status NetworkDepthSensor::getAvailableFrameTypes(
     }
 
     net->send_buff.set_func_name("GetAvailableFrameTypes");
-    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
         m_sensorInformations.id);
     net->send_buff.set_expect_reply(true);
 
@@ -277,7 +277,7 @@ NetworkDepthSensor::setFrameType(const aditof::FrameDetails &details) {
     }
 
     net->send_buff.set_func_name("SetFrameType");
-    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
         m_sensorInformations.id);
     net->send_buff.mutable_frame_type()->set_width(details.width);
     net->send_buff.mutable_frame_type()->set_height(details.height);
@@ -376,7 +376,7 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer,
     }
 
     net->send_buff.set_func_name("GetFrame");
-    net->send_buff.mutable_sensors_info()->mutable_image_sensors()->set_id(
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
         m_sensorInformations.id);
     net->send_buff.set_expect_reply(true);
 
