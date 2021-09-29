@@ -433,7 +433,8 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer,
         }
 
         //conversion done on the target
-        RgbSensor::bayer2RGB(buffer, pdata[i], RGB_FRAME_WIDTH, RGB_FRAME_HEIGHT);
+        RgbSensor::bayer2RGB(buffer, pdata[i], RGB_FRAME_WIDTH,
+                             RGB_FRAME_HEIGHT);
 
         status = enqueueInternalBufferPrivate(buf[i], dev);
         if (status != Status::OK) {
