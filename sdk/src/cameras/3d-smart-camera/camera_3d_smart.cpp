@@ -405,7 +405,7 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
 
         // Set the RGB sensor frame type
 
-        auto rgbFrameType = frameTypePair.first;
+        auto rgbFrameType = frameTypePair.second;
         status = m_rgbSensor->setFrameType(rgbFrameType);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to set frame type of the rgb sensor";
@@ -460,8 +460,8 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
     uint16_t *depthIrDataLocation;
     frame->getData(FrameDataType::FULL_DATA, &depthIrDataLocation);
 
-    aditof::BufferInfo bufferInfo;
-    status = m_depthSensor->getFrame(depthIrDataLocation, &bufferInfo);
+    aditof::BufferInfo depthBufferInfo;
+    status = m_depthSensor->getFrame(depthIrDataLocation, &depthBufferInfo);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from depth sensor";
         return status;
@@ -471,7 +471,8 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
     uint16_t *rgbDataLocation;
     frame->getData(FrameDataType::RGB, &rgbDataLocation);
 
-    status = m_rgbSensor->getFrame(rgbDataLocation);
+    aditof::BufferInfo rgbBufferInfo;
+    status = m_rgbSensor->getFrame(rgbDataLocation, &rgbBufferInfo);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to get frame from RGB sensor";
         return status;
