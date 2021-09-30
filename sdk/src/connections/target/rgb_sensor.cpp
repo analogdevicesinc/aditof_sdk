@@ -433,8 +433,7 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer,
         }
 
         //conversion done on the target
-        RgbSensor::bayer2RGB(buffer, pdata[i], RGB_FRAME_WIDTH,
-                             RGB_FRAME_HEIGHT);
+        bayer2RGB(buffer, pdata[i], RGB_FRAME_WIDTH, RGB_FRAME_HEIGHT);
 
         status = enqueueInternalBufferPrivate(buf[i], dev);
         if (status != Status::OK) {
@@ -580,12 +579,6 @@ aditof::Status RgbSensor::enqueueInternalBuffer(struct v4l2_buffer &buf) {
     return enqueueInternalBufferPrivate(buf);
 }
 
-void RgbSensor::setRw(int value) { this->Rw = value; }
-
-void RgbSensor::setGw(int value) { this->Gw = value; }
-
-void RgbSensor::setBw(int value) { this->Bw = value; }
-
 uint16_t RgbSensor::getValueFromData(uint8_t *pData, int x, int y, int width,
                                      int height) {
     return ((pData[x * width * 2 + y * 2 + 1] << 8) +
@@ -604,7 +597,7 @@ uint16_t RgbSensor::verticalKernel(uint8_t *pData, int x, int y, int width,
         sum += getValueFromData(pData, x + 1, y, width, height);
         nr++;
     }
-    return ((uint16_t)((float)sum / (float)nr));
+    return (uint16_t)((float)sum / (float)(nr > 0 ? nr : 1));
 }
 uint16_t RgbSensor::horizontalKernel(uint8_t *pData, int x, int y, int width,
                                      int height) {
@@ -618,7 +611,7 @@ uint16_t RgbSensor::horizontalKernel(uint8_t *pData, int x, int y, int width,
         sum += getValueFromData(pData, x, y + 1, width, height);
         nr++;
     }
-    return ((uint16_t)((float)sum / (float)nr));
+    return (uint16_t)((float)sum / (float)(nr > 0 ? nr : 1));
 }
 uint16_t RgbSensor::plusKernel(uint8_t *pData, int x, int y, int width,
                                int height) {
@@ -640,7 +633,7 @@ uint16_t RgbSensor::plusKernel(uint8_t *pData, int x, int y, int width,
         sum += getValueFromData(pData, x, y + 1, width, height);
         nr++;
     }
-    return ((uint16_t)((float)sum / (float)nr));
+    return (uint16_t)((float)sum / (float)(nr > 0 ? nr : 1));
 }
 uint16_t RgbSensor::crossKernel(uint8_t *pData, int x, int y, int width,
                                 int height) {
@@ -662,7 +655,7 @@ uint16_t RgbSensor::crossKernel(uint8_t *pData, int x, int y, int width,
         sum += getValueFromData(pData, x + 1, y + 1, width, height);
         nr++;
     }
-    return ((uint16_t)((float)sum / (float)nr));
+    return (uint16_t)((float)sum / (float)(nr > 0 ? nr : 1));
 }
 
 uint16_t RgbSensor::directCopy(uint8_t *pData, int x, int y, int width,
@@ -674,62 +667,60 @@ void RgbSensor::bayer2RGB(uint16_t *buffer, uint8_t *pData, int width,
                           int height) {
     //casting into 8 in order to work with it
     uint8_t *rgb = (uint8_t *)buffer;
-    //uint16_t *rgb = buffer;
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            //rgb[(i*width+j)*RED] =
-
             if (i % 2 == RED_START_POZ_Y &&
                 j % 2 == RED_START_POZ_X) //red square
             {
                 rgb[(i * width + j) * 3 + RED] = (uint8_t)(
-                    ((float)directCopy(pData, i, j, width, height) / Rw) *
+                    ((float)directCopy(pData, i, j, width, height) / m_Rw) *
                     255.0);
                 rgb[(i * width + j) * 3 + GREEN] = (uint8_t)(
-                    ((float)plusKernel(pData, i, j, width, height) / Gw) *
+                    ((float)plusKernel(pData, i, j, width, height) / m_Gw) *
                     255.0);
                 rgb[(i * width + j) * 3 + BLUE] = (uint8_t)(
-                    ((float)crossKernel(pData, i, j, width, height) / Bw) *
+                    ((float)crossKernel(pData, i, j, width, height) / m_Bw) *
                     255.0);
             } else if (i % 2 == (RED_START_POZ_Y ^ 1) &&
                        j % 2 == (RED_START_POZ_X ^ 1)) //blue square
             {
                 rgb[(i * width + j) * 3 + RED] = (uint8_t)(
-                    ((float)crossKernel(pData, i, j, width, height) / Rw) *
+                    ((float)crossKernel(pData, i, j, width, height) / m_Rw) *
                     255.0);
                 rgb[(i * width + j) * 3 + GREEN] = (uint8_t)(
-                    ((float)plusKernel(pData, i, j, width, height) / Gw) *
+                    ((float)plusKernel(pData, i, j, width, height) / m_Gw) *
                     255.0);
                 rgb[(i * width + j) * 3 + BLUE] = (uint8_t)(
-                    ((float)directCopy(pData, i, j, width, height) / Rw) *
+                    ((float)directCopy(pData, i, j, width, height) / m_Bw) *
                     255.0);
             } else if (i % 2 == (RED_START_POZ_Y ^ 1) &&
                        j % 2 == RED_START_POZ_X) //green pixel, blue row
             {
                 rgb[(i * width + j) * 3 + RED] = (uint8_t)(
-                    ((float)verticalKernel(pData, i, j, width, height) / Rw) *
+                    ((float)verticalKernel(pData, i, j, width, height) / m_Rw) *
                     255.0);
                 rgb[(i * width + j) * 3 + GREEN] = (uint8_t)(
-                    ((float)directCopy(pData, i, j, width, height) / Rw) *
+                    ((float)directCopy(pData, i, j, width, height) / m_Gw) *
                     255.0);
                 rgb[(i * width + j) * 3 + BLUE] = (uint8_t)(
-                    ((float)horizontalKernel(pData, i, j, width, height) / Bw) *
+                    ((float)horizontalKernel(pData, i, j, width, height) /
+                     m_Bw) *
                     255.0);
             } else if (i % 2 == RED_START_POZ_Y &&
                        j % 2 == (RED_START_POZ_X ^ 1)) // green pixel, red row
             {
                 rgb[(i * width + j) * 3 + RED] = (uint8_t)(
-                    ((float)horizontalKernel(pData, i, j, width, height) / Rw) *
+                    ((float)horizontalKernel(pData, i, j, width, height) /
+                     m_Rw) *
                     255.0);
                 rgb[(i * width + j) * 3 + GREEN] = (uint8_t)(
-                    ((float)directCopy(pData, i, j, width, height) / Rw) *
+                    ((float)directCopy(pData, i, j, width, height) / m_Gw) *
                     255.0);
                 rgb[(i * width + j) * 3 + BLUE] = (uint8_t)(
-                    ((float)verticalKernel(pData, i, j, width, height) / Bw) *
+                    ((float)verticalKernel(pData, i, j, width, height) / m_Bw) *
                     255.0);
             }
         }
     }
-    buffer = (uint16_t *)rgb;
 }

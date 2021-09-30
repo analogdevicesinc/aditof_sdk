@@ -91,9 +91,6 @@ class RgbSensor : public aditof::DepthSensorInterface,
     enqueueInternalBuffer(struct v4l2_buffer &buf) override;
     virtual aditof::Status
     getDeviceFileDescriptor(int &fileDescriptor) override;
-    void setRw(int value);
-    void setGw(int value);
-    void setBw(int value);
 
   private:
     aditof::Status waitForBufferPrivate(struct VideoDev *dev = nullptr);
@@ -123,9 +120,10 @@ class RgbSensor : public aditof::DepthSensorInterface,
     std::string m_driverSubPath;
     std::string m_captureDev;
     std::unique_ptr<ImplData> m_implData;
-    int Rw = 256; //scaling monitor: https://en.wikipedia.org/wiki/Color_balance
-    int Gw = 256;
-    int Bw = 256;
+    int m_Rw =
+        256; //scaling monitor: https://en.wikipedia.org/wiki/Color_balance
+    int m_Gw = 256;
+    int m_Bw = 256;
 };
 
 #endif // RGB_SENSOR_H
