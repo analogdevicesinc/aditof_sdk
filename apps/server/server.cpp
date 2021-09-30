@@ -403,8 +403,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         } else {
             for (auto detail : frameDetails) {
                 auto type = buff_send.add_available_frame_types();
-                type->set_rgbWidth(detail.width);
-                type->set_rgbHeight(detail.height);
+                type->set_width(detail.rgbWidth);
+                type->set_height(detail.rgbHeight);
                 type->set_type(detail.type);
             }
         }
@@ -689,10 +689,10 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     case GET_NAME: {
         int index = buff_recv.sensors_info().image_sensors(0).id();
         std::string name;
-        status = camDepthSensor[index]->getName(name);
+        aditof::Status status = camDepthSensor[index]->getName(name);
         buff_send.mutable_sensors_info()->add_image_sensors()->set_name(name);
             buff_send.set_status(
-            static_cast<::payload::Status>(static_cast<::payload::Status>(status));
+            static_cast<::payload::Status>(static_cast<::payload::Status>(status)));
         break;
     }
 
