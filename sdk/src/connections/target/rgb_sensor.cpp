@@ -103,6 +103,7 @@ RgbSensor::RgbSensor(const std::string &driverPath,
     m_Rw = 255.0 * 0.25;
     m_Gw = 255.0 * 0.35;
     m_Bw = 255.0 * 0.25;
+    m_sensorInformations.sensorName = "ov2735";
 }
 
 RgbSensor::~RgbSensor() {
@@ -468,6 +469,12 @@ aditof::Status RgbSensor::getDetails(aditof::SensorDetails &details) const {
 
 aditof::Status RgbSensor::getHandle(void **handle) {
     return aditof::Status::UNAVAILABLE;
+}
+
+aditof::Status RgbSensor::getName(std::string &sensorName) {
+    sensorName = m_sensorInformations.sensorName;
+
+    return aditof::Status::OK;
 }
 
 aditof::Status RgbSensor::waitForBufferPrivate(struct VideoDev *dev) {
