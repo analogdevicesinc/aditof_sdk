@@ -60,6 +60,7 @@ bool sensors_are_created = false;
 std::vector<std::shared_ptr<aditof::DepthSensorInterface>> camDepthSensor;
 std::vector<std::shared_ptr<aditof::V4lBufferAccessInterface>>
     sensorV4lBufAccess;
+aditof::FrameDetails frameDetailsCache[2];
 
 static payload::ClientRequest buff_recv;
 static payload::ServerResponse buff_send;
@@ -390,13 +391,22 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         int index = buff_recv.sensors_info().image_sensors(0).id();
         aditof::Status status =
             camDepthSensor[index]->getAvailableFrameTypes(frameDetails);
-        for (auto detail : frameDetails) {
-            auto type = buff_send.add_available_frame_types();
-            type->set_width(detail.width);
-            type->set_height(detail.height);
-            type->set_type(detail.type);
-            type->set_full_data_width(detail.fullDataWidth);
-            type->set_full_data_height(detail.fullDataHeight);
+        if (!index) {
+            for (auto detail : frameDetails) {
+                auto type = buff_send.add_available_frame_types();
+                type->set_width(detail.width);
+                type->set_height(detail.height);
+                type->set_type(detail.type);
+                type->set_full_data_width(detail.fullDataWidth);
+                type->set_full_data_height(detail.fullDataHeight);
+            }
+        } else {
+            for (auto detail : frameDetails) {
+                auto type = buff_send.add_available_frame_types();
+                type->set_rgbWidth(detail.width);
+                type->set_rgbHeight(detail.height);
+                type->set_type(detail.type);
+            }
         }
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
@@ -413,11 +423,13 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             details.fullDataWidth = buff_recv.frame_type().full_data_width();
             details.fullDataHeight = buff_recv.frame_type().full_data_height();
             status = camDepthSensor[index]->setFrameType(details);
+            frameDetailsCache[index] = details;
         } else {
             details.rgbWidth = buff_recv.frame_type().width();
             details.rgbHeight = buff_recv.frame_type().height();
             details.type = buff_recv.frame_type().type();
             status = camDepthSensor[index]->setFrameType(details);
+            frameDetailsCache[index] = details;
         }
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
@@ -459,9 +471,13 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         }
 
 #ifdef JETSON
+
+        //TO DO : must check if rgb data is interleaved.
+
         buff_send.add_int32_payload(0);
         buff_send.add_bytes_payload(buffer,
                                     buf_data_len * sizeof(uint16_t) / 3);
+
 #else
         buff_send.add_int32_payload(1);
         buff_send.add_bytes_payload(buffer, buf_data_len * sizeof(uint8_t));
