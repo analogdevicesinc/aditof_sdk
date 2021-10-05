@@ -558,8 +558,9 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
 #if defined(JETSON)
         if (m_implData->frameDetails.type == "depth_ir") {
             const uint16_t address[] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
-            const uint16_t data[2][5] = {{0x0006, 0x0004, 0x05, 0x0007, 0x0004},
-                                         {0x0006, 0x0004, 0x03, 0x0007, 0x0004}};
+            const uint16_t data[2][5] = {
+                {0x0006, 0x0004, 0x05, 0x0007, 0x0004},
+                {0x0006, 0x0004, 0x03, 0x0007, 0x0004}};
             writeAfeRegisters(address, data[dataType],
                               sizeof(address) / sizeof(address[0]));
             dataType = !dataType;
@@ -654,7 +655,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
                                     ((buffer[i + 1]) & 0xF000) >> 12;
                 }
 #elif defined(JETSON)
-            if(dataType) {
+            if (dataType) {
                 memcpy(buffer, pdata[0], buf[0].bytesused);
             } else {
                 memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
