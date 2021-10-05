@@ -66,7 +66,7 @@ aditof::Status fromFrameToIrMat(aditof::Frame &frame, cv::Mat &mat) {
     aditof::FrameDetails frameDetails;
     frame.getDetails(frameDetails);
 
-    const int frameHeight = static_cast<int>(frameDetails.height) / 2;
+    const int frameHeight = static_cast<int>(frameDetails.height);
     const int frameWidth = static_cast<int>(frameDetails.width);
 
     uint16_t *irData;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    status = camera->setFrameType("depth_only");
+    status = camera->setFrameType("depth_ir");
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set camera frame type!";
         return 0;
@@ -138,10 +138,12 @@ int main(int argc, char *argv[]) {
     camera->setControl("noise_reduction_threshold",
                        std::to_string(smallSignalThreshold));
 
-    cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("Depth Image", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("IR Image", cv::WINDOW_AUTOSIZE);
 
     while (cv::waitKey(1) != 27 &&
-           getWindowProperty("Display Image", cv::WND_PROP_AUTOSIZE) >= 0) {
+           getWindowProperty("Depth Image", cv::WND_PROP_AUTOSIZE) >= 0 &&
+           getWindowProperty("IR Image", cv::WND_PROP_AUTOSIZE) >= 0) {
 
         /* Request frame from camera */
         status = camera->requestFrame(&frame);
@@ -169,7 +171,20 @@ int main(int argc, char *argv[]) {
         applyColorMap(mat, mat, cv::COLORMAP_RAINBOW);
 
         /* Display the image */
-        imshow("Display Image", mat);
+        imshow("Depth Image", mat);
+        
+        /* Convert from frame to IR mat */
+        status = fromFrameToIrMat(frame, mat);
+        if (status != Status::OK) {
+            LOG(ERROR) << "Could not convert from frame to mat!";
+            return 0;
+        }
+       
+        /* Convert from raw values to values that opencv can understand */
+        mat.convertTo(mat, CV_8U, 255.0 / 4095);
+        
+        /* Display the image */
+        imshow("IR Image", mat);
     }
 
     return 0;

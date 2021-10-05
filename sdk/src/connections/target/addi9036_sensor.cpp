@@ -555,6 +555,17 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             return Status::INVALID_ARGUMENT;
         }
 
+#if defined(JETSON)
+        if (m_implData->frameDetails.type == "depth_ir") {
+            const uint16_t address[] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
+            const uint16_t data[2][5] = {{0x0006, 0x0004, 0x05, 0x0007, 0x0004},
+                                         {0x0006, 0x0004, 0x03, 0x0007, 0x0004}};
+            writeAfeRegisters(address, data[dataType],
+                              sizeof(address) / sizeof(address[0]));
+            dataType = !dataType;
+        }
+#endif
+
         for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
             dev = &m_implData->videoDevs[i];
             status = waitForBufferPrivate(dev);
@@ -567,16 +578,6 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
                 return status;
             }
         }
-
-#if defined(JETSON)
-        if (m_implData->frameDetails.type == "depth_ir") {
-            const uint16_t address[] = {0xC3DA};
-            const uint16_t data[] = {0x5, 0x3};
-            writeAfeRegisters(address, &data[dataType],
-                              sizeof(address) / sizeof(address[0]));
-            dataType = !dataType;
-        }
-#endif
 
         unsigned int width;
         unsigned int height;
@@ -632,7 +633,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
 
                 memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
             } else {
-#ifdef TOYBRICK
+#if defined(TOYBRICK)
                 unsigned int fullDataWidth =
                     m_implData->frameDetails.fullDataWidth;
                 unsigned int fullDataHeight =
@@ -652,6 +653,12 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
                     buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
                                     ((buffer[i + 1]) & 0xF000) >> 12;
                 }
+#elif defined(JETSON)
+            if(dataType) {
+                memcpy(buffer, pdata[0], buf[0].bytesused);
+            } else {
+                memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
+            }
 #else
             // Not Packed and type == "depth_ir"
             uint16_t *ptr_depth = (uint16_t *)pdata[0];
@@ -676,15 +683,8 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
         uint16_t *irPtr = buffer + (width * height);
         unsigned int j = 0;
 
-#if defined(JETSON)
-        if (m_implData->frameDetails.type == "depth_only" ||
-                m_implData->frameDetails.type == "ir_only"||
-                m_implData->frameDetails.type == "depth_ir") {
-
-#else
         if (m_implData->frameDetails.type == "depth_only" ||
                 m_implData->frameDetails.type == "ir_only") {
-#endif
                 buf_data_len /= 2;
         }
         /* The frame is read from the device as an array of uint8_t's where
@@ -728,11 +728,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
                 irPtr += 16;
             } else {
                 /* Store the 16 frame pixel in the corresponding image */
-#if defined(JETSON)
-                if (!dataType) {
-#else
                 if ((j / width) % 2) {
-#endif
                     vst2q_u16(irPtr, toStore);
                     irPtr += 16;
                 } else {
@@ -746,27 +742,6 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             // clang-format on
         }
 
-#if defined(JETSON)
-        if (m_implData->frameDetails.type == "depth_ir" && dataType) {
-            struct v4l2_buffer buf_tmp[m_implData->numVideoDevs];
-            for (uint8_t i = 0; i < m_implData->numVideoDevs; i++) {
-                dev = &m_implData->videoDevs[i];
-                status = waitForBufferPrivate(dev);
-                if (status != Status::OK) {
-                    return status;
-                }
-                status = dequeueInternalBufferPrivate(buf_tmp[i], dev);
-                if (status != Status::OK) {
-                    return status;
-                }
-                status = enqueueInternalBufferPrivate(buf_tmp[i], dev);
-                if (status != Status::OK) {
-                    return status;
-                }
-            }
-        }
-#endif
-
         for (uint8_t i = 0; i < m_implData->numVideoDevs; i++) {
             dev = &m_implData->videoDevs[i];
             status = enqueueInternalBufferPrivate(buf[i], dev);
@@ -779,6 +754,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
 
 #if defined(JETSON)
+        usleep(25000);
     }
 #endif
 
