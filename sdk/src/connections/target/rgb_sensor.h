@@ -102,14 +102,14 @@ class RgbSensor : public aditof::DepthSensorInterface,
                                             struct VideoDev *dev = nullptr);
     aditof::Status enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
                                                 struct VideoDev *dev = nullptr);
-    uint16_t verticalKernel(uint8_t *pData, int x, int y, int width,
+    float verticalKernel(uint8_t *pData, int x, int y, int width,
                             int height);
-    uint16_t horizontalKernel(uint8_t *pData, int x, int y, int width,
+    float horizontalKernel(uint8_t *pData, int x, int y, int width,
                               int height);
-    uint16_t plusKernel(uint8_t *pData, int x, int y, int width, int height);
-    uint16_t crossKernel(uint8_t *pData, int x, int y, int width, int height);
-    uint16_t directCopy(uint8_t *buffer, int x, int y, int width, int height);
-    uint16_t getValueFromData(uint8_t *pData, int x, int y, int width,
+    float plusKernel(uint8_t *pData, int x, int y, int width, int height);
+    float crossKernel(uint8_t *pData, int x, int y, int width, int height);
+    float directCopy(uint8_t *buffer, int x, int y, int width, int height);
+    float getValueFromData(uint8_t *pData, int x, int y, int width,
                               int height);
     void bayer2RGB(uint16_t *buffer, uint8_t *pData, int width, int height);
 
@@ -120,10 +120,10 @@ class RgbSensor : public aditof::DepthSensorInterface,
     std::string m_driverSubPath;
     std::string m_captureDev;
     std::unique_ptr<ImplData> m_implData;
-    int m_Rw =
-        256; //scaling monitor: https://en.wikipedia.org/wiki/Color_balance
-    int m_Gw = 256;
-    int m_Bw = 256;
+    float m_Rw =
+        255.0*0.25; //scaling monitor: https://en.wikipedia.org/wiki/Color_balance
+    float m_Gw = 255.0*0.35;
+    float m_Bw = 255.0*0.25;
 };
 
 #endif // RGB_SENSOR_H
