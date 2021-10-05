@@ -115,7 +115,7 @@ static int addi9036_set_chip_config(struct v4l2_ctrl *ctrl)
 	for (index = 0; index < ctrl->elems; index += 2) {
 		ret = regmap_write(priv->regmap, *reg, *val);
 		if (ret)
-			dev_warn(dev,
+			dev_dbg(dev,
 				 "could not write to register %x\n", *reg);
 
 		reg += 2;
