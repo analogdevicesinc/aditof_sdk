@@ -172,17 +172,17 @@ int main(int argc, char *argv[]) {
 
         /* Display the image */
         imshow("Depth Image", mat);
-        
+
         /* Convert from frame to IR mat */
         status = fromFrameToIrMat(frame, mat);
         if (status != Status::OK) {
             LOG(ERROR) << "Could not convert from frame to mat!";
             return 0;
         }
-       
+
         /* Convert from raw values to values that opencv can understand */
         mat.convertTo(mat, CV_8U, 255.0 / 4095);
-        
+
         /* Display the image */
         imshow("IR Image", mat);
     }
