@@ -40,7 +40,7 @@ message SensorsInfo
 {
   repeated StorageInfo storages = 10;               // Information about available storages
   repeated TemperatureSensorInfo temp_sensors = 20; // Information about available temperature sensors
-  repeated ImagerInfo image_sensors = 30;                    // Information about available image sensors
+  repeated ImagerInfo image_sensors = 30;           // Information about available image sensors
 }
 
 message BufferInfo
@@ -65,7 +65,7 @@ message ClientRequest
   repeated bytes func_bytes_param = 40; // List of function parameters of type byte-array
   bool expect_reply = 50;               // Whether a response with data is expected or not
   FrameDetails frame_type = 60;         // Frame type information
-  SensorsInfo sensors_info = 70;        // List of informations regarding which sensor to address
+  SensorsInfo sensors_info = 70;        // The sensor for which the request should apply
 }
 
 message ServerResponse

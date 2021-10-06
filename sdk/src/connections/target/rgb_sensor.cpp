@@ -100,10 +100,10 @@ RgbSensor::RgbSensor(const std::string &driverPath,
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
       m_captureDev(captureDev), m_implData(new RgbSensor::ImplData) {
 
+    m_sensorName = "ov2735";
     m_Rw = 255.0 * 0.25;
     m_Gw = 255.0 * 0.35;
     m_Bw = 255.0 * 0.25;
-    m_sensorInformations.sensorName = "ov2735";
 }
 
 RgbSensor::~RgbSensor() {
@@ -471,8 +471,8 @@ aditof::Status RgbSensor::getHandle(void **handle) {
     return aditof::Status::UNAVAILABLE;
 }
 
-aditof::Status RgbSensor::getName(std::string &sensorName) {
-    sensorName = m_sensorInformations.sensorName;
+aditof::Status RgbSensor::getName(std::string &sensorName) const {
+    sensorName = m_sensorName;
 
     return aditof::Status::OK;
 }

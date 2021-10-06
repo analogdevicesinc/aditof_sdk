@@ -77,7 +77,7 @@ class RgbSensor : public aditof::DepthSensorInterface,
     virtual aditof::Status
     getDetails(aditof::SensorDetails &details) const override;
     virtual aditof::Status getHandle(void **handle) override;
-    virtual aditof::Status getName(std::string &sensorName) override;
+    virtual aditof::Status getName(std::string &sensorName) const override;
 
   public: // implements V4lBufferAccessInterface
     // Methods that give a finer control than getFrame()
@@ -113,7 +113,8 @@ class RgbSensor : public aditof::DepthSensorInterface,
 
   private:
     struct ImplData;
-    aditof::SensorInformations m_sensorInformations;
+    std::string m_sensorName;
+    int m_id;
     aditof::SensorDetails m_sensorDetails;
     std::string m_driverPath;
     std::string m_driverSubPath;
