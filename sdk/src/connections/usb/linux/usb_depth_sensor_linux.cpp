@@ -578,8 +578,8 @@ aditof::Status UsbDepthSensor::getHandle(void **handle) {
     }
 }
 
-aditof::Status UsbDepthSensor::getName(std::string &sensorName) {
-    sensorName = m_sensorInformations.sensorName;
+aditof::Status UsbDepthSensor::getName(std::string &sensorName) const {
+    sensorName = m_sensorName;
 
     return aditof::Status::OK;
 }

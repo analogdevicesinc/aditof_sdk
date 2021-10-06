@@ -98,7 +98,7 @@ Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
                                const std::string &captureDev)
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
       m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData) {
-    m_sensorInformations.sensorName = "addi9036";
+    m_sensorName = "addi9036";
 }
 
 Addi9036Sensor::~Addi9036Sensor() {
@@ -871,8 +871,8 @@ aditof::Status Addi9036Sensor::getHandle(void **handle) {
     return aditof::Status::OK;
 }
 
-aditof::Status Addi9036Sensor::getName(std::string &sensorName) {
-    sensorName = m_sensorInformations.sensorName;
+aditof::Status Addi9036Sensor::getName(std::string &sensorName) const {
+    sensorName = m_sensorName;
 
     return aditof::Status::OK;
 }

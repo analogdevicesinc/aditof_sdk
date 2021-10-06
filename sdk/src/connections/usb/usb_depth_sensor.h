@@ -68,12 +68,13 @@ class UsbDepthSensor : public aditof::DepthSensorInterface {
     virtual aditof::Status
     getDetails(aditof::SensorDetails &details) const override;
     virtual aditof::Status getHandle(void **handle) override;
-    virtual aditof::Status getName(std::string &sensorName) override;
+    virtual aditof::Status getName(std::string &sensorName) const override;
 
   private:
     struct ImplData;
 
-    aditof::SensorInformations m_sensorInformations;
+    std::string m_sensorName;
+    int m_id;
     aditof::SensorDetails m_sensorDetails;
     aditof::BufferInfo m_bufferInfo;
     std::string m_driverPath;
