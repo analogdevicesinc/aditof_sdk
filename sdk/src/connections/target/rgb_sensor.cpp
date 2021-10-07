@@ -99,11 +99,11 @@ RgbSensor::RgbSensor(const std::string &driverPath,
                      const std::string &captureDev)
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
       m_captureDev(captureDev), m_implData(new RgbSensor::ImplData) {
-        
-        m_Rw = 255.0 * 0.25;
-        m_Gw = 255.0 * 0.35;
-        m_Bw = 255.0 * 0.25;
-      }
+
+    m_Rw = 255.0 * 0.25;
+    m_Gw = 255.0 * 0.35;
+    m_Bw = 255.0 * 0.25;
+}
 
 RgbSensor::~RgbSensor() {
     struct VideoDev *dev;
