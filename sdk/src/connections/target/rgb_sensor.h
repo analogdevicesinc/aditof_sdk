@@ -117,11 +117,9 @@ class RgbSensor : public aditof::DepthSensorInterface,
     std::string m_driverSubPath;
     std::string m_captureDev;
     std::unique_ptr<ImplData> m_implData;
-    float m_Rw =
-        255.0 *
-        0.25; //scaling monitor: https://en.wikipedia.org/wiki/Color_balance
-    float m_Gw = 255.0 * 0.35;
-    float m_Bw = 255.0 * 0.25;
+    float m_Rw;
+    float m_Gw;
+    float m_Bw;
 };
 
 #endif // RGB_SENSOR_H
