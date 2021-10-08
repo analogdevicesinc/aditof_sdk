@@ -43,41 +43,54 @@ struct CalibrationData {
     uint16_t *cache;
 };
 struct NetworkDepthSensor::ImplData {
-    NetworkHandle handle;
+    NetworkHandle *handle;
+    bool ownsHandle;
     std::string ip;
     aditof::FrameDetails frameDetails_cache;
     std::unordered_map<std::string, CalibrationData> calibration_cache;
     bool opened;
 };
 
-NetworkDepthSensor::NetworkDepthSensor(const std::string &ip)
-    : m_implData(new NetworkDepthSensor::ImplData) {
+NetworkDepthSensor::NetworkDepthSensor(const std::string &name, int id,
+                                       const std::string &ip)
+    : m_sensorName(name), m_id(id),
+      m_implData(new NetworkDepthSensor::ImplData) {
 
-    Network *net = new Network();
-    m_implData->handle.net = net;
+    m_implData->handle = new NetworkHandle;
+    m_implData->ownsHandle = true;
+    m_implData->handle->net = new Network();
     m_implData->ip = ip;
     m_implData->opened = false;
+}
 
-    static int idCount = 0;
-    m_id = idCount;
-    idCount++;
+NetworkDepthSensor::NetworkDepthSensor(const std::string &name, int id,
+                                       void *handle)
+    : m_sensorName(name), m_id(id),
+      m_implData(new NetworkDepthSensor::ImplData) {
+
+    m_implData->handle = reinterpret_cast<struct NetworkHandle *>(handle);
+    m_implData->ownsHandle = false;
+    m_implData->opened = false;
 }
 
 NetworkDepthSensor::~NetworkDepthSensor() {
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
-    if (!m_implData->handle.net->isServer_Connected()) {
+    if (!m_implData->handle->net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
     }
 
-    m_implData->handle.net->send_buff.set_func_name("HangUp");
-    m_implData->handle.net->send_buff.set_expect_reply(false);
+    if (m_implData->ownsHandle) {
+        m_implData->handle->net->send_buff.set_func_name("HangUp");
+        m_implData->handle->net->send_buff.set_expect_reply(false);
 
-    if (m_implData->handle.net->SendCommand() != 0) {
-        LOG(WARNING) << "Send Command Failed";
+        if (m_implData->handle->net->SendCommand() != 0) {
+            LOG(WARNING) << "Send Command Failed";
+        }
+
+        delete m_implData->handle->net;
+        delete m_implData->handle;
     }
-
-    delete m_implData->handle.net;
 
     for (auto it = m_implData->calibration_cache.begin();
          it != m_implData->calibration_cache.begin(); ++it) {
@@ -89,10 +102,10 @@ NetworkDepthSensor::~NetworkDepthSensor() {
 aditof::Status NetworkDepthSensor::open() {
     using namespace aditof;
 
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    Network *net = m_implData->handle->net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
-    if (net->ServerConnect(m_implData->ip) != 0) {
+    if (m_implData->ownsHandle && net->ServerConnect(m_implData->ip) != 0) {
         LOG(WARNING) << "Server Connect Failed";
         return Status::UNREACHABLE;
     }
@@ -103,8 +116,7 @@ aditof::Status NetworkDepthSensor::open() {
     }
 
     net->send_buff.set_func_name("Open");
-    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
-        m_id);
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(m_id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -135,8 +147,8 @@ aditof::Status NetworkDepthSensor::open() {
 aditof::Status NetworkDepthSensor::start() {
     using namespace aditof;
 
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    Network *net = m_implData->handle->net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -144,8 +156,7 @@ aditof::Status NetworkDepthSensor::start() {
     }
 
     net->send_buff.set_func_name("Start");
-    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
-        m_id);
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(m_id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -172,8 +183,8 @@ aditof::Status NetworkDepthSensor::start() {
 aditof::Status NetworkDepthSensor::stop() {
     using namespace aditof;
 
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    Network *net = m_implData->handle->net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
     LOG(INFO) << "Stopping device";
 
@@ -183,8 +194,7 @@ aditof::Status NetworkDepthSensor::stop() {
     }
 
     net->send_buff.set_func_name("Stop");
-    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
-        m_id);
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(m_id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -212,8 +222,8 @@ aditof::Status NetworkDepthSensor::getAvailableFrameTypes(
     std::vector<aditof::FrameDetails> &types) {
     using namespace aditof;
 
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    Network *net = m_implData->handle->net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -221,8 +231,7 @@ aditof::Status NetworkDepthSensor::getAvailableFrameTypes(
     }
 
     net->send_buff.set_func_name("GetAvailableFrameTypes");
-    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
-        m_id);
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(m_id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -272,8 +281,8 @@ aditof::Status
 NetworkDepthSensor::setFrameType(const aditof::FrameDetails &details) {
     using namespace aditof;
 
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    Network *net = m_implData->handle->net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -281,8 +290,7 @@ NetworkDepthSensor::setFrameType(const aditof::FrameDetails &details) {
     }
 
     net->send_buff.set_func_name("SetFrameType");
-    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
-        m_id);
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(m_id);
     net->send_buff.mutable_frame_type()->set_width(details.width);
     net->send_buff.mutable_frame_type()->set_height(details.height);
     net->send_buff.mutable_frame_type()->set_type(details.type);
@@ -328,8 +336,8 @@ aditof::Status NetworkDepthSensor::program(const uint8_t *firmware,
 
     assert(size > 0);
 
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    Network *net = m_implData->handle->net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -371,8 +379,8 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer,
         return Status::INVALID_ARGUMENT;
     }
 
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    Network *net = m_implData->handle->net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -380,8 +388,7 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer,
     }
 
     net->send_buff.set_func_name("GetFrame");
-    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(
-        m_id);
+    net->send_buff.mutable_sensors_info()->add_image_sensors()->set_id(m_id);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
@@ -445,8 +452,8 @@ aditof::Status NetworkDepthSensor::readAfeRegisters(const uint16_t *address,
 
     assert(length > 0);
 
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    Network *net = m_implData->handle->net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -502,8 +509,8 @@ aditof::Status NetworkDepthSensor::writeAfeRegisters(const uint16_t *address,
 
     assert(length > 0);
 
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
+    Network *net = m_implData->handle->net;
+    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
     if (!net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
@@ -545,49 +552,13 @@ NetworkDepthSensor::getDetails(aditof::SensorDetails &details) const {
 }
 
 aditof::Status NetworkDepthSensor::getHandle(void **handle) {
-    if (m_implData->opened) {
-        *handle = &m_implData->handle;
-        return aditof::Status::OK;
-    } else {
-        *handle = nullptr;
-        LOG(ERROR) << "Won't return the handle. Device hasn't been opened yet.";
-        return aditof::Status::UNAVAILABLE;
-    }
+    *handle = m_implData->handle;
+
     return aditof::Status::OK;
 }
 
 aditof::Status NetworkDepthSensor::getName(std::string &sensorName) const {
+    sensorName = m_sensorName;
 
-    using namespace aditof;
-
-    Network *net = m_implData->handle.net;
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle.net_mutex);
-
-    if (!net->isServer_Connected()) {
-        LOG(WARNING) << "Not connected to server";
-        return Status::UNREACHABLE;
-    }
-
-    net->send_buff.set_func_name("GetName");
-
-    if (net->SendCommand() != 0) {
-        LOG(WARNING) << "Send Command Failed";
-        return Status::INVALID_ARGUMENT;
-    }
-
-    if (net->recv_server_data() != 0) {
-        LOG(WARNING) << "Receive Data Failed";
-        return Status::GENERIC_ERROR;
-    }
-
-    if (net->recv_buff.server_status() !=
-        payload::ServerStatus::REQUEST_ACCEPTED) {
-        LOG(WARNING) << "API execution on Target Failed";
-        return Status::GENERIC_ERROR;
-    }
-
-    sensorName = net->recv_buff.sensors_info().image_sensors(0).name();
-    Status status = static_cast<Status>(net->recv_buff.status());
-
-    return status;
+    return aditof::Status::OK;
 }

@@ -118,6 +118,13 @@ Status NetworkSensorEnumerator::searchSensors() {
     const payload::ServerResponse &msg = net->recv_buff;
     const payload::SensorsInfo &pbSensorsInfo = msg.sensors_info();
 
+    for (int i = 0; i < pbSensorsInfo.image_sensors().size(); ++i) {
+        std::string name = pbSensorsInfo.image_sensors(i).name();
+        unsigned int id = pbSensorsInfo.image_sensors(i).id();
+        m_imageSensorsInfo.emplace_back(
+            std::pair<std::string, unsigned int>(name, id));
+    }
+
     for (int i = 0; i < pbSensorsInfo.storages().size(); ++i) {
         std::string name = pbSensorsInfo.storages(i).name();
         unsigned int id = pbSensorsInfo.storages(i).id();
@@ -142,8 +149,26 @@ Status NetworkSensorEnumerator::getDepthSensors(
 
     depthSensors.clear();
 
-    auto sensor = std::make_shared<NetworkDepthSensor>(m_ip);
-    depthSensors.emplace_back(sensor);
+    if (m_imageSensorsInfo.size() > 0) {
+        auto info = m_imageSensorsInfo.front();
+        auto sensor =
+            std::make_shared<NetworkDepthSensor>(info.first, info.second, m_ip);
+        depthSensors.emplace_back(sensor);
+
+        void *communicationHandle;
+        aditof::Status status = sensor->getHandle(&communicationHandle);
+        if (status != Status::OK) {
+            LOG(ERROR) << "Failed to obtain the handle";
+            return status;
+        }
+
+        for (int i = 1; i < m_imageSensorsInfo.size(); ++i) {
+            auto info = m_imageSensorsInfo.at(i);
+            auto sensor = std::make_shared<NetworkDepthSensor>(
+                info.first, info.second, communicationHandle);
+            depthSensors.emplace_back(sensor);
+        }
+    }
 
     return Status::OK;
 }
