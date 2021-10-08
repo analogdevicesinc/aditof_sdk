@@ -38,7 +38,13 @@
 
 class NetworkDepthSensor : public aditof::DepthSensorInterface {
   public:
-    NetworkDepthSensor(const std::string &ip);
+    /* Call when you want the comunication object to be constructed */
+    explicit NetworkDepthSensor(const std::string &name, int id,
+                                const std::string &ip);
+
+    /* Call when you want to use an already constructed comunication object */
+    explicit NetworkDepthSensor(const std::string &name, int id, void *handle);
+
     ~NetworkDepthSensor();
 
   public: // implements DepthSensorInterface
