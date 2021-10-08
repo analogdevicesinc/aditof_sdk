@@ -56,7 +56,6 @@ enum api_Values {
     TEMPERATURE_SENSOR_CLOSE,
     HANG_UP,
     GET_CONNECTION_STRING,
-    GET_NAME
 };
 
 enum protocols { PROTOCOL_EXAMPLE, PROTOCOL_COUNT };

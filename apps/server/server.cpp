@@ -686,16 +686,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         break;
     }
 
-    case GET_NAME: {
-        int index = buff_recv.sensors_info().image_sensors(0).id();
-        std::string name;
-        aditof::Status status = camDepthSensor[index]->getName(name);
-        buff_send.mutable_sensors_info()->add_image_sensors()->set_name(name);
-        buff_send.set_status(static_cast<::payload::Status>(
-            static_cast<::payload::Status>(status)));
-        break;
-    }
-
     default: {
         std::string msgErr = "Function not found";
         std::cout << msgErr << "\n";
@@ -729,5 +719,4 @@ void Initialize() {
     s_map_api_Values["TemperatureSensorClose"] = TEMPERATURE_SENSOR_CLOSE;
     s_map_api_Values["HangUp"] = HANG_UP;
     s_map_api_Values["GetVersionString"] = GET_CONNECTION_STRING;
-    s_map_api_Values["GetName"] = GET_NAME;
 }
