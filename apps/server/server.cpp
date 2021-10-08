@@ -325,12 +325,12 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         auto pbSensorsInfo = buff_send.mutable_sensors_info();
         int depth_sensor_id = 0;
         for (const auto &depthSensor : depthSensors) {
-            camDepthSensor[depth_sensor_id] = depthSensor;
-            sensorV4lBufAccess.at(depth_sensor_id) =
+            camDepthSensor.emplace_back(depthSensor);
+            sensorV4lBufAccess.emplace_back(
                 std::dynamic_pointer_cast<aditof::V4lBufferAccessInterface>(
-                    camDepthSensor.at(depth_sensor_id));
+                    depthSensor));
             std::string name;
-            camDepthSensor[depth_sensor_id]->getName(name);
+            depthSensor->getName(name);
             auto pbImagerInfo = pbSensorsInfo->add_image_sensors();
             pbImagerInfo->set_name(name);
             pbImagerInfo->set_id(depth_sensor_id);
@@ -691,8 +691,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         std::string name;
         aditof::Status status = camDepthSensor[index]->getName(name);
         buff_send.mutable_sensors_info()->add_image_sensors()->set_name(name);
-            buff_send.set_status(
-            static_cast<::payload::Status>(static_cast<::payload::Status>(status)));
+        buff_send.set_status(static_cast<::payload::Status>(
+            static_cast<::payload::Status>(status)));
         break;
     }
 
