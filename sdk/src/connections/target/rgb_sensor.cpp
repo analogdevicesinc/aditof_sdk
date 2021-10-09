@@ -339,7 +339,7 @@ aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
-        if (details != m_implData->frameDetails) {
+        if (details.type != m_implData->frameDetails.type) {
             for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
                 if (munmap(dev->videoBuffers[i].start,
                            dev->videoBuffers[i].length) == -1) {

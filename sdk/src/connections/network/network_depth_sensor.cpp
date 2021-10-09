@@ -298,6 +298,8 @@ NetworkDepthSensor::setFrameType(const aditof::FrameDetails &details) {
         details.fullDataWidth);
     net->send_buff.mutable_frame_type()->set_full_data_height(
         details.fullDataHeight);
+    net->send_buff.mutable_frame_type()->set_rgb_width(details.rgbWidth);
+    net->send_buff.mutable_frame_type()->set_rgb_height(details.rgbHeight);
     net->send_buff.set_expect_reply(true);
 
     if (net->SendCommand() != 0) {
