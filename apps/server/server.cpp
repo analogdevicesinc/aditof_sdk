@@ -416,21 +416,17 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         aditof::FrameDetails details;
         int index = buff_recv.sensors_info().image_sensors(0).id();
         aditof::Status status;
-        if (!index) {
-            details.width = buff_recv.frame_type().width();
-            details.height = buff_recv.frame_type().height();
-            details.type = buff_recv.frame_type().type();
-            details.fullDataWidth = buff_recv.frame_type().full_data_width();
-            details.fullDataHeight = buff_recv.frame_type().full_data_height();
-            status = camDepthSensor[index]->setFrameType(details);
-            frameDetailsCache[index] = details;
-        } else {
-            details.rgbWidth = buff_recv.frame_type().width();
-            details.rgbHeight = buff_recv.frame_type().height();
-            details.type = buff_recv.frame_type().type();
-            status = camDepthSensor[index]->setFrameType(details);
-            frameDetailsCache[index] = details;
-        }
+
+        details.width = buff_recv.frame_type().width();
+        details.height = buff_recv.frame_type().height();
+        details.type = buff_recv.frame_type().type();
+        details.fullDataWidth = buff_recv.frame_type().full_data_width();
+        details.fullDataHeight = buff_recv.frame_type().full_data_height();
+        details.rgbWidth = buff_recv.frame_type().rgb_width();
+        details.rgbHeight = buff_recv.frame_type().rgb_height();
+        status = camDepthSensor[index]->setFrameType(details);
+        frameDetailsCache[index] = details;
+
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
