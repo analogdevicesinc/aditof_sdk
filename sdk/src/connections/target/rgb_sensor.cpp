@@ -511,6 +511,9 @@ aditof::Status RgbSensor::dequeueInternalBufferPrivate(struct v4l2_buffer &buf,
     Status status = Status::OK;
     enum v4l2_buf_type type;
 
+    if (dev == nullptr)
+        dev = &m_implData->videoDevs[0];
+
     CLEAR(buf);
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
