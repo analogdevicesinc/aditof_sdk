@@ -74,19 +74,22 @@ NetworkDepthSensor::NetworkDepthSensor(const std::string &name, int id,
 }
 
 NetworkDepthSensor::~NetworkDepthSensor() {
-    std::unique_lock<std::mutex> mutex_lock(m_implData->handle->net_mutex);
 
     if (!m_implData->handle->net->isServer_Connected()) {
         LOG(WARNING) << "Not connected to server";
     }
 
     if (m_implData->ownsHandle) {
-        m_implData->handle->net->send_buff.set_func_name("HangUp");
-        m_implData->handle->net->send_buff.set_expect_reply(false);
+        {
+            std::unique_lock<std::mutex> mutex_lock(
+                m_implData->handle->net_mutex);
+            m_implData->handle->net->send_buff.set_func_name("HangUp");
+            m_implData->handle->net->send_buff.set_expect_reply(false);
 
-        if (m_implData->handle->net->SendCommand() != 0) {
-            LOG(WARNING) << "Send Command Failed";
-        }
+            if (m_implData->handle->net->SendCommand() != 0) {
+                LOG(WARNING) << "Send Command Failed";
+            }
+        } // mutex_lock goes out of scope and the mutex that it owns can be destroyed
 
         delete m_implData->handle->net;
         delete m_implData->handle;
