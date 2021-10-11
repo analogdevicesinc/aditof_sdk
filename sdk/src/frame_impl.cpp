@@ -133,7 +133,7 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
 void FrameImpl::allocFrameData(const aditof::FrameDetails &details) {
 
     m_fullData = new uint16_t[details.width * details.height * 2 +
-                              details.rgbWidth * details.rgbHeight];
+                              (int)(details.rgbWidth * details.rgbHeight*1.5)];
     m_depthData = m_fullData;
     m_irData = m_fullData + (details.width * details.height);
     m_rgbData = m_fullData + (details.width * details.height * 2);
