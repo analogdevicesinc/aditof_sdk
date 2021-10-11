@@ -98,12 +98,9 @@ RgbSensor::RgbSensor(const std::string &driverPath,
                      const std::string &driverSubPath,
                      const std::string &captureDev)
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
-
-      m_captureDev(captureDev), m_implData(new RgbSensor::ImplData) {
-
-    m_sensorName = "ov2735";
-
-    m_captureDev(captureDev), m_implData(new RgbSensor::ImplData) {}
+    m_captureDev(captureDev), m_implData(new RgbSensor::ImplData) {
+            m_sensorName = "ov2735";
+    }
 
     RgbSensor::~RgbSensor() {
         struct VideoDev *dev;
