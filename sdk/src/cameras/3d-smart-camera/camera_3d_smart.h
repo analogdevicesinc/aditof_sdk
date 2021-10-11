@@ -32,6 +32,13 @@
 #ifndef CAMERA_3D_SMART_H
 #define CAMERA_3D_SMART_H
 
+#define RED_START_POZ_X 1
+#define RED_START_POZ_Y 1
+
+#define RED 0
+#define GREEN 1
+#define BLUE 2
+
 #include "calibration_3d_smart.h"
 
 #include <aditof/camera.h>
@@ -85,6 +92,13 @@ class Camera3D_Smart : public aditof::Camera {
   private:
     aditof::Status setNoiseReductionTreshold(uint16_t treshold);
     aditof::Status setIrGammaCorrection(float gamma);
+    float verticalKernel(uint8_t *pData, int x, int y, int width, int height);
+    float horizontalKernel(uint8_t *pData, int x, int y, int width, int height);
+    float plusKernel(uint8_t *pData, int x, int y, int width, int height);
+    float crossKernel(uint8_t *pData, int x, int y, int width, int height);
+    float directCopy(uint8_t *buffer, int x, int y, int width, int height);
+    float getValueFromData(uint8_t *pData, int x, int y, int width, int height);
+    void bayer2RGB(uint16_t *buffer, uint8_t *pData, int width, int height);
 
   private:
     aditof::CameraDetails m_details;
@@ -107,6 +121,9 @@ class Camera3D_Smart : public aditof::Camera {
     std::vector<aditof::FrameDetails> m_rgbFrameTypes;
     std::map<std::string, std::pair<aditof::FrameDetails, aditof::FrameDetails>>
         m_camFrameTypesMap;
+    float m_Rw;
+    float m_Gw;
+    float m_Bw;
 };
 
 #endif // CAMERA_3D_SMART_H

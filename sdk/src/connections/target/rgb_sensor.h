@@ -32,13 +32,6 @@
 #ifndef RGB_SENSOR_H
 #define RGB_SENSOR_H
 
-#define RED_START_POZ_X 1
-#define RED_START_POZ_Y 1
-
-#define RED 0
-#define GREEN 1
-#define BLUE 2
-
 #include "aditof/depth_sensor_interface.h"
 #include "connections/target/v4l_buffer_access_interface.h"
 
@@ -103,13 +96,6 @@ class RgbSensor : public aditof::DepthSensorInterface,
                                             struct VideoDev *dev = nullptr);
     aditof::Status enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
                                                 struct VideoDev *dev = nullptr);
-    float verticalKernel(uint8_t *pData, int x, int y, int width, int height);
-    float horizontalKernel(uint8_t *pData, int x, int y, int width, int height);
-    float plusKernel(uint8_t *pData, int x, int y, int width, int height);
-    float crossKernel(uint8_t *pData, int x, int y, int width, int height);
-    float directCopy(uint8_t *buffer, int x, int y, int width, int height);
-    float getValueFromData(uint8_t *pData, int x, int y, int width, int height);
-    void bayer2RGB(uint16_t *buffer, uint8_t *pData, int width, int height);
 
   private:
     struct ImplData;
@@ -120,9 +106,6 @@ class RgbSensor : public aditof::DepthSensorInterface,
     std::string m_driverSubPath;
     std::string m_captureDev;
     std::unique_ptr<ImplData> m_implData;
-    float m_Rw;
-    float m_Gw;
-    float m_Bw;
 };
 
 #endif // RGB_SENSOR_H
