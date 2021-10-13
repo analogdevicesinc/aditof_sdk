@@ -436,7 +436,8 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer,
 
         //conversion done on the target
 
-        memcpy((uint8_t *)buffer, pdata[i], RGB_FRAME_WIDTH * RGB_FRAME_HEIGHT * 2);
+        memcpy((uint8_t *)buffer, pdata[i],
+               RGB_FRAME_WIDTH * RGB_FRAME_HEIGHT * 2);
 
         status = enqueueInternalBufferPrivate(buf[i], dev);
         if (status != Status::OK) {
