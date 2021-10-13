@@ -10,6 +10,10 @@ then
 elif [ $DISTRO_CODENAME = "focal" ]
 then
         ROS_DISTRO="noetic"
+        
+elif [ $DISTRO_CODENAME = "buster" ]
+then
+        ROS_DISTRO="melodic"
 fi
 
 
