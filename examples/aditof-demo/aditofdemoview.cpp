@@ -1061,6 +1061,7 @@ void AdiTofDemoView::_displayDepthImage() {
                         cv::FONT_HERSHEY_DUPLEX, 2,
                         cv::Scalar(color, color, color));
         }
+        int key = cv::waitKey(1);
         m_waitKeyBarrier += 1;
         if (m_waitKeyBarrier == threadNum) {
             imshow_lock.unlock();
@@ -1101,6 +1102,7 @@ void AdiTofDemoView::_displayIrImage() {
         m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
         flip(m_irImage, m_irImage, 1);
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
+        int key = cv::waitKey(1);
         m_waitKeyBarrier += 1;
         if (m_waitKeyBarrier == threadNum) {
             imshow_lock.unlock();
