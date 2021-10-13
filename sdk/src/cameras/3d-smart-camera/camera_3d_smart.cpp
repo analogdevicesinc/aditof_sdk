@@ -776,33 +776,26 @@ void Camera3D_Smart::bayer2RGB(uint16_t *buffer, uint8_t *pData, int width,
                 rgb[(i * width + j) * 3 + RED] =
                     (uint8_t)(directCopy(pData, i, j, width, height) * 255.0 /
                               this->m_Rw);
-                rgb[(i * width + j) * 3 + GREEN] =
-                    (uint8_t)(plusKernel(pData, i, j, width, height) * 255.0 /
-                              m_Gw);
-                rgb[(i * width + j) * 3 + BLUE] =
-                    (uint8_t)(crossKernel(pData, i, j, width, height) * 255.0 /
-                              m_Bw);
+                rgb[(i * width + j) * 3 + GREEN] = (uint8_t)(
+                    plusKernel(pData, i, j, width, height) * 255.0 / m_Gw);
+                rgb[(i * width + j) * 3 + BLUE] = (uint8_t)(
+                    crossKernel(pData, i, j, width, height) * 255.0 / m_Bw);
             } else if (i % 2 == (RED_START_POZ_Y ^ 1) &&
                        j % 2 == (RED_START_POZ_X ^ 1)) //blue square
             {
-                rgb[(i * width + j) * 3 + RED] =
-                    (uint8_t)(crossKernel(pData, i, j, width, height) * 255.0 /
-                              m_Rw);
-                rgb[(i * width + j) * 3 + GREEN] =
-                    (uint8_t)(plusKernel(pData, i, j, width, height) * 255.0 /
-                              m_Gw);
-                rgb[(i * width + j) * 3 + BLUE] =
-                    (uint8_t)(directCopy(pData, i, j, width, height) * 255.0 /
-                              m_Bw);
+                rgb[(i * width + j) * 3 + RED] = (uint8_t)(
+                    crossKernel(pData, i, j, width, height) * 255.0 / m_Rw);
+                rgb[(i * width + j) * 3 + GREEN] = (uint8_t)(
+                    plusKernel(pData, i, j, width, height) * 255.0 / m_Gw);
+                rgb[(i * width + j) * 3 + BLUE] = (uint8_t)(
+                    directCopy(pData, i, j, width, height) * 255.0 / m_Bw);
             } else if (i % 2 == (RED_START_POZ_Y ^ 1) &&
                        j % 2 == RED_START_POZ_X) //green pixel, blue row
             {
-                rgb[(i * width + j) * 3 + RED] =
-                    (uint8_t)(verticalKernel(pData, i, j, width, height) *
-                              255.0 / m_Rw);
-                rgb[(i * width + j) * 3 + GREEN] =
-                    (uint8_t)(directCopy(pData, i, j, width, height) * 255.0 /
-                              m_Gw);
+                rgb[(i * width + j) * 3 + RED] = (uint8_t)(
+                    verticalKernel(pData, i, j, width, height) * 255.0 / m_Rw);
+                rgb[(i * width + j) * 3 + GREEN] = (uint8_t)(
+                    directCopy(pData, i, j, width, height) * 255.0 / m_Gw);
                 rgb[(i * width + j) * 3 + BLUE] =
                     (uint8_t)(horizontalKernel(pData, i, j, width, height) *
                               255.0 / m_Bw);
@@ -812,12 +805,10 @@ void Camera3D_Smart::bayer2RGB(uint16_t *buffer, uint8_t *pData, int width,
                 rgb[(i * width + j) * 3 + RED] =
                     (uint8_t)(horizontalKernel(pData, i, j, width, height) *
                               255.0 / m_Rw);
-                rgb[(i * width + j) * 3 + GREEN] =
-                    (uint8_t)(directCopy(pData, i, j, width, height) * 255.0 /
-                              m_Gw);
-                rgb[(i * width + j) * 3 + BLUE] =
-                    (uint8_t)(verticalKernel(pData, i, j, width, height) *
-                              255.0 / m_Bw);
+                rgb[(i * width + j) * 3 + GREEN] = (uint8_t)(
+                    directCopy(pData, i, j, width, height) * 255.0 / m_Gw);
+                rgb[(i * width + j) * 3 + BLUE] = (uint8_t)(
+                    verticalKernel(pData, i, j, width, height) * 255.0 / m_Bw);
             }
         }
     }
