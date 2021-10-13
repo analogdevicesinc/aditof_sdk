@@ -319,6 +319,7 @@ aditof::Status Addi9036Sensor::getAvailableFrameTypes(
     Status status = Status::OK;
 
     FrameDetails details;
+    memset(&details, 0, sizeof(FrameDetails));
 
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
