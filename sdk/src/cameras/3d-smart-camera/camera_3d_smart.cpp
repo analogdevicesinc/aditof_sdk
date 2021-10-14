@@ -42,6 +42,8 @@
 #include <map>
 #include <math.h>
 
+#define SYNCDELAY 180
+
 static const std::string skCameraName = "3D-Smart-Camera";
 
 struct rangeStruct {
@@ -72,6 +74,8 @@ Camera3D_Smart::Camera3D_Smart(
       m_cameraGeometryCorrection(true), m_revision("RevA"),
       m_devProgrammed(false) {
 
+    m_depthIrTimestamp = 0;
+    m_rgbTimestamp = 0;
     // Check Depth Sensor
     if (!depthSensor) {
         LOG(WARNING) << "Invalid instance of a depth sensor";
@@ -460,26 +464,29 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
         frame->setDetails(m_details.frameType);
     }
 
-    // Get the frame from the Depth sensor
-    uint16_t *depthIrDataLocation;
-    frame->getData(FrameDataType::FULL_DATA, &depthIrDataLocation);
+    if (m_depthIrTimestamp == 0 || m_dep) {
+        // Get the frame from the Depth sensor
+        uint16_t *depthIrDataLocation;
+        frame->getData(FrameDataType::FULL_DATA, &depthIrDataLocation);
 
-    aditof::BufferInfo depthBufferInfo;
-    status = m_depthSensor->getFrame(depthIrDataLocation, &depthBufferInfo);
-    if (status != Status::OK) {
-        LOG(WARNING) << "Failed to get frame from depth sensor";
-        return status;
-    }
+        aditof::BufferInfo depthBufferInfo;
+        status = m_depthSensor->getFrame(depthIrDataLocation, &depthBufferInfo);
+        if (status != Status::OK) {
+            LOG(WARNING) << "Failed to get frame from depth sensor";
+            return status;
+        }
 
-    // Get the frame from the RGB sensor
-    uint16_t *rgbDataLocation;
-    frame->getData(FrameDataType::RGB, &rgbDataLocation);
+    } else {
+        // Get the frame from the RGB sensor
+        uint16_t *rgbDataLocation;
+        frame->getData(FrameDataType::RGB, &rgbDataLocation);
 
-    aditof::BufferInfo rgbBufferInfo;
-    status = m_rgbSensor->getFrame(rgbDataLocation, &rgbBufferInfo);
-    if (status != Status::OK) {
-        LOG(WARNING) << "Failed to get frame from RGB sensor";
-        return status;
+        aditof::BufferInfo rgbBufferInfo;
+        status = m_rgbSensor->getFrame(rgbDataLocation, &rgbBufferInfo);
+        if (status != Status::OK) {
+            LOG(WARNING) << "Failed to get frame from RGB sensor";
+            return status;
+        }
     }
 
     // TO DO: Synchronize the two sensors
