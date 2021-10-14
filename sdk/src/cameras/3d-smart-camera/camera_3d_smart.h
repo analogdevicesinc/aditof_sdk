@@ -107,8 +107,9 @@ class Camera3D_Smart : public aditof::Camera {
     std::vector<aditof::FrameDetails> m_rgbFrameTypes;
     std::map<std::string, std::pair<aditof::FrameDetails, aditof::FrameDetails>>
         m_camFrameTypesMap;
-    long long unsigned int m_depthIrTimestamp; //for synchronization, store previous timestamps
-    long long unsigned int m_rgbTimestamp;
+
+    aditof::BufferInfo depthBufferInfo;
+    aditof::BufferInfo rgbBufferInfo;
 };
 
 #endif // CAMERA_3D_SMART_H

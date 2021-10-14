@@ -74,8 +74,8 @@ Camera3D_Smart::Camera3D_Smart(
       m_cameraGeometryCorrection(true), m_revision("RevA"),
       m_devProgrammed(false) {
 
-    m_depthIrTimestamp = 0;
-    m_rgbTimestamp = 0;
+    depthBufferInfo.timestamp = 0;
+    rgbBufferInfo.timestamp = 0;
     // Check Depth Sensor
     if (!depthSensor) {
         LOG(WARNING) << "Invalid instance of a depth sensor";
@@ -464,16 +464,30 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
         frame->setDetails(m_details.frameType);
     }
 
-    if (m_depthIrTimestamp == 0 || m_dep) {
+    if (depthBufferInfo.timestamp == 0 ||
+        depthBufferInfo.timestamp < rgbBufferInfo.timestamp) {
         // Get the frame from the Depth sensor
         uint16_t *depthIrDataLocation;
         frame->getData(FrameDataType::FULL_DATA, &depthIrDataLocation);
 
-        aditof::BufferInfo depthBufferInfo;
         status = m_depthSensor->getFrame(depthIrDataLocation, &depthBufferInfo);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to get frame from depth sensor";
             return status;
+        }
+        if (m_details.mode != skCustomMode &&
+            (m_details.frameType.type == "depth_ir_rgb" ||
+             m_details.frameType.type == "depth_rgb")) {
+            if (m_depthCorrection) {
+                m_calibration.calibrateDepth(depthIrDataLocation,
+                                             m_details.frameType.width *
+                                                 m_details.frameType.height);
+            }
+            if (m_cameraGeometryCorrection) {
+                m_calibration.calibrateCameraGeometry(
+                    depthIrDataLocation,
+                    m_details.frameType.width * m_details.frameType.height);
+            }
         }
 
     } else {
@@ -481,28 +495,10 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
         uint16_t *rgbDataLocation;
         frame->getData(FrameDataType::RGB, &rgbDataLocation);
 
-        aditof::BufferInfo rgbBufferInfo;
         status = m_rgbSensor->getFrame(rgbDataLocation, &rgbBufferInfo);
         if (status != Status::OK) {
             LOG(WARNING) << "Failed to get frame from RGB sensor";
             return status;
-        }
-    }
-
-    // TO DO: Synchronize the two sensors
-
-    if (m_details.mode != skCustomMode &&
-        (m_details.frameType.type == "depth_ir_rgb" ||
-         m_details.frameType.type == "depth_rgb")) {
-        if (m_depthCorrection) {
-            m_calibration.calibrateDepth(depthIrDataLocation,
-                                         m_details.frameType.width *
-                                             m_details.frameType.height);
-        }
-        if (m_cameraGeometryCorrection) {
-            m_calibration.calibrateCameraGeometry(
-                depthIrDataLocation,
-                m_details.frameType.width * m_details.frameType.height);
         }
     }
 
