@@ -116,6 +116,7 @@ class Camera3D_Smart : public aditof::Camera {
     float m_irGammaCorrection;
     bool m_depthCorrection;
     bool m_cameraGeometryCorrection;
+    bool m_cameraBayerRgbConversion;
     std::string m_revision;
     std::vector<aditof::FrameDetails> m_depthFrameTypes;
     std::vector<aditof::FrameDetails> m_rgbFrameTypes;
