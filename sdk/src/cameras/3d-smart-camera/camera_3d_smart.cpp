@@ -60,7 +60,7 @@ static const std::string skCustomMode = "custom";
 
 static const std::vector<std::string> availableControls = {
     "noise_reduction_threshold", "ir_gamma_correction", "depth_correction",
-    "camera_geometry_correction"};
+    "camera_geometry_correction", "bayer_rgb_conversion"};
 
 Camera3D_Smart::Camera3D_Smart(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
@@ -70,8 +70,8 @@ Camera3D_Smart::Camera3D_Smart(
     : m_depthSensor(depthSensor), m_rgbSensor(rgbSensor), m_devStarted(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
       m_availableControls(availableControls), m_depthCorrection(true),
-      m_cameraGeometryCorrection(true), m_revision("RevA"),
-      m_devProgrammed(false) {
+      m_cameraGeometryCorrection(true), m_cameraBayerRgbConversion(true),
+      m_revision("RevA"), m_devProgrammed(false) {
 
     m_Rw = 255.0 * 0.25;
     m_Gw = 255.0 * 0.35;
@@ -487,19 +487,21 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
         return status;
     }
 
-    //conversion for bayer to rgb
-    uint16_t *copyOfRgbData =
-        (uint16_t *)malloc(m_details.frameType.rgbWidth *
-                           m_details.frameType.rgbHeight * sizeof(uint16_t));
+    if (m_cameraBayerRgbConversion) {
+        //conversion for bayer to rgb
+        uint16_t *copyOfRgbData = (uint16_t *)malloc(
+            m_details.frameType.rgbWidth * m_details.frameType.rgbHeight *
+            sizeof(uint16_t));
 
-    std::memcpy(copyOfRgbData, rgbDataLocation,
-                m_details.frameType.rgbWidth * m_details.frameType.rgbHeight *
-                    2);
+        std::memcpy(copyOfRgbData, rgbDataLocation,
+                    m_details.frameType.rgbWidth *
+                        m_details.frameType.rgbHeight * 2);
 
-    bayer2RGB(rgbDataLocation, (uint8_t *)copyOfRgbData,
-              m_details.frameType.rgbWidth, m_details.frameType.rgbHeight);
+        bayer2RGB(rgbDataLocation, (uint8_t *)copyOfRgbData,
+                  m_details.frameType.rgbWidth, m_details.frameType.rgbHeight);
 
-    free(copyOfRgbData);
+        free(copyOfRgbData);
+    }
 
     // TO DO: Synchronize the two sensors
 
@@ -594,6 +596,10 @@ aditof::Status Camera3D_Smart::setControl(const std::string &control,
         m_cameraGeometryCorrection = std::stoi(value) != 0;
     }
 
+    if (control == "bayer_rgb_conversion") {
+        m_cameraBayerRgbConversion = std::stoi(value) != 0;
+    }
+
     return status;
 }
 
@@ -623,6 +629,10 @@ aditof::Status Camera3D_Smart::getControl(const std::string &control,
 
     if (control == "camera_geometry_correction") {
         value = m_cameraGeometryCorrection ? "1" : "0";
+    }
+
+    if (control == "bayer_rgb_conversion") {
+        value = m_cameraBayerRgbConversion ? "1" : "0";
     }
 
     return status;
