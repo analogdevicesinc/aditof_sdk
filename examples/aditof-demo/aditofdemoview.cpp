@@ -181,7 +181,7 @@ void AdiTofDemoView::render() {
     int numberOfFrames = 0;
 
     std::string modes[3] = {"near", "medium", "far"};
-    std::string frameTypesDepth[3] = {"depth_ir", "depth_only", "ir_only"};
+    std::string frameTypesDepth[3] = {"depth_ir", "depth", "ir"};
     std::string frameTypesRgb[3] = {"depth_ir_rgb", "depth_rgb", "ir_rgb"};
     std::string *frameTypes = frameTypesDepth;
 
@@ -288,32 +288,6 @@ void AdiTofDemoView::render() {
             blendedViewChecked = xorValue & 1;
         }
 
-        // TODO: set camera mode here
-        if (frameTypeCheckboxChanged) {
-            int selectedFrameType =
-                (2 - static_cast<int>(std::log2(frameTypeCurrentValue)));
-            m_ctrl->setFrameType(frameTypes[selectedFrameType]);
-
-            status = "Frame type set: " + frameTypes[selectedFrameType];
-            frameTypeCheckboxChanged = false;
-
-            int selectedMode =
-                (2 - static_cast<int>(std::log2(modeCurrentValue)));
-            m_ctrl->setMode(modes[selectedMode]);
-            status = "Mode set: " + modes[selectedMode];
-            m_crtSmallSignalState = false;
-            checkboxChanged = false;
-        }
-
-        if (checkboxChanged) {
-            int selectedMode =
-                (2 - static_cast<int>(std::log2(modeCurrentValue)));
-            m_ctrl->setMode(modes[selectedMode]);
-            status = "Mode set: " + modes[selectedMode];
-            m_crtSmallSignalState = false;
-            checkboxChanged = false;
-        }
-
         // Connection mode checkbox group
         bool connectionCheckboxChanged = false;
         if (USBModeChecked == true) {
@@ -400,6 +374,15 @@ void AdiTofDemoView::render() {
 
             if (localModeChecked) {
                 bool connectionResult = m_ctrl->setRegularConnection();
+                m_ctrl->getAvailableFrameTypes(availableFrameTypes);
+                for (auto availableFrameType : availableFrameTypes) {
+                    if (availableFrameType.find("rgb") != std::string::npos) {
+                        m_rgbCameraAvailable = true;
+                        frameTypes = frameTypesRgb;
+                        break;
+                    }
+                }
+
                 if (connectionResult == true) {
                     int selectedFrameType =
                         (2 -
@@ -413,6 +396,41 @@ void AdiTofDemoView::render() {
             }
         }
 
+        // TODO: set camera mode here
+        if (frameTypeCheckboxChanged) {
+
+            m_ctrl->getAvailableFrameTypes(availableFrameTypes);
+            for (auto availableFrameType : availableFrameTypes) {
+                if (availableFrameType.find("rgb") != std::string::npos) {
+                    m_rgbCameraAvailable = true;
+                    frameTypes = frameTypesRgb;
+                    break;
+                }
+            }
+
+            int selectedFrameType =
+                (2 - static_cast<int>(std::log2(frameTypeCurrentValue)));
+            m_ctrl->setFrameType(frameTypes[selectedFrameType]);
+
+            status = "Frame type set: " + frameTypes[selectedFrameType];
+            frameTypeCheckboxChanged = false;
+
+            int selectedMode =
+                (2 - static_cast<int>(std::log2(modeCurrentValue)));
+            m_ctrl->setMode(modes[selectedMode]);
+            status = "Mode set: " + modes[selectedMode];
+            m_crtSmallSignalState = false;
+            checkboxChanged = false;
+        }
+
+        if (checkboxChanged) {
+            int selectedMode =
+                (2 - static_cast<int>(std::log2(modeCurrentValue)));
+            m_ctrl->setMode(modes[selectedMode]);
+            status = "Mode set: " + modes[selectedMode];
+            m_crtSmallSignalState = false;
+            checkboxChanged = false;
+        }
         cvui::beginColumn(frame, 50, 105);
         cvui::space(10);
         cvui::text("Mode: ", 0.6);

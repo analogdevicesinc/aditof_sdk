@@ -261,17 +261,13 @@ aditof::Status NetworkDepthSensor::getAvailableFrameTypes(
     for (int i = 0; i < net->recv_buff.available_frame_types_size(); i++) {
         payload::FrameDetails details = net->recv_buff.available_frame_types(i);
         aditof::FrameDetails aditofDetails;
-        if (!m_id) {
-            aditofDetails.width = details.width();
-            aditofDetails.height = details.height();
-            aditofDetails.type = details.type();
-            aditofDetails.fullDataWidth = details.full_data_width();
-            aditofDetails.fullDataHeight = details.full_data_height();
-        } else {
-            aditofDetails.rgbWidth = details.width();
-            aditofDetails.rgbHeight = details.height();
-            aditofDetails.type = details.type();
-        }
+        aditofDetails.width = details.width();
+        aditofDetails.height = details.height();
+        aditofDetails.type = details.type();
+        aditofDetails.fullDataWidth = details.full_data_width();
+        aditofDetails.fullDataHeight = details.full_data_height();
+        aditofDetails.rgbWidth = details.rgb_width();
+        aditofDetails.rgbHeight = details.rgb_height();
         types.push_back(aditofDetails);
     }
 

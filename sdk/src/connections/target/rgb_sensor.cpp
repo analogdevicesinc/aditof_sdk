@@ -301,10 +301,18 @@ aditof::Status RgbSensor::stop() {
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
         dev = &m_implData->videoDevs[i];
+
+        if (!dev->started) {
+            LOG(INFO) << "Device " << i << " already stopped";
+            return Status::BUSY;
+        }
+
         type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if (-1 == xioctl(dev->fd, VIDIOC_STREAMOFF, &type))
             return Status::GENERIC_ERROR;
     }
+
+    dev->started = false;
     return status;
 }
 
@@ -353,7 +361,7 @@ aditof::Status RgbSensor::setFrameType(const aditof::FrameDetails &details) {
 
         /* Allocate the video buffers in the driver */
         CLEAR(req);
-        req.count = 4;
+        req.count = 2;
         req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         req.memory = V4L2_MEMORY_MMAP;
 
@@ -434,18 +442,15 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer,
             return status;
         }
 
-        //copy and convert into rgb format on 2 bytes, little endiannes
         uint16_t *data = (uint16_t *)pdata[i];
-        for (int j = 0; j < RGB_FRAME_HEIGHT; j++) {
-            for (int k = 0; k < RGB_FRAME_WIDTH; k++) {
-                //BGGR format
-                buffer[(j * RGB_FRAME_WIDTH + k) * 3 + 0] =
-                    data[ORIGINAL_FRAME_WIDTH * (j * 2 + 1) +
-                         (k * 2 + 1)]; //red
-                buffer[(j * RGB_FRAME_WIDTH + k) * 3 + 1] =
-                    data[ORIGINAL_FRAME_WIDTH * (j * 2 + 1) + (k * 2)]; //green
-                buffer[(j * RGB_FRAME_WIDTH + k) * 3 + 2] =
-                    data[ORIGINAL_FRAME_WIDTH * (j * 2) + (k * 2)]; //blue
+
+        //reduce frame size, keep BGGR format
+        for (int j = 0; j < RGB_FRAME_HEIGHT; ++j) {
+            for (int k = 0; k < RGB_FRAME_WIDTH; k = k + 2) {
+                buffer[(j * RGB_FRAME_WIDTH + k)] =
+                    data[ORIGINAL_FRAME_WIDTH * j * 2 + k * 2];
+                buffer[(j * RGB_FRAME_WIDTH + k + 1)] =
+                    data[ORIGINAL_FRAME_WIDTH * (j * 2 + 1) + k * 2 + 1];
             }
         }
 
