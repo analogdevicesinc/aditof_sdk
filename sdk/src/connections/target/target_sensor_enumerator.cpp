@@ -34,13 +34,14 @@
 #include "connections/target/adt7410_sensor.h"
 #include "connections/target/eeprom.h"
 #include "connections/target/rgb_sensor.h"
+#include "connections/target/rgbd_sensor.h"
 #include "connections/target/tmp10x_sensor.h"
+#include <algorithm>
 
 using namespace aditof;
-
+using namespace std;
 Status TargetSensorEnumerator::getDepthSensors(
     std::vector<std::shared_ptr<DepthSensorInterface>> &depthSensors) {
-
     depthSensors.clear();
 
     for (const auto &sInfo : m_sensorsInfo) {
@@ -58,6 +59,30 @@ Status TargetSensorEnumerator::getDepthSensors(
             break;
         }
         }
+    }
+
+    std::vector<std::shared_ptr<DepthSensorInterface>>::iterator
+        tmpDepthSensor = std::find_if(depthSensors.begin(), depthSensors.end(),
+                                      [](shared_ptr<DepthSensorInterface> aux) {
+                                          std::string tmpName;
+                                          aux.get()->getName(tmpName);
+                                          return (tmpName == "addi9036");
+                                      });
+    std::vector<std::shared_ptr<DepthSensorInterface>>::iterator tmpRgbSensor =
+        std::find_if(depthSensors.begin(), depthSensors.end(),
+                     [](shared_ptr<DepthSensorInterface> aux) {
+                         std::string tmpName;
+                         aux.get()->getName(tmpName);
+                         return (tmpName == "ov2735");
+                     });
+
+    if (tmpDepthSensor != depthSensors.end() &&
+        tmpRgbSensor != depthSensors.end()) {
+        auto sensor =
+            std::make_shared<RgbdSensor>(*tmpDepthSensor, *tmpRgbSensor);
+        depthSensors.erase(tmpDepthSensor);
+        depthSensors.erase(tmpRgbSensor);
+        depthSensors.emplace_back(sensor);
     }
 
     return Status::OK;

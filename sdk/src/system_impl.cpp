@@ -82,9 +82,8 @@ buildCamera(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
         camera = std::make_shared<CameraFxTof1>(depthSensors[0], storages,
                                                 temperatureSensors);
     case CameraType::SMART_3D_CAMERA:
-        // TO DO: once the RGBD sensor is implemented, change the Camera3D_Smart constructor to take only one depthSensor
-        camera = std::make_shared<Camera3D_Smart>(
-            depthSensors[0], depthSensors[1], storages, temperatureSensors);
+        camera = std::make_shared<Camera3D_Smart>(depthSensors[0], storages,
+                                                  temperatureSensors);
     }
 #else
 #if defined(FXTOF1)
@@ -93,9 +92,8 @@ buildCamera(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
 #elif defined(SMART_3D)
     if (depthSensors.size() != 2)
         return nullptr;
-    // TO DO: once the RGBD sensor is implemented, change the Camera3D_Smart constructor to take only one depthSensor
-    camera = std::make_shared<Camera3D_Smart>(depthSensors[0], depthSensors[1],
-                                              storages, temperatureSensors);
+    camera = std::make_shared<Camera3D_Smart>(depthSensors[0], storages,
+                                              temperatureSensors);
 #else
     camera = std::make_shared<Camera96Tof1>(depthSensors[0], storages,
                                             temperatureSensors);

@@ -57,6 +57,12 @@ class Camera3D_Smart : public aditof::Camera {
         std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms,
         std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
             &tSensors);
+
+    Camera3D_Smart(
+        std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
+        std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms,
+        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+            &tSensors);
     ~Camera3D_Smart();
 
   public: // implements Camera
@@ -107,6 +113,7 @@ class Camera3D_Smart : public aditof::Camera {
     aditof::CameraDetails m_details;
     std::shared_ptr<aditof::DepthSensorInterface> m_depthSensor;
     std::shared_ptr<aditof::DepthSensorInterface> m_rgbSensor;
+    std::shared_ptr<aditof::DepthSensorInterface> m_rgbdSensor;
     std::shared_ptr<aditof::StorageInterface> m_eeprom;
     std::shared_ptr<aditof::TemperatureSensorInterface> m_temperatureSensor;
     bool m_devStarted;
@@ -121,10 +128,7 @@ class Camera3D_Smart : public aditof::Camera {
     bool m_cameraGeometryCorrection;
     bool m_cameraBayerRgbConversion;
     std::string m_revision;
-    std::vector<aditof::FrameDetails> m_depthFrameTypes;
-    std::vector<aditof::FrameDetails> m_rgbFrameTypes;
-    std::map<std::string, std::pair<aditof::FrameDetails, aditof::FrameDetails>>
-        m_camFrameTypesMap;
+    std::vector<aditof::FrameDetails> m_rgbdFrameTypes;
     float m_Rw;
     float m_Gw;
     float m_Bw;

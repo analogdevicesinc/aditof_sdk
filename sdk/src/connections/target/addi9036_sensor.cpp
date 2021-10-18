@@ -324,12 +324,8 @@ aditof::Status Addi9036Sensor::getAvailableFrameTypes(
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-#if defined JETSON
-    details.fullDataHeight = details.height;
-#else
     details.fullDataHeight =
         details.height * ((m_implData->numVideoDevs == 2) ? 1 : 2);
-#endif
     details.type = "depth_ir";
     types.push_back(details);
 
@@ -337,14 +333,14 @@ aditof::Status Addi9036Sensor::getAvailableFrameTypes(
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
     details.fullDataHeight = details.height;
-    details.type = "depth_only";
+    details.type = "depth";
     types.push_back(details);
 
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
     details.fullDataHeight = details.height;
-    details.type = "ir_only";
+    details.type = "ir";
     types.push_back(details);
 
     return status;
@@ -398,8 +394,11 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
 #endif
         fmt.fmt.pix.width = details.fullDataWidth;
+#if defined JETSON
+        fmt.fmt.pix.height = details.height;
+#else
         fmt.fmt.pix.height = details.fullDataHeight;
-
+#endif
         if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
             LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
                          << " error: " << strerror(errno);
@@ -635,11 +634,14 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
         } else if (!isBufferPacked(buf[0], width, height)) {
             // TODO: investigate optimizations for this (arm neon / 1024 bytes
             // chunks)
-            if (m_implData->frameDetails.type == "depth_only") {
+            if (m_implData->frameDetails.type == "depth") {
                 memcpy(buffer, pdata[0], buf[0].bytesused);
-            } else if (m_implData->frameDetails.type == "ir_only") {
-
-                memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
+            } else if (m_implData->frameDetails.type == "ir") {
+#if defined(JETSON)
+                memcpy(buffer, pdata[0], buf[0].bytesused);
+#else
+            memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
+#endif
             } else {
 #if defined(TOYBRICK)
                 unsigned int fullDataWidth =
@@ -691,8 +693,8 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
         uint16_t *irPtr = buffer + (width * height);
         unsigned int j = 0;
 
-        if (m_implData->frameDetails.type == "depth_only" ||
-                m_implData->frameDetails.type == "ir_only") {
+        if (m_implData->frameDetails.type == "depth" ||
+                m_implData->frameDetails.type == "ir") {
                 buf_data_len /= 2;
         }
         /* The frame is read from the device as an array of uint8_t's where
@@ -728,10 +730,10 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             toStore.val[0] = aBuffer;
             toStore.val[1] = bBuffer;
 
-            if (m_implData->frameDetails.type == "depth_only") {
+            if (m_implData->frameDetails.type == "depth") {
                 vst2q_u16(depthPtr, toStore);
                 depthPtr += 16;
-            } else if (m_implData->frameDetails.type == "ir_only") {
+            } else if (m_implData->frameDetails.type == "ir") {
                 vst2q_u16(irPtr, toStore);
                 irPtr += 16;
             } else {
@@ -762,7 +764,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
 
 #if defined(JETSON)
-        usleep(50000);
+        usleep(35000);
     }
 #endif
 

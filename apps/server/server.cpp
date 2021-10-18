@@ -396,7 +396,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         int index = buff_recv.sensors_info().image_sensors(0).id();
         aditof::Status status = camDepthSensor[index]->stop();
         buff_send.set_status(static_cast<::payload::Status>(status));
-
         break;
     }
 
@@ -405,22 +404,16 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         int index = buff_recv.sensors_info().image_sensors(0).id();
         aditof::Status status =
             camDepthSensor[index]->getAvailableFrameTypes(frameDetails);
-        if (!index) {
-            for (auto detail : frameDetails) {
-                auto type = buff_send.add_available_frame_types();
-                type->set_width(detail.width);
-                type->set_height(detail.height);
-                type->set_type(detail.type);
-                type->set_full_data_width(detail.fullDataWidth);
-                type->set_full_data_height(detail.fullDataHeight);
-            }
-        } else {
-            for (auto detail : frameDetails) {
-                auto type = buff_send.add_available_frame_types();
-                type->set_width(detail.rgbWidth);
-                type->set_height(detail.rgbHeight);
-                type->set_type(detail.type);
-            }
+
+        for (auto detail : frameDetails) {
+            auto type = buff_send.add_available_frame_types();
+            type->set_width(detail.width);
+            type->set_height(detail.height);
+            type->set_type(detail.type);
+            type->set_full_data_width(detail.fullDataWidth);
+            type->set_full_data_height(detail.fullDataHeight);
+            type->set_rgb_width(detail.rgbWidth);
+            type->set_rgb_height(detail.rgbHeight);
         }
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
@@ -444,14 +437,10 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         if (sensorsFrameBuffers[index]) {
             delete[] sensorsFrameBuffers[index];
         }
-        auto width = details.width;
-        auto height = details.height;
-        if (index == 1) {
-            width = details.rgbWidth;
-            height = details.rgbHeight;
-        }
+
         sensorsFrameBuffers[index] =
-            new uint16_t[width * height * sizeof(uint16_t)];
+            new uint16_t[details.fullDataWidth * details.fullDataHeight +
+                         details.rgbWidth * details.rgbHeight];
 
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
@@ -469,37 +458,24 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     case GET_FRAME: {
         int index = buff_recv.sensors_info().image_sensors(0).id();
         aditof::BufferInfo bufferInfo;
-
-        int frameHeight;
-        int frameWidth;
-
-        if (!index) {
-            frameWidth = frameDetailsCache[index].width;
-            frameHeight = frameDetailsCache[index].height;
-        } else {
-            frameWidth = frameDetailsCache[index].rgbWidth;
-            frameHeight = frameDetailsCache[index].rgbHeight;
-        }
-
         aditof::Status status = camDepthSensor[index]->getFrame(
             sensorsFrameBuffers[index], &bufferInfo);
 
 #ifdef JETSON
         buff_send.add_int32_payload(0);
-        if (!index) {
-            buff_send.add_bytes_payload(sensorsFrameBuffers[index],
-                                        frameWidth * frameHeight *
-                                            sizeof(uint16_t) * 2);
-        } else {
-            buff_send.add_bytes_payload(sensorsFrameBuffers[index],
-                                        frameWidth * frameHeight *
-                                            sizeof(uint16_t));
-        }
+        buff_send.add_bytes_payload(
+            sensorsFrameBuffers[index],
+            (frameDetailsCache[index].fullDataWidth *
+                 frameDetailsCache[index].fullDataHeight +
+             frameDetailsCache[index].rgbWidth *
+                 frameDetailsCache[index].rgbHeight) *
+                sizeof(uint16_t));
 #else
         buff_send.add_int32_payload(1);
-        buff_send.add_bytes_payload(sensorsFrameBuffers[index],
-                                    frameWidth * frameHeight *
-                                        sizeof(uint16_t));
+        buff_send.add_bytes_payload(
+            sensorsFrameBuffers[index],
+            frameDetailsCache[index].fullDataWidth *
+                frameDetailsCache[index].fullDataHeight * sizeof(uint16_t));
 #endif
         buff_send.set_status(payload::Status::OK);
         break;
