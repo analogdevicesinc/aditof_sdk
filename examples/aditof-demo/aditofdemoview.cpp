@@ -69,7 +69,7 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
     : m_ctrl(ctrl), m_viewName(name), m_depthFrameAvailable(false),
       m_irFrameAvailable(false), m_stopWorkersFlag(false), m_center(true),
       m_waitKeyBarrier(0), m_distanceVal(0), m_crtSmallSignalState(false),
-      m_crtIRGamma(false) {
+      m_crtIRGamma(false), m_rgbCameraAvailable(false) {
     // cv::setNumThreads(2);
     m_depthImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
@@ -181,7 +181,7 @@ void AdiTofDemoView::render() {
     int numberOfFrames = 0;
 
     std::string modes[3] = {"near", "medium", "far"};
-    std::string frameTypes[3] = {"depth_ir", "depth_only", "ir_only"};
+    std::string frameTypes[3] = {"depth_ir_rgb", "depth_rgb", "ir_rgb"};
 
     char afe_temp_str[32] = "AFE TEMP:";
     char laser_temp_str[32] = "LASER TEMP:";
@@ -391,11 +391,11 @@ void AdiTofDemoView::render() {
             m_ctrl->getAvailableFrameTypes(availableFrameTypes);
         }
 
-        if (find(availableFrameTypes.begin(), availableFrameTypes.end(),
-                 "rgb") != availableFrameTypes.end()) {
-            m_rgbCameraAvailable = true;
-        } else {
-            m_rgbCameraAvailable = false;
+        for (auto availableFrameType : availableFrameTypes) {
+            if (availableFrameType.find("rgb") != std::string::npos) {
+                m_rgbCameraAvailable = true;
+                break;
+            }
         }
 
         cvui::beginColumn(frame, 50, 105);
@@ -410,7 +410,7 @@ void AdiTofDemoView::render() {
         cvui::checkbox("Far", &farModeChecked);
         cvui::endRow();
         cvui::endColumn();
-#ifdef FXTOF1
+#if defined(FXTOF1) || defined(SMART_3D)
         if (!USBModeChecked) {
             cvui::beginColumn(frame, 265, 105);
             cvui::space(10);
@@ -1035,7 +1035,7 @@ void AdiTofDemoView::_displayDepthImage() {
             (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
              m_ctrl->getRangeMin()));
         applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
-        flip(m_depthImage, m_depthImage, 1);
+        flip(m_depthImage, m_depthImage, 0);
         int color;
         if (m_distanceVal > 2500)
             color = 0;
@@ -1100,7 +1100,7 @@ void AdiTofDemoView::_displayIrImage() {
 
         m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
         m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
-        flip(m_irImage, m_irImage, 1);
+        flip(m_irImage, m_irImage, 0);
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         int key = cv::waitKey(1);
         m_waitKeyBarrier += 1;
@@ -1129,7 +1129,7 @@ void AdiTofDemoView::_displayBlendedImage() {
 
     m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
     m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
-    flip(m_irImage, m_irImage, 1);
+    flip(m_irImage, m_irImage, 0);
     cv::cvtColor(m_irImage, m_irImage, cv::COLOR_GRAY2RGB);
 
     m_depthImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
@@ -1138,7 +1138,7 @@ void AdiTofDemoView::_displayBlendedImage() {
         (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
         (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
          m_ctrl->getRangeMin()));
-    flip(m_depthImage, m_depthImage, 1);
+    flip(m_depthImage, m_depthImage, 0);
     applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
 
     cv::addWeighted(m_depthImage, m_blendValue, m_irImage, 1.0F - m_blendValue,
@@ -1160,23 +1160,25 @@ void AdiTofDemoView::_displayRgbImage() {
         std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
         lock.unlock(); // Lock is no longer needed
 
-        //To be modified when rgb is implemented
+        if (!localFrame)
+            continue;
 
-        size_t width = 640;
-        size_t height = 480;
-        uint16_t *rgbData = new uint16_t[width * height];
-        memset(rgbData, 0, width * height);
-        //localFrame->getData(aditof::FrameDataType::RGB, &rgbData);
+        uint16_t *rgbData;
+        localFrame->getData(aditof::FrameDataType::RGB, &rgbData);
 
-        //aditof::FrameDetails frameDetails;
-        //localFrame->getDetails(frameDetails);
+        aditof::FrameDetails frameDetails;
+        localFrame->getDetails(frameDetails);
 
-        //int frameHeight = static_cast<int>(frameDetails.rgbHeight);
-        //int frameWidth = static_cast<int>(frameDetails.rgbWidth);
-        int max_value_of_IR_pixel = (1 << m_ctrl->getbitCount()) - 1;
-        m_rgbImage = cv::Mat(height, width, CV_16UC1, rgbData);
-        m_rgbImage.convertTo(m_rgbImage, CV_8U, 255.0 / max_value_of_IR_pixel);
-        //flip(m_rgbImage, m_rgbImage, 1);
+        int frameHeight = static_cast<int>(frameDetails.rgbHeight);
+        int frameWidth = static_cast<int>(frameDetails.rgbWidth);
+        int max_value_of_IR_pixel = 32768;
+        m_rgbImage = cv::Mat(frameHeight, frameWidth, CV_8UC3, rgbData);
+        cv::cvtColor(m_rgbImage, m_rgbImage, cv::COLOR_RGB2BGR);
+        cv::resize(m_rgbImage, m_rgbImage, cv::Size(640, 480));
+        m_rgbImage *= 4;
+        //m_rgbImage += cv::Scalar(50, 50, 50);
+        flip(m_rgbImage, m_rgbImage, 0);
+
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         m_waitKeyBarrier += 1;
         if (m_waitKeyBarrier == threadNum) {

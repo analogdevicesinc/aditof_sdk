@@ -324,8 +324,12 @@ aditof::Status Addi9036Sensor::getAvailableFrameTypes(
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
+#if defined JETSON
+    details.fullDataHeight = details.height;
+#else
     details.fullDataHeight =
         details.height * ((m_implData->numVideoDevs == 2) ? 1 : 2);
+#endif
     details.type = "depth_ir";
     types.push_back(details);
 
@@ -758,7 +762,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
 
 #if defined(JETSON)
-        usleep(25000);
+        usleep(50000);
     }
 #endif
 
