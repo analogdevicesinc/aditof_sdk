@@ -181,7 +181,9 @@ void AdiTofDemoView::render() {
     int numberOfFrames = 0;
 
     std::string modes[3] = {"near", "medium", "far"};
-    std::string frameTypes[3] = {"depth_ir_rgb", "depth_rgb", "ir_rgb"};
+    std::string frameTypesDepth[3] = {"depth_ir", "depth_only", "ir_only"};
+    std::string frameTypesRgb[3] = {"depth_ir_rgb", "depth_rgb", "ir_rgb"};
+    std::string *frameTypes = frameTypesDepth;
 
     char afe_temp_str[32] = "AFE TEMP:";
     char laser_temp_str[32] = "LASER TEMP:";
@@ -288,6 +290,7 @@ void AdiTofDemoView::render() {
             int selectedFrameType =
                 (2 - static_cast<int>(std::log2(frameTypeCurrentValue)));
             m_ctrl->setFrameType(frameTypes[selectedFrameType]);
+
             status = "Frame type set: " + frameTypes[selectedFrameType];
             frameTypeCheckboxChanged = false;
 
@@ -350,6 +353,15 @@ void AdiTofDemoView::render() {
                         int selectedFrameType =
                             (2 - static_cast<int>(
                                      std::log2(frameTypeCurrentValue)));
+                        m_ctrl->getAvailableFrameTypes(availableFrameTypes);
+                        for (auto availableFrameType : availableFrameTypes) {
+                            if (availableFrameType.find("rgb") !=
+                                std::string::npos) {
+                                m_rgbCameraAvailable = true;
+                                frameTypes = frameTypesRgb;
+                                break;
+                            }
+                        }
                         m_ctrl->setFrameType(frameTypes[selectedFrameType]);
 
                         int selectedMode =
@@ -366,6 +378,15 @@ void AdiTofDemoView::render() {
                     int selectedFrameType =
                         (2 -
                          static_cast<int>(std::log2(frameTypeCurrentValue)));
+                    m_ctrl->getAvailableFrameTypes(availableFrameTypes);
+                    for (auto availableFrameType : availableFrameTypes) {
+                        if (availableFrameType.find("rgb") !=
+                            std::string::npos) {
+                            m_rgbCameraAvailable = true;
+                            frameTypes = frameTypesRgb;
+                            break;
+                        }
+                    }
                     m_ctrl->setFrameType(frameTypes[selectedFrameType]);
 
                     int selectedMode =
@@ -386,15 +407,6 @@ void AdiTofDemoView::render() {
                         (2 - static_cast<int>(std::log2(modeCurrentValue)));
                     m_ctrl->setMode(modes[selectedMode]);
                 }
-            }
-
-            m_ctrl->getAvailableFrameTypes(availableFrameTypes);
-        }
-
-        for (auto availableFrameType : availableFrameTypes) {
-            if (availableFrameType.find("rgb") != std::string::npos) {
-                m_rgbCameraAvailable = true;
-                break;
             }
         }
 
@@ -417,13 +429,13 @@ void AdiTofDemoView::render() {
             cvui::text("Frame type: ", 0.6);
             cvui::space(10);
             cvui::beginRow(frame, 265, 140);
-            cvui::checkbox("depth_ir", &depthIrChecked);
+            cvui::checkbox(frameTypes[0], &depthIrChecked);
             cvui::endRow();
             cvui::beginRow(frame, 265, 170);
-            cvui::checkbox("depth_only", &depthOnlyChecked);
+            cvui::checkbox(frameTypes[1], &depthOnlyChecked);
             cvui::endRow();
             cvui::beginRow(frame, 265, 200);
-            cvui::checkbox("ir_only", &irOnlyChecked);
+            cvui::checkbox(frameTypes[2], &irOnlyChecked);
             cvui::endRow();
             cvui::endColumn();
         }
