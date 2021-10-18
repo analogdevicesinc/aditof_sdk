@@ -338,11 +338,7 @@ aditof::Status Camera3D_Smart::setMode(const std::string &mode,
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     } else if (m_details.frameType.type == "depth_ir_rgb") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
-#if defined(JETSON)
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
-#else
-        uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x07, 0x0007, 0x0004};
-#endif
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
 
@@ -427,9 +423,9 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
     if (!m_devStarted) {
         status = m_depthSensor->start();
         status = m_rgbSensor->start();
-        if (status != Status::OK) {
-            return status;
-        }
+        //if (status != Status::OK) {
+        //    return status;
+        //}
         m_devStarted = true;
     }
 

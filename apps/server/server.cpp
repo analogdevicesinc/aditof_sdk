@@ -442,53 +442,37 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
     case GET_FRAME: {
         int index = buff_recv.sensors_info().image_sensors(0).id();
-        aditof::Status status = sensorV4lBufAccess[index]->waitForBuffer();
-        if (status != aditof::Status::OK) {
-            buff_send.set_status(static_cast<::payload::Status>(status));
-            break;
+        static uint16_t buffer[2][1920 * 1080];
+        aditof::BufferInfo bufferInfo;
+
+        int frameHeight;
+        int frameWidth;
+
+        if (!index) {
+            frameWidth = frameDetailsCache[index].width;
+            frameHeight = frameDetailsCache[index].height;
+        } else {
+            frameWidth = frameDetailsCache[index].rgbWidth;
+            frameHeight = frameDetailsCache[index].rgbHeight;
         }
 
-        struct v4l2_buffer buf;
-
-        status = sensorV4lBufAccess[index]->dequeueInternalBuffer(buf);
-        if (status != aditof::Status::OK) {
-            buff_send.set_status(static_cast<::payload::Status>(status));
-            break;
-        }
-
-        unsigned int buf_data_len;
-        uint8_t *buffer;
-
-        status = sensorV4lBufAccess[index]->getInternalBuffer(
-            &buffer, buf_data_len, buf);
-        if (status != aditof::Status::OK) {
-            buff_send.set_status(static_cast<::payload::Status>(status));
-            break;
-        }
+        aditof::Status status =
+            camDepthSensor[index]->getFrame(buffer[index], &bufferInfo);
 
 #ifdef JETSON
-
-        //TO DO : must check if rgb data is interleaved.
-
         buff_send.add_int32_payload(0);
-        buff_send.add_bytes_payload(buffer,
-                                    buf_data_len * sizeof(uint16_t) / 3);
-
+        if (!index) {
+            buff_send.add_bytes_payload(
+                buffer[index], frameWidth * frameHeight * sizeof(uint16_t) * 2);
+        } else {
+            buff_send.add_bytes_payload(
+                buffer[index], frameWidth * frameHeight * sizeof(uint16_t));
+        }
 #else
         buff_send.add_int32_payload(1);
-        buff_send.add_bytes_payload(buffer, buf_data_len * sizeof(uint8_t));
+        buff_send.add_bytes_payload(buffer[index], frameWidth * frameHeight *
+                                                       sizeof(uint16_t));
 #endif
-
-        auto bufDetails = buff_send.mutable_buffer_details();
-        bufDetails->set_timestamp(buf.timestamp.tv_sec * 1000000 +
-                                  buf.timestamp.tv_usec);
-
-        status = sensorV4lBufAccess[index]->enqueueInternalBuffer(buf);
-        if (status != aditof::Status::OK) {
-            buff_send.set_status(static_cast<::payload::Status>(status));
-            break;
-        }
-
         buff_send.set_status(payload::Status::OK);
         break;
     }
