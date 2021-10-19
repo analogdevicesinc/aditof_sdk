@@ -29,42 +29,27 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "connections/usb/usb_sensor_enumerator.h"
+#ifndef TARGET_SDK_DEFINITIONS_H
+#define TARGET_SDK_DEFINITIONS_H
 
-using namespace aditof;
+#include <string>
 
-Status UsbSensorEnumerator::searchSensors() {
-    // TO DO: implement this when enabling macos support
+/**
+ * @brief Namespace aditof
+ */
+namespace aditof {
 
-    return Status::OK;
-}
+/**
+ * @enum CameraType
+ * @brief Types of cameras
+ */
+enum class CameraType {
+    AD_96TOF1_EBZ,  //!< AD-96TOF1-EBZ camera
+    CHICONY,        //!< Chicony Tof camera
+    AD_FXTOF1_EBZ,  //!< AD-FXTOF1-EBZ camera
+    SMART_3D_CAMERA //!< 3D Smart camera
+};
 
-Status UsbSensorEnumerator::getDepthSensors(
-    std::vector<std::shared_ptr<DepthSensorInterface>> & /*depthSensors*/) {
+} // namespace aditof
 
-    // TO DO: implement this when enabling macos support
-
-    return Status::OK;
-}
-
-Status UsbSensorEnumerator::getStorages(
-    std::vector<std::shared_ptr<StorageInterface>> & /*storages*/) {
-
-    // TO DO: implement this when enabling macos support
-
-    return Status::OK;
-}
-
-Status UsbSensorEnumerator::getTemperatureSensors(
-    std::vector<std::shared_ptr<TemperatureSensorInterface>>
-        & /*temperatureSensors*/) {
-
-    // TO DO: implement this when enabling macos support
-
-    return Status::OK;
-}
-
-Status UsbSensorEnumerator::getCameraTypeOnTarget(CameraType &/*cameraType*/) {
-    // TO DO: implement this when enabling macos support
-    return Status::OK;
-}
+#endif // TARGET_SDK_DEFINITIONS_H

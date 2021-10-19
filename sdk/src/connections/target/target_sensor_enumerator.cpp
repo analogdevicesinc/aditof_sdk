@@ -102,3 +102,8 @@ Status TargetSensorEnumerator::getTemperatureSensors(
 
     return Status::OK;
 }
+
+Status TargetSensorEnumerator::getCameraTypeOnTarget(CameraType &cameraType) {
+    // TO DO: implement this
+    return Status::OK;
+}
