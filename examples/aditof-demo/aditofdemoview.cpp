@@ -189,6 +189,10 @@ void AdiTofDemoView::render() {
     char laser_temp_str[32] = "LASER TEMP:";
     int temp_cnt = 0;
 
+    bool frameTypeCheckboxChanged = false;
+    if (localModeChecked) {
+        frameTypeCheckboxChanged = true;
+    }
     while (true) {
 
         // Fill the frame with a nice color
@@ -204,7 +208,6 @@ void AdiTofDemoView::render() {
         }
 
         bool checkboxChanged = false;
-        bool frameTypeCheckboxChanged = false;
 
         // Mode checkbox group
         int btnGroupMode =
