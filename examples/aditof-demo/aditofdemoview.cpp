@@ -1047,7 +1047,9 @@ void AdiTofDemoView::_displayDepthImage() {
             (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
              m_ctrl->getRangeMin()));
         applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
-        flip(m_depthImage, m_depthImage, 0);
+        if (m_rgbCameraAvailable) {
+            flip(m_depthImage, m_depthImage, 0);
+        }
         int color;
         if (m_distanceVal > 2500)
             color = 0;
@@ -1112,7 +1114,9 @@ void AdiTofDemoView::_displayIrImage() {
 
         m_irImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, irData);
         m_irImage.convertTo(m_irImage, CV_8U, 255.0 / max_value_of_IR_pixel);
-        flip(m_irImage, m_irImage, 0);
+        if (m_rgbCameraAvailable) {
+            flip(m_irImage, m_irImage, 0);
+        }
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         int key = cv::waitKey(1);
         m_waitKeyBarrier += 1;
@@ -1150,7 +1154,9 @@ void AdiTofDemoView::_displayBlendedImage() {
         (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
         (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
          m_ctrl->getRangeMin()));
-    flip(m_depthImage, m_depthImage, 0);
+    if (m_rgbCameraAvailable) {
+        flip(m_depthImage, m_depthImage, 0);
+    }
     applyColorMap(m_depthImage, m_depthImage, cv::COLORMAP_RAINBOW);
 
     cv::addWeighted(m_depthImage, m_blendValue, m_irImage, 1.0F - m_blendValue,
@@ -1186,9 +1192,8 @@ void AdiTofDemoView::_displayRgbImage() {
         int max_value_of_IR_pixel = 32768;
         m_rgbImage = cv::Mat(frameHeight, frameWidth, CV_8UC3, rgbData);
         cv::cvtColor(m_rgbImage, m_rgbImage, cv::COLOR_RGB2BGR);
-        cv::resize(m_rgbImage, m_rgbImage, cv::Size(640, 480));
+        cv::resize(m_rgbImage, m_rgbImage, cv::Size(960, 540));
         m_rgbImage *= 4;
-        //m_rgbImage += cv::Scalar(50, 50, 50);
         flip(m_rgbImage, m_rgbImage, 0);
 
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
