@@ -423,9 +423,6 @@ aditof::Status Camera3D_Smart::setFrameType(const std::string &frameType) {
     if (!m_devStarted) {
         status = m_depthSensor->start();
         status = m_rgbSensor->start();
-        //if (status != Status::OK) {
-        //    return status;
-        //}
         m_devStarted = true;
     }
 
