@@ -365,7 +365,7 @@ aditof::Status CameraChicony::getDetails(aditof::CameraDetails &details) const {
 aditof::Status CameraChicony::getImageSensors(
     std::vector<std::shared_ptr<aditof::DepthSensorInterface>> &sensors) {
     sensors.clear();
-    sensors.emplace_back(m_depthSensor);
+    sensors.emplace_back(m_sensor);
     return aditof::Status::OK;
 }
 
