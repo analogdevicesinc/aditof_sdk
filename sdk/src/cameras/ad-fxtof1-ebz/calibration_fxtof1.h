@@ -44,19 +44,6 @@
 #define INTRINSIC 5
 #define DISTORTION_COEFFICIENTS 6
 
-//! mode_struct - Structure to hold the packet consisting of map of parameters
-/*!
-    mode_struct provides structure to hold the packet(sub map) of parameters
-*/
-struct mode_struct {
-    uint16_t pulse_cnt;
-    uint8_t depth_pwr[48];
-    uint16_t depth_x0;
-    uint16_t depth_offset[49];
-    uint16_t depth3;
-    uint16_t depth2;
-};
-
 namespace aditof {
 class StorageInterface;
 }
@@ -83,6 +70,20 @@ class CalibrationFxTof1 {
                                     int16_t maxPixelValue, int range);
     void buildGeometryCalibrationCache(const std::vector<float> &cameraMatrix,
                                        unsigned int width, unsigned int height);
+
+  private:
+    //! mode_struct - Structure to hold the packet consisting of map of parameters
+    /*!
+    mode_struct provides structure to hold the packet(sub map) of parameters
+*/
+    struct mode_struct {
+        uint16_t pulse_cnt;
+        uint8_t depth_pwr[48];
+        uint16_t depth_x0;
+        uint16_t depth_offset[49];
+        uint16_t depth3;
+        uint16_t depth2;
+    };
 
   private:
     uint16_t *m_depth_cache;
