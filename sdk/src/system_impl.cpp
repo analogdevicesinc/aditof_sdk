@@ -32,6 +32,13 @@
 #include "system_impl.h"
 #include "aditof/sensor_enumerator_factory.h"
 #include "aditof/sensor_enumerator_interface.h"
+
+#ifndef TARGET
+#include "cameras/ad-96tof1-ebz/camera_96tof1.h"
+#include "cameras/chicony-006/camera_chicony_006.h"
+#include "cameras/ad-fxtof1-ebz/camera_fxtof1.h"
+#include "cameras/3d-smart-camera/camera_3d_smart.h"
+#else
 #if defined(CHICONY_006)
 #include "camera_chicony_006.h"
 #elif defined(FXTOF1)
@@ -41,6 +48,7 @@
 #else
 #include "camera_96tof1.h"
 #endif
+#endif // #ifndef TARGET
 
 #include <aditof/camera.h>
 #include <algorithm>
@@ -55,30 +63,53 @@ buildCamera(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
     std::vector<std::shared_ptr<DepthSensorInterface>> depthSensors;
     std::vector<std::shared_ptr<StorageInterface>> storages;
     std::vector<std::shared_ptr<TemperatureSensorInterface>> temperatureSensors;
+    std::shared_ptr<Camera> camera;
+    CameraType cameraType;
 
     enumerator->getDepthSensors(depthSensors);
+    if (depthSensors.size() < 0) {
+        LOG(ERROR) << "No imagers found";
+        return nullptr;
+    }
+
     enumerator->getStorages(storages);
     enumerator->getTemperatureSensors(temperatureSensors);
+    enumerator->getCameraTypeOnTarget(cameraType);
 
-    std::shared_ptr<Camera> camera;
-    if (depthSensors.size() > 0) {
-#if defined(CHICONY_006)
-        camera = std::make_shared<CameraChicony>(depthSensors[0], storages,
-                                                 temperatureSensors);
-#elif defined(FXTOF1)
-        camera = std::make_shared<CameraFxTof1>(depthSensors[0], storages,
-                                                temperatureSensors);
-#elif defined(SMART_3D)
-        if (depthSensors.size() != 2)
-            return nullptr;
-        // TO DO: find a way to differentiate the DEPTH and RBG sensors
-        camera = std::make_shared<Camera3D_Smart>(
-            depthSensors[0], depthSensors[1], storages, temperatureSensors);
-#else
+#ifndef TARGET
+    switch (cameraType) {
+    case CameraType::AD_96TOF1_EBZ:
         camera = std::make_shared<Camera96Tof1>(depthSensors[0], storages,
                                                 temperatureSensors);
-#endif
+    case CameraType::CHICONY:
+        camera = std::make_shared<CameraChicony>(depthSensors[0], storages,
+                                                 temperatureSensors);
+    case CameraType::AD_FXTOF1_EBZ:
+        camera = std::make_shared<CameraFxTof1>(depthSensors[0], storages,
+                                                temperatureSensors);
+    case CameraType::SMART_3D_CAMERA:
+        // TO DO: once the RGBD sensor is implemented, change the Camera3D_Smart constructor to take only one depthSensor
+        camera = std::make_shared<Camera3D_Smart>(
+            depthSensors[0], depthSensors[1], storages, temperatureSensors);
     }
+#else
+#if defined(CHICONY_006)
+    camera = std::make_shared<CameraChicony>(depthSensors[0], storages,
+                                             temperatureSensors);
+#elif defined(FXTOF1)
+    camera = std::make_shared<CameraFxTof1>(depthSensors[0], storages,
+                                            temperatureSensors);
+#elif defined(SMART_3D)
+    if (depthSensors.size() != 2)
+        return nullptr;
+    // TO DO: once the RGBD sensor is implemented, change the Camera3D_Smart constructor to take only one depthSensor
+    camera = std::make_shared<Camera3D_Smart>(depthSensors[0], depthSensors[1],
+                                              storages, temperatureSensors);
+#else
+    camera = std::make_shared<Camera96Tof1>(depthSensors[0], storages,
+                                            temperatureSensors);
+#endif
+#endif // #ifndef TARGET
 
     return camera;
 }

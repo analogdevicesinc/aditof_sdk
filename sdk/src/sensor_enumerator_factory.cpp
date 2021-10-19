@@ -31,11 +31,6 @@
  */
 #include "aditof/sensor_enumerator_factory.h"
 
-#if defined(DRAGONBOARD) || defined(RASPBERRYPI) || defined(JETSON) ||         \
-    defined(XAVIER) || defined(XAVIERNX) || defined(TOYBRICK)
-#define TARGET
-#endif
-
 /* On target SDK will know only about TargetSensorEnumerator, while
 // on remote, SDK will only know about UsbSensorEnumerator and
 // (optionally) about NetworkSensorEnumerator. */

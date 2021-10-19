@@ -38,17 +38,36 @@ option(USE_3D_SMART "Use 3D Smart camera?" OFF)
 option(WITH_TOOLS "Build tools?" OFF)
 option(IGNORE_TARGET_VERSION "Ignore sdk version on target?" OFF)
 
-# Throw error if more than one camera is selected
-set(SELECTED_CAMERAS 0)
-set(ALL_CAM_OPTIONS USE_CHICONY;USE_FXTOF1;USE_3D_SMART)
-foreach(option IN LISTS ALL_CAM_OPTIONS)
-    if(${option})
-        math(EXPR SELECTED_CAMERAS "${SELECTED_CAMERAS}+1")
+# Check whether we configure things for remote or we're on target
+set(SELECTED_PLATFORMS 0)
+set(ALL_PLATFORMS DRAGONBOARD;RASPBERRYPI;JETSON;XAVIER;XAVIERNX;TOYBRICK)
+foreach(platform IN LISTS ALL_PLATFORMS)
+    if(${platform})
+        math(EXPR SELECTED_PLATFORMS "${SELECTED_PLATFORMS}+1")
     endif()
 endforeach()
 
-if(${SELECTED_CAMERAS} GREATER 1)
-    message("More than one camera was selected. \nPlease select a single camera. CMake will exit.")
+set(ON_TARGET FALSE)
+if(${SELECTED_PLATFORMS} GREATER 1)
+        message(FATAL_ERROR "More than one platform was selected. \nPlease select a single platform. CMake will exit.")
+elseif(${SELECTED_PLATFORMS} EQUAL 1)
+    add_definitions(-DTARGET)
+    set(ON_TARGET TRUE)
+endif()
+
+# Throw error if more than one camera is selected when running on target
+if (ON_TARGET)
+    set(SELECTED_CAMERAS 0)
+    set(ALL_CAM_OPTIONS USE_CHICONY;USE_FXTOF1;USE_3D_SMART)
+    foreach(option IN LISTS ALL_CAM_OPTIONS)
+    if(${option})
+        math(EXPR SELECTED_CAMERAS "${SELECTED_CAMERAS}+1")
+    endif()
+    endforeach()
+
+    if(${SELECTED_CAMERAS} GREATER 1)
+    message(FATAL_ERROR "More than one camera was selected. \nPlease select a single camera. CMake will exit.")
+    endif()
 endif()
 
 
