@@ -35,7 +35,6 @@
 
 #ifndef TARGET
 #include "cameras/ad-96tof1-ebz/camera_96tof1.h"
-#include "cameras/chicony-006/camera_chicony_006.h"
 #include "cameras/ad-fxtof1-ebz/camera_fxtof1.h"
 #include "cameras/3d-smart-camera/camera_3d_smart.h"
 #else
@@ -82,8 +81,7 @@ buildCamera(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
         camera = std::make_shared<Camera96Tof1>(depthSensors[0], storages,
                                                 temperatureSensors);
     case CameraType::CHICONY:
-        camera = std::make_shared<CameraChicony>(depthSensors[0], storages,
-                                                 temperatureSensors);
+        LOG(WARNING) << "Chicony camera is not supported on remote (only on target)";
     case CameraType::AD_FXTOF1_EBZ:
         camera = std::make_shared<CameraFxTof1>(depthSensors[0], storages,
                                                 temperatureSensors);
