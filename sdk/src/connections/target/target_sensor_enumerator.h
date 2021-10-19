@@ -50,6 +50,8 @@ class TargetSensorEnumerator : public aditof::SensorEnumeratorInterface {
     virtual aditof::Status getTemperatureSensors(
         std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
             &temperatureSensors) override;
+    virtual aditof::Status
+    getCameraTypeOnTarget(aditof::CameraType &cameraType) override;
 
   private:
     enum class SensorType {

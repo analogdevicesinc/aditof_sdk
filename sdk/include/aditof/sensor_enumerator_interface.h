@@ -35,6 +35,7 @@
 #include "aditof/depth_sensor_interface.h"
 #include "aditof/status_definitions.h"
 #include "aditof/storage_interface.h"
+#include "aditof/target_sdk_definitions.h"
 #include "aditof/temperature_sensor_interface.h"
 
 #include <memory>
@@ -84,6 +85,14 @@ class SensorEnumeratorInterface {
     virtual aditof::Status getTemperatureSensors(
         std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
             &temperatureSensors) = 0;
+
+    /**
+     * @brief Find out for which camera the SDK on target was built for
+     * @param[out] cameraType - the requested camera type
+     * @return Status
+     */
+    virtual aditof::Status
+    getCameraTypeOnTarget(aditof::CameraType &cameraType) = 0;
 };
 
 } // namespace aditof

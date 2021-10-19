@@ -226,3 +226,8 @@ Status UsbSensorEnumerator::getTemperatureSensors(
 
     return Status::OK;
 }
+
+Status UsbSensorEnumerator::getCameraTypeOnTarget(CameraType &cameraType) {
+    // TO DO: implement this
+    return Status::OK;
+}
