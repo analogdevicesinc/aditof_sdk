@@ -76,13 +76,11 @@ if (ON_TARGET)
     endif()
 else()
     file(GLOB ALL_CAMERAS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/3d-smart-camera/*.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.cpp
     )
     file(GLOB ALL_CAMERAS_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/chicony-006/*.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/3d-smart-camera/*.h
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-96tof1-ebz/*.h
