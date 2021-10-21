@@ -39,11 +39,11 @@
 #include "cameras/3d-smart-camera/camera_3d_smart.h"
 #else
 #if defined(FXTOF1)
-#include "camera_fxtof1.h"
+#include "cameras/ad-fxtof1-ebz/camera_fxtof1.h"
 #elif defined(SMART_3D)
-#include "camera_3d_smart.h"
+#include "cameras/3d-smart-camera/camera_3d_smart.h"
 #else
-#include "camera_96tof1.h"
+#include "cameras/ad-96tof1-ebz/camera_96tof1.h"
 #endif
 #endif // #ifndef TARGET
 

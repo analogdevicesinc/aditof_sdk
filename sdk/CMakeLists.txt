@@ -62,13 +62,22 @@ endif()
 
 # Choose the camera sources to build (on remote we build all cameras)
 if (ON_TARGET)
-    if(USE_FXTOF1)
-        set(CAMERA_DIR "cameras/ad-fxtof1-ebz")
-    elseif(USE_3D_SMART)
-        set(CAMERA_DIR "cameras/3d-smart-camera")
-    else ()
-        set(CAMERA_DIR "cameras/ad-96tof1-ebz")
-    endif()
+  if(USE_FXTOF1)
+    set(CAMERA_DIR "cameras/ad-fxtof1-ebz")
+  elseif(USE_3D_SMART)
+    set(CAMERA_DIR "cameras/3d-smart-camera")
+  else ()
+    set(CAMERA_DIR "cameras/ad-96tof1-ebz")
+  endif()
+
+  file(GLOB ONE_CAMERA_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp
+  )
+  file(GLOB ONE_CAMERA_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.h
+  )
 else()
     file(GLOB ALL_CAMERAS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cameras/ad-fxtof1-ebz/*.cpp
@@ -93,8 +102,6 @@ endif()
 # Platform specific sources and headers
 file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.cpp
-    $<$<BOOL:${ON_TARGET}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/*.cpp>
-    $<$<BOOL:${ON_TARGET}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.cpp>
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/utils/*.cpp
 )
@@ -102,8 +109,6 @@ file(GLOB PLATFORM_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/${OS_SPECIFIC_DIR}/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/usb/*.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/connections/utils/*.h
-    $<$<BOOL:${ON_TARGET}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/*.h>
-    $<$<BOOL:${ON_TARGET}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}/*.h>
 )
 
 file(GLOB NETWORK_SOURCES
@@ -118,6 +123,8 @@ add_library(${PROJECT_NAME} SHARED
     ${SOURCES}
     ${PLATFORM_SOURCES}
     ${PLATFORM_HEADERS}
+    $<$<BOOL:${ON_TARGET}>:${ONE_CAMERA_SOURCES}>
+    $<$<BOOL:${ON_TARGET}>:${ONE_CAMERA_HEADERS}>
     $<$<NOT:$<BOOL:${ON_TARGET}>>:${ALL_CAMERAS_SOURCES}>
     $<$<NOT:$<BOOL:${ON_TARGET}>>:${ALL_CAMERAS_HEADERS}>
     $<$<BOOL:${WITH_NETWORK}>:${NETWORK_SOURCES}>
@@ -136,6 +143,8 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         src/
         src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
+        $<$<BOOL:${WITH_NETWORK}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}>
+        $<$<BOOL:${WITH_NETWORK}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}>
         ${Protobuf_INCLUDE_DIRS}
         ${GENERATED_PROTO_FILES_DIR}
         ${LIBWEBSOCKETS_INCLUDE_DIRS}
