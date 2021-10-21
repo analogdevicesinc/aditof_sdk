@@ -61,6 +61,7 @@ std::vector<std::shared_ptr<aditof::DepthSensorInterface>> camDepthSensor;
 std::vector<std::shared_ptr<aditof::V4lBufferAccessInterface>>
     sensorV4lBufAccess;
 aditof::FrameDetails frameDetailsCache[2];
+std::vector<uint16_t *> sensorsFrameBuffers;
 
 static payload::ClientRequest buff_recv;
 static payload::ServerResponse buff_send;
@@ -103,6 +104,13 @@ static void cleanup_sensors() {
         depthSensor.reset();
     }
     sensorV4lBufAccess.clear();
+
+    for (int i = 0; i < sensorsFrameBuffers.size(); ++i) {
+        if (sensorsFrameBuffers[i]) {
+            delete[] sensorsFrameBuffers[i];
+        }
+    }
+    sensorsFrameBuffers.clear();
 
     sensors_are_created = false;
 }
@@ -311,6 +319,12 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             sensorsEnumerator->getStorages(storages);
             sensorsEnumerator->getTemperatureSensors(temperatureSensors);
             sensors_are_created = true;
+
+            // Create buffers to be used by depth sensors when reuqesting frame from them
+            sensorsFrameBuffers.resize(depthSensors.size());
+            for (int i = 0; i < sensorsFrameBuffers.size(); ++i) {
+                sensorsFrameBuffers[i] = nullptr;
+            }
         }
 
         /* Add information about available sensors */
@@ -427,6 +441,18 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         status = camDepthSensor[index]->setFrameType(details);
         frameDetailsCache[index] = details;
 
+        if (sensorsFrameBuffers[index]) {
+            delete[] sensorsFrameBuffers[index];
+        }
+        auto width = details.width;
+        auto height = details.height;
+        if (index == 1) {
+            width = details.rgbWidth;
+            height = details.rgbHeight;
+        }
+        sensorsFrameBuffers[index] =
+            new uint16_t[width * height * sizeof(uint16_t)];
+
         buff_send.set_status(static_cast<::payload::Status>(status));
         break;
     }
@@ -442,7 +468,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
 
     case GET_FRAME: {
         int index = buff_recv.sensors_info().image_sensors(0).id();
-        static uint16_t buffer[2][1920 * 1080];
         aditof::BufferInfo bufferInfo;
 
         int frameHeight;
@@ -457,20 +482,20 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         }
 
         aditof::Status status =
-            camDepthSensor[index]->getFrame(buffer[index], &bufferInfo);
+            camDepthSensor[index]->getFrame(sensorsFrameBuffers[index], &bufferInfo);
 
 #ifdef JETSON
         buff_send.add_int32_payload(0);
         if (!index) {
             buff_send.add_bytes_payload(
-                buffer[index], frameWidth * frameHeight * sizeof(uint16_t) * 2);
+                sensorsFrameBuffers[index], frameWidth * frameHeight * sizeof(uint16_t) * 2);
         } else {
             buff_send.add_bytes_payload(
-                buffer[index], frameWidth * frameHeight * sizeof(uint16_t));
+                sensorsFrameBuffers[index], frameWidth * frameHeight * sizeof(uint16_t));
         }
 #else
         buff_send.add_int32_payload(1);
-        buff_send.add_bytes_payload(buffer[index], frameWidth * frameHeight *
+        buff_send.add_bytes_payload(sensorsFrameBuffers[index], frameWidth * frameHeight *
                                                        sizeof(uint16_t));
 #endif
         buff_send.set_status(payload::Status::OK);
