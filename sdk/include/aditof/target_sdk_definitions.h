@@ -45,7 +45,6 @@ namespace aditof {
  */
 enum class CameraType {
     AD_96TOF1_EBZ,  //!< AD-96TOF1-EBZ camera
-    CHICONY,        //!< Chicony Tof camera
     AD_FXTOF1_EBZ,  //!< AD-FXTOF1-EBZ camera
     SMART_3D_CAMERA //!< 3D Smart camera
 };
