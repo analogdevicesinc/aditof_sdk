@@ -18,6 +18,13 @@ enum ServerStatus
   REQUEST_UNKNOWN = 1;
 }
 
+enum CameraType
+{
+  AD_96TOF1_EBZ = 0;   // AD-96TOF1-EBZ camera
+  AD_FXTOF1_EBZ = 1;   // AD-FXTOF1-EBZ camera
+  SMART_3D_CAMERA = 2; // 3D Smart camera 
+}
+
 message ImagerInfo
 {
   string name = 10;
@@ -82,4 +89,5 @@ message ServerResponse
   SensorsInfo sensors_info = 80;                     // List of information about existing devices on the same platform as the server
   string message = 90;                               // Additional message (if any)
   BufferInfo buffer_details = 100;                   // Buffer details
+  CameraType camera_type = 110;                      // The camera for which the SDK on platform has been built
 }

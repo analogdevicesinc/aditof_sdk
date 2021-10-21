@@ -56,6 +56,7 @@ enum api_Values {
     TEMPERATURE_SENSOR_CLOSE,
     HANG_UP,
     GET_CONNECTION_STRING,
+    GET_CAMERA_TYPE,
 };
 
 enum protocols { PROTOCOL_EXAMPLE, PROTOCOL_COUNT };

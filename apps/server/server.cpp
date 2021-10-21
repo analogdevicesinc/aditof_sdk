@@ -694,6 +694,38 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         break;
     }
 
+    case GET_CAMERA_TYPE: {
+        auto sensorsEnumerator =
+            aditof::SensorEnumeratorFactory::buildTargetSensorEnumerator();
+        if (!sensorsEnumerator) {
+            std::string errMsg = "Failed to create a target sensor enumerator";
+            LOG(WARNING) << errMsg;
+            buff_send.set_message(errMsg);
+            buff_send.set_status(
+                static_cast<::payload::Status>(aditof::Status::UNAVAILABLE));
+            break;
+        }
+
+        aditof::CameraType tofCameraType;
+        aditof::Status status = sensorEnumerator->getCameraType(tofCameraType);
+        ::payload::CameraType msgCameraType;
+        if (status == aditof::Status::OK) {
+            switch (tofCameraType) {
+            case aditof::CameraType::AD_96TOF1_EBZ:
+                msgCameraType = ::payload::CameraType::AD_96TOF1_EBZ;
+            case aditof::CameraType::AD_FXTOF1_EBZ:
+                msgCameraType = ::payload::CameraType::AD_FXTOF1_EBZ;
+            case aditof::CameraType::3SMART_3D_CAMERA:
+                msgCameraType = ::payload::CameraType::3SMART_3D_CAMERA;
+            }
+            buff_send.set_camera_type(msgCameraType);
+        }
+
+        buff_send.set_status(
+            static_cast<::payload::Status>(aditof::Status::OK));
+        break;
+    }
+
     default: {
         std::string msgErr = "Function not found";
         std::cout << msgErr << "\n";
@@ -727,4 +759,5 @@ void Initialize() {
     s_map_api_Values["TemperatureSensorClose"] = TEMPERATURE_SENSOR_CLOSE;
     s_map_api_Values["HangUp"] = HANG_UP;
     s_map_api_Values["GetVersionString"] = GET_CONNECTION_STRING;
+    s_map_api_Values["GetCameraType"] = GET_CAMERA_TYPE;
 }
