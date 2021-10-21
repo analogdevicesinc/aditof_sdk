@@ -1192,11 +1192,13 @@ void AdiTofDemoView::_displayRgbImage() {
 
         int frameHeight = static_cast<int>(frameDetails.rgbHeight);
         int frameWidth = static_cast<int>(frameDetails.rgbWidth);
-        int max_value_of_IR_pixel = 32768;
-        m_rgbImage = cv::Mat(frameHeight, frameWidth, CV_8UC3, rgbData);
-        cv::cvtColor(m_rgbImage, m_rgbImage, cv::COLOR_RGB2BGR);
+        double minVal, maxVal;
+        m_rgbImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, rgbData);
+        cv::minMaxLoc(m_rgbImage, &minVal, &maxVal);
+        m_rgbImage -= minVal / 2;
+        m_rgbImage *= 65535 / (maxVal - minVal / 2);
+        cv::cvtColor(m_rgbImage, m_rgbImage, cv::COLOR_BayerBG2RGB);
         cv::resize(m_rgbImage, m_rgbImage, cv::Size(960, 540));
-        m_rgbImage *= 4;
         flip(m_rgbImage, m_rgbImage, 0);
 
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);

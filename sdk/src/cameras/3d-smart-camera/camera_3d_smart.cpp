@@ -70,7 +70,7 @@ Camera3D_Smart::Camera3D_Smart(
     : m_depthSensor(depthSensor), m_rgbSensor(rgbSensor), m_devStarted(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
       m_availableControls(availableControls), m_depthCorrection(true),
-      m_cameraGeometryCorrection(true), m_cameraBayerRgbConversion(true),
+      m_cameraGeometryCorrection(true), m_cameraBayerRgbConversion(false),
       m_revision("RevA"), m_devProgrammed(false) {
 
     m_Rw = 255.0 * 0.25;
@@ -480,6 +480,7 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
         return status;
     }
 
+#ifdef BAYER_CONVERSION
     if (m_cameraBayerRgbConversion) {
         //conversion for bayer to rgb
         uint16_t *copyOfRgbData = (uint16_t *)malloc(
@@ -495,7 +496,7 @@ Camera3D_Smart::requestFrame(aditof::Frame *frame,
 
         free(copyOfRgbData);
     }
-
+#endif
     // TO DO: Synchronize the two sensors
 
     if (m_details.mode != skCustomMode &&
@@ -681,6 +682,8 @@ aditof::Status Camera3D_Smart::setIrGammaCorrection(float gamma) {
 
     return status;
 }
+
+#ifdef BAYER_CONVERSION
 float Camera3D_Smart::getValueFromData(uint8_t *pData, int x, int y, int width,
                                        int height) {
     return (float)((pData[x * width * 2 + y * 2 + 1] << 8) +
@@ -816,3 +819,4 @@ void Camera3D_Smart::bayer2RGB(uint16_t *buffer, uint8_t *pData, int width,
         }
     }
 }
+#endif
