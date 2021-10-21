@@ -62,12 +62,7 @@ endif()
 
 # Choose the camera sources to build (on remote we build all cameras)
 if (ON_TARGET)
-    if (USE_CHICONY)
-        if (NOT RASPBERRYPI)
-            message( FATAL_ERROR "USE_CHICONY only works when on RaspberryPI. CMake will exit." )
-        endif()
-        set(CAMERA_DIR "cameras/chicony-006")
-    elseif(USE_FXTOF1)
+    if(USE_FXTOF1)
         set(CAMERA_DIR "cameras/ad-fxtof1-ebz")
     elseif(USE_3D_SMART)
         set(CAMERA_DIR "cameras/3d-smart-camera")
@@ -166,20 +161,6 @@ else()
         PUBLIC
             glog::glog
     )
-endif()
-
-if (USE_CHICONY AND RASPBERRYPI)
-    if (NOT DEFINED CHICONY_EEPROM_SO)
-        set(CHICONY_EEPROM_SO "${CMAKE_SOURCE_DIR}/misc/chicony/libChicony_EEPROM.so")
-    endif()
-
-    add_library(chicony-eeprom SHARED IMPORTED)
-    set_target_properties(chicony-eeprom PROPERTIES
-        IMPORTED_LOCATION ${CHICONY_EEPROM_SO}
-        IMPORTED_NO_SONAME 1
-    )
-
-    target_link_libraries(${PROJECT_NAME} PRIVATE chicony-eeprom)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
