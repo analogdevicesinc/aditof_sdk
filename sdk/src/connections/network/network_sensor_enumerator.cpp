@@ -45,7 +45,7 @@ NetworkSensorEnumerator::NetworkSensorEnumerator(const std::string &ip)
 
 NetworkSensorEnumerator::~NetworkSensorEnumerator() = default;
 
-aditof::Status getVersionString(std::unique_ptr<Network> &net,
+Status getVersionString(std::unique_ptr<Network> &net,
                                 std::string &connectionString) {
 
     net->send_buff.set_func_name("GetVersionString");
@@ -76,6 +76,43 @@ aditof::Status getVersionString(std::unique_ptr<Network> &net,
     return status;
 }
 
+Status getCameraType(std::unique_ptr<Network> &net, CameraType &cameraType) {
+
+    net->send_buff.set_func_name("GetCameraType");
+    net->send_buff.set_expect_reply(true);
+
+    if (net->SendCommand() != 0) {
+        LOG(WARNING) << "Send Command Failed";
+        return Status::INVALID_ARGUMENT;
+    }
+
+    if (net->recv_server_data() != 0) {
+        LOG(WARNING) << "Receive Data Failed";
+        return Status::GENERIC_ERROR;
+    }
+
+    if (net->recv_buff.server_status() !=
+        payload::ServerStatus::REQUEST_ACCEPTED) {
+        LOG(WARNING) << "API execution on Target Failed";
+        return Status::GENERIC_ERROR;
+    }
+
+    Status status = static_cast<Status>(net->recv_buff.status());
+
+    if (status == Status::OK) {
+        switch (net->recv_buff.camera_type()) {
+        case payload::CameraType::AD_96TOF1_EBZ:
+            cameraType = aditof::CameraType::AD_96TOF1_EBZ;
+        case payload::CameraType::AD_FXTOF1_EBZ:
+            cameraType = aditof::CameraType::AD_FXTOF1_EBZ;
+        case payload::CameraType::SMART_3D_CAMERA:
+            cameraType = aditof::CameraType::SMART_3D_CAMERA;
+        }
+    }
+
+    return status;
+}
+
 Status NetworkSensorEnumerator::searchSensors() {
     Status status = Status::OK;
 
@@ -94,6 +131,12 @@ Status NetworkSensorEnumerator::searchSensors() {
     if (!isValidConnection(aditof::ConnectionType::NETWORK, connectionString)) {
         LOG(ERROR) << "invalid connection string: " << connectionString;
         return Status::GENERIC_ERROR;
+    }
+
+    status = getCameraType(net, m_cameraType);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to find out the camera type on target. Assumming it's camera: AD-96TOF1-EBZ";
+        m_cameraType = CameraType::AD_96TOF1_EBZ;
     }
 
     net->send_buff.set_func_name("FindSensors");
@@ -203,6 +246,8 @@ Status NetworkSensorEnumerator::getTemperatureSensors(
 }
 
 Status NetworkSensorEnumerator::getCameraTypeOnTarget(CameraType &cameraType) {
-    // TO DO: implement this
+
+    cameraType = m_cameraType;
+
     return Status::OK;
 }
