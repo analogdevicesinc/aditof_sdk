@@ -92,6 +92,8 @@ class Camera3D_Smart : public aditof::Camera {
   private:
     aditof::Status setNoiseReductionTreshold(uint16_t treshold);
     aditof::Status setIrGammaCorrection(float gamma);
+
+#ifdef BAYER_CONVERSION
     float verticalKernel(uint8_t *pData, int x, int y, int width, int height);
     float horizontalKernel(uint8_t *pData, int x, int y, int width, int height);
     float plusKernel(uint8_t *pData, int x, int y, int width, int height);
@@ -99,6 +101,7 @@ class Camera3D_Smart : public aditof::Camera {
     float directCopy(uint8_t *buffer, int x, int y, int width, int height);
     float getValueFromData(uint8_t *pData, int x, int y, int width, int height);
     void bayer2RGB(uint16_t *buffer, uint8_t *pData, int width, int height);
+#endif
 
   private:
     aditof::CameraDetails m_details;
