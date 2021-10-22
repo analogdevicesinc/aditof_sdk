@@ -105,8 +105,17 @@ void PropListener::applyValue() {
     case aditof::ADITOF_PROPERTY_FRAME_TYPE:
         m_parent->setDisplayedFrameType(m_lastIntValue);
         break;
-    case aditof::ADITOF_PROPERTY_SMALL_SIGNAL:
-        m_parent->setSmallSignalValue(m_lastIntValue);
+    case aditof::ADITOF_PROPERTY_NOISE_REDUCTION_THRESHOLD:
+        m_parent->setNoiseReductionThreshold(m_lastIntValue);
+        break;
+    case aditof::ADITOF_PROPERTY_IR_GAMMA_CORRECTION:
+        m_parent->setIrGammaCorrection(m_lastStrValue);
+        break;
+    case aditof::ADITOF_PROPERTY_DEPTH_CORRECTION:
+        m_parent->setDepthCorrection(m_lastIntValue);
+        break;
+    case aditof::ADITOF_PROPERTY_GEOMETRY_CORRECTION:
+        m_parent->setCameraGeometryCorrection(m_lastIntValue);
         break;
     }
 

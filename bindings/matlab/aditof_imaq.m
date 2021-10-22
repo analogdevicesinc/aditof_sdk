@@ -23,7 +23,7 @@ vid = videoinput('aditofadapter');
 %%% Set the camera to output Depth and the mode to Near range
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 src = getselectedsource(vid); 
-src.FrameType = 'Depth';
+src.FrameType = 'DepthRgb';
 src.CameraMode = 'Near';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,7 +41,7 @@ stop(vid);
 %%% Set the camera to output IR and the mode to Medium range
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 src = getselectedsource(vid); 
-src.FrameType = 'Ir';
+src.FrameType = 'IrRgb';
 src.CameraMode = 'Medium';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
