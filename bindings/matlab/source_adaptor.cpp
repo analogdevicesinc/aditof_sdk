@@ -60,7 +60,7 @@ SourceAdaptor::SourceAdaptor(imaqkit::IEngine *engine,
       m_sendThread(static_cast<Thread>(NULL)), m_formatName(formatName),
       m_acquisitionActive(false), m_camera(camera),
       m_currentMode(aditof::MODE_NEAR_ID),
-      m_currentDisplayedType(aditof::FRAME_TYPE_DEPTH_ID) {
+      m_currentDisplayedType(aditof::FRAME_TYPE_DEPTH_RGB_ID) {
 
     // Perform any necessary device initialization and create listeners for
     // device-specific properties.
@@ -276,32 +276,42 @@ void SourceAdaptor::setDisplayedFrameType(int16_t type) {
     }
     //Do we still ned to keep this?
     switch (type) {
-    case aditof::FRAME_TYPE_DEPTH_ID:
+    case aditof::FRAME_TYPE_DEPTH_RGB_ID:
         break;
-    case aditof::FRAME_TYPE_IR_ID:
+    case aditof::FRAME_TYPE_IR_RGB_ID:
         break;
     }
 
     m_currentDisplayedType = type;
 }
 
-void SourceAdaptor::setSmallSignalValue(int16_t value) {
-    const size_t REGS_CNT = 5;
-    uint16_t afeRegsAddr[REGS_CNT] = {0x4001, 0x7c22, 0xc34a, 0x4001, 0x7c22};
-    uint16_t afeRegsVal[REGS_CNT] = {0x0006, 0x0004, 0, 0x0007, 0x0004};
+void SourceAdaptor::setNoiseReductionThreshold(int16_t value) {
 
-    afeRegsVal[2] |= value;
-
-    //    if (m_smallSignal) {
-    afeRegsVal[2] |= 0x8000; // enable disable property
-    //    }
-    // TO DO: This breaks things over USB. Works well on the target and
-    // over network.
     if (m_camera) {
-        std::vector <
-            std::shared_ptr<aditof::DepthSensorInterface> imageSensors;
-        m_camera->getImageSensors(imageSensors);
-        imageSensors[0]->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+        m_camera->setControl("noise_reduction_threshold",
+                             std::to_string(value));
+    }
+}
+
+void SourceAdaptor::setIrGammaCorrection(std::string value) {
+
+    if (m_camera) {
+        m_camera->setControl("ir_gamma_correction", value);
+    }
+}
+
+void SourceAdaptor::setDepthCorrection(int16_t value) {
+
+    if (m_camera) {
+        m_camera->setControl("depth_correction", std::to_string(value));
+    }
+}
+
+void SourceAdaptor::setCameraGeometryCorrection(int16_t value) {
+
+    if (m_camera) {
+        m_camera->setControl("camera_geometry_correction",
+                             std::to_string(value));
     }
 }
 
@@ -566,7 +576,8 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
         imaqkit::frametypes::FRAMETYPE frameType;
 
         if (frame) {
-            if (adaptor->m_currentDisplayedType == aditof::FRAME_TYPE_IR_ID) {
+            if (adaptor->m_currentDisplayedType ==
+                aditof::FRAME_TYPE_IR_RGB_ID) {
 
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::IR, &data);
@@ -577,7 +588,7 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
 
                 frameType = imaqkit::frametypes::MONO8;
             } else if (adaptor->m_currentDisplayedType ==
-                       aditof::FRAME_TYPE_DEPTH_ID) {
+                       aditof::FRAME_TYPE_DEPTH_RGB_ID) {
 
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::DEPTH, &data);
@@ -607,12 +618,32 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
 
                 frameType = imaqkit::frametypes::BGR24_PACKED;
             } else if (adaptor->m_currentDisplayedType ==
-                       aditof::FRAME_TYPE_RAW_DEPTH_ID) {
+                       aditof::FRAME_TYPE_DEPTH_RAW_ID) {
 
                 uint16_t *data = nullptr;
                 frame->getData(aditof::FrameDataType::DEPTH, &data);
                 uint8_t *displayedImage = new uint8_t[2 * bufferSize];
                 memcpy(displayedImage, data, bufferSize * 2);
+                delete[] imBuffer;
+                imBuffer = displayedImage;
+                frameType = imaqkit::frametypes::MONO16;
+            } else if (adaptor->m_currentDisplayedType ==
+                       aditof::FRAME_TYPE_IR_RAW_ID) {
+
+                uint16_t *data = nullptr;
+                frame->getData(aditof::FrameDataType::IR, &data);
+                uint8_t *displayedImage = new uint8_t[2 * bufferSize];
+                memcpy(displayedImage, data, bufferSize * 2);
+                delete[] imBuffer;
+                imBuffer = displayedImage;
+                frameType = imaqkit::frametypes::MONO16;
+            } else if (adaptor->m_currentDisplayedType ==
+                       aditof::FRAME_TYPE_DEPTH_IR_RAW_ID) {
+
+                uint16_t *data = nullptr;
+                frame->getData(aditof::FrameDataType::FULL_DATA, &data);
+                uint8_t *displayedImage = new uint8_t[4 * bufferSize];
+                memcpy(displayedImage, data, bufferSize * 4);
                 delete[] imBuffer;
                 imBuffer = displayedImage;
                 frameType = imaqkit::frametypes::MONO16;

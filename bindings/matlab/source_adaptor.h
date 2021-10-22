@@ -213,7 +213,13 @@ class SourceAdaptor : public imaqkit::IAdaptor {
 
     void setDisplayedFrameType(int16_t type);
 
-    void setSmallSignalValue(int16_t value);
+    void setNoiseReductionThreshold(int16_t value);
+
+    void setIrGammaCorrection(std::string value);
+
+    void setDepthCorrection(int16_t value);
+
+    void setCameraGeometryCorrection(int16_t value);
 
     std::string readTemp() const;
 
