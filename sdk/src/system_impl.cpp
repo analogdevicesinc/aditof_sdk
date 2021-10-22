@@ -107,7 +107,9 @@ Status SystemImpl::getCameraList(
     Status status = sensorEnumerator->searchSensors();
     if (status == Status::OK) {
         auto camera = buildCamera(std::move(sensorEnumerator));
-        cameraList.emplace_back(camera);
+        if (camera) {
+            cameraList.emplace_back(camera);
+        }
     }
 
     return Status::OK;
@@ -130,7 +132,9 @@ SystemImpl::getCameraListAtIp(std::vector<std::shared_ptr<Camera>> &cameraList,
     Status status = sensorEnumerator->searchSensors();
     if (status == Status::OK) {
         auto camera = buildCamera(std::move(sensorEnumerator));
-        cameraList.emplace_back(camera);
+        if (camera) {
+            cameraList.emplace_back(camera);
+        }
     }
 
     return Status::OK;
