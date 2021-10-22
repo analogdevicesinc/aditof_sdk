@@ -481,22 +481,25 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             frameHeight = frameDetailsCache[index].rgbHeight;
         }
 
-        aditof::Status status =
-            camDepthSensor[index]->getFrame(sensorsFrameBuffers[index], &bufferInfo);
+        aditof::Status status = camDepthSensor[index]->getFrame(
+            sensorsFrameBuffers[index], &bufferInfo);
 
 #ifdef JETSON
         buff_send.add_int32_payload(0);
         if (!index) {
-            buff_send.add_bytes_payload(
-                sensorsFrameBuffers[index], frameWidth * frameHeight * sizeof(uint16_t) * 2);
+            buff_send.add_bytes_payload(sensorsFrameBuffers[index],
+                                        frameWidth * frameHeight *
+                                            sizeof(uint16_t) * 2);
         } else {
-            buff_send.add_bytes_payload(
-                sensorsFrameBuffers[index], frameWidth * frameHeight * sizeof(uint16_t));
+            buff_send.add_bytes_payload(sensorsFrameBuffers[index],
+                                        frameWidth * frameHeight *
+                                            sizeof(uint16_t));
         }
 #else
         buff_send.add_int32_payload(1);
-        buff_send.add_bytes_payload(sensorsFrameBuffers[index], frameWidth * frameHeight *
-                                                       sizeof(uint16_t));
+        buff_send.add_bytes_payload(sensorsFrameBuffers[index],
+                                    frameWidth * frameHeight *
+                                        sizeof(uint16_t));
 #endif
         buff_send.set_status(payload::Status::OK);
         break;
