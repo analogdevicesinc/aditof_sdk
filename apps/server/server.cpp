@@ -695,7 +695,7 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         }
 
         aditof::CameraType tofCameraType;
-        aditof::Status status = sensorEnumerator->getCameraType(tofCameraType);
+        aditof::Status status = sensorsEnumerator->getCameraTypeOnTarget(tofCameraType);
         ::payload::CameraType msgCameraType;
         if (status == aditof::Status::OK) {
             switch (tofCameraType) {
@@ -703,8 +703,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
                 msgCameraType = ::payload::CameraType::AD_96TOF1_EBZ;
             case aditof::CameraType::AD_FXTOF1_EBZ:
                 msgCameraType = ::payload::CameraType::AD_FXTOF1_EBZ;
-            case aditof::CameraType::3SMART_3D_CAMERA:
-                msgCameraType = ::payload::CameraType::3SMART_3D_CAMERA;
+            case aditof::CameraType::SMART_3D_CAMERA:
+                msgCameraType = ::payload::CameraType::SMART_3D_CAMERA;
             }
             buff_send.set_camera_type(msgCameraType);
         }
