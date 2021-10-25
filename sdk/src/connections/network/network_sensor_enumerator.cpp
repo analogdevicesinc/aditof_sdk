@@ -103,10 +103,16 @@ Status getCameraType(std::unique_ptr<Network> &net, CameraType &cameraType) {
         switch (net->recv_buff.camera_type()) {
         case payload::CameraType::AD_96TOF1_EBZ:
             cameraType = aditof::CameraType::AD_96TOF1_EBZ;
+            break;
         case payload::CameraType::AD_FXTOF1_EBZ:
             cameraType = aditof::CameraType::AD_FXTOF1_EBZ;
+            break;
         case payload::CameraType::SMART_3D_CAMERA:
             cameraType = aditof::CameraType::SMART_3D_CAMERA;
+            break;
+        default:
+            LOG(ERROR) << "Invalid camera type received from server";
+            break;
         }
     }
 

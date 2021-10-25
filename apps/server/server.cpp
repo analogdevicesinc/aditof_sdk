@@ -714,10 +714,13 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
             switch (tofCameraType) {
             case aditof::CameraType::AD_96TOF1_EBZ:
                 msgCameraType = ::payload::CameraType::AD_96TOF1_EBZ;
+                break;
             case aditof::CameraType::AD_FXTOF1_EBZ:
                 msgCameraType = ::payload::CameraType::AD_FXTOF1_EBZ;
+                break;
             case aditof::CameraType::SMART_3D_CAMERA:
                 msgCameraType = ::payload::CameraType::SMART_3D_CAMERA;
+                break;
             }
             buff_send.set_camera_type(msgCameraType);
         }
