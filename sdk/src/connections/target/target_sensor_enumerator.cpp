@@ -104,6 +104,13 @@ Status TargetSensorEnumerator::getTemperatureSensors(
 }
 
 Status TargetSensorEnumerator::getCameraTypeOnTarget(CameraType &cameraType) {
-    // TO DO: implement this
+#if defined(FXTOF1)
+    cameraType = CameraType::AD_FXTOF1_EBZ;
+#elif defined(SMART_3D)
+    cameraType = CameraType::SMART_3D_CAMERA;
+#else
+    cameraType = CameraType::AD_96TOF1_EBZ;
+#endif
+
     return Status::OK;
 }
