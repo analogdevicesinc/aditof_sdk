@@ -434,22 +434,18 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer,
             return status;
         }
 
-        //conversion done on the target
-
-        //memcpy((uint8_t *)buffer, pdata[i],
-        //      RGB_FRAME_WIDTH * RGB_FRAME_HEIGHT * 2);
-
         //copy and convert into rgb format on 2 bytes, little endiannes
         uint16_t *data = (uint16_t *)pdata[i];
         for (int j = 0; j < RGB_FRAME_HEIGHT; j++) {
             for (int k = 0; k < RGB_FRAME_WIDTH; k++) {
                 //BGGR format
                 buffer[(j * RGB_FRAME_WIDTH + k) * 3 + 0] =
-                    data[1920 * (j * 2 + 1) + (k * 2 + 1)]; //red
+                    data[ORIGINAL_FRAME_WIDTH * (j * 2 + 1) +
+                         (k * 2 + 1)]; //red
                 buffer[(j * RGB_FRAME_WIDTH + k) * 3 + 1] =
-                    data[1920 * (j * 2 + 1) + (k * 2)]; //green
+                    data[ORIGINAL_FRAME_WIDTH * (j * 2 + 1) + (k * 2)]; //green
                 buffer[(j * RGB_FRAME_WIDTH + k) * 3 + 2] =
-                    data[1920 * (j * 2) + (k * 2)]; //blue
+                    data[ORIGINAL_FRAME_WIDTH * (j * 2) + (k * 2)]; //blue
             }
         }
 
