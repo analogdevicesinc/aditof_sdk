@@ -46,7 +46,7 @@ NetworkSensorEnumerator::NetworkSensorEnumerator(const std::string &ip)
 NetworkSensorEnumerator::~NetworkSensorEnumerator() = default;
 
 Status getVersionString(std::unique_ptr<Network> &net,
-                                std::string &connectionString) {
+                        std::string &connectionString) {
 
     net->send_buff.set_func_name("GetVersionString");
     net->send_buff.set_expect_reply(true);
@@ -135,7 +135,8 @@ Status NetworkSensorEnumerator::searchSensors() {
 
     status = getCameraType(net, m_cameraType);
     if (status != Status::OK) {
-        LOG(WARNING) << "Failed to find out the camera type on target. Assumming it's camera: AD-96TOF1-EBZ";
+        LOG(WARNING) << "Failed to find out the camera type on target. "
+                        "Assumming it's camera: AD-96TOF1-EBZ";
         m_cameraType = CameraType::AD_96TOF1_EBZ;
     }
 
