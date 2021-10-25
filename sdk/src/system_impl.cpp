@@ -34,9 +34,9 @@
 #include "aditof/sensor_enumerator_interface.h"
 
 #ifndef TARGET
+#include "cameras/3d-smart-camera/camera_3d_smart.h"
 #include "cameras/ad-96tof1-ebz/camera_96tof1.h"
 #include "cameras/ad-fxtof1-ebz/camera_fxtof1.h"
-#include "cameras/3d-smart-camera/camera_3d_smart.h"
 #else
 #if defined(FXTOF1)
 #include "cameras/ad-fxtof1-ebz/camera_fxtof1.h"

@@ -707,7 +707,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         }
 
         aditof::CameraType tofCameraType;
-        aditof::Status status = sensorsEnumerator->getCameraTypeOnTarget(tofCameraType);
+        aditof::Status status =
+            sensorsEnumerator->getCameraTypeOnTarget(tofCameraType);
         ::payload::CameraType msgCameraType;
         if (status == aditof::Status::OK) {
             switch (tofCameraType) {
