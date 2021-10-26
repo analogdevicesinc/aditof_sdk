@@ -59,6 +59,8 @@ For more details about the SDK check the links below:
 
 [Software stack documentation](https://github.com/analogdevicesinc/aditof_sdk/blob/master/sdk/readme.md)
 
+[Camera details documentation](https://github.com/analogdevicesinc/aditof_sdk/blob/master/sdk/src/cameras/readme.md)
+
 [API Doxygen documentation](https://analogdevicesinc.github.io/aditof_sdk/)
 
 [Building and installing the SDK](https://github.com/analogdevicesinc/aditof_sdk/tree/master/cmake/)
