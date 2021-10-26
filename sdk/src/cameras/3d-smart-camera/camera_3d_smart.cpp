@@ -342,7 +342,7 @@ aditof::Status Camera3D_Smart::setMode(const std::string &mode,
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
 
-    m_details.depthParameters.depthGain = 1.0f;
+    m_details.depthParameters.depthGain = (mode == "near" ? 0.5 : 1.15);
     m_details.depthParameters.depthOffset = 0.0f;
 
     m_details.mode = mode;
