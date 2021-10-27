@@ -61,11 +61,13 @@ struct IntrinsicParameters {
     /**
      * @brief The 3x3 intrinsic parameter matrix (a.k.a K matrix) with values
      * specified in pixel units.
+     * Order of intrinsic parameters: [fx, 0, cx, 0, fy, cy, 0, 0, 1]
      */
     std::vector<float> cameraMatrix;
 
     /**
      * @brief The distortion coefficients
+     * Order of distortion coefficients: [k1, k2, p1, p2, k3]
      */
     std::vector<float> distCoeffs;
 
