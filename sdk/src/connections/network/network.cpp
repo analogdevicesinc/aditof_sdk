@@ -36,7 +36,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <iostream>
 
-#define RX_BUFFER_BYTES (4147900)
+#define RX_BUFFER_BYTES (4147900 * 2)
 #define MAX_RETRY_CNT 3
 
 enum protocols { PROTOCOL_0 = 0, PROTOCOL_COUNT };

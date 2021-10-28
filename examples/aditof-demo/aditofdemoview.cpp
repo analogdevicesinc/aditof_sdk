@@ -1185,6 +1185,7 @@ void AdiTofDemoView::_displayBlendedImage() {
 }
 
 void AdiTofDemoView::_displayRgbImage() {
+    double minAvg = 0, maxAvg = 512;
     while (!m_stopWorkersFlag) {
         std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
         m_frameCapturedCv.wait(
@@ -1213,8 +1214,10 @@ void AdiTofDemoView::_displayRgbImage() {
         double minVal, maxVal;
         m_rgbImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, rgbData);
         cv::minMaxLoc(m_rgbImage, &minVal, &maxVal);
-        m_rgbImage -= minVal / 2;
-        m_rgbImage *= 65535 / (maxVal - minVal / 2);
+        minAvg = minAvg * 0.9 + minVal * 0.1;
+        maxAvg = maxAvg * 0.9 + maxVal * 0.1;
+        m_rgbImage -= minAvg / 2;
+        m_rgbImage *= 65535 / (maxAvg - minAvg / 2);
         cv::cvtColor(m_rgbImage, m_rgbImage, cv::COLOR_BayerBG2RGB);
         cv::resize(m_rgbImage, m_rgbImage, cv::Size(960, 540));
         flip(m_rgbImage, m_rgbImage, 0);
