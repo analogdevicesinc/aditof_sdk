@@ -81,6 +81,7 @@ class AditofDemoRecorder {
     std::ifstream m_playbackFile;
 
     aditof::FrameDetails m_frameDetails;
+    uint8_t m_rgbEnabled;
 
     std::thread m_recordThread;
     std::thread m_playbackThread;
