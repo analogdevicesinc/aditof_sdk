@@ -55,16 +55,31 @@ void AditofDemoRecorder::startRecording(
 
     m_frameDetails.height = static_cast<int>(frameDetails.height);
     m_frameDetails.width = static_cast<int>(frameDetails.width);
+    m_frameDetails.rgbHeight = static_cast<int>(frameDetails.rgbHeight);
+    m_frameDetails.rgbWidth = static_cast<int>(frameDetails.rgbWidth);
+    m_frameDetails.type = static_cast<std::string>(frameDetails.type);
 
+    if (frameDetails.type.find("rgb") != std::string::npos) {
+        m_rgbEnabled = 1;
+    } else {
+        m_rgbEnabled = 0;
+    }
     /* Header version */
     unsigned char version = FILE_HEADER_VERSION;
     m_recordFile.write(reinterpret_cast<const char *>(&version),
                        sizeof(unsigned char));
-    /* Frame Height, Width and FPS */
+    /* Frame Height, Width, type and FPS */
     m_recordFile.write(reinterpret_cast<const char *>(&m_frameDetails.height),
                        sizeof(unsigned int));
     m_recordFile.write(reinterpret_cast<const char *>(&m_frameDetails.width),
                        sizeof(unsigned int));
+    m_recordFile.write(
+        reinterpret_cast<const char *>(&m_frameDetails.rgbHeight),
+        sizeof(unsigned int));
+    m_recordFile.write(reinterpret_cast<const char *>(&m_frameDetails.rgbWidth),
+                       sizeof(unsigned int));
+    m_recordFile.write(reinterpret_cast<const char *>(&m_rgbEnabled),
+                       sizeof(uint8_t));
     m_recordFile.write(reinterpret_cast<const char *>(&fps),
                        sizeof(unsigned int));
     /* Depth gain and offset */
@@ -111,7 +126,6 @@ void AditofDemoRecorder::startRecording(
     m_recordFile.write(reinterpret_cast<const char *>(&p2), sizeof(float));
     float k3 = cameraDetails.intrinsics.distCoeffs.at(4);
     m_recordFile.write(reinterpret_cast<const char *>(&k3), sizeof(float));
-
     m_recordTreadStop = false;
     m_recordThread =
         std::thread(std::bind(&AditofDemoRecorder::recordThread, this));
@@ -146,6 +160,14 @@ int AditofDemoRecorder::startPlayback(const std::string &fileName, int &fps) {
     int frameWidth;
     m_playbackFile.read(reinterpret_cast<char *>(&frameWidth),
                         sizeof(unsigned int));
+    int rgbFrameHeight;
+    m_playbackFile.read(reinterpret_cast<char *>(&rgbFrameHeight),
+                        sizeof(unsigned int));
+    int rgbFrameWidth;
+    m_playbackFile.read(reinterpret_cast<char *>(&rgbFrameWidth),
+                        sizeof(unsigned int));
+    uint8_t rgbEnabled;
+    m_playbackFile.read(reinterpret_cast<char *>(&rgbEnabled), sizeof(char));
     m_playbackFile.read(reinterpret_cast<char *>(&fps), sizeof(unsigned int));
     /* Depth gain and offset */
     float depthGain;
@@ -187,13 +209,26 @@ int AditofDemoRecorder::startPlayback(const std::string &fileName, int &fps) {
     m_playbackFile.read(reinterpret_cast<char *>(&k3), sizeof(float));
 
     int sizeOfHeader = m_playbackFile.tellg();
-    int sizeOfFrame = sizeof(uint16_t) * frameHeight * frameWidth;
+    int sizeOfFrame;
+    if (rgbEnabled) {
+        sizeOfFrame = sizeof(uint16_t) * (frameHeight * frameWidth +
+                                          rgbFrameHeight * rgbFrameWidth);
+    } else {
+        sizeOfFrame = sizeof(uint16_t) * frameHeight * frameWidth;
+    }
 
     m_numberOfFrames = (fileSize - sizeOfHeader) / sizeOfFrame;
 
     m_frameDetails.height = frameHeight;
     m_frameDetails.width = frameWidth;
-
+    m_frameDetails.rgbHeight = rgbFrameHeight;
+    m_frameDetails.rgbWidth = rgbFrameWidth;
+    m_rgbEnabled = rgbEnabled;
+    if (m_rgbEnabled) {
+        m_frameDetails.type = "depth_ir_rgb";
+    } else {
+        m_frameDetails.type = "depth_ir";
+    }
     m_playbackThreadStop = false;
     m_playBackEofReached = false;
     m_playbackThread =
@@ -261,9 +296,16 @@ void AditofDemoRecorder::recordThread() {
 
         unsigned int width = m_frameDetails.width;
         unsigned int height = m_frameDetails.height;
+        unsigned int rgbWidth = m_frameDetails.rgbWidth;
+        unsigned int rgbHeight = m_frameDetails.rgbHeight;
+        int size;
 
-        int size = static_cast<int>(sizeof(uint16_t) * width * height * 2);
-
+        if (m_rgbEnabled) {
+            size = static_cast<int>(
+                sizeof(uint16_t) * (width * height * 2 + rgbWidth * rgbHeight));
+        } else {
+            size = static_cast<int>(sizeof(uint16_t) * width * height * 2);
+        }
         m_recordFile.write(reinterpret_cast<const char *>(data), size);
     }
 }
@@ -287,18 +329,25 @@ void AditofDemoRecorder::playbackThread() {
             std::make_shared<aditof::Frame>();
         ;
         frame->setDetails(m_frameDetails);
-
         uint16_t *frameDataLocation;
         frame->getData(aditof::FrameDataType::FULL_DATA, &frameDataLocation);
-
         unsigned int width = m_frameDetails.width;
         unsigned int height = m_frameDetails.height;
+        unsigned int rgbWidth = m_frameDetails.rgbWidth;
+        unsigned int rgbHeight = m_frameDetails.rgbHeight;
+        uint8_t rgbEnabled = m_rgbEnabled;
+        size_t size;
+        if (rgbEnabled) {
+            size = static_cast<int>(
+                sizeof(uint16_t) * (width * height * 2 + rgbWidth * rgbHeight));
+        } else {
+            size = static_cast<int>(sizeof(uint16_t) * width * height * 2);
+        }
 
         if (m_playbackFile.eof()) {
-            memset(frameDataLocation, 0, sizeof(uint16_t) * width * height * 2);
+            memset(frameDataLocation, 0, size);
             m_playBackEofReached = true;
         } else {
-            int size = static_cast<int>(sizeof(uint16_t) * width * height * 2);
             m_playbackFile.read(reinterpret_cast<char *>(frameDataLocation),
                                 size);
         }
