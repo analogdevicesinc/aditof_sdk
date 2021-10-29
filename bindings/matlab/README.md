@@ -26,7 +26,7 @@ In the Acquisition parameters menu under 'Device Properties' there are a few con
 * Camera mode (near,medium,far)
 * Depth correction (on/off)
 * Frame Type: 
- DepthRgb and IrRgb are used with BGR format in order to visualise the data.
+ DepthRgb and IrRgb are used with RGB format in order to visualise the data.
  DepthRaw, IrRaw and DepthIrRaw are used with MONO16 to obtain real depth from the camera. (For DepthIrRaw both data are in the same frame; in the first half is depth and in the second half ir.
  
 ![Display Image](https://github.com/analogdevicesinc/aditof_sdk/blob/master/doc/img/AquisitionParametersFrameTypes.PNG) 
@@ -37,4 +37,4 @@ In the Acquisition parameters menu under 'Device Properties' there are a few con
 
 ### Troubleshooting
 
-When using the `aditof_imaq.m` file, `imaqregister` might return an error that sound like this `...aditofadapter.dll is not a valid adaptor`. To fix this issue make sure that `aditof.dll` is in the system environment variable `PATH`.
+When using the `aditof_imaq.m` file, `imaqregister` might return an error that sounds like this `...aditofadapter.dll is not a valid adaptor`. To fix this issue make sure that `aditof.dll` is in the system environment variable `PATH`.
