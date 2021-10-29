@@ -18,7 +18,7 @@ For more details on building the SDK on a host platform please check the **User 
 
 ## Supported embedded platforms
 
-Designed using a modular approach, the 3D ToF platforms enable connectivity to the to a variety of embedded processing platforms. For more details on running the SDK on your processing platform of choice please check the **User Guide** below.
+Designed using a modular approach, the 3D ToF platforms enable connectivity to the to a variety of embedded processing platforms. For more details on running the SDK on your processing platform of choice please check the corresponding **User Guide** below.
 
 ### AD-96TOF1-EBZ
 Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green.svg)](https://wiki.analog.com/resources/eval/user-guides/ad-96tof1-ebz)
