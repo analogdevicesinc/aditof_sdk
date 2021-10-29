@@ -90,8 +90,6 @@ buildCamera(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
     camera = std::make_shared<CameraFxTof1>(depthSensors[0], storages,
                                             temperatureSensors);
 #elif defined(SMART_3D)
-    if (depthSensors.size() != 2)
-        return nullptr;
     camera = std::make_shared<Camera3D_Smart>(depthSensors[0], storages,
                                               temperatureSensors);
 #else
