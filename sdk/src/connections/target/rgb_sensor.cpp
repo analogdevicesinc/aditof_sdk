@@ -442,17 +442,7 @@ aditof::Status RgbSensor::getFrame(uint16_t *buffer,
             return status;
         }
 
-        uint16_t *data = (uint16_t *)pdata[i];
-
-        //reduce frame size, keep BGGR format
-        for (int j = 0; j < RGB_FRAME_HEIGHT; ++j) {
-            for (int k = 0; k < RGB_FRAME_WIDTH; k = k + 2) {
-                buffer[(j * RGB_FRAME_WIDTH + k)] =
-                    data[ORIGINAL_FRAME_WIDTH * j * 2 + k * 2];
-                buffer[(j * RGB_FRAME_WIDTH + k + 1)] =
-                    data[ORIGINAL_FRAME_WIDTH * (j * 2 + 1) + k * 2 + 1];
-            }
-        }
+        memcpy(buffer, pdata[i], RGB_FRAME_HEIGHT * RGB_FRAME_WIDTH * 2);
 
         status = enqueueInternalBufferPrivate(buf[i], dev);
         if (status != Status::OK) {
