@@ -1213,7 +1213,6 @@ void AdiTofDemoView::_displayRgbImage() {
         int frameWidth = static_cast<int>(frameDetails.rgbWidth);
         double minVal, maxVal;
         cv::Scalar avg;
-        
         m_rgbImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, rgbData);
         cv::minMaxLoc(m_rgbImage, &minVal, &maxVal);
         minAvg = minAvg * 0.9 + minVal * 0.1;
@@ -1225,7 +1224,6 @@ void AdiTofDemoView::_displayRgbImage() {
         cv::cvtColor(m_rgbImage, m_rgbImage, cv::COLOR_BayerBG2RGB);
         cv::resize(m_rgbImage, m_rgbImage, cv::Size(960, 540));
         flip(m_rgbImage, m_rgbImage, 0);
-
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         m_waitKeyBarrier += 1;
         if (m_waitKeyBarrier == threadNum) {
