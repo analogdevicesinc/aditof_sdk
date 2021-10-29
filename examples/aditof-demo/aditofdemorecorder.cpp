@@ -223,6 +223,8 @@ int AditofDemoRecorder::startPlayback(const std::string &fileName, int &fps) {
     m_frameDetails.width = frameWidth;
     m_frameDetails.rgbHeight = rgbFrameHeight;
     m_frameDetails.rgbWidth = rgbFrameWidth;
+    m_frameDetails.fullDataHeight = frameHeight * 2;
+    m_frameDetails.fullDataWidth = frameWidth;
     m_rgbEnabled = rgbEnabled;
     if (m_rgbEnabled) {
         m_frameDetails.type = "depth_ir_rgb";
