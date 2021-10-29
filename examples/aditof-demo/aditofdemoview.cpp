@@ -1212,12 +1212,16 @@ void AdiTofDemoView::_displayRgbImage() {
         int frameHeight = static_cast<int>(frameDetails.rgbHeight);
         int frameWidth = static_cast<int>(frameDetails.rgbWidth);
         double minVal, maxVal;
+        cv::Scalar avg;
+        
         m_rgbImage = cv::Mat(frameHeight, frameWidth, CV_16UC1, rgbData);
         cv::minMaxLoc(m_rgbImage, &minVal, &maxVal);
         minAvg = minAvg * 0.9 + minVal * 0.1;
         maxAvg = maxAvg * 0.9 + maxVal * 0.1;
         m_rgbImage -= minAvg / 2;
         m_rgbImage *= 65535 / (maxAvg - minAvg / 2);
+        avg = cv::mean(m_rgbImage);
+        m_rgbImage *= 32768.0 / avg[0];
         cv::cvtColor(m_rgbImage, m_rgbImage, cv::COLOR_BayerBG2RGB);
         cv::resize(m_rgbImage, m_rgbImage, cv::Size(960, 540));
         flip(m_rgbImage, m_rgbImage, 0);
