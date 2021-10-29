@@ -45,7 +45,7 @@ Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green
 
 ## SDK documentation
 
-From an architectural point of view, the SDK consists of two layers. One layer is the high level API that allows clients to easily grab a camera object, configure it and request frames. The other layer is the low level API which exposes the interface through which low level operations can be made to the camera hardware.
+From an architectural point of view, the SDK consists of two layers. One layer is the high level API which allows to easily create a camera object, configure it and request frames. The other layer is the low level API which exposes an interface through which advanced configuration operations can be executed on the camera hardware.
 
 For more details about the SDK check the links below:
 
