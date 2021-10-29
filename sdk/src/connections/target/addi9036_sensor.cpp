@@ -764,7 +764,9 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
 
 #if defined(JETSON)
-        usleep(35000);
+        if(m_implData->frameDetails.type == "depth_ir") {
+            usleep(45000);
+        }
     }
 #endif
 
