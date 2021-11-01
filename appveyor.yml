@@ -90,7 +90,7 @@ build_script:
     - ps: popd
 
 after_build:
-    - cinst InnoSetup
+    - choco install innosetup --version=5.5.9
     - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" ( 
         C:\projects\aditof-sdk\ci\appveyor\make_installer.bat
       )
