@@ -316,6 +316,10 @@ void AdiTofDemoController::captureFrames() {
 }
 
 int AdiTofDemoController::getRangeMax() const {
+    if (m_recorder->isPlaybackEnabled()) {
+        return m_recorder->getRangeMax();
+    }
+
     aditof::CameraDetails cameraDetails;
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
         cameraDetails);
@@ -323,6 +327,9 @@ int AdiTofDemoController::getRangeMax() const {
 }
 
 int AdiTofDemoController::getRangeMin() const {
+    if (m_recorder->isPlaybackEnabled()) {
+        return m_recorder->getRangeMin();
+    }
     aditof::CameraDetails cameraDetails;
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
         cameraDetails);
@@ -330,6 +337,9 @@ int AdiTofDemoController::getRangeMin() const {
 }
 
 int AdiTofDemoController::getbitCount() const {
+    if (m_recorder->isPlaybackEnabled()) {
+        return m_recorder->getBitCount();
+    }
     aditof::CameraDetails cameraDetails;
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->getDetails(
         cameraDetails);
