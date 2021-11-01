@@ -872,6 +872,9 @@ void AdiTofDemoView::render() {
                 m_ctrl->stopPlayback();
                 cv::destroyWindow(windows[1]);
                 cv::destroyWindow(windows[2]);
+                if (m_rgbCameraAvailable) {
+                    cv::destroyWindow(windows[5]);
+                }
             } else if (!captureBlendedEnabled) {
                 m_capturedFrame = m_ctrl->getFrame();
                 aditof::FrameDetails fDetails;
