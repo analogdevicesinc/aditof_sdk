@@ -2,8 +2,6 @@ version: '1.0.{build}'
 
 image:
     - Visual Studio 2019
-    - Visual Studio 2017
-    - Visual Studio 2015
 
 cache:
     - C:\projects\aditof-sdk\deps\glog -> ci\appveyor\install_glog.bat
@@ -12,13 +10,9 @@ cache:
     - C:\tools\opencv -> ci\appveyor\install_opencv.bat
 
 install:
-    - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" (
-            set generator=Visual Studio 14 2015
-        ) else if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (
-            set generator=Visual Studio 15 2017
-        ) else if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (
+    - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (
             set generator=Visual Studio 16 2019
-        )
+      )
     #- set generator=%generator:"=%
     - if not exist "deps" ( mkdir deps )
     - C:\projects\aditof-sdk\ci\appveyor\install_opencv.bat
@@ -97,7 +91,7 @@ build_script:
 
 after_build:
     - cinst InnoSetup
-    - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( 
+    - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" ( 
         C:\projects\aditof-sdk\ci\appveyor\make_installer.bat
       )
     - C:\projects\aditof-sdk\ci\appveyor\make_zip.bat
