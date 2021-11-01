@@ -4,7 +4,7 @@
 ## Building the SDK only
 
 ### Pre-requisites
-* Install MS Visual Studio 14 2015
+* Install MS Visual Studio 16 2019
 * Install MS .NET Framework 4.5
 * CMake
 * Glog v0.3.5
@@ -22,7 +22,7 @@ Windows installer can be downloaded from: https://cmake.org/download/
 git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
 cd glog
 mkdir build_0_3_5 && cd build_0_3_5
-cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=./local_path/glog -G "Visual Studio 14 2015 Win64" ..
+cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=./local_path/glog -G "Visual Studio 16 2019" ..
 cmake --build . --target install --config Debug
 cmake --build . --target install --config Release
 ```
@@ -33,7 +33,7 @@ Libewbesockets needs OpenSSL. One option to get it on windows is from: https://s
 git clone --branch v3.1-stable --depth 1 https://github.com/warmcat/libwebsockets
 cd libwebsockets
 mkdir build_3_1 && cd build_3_1
-cmake -DOPENSSL_ROOT_DIR="C:\OpenSSL-Win64" -DCMAKE_INSTALL_PREFIX=./local_path/websockets -G "Visual Studio 14 2015 Win64" ..
+cmake -DOPENSSL_ROOT_DIR="C:\OpenSSL-Win64" -DCMAKE_INSTALL_PREFIX=./local_path/websockets -G "Visual Studio 16 2019" ..
 cmake --build . --target install --config Debug
 cmake --build . --target install --config Release
 ```
@@ -43,7 +43,7 @@ cmake --build . --target install --config Release
 git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
 cd protobuf
 mkdir build_3_9_0 && cd build_3_9_0
-cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -DCMAKE_INSTALL_PREFIX=./local_path/protobuf -G "Visual Studio 14 2015 Win64" ../cmake
+cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -DCMAKE_INSTALL_PREFIX=./local_path/protobuf -G "Visual Studio 16 2019" ../cmake
 cmake --build . --target install --config Debug
 cmake --build . --target install --config Release
 ```
@@ -55,7 +55,7 @@ git clone https://github.com/analogdevicesinc/aditof_sdk
 cd aditof_sdk
 mkdir build
 cd build
-cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1\local_path\websockets" -G "Visual Studio 14 2015 Win64" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=off ..
+cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1\local_path\websockets" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=off ..
 cmake --build . --config Release
 ```
 
@@ -71,13 +71,13 @@ cmake --build . --config Release
 
 ```
 OPENCV_DIR=path_to_opencv_installation_dir\build
-OPENCV_PATH=path_to_opencv_installation_dir\build\x64\vc14\bin
+OPENCV_PATH=path_to_opencv_installation_dir\build\x64\vc15\bin
 ```
 
 For instance, if OpenCV were to be installed at: C:\opencv, then the variable should look like this:
 ```
 OPENCV_DIR=C:\opencv\build
-OPENCV_PATH=C:\opencv\build\x64\vc14\bin
+OPENCV_PATH=C:\opencv\build\x64\vc15\bin
 ```
 
 ### Build SDK with examples and in Visual Studio
@@ -86,9 +86,9 @@ OPENCV_PATH=C:\opencv\build\x64\vc14\bin
 cd aditof_sdk
 mkdir build
 cd build
-cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1\local_path\websockets" -G "Visual Studio 14 2015 Win64" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=on ..
+cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1\local_path\websockets" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=on ..
 ```
-- Open 'adi_tof_project.sln' generated in 'aditof_sdk\build' in MS Visual Studio 2015
+- Open 'adi_tof_project.sln' generated in 'aditof_sdk\build' in MS Visual Studio 2019
 - Select 'Release' build
 - Application binaries are created in 'aditof_sdk\build\example\aditof-demo\Release' directory
 
@@ -106,10 +106,10 @@ cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_pa
 
 ### Steps to build the SDK
 - Run the script located in: 'aditof_sdk\scripts\windows' with the suitable configuration parameters. <br>
-The following example runs the script with generator **Visual Studio 14 2015 Win64** and configuration **Release**. The sdk will be built in folder: **current_script_path\build** and the dependencies will be installed in folder: **current_script_path\deps\installed**.
+The following example runs the script with generator **Visual Studio 16 2019** and configuration **Release**. The sdk will be built in folder: **current_script_path\build** and the dependencies will be installed in folder: **current_script_path\deps\installed**.
 Use parameter *-h* or *--help* for more information regarding the parameters. 
 ```
-.\setup_project.bat -g "Visual Studio 14 2015 Win64" -c Release
+.\setup_project.bat -g "Visual Studio 16 2019" -c Release
 ```
 - Open 'adi_tof_project.sln' generated in **current_script_path\build** in MS Visual Studio.
 
