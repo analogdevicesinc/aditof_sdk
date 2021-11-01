@@ -43,7 +43,7 @@
 class RgbImageMsg : public AditofSensorMsg {
   public:
     RgbImageMsg(const std::shared_ptr<aditof::Camera> &camera,
-               aditof::Frame *frame, std::string encoding, ros::Time tStamp);
+                aditof::Frame *frame, std::string encoding, ros::Time tStamp);
     /**
      * @brief Each message corresponds to one frame
      */

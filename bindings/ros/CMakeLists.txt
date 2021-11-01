@@ -5,7 +5,6 @@ if(UNIX)
   # set variables
   set(CATKIN_WS "${CMAKE_BINARY_DIR}/catkin_ws")
   set(ROS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-  set(DCMAKE_BUILD_TYPE "Debug")
 
   # create and run ROS setup script
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ros_setup.bash

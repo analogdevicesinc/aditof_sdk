@@ -35,18 +35,20 @@ using namespace aditof;
 RgbImageMsg::RgbImageMsg() {}
 
 RgbImageMsg::RgbImageMsg(const std::shared_ptr<aditof::Camera> &camera,
-                       aditof::Frame *frame, std::string encoding,
-                       ros::Time tStamp) {
+                         aditof::Frame *frame, std::string encoding,
+                         ros::Time tStamp) {
     imgEncoding = encoding;
     FrameDataToMsg(camera, frame, tStamp);
 }
 
 void RgbImageMsg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
-                                aditof::Frame *frame, ros::Time tStamp) {
+                                 aditof::Frame *frame, ros::Time tStamp) {
     FrameDetails fDetails;
     frame->getDetails(fDetails);
 
-    setMetadataMembers(1920, 1080, tStamp); // to make more generic, based on selected resolution on camera
+    setMetadataMembers(
+        1920, 1080,
+        tStamp); // to make more generic, based on selected resolution on camera
 
     uint16_t *frameData = getFrameData(frame, aditof::FrameDataType::RGB);
     if (!frameData) {
@@ -74,7 +76,7 @@ void RgbImageMsg::setMetadataMembers(int width, int height, ros::Time tStamp) {
 }
 
 void RgbImageMsg::setDataMembers(const std::shared_ptr<Camera> &camera,
-                                uint16_t *frameData) {
+                                 uint16_t *frameData) {
     if (msg.encoding.compare(sensor_msgs::image_encodings::BAYER_BGGR16) == 0) {
         uint8_t *msgDataPtr = msg.data.data();
         std::memcpy(msgDataPtr, frameData, msg.step * msg.height);
