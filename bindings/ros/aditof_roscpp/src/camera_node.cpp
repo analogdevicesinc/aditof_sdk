@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
     std::shared_ptr<Camera> camera = initCamera(argc, argv);
     ROS_ASSERT_MSG(camera, "initCamera call failed");
 
-    setFrameType(camera, "depth_ir");
+    setFrameType(camera, "depth_ir_rgb");
     setMode(camera, "near");
 
     ros::init(argc, argv, "aditof_camera_node");
@@ -103,6 +103,10 @@ int main(int argc, char **argv) {
     ros::Publisher ir_img_pubisher =
         nHandle.advertise<sensor_msgs::Image>("aditof_ir", 5);
     ROS_ASSERT_MSG(ir_img_pubisher, "creating ir_img_pubisher failed");
+
+    ros::Publisher rgb_img_pubisher =
+        nHandle.advertise<sensor_msgs::Image>("aditof_rgb", 5);
+    ROS_ASSERT_MSG(rgb_img_pubisher, "creating rgb_img_pubisher failed");
 
     ros::Publisher camera_info_pubisher =
         nHandle.advertise<sensor_msgs::CameraInfo>("aditof_camera_info", 5);
@@ -135,6 +139,13 @@ int main(int argc, char **argv) {
     ROS_ASSERT_MSG(irImgMsg,
                    "downcast from AditofSensorMsg to IRImageMsg failed");
 
+    AditofSensorMsg *rgb_img_msg = MessageFactory::create(
+        camera, &frame, MessageType::sensor_msgs_RgbImage, timeStamp);
+    ROS_ASSERT_MSG(rgb_img_msg, "rgb_image message creation failed");
+    RgbImageMsg *rgbImgMsg = dynamic_cast<RgbImageMsg *>(rgb_img_msg);
+    ROS_ASSERT_MSG(rgbImgMsg,
+                   "downcast from AditofSensorMsg to RgbImageMsg failed");
+
     AditofSensorMsg *camera_info_msg = MessageFactory::create(
         camera, &frame, MessageType::sensor_msgs_CameraInfo, timeStamp);
     ROS_ASSERT_MSG(camera_info_msg, "camera_info_msg message creation failed");
@@ -156,6 +167,9 @@ int main(int argc, char **argv) {
         irImgMsg->FrameDataToMsg(camera, &frame, tStamp);
         irImgMsg->publishMsg(ir_img_pubisher);
 
+        rgbImgMsg->FrameDataToMsg(camera, &frame, tStamp);
+        rgbImgMsg->publishMsg(rgb_img_pubisher);
+
         cameraInfoMsg->FrameDataToMsg(camera, &frame, tStamp);
         cameraInfoMsg->publishMsg(camera_info_pubisher);
 
@@ -165,6 +179,7 @@ int main(int argc, char **argv) {
     delete pcl_msg;
     delete depth_img_msg;
     delete ir_img_msg;
+    delete rgb_img_msg;
     delete camera_info_msg;
     return 0;
 }

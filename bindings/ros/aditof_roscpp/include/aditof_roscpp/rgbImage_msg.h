@@ -29,54 +29,54 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "message_factory.h"
-#include <aditof_utils.h>
-#include <ros/ros.h>
+#ifndef RGBIMAGE_MSG_H
+#define RGBIMAGE_MSG_H
 
-using namespace aditof;
+#include <aditof/frame.h>
 
-int main(int argc, char **argv) {
+#include "aditof_sensor_msg.h"
+#include "aditof_utils.h"
 
-    std::shared_ptr<Camera> camera = initCamera(argc, argv);
-    if (!camera) {
-        ROS_ERROR("initCamera call failed");
-        return -1;
-    }
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 
-    setFrameType(camera, "depth_ir_rgb");
-    setMode(camera, "medium");
+class RgbImageMsg : public AditofSensorMsg {
+  public:
+    RgbImageMsg(const std::shared_ptr<aditof::Camera> &camera,
+               aditof::Frame *frame, std::string encoding, ros::Time tStamp);
+    /**
+     * @brief Each message corresponds to one frame
+     */
+    sensor_msgs::Image msg;
 
-    ros::init(argc, argv, "aditof_rviz_node");
+    /**
+     * @brief Will be assigned a value from the list of strings in include/sensor_msgs/image_encodings.h
+     */
+    std::string imgEncoding;
 
-    ros::NodeHandle nHandle;
-    ros::Publisher frame_pubisher =
-        nHandle.advertise<sensor_msgs::PointCloud2>("aditof_pcloud", 100);
+    /**
+     * @brief Converts the frame data to a message
+     */
+    void FrameDataToMsg(const std::shared_ptr<aditof::Camera> &camera,
+                        aditof::Frame *frame, ros::Time tStamp);
+    /**
+     * @brief Assigns values to the message fields concerning metadata
+     */
+    void setMetadataMembers(int width, int height, ros::Time tStamp);
 
-    applyNoiseReduction(camera, 0);
+    /**
+     * @brief Assigns values to the message fields concerning the point data
+     */
+    void setDataMembers(const std::shared_ptr<aditof::Camera> &camera,
+                        uint16_t *frameData);
 
-    Frame frame;
-    getNewFrame(camera, &frame);
+    /**
+     * @brief Publishes a message
+     */
+    void publishMsg(const ros::Publisher &pub);
 
-    AditofSensorMsg *msg = MessageFactory::create(
-        camera, &frame, MessageType::sensor_msgs_PointCloud2, ros::Time::now());
+  private:
+    RgbImageMsg();
+};
 
-    if (!msg) {
-        ROS_ERROR("pointcloud message creation failed");
-        return -1;
-    }
-
-    while (ros::ok()) {
-        getNewFrame(camera, &frame);
-        PointCloud2Msg *pclMsg = dynamic_cast<PointCloud2Msg *>(msg);
-
-        if (!pclMsg) {
-            ROS_ERROR("downcast from AditofSensorMsg to PointCloud2Msg failed");
-            return -1;
-        }
-        pclMsg->FrameDataToMsg(camera, &frame, ros::Time::now());
-        pclMsg->publishMsg(frame_pubisher);
-    }
-
-    delete msg;
-    return 0;
-}
+#endif // RGBIMAGE_MSG_H
