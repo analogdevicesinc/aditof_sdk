@@ -141,29 +141,21 @@ if %opt%==0 (
 )
 echo Setup will continue with the configuration: %config_type%
 
-::check if the generator is correct
+::check if the generator is correct (keep the mechanism in case newer versions of msvc will be added)
 set /a opt=0
 set vs=15
 if %generator%=="Visual Studio 16 2019" (
     set /a opt=1
     set vs=15
 )
-if %generator%=="Visual Studio 15 2017 Win64" (
-    set /a opt=1
-    set vs=15
-)
-if %generator%=="Visual Studio 14 2015 Win64" (
-    set /a opt=1
-    set vs=14
-)
 
 if %set_generator%==0 (
    set /a opt=1
-   set generator="Visual Studio 15 2017 Win64"
+   set generator="Visual Studio 16 2019"
    set vs=15
    )
 if %opt%==0 (
-    echo Please enter a correct configuration ("Visual Studio 16 2019"; "Visual Studio 15 2017 Win64" or "Visual Studio 14 2015 Win64"^)
+    echo Please enter a correct configuration ("Visual Studio 16 2019"^)
     EXIT /B %ERRORLEVEL%
 )
 echo Setup will continue with the generator: %generator%
@@ -237,8 +229,6 @@ ECHO -i^|--depsinstalldir
 ECHO        Specify the directory where the dependencies will be installed.
 ECHO -g^|--generator
 ECHO        Visual Studio 16 2019 = Generates Visual Studio 2019 project files.
-ECHO        Visual Studio 15 2017 Win64 = Generates Visual Studio 2017 project files.
-ECHO        Visual Studio 14 2015 Win64 = Generates Visual Studio 2015 project files.
 ECHO -c^|--configuration
 ECHO        Release = Configuration for Release build.
 ECHO        Debug   = Configuration for Debug build.
