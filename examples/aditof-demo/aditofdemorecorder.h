@@ -68,6 +68,10 @@ class AditofDemoRecorder {
 
     int getNumberOfFrames() const;
 
+    int getRangeMax() const;
+    int getRangeMin() const;
+    int getBitCount() const;
+
   private:
     void recordThread();
     void playbackThread();
@@ -81,6 +85,7 @@ class AditofDemoRecorder {
     std::ifstream m_playbackFile;
 
     aditof::FrameDetails m_frameDetails;
+    aditof::CameraDetails m_recorderDetails;
     uint8_t m_rgbEnabled;
 
     std::thread m_recordThread;

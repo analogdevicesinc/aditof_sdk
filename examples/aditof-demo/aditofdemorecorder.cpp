@@ -141,7 +141,9 @@ void AditofDemoRecorder::stopRecording() {
 
 int AditofDemoRecorder::startPlayback(const std::string &fileName, int &fps) {
     m_playbackFile.open(fileName, std::ios::binary);
-
+    if (!m_playbackFile.is_open()) {
+        return 0;
+    }
     m_playbackFile.seekg(0, std::ios_base::end);
     int fileSize = m_playbackFile.tellg();
     m_playbackFile.seekg(0, std::ios_base::beg);
@@ -170,23 +172,29 @@ int AditofDemoRecorder::startPlayback(const std::string &fileName, int &fps) {
     m_playbackFile.read(reinterpret_cast<char *>(&rgbEnabled), sizeof(char));
     m_playbackFile.read(reinterpret_cast<char *>(&fps), sizeof(unsigned int));
     /* Depth gain and offset */
-    float depthGain;
-    m_playbackFile.read(reinterpret_cast<char *>(&depthGain), sizeof(float));
-    float depthOffset;
-    m_playbackFile.read(reinterpret_cast<char *>(&depthOffset), sizeof(float));
+    m_playbackFile.read(
+        reinterpret_cast<char *>(&m_recorderDetails.depthParameters.depthGain),
+        sizeof(float));
+    m_playbackFile.read(reinterpret_cast<char *>(
+                            &m_recorderDetails.depthParameters.depthOffset),
+                        sizeof(float));
     /* bit count */
-    int bitCount;
-    m_playbackFile.read(reinterpret_cast<char *>(&bitCount), sizeof(int));
+    m_playbackFile.read(reinterpret_cast<char *>(&m_recorderDetails.bitCount),
+                        sizeof(int));
     /* min and max depth */
-    int minDepth;
-    m_playbackFile.read(reinterpret_cast<char *>(&minDepth), sizeof(int));
-    int maxDepth;
-    m_playbackFile.read(reinterpret_cast<char *>(&maxDepth), sizeof(int));
+    m_playbackFile.read(
+        reinterpret_cast<char *>(&m_recorderDetails.depthParameters.minDepth),
+        sizeof(int));
+    m_playbackFile.read(
+        reinterpret_cast<char *>(&m_recorderDetails.depthParameters.maxDepth),
+        sizeof(int));
     /* intrinsics pixel height and width */
-    float pixelHeight;
-    m_playbackFile.read(reinterpret_cast<char *>(&pixelHeight), sizeof(float));
-    float pixelWidth;
-    m_playbackFile.read(reinterpret_cast<char *>(&pixelWidth), sizeof(float));
+    m_playbackFile.read(
+        reinterpret_cast<char *>(&m_recorderDetails.intrinsics.pixelHeight),
+        sizeof(float));
+    m_playbackFile.read(
+        reinterpret_cast<char *>(&m_recorderDetails.intrinsics.pixelWidth),
+        sizeof(float));
     /* intrinsics fx, fy, cx and cy */
     float fx;
     m_playbackFile.read(reinterpret_cast<char *>(&fx), sizeof(float));
@@ -231,6 +239,7 @@ int AditofDemoRecorder::startPlayback(const std::string &fileName, int &fps) {
     } else {
         m_frameDetails.type = "depth_ir";
     }
+
     m_playbackThreadStop = false;
     m_playBackEofReached = false;
     m_playbackThread =
@@ -356,4 +365,16 @@ void AditofDemoRecorder::playbackThread() {
 
         m_playbackQueue.enqueue(frame);
     }
+}
+
+int AditofDemoRecorder::getRangeMax() const {
+    return m_recorderDetails.depthParameters.maxDepth;
+}
+
+int AditofDemoRecorder::getRangeMin() const {
+    return m_recorderDetails.depthParameters.minDepth;
+}
+
+int AditofDemoRecorder::getBitCount() const {
+    return m_recorderDetails.bitCount;
 }

@@ -566,16 +566,6 @@ void AdiTofDemoView::render() {
             }
         }
 
-        if (depthIrChecked) {
-            threadNum = 2;
-        } else {
-            threadNum = 1;
-        }
-
-        if (m_rgbCameraAvailable) {
-            threadNum++;
-        }
-
         cvui::rect(frame, 50, 220, 190, 30, fieldColor);
         cvui::text(frame, 60, 230, fileName);
 
@@ -884,19 +874,28 @@ void AdiTofDemoView::render() {
                 cv::destroyWindow(windows[2]);
             } else if (!captureBlendedEnabled) {
                 m_capturedFrame = m_ctrl->getFrame();
+                aditof::FrameDetails fDetails;
+                m_capturedFrame->getDetails(fDetails);
+                if (fDetails.type.find("rgb") != std::string::npos) {
+                    m_rgbCameraAvailable = true;
+                }
                 std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
                 if (depthOnlyChecked) {
                     m_depthFrameAvailable = true;
                     m_irFrameAvailable = false;
+                    threadNum = 1;
                 } else if (irOnlyChecked) {
                     m_irFrameAvailable = true;
                     m_depthFrameAvailable = false;
+                    threadNum = 1;
                 } else {
                     m_depthFrameAvailable = true;
                     m_irFrameAvailable = true;
+                    threadNum = 2;
                 }
                 if (m_rgbCameraAvailable) {
                     m_rgbFrameAvailable = true;
+                    threadNum++;
                 }
 
                 lock.unlock();
