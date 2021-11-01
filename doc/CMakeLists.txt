@@ -15,14 +15,11 @@ set(PROJECT_NAME "Time-of-Flight-SDK")
 set(DOCUMENTED_FILES "${SOURCES_DIR}/frame.h \\
                       ${SOURCES_DIR}/frame_definitions.h \\
                       ${SOURCES_DIR}/frame_operations.h \\
-                      ${SOURCES_DIR}/frame_processor.h \\
-                      ${SOURCES_DIR}/frame_processor_factory.h \\
                       ${SOURCES_DIR}/camera.h \\
                       ${SOURCES_DIR}/camera_definitions.h \\
                       ${SOURCES_DIR}/system.h \\
                       ${SOURCES_DIR}/status_definitions.h \\
                       ${SOURCES_DIR}/connections.h \\
-                      ${SOURCES_DIR}/frame_processor.h \\
                       ${SOURCES_DIR}/depth_sensor_interface.h \\
                       ${SOURCES_DIR}/sensor_definitions.h \\
                       ${SOURCES_DIR}/storage_interface.h \\
@@ -30,7 +27,6 @@ set(DOCUMENTED_FILES "${SOURCES_DIR}/frame.h \\
                       ${SOURCES_DIR}/sensor_enumerator_interface.h \\
                       ${SOURCES_DIR}/sensor_enumerator_factory.h \\
                       ${SOURCES_DIR}/target_sdk_definitions.h \\
-                      ${SOURCES_DIR}/filters_factory.h \\
                       ${CMAKE_CURRENT_SOURCE_DIR}/mainpage.dox
                       "
 )
