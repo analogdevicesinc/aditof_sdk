@@ -8,10 +8,6 @@ if (WITH_NETWORK)
     add_subdirectory(first-frame-network)
 endif()
 
-if (JETSON)
-    add_subdirectory(imshow-jetson)
-endif()
-
 if (XAVIER)
     add_subdirectory(imshow-xavier)
 endif()
