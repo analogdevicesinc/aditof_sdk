@@ -1,11 +1,7 @@
 mkdir C:\aditof-sdk\
 pushd C:\aditof-sdk
 
-if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" (
-    set folder=vs14
-) else if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (
-    set folder=vs15
-) else if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (
+if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (
     set folder=vs16
 )
 mkdir x64

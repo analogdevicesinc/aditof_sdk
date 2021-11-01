@@ -3,11 +3,7 @@ set arch=%~2
 
 echo "Installing websockets with config=%configuration% arch=%arch%"
 
-if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" (
-    set generator=Visual Studio 14 2015
-) else if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (
-    set generator=Visual Studio 15 2017
-) else if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (
+if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2019" (
     set generator=Visual Studio 16 2019
 )
 
