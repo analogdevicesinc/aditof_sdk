@@ -35,8 +35,8 @@
 #include "cameraInfo_msg.h"
 #include "depthImage_msg.h"
 #include "irImage_msg.h"
-#include "rgbImage_msg.h"
 #include "pointcloud2_msg.h"
+#include "rgbImage_msg.h"
 
 enum class MessageType {
     sensor_msgs_PointCloud2,
