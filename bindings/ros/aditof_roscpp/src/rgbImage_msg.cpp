@@ -52,6 +52,7 @@ void RgbImageMsg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
         tStamp); // to make more generic, based on selected resolution on camera
 
     uint16_t *frameData = getFrameData(frame, aditof::FrameDataType::RGB);
+    rgbFrameEnhancement(frameData, msg.width, msg.height);
     if (!frameData) {
         LOG(ERROR) << "getFrameData call failed";
         return;
