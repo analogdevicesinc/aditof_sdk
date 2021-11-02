@@ -47,7 +47,8 @@ void RgbImageMsg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
     frame->getDetails(fDetails);
 
     setMetadataMembers(
-        1920, 1080,
+
+        fDetails.rgbWidth, fDetails.rgbHeight,
         tStamp); // to make more generic, based on selected resolution on camera
 
     uint16_t *frameData = getFrameData(frame, aditof::FrameDataType::RGB);

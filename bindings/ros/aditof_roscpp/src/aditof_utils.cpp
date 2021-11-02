@@ -105,6 +105,15 @@ void setFrameType(const std::shared_ptr<aditof::Camera> &camera,
     }
 }
 
+void getAvailableFrameType(const std::shared_ptr<aditof::Camera> &camera,
+                           std::vector<std::string> &availableFrameTypes) {
+    camera->getAvailableFrameTypes(availableFrameTypes);
+    if (availableFrameTypes.empty()) {
+        LOG(ERROR) << "No frame type available!";
+        return;
+    }
+}
+
 void setMode(const std::shared_ptr<aditof::Camera> &camera,
              const std::string &mode) {
     std::vector<std::string> modes;
