@@ -454,7 +454,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
         }
 
 #ifdef JETSON
-        buff_send.add_int32_payload(0);
         buff_send.add_bytes_payload(
             sensorsFrameBuffers[index],
             (frameDetailsCache[index].fullDataWidth *
@@ -463,7 +462,6 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
                  frameDetailsCache[index].rgbHeight) *
                 sizeof(uint16_t));
 #else
-        buff_send.add_int32_payload(1);
         buff_send.add_bytes_payload(
             sensorsFrameBuffers[index],
             frameDetailsCache[index].fullDataWidth *
