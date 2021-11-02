@@ -78,12 +78,15 @@ buildCamera(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
     case CameraType::AD_96TOF1_EBZ:
         camera = std::make_shared<Camera96Tof1>(depthSensors[0], storages,
                                                 temperatureSensors);
+        break;
     case CameraType::AD_FXTOF1_EBZ:
         camera = std::make_shared<CameraFxTof1>(depthSensors[0], storages,
                                                 temperatureSensors);
+        break;
     case CameraType::SMART_3D_CAMERA:
         camera = std::make_shared<Camera3D_Smart>(depthSensors[0], storages,
                                                   temperatureSensors);
+        break;
     }
 #else
 #if defined(FXTOF1)
