@@ -414,21 +414,8 @@ aditof::Status NetworkDepthSensor::getFrame(uint16_t *buffer,
         return status;
     }
 
-    // Deinterleave data. The server sends raw data (uninterleaved) for better
-    // throughput (raw data chunck is smaller, deinterleaving is usually slower
-    // on target).
-
-    // net->recv_buff.bytes_payload(0).c_str() is 1 if deinterleaving is needed
-    // or 0 if not.
-    if (net->recv_buff.int32_payload(0) == 0) {
-        memcpy(buffer, net->recv_buff.bytes_payload(0).c_str(),
-               net->recv_buff.bytes_payload(0).length());
-    } else {
-        aditof::deinterleave(net->recv_buff.bytes_payload(0).c_str(), buffer,
-                             net->recv_buff.bytes_payload(0).length(),
-                             m_implData->frameDetails_cache.fullDataWidth,
-                             m_implData->frameDetails_cache.fullDataHeight);
-    }
+    memcpy(buffer, net->recv_buff.bytes_payload(0).c_str(),
+           net->recv_buff.bytes_payload(0).length());
 
     if (bufferInfo) {
         bufferInfo->timestamp = net->recv_buff.buffer_details().timestamp();
