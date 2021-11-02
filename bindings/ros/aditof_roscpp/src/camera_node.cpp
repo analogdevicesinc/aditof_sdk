@@ -165,6 +165,10 @@ int main(int argc, char **argv) {
     ROS_ASSERT_MSG(cameraInfoMsg,
                    "downcast from AditofSensorMsg to CameraInfoMsg failed");
 
+    if (!m_rgbSensor) {
+        delete rgb_img_msg;
+    }
+
     while (ros::ok()) {
         ros::Time tStamp = ros::Time::now();
         getNewFrame(camera, &frame);
@@ -192,9 +196,9 @@ int main(int argc, char **argv) {
     delete pcl_msg;
     delete depth_img_msg;
     delete ir_img_msg;
-
-    delete rgb_img_msg;
-
+    if (m_rgbSensor) {
+        delete rgb_img_msg;
+    }
     delete camera_info_msg;
     return 0;
 }
