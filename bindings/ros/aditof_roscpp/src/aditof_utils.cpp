@@ -242,3 +242,15 @@ void irTo16bitGrayscale(uint16_t *frameData, int width, int height) {
         frameData[i] = static_cast<uint16_t>(grayscale_val);
     }
 }
+
+void rgbFrameEnhancement(uint16_t *frame, int width, int height) {
+    int max = -1;
+    for (int i = 0; i < height * width; i++) {
+        if (max < frame[i])
+            max = frame[i];
+    }
+    int correctionRatio = (int)(0xffff) / max;
+    for (int i = 0; i < height * width; i++) {
+        frame[i] = frame[i] * correctionRatio;
+    }
+}
