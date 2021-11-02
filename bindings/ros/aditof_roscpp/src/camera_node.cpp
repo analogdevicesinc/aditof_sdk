@@ -79,7 +79,18 @@ int main(int argc, char **argv) {
     std::shared_ptr<Camera> camera = initCamera(argc, argv);
     ROS_ASSERT_MSG(camera, "initCamera call failed");
 
-    setFrameType(camera, "depth_ir_rgb");
+    std::vector<std::string> availableFrameTypes;
+    getAvailableFrameType(camera, availableFrameTypes);
+    bool m_rgbSensor;
+
+    if (availableFrameTypes.front().find("rgb") != std::string::npos) {
+        setFrameType(camera, "depth_ir_rgb");
+        m_rgbSensor = 1;
+    } else {
+        setFrameType(camera, "depth_ir");
+        m_rgbSensor = 0;
+    }
+
     setMode(camera, "near");
 
     ros::init(argc, argv, "aditof_camera_node");
@@ -167,8 +178,10 @@ int main(int argc, char **argv) {
         irImgMsg->FrameDataToMsg(camera, &frame, tStamp);
         irImgMsg->publishMsg(ir_img_pubisher);
 
-        rgbImgMsg->FrameDataToMsg(camera, &frame, tStamp);
-        rgbImgMsg->publishMsg(rgb_img_pubisher);
+        if (m_rgbSensor) {
+            rgbImgMsg->FrameDataToMsg(camera, &frame, tStamp);
+            rgbImgMsg->publishMsg(rgb_img_pubisher);
+        }
 
         cameraInfoMsg->FrameDataToMsg(camera, &frame, tStamp);
         cameraInfoMsg->publishMsg(camera_info_pubisher);
@@ -179,7 +192,9 @@ int main(int argc, char **argv) {
     delete pcl_msg;
     delete depth_img_msg;
     delete ir_img_msg;
+
     delete rgb_img_msg;
+
     delete camera_info_msg;
     return 0;
 }

@@ -39,6 +39,8 @@ std::string parseArgs(int argc, char **argv);
 std::shared_ptr<aditof::Camera> initCamera(int argc, char **argv);
 void setFrameType(const std::shared_ptr<aditof::Camera> &camera,
                   const std::string &type);
+void getAvailableFrameType(const std::shared_ptr<aditof::Camera> &camera,
+                           std::vector<std::string> &availableFrameTypes);
 void setMode(const std::shared_ptr<aditof::Camera> &camera,
              const std::string &mode);
 void setCameraRevision(const std::shared_ptr<aditof::Camera> &camera,
