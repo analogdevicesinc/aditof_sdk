@@ -190,9 +190,8 @@ void AdiTofDemoView::render() {
     int temp_cnt = 0;
 
     bool frameTypeCheckboxChanged = false;
-    if (localModeChecked) {
-        frameTypeCheckboxChanged = true;
-    }
+    bool connectionCheckboxChanged = true;
+
     while (true) {
 
         // Fill the frame with a nice color
@@ -241,7 +240,8 @@ void AdiTofDemoView::render() {
             lowLevelChecked = xorValue & (1 << 2);
             mediumLevelChecked = xorValue & (1 << 1);
             highLevelChecked = xorValue & 1;
-            checkboxChanged = true;
+            //we do not use level for now
+            //checkboxChanged = true;
         }
 
         cvui::beginColumn(frame, 50, 520);
@@ -289,7 +289,6 @@ void AdiTofDemoView::render() {
         }
 
         // Connection mode checkbox group
-        bool connectionCheckboxChanged = false;
         if (USBModeChecked == true) {
             int btnGroupConnection =
                 USBModeChecked << 2 | localModeChecked << 1 | ethModeChecked;
@@ -370,6 +369,8 @@ void AdiTofDemoView::render() {
                         (2 - static_cast<int>(std::log2(modeCurrentValue)));
                     m_ctrl->setMode(modes[selectedMode]);
                 }
+
+                connectionCheckboxChanged = false;
             }
 
             if (localModeChecked) {
@@ -393,6 +394,8 @@ void AdiTofDemoView::render() {
                         (2 - static_cast<int>(std::log2(modeCurrentValue)));
                     m_ctrl->setMode(modes[selectedMode]);
                 }
+
+                connectionCheckboxChanged = false;
             }
         }
 

@@ -38,32 +38,7 @@
 
 AdiTofDemoController::AdiTofDemoController()
     : m_cameraInUse(-1), m_frameRequested(false),
-      m_recorder(new AditofDemoRecorder()) {
-    m_system = new aditof::System();
-    m_system->getCameraList(m_cameras);
-    if (m_cameras.size()) {
-        // Use the first camera that is found
-        m_cameraInUse = 0;
-        auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
-        camera->initialize();
-        std::vector<std::string> frameTypes;
-        camera->getAvailableFrameTypes(frameTypes);
-        if (frameTypes.empty()) {
-            LOG(WARNING) << "no frame type available!";
-            return;
-        }
-
-        std::vector<std::string> modes;
-        camera->getAvailableModes(modes);
-        if (modes.empty()) {
-            LOG(WARNING) << "no camera modes available!";
-            return;
-        }
-
-    } else {
-        LOG(WARNING) << "No cameras found!";
-    }
-}
+      m_recorder(new AditofDemoRecorder()) {}
 
 bool AdiTofDemoController::setRegularConnection() {
     delete m_system;
