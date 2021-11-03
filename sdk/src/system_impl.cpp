@@ -64,7 +64,7 @@ buildCamera(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
     CameraType cameraType;
 
     enumerator->getDepthSensors(depthSensors);
-    if (depthSensors.size() < 0) {
+    if (depthSensors.size() < 1) {
         LOG(ERROR) << "No imagers found";
         return nullptr;
     }
