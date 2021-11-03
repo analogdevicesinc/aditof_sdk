@@ -43,7 +43,13 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    setFrameType(camera, "depth_ir_rgb");
+    std::vector<std::string> availableFrameTypes;
+    getAvailableFrameType(camera, availableFrameTypes);
+    if (availableFrameTypes.front().find("rgb") != std::string::npos) {
+        setFrameType(camera, "depth_ir_rgb");
+    } else {
+        setFrameType(camera, "depth_ir");
+    }
     setMode(camera, "medium");
 
     ros::init(argc, argv, "aditof_rviz_node");
