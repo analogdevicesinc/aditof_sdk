@@ -228,6 +228,7 @@ Status UsbSensorEnumerator::getTemperatureSensors(
 }
 
 Status UsbSensorEnumerator::getCameraTypeOnTarget(CameraType &cameraType) {
-    // TO DO: implement this
+    // TO DO: get this information from target. Currently is fixed to 96TOF1
+    cameraType = CameraType::AD_96TOF1_EBZ;
     return Status::OK;
 }
