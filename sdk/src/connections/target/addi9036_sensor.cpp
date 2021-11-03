@@ -330,8 +330,7 @@ aditof::Status Addi9036Sensor::getAvailableFrameTypes(
     details.width = aditof::FRAME_WIDTH;
     details.height = aditof::FRAME_HEIGHT;
     details.fullDataWidth = details.width;
-    details.fullDataHeight =
-        details.height * ((m_implData->numVideoDevs == 2) ? 1 : 2);
+    details.fullDataHeight = details.height * 2;
     details.type = "depth_ir";
     types.push_back(details);
 
