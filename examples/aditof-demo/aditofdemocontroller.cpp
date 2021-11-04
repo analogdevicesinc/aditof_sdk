@@ -41,9 +41,7 @@ AdiTofDemoController::AdiTofDemoController()
       m_recorder(new AditofDemoRecorder()) {}
 
 bool AdiTofDemoController::setRegularConnection() {
-    delete m_system;
-    m_system = new aditof::System();
-    m_system->getCameraList(m_cameras);
+    m_system.getCameraList(m_cameras);
     m_IsNetworkConnection = false;
     if (m_cameras.size()) {
         // Use the first camera that is found
@@ -75,13 +73,9 @@ bool AdiTofDemoController::setRegularConnection() {
 }
 
 bool AdiTofDemoController::setNetworkConnection(const std::string &ip) {
-    delete m_system;
     // TO DO: replace the boolean variable m_IsNetworkConnection with a check
     // of the camera type (we need the sdk implementation first)
-    if (m_IsNetworkConnection == true)
-        m_cameras.clear();
-    m_system = new aditof::System();
-    m_system->getCameraListAtIp(m_cameras, ip);
+    m_system.getCameraListAtIp(m_cameras, ip);
     m_IsNetworkConnection = true;
     if (m_cameras.size()) {
         // Use the first camera that is found
@@ -117,7 +111,6 @@ AdiTofDemoController::~AdiTofDemoController() {
     }
     stopCapture();
     m_cameras[static_cast<unsigned int>(m_cameraInUse)]->stop();
-    delete m_system;
 }
 
 void AdiTofDemoController::startCapture() {

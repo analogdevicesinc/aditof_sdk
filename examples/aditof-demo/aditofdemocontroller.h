@@ -99,7 +99,7 @@ class AdiTofDemoController {
     void captureFrames();
 
   private:
-    aditof::System *m_system;
+    aditof::System m_system;
     std::vector<std::shared_ptr<aditof::Camera>> m_cameras;
 
     int m_cameraInUse;
