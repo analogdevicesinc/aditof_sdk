@@ -58,6 +58,7 @@ class AdiTofDemoController {
     void setFrameType(const std::string &frameType);
     void
     getAvailableFrameTypes(std::vector<std::string> &availableFrameTypes) const;
+    void getAvailableModes(std::vector<std::string> &availableModes) const;
 
     std::pair<float, float> getTemperature();
 
