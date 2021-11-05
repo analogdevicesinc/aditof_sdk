@@ -60,7 +60,7 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 static const std::string skCustomMode = "custom";
 static const std::vector<std::string> availableControls = {
     "noise_reduction_threshold", "ir_gamma_correction", "depth_correction",
-    "camera_geometry_correction"};
+    "camera_geometry_correction", "revision"};
 static const std::string skEepromName = "custom";
 CameraFxTof1::CameraFxTof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
@@ -480,6 +480,10 @@ aditof::Status CameraFxTof1::setControl(const std::string &control,
         m_cameraGeometryCorrection = std::stoi(value) != 0;
     }
 
+    if (control == "revision") {
+        m_revision = value;
+    }
+
     return status;
 }
 
@@ -509,6 +513,10 @@ aditof::Status CameraFxTof1::getControl(const std::string &control,
 
     if (control == "camera_geometry_correction") {
         value = m_cameraGeometryCorrection ? "1" : "0";
+    }
+
+    if (control == "revision") {
+        value = m_revision;
     }
 
     return status;
