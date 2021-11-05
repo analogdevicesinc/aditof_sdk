@@ -338,6 +338,18 @@ void AdiTofDemoView::render() {
                                 break;
                             }
                         }
+
+                        m_ctrl->getAvailableModes(availableModes);
+                        for (auto availableMode : availableModes) {
+                            if (availableMode.find("far") !=
+                                std::string::npos) {
+                                m_farModeEnabled = true;
+                                break;
+                            } else {
+                                m_farModeEnabled = false;
+                            }
+                        }
+
                         m_ctrl->setFrameType(frameTypes[selectedFrameType]);
 
                         int selectedMode =
@@ -363,6 +375,17 @@ void AdiTofDemoView::render() {
                             break;
                         }
                     }
+
+                    m_ctrl->getAvailableModes(availableModes);
+                    for (auto availableMode : availableModes) {
+                        if (availableMode.find("far") != std::string::npos) {
+                            m_farModeEnabled = true;
+                            break;
+                        } else {
+                            m_farModeEnabled = false;
+                        }
+                    }
+
                     m_ctrl->setFrameType(frameTypes[selectedFrameType]);
 
                     int selectedMode =
@@ -381,6 +404,16 @@ void AdiTofDemoView::render() {
                         m_rgbCameraAvailable = true;
                         frameTypes = frameTypesRgb;
                         break;
+                    }
+                }
+
+                m_ctrl->getAvailableModes(availableModes);
+                for (auto availableMode : availableModes) {
+                    if (availableMode.find("far") != std::string::npos) {
+                        m_farModeEnabled = true;
+                        break;
+                    } else {
+                        m_farModeEnabled = false;
                     }
                 }
 
@@ -443,27 +476,30 @@ void AdiTofDemoView::render() {
         cvui::space(10);
         cvui::checkbox("Medium", &mediumModeChecked);
         cvui::space(10);
-        cvui::checkbox("Far", &farModeChecked);
+        if (m_farModeEnabled) {
+            cvui::checkbox("Far", &farModeChecked);
+        }
         cvui::endRow();
         cvui::endColumn();
-#if defined(FXTOF1) || defined(SMART_3D)
-        if (!USBModeChecked) {
-            cvui::beginColumn(frame, 265, 105);
-            cvui::space(10);
-            cvui::text("Frame type: ", 0.6);
-            cvui::space(10);
-            cvui::beginRow(frame, 265, 140);
-            cvui::checkbox(frameTypes[0], &depthIrChecked);
-            cvui::endRow();
-            cvui::beginRow(frame, 265, 170);
-            cvui::checkbox(frameTypes[1], &depthOnlyChecked);
-            cvui::endRow();
-            cvui::beginRow(frame, 265, 200);
-            cvui::checkbox(frameTypes[2], &irOnlyChecked);
-            cvui::endRow();
-            cvui::endColumn();
+
+        if (!m_farModeEnabled) {
+            if (!USBModeChecked) {
+                cvui::beginColumn(frame, 265, 105);
+                cvui::space(10);
+                cvui::text("Frame type: ", 0.6);
+                cvui::space(10);
+                cvui::beginRow(frame, 265, 140);
+                cvui::checkbox(frameTypes[0], &depthIrChecked);
+                cvui::endRow();
+                cvui::beginRow(frame, 265, 170);
+                cvui::checkbox(frameTypes[1], &depthOnlyChecked);
+                cvui::endRow();
+                cvui::beginRow(frame, 265, 200);
+                cvui::checkbox(frameTypes[2], &irOnlyChecked);
+                cvui::endRow();
+                cvui::endColumn();
+            }
         }
-#endif
         cvui::text(frame, 50, 160, "Video: ", 0.6);
 
         if (cvui::button(

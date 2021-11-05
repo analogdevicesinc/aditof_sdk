@@ -166,6 +166,15 @@ void AdiTofDemoController::getAvailableFrameTypes(
     camera->getAvailableFrameTypes(availableFrameTypes);
 }
 
+void AdiTofDemoController::getAvailableModes(
+    std::vector<std::string> &availableModes) const {
+    if (m_cameraInUse == -1) {
+        return;
+    }
+    auto camera = m_cameras[static_cast<unsigned int>(m_cameraInUse)];
+    camera->getAvailableModes(availableModes);
+}
+
 std::pair<float, float> AdiTofDemoController::getTemperature() {
     auto returnValue = std::make_pair<float, float>(0.0, 0.0);
 

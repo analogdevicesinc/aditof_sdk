@@ -79,6 +79,7 @@ class AdiTofDemoView {
     std::shared_ptr<aditof::Frame> m_capturedFrame;
     std::condition_variable m_frameCapturedCv;
     std::vector<std::string> availableFrameTypes;
+    std::vector<std::string> availableModes;
     bool m_stopWorkersFlag;
     bool m_center;
 
@@ -90,6 +91,7 @@ class AdiTofDemoView {
 
     bool m_crtSmallSignalState;
     bool m_crtIRGamma;
+    bool m_farModeEnabled;
 
     bool USBModeChecked = false;
     bool localModeChecked = false;
