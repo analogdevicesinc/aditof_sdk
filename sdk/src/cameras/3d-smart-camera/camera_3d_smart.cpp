@@ -59,8 +59,8 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 static const std::string skCustomMode = "custom";
 
 static const std::vector<std::string> availableControls = {
-    "noise_reduction_threshold", "ir_gamma_correction", "depth_correction",
-    "camera_geometry_correction", "bayer_rgb_conversion"};
+    "noise_reduction_threshold",  "ir_gamma_correction",  "depth_correction",
+    "camera_geometry_correction", "bayer_rgb_conversion", "revision"};
 
 //one sensor constructor
 Camera3D_Smart::Camera3D_Smart(
@@ -551,6 +551,9 @@ aditof::Status Camera3D_Smart::setControl(const std::string &control,
         m_cameraBayerRgbConversion = std::stoi(value) != 0;
     }
 
+    if (control == "revision") {
+        m_revision = value;
+    }
     return status;
 }
 
@@ -585,7 +588,9 @@ aditof::Status Camera3D_Smart::getControl(const std::string &control,
     if (control == "bayer_rgb_conversion") {
         value = m_cameraBayerRgbConversion ? "1" : "0";
     }
-
+    if (control == "revision") {
+        value = m_revision;
+    }
     return status;
 }
 
