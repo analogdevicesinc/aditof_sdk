@@ -45,7 +45,7 @@ void CameraInfoMsg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
     FrameDetails fDetails;
     frame->getDetails(fDetails);
 
-    setMembers(camera, fDetails.width, fDetails.height / 2, tStamp);
+    setMembers(camera, fDetails.width, fDetails.height, tStamp);
 }
 
 void CameraInfoMsg::setMembers(const std::shared_ptr<Camera> &camera, int width,

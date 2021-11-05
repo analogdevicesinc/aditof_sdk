@@ -44,7 +44,7 @@ void PointCloud2Msg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
     FrameDetails fDetails;
     frame->getDetails(fDetails);
 
-    setMetadataMembers(fDetails.width, fDetails.height / 2, tStamp);
+    setMetadataMembers(fDetails.width, fDetails.height, tStamp);
     setDataMembers(camera, frame);
 }
 
