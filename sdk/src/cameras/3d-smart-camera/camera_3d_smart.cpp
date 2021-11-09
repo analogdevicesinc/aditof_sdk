@@ -59,9 +59,14 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 static const std::string skCustomMode = "custom";
 
 static const std::vector<std::string> availableControls = {
-    "noise_reduction_threshold",  "ir_gamma_correction",  "depth_correction",
-    "camera_geometry_correction", "bayer_rgb_conversion", "revision"};
 
+    "noise_reduction_threshold",
+    "ir_gamma_correction",
+    "depth_correction",
+    "camera_geometry_correction",
+    "bayer_rgb_conversion",
+    "camera_distortion_correction",
+    "revision"};
 //one sensor constructor
 Camera3D_Smart::Camera3D_Smart(
     std::shared_ptr<aditof::DepthSensorInterface> rgbdSensor,
@@ -70,7 +75,8 @@ Camera3D_Smart::Camera3D_Smart(
     : m_rgbdSensor(rgbdSensor), m_devStarted(false), m_devProgrammed(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
       m_availableControls(availableControls), m_depthCorrection(true),
-      m_cameraGeometryCorrection(true), m_revision("RevA") {
+      m_cameraGeometryCorrection(true), m_revision("RevA"),
+      m_cameraDistortionCorrection(true) {
 
     m_Rw = 255.0 * 0.25;
     m_Gw = 255.0 * 0.35;
@@ -470,6 +476,11 @@ if (m_details.mode != skCustomMode &&
                                               m_details.frameType.width *
                                                   m_details.frameType.height);
     }
+    if (m_cameraDistortionCorrection) {
+        m_calibration.distortionCorrection(depthDataLocation,
+                                           m_details.frameType.width,
+                                           m_details.frameType.height);
+    }
 }
 
 return Status::OK;
@@ -554,6 +565,9 @@ aditof::Status Camera3D_Smart::setControl(const std::string &control,
     if (control == "revision") {
         m_revision = value;
     }
+    if (control == "camera_distortion_correction") {
+        m_cameraDistortionCorrection = std::stoi(value) != 0;
+    }
     return status;
 }
 
@@ -591,6 +605,11 @@ aditof::Status Camera3D_Smart::getControl(const std::string &control,
     if (control == "revision") {
         value = m_revision;
     }
+
+    if (control == "camera_distortion_correction") {
+        value = m_cameraDistortionCorrection ? "1" : "0";
+    }
+
     return status;
 }
 
