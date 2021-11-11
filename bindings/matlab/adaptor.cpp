@@ -181,6 +181,20 @@ void getAvailHW(imaqkit::IHardwareInfo *hardwareContainer) {
 
     deviceInfo->addDeviceFormat(deviceFormat);
 
+    deviceFormat = deviceInfo->createDeviceFormat(
+        aditof::RGB_CAMERA_FORMAT_ID, aditof::RGB_CAMERA_FORMAT_STR);
+
+    DeviceFormat *rgbCameraFormatInfo = new DeviceFormat();
+
+    rgbCameraFormatInfo->setFormatWidth(aditof::RGB_CAMERA_FORMAT_WIDTH);
+    rgbCameraFormatInfo->setFormatHeight(aditof::RGB_CAMERA_FORMAT_HEIGHT);
+    rgbCameraFormatInfo->setFormatNumBands(aditof::RGB_CAMERA_FORMAT_BANDS);
+    rgbCameraFormatInfo->setFormatFrameType(imaqkit::frametypes::BAYER12_BGGR);
+
+    deviceFormat->setAdaptorData(rgbCameraFormatInfo);
+
+    deviceInfo->addDeviceFormat(deviceFormat);
+
     hardwareContainer->addDevice(deviceInfo);
 }
 
@@ -277,6 +291,8 @@ void getDeviceAttributes(const imaqkit::IDeviceInfo *deviceInfo,
                                      aditof::FRAME_TYPE_IR_RAW_ID);
         devicePropFact->addEnumValue(hProp, aditof::FRAME_TYPE_DEPTH_IR_RAW_STR,
                                      aditof::FRAME_TYPE_DEPTH_IR_RAW_ID);
+        devicePropFact->addEnumValue(hProp, aditof::FRAME_TYPE_RGB_STR,
+                                     aditof::FRAME_TYPE_RGB_ID);
 
         devicePropFact->setPropReadOnly(hProp,
                                         imaqkit::propreadonly::WHILE_RUNNING);
