@@ -59,6 +59,8 @@ class SafeQueue {
 
     bool empty() const { return m_queue.empty(); }
 
+    void clear() { m_queue = {}; }
+
   private:
     std::queue<T> m_queue;
     std::mutex m_mutex;
