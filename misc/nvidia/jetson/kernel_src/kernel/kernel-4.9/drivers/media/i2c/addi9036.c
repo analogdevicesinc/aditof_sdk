@@ -50,7 +50,7 @@ struct addi9036 {
 static bool addi9306_readable_register(struct device *dev, unsigned int reg)
 {
 	if (((reg >= 0x4000) && (reg <= 0x6FFF)) ||
-	    ((reg >= 0x7C00) && (reg <= 0x7C1F)) ||
+	    ((reg >= 0x7C00) && (reg <= 0x7C9F)) ||
 	    ((reg >= 0x7CE0) && (reg <= 0x7FFF)) ||
 	    ((reg >= 0xC000) && (reg <= 0xC0FF)) ||
 	    ((reg >= 0xC110) && (reg <= 0xC200)) ||
