@@ -647,10 +647,22 @@ void SourceAdaptor::sendFrame(SourceAdaptor *adaptor) {
                 delete[] imBuffer;
                 imBuffer = displayedImage;
                 frameType = imaqkit::frametypes::MONO16;
-            }
-        } else {
-            for (int i = 0; i < imageHeight * imageWidth; ++i) {
-                imBuffer[i] = 123;
+            } else if (adaptor->m_currentDisplayedType ==
+                       aditof::FRAME_TYPE_RGB_ID) {
+
+                size_t rgbBufferSize = aditof::RGB_CAMERA_FORMAT_WIDTH *
+                                       aditof::RGB_CAMERA_FORMAT_HEIGHT * 2;
+                uint16_t *data = nullptr;
+                frame->getData(aditof::FrameDataType::RGB, &data);
+                uint8_t *displayedImage = new uint8_t[rgbBufferSize];
+                memcpy(displayedImage, data, rgbBufferSize);
+                delete[] imBuffer;
+                imBuffer = displayedImage;
+                frameType = imaqkit::frametypes::BAYER12_BGGR;
+            } else {
+                for (int i = 0; i < imageHeight * imageWidth; ++i) {
+                    imBuffer[i] = 123;
+                }
             }
         }
 

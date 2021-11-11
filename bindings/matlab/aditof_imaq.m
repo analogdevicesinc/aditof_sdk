@@ -33,6 +33,7 @@ start(vid);
 pause(1);               
 for i = 1:300              
     depthMap = getsnapshot(vid);
+    wait(vid);
     figure(1); imshow(depthMap);
 end
 stop(vid);
@@ -51,10 +52,36 @@ start(vid);
 pause(1);               
 for i = 1:300              
     depthMap = getsnapshot(vid);
+    wait(vid);
     figure(2); imshow(depthMap);
 end
 stop(vid);
 delete(vid);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Set the camera to output RGB and the mode to Medium range
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% For 3d_smart_camera uncomment the following lines to enable the display
+%%% of rgb images 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%vid = videoinput('aditofadapter', 1, "RGB_CAMERA");
+
+%src = getselectedsource(vid); 
+%src.FrameType = 'Rgb';
+%src.CameraMode = 'Medium';
+%vid.ReturnedColorSpace = 'grayscale';
+
+%start(vid);
+%pause(1);               
+%for i = 300              
+%    rgbRawImage = getsnapshot(vid);
+%    wait(vid);
+%    rgbProcessedImage = double(demosaic(rgbRawImage,'bggr'))/256;
+%    figure(3); imshow(rgbProcessedImage);
+%end
+%stop(vid);
+%delete(vid);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Run the image acquisition tool to see all the adaptor's attributes and play the video

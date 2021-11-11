@@ -88,6 +88,12 @@ const int MONO16_FORMAT_WIDTH = 640;
 const int MONO16_FORMAT_HEIGHT = 480;
 const int MONO16_FORMAT_BANDS = 1;
 
+const char *const RGB_CAMERA_FORMAT_STR = "RGB_CAMERA";
+const int RGB_CAMERA_FORMAT_ID = 3;
+const int RGB_CAMERA_FORMAT_WIDTH = 1920;
+const int RGB_CAMERA_FORMAT_HEIGHT = 1080;
+const int RGB_CAMERA_FORMAT_BANDS = 1;
+
 enum {
     ADITOF_PROPERTY_MODE = 1,
     ADITOF_PROPERTY_FRAME_TYPE = 2,
@@ -112,13 +118,15 @@ const char *const FRAME_TYPE_IR_RGB_STR = "IrRgb";
 const char *const FRAME_TYPE_DEPTH_RAW_STR = "DepthRaw";
 const char *const FRAME_TYPE_IR_RAW_STR = "IrRaw";
 const char *const FRAME_TYPE_DEPTH_IR_RAW_STR = "DepthIrRaw";
+const char *const FRAME_TYPE_RGB_STR = "Rgb";
 
 enum {
     FRAME_TYPE_DEPTH_RGB_ID = 1,
     FRAME_TYPE_IR_RGB_ID = 2,
     FRAME_TYPE_DEPTH_RAW_ID = 3,
     FRAME_TYPE_IR_RAW_ID = 4,
-    FRAME_TYPE_DEPTH_IR_RAW_ID = 5
+    FRAME_TYPE_DEPTH_IR_RAW_ID = 5,
+    FRAME_TYPE_RGB_ID = 6
 };
 
 const char *const NOISE_REDUCTION_THRESHOLD_STR = "NoiseReductionThreshold";
