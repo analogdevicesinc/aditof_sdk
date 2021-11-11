@@ -466,6 +466,9 @@ if (m_details.mode != skCustomMode &&
     uint16_t *depthDataLocation;
     frame->getData(FrameDataType::DEPTH, &depthDataLocation);
 
+    uint16_t *irDataLocation;
+    frame->getData(FrameDataType::IR, &irDataLocation);
+
     if (m_depthCorrection) {
         m_calibration.calibrateDepth(depthDataLocation,
                                      m_details.frameType.width *
@@ -478,6 +481,9 @@ if (m_details.mode != skCustomMode &&
     }
     if (m_cameraDistortionCorrection) {
         m_calibration.distortionCorrection(depthDataLocation,
+                                           m_details.frameType.width,
+                                           m_details.frameType.height);
+        m_calibration.distortionCorrection(irDataLocation,
                                            m_details.frameType.width,
                                            m_details.frameType.height);
     }
