@@ -431,20 +431,21 @@ void Calibration3D_Smart::buildDistortionCorrectionCache(unsigned int width,
                                                          unsigned int height) {
     using namespace aditof;
 
-    double fx = (double)m_intrinsics[0];
-    double fy = (double)m_intrinsics[4];
-    double cx = (double)m_intrinsics[2];
-    double cy = (double)m_intrinsics[5];
+    double fx = (double)m_intrinsics[2];
+    double fy = (double)m_intrinsics[3];
+    double cx = (double)m_intrinsics[0];
+    double cy = (double)m_intrinsics[1];
     std::vector<double> k{(double)m_intrinsics[4], (double)m_intrinsics[5], 0.0,
                           0.0, m_intrinsics[6]};
     if (m_distortion_cache) {
         delete[] m_distortion_cache;
     }
+
     m_distortion_cache = new double[width * height];
     for (uint16_t i = 0; i < width; i++) {
         for (uint16_t j = 0; j < height; j++) {
-            double x = (double(i) - cx) / fx;
-            double y = (double(j) - cy) / fy;
+            double x = (i - cx) / fx;
+            double y = (j - cy) / fy;
 
             //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
             double r2 = x * x + y * y;
@@ -459,16 +460,16 @@ aditof::Status Calibration3D_Smart::distortionCorrection(uint16_t *frame,
                                                          unsigned int width,
                                                          unsigned int height) {
     using namespace aditof;
-    double fx = (double)m_intrinsics[0];
-    double fy = (double)m_intrinsics[4];
-    double cx = (double)m_intrinsics[2];
-    double cy = (double)m_intrinsics[5];
+    double fx = (double)m_intrinsics[2];
+    double fy = (double)m_intrinsics[3];
+    double cx = (double)m_intrinsics[0];
+    double cy = (double)m_intrinsics[1];
     uint16_t *buff;
+
     buff = new uint16_t[width * height];
 
     for (uint16_t i = 0; i < width; i++) {
         for (uint16_t j = 0; j < height; j++) {
-
             //transform in dimensionless space
             double x = (double(i) - cx) / fx;
             double y = (double(j) - cy) / fy;
@@ -480,11 +481,13 @@ aditof::Status Calibration3D_Smart::distortionCorrection(uint16_t *frame,
             //back to original space
             int x_dist = (int)(x_dist_adim * fx + cx);
             int y_dist = (int)(y_dist_adim * fy + cy);
+
             if (x_dist >= 0 && x_dist < width && y_dist >= 0 &&
                 y_dist < height) {
                 buff[j * width + i] = frame[y_dist * width + x_dist];
-            } else
+            } else {
                 buff[j * width + i] = frame[j * width + i];
+            }
         }
     }
     memcpy(frame, buff, width * height * 2);
