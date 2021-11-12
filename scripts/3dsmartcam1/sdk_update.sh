@@ -7,21 +7,21 @@ sudo rm -rf build_0_3_5
 mkdir build_0_3_5 && cd build_0_3_5
 cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=/opt/glog ..
 sudo cmake --build . --target install
-cd ..
+cd ../..
 
 cd libwebsockets
 sudo rm -rf build_3_1
 mkdir build_3_1 && cd build_3_1
 cmake -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/opt/websockets ..
 sudo cmake --build . --target install
-cd ..
+cd ../..
 
 cd protobuf
 sudo rm -rf build_3_9_0
 mkdir build_3_9_0 && cd build_3_9_0
 cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/opt/protobuf ../cmake
 sudo cmake --build . --target install
-cd ..
+cd ../..
 
 cd ~/Workspace/aditof_sdk/
 git pull
