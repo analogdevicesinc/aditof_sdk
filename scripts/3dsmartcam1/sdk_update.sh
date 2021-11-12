@@ -35,6 +35,11 @@ cp aditof-demo.sh ~/Desktop/
 ./vnc_install.sh
 
 cd ~/Workspace/
+sudo apt install git-lfs
 git clone https://github.com/robotics-ai/tof_process_public
-cd tof_process_public/adi_smart_camera/
+cd tof_process_public
+git lfs install
+cd adi_smart_camera/
+git lfs fetch --all
+git lfs pull
 ./install_bionic_nano.sh
