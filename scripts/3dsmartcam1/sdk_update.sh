@@ -36,5 +36,5 @@ cp aditof-demo.sh ~/Desktop/
 
 cd ~/Workspace/
 git clone https://github.com/robotics-ai/tof_process_public
-cd cd tof_process_public/adi_smart_camera/
+cd tof_process_public/adi_smart_camera/
 ./install_bionic_nano.sh
