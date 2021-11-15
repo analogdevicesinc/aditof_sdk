@@ -103,6 +103,15 @@ class Calibration96Tof1 {
     aditof::Status calibrateDepth(uint16_t *frame, uint32_t frame_size);
     aditof::Status calibrateCameraGeometry(uint16_t *frame,
                                            uint32_t frame_size);
+    void
+    buildDistortionCorrectionCache(const std::vector<float> &cameraMatrix,
+                                   const std::vector<float> &distortionCoeffs,
+                                   unsigned int width, unsigned int height);
+    aditof::Status
+    distortionCorrection(const std::vector<float> &cameraMatrix,
+                         const std::vector<float> &distortionCoeffs,
+                         uint16_t *frame, uint16_t *frame, unsigned int width,
+                         unsigned int height);
 
   private:
     float getMapSize(
@@ -117,6 +126,7 @@ class Calibration96Tof1 {
   private:
     std::unordered_map<float, packet_struct> m_calibration_map;
     uint16_t *m_depth_cache;
+    double *m_distortion_cache;
     double *m_geometry_cache;
     int m_range;
 };
