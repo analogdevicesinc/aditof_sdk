@@ -72,7 +72,7 @@ print("camera1.setMode()", status)
 
 # Get access to the low-level API of the camera
 image_sensors = []
-camera1.getImageSensor(image_sensors)
+camera1.getImageSensors(image_sensors)
 cam1Sensor = image_sensors[0]
 
 eeproms = []

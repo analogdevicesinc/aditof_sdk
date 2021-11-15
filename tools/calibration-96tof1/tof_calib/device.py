@@ -47,7 +47,7 @@ def write_AFE_reg(cam_handle, addr, data):
     address_array = np.array(addr, dtype='uint16')
     data_array = np.array(data, dtype='uint16')
 
-    sensor = cam_handle.getImageSensor()[0]
+    sensor = cam_handle.getImageSensors()[0]
 
     status = sensor.writeAfeRegisters(
         address_array, data_array, len(data_array))
@@ -68,7 +68,7 @@ def read_AFE_reg(cam_handle, addr, length):
     data_array = np.zeros(length, dtype='uint16')
 
     image_sensors = []
-    cam_handle.getImageSensor(image_sensors)
+    cam_handle.getImageSensors(image_sensors)
     sensor = image_sensors[0]
     status = sensor.readAfeRegisters(address_array, data_array, length)
     # logger.debug(status)
