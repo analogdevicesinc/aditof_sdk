@@ -543,7 +543,7 @@ float Calibration96Tof1::getPacketSize(
     return packet_size;
 }
 
-void Calibration3D_Smart::buildDistortionCorrectionCache(
+void Calibration96Tof1::buildDistortionCorrectionCache(
     const std::vector<float> &cameraMatrix,
     const std::vector<float> &distortionCoeffs, unsigned int width,
     unsigned int height) {
@@ -551,10 +551,10 @@ void Calibration3D_Smart::buildDistortionCorrectionCache(
 
     double fx = cameraMatrix[0];
     double fy = cameraMatrix[4];
-    double x0 = cameraMatrix[2];
-    double y0 = cameraMatrix[5];
+    double cx = cameraMatrix[2];
+    double cy = cameraMatrix[5];
     //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
-    std::vector<double> k = distortionCoeffs;
+    std::vector<double> k(distortionCoeffs.begin(), distortionCoeffs.end());
     if (m_distortion_cache) {
         delete[] m_distortion_cache;
     }
@@ -573,7 +573,7 @@ void Calibration3D_Smart::buildDistortionCorrectionCache(
     }
 }
 
-aditof::Status Calibration3D_Smart::distortionCorrection(
+aditof::Status Calibration96Tof1::distortionCorrection(
     const std::vector<float> &cameraMatrix,
     const std::vector<float> &distortionCoeffs, uint16_t *frame,
     unsigned int width, unsigned int height) {
@@ -581,10 +581,10 @@ aditof::Status Calibration3D_Smart::distortionCorrection(
 
     double fx = cameraMatrix[0];
     double fy = cameraMatrix[4];
-    double x0 = cameraMatrix[2];
-    double y0 = cameraMatrix[5];
+    double cx = cameraMatrix[2];
+    double cy = cameraMatrix[5];
     //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
-    std::vector<double> k = distortionCoeffs;
+    std::vector<double> k(distortionCoeffs.begin(), distortionCoeffs.end());
     uint16_t *buff;
 
     buff = new uint16_t[width * height];
