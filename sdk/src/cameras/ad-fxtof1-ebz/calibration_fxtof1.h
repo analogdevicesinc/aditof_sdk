@@ -68,6 +68,15 @@ class CalibrationFxTof1 {
     aditof::Status calibrateDepth(uint16_t *frame, uint32_t frame_size);
     aditof::Status calibrateCameraGeometry(uint16_t *frame,
                                            uint32_t frame_size);
+    void
+    buildDistortionCorrectionCache(const std::vector<float> &cameraMatrix,
+                                   const std::vector<float> &distortionCoeffs,
+                                   unsigned int width, unsigned int height);
+    aditof::Status
+    distortionCorrection(const std::vector<float> &cameraMatrix,
+                         const std::vector<float> &distortionCoeffs,
+                         uint16_t *frame, unsigned int width,
+                         unsigned int height);
 
   private:
     void buildDepthCalibrationCache(float gain, float offset,
@@ -92,6 +101,7 @@ class CalibrationFxTof1 {
   private:
     uint16_t *m_depth_cache;
     double *m_geometry_cache;
+    double *m_distortion_cache;
     int m_range;
     mode_struct m_mode_settings[2];
     std::vector<float> m_intrinsics;

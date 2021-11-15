@@ -110,7 +110,7 @@ class Calibration96Tof1 {
     aditof::Status
     distortionCorrection(const std::vector<float> &cameraMatrix,
                          const std::vector<float> &distortionCoeffs,
-                         uint16_t *frame, uint16_t *frame, unsigned int width,
+                         uint16_t *frame, unsigned int width,
                          unsigned int height);
 
   private:

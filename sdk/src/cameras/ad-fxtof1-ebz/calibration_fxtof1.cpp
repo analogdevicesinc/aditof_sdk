@@ -66,8 +66,8 @@ static const uint16_t MODE_LCORR_BASE_ADDR[] = {0x6A80, 0x6AC0};
 #define ARRAY_SIZE(X) sizeof(X) / sizeof(X[0])
 
 CalibrationFxTof1::CalibrationFxTof1()
-    : m_depth_cache(nullptr), m_geometry_cache(nullptr), m_range(16000),
-      m_cal_valid(false) {
+    : m_depth_cache(nullptr), m_geometry_cache(nullptr),
+      m_distortion_cache(nullptr), m_range(16000), m_cal_valid(false) {
     m_afe_code.insert(m_afe_code.end(), &basecode[0],
                       &basecode[ARRAY_SIZE(basecode)]);
 }
@@ -79,6 +79,10 @@ CalibrationFxTof1::~CalibrationFxTof1() {
 
     if (m_geometry_cache) {
         delete[] m_geometry_cache;
+    }
+
+    if (m_distortion_cache) {
+        delete[] m_distortion_cache;
     }
 }
 
@@ -270,11 +274,12 @@ setMode - Sets the mode to be used for depth calibration
 aditof::Status CalibrationFxTof1::setMode(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
     const std::string &mode, int range, unsigned int frameWidth,
-    unsigned int frameheight) {
+    unsigned int frameHeight) {
     using namespace aditof;
 
     Status status = Status::OK;
     std::vector<float> cameraMatrix;
+    std::vector<float> distortionCoeffs;
     uint16_t mode_id = (mode == "near" ? 0 : 1);
     const int16_t pixelMaxValue = (1 << 12) - 1; // 4095
     float gain = (mode == "near" ? 0.5 : 1.15);
@@ -292,9 +297,16 @@ aditof::Status CalibrationFxTof1::setMode(
                   << "    fy: " << cameraMatrix[4] << "\n"
                   << "    cx: " << cameraMatrix[2] << "\n"
                   << "    cy: " << cameraMatrix[5];
-        buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
+        buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameHeight);
     }
 
+    status = getIntrinsic(DISTORTION_COEFFICIENTS, distortionCoeffs);
+    if (status != Status::OK) {
+        LOG(WARNING) << "Failed to read distortion coeffs from eeprom";
+        return status;
+    }
+    buildDistortionCorrectionCache(cameraMatrix, distortionCoeffs, frameWidth,
+                                   frameHeight);
     /*Execute the mode change command*/
     uint16_t afeRegsAddr[] = {0x4000, 0x4001, 0x7c22};
     uint16_t afeRegsVal[] = {mode_id, 0x0004, 0x0004};
@@ -412,4 +424,78 @@ void CalibrationFxTof1::buildGeometryCalibrationCache(
             }
         }
     }
+}
+
+void CalibrationFxTof1::buildDistortionCorrectionCache(
+    const std::vector<float> &cameraMatrix,
+    const std::vector<float> &distortionCoeffs, unsigned int width,
+    unsigned int height) {
+    using namespace aditof;
+
+    double fx = cameraMatrix[0];
+    double fy = cameraMatrix[4];
+    double cx = cameraMatrix[2];
+    double cy = cameraMatrix[5];
+    //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
+    std::vector<double> k(distortionCoeffs.begin(), distortionCoeffs.end());
+    if (m_distortion_cache) {
+        delete[] m_distortion_cache;
+    }
+
+    m_distortion_cache = new double[width * height];
+    for (uint16_t i = 0; i < width; i++) {
+        for (uint16_t j = 0; j < height; j++) {
+            double x = (i - cx) / fx;
+            double y = (j - cy) / fy;
+
+            double r2 = x * x + y * y;
+            double k_calc =
+                double(1 + k[0] * r2 + k[1] * r2 * r2 + k[4] * r2 * r2 * r2);
+            m_distortion_cache[j * width + i] = k_calc;
+        }
+    }
+}
+
+aditof::Status CalibrationFxTof1::distortionCorrection(
+    const std::vector<float> &cameraMatrix,
+    const std::vector<float> &distortionCoeffs, uint16_t *frame,
+    unsigned int width, unsigned int height) {
+    using namespace aditof;
+
+    double fx = cameraMatrix[0];
+    double fy = cameraMatrix[4];
+    double cx = cameraMatrix[2];
+    double cy = cameraMatrix[5];
+    //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
+    std::vector<double> k(distortionCoeffs.begin(), distortionCoeffs.end());
+    uint16_t *buff;
+
+    buff = new uint16_t[width * height];
+
+    for (uint16_t i = 0; i < width; i++) {
+        for (uint16_t j = 0; j < height; j++) {
+            //transform in dimensionless space
+            double x = (double(i) - cx) / fx;
+            double y = (double(j) - cy) / fy;
+
+            //apply correction
+            double x_dist_adim = x * m_distortion_cache[j * width + i];
+            double y_dist_adim = y * m_distortion_cache[j * width + i];
+
+            //back to original space
+            int x_dist = (int)(x_dist_adim * fx + cx);
+            int y_dist = (int)(y_dist_adim * fy + cy);
+
+            if (x_dist >= 0 && x_dist < width && y_dist >= 0 &&
+                y_dist < height) {
+                buff[j * width + i] = frame[y_dist * width + x_dist];
+            } else {
+                buff[j * width + i] = frame[j * width + i];
+            }
+        }
+    }
+
+    memcpy(frame, buff, width * height * 2);
+    delete[] buff;
+    return Status::OK;
 }
