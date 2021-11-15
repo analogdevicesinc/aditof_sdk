@@ -183,6 +183,20 @@ aditof::Status Camera3D_Smart::initialize() {
     }
     m_tempSensorsInitialized = true;
 
+    // Read the camera's serial number from eeprom
+    uint8_t *eepromSerial = new uint8_t(EEPROM_SERIAL_LENGHT);
+    status =
+        m_eeprom->read(EEPROM_SERIAL_ADDR, eepromSerial, EEPROM_SERIAL_LENGHT);
+    if (status != Status::OK) {
+        LOG(ERROR) << "Failed to read serial from eeprom";
+        return status;
+    }
+
+    m_details.cameraId =
+        std::string((char *)(eepromSerial), EEPROM_SERIAL_LENGHT);
+    delete[] eepromSerial;
+    LOG(INFO) << "Camera ID: " << m_details.cameraId;
+
     status = m_calibration.readCalMap(m_eeprom);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to read calibration data from eeprom";

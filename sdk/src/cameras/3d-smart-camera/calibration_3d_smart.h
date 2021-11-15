@@ -43,6 +43,10 @@
 
 #define INTRINSIC 5
 #define DISTORTION_COEFFICIENTS 6
+#ifndef EEPROM_SERIAL_ADDR
+#define EEPROM_SERIAL_ADDR 0x00010014
+#define EEPROM_SERIAL_LENGHT 12
+#endif
 
 namespace aditof {
 class StorageInterface;
