@@ -84,6 +84,14 @@ Calibration96Tof1::~Calibration96Tof1() {
     if (m_distortion_cache) {
         delete[] m_distortion_cache;
     }
+
+    if (m_intrinsics) {
+        delete[] m_intrinsics;
+    }
+
+    if (m_distCoeffs) {
+        delete[] m_distCoeffs;
+    }
 }
 
 //! DisplayCalMap - Display the entire calibration map
@@ -549,12 +557,23 @@ void Calibration96Tof1::buildDistortionCorrectionCache(
     unsigned int height) {
     using namespace aditof;
 
-    double fx = cameraMatrix[0];
-    double fy = cameraMatrix[4];
-    double cx = cameraMatrix[2];
-    double cy = cameraMatrix[5];
     //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
-    std::vector<double> k(distortionCoeffs.begin(), distortionCoeffs.end());
+    m_distCoeffs = new double[5];
+    m_intrinsics = new double[4];
+    for (int i = 0; i < 5; i++) {
+        m_distCoeffs[i] = double(distortionCoeffs.at(i));
+    }
+
+    m_intrinsics[0] = double(cameraMatrix[0]);
+    m_intrinsics[1] = double(cameraMatrix[4]);
+    m_intrinsics[2] = double(cameraMatrix[2]);
+    m_intrinsics[3] = double(cameraMatrix[5]);
+
+    double fx = m_intrinsics[0];
+    double fy = m_intrinsics[1];
+    double cx = m_intrinsics[2];
+    double cy = m_intrinsics[3];
+
     if (m_distortion_cache) {
         delete[] m_distortion_cache;
     }
@@ -567,24 +586,24 @@ void Calibration96Tof1::buildDistortionCorrectionCache(
 
             double r2 = x * x + y * y;
             double k_calc =
-                double(1 + k[0] * r2 + k[1] * r2 * r2 + k[4] * r2 * r2 * r2);
+                double(1 + m_distCoeffs[0] * r2 + m_distCoeffs[1] * r2 * r2 +
+                       m_distCoeffs[4] * r2 * r2 * r2);
             m_distortion_cache[j * width + i] = k_calc;
         }
     }
 }
 
-aditof::Status Calibration96Tof1::distortionCorrection(
-    const std::vector<float> &cameraMatrix,
-    const std::vector<float> &distortionCoeffs, uint16_t *frame,
-    unsigned int width, unsigned int height) {
+aditof::Status Calibration96Tof1::distortionCorrection(uint16_t *frame,
+                                                       unsigned int width,
+                                                       unsigned int height) {
     using namespace aditof;
 
-    double fx = cameraMatrix[0];
-    double fy = cameraMatrix[4];
-    double cx = cameraMatrix[2];
-    double cy = cameraMatrix[5];
+    double fx = m_intrinsics[0];
+    double fy = m_intrinsics[1];
+    double cx = m_intrinsics[2];
+    double cy = m_intrinsics[3];
     //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
-    std::vector<double> k(distortionCoeffs.begin(), distortionCoeffs.end());
+
     uint16_t *buff;
 
     buff = new uint16_t[width * height];
@@ -620,10 +639,10 @@ aditof::Status Calibration96Tof1::distortionCorrection(
             double r2 = x * x + y * y;
 
             //apply correction
-            double x_dist_adim =
-                x + (2 * k[2] * x * y + k[3] * (r2 + 2 * x * x));
-            double y_dist_adim =
-                y + (k[2] * (r2 + 2 * y * y) + 2 * k[3] * x * y);
+            double x_dist_adim = x + (2 * m_distCoeffs[2] * x * y +
+                                      m_distCoeffs[3] * (r2 + 2 * x * x));
+            double y_dist_adim = y + (m_distCoeffs[2] * (r2 + 2 * y * y) +
+                                      2 * m_distCoeffs[3] * x * y);
 
             //back to original space
             int x_dist = (int)(x_dist_adim * fx + cx);
