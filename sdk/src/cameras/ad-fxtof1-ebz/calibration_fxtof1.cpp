@@ -304,9 +304,11 @@ aditof::Status CalibrationFxTof1::setMode(
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to read distortion coeffs from eeprom";
         return status;
+    } else {
+        buildDistortionCorrectionCache(cameraMatrix, distortionCoeffs,
+                                       frameWidth, frameHeight);
     }
-    buildDistortionCorrectionCache(cameraMatrix, distortionCoeffs, frameWidth,
-                                   frameHeight);
+
     /*Execute the mode change command*/
     uint16_t afeRegsAddr[] = {0x4000, 0x4001, 0x7c22};
     uint16_t afeRegsVal[] = {mode_id, 0x0004, 0x0004};
@@ -431,13 +433,16 @@ void CalibrationFxTof1::buildDistortionCorrectionCache(
     const std::vector<float> &distortionCoeffs, unsigned int width,
     unsigned int height) {
     using namespace aditof;
-
-    double fx = cameraMatrix[0];
-    double fy = cameraMatrix[4];
-    double cx = cameraMatrix[2];
-    double cy = cameraMatrix[5];
     //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
-    std::vector<double> k(distortionCoeffs.begin(), distortionCoeffs.end());
+    double *m_distCoeffs = new double[5];
+    for (int i = 0; i < 5; i++) {
+        m_distCoeffs[i] = double(distortionCoeffs.at(i));
+    }
+
+    double fx = m_intrinsics[2];
+    double fy = m_intrinsics[3];
+    double cx = m_intrinsics[0];
+    double cy = m_intrinsics[1];
     if (m_distortion_cache) {
         delete[] m_distortion_cache;
     }
@@ -450,26 +455,23 @@ void CalibrationFxTof1::buildDistortionCorrectionCache(
 
             double r2 = x * x + y * y;
             double k_calc =
-                double(1 + k[0] * r2 + k[1] * r2 * r2 + k[4] * r2 * r2 * r2);
+                double(1 + m_distCoeffs[0] * r2 + m_distCoeffs[1] * r2 * r2 +
+                       m_distCoeffs[4] * r2 * r2 * r2);
             m_distortion_cache[j * width + i] = k_calc;
         }
     }
 }
 
-aditof::Status CalibrationFxTof1::distortionCorrection(
-    const std::vector<float> &cameraMatrix,
-    const std::vector<float> &distortionCoeffs, uint16_t *frame,
-    unsigned int width, unsigned int height) {
+aditof::Status CalibrationFxTof1::distortionCorrection(uint16_t *frame,
+                                                       unsigned int width,
+                                                       unsigned int height) {
     using namespace aditof;
+    double fx = m_intrinsics[2];
+    double fy = m_intrinsics[3];
+    double cx = m_intrinsics[0];
+    double cy = m_intrinsics[1];
 
-    double fx = cameraMatrix[0];
-    double fy = cameraMatrix[4];
-    double cx = cameraMatrix[2];
-    double cy = cameraMatrix[5];
-    //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
-    std::vector<double> k(distortionCoeffs.begin(), distortionCoeffs.end());
     uint16_t *buff;
-
     buff = new uint16_t[width * height];
 
     for (uint16_t i = 0; i < width; i++) {

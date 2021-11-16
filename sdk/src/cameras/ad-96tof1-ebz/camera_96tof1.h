@@ -99,6 +99,7 @@ class Camera96Tof1 : public aditof::Camera {
     float m_irGammaCorrection;
     bool m_depthCorrection;
     bool m_cameraGeometryCorrection;
+    bool m_distortionCorrection;
     std::string m_revision;
 };
 

@@ -60,8 +60,12 @@ static const std::map<std::string, std::array<rangeStruct, 3>>
 static const std::string skCustomMode = "custom";
 
 static const std::vector<std::string> availableControls = {
-    "noise_reduction_threshold", "ir_gamma_correction", "depth_correction",
-    "camera_geometry_correction", "revision"};
+    "noise_reduction_threshold",
+    "ir_gamma_correction",
+    "depth_correction",
+    "camera_geometry_correction",
+    "camera_distortion_correction",
+    "revision"};
 
 Camera96Tof1::Camera96Tof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
@@ -70,7 +74,8 @@ Camera96Tof1::Camera96Tof1(
     : m_depthSensor(depthSensor), m_devStarted(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
       m_availableControls(availableControls), m_depthCorrection(true),
-      m_cameraGeometryCorrection(true), m_revision("RevC") {
+      m_cameraGeometryCorrection(true), m_distortionCorrection(true),
+      m_revision("RevC") {
 
     // Check Depth Sensor
     if (!depthSensor) {
@@ -463,6 +468,20 @@ aditof::Status Camera96Tof1::requestFrame(aditof::Frame *frame,
                 frameDataLocation,
                 m_details.frameType.width * m_details.frameType.height);
         }
+        if (m_distortionCorrection) {
+            m_calibration.distortionCorrection(frameDataLocation,
+                                               m_details.frameType.width,
+                                               m_details.frameType.height);
+        }
+    }
+    if ((m_details.frameType.type == "depth_ir" ||
+         m_details.frameType.type == "ir") &&
+        m_distortionCorrection) {
+        uint16_t *irDataLocation;
+        frame->getData(FrameDataType::IR, &irDataLocation);
+        m_calibration.distortionCorrection(irDataLocation,
+                                           m_details.frameType.width,
+                                           m_details.frameType.height);
     }
 
     return Status::OK;
@@ -541,6 +560,10 @@ aditof::Status Camera96Tof1::setControl(const std::string &control,
         m_cameraGeometryCorrection = std::stoi(value) != 0;
     }
 
+    if (control == "camera_distortion_correction") {
+        m_distortionCorrection = std::stoi(value) != 0;
+    }
+
     if (control == "revision") {
         m_revision = value;
     }
@@ -574,6 +597,10 @@ aditof::Status Camera96Tof1::getControl(const std::string &control,
 
     if (control == "camera_geometry_correction") {
         value = m_cameraGeometryCorrection ? "1" : "0";
+    }
+
+    if (control == "camera_distortion_correction") {
+        value = m_distortionCorrection ? "1" : "0";
     }
 
     if (control == "revision") {
