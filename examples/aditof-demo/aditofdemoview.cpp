@@ -68,8 +68,10 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
                                const std::string &name)
     : m_ctrl(ctrl), m_viewName(name), m_depthFrameAvailable(false),
       m_irFrameAvailable(false), m_rgbCameraAvailable(false),
-      m_stopWorkersFlag(false), m_center(true), m_waitKeyBarrier(0),
-      m_distanceVal(0), m_crtSmallSignalState(false), m_crtIRGamma(false) {
+      m_pointCloudImageAvailable(false), m_stopWorkersFlag(false),
+      m_center(true), m_waitKeyBarrier(0), m_distanceVal(0),
+      m_crtSmallSignalState(false), m_crtIRGamma(false),
+      m_pointCloudEnabled(false) {
     // cv::setNumThreads(2);
     m_depthImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));
@@ -77,6 +79,8 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
         std::thread(std::bind(&AdiTofDemoView::_displayIrImage, this));
     m_rgbImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayRgbImage, this));
+    m_pointCloudImageWorker =
+        std::thread(std::bind(&AdiTofDemoView::_displayPointCloudImage, this));
 }
 AdiTofDemoView::~AdiTofDemoView() {
     std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
@@ -86,6 +90,7 @@ AdiTofDemoView::~AdiTofDemoView() {
     m_depthImageWorker.join();
     m_irImageWorker.join();
     m_rgbImageWorker.join();
+    m_pointCloudImageWorker.join();
 }
 
 bool USBModeChecked = false;
@@ -806,6 +811,10 @@ void AdiTofDemoView::render() {
         cvui::space(10);
         cvui::endColumn();
 
+        cvui::beginColumn(frame, 160, 385);
+        cvui::checkbox("Display Point Cloud", &m_pointCloudEnabled);
+        cvui::endColumn();
+
         cvui::rect(frame, 50, 430, 100, 30, valueColorSTh);
         cvui::text(frame, 60, 440, valueSTh);
         int thresholdClicked = cvui::iarea(50, 430, 100, 30);
@@ -936,8 +945,16 @@ void AdiTofDemoView::render() {
                 }
                 if (m_rgbCameraAvailable) {
                     m_rgbFrameAvailable = true;
+                }
+                if (m_pointCloudEnabled) {
+                    m_pointCloudImageAvailable = true;
+                }
+                if (m_rgbCameraAvailable && m_pointCloudEnabled) {
+                    threadNum += 2;
+                } else if (m_rgbCameraAvailable || m_pointCloudEnabled) {
                     threadNum++;
                 }
+                LOG(INFO) << "thread num: " << threadNum;
 
                 lock.unlock();
                 m_frameCapturedCv.notify_all();
@@ -964,6 +981,10 @@ void AdiTofDemoView::render() {
             if (m_rgbCameraAvailable) {
                 cvui::imshow("Rgb Image", m_rgbImage);
                 m_rgbImage.release();
+            }
+
+            if (m_pointCloudEnabled) {
+                m_pointCloudImage.release();
             }
         }
 
@@ -1264,6 +1285,27 @@ void AdiTofDemoView::_displayRgbImage() {
         cv::cvtColor(m_rgbImage, m_rgbImage, cv::COLOR_BayerBG2RGB);
         cv::resize(m_rgbImage, m_rgbImage, cv::Size(960, 540));
         flip(m_rgbImage, m_rgbImage, 0);
+        std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
+        m_waitKeyBarrier += 1;
+        if (m_waitKeyBarrier == threadNum) {
+            imshow_lock.unlock();
+            m_barrierCv.notify_all();
+        }
+    }
+}
+
+void AdiTofDemoView::_displayPointCloudImage() {
+    while (!m_stopWorkersFlag) {
+        std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
+        m_frameCapturedCv.wait(lock, [&]() {
+            return m_pointCloudImageAvailable || m_stopWorkersFlag;
+        });
+
+        if (m_stopWorkersFlag) {
+            break;
+        }
+        m_pointCloudImageAvailable = false;
+        lock.unlock(); // Lock is no longer needed
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         m_waitKeyBarrier += 1;
         if (m_waitKeyBarrier == threadNum) {
