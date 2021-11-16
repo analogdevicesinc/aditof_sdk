@@ -217,13 +217,13 @@ aditof::Status Camera96Tof1::initialize() {
 }
 
 aditof::Status Camera96Tof1::start() {
-    // return m_depthSensor->start(); // For now we keep the device open all the time
-    return aditof::Status::OK;
+    return m_depthSensor
+        ->start(); // For now we keep the device open all the time
 }
 
 aditof::Status Camera96Tof1::stop() {
-    // return m_depthSensor->stop(); // For now we keep the device open all the time
-    return aditof::Status::OK;
+    return m_depthSensor
+        ->stop(); // For now we keep the device open all the time
 }
 
 aditof::Status Camera96Tof1::setMode(const std::string &mode,
@@ -371,6 +371,14 @@ aditof::Status Camera96Tof1::getAvailableModes(
 aditof::Status Camera96Tof1::setFrameType(const std::string &frameType) {
     using namespace aditof;
     Status status = Status::OK;
+
+    if (m_devStarted) {
+        status = m_depthSensor->stop();
+        if (status != Status::OK) {
+            return status;
+        }
+        m_devStarted = false;
+    }
 
     std::vector<FrameDetails> detailsList;
     status = m_depthSensor->getAvailableFrameTypes(detailsList);
