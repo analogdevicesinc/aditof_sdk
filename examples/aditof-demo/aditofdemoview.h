@@ -57,6 +57,7 @@ class AdiTofDemoView {
     void _displayIrImage();
     void _displayBlendedImage();
     void _displayRgbImage();
+    void _displayPointCloudImage();
 
   private:
     std::shared_ptr<AdiTofDemoController> m_ctrl;
@@ -66,16 +67,19 @@ class AdiTofDemoView {
     cv::Mat m_irImage;
     cv::Mat m_blendedImage;
     cv::Mat m_rgbImage;
+    cv::Mat m_pointCloudImage;
     double m_blendValue = 0.5;
 
     std::thread m_depthImageWorker;
     std::thread m_irImageWorker;
     std::thread m_rgbImageWorker;
+    std::thread m_pointCloudImageWorker;
     std::mutex m_frameCapturedMutex;
     bool m_depthFrameAvailable;
     bool m_irFrameAvailable;
     bool m_rgbFrameAvailable;
     bool m_rgbCameraAvailable;
+    bool m_pointCloudImageAvailable;
     std::shared_ptr<aditof::Frame> m_capturedFrame;
     std::condition_variable m_frameCapturedCv;
     std::vector<std::string> availableFrameTypes;
@@ -92,6 +96,7 @@ class AdiTofDemoView {
     bool m_crtSmallSignalState;
     bool m_crtIRGamma;
     bool m_farModeEnabled;
+    bool m_pointCloudEnabled;
 
     bool USBModeChecked = false;
     bool localModeChecked = false;
