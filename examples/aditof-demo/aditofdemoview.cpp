@@ -482,24 +482,23 @@ void AdiTofDemoView::render() {
         cvui::endRow();
         cvui::endColumn();
 
-        if (!m_farModeEnabled) {
-            if (!USBModeChecked) {
-                cvui::beginColumn(frame, 265, 105);
-                cvui::space(10);
-                cvui::text("Frame type: ", 0.6);
-                cvui::space(10);
-                cvui::beginRow(frame, 265, 140);
-                cvui::checkbox(frameTypes[0], &depthIrChecked);
-                cvui::endRow();
-                cvui::beginRow(frame, 265, 170);
-                cvui::checkbox(frameTypes[1], &depthOnlyChecked);
-                cvui::endRow();
-                cvui::beginRow(frame, 265, 200);
-                cvui::checkbox(frameTypes[2], &irOnlyChecked);
-                cvui::endRow();
-                cvui::endColumn();
-            }
+        if (!USBModeChecked) {
+            cvui::beginColumn(frame, 265, 105);
+            cvui::space(10);
+            cvui::text("Frame type: ", 0.6);
+            cvui::space(10);
+            cvui::beginRow(frame, 265, 140);
+            cvui::checkbox(frameTypes[0], &depthIrChecked);
+            cvui::endRow();
+            cvui::beginRow(frame, 265, 170);
+            cvui::checkbox(frameTypes[1], &depthOnlyChecked);
+            cvui::endRow();
+            cvui::beginRow(frame, 265, 200);
+            cvui::checkbox(frameTypes[2], &irOnlyChecked);
+            cvui::endRow();
+            cvui::endColumn();
         }
+
         cvui::text(frame, 50, 160, "Video: ", 0.6);
 
         if (cvui::button(
