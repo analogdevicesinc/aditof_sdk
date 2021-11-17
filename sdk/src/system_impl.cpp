@@ -51,6 +51,8 @@
 #include <algorithm>
 #include <glog/logging.h>
 
+#include "aditof/version.h"
+
 using namespace aditof;
 
 /* Constructs a camera based on the sensors & other devices provided
@@ -104,7 +106,15 @@ buildCamera(std::unique_ptr<SensorEnumeratorInterface> enumerator) {
     return camera;
 }
 
-SystemImpl::SystemImpl() {}
+SystemImpl::SystemImpl() {
+    static bool sdkRevisionLogged = false;
+    if (!sdkRevisionLogged) {
+        LOG(INFO) << "SDK version: " << aditof::getApiVersion()
+                  << " | branch: " << ADITOFSDK_GIT_BRANCH
+                  << " | commit: " << ADITOFSDK_GIT_COMMIT;
+        sdkRevisionLogged = true;
+    }
+}
 
 SystemImpl::~SystemImpl() = default;
 

@@ -17,9 +17,9 @@
 #define SERVER_VERSION       "@VERSION_SERVER@"   
 
 namespace aditof {
- const std::string getApiVersion() { return std::string(ADITOF_API_VERSION); }
- const std::string getUvcVersion() { return std::string(UVC_GADGET_VERSION); }
- const std::string getServerVersion() { return std::string(SERVER_VERSION); }
+ static inline const std::string getApiVersion() { return std::string(ADITOF_API_VERSION); }
+ static inline const std::string getUvcVersion() { return std::string(UVC_GADGET_VERSION); }
+ static inline const std::string getServerVersion() { return std::string(SERVER_VERSION); }
 
 } // namespace aditof
 
