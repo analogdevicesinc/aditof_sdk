@@ -68,6 +68,8 @@ class AdiTofDemoView {
     cv::Mat m_blendedImage;
     cv::Mat m_rgbImage;
     cv::Mat m_pointCloudImage;
+    cv::Mat m_pointCloudDepthColors;
+    cv::_InputArray m_pointCloudColors;
     double m_blendValue = 0.5;
 
     std::thread m_depthImageWorker;

@@ -986,7 +986,7 @@ void AdiTofDemoView::render() {
             }
 
             if (m_pointCloudEnabled) {
-                cv::viz::WCloud cloud(m_pointCloudImage, cv::viz::Color::red());
+                cv::viz::WCloud cloud(m_pointCloudImage, m_pointCloudColors);
                 pointCloudWindow.showWidget("Cloud", cloud);
                 pointCloudWindow.spinOnce();
             }
@@ -1322,6 +1322,17 @@ void AdiTofDemoView::_displayPointCloudImage() {
         int frameHeight = static_cast<int>(frameDetails.height);
         int frameWidth = static_cast<int>(frameDetails.width);
 
+        m_pointCloudDepthColors =
+            cv::Mat(frameHeight, frameWidth, CV_16UC1, data);
+        m_pointCloudDepthColors.convertTo(
+            m_pointCloudDepthColors, CV_8U,
+            (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),
+            (-(255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())) *
+             m_ctrl->getRangeMin()));
+        applyColorMap(m_pointCloudDepthColors, m_pointCloudDepthColors,
+                      cv::COLORMAP_RAINBOW);
+
+        m_pointCloudColors = cv::_InputArray(m_pointCloudDepthColors);
         std::vector<cv::Vec3f> buffer(frameWidth * frameHeight);
         for (int i = 0; i < frameHeight; i++) {
             for (int j = 0; j < frameWidth; j++) {
