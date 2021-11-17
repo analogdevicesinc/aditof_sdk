@@ -174,6 +174,8 @@ void AdiTofDemoView::render() {
         "Blended Image", "Depth/Ir Only Image", "Rgb Image"};
     cvui::init(windows, 1);
 
+    cv::viz::Viz3d pointCloudWindow("Point Cloud Window");
+
     int frameCount = 0;
     int displayFps = 0;
     auto startTime = std::chrono::system_clock::now();
@@ -984,7 +986,9 @@ void AdiTofDemoView::render() {
             }
 
             if (m_pointCloudEnabled) {
-                m_pointCloudImage.release();
+                cv::viz::WCloud cloud(m_pointCloudImage, cv::viz::Color::red());
+                pointCloudWindow.showWidget("Cloud", cloud);
+                pointCloudWindow.spinOnce();
             }
         }
 
@@ -1304,8 +1308,31 @@ void AdiTofDemoView::_displayPointCloudImage() {
         if (m_stopWorkersFlag) {
             break;
         }
+
         m_pointCloudImageAvailable = false;
+        std::shared_ptr<aditof::Frame> localFrame = m_capturedFrame;
         lock.unlock(); // Lock is no longer needed
+
+        uint16_t *data;
+        localFrame->getData(aditof::FrameDataType::DEPTH, &data);
+
+        aditof::FrameDetails frameDetails;
+        localFrame->getDetails(frameDetails);
+
+        int frameHeight = static_cast<int>(frameDetails.height);
+        int frameWidth = static_cast<int>(frameDetails.width);
+
+        std::vector<cv::Vec3f> buffer(frameWidth * frameHeight);
+        for (int i = 0; i < frameHeight; i++) {
+            for (int j = 0; j < frameWidth; j++) {
+                buffer[i * frameWidth + j] =
+                    cv::Vec3f(static_cast<float>(i), static_cast<float>(j),
+                              static_cast<float>(data[i * frameWidth + j]));
+            }
+        }
+
+        m_pointCloudImage =
+            cv::Mat(frameHeight, frameWidth, CV_32FC3, &buffer[0]).clone();
         std::unique_lock<std::mutex> imshow_lock(m_imshowMutex);
         m_waitKeyBarrier += 1;
         if (m_waitKeyBarrier == threadNum) {
