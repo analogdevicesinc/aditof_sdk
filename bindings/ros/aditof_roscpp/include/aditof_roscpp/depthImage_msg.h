@@ -107,8 +107,12 @@ class DepthImageMsg : public AditofSensorMsg {
      */
     void publishMsg(const ros::Publisher &pub);
 
+    void setDepthDataFormat(int value);
+    int getDepthDataFormat();
+
   private:
     DepthImageMsg();
+    int m_depthDataFormat; //MONO16 - 0, RGBA8 - 1
 };
 
 #endif // DEPTHIMAGE_MSG_H

@@ -40,7 +40,7 @@
 using namespace aditof;
 
 void callback(aditof_roscpp::Aditof_roscppConfig &config, uint32_t level,
-              std::shared_ptr<Camera> &camera) {
+              std::shared_ptr<Camera> &camera, DepthImageMsg *depthImgMsg) {
 
     config.groups.camera_tof.noise_reduction.state = true;
 
@@ -62,16 +62,29 @@ void callback(aditof_roscpp::Aditof_roscppConfig &config, uint32_t level,
         config.groups.camera_tof.noise_reduction.state = false;
         break;
     }
-
+    /*
     switch (config.revision) {
     case 0:
-        setCameraRevision(camera, "RevB");
+        setCameraRevision(camera, "RevA");
         break;
     case 1:
+        setCameraRevision(camera, "RevB");
+        break;
+
+    case 2:
         setCameraRevision(camera, "RevC");
         break;
     }
     setIrGammaCorrection(camera, config.ir_gamma);
+*/
+    switch (config.depth_data_format) { //MONO16 - 0, RGBA8 - 1
+    case 0:
+        depthImgMsg->setDepthDataFormat(0);
+        break;
+    case 1:
+        depthImgMsg->setDepthDataFormat(1);
+        break;
+    }
 }
 
 int main(int argc, char **argv) {
@@ -97,9 +110,6 @@ int main(int argc, char **argv) {
     dynamic_reconfigure::Server<aditof_roscpp::Aditof_roscppConfig> server;
     dynamic_reconfigure::Server<
         aditof_roscpp::Aditof_roscppConfig>::CallbackType f;
-
-    f = boost::bind(&callback, _1, _2, camera);
-    server.setCallback(f);
 
     //create publishers
     ros::NodeHandle nHandle("aditof_roscpp");
@@ -164,6 +174,9 @@ int main(int argc, char **argv) {
         dynamic_cast<CameraInfoMsg *>(camera_info_msg);
     ROS_ASSERT_MSG(cameraInfoMsg,
                    "downcast from AditofSensorMsg to CameraInfoMsg failed");
+
+    f = boost::bind(&callback, _1, _2, camera, depthImgMsg);
+    server.setCallback(f);
 
     if (!m_rgbSensor) {
         delete rgb_img_msg;

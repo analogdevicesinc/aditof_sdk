@@ -39,6 +39,7 @@ DepthImageMsg::DepthImageMsg(const std::shared_ptr<aditof::Camera> &camera,
                              ros::Time tStamp) {
     imgEncoding = encoding;
     FrameDataToMsg(camera, frame, tStamp);
+    m_depthDataFormat = 1; //RGBA8
 }
 
 void DepthImageMsg::FrameDataToMsg(const std::shared_ptr<Camera> &camera,
@@ -76,14 +77,29 @@ void DepthImageMsg::setMetadataMembers(int width, int height,
 
 void DepthImageMsg::setDataMembers(const std::shared_ptr<Camera> &camera,
                                    uint16_t *frameData) {
-    if (msg.encoding.compare(sensor_msgs::image_encodings::RGBA8) == 0) {
-        std::vector<uint16_t> depthData(frameData,
-                                        frameData + msg.width * msg.height);
-        auto min_range = std::min_element(depthData.begin(), depthData.end());
+    if (m_depthDataFormat == 1) //RGBA8
+    {
+        if (msg.encoding.compare(sensor_msgs::image_encodings::RGBA8) == 0) {
+            std::vector<uint16_t> depthData(frameData,
+                                            frameData + msg.width * msg.height);
+            auto min_range =
+                std::min_element(depthData.begin(), depthData.end());
 
-        dataToRGBA8(*min_range, getRangeMax(camera), frameData);
-    } else
-        ROS_ERROR("Image encoding invalid or not available");
+            dataToRGBA8(*min_range, getRangeMax(camera), frameData);
+        } else
+            ROS_ERROR("Image encoding invalid or not available");
+    } else if (m_depthDataFormat == 0) //MONO16
+    {
+        if (msg.encoding.compare(sensor_msgs::image_encodings::MONO16) == 0) {
+            std::vector<uint16_t> depthData(frameData,
+                                            frameData + msg.width * msg.height);
+            auto min_range =
+                std::min_element(depthData.begin(), depthData.end());
+
+            memcpy(msg.data.data(), frameData, 2 * msg.width * msg.height);
+        } else
+            ROS_ERROR("Image encoding invalid or not available");
+    }
 }
 
 void DepthImageMsg::dataToRGBA8(uint16_t min_range, uint16_t max_range,
@@ -148,3 +164,11 @@ Rgba8Color DepthImageMsg::HSVtoRGBA8(double hue, double sat, double val) {
 }
 
 void DepthImageMsg::publishMsg(const ros::Publisher &pub) { pub.publish(msg); }
+
+void DepthImageMsg::setDepthDataFormat(int value) {
+    m_depthDataFormat = value;
+    imgEncoding = (value == 1) ? sensor_msgs::image_encodings::RGBA8
+                               : sensor_msgs::image_encodings::MONO16;
+}
+
+int DepthImageMsg::getDepthDataFormat() { return (m_depthDataFormat); }
