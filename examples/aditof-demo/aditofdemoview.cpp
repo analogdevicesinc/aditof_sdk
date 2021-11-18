@@ -957,7 +957,6 @@ void AdiTofDemoView::render() {
                 } else if (m_rgbCameraAvailable || m_pointCloudEnabled) {
                     threadNum++;
                 }
-                LOG(INFO) << "thread num: " << threadNum;
 
                 lock.unlock();
                 m_frameCapturedCv.notify_all();
