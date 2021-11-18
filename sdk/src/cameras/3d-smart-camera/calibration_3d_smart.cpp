@@ -479,8 +479,8 @@ aditof::Status Calibration3D_Smart::distortionCorrection(uint16_t *frame,
             double y_dist_adim = y * m_distortion_cache[j * width + i];
 
             //back to original space
-            int x_dist = (int)(x_dist_adim * fx + cx);
-            int y_dist = (int)(y_dist_adim * fy + cy);
+            unsigned int x_dist = (unsigned int)(x_dist_adim * fx + cx);
+            unsigned int y_dist = (unsigned int)(y_dist_adim * fy + cy);
 
             if (x_dist >= 0 && x_dist < width && y_dist >= 0 &&
                 y_dist < height) {

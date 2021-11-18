@@ -61,6 +61,22 @@ class AdiTofDemoView {
   private:
     std::shared_ptr<AdiTofDemoController> m_ctrl;
     std::string m_viewName;
+	
+    bool m_depthFrameAvailable;
+    bool m_irFrameAvailable;
+    bool m_stopWorkersFlag;
+    bool m_center;
+
+    int m_waitKeyBarrier;
+    int m_distanceVal;
+
+    bool m_crtSmallSignalState;
+    bool m_crtIRGamma;
+    bool m_rgbCameraAvailable;
+
+    std::thread m_depthImageWorker;
+    std::thread m_irImageWorker;
+    std::thread m_rgbImageWorker;
 
     cv::Mat m_depthImage;
     cv::Mat m_irImage;
@@ -68,29 +84,27 @@ class AdiTofDemoView {
     cv::Mat m_rgbImage;
     double m_blendValue = 0.5;
 
-    std::thread m_depthImageWorker;
-    std::thread m_irImageWorker;
-    std::thread m_rgbImageWorker;
+    
     std::mutex m_frameCapturedMutex;
-    bool m_depthFrameAvailable;
-    bool m_irFrameAvailable;
+
+
     bool m_rgbFrameAvailable;
-    bool m_rgbCameraAvailable;
+
     std::shared_ptr<aditof::Frame> m_capturedFrame;
     std::condition_variable m_frameCapturedCv;
     std::vector<std::string> availableFrameTypes;
     std::vector<std::string> availableModes;
-    bool m_stopWorkersFlag;
-    bool m_center;
+
+
 
     std::mutex m_imshowMutex;
-    int m_waitKeyBarrier;
+
     int threadNum;
     std::condition_variable m_barrierCv;
-    int m_distanceVal;
 
-    bool m_crtSmallSignalState;
-    bool m_crtIRGamma;
+
+
+
     bool m_farModeEnabled;
 
     bool USBModeChecked = false;
