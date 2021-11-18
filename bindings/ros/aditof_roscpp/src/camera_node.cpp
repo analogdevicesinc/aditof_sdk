@@ -74,9 +74,9 @@ void callback(aditof_roscpp::Aditof_roscppConfig &config, uint32_t level,
     case 2:
         setCameraRevision(camera, "RevC");
         break;
-    }
+    }*/
     setIrGammaCorrection(camera, config.ir_gamma);
-*/
+
     switch (config.depth_data_format) { //MONO16 - 0, RGBA8 - 1
     case 0:
         depthImgMsg->setDepthDataFormat(0);
