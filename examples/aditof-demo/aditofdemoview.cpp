@@ -170,11 +170,12 @@ void AdiTofDemoView::render() {
     bool fileNameFieldSelected = false;
 
     const cv::String windows[] = {
-        m_viewName,      "Depth Image",         "IR Image",
-        "Blended Image", "Depth/Ir Only Image", "Rgb Image"};
+        m_viewName,         "Depth Image",         "IR Image",
+        "Blended Image",    "Depth/Ir Only Image", "Rgb Image",
+        "Point Cloud Image"};
     cvui::init(windows, 1);
 
-    cv::viz::Viz3d pointCloudWindow("Point Cloud Window");
+    cv::viz::Viz3d pointCloudWindow(windows[6]);
 
     int frameCount = 0;
     int displayFps = 0;
@@ -1008,6 +1009,12 @@ void AdiTofDemoView::render() {
             if (m_rgbCameraAvailable) {
                 cvui::imshow("Rgb Image", m_rgbImage);
                 m_rgbImage.release();
+            }
+
+            if (m_pointCloudEnabled) {
+                cv::viz::WCloud cloud(m_pointCloudImage, m_pointCloudColors);
+                pointCloudWindow.showWidget("Cloud", cloud);
+                pointCloudWindow.spinOnce();
             }
         }
 
