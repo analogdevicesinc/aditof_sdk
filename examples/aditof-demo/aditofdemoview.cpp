@@ -67,9 +67,9 @@ uint16_t fromHexToUint(const std::string &hexValue) {
 AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
                                const std::string &name)
     : m_ctrl(ctrl), m_viewName(name), m_depthFrameAvailable(false),
-      m_irFrameAvailable(false), m_stopWorkersFlag(false), m_center(true),
-      m_waitKeyBarrier(0), m_distanceVal(0), m_crtSmallSignalState(false),
-      m_crtIRGamma(false), m_rgbCameraAvailable(false) {
+      m_irFrameAvailable(false), m_rgbCameraAvailable(false),
+      m_stopWorkersFlag(false), m_center(true), m_waitKeyBarrier(0),
+      m_distanceVal(0), m_crtSmallSignalState(false), m_crtIRGamma(false) {
     // cv::setNumThreads(2);
     m_depthImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayDepthImage, this));

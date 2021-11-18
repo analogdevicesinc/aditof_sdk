@@ -75,8 +75,8 @@ Camera3D_Smart::Camera3D_Smart(
     : m_rgbdSensor(rgbdSensor), m_devStarted(false), m_devProgrammed(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
       m_availableControls(availableControls), m_depthCorrection(true),
-      m_cameraGeometryCorrection(true), m_revision("RevA"),
-      m_cameraDistortionCorrection(true) {
+      m_cameraGeometryCorrection(true), m_cameraDistortionCorrection(true),
+      m_revision("RevA") {
 
     m_Rw = 255.0 * 0.25;
     m_Gw = 255.0 * 0.35;
