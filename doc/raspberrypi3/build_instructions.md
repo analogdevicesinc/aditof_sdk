@@ -9,7 +9,7 @@ To build the SDK and run the included applications and example code the followin
  - libopencv-dev
  - cmake
  - glog v0.3.5
- - libwebsockets v3.1
+ - libwebsockets v4.2.0
  - protocol buffers v3.9.0
 
 The SD card image already contains all the SDK dependencies and there's no need to install them again. To update and build the SDK just follow the steps below.

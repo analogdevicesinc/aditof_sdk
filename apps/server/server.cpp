@@ -269,7 +269,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     while (!interrupted) {
-        lws_service(network->context, 50 /* timeout_ms */);
+        lws_service(network->context, 0 /* timeout_ms */);
     }
 
     if (sensors_are_created) {
