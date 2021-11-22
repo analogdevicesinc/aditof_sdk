@@ -39,7 +39,7 @@ build_script:
       -DWITH_PYTHON=on \
       -DWITH_OPENCV=on \
       -DOpenCV_DIR="C:\tools\opencv\build\x64\vc15\lib" \
-      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0x64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stablex64\local_path\websockets" \
+      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0x64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_4_2_0x64\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" \
       ..
     - cmake --build . --config "Release"
@@ -50,7 +50,7 @@ build_script:
       -DWITH_PYTHON=on \
       -DWITH_OPENCV=on \
       -DOpenCV_DIR="C:\tools\opencv\build\x64\vc15\lib" \
-      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0x64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stablex64\local_path\websockets" \
+      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0x64\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_4_2_0x64\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" \
       ..
     - cmake --build . --config "Debug"
@@ -73,7 +73,7 @@ build_script:
     - cmake -G "%generator%" -A "Win32" \
       -DWITH_EXAMPLES=off \
       -DWITH_PYTHON=on \
-      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win32\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stableWin32\local_path\websockets" \
+      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win32\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_4_2_0Win32\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win32\include" \
       ..
     - cmake --build . --config "Release"
@@ -83,7 +83,7 @@ build_script:
     - cmake -G "%generator%" -A "Win32" \
       -DWITH_EXAMPLES=off \
       -DWITH_PYTHON=on \
-      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win32\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1_stableWin32\local_path\websockets" \
+      -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\protobuf\build_3_9_0Win32\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_4_2_0Win32\local_path\websockets" \
       -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win32\include" \
       ..
     - cmake --build . --config "Debug"
