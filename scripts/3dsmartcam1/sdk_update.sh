@@ -10,8 +10,8 @@ sudo cmake --build . --target install
 cd ../..
 
 cd libwebsockets
-sudo rm -rf build_3_1
-mkdir build_3_1 && cd build_3_1
+sudo rm -rf build_4_2_0
+mkdir build_4_2_0 && cd build_4_2_0
 cmake -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/opt/websockets ..
 sudo cmake --build . --target install
 cd ../..

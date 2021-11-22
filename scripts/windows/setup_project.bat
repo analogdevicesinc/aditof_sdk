@@ -278,10 +278,10 @@ EXIT /B 0
 set configuration=%~1
 echo "Installing websockets with config=%configuration% and generator=%generator%"
 pushd %deps_dir%
-if not exist "libwebsockets" ( git clone --branch v3.1-stable --depth 1  https://libwebsockets.org/repo/libwebsockets )
+if not exist "libwebsockets" ( git clone --branch v4.2.0 --depth 1  https://libwebsockets.org/repo/libwebsockets )
 pushd libwebsockets
-if not exist "build_3_1_stable" ( mkdir build_3_1_stable )
-pushd build_3_1_stable
+if not exist "build_4_2_0" ( mkdir build_4_2_0 )
+pushd build_4_2_0
 cmake -DOPENSSL_ROOT_DIR="%openSSLPath%" -DCMAKE_INSTALL_PREFIX=%deps_install_dir%\libwebsockets -G %generator% ..
 cmake --build . --target install --config %configuration%
 popd
