@@ -10,7 +10,7 @@ build_default() {
     # setup more deps
     # TODO cache this
     sudo apt-get update
-    sudo apt-get install -y build-essential libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+    sudo apt-get install -y build-essential libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev libgl1-mesa-dev libglfw3-dev
   
     sudo sh -c 'echo "${DEPS_DIR}/installed/opencv/lib" > /etc/ld.so.conf.d/opencv.conf'
 	sudo ldconfig
