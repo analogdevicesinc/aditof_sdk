@@ -27,3 +27,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 			"${PROJECT_SOURCE_DIR}/../deps/imgui/src/examples"
 			"${PROJECT_SOURCE_DIR}/../deps/imgui/src"
 )
+
+# Post build actions
+if( WIN32 )
+    add_custom_command( TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:aditof> $<TARGET_FILE_DIR:${PROJECT_NAME}>/.
+    )
+endif()
