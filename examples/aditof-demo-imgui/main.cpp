@@ -5,6 +5,10 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+
+#include <aditof/aditof.h>
+
+#include <string>
 #include <stdio.h>
 
 // About Desktop OpenGL function loaders:
@@ -70,8 +74,9 @@ int main(int, char**)
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
+    std::string titleBarName = "aditof-demo " + aditof::getApiVersion();
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, titleBarName.c_str(), NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
