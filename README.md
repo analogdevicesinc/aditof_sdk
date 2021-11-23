@@ -20,6 +20,22 @@ For more details on building the SDK on a host platform please check the **User 
 
 Designed using a modular approach, the 3D ToF platforms enable connectivity to the to a variety of embedded processing platforms. For more details on running the SDK on your processing platform of choice please check the corresponding **User Guide** below.
 
+### AD-3DSMARTCAM1-PRZ
+Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green.svg)](https://https://wiki.analog.com/resources/eval/user-guides/ad-3dsmartcam1-prz)
+
+| Documentation | GitHub master status | Downloads |
+| ------------- | ----------- | ----------- |
+| [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-3dsmartcam1-prz?rev=1637140560#getting_your_system_up_and_running) <br> [Build Instructions](doc/jetson/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) |  [![sdk release](https://img.shields.io/badge/release-sdk-blue.svg)](https://github.com/analogdevicesinc/aditof_sdk/releases/latest) 
+
+### AD-FXTOF1-EBZ
+Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green.svg)](https://wiki.analog.com/resources/eval/user-guides/ad-fxtof1-ebz)
+
+| Platform | Documentation | GitHub master status | Downloads |
+| --------- | ------------- | ----------- | ----------- |
+| Raspberry Pi 3,4 | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-fxtof1-ebz/ug_rpi) <br> [Build Instructions](doc/raspberrypi3/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](https://swdownloads.analog.com/cse/aditof/raspberrypi-fxtof1-latest-image.tar.xz) <br> [![Sha256sum Checksum](https://img.shields.io/badge/sha256sum-yellow.svg)](https://swdownloads.analog.com/cse/aditof/raspberrypi-fxtof1-latest-image-Sha256sum.txt) 
+| Nvidia Jetson Nano | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-fxtof1-ebz/ug_jetson) <br> [Build Instructions](doc/jetson/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/jetson_nano-fxtof1-latest-image.tar.xz) <br> [![Sha256sum Checksum](https://img.shields.io/badge/sha256sum-yellow.svg)](http://swdownloads.analog.com/cse/aditof/jetson_nano-fxtof1-latest-image-Sha256sum.txt) 
+| Nvidia Jetson Xavier NX | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-fxtof1-ebz/ug_xavier_nx) <br> [Build Instructions](doc/xavier-nx/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/xavier_nx-fxtof1-latest-image.tar.xz) <br> [![Sha256sum Checksum](https://img.shields.io/badge/sha256sum-yellow.svg)](http://swdownloads.analog.com/cse/aditof/xavier_nx-fxtof1-latest-image-sha256.txt)
+
 ### AD-96TOF1-EBZ
 Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green.svg)](https://wiki.analog.com/resources/eval/user-guides/ad-96tof1-ebz)
 
@@ -31,22 +47,6 @@ Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green
 | Nvidia Jetson Xavier NX | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-96tof1-ebz/ug_xavier_nx) <br> [Build Instructions](doc/xavier-nx/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/jetson_xavier_nx-latest-image.tar.xz) <br> [![Sha256sum Checksum](https://img.shields.io/badge/sha256sum-yellow.svg)](http://swdownloads.analog.com/cse/aditof/jetson_xavier_nx-latest-image-Sha256sum.txt) 
 | Nvidia Jetson Xavier AGX | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-96tof1-ebz/ug_xavier_agx) <br> [Build Instructions](doc/xavier-agx/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/jetson_xavier_agx-latest-image.tar.xz) <br> [![Sha256sum Checksum](https://img.shields.io/badge/sha256sum-yellow.svg)](http://swdownloads.analog.com/cse/aditof/jetson_xavier_agx-latest-image-Sha256sum.txt) 
 | Thor96 | [Arrow Electronics Github](https://github.com/ArrowElectronics/aditof_sdk#supported-embedded-platforms) | - | - |
-
-### AD-FXTOF1-EBZ
-Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green.svg)](https://wiki.analog.com/resources/eval/user-guides/ad-fxtof1-ebz)
-
-| Platform | Documentation | GitHub master status | Downloads |
-| --------- | ------------- | ----------- | ----------- |
-| Raspberry Pi 3,4 | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-fxtof1-ebz/ug_rpi) <br> [Build Instructions](doc/raspberrypi3/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](https://swdownloads.analog.com/cse/aditof/raspberrypi-fxtof1-latest-image.tar.xz) <br> [![Sha256sum Checksum](https://img.shields.io/badge/sha256sum-yellow.svg)](https://swdownloads.analog.com/cse/aditof/raspberrypi-fxtof1-latest-image-Sha256sum.txt) 
-| Nvidia Jetson Nano | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-fxtof1-ebz/ug_jetson) <br> [Build Instructions](doc/jetson/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/jetson_nano-fxtof1-latest-image.tar.xz) <br> [![Sha256sum Checksum](https://img.shields.io/badge/sha256sum-yellow.svg)](http://swdownloads.analog.com/cse/aditof/jetson_nano-fxtof1-latest-image-Sha256sum.txt) 
-| Nvidia Jetson Xavier NX | [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-fxtof1-ebz/ug_xavier_nx) <br> [Build Instructions](doc/xavier-nx/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) | [![SD card image](https://img.shields.io/badge/release-latest_sd_card_image-blue.svg)](http://swdownloads.analog.com/cse/aditof/xavier_nx-fxtof1-latest-image.tar.xz) <br> [![Sha256sum Checksum](https://img.shields.io/badge/sha256sum-yellow.svg)](http://swdownloads.analog.com/cse/aditof/xavier_nx-fxtof1-latest-image-sha256.txt) 
-
-### AD-3DSMARTCAM1-PRZ
-Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green.svg)](https://https://wiki.analog.com/resources/eval/user-guides/ad-3dsmartcam1-prz)
-
-| Documentation | GitHub master status | Downloads |
-| ------------- | ----------- | ----------- |
-| [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-3dsmartcam1-prz?rev=1637140560#getting_your_system_up_and_running) <br> [Build Instructions](doc/jetson/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) |  [![sdk release](https://img.shields.io/badge/release-sdk-blue.svg)](https://github.com/analogdevicesinc/aditof_sdk/releases/latest) 
 
 [How to write the SD card image onto the SD card?](doc/sdcard_burn.md)
 
