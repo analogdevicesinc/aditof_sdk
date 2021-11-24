@@ -2,3 +2,4 @@ bindings/python/pybind11
 misc/nvidia
 tools/deps/wingetopt/src
 examples/aditof-test/cvui.h
+examples/deps
