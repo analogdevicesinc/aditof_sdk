@@ -158,11 +158,21 @@ int main(int, char**)
 
         // 1. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-
             ImGui::SetNextWindowPos(ImVec2(0, 0));
             ImGui::SetNextWindowSize(ImVec2(mainWindowWidth, mainWindoHeight));
             bool boolFalse = false;
             ImGui::Begin("Hello, world!", &boolFalse, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+
+            if (ImGui::BeginMenuBar()) {
+                if (ImGui::BeginMenu("File")) {
+                    if (ImGui::MenuItem("Close", "Quit")) {
+                        glfwSetWindowShouldClose(window, true);
+                    }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenuBar();
+            }
+
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
