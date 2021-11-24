@@ -137,6 +137,10 @@ int main(int, char**)
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    int mainWindowWidth;
+    int mainWindoHeight;
+    glfwGetWindowSize(window, &mainWindowWidth, &mainWindoHeight);
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -154,8 +158,11 @@ int main(int, char**)
 
         // 1. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
+            ImGui::SetNextWindowPos(ImVec2(0, 0));
+            ImGui::SetNextWindowSize(ImVec2(mainWindowWidth, mainWindoHeight));
+            bool boolFalse = false;
+            ImGui::Begin("Hello, world!", &boolFalse, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
