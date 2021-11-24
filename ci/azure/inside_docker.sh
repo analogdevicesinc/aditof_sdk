@@ -3,6 +3,9 @@
 project_dir=$1
 pushd ${project_dir}
 
+sudo apt update
+sudo apt install -y libgl1-mesa-dev libglfw3-dev
+
 GLOG_INSTALL_DIR="/aditof-deps/installed/glog"
 PROTOBUF_INSTALL_DIR="/aditof-deps/installed/protobuf"
 WEBSOCKETS_INSTALL_DIR="/aditof-deps/installed/websockets"
