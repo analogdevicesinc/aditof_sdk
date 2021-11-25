@@ -83,11 +83,12 @@ jobs:
         DOCKER: "virgilix/nvidia-tegra"
         EXTRA_CMAKE_FLAGS: "-DXAVIERNX=1 -DUSE_FXTOF1=1"
 
+      # Not needed right now. Leaving this here in case we want to reenable it
       #TOYBRICK
-      ubuntu_18_Toybrick_fxtof1:
-        imageName: 'ubuntu-18.04'
-        DOCKER: "virgilix/toybrick"
-        EXTRA_CMAKE_FLAGS: "-DTOYBRICK=1 -DUSE_FXTOF1=1"
+      # ubuntu_18_Toybrick_fxtof1:
+      #   imageName: 'ubuntu-18.04'
+      #   DOCKER: "virgilix/toybrick"
+      #   EXTRA_CMAKE_FLAGS: "-DTOYBRICK=1 -DUSE_FXTOF1=1"
 
       #code quality
       clang_format:
