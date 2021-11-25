@@ -33,11 +33,12 @@ jobs:
       ubuntu_20_04_x86_64:
         imageName: 'ubuntu-20.04'
       
+      # Disabled for now until we fix the issue where we can't run apt update on this docker image
       #DB
-      Dragonboard:
-        imageName: 'ubuntu-20.04'
-        DOCKER: "danielguramulta/aditof-sdk-debian"
-        EXTRA_CMAKE_FLAGS: "-DDRAGONBOARD=1"
+      # Dragonboard:
+      #   imageName: 'ubuntu-20.04'
+      #   DOCKER: "danielguramulta/aditof-sdk-debian"
+      #   EXTRA_CMAKE_FLAGS: "-DDRAGONBOARD=1"
       
       #RP
       Raspberry_96tof1:
