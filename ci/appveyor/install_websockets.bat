@@ -17,9 +17,9 @@ if "%arch%"=="x64" (
 
 set folder_arch=%arch%
 
-if not exist "libwebsockets" ( git clone --branch v4.2.0 --depth 1  https://libwebsockets.org/repo/libwebsockets ) 
+if not exist "libwebsockets" ( git clone --branch v3.2.3 --depth 1  https://libwebsockets.org/repo/libwebsockets ) 
 pushd libwebsockets
-set build_dir="build_4_2_0%folder_arch%"
+set build_dir="build_3_2_3%folder_arch%"
 if not exist %build_dir% ( mkdir %build_dir% )
 pushd %build_dir%
 cmake  -DLWS_WITHOUT_TESTAPPS=ON -DLWS_WITHOUT_TEST_SERVER=ON -DOPENSSL_ROOT_DIR="C:\OpenSSL-Win%arch_bits%" -DCMAKE_INSTALL_PREFIX="./local_path/websockets" -G "%generator%" -A "%arch%" ..

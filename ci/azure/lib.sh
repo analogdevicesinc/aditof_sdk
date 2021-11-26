@@ -177,13 +177,13 @@ build_and_install_protobuf() {
 }
 
 ############################################################################
-# Build and install v4.2.0 of libwebsockets from the specified repository
+# Build and install v3.2.3 of libwebsockets from the specified repository
 ############################################################################
 build_and_install_websockets() {
     REPO_DIR=$1
     INSTALL_DIR=$2
     EXTRA_CMAKE_OPTIONS=$3
-    LIB_BUILD_DIR=${REPO_DIR}/build_4_2_0
+    LIB_BUILD_DIR=${REPO_DIR}/build_3_2_3
 
     mkdir -p ${INSTALL_DIR}
     mkdir -p ${LIB_BUILD_DIR}
@@ -288,7 +288,7 @@ get_deps_source_code() {
     }
 
     [ -d "libwebsockets" ] || {
-        git clone --branch v4.2.0 --depth 1 https://github.com/warmcat/libwebsockets
+        git clone --branch v3.2.3 --depth 1 https://github.com/warmcat/libwebsockets
     }
 
     [ -d "opencv-${OPENCV}" ] || {
