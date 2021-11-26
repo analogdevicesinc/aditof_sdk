@@ -8,7 +8,7 @@
 * Install MS .NET Framework 4.5
 * CMake
 * Glog v0.3.5
-* Libwebsockets v4.2.0
+* Libwebsockets v3.2.3
   * OpenSSL
 * Protocol Buffers v3.9.0
 
@@ -30,9 +30,9 @@ cmake --build . --target install --config Release
 * Libwebsockets:
 Libewbesockets needs OpenSSL. One option to get it on windows is from: https://slproweb.com/products/Win32OpenSSL.html. Make sure to get the developer package and not the light weight package.
 ```console
-git clone --branch v4.2.0 --depth 1 https://github.com/warmcat/libwebsockets
+git clone --branch v3.2.3 --depth 1 https://github.com/warmcat/libwebsockets
 cd libwebsockets
-mkdir build_4_2_0 && cd build_4_2_0
+mkdir build_3_2_3 && cd build_3_2_3
 cmake -DOPENSSL_ROOT_DIR="C:\OpenSSL-Win64" -DCMAKE_INSTALL_PREFIX=./local_path/websockets -G "Visual Studio 16 2019" ..
 cmake --build . --target install --config Debug
 cmake --build . --target install --config Release
@@ -55,7 +55,7 @@ git clone https://github.com/analogdevicesinc/aditof_sdk
 cd aditof_sdk
 mkdir build
 cd build
-cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_4_2_0\local_path\websockets" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=off ..
+cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_2_3\local_path\websockets" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=off ..
 cmake --build . --config Release
 ```
 
@@ -86,7 +86,7 @@ OPENCV_PATH=C:\opencv\build\x64\vc15\bin
 cd aditof_sdk
 mkdir build
 cd build
-cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_4_2_0\local_path\websockets" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=on ..
+cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_2_3\local_path\websockets" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=on ..
 ```
 - Open 'adi_tof_project.sln' generated in 'aditof_sdk\build' in MS Visual Studio 2019
 - Select 'Release' build
