@@ -29,22 +29,23 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef VIEW_H
+#define VIEW_H
 
-#include "view.h"
-#include <glog/logging.h>
+#include <memory>
 
-int main(int argc, char **argv) {
+class View {
+  public:
+    View();
+    ~View();
 
-    // Init google logging system
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_alsologtostderr = 1;
+    bool initialize();
+    void render();
 
-    auto view =
-        std::make_shared<View>();
-    if (!view->initialize()) {
-        return EXIT_FAILURE;
-    }
-    view->render();
+  private:
+    struct ImplData;
 
-    return EXIT_SUCCESS;
-}
+    std::unique_ptr<ImplData> m_implData;
+};
+
+#endif
