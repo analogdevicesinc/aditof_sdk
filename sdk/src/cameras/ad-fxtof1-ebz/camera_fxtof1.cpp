@@ -70,11 +70,11 @@ CameraFxTof1::CameraFxTof1(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
     std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms,
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
-    : m_depthSensor(depthSensor), m_devStarted(false),
+    : m_depthSensor(depthSensor), m_devStarted(false), m_devProgrammed(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
       m_availableControls(availableControls), m_depthCorrection(true),
       m_cameraGeometryCorrection(true), m_distortionCorrection(true),
-      m_revision("RevA"), m_devProgrammed(false) {
+      m_revision("RevA") {
 
     // Check Depth Sensor
     if (!depthSensor) {
