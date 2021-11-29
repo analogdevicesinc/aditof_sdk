@@ -1,0 +1,383 @@
+/*
+ * BSD 3-Clause License
+ *
+ * Copyright (c) 2019, Analog Devices, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+#include <emscripten/bind.h>
+
+#include <aditof/aditof.h>
+
+namespace em = emscripten;
+
+EMSCRIPTEN_BINDINGS(Module) {
+    // function("lerp", &lerp);
+    // General declarations
+
+    enum_<aditof::Status>("Status")
+        .value("Ok", aditof::Status::OK)
+        .value("Busy", aditof::Status::BUSY)
+        .value("Unreachable", aditof::Status::UNREACHABLE)
+        .value("InvalidArgument", aditof::Status::INVALID_ARGUMENT)
+        .value("Unavailable", aditof::Status::UNAVAILABLE)
+        .value("GenericError", aditof::Status::GENERIC_ERROR)
+        ;
+
+    // Frame declarations
+
+    enum_<aditof::FrameDataType>("FrameDataType")
+        .value("FullData", aditof::FrameDataType::FULL_DATA)
+        .value("Depth", aditof::FrameDataType::DEPTH)
+        .value("IR", aditof::FrameDataType::IR)
+        ;
+
+    class_<aditof::FrameDetails>("FrameDetails")
+        .constructor<>()
+        .property("width", &aditof::FrameDetails::width)
+        .property("height", &aditof::FrameDetails::height)
+        .property("fullDataWidth", &aditof::FrameDetails::fullDataWidth)
+        .property("fullDataHeight", &aditof::FrameDetails::fullDataHeight)
+        .property("rgbWidth", &aditof::FrameDetails::rgbWidth)
+        .property("rgbHeight", &aditof::FrameDetails::rgbHeight)
+        .property("type", &aditof::FrameDetails::type)
+        ;
+
+    // Camera declarations
+
+    enum_<aditof::ConnectionType>("ConnectionType")
+        .value("Usb", aditof::ConnectionType::USB)
+        .value("Network", aditof::ConnectionType::NETWORK)
+        .value("OnTarget", aditof::ConnectionType::ON_TARGET)
+        ;
+
+    class_<aditof::IntrinsicParameters>("IntrinsicParameters")
+        .constructor<>()
+        .property("cameraMatrix", &aditof::IntrinsicParameters::cameraMatrix)
+        .property("distCoeffs", &aditof::IntrinsicParameters::distCoeffs)
+        .property("pixelWidth", &aditof::IntrinsicParameters::pixelWidth)
+        .property("pixelHeight", &aditof::IntrinsicParameters::pixelHeight)
+        ;
+
+    class_<aditof::DepthParameters>("DepthParameters")
+        .constructor<>()
+        .property("depthGain", &aditof::DepthParameters::depthGain)
+        .property("depthOffset", &aditof::DepthParameters::depthOffset)
+        .property("minDepth", &aditof::DepthParameters::minDepth)
+        .property("maxDepth", &aditof::DepthParameters::maxDepth)
+        ;
+
+    class_<aditof::CameraDetails>("CameraDetails")
+        .constructor<>()
+        .property("cameraId", &aditof::CameraDetails::cameraId)
+        .property("mode", &aditof::CameraDetails::mode)
+        .property("frameType", &aditof::CameraDetails::frameType)
+        .property("connection", &aditof::CameraDetails::connection)
+        .property("intrinsics", &aditof::CameraDetails::intrinsics)
+        .property("depthParameters", &aditof::CameraDetails::depthParameters)
+        .property("bitCount", &aditof::CameraDetails::bitCount)
+        ;
+
+    // Helpers
+
+    struct frameData {
+        uint16_t *pData;
+        aditof::FrameDetails details;
+    };
+
+    class_<frameData>("frameData", buffer_protocol())
+        .constructor<>()
+        .def_buffer([](const frameData &f) -> buffer_info {
+            return buffer_info(
+                f.pData, sizeof(uint16_t),
+                format_descriptor<uint16_t>::format(), 2,
+                {f.details.height + f.details.rgbHeight,
+                 f.details.width + f.details.rgbWidth},
+                {sizeof(uint16_t) * f.details.width, sizeof(uint16_t)});
+        })
+        ;
+
+    // ADI Time of Flight API
+
+    // System
+    class_<aditof::System>("System")
+        .constructor<>()
+        .def("getCameraList",
+             [](aditof::System &system, list cameras) {
+                 std::vector<std::shared_ptr<aditof::Camera>> cameraList;
+                 aditof::Status status = system.getCameraList(cameraList);
+
+                 for (const auto &cam : cameraList) {
+                     cameras.append(cam);
+                 }
+
+                 return status;
+             },
+             arg("cameras"))
+        .def("getCameraListAtIp",
+             [](aditof::System &system, list cameras, str ip) {
+                 std::vector<std::shared_ptr<aditof::Camera>> cameraList;
+                 aditof::Status status =
+                     system.getCameraListAtIp(cameraList, ip);
+
+                 for (const auto &cam : cameraList) {
+                     cameras.append(cam);
+                 }
+
+                 return status;
+             },
+             arg("cameras"), arg("ip"))
+        ;
+
+    // Camera
+    class_<aditof::Camera, std::shared_ptr<aditof::Camera>>("Camera")
+        .def("initialize", &aditof::Camera::initialize)
+        .def("start", &aditof::Camera::start)
+        .def("stop", &aditof::Camera::stop)
+        .def("setMode", &aditof::Camera::setMode, arg("mode"),
+             arg("modeFilename") = "")
+        .def("getAvailableModes",
+             [](const aditof::Camera &camera, list modes) {
+                 std::vector<std::string> modeList;
+                 aditof::Status status = camera.getAvailableModes(modeList);
+
+                 for (const auto &mode : modeList)
+                     modes.append(mode);
+
+                 return status;
+             },
+             arg("availableModes"))
+        .def("setFrameType", &aditof::Camera::setFrameType,
+             arg("frameType"))
+        .def("getAvailableFrameTypes",
+             [](const aditof::Camera &camera, list types) {
+                 std::vector<std::string> typeList;
+                 aditof::Status status =
+                     camera.getAvailableFrameTypes(typeList);
+
+                 for (const auto &type : typeList)
+                     types.append(type);
+
+                 return status;
+             },
+             arg("availableFrameTypes"))
+        .def("requestFrame", &aditof::Camera::requestFrame, arg("frame"),
+             arg("cb") = nullptr)
+        .def("getDetails", &aditof::Camera::getDetails, arg("details"))
+        .def("getAvailableControls",
+             [](const aditof::Camera &camera, list controls) {
+                 std::vector<std::string> controlsList;
+                 aditof::Status status =
+                     camera.getAvailableControls(controlsList);
+
+                 for (const auto &control : controlsList)
+                     controls.append(control);
+
+                 return status;
+             },
+             arg("controls"))
+        .def("setControl", &aditof::Camera::setControl, arg("control"),
+             arg("value"))
+        .def("getControl", &aditof::Camera::getControl, arg("control"),
+             arg("value"))
+        .def("getImageSensors",
+             [](aditof::Camera &camera, list sensors) {
+                 std::vector<std::shared_ptr<aditof::DepthSensorInterface>>
+                     sensorList;
+                 aditof::Status status = camera.getImageSensors(sensorList);
+
+                 for (const auto &sensor : sensorList)
+                     sensors.append(sensor);
+
+                 return status;
+             },
+             arg("eeproms"))
+        .def("getEeproms",
+             [](aditof::Camera &camera, list eeproms) {
+                 std::vector<std::shared_ptr<aditof::StorageInterface>>
+                     eepromList;
+                 aditof::Status status = camera.getEeproms(eepromList);
+
+                 for (const auto &e : eepromList)
+                     eeproms.append(e);
+
+                 return status;
+             },
+             arg("eeproms"))
+        .def(
+            "getTemperatureSensors",
+            [](aditof::Camera &camera, list tempSensors) {
+                std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
+                    sensorList;
+                aditof::Status status =
+                    camera.getTemperatureSensors(sensorList);
+
+                for (const auto &s : sensorList)
+                    tempSensors.append(s);
+
+                return status;
+            },
+            arg("tempSensors"))
+        ;
+
+    // Frame
+    class_<aditof::Frame>("Frame")
+        .constructor<>()
+        .def("setDetails", &aditof::Frame::setDetails, arg("details"))
+        .def("getDetails", &aditof::Frame::getDetails, arg("details"))
+        .def("getData",
+             [](aditof::Frame &frame,
+                aditof::FrameDataType dataType) -> frameData {
+                 frameData f;
+
+                 frame.getData(dataType, &f.pData);
+                 frame.getDetails(f.details);
+
+                 return f;
+             },
+             arg("dataType"))
+        ;
+
+    // DepthSensorInterface
+    class_<aditof::DepthSensorInterface, std::shared_ptr<aditof::DepthSensorInterface>>("DepthSensorInterface")
+        .def("open", &aditof::DepthSensorInterface::open)
+        .def("start", &aditof::DepthSensorInterface::start)
+        .def("stop", &aditof::DepthSensorInterface::stop)
+        .def("getAvailableFrameTypes",
+             [](aditof::DepthSensorInterface &device, list types) {
+                 std::vector<aditof::FrameDetails> typeList;
+                 aditof::Status status =
+                     device.getAvailableFrameTypes(typeList);
+
+                 for (const auto &type : typeList)
+                     types.append(type);
+
+                 return status;
+             },
+             arg("types"))
+        .def("setFrameType", &aditof::DepthSensorInterface::setFrameType,
+             arg("details"))
+        .def("program",
+             [](aditof::DepthSensorInterface &device,
+                array_t<uint8_t> firmware, size_t size) {
+                 buffer_info buffInfo = firmware.request();
+                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
+
+                 return device.program(ptr, size);
+             },
+             arg("firmware"), arg("size"))
+        .def("getFrame",
+             [](aditof::DepthSensorInterface &device,
+                array_t<uint16_t> buffer) {
+                 buffer_info buffInfo = buffer.request(true);
+                 uint16_t *ptr = static_cast<uint16_t *>(buffInfo.ptr);
+
+                 return device.getFrame(ptr);
+             },
+             arg("buffer"))
+        .def("readAfeRegisters",
+             [](aditof::DepthSensorInterface &device,
+                array_t<uint16_t> address, array_t<uint16_t> data,
+                size_t length) {
+                 buffer_info addrBuffInfo = address.request();
+                 uint16_t *addrPtr = static_cast<uint16_t *>(addrBuffInfo.ptr);
+
+                 buffer_info dataBuffInfo = data.request(true);
+                 uint16_t *dataPtr = static_cast<uint16_t *>(dataBuffInfo.ptr);
+
+                 return device.readAfeRegisters(addrPtr, dataPtr, length);
+             },
+             arg("address"), arg("data"), arg("length"))
+        .def("writeAfeRegisters",
+             [](aditof::DepthSensorInterface &device,
+                array_t<uint16_t> address, array_t<uint16_t> data,
+                size_t length) {
+                 buffer_info addrBuffInfo = address.request();
+                 uint16_t *addrPtr = static_cast<uint16_t *>(addrBuffInfo.ptr);
+
+                 buffer_info dataBuffInfo = data.request();
+                 uint16_t *dataPtr = static_cast<uint16_t *>(dataBuffInfo.ptr);
+
+                 return device.writeAfeRegisters(addrPtr, dataPtr, length);
+             },
+             arg("address"), arg("data"), arg("length"))
+        ;
+
+    // StorageInterface
+    class_<aditof::StorageInterface, std::shared_ptr<aditof::StorageInterface>>("StorageInterface")
+        .def("open", &aditof::StorageInterface::open)
+        .def("read",
+             [](aditof::StorageInterface &eeprom, uint32_t address,
+                array_t<uint8_t> data, size_t length) {
+                 buffer_info buffInfo = data.request(true);
+                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
+
+                 return eeprom.read(address, ptr, length);
+             },
+             arg("address"), arg("data"), arg("length"))
+        .def("write",
+             [](aditof::StorageInterface &eeprom, uint32_t address,
+                array_t<uint8_t> data, size_t length) {
+                 buffer_info buffInfo = data.request();
+                 uint8_t *ptr = static_cast<uint8_t *>(buffInfo.ptr);
+
+                 return eeprom.write(address, ptr, length);
+             },
+             arg("address"), arg("data"), arg("length"))
+        .def("close", &aditof::StorageInterface::close)
+        .def("getName", [](aditof::StorageInterface &eeprom) {
+            std::string n;
+            eeprom.getName(n);
+
+            return n;
+        })
+        ;
+
+    // TemperatureSensorInterface
+    class_<aditof::TemperatureSensorInterface, std::shared_ptr<aditof::TemperatureSensorInterface>>("TemperatureSensorInterface")
+        .def("open", &aditof::TemperatureSensorInterface::open)
+        .def("read",
+             [](aditof::TemperatureSensorInterface &sensor,
+                list temperature) {
+                 float temp;
+                 aditof::Status status = sensor.read(temp);
+                 if (status == aditof::Status::OK) {
+                     temperature.append(temp);
+                 }
+                 return status;
+             },
+             arg("temperature"))
+        .def("close", &aditof::TemperatureSensorInterface::close)
+        .def("getName", [](aditof::TemperatureSensorInterface &sensor) {
+            std::string n;
+            sensor.getName(n);
+
+            return n;
+        })
+        ;
+
+}

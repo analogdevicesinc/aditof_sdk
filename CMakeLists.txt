@@ -37,6 +37,9 @@ option(USE_3D_SMART "Use 3D Smart camera?" OFF)
 option(WITH_TOOLS "Build tools?" OFF)
 option(IGNORE_TARGET_VERSION "Ignore sdk version on target?" OFF)
 
+option(WITH_JS "Build javascript bindings?" OFF)
+
+
 # Check whether we configure things for remote or we're on target
 set(SELECTED_PLATFORMS 0)
 set(ALL_PLATFORMS DRAGONBOARD;RASPBERRYPI;JETSON;XAVIER;XAVIERNX;TOYBRICK)
@@ -142,6 +145,9 @@ if (WITH_OPEN3D)
 endif()
 if (WITH_ROS)
         add_subdirectory(bindings/ros)
+endif()
+if (WITH_JS)
+        add_subdirectory(bindings/javascript)
 endif()
 
 ############################### Install udev rules #######################################
