@@ -3,7 +3,12 @@ project(aditof-demo-imgui)
 
 find_package(OpenGL REQUIRED)
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME}
+			aditofdemorecorder.cpp
+			aditofdemocontroller.cpp
+			view.cpp
+			main.cpp
+)
 
 if( WIN32 )
 	target_link_libraries(${PROJECT_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/../deps/imgui/src/examples/libs/glfw/lib-vc2010-64/glfw3.lib")
