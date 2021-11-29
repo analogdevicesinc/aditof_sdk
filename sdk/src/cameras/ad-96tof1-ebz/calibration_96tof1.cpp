@@ -38,9 +38,9 @@
 #define EEPROM_SIZE 131072
 
 Calibration96Tof1::Calibration96Tof1()
-    : m_depth_cache(nullptr), m_geometry_cache(nullptr),
-      m_distortion_cache(nullptr), m_distCoeffs(nullptr), m_intrinsics(nullptr),
-      m_range(16000) {
+    : m_intrinsics(nullptr), m_distCoeffs(nullptr), 
+      m_depth_cache(nullptr), m_distortion_cache(nullptr), 
+      m_geometry_cache(nullptr), m_range(16000) {
     std::unordered_map<float, param_struct> Header;
     Header[EEPROM_VERSION].value = {0};
     Header[EEPROM_VERSION].size =
