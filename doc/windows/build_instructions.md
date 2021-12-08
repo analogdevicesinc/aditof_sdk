@@ -132,3 +132,43 @@ Use parameter *-h* or *--help* for more information regarding the parameters.
 ![Display Image](/doc/img/run_VS.PNG) 
 
 - Application executable is created in **current_script_path\build\example\aditof-demo\Release** directory.
+
+### Enabling the point cloud display in aditof-demo
+
+ OpenCV needs to be build manually in order to visualize pointCloud data because the prebuild libraries do not come with the viz module installed.
+ The steps required for building and including the required dependencies are presented below:
+ 
+ Requirements:
+ * OpenCV 4.5.0
+   * VTK 8.2
+
+* VTK 8.2
+```console
+git clone --branch v8.2.0 --depth 1 https://github.com/Kitware/VTK.git
+cd VTK
+mkdir build_8_2_0 && cd build_8_2_0
+cmake -DCMAKE_INSTALL_PREFIX=./local_path/vtk -G "Visual Studio 16 2019" ..
+cmake --build . --target install --config Release
+```
+
+* OpenCV
+```console
+git clone --branch 4.5.0 --depth 1 https://github.com/opencv/opencv.git
+git clone --branch 4.5.0 --depth 1 https://github.com/opencv/opencv_contrib.git
+cp -r .\opencv_contrib\modules\viz .\opencv\modules\
+cd opencv
+mkdir build_4_5_0 && cd build_4_5_0
+cmake -DWITH_VTK=ON -DBUILD_opencv_viz=ON -DBUILD_opencv_world=ON -DCMAKE_PREFIX_PATH=./local_path/vtk -DCMAKE_INSTALL_PREFIX=./local_path/opencv -G "Visual Studio 16 2019" ..
+cmake --build . --target install --config Release
+```
+Add the path from ./local_path/vtk/bin to enviroment variables to load them at runtine.
+
+Compile the sdk and add OpenCV to CMAKE_PREFIX_PATH:
+
+```console
+cd aditof_sdk
+mkdir build
+cd build
+cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_2_3\local_path\websockets;C:\projects\aditof-sdk\deps\opencv\build_4_5_0\local_path\opencv" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=on ..
+cmake --build . --target install --config Release
+```
