@@ -57,7 +57,10 @@ class AdiTofDemoView {
     void _displayIrImage();
     void _displayBlendedImage();
     void _displayRgbImage();
+
+#ifdef DEMO_POINT_CLOUD
     void _displayPointCloudImage();
+#endif
 
   private:
     std::shared_ptr<AdiTofDemoController> m_ctrl;

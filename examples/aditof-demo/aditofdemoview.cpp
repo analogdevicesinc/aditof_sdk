@@ -79,8 +79,10 @@ AdiTofDemoView::AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,
         std::thread(std::bind(&AdiTofDemoView::_displayIrImage, this));
     m_rgbImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayRgbImage, this));
+#ifdef DEMO_POINT_CLOUD
     m_pointCloudImageWorker =
         std::thread(std::bind(&AdiTofDemoView::_displayPointCloudImage, this));
+#endif
 }
 AdiTofDemoView::~AdiTofDemoView() {
     std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
@@ -90,7 +92,9 @@ AdiTofDemoView::~AdiTofDemoView() {
     m_depthImageWorker.join();
     m_irImageWorker.join();
     m_rgbImageWorker.join();
+#ifdef DEMO_POINT_CLOUD
     m_pointCloudImageWorker.join();
+#endif
 }
 
 bool USBModeChecked = false;
@@ -175,7 +179,9 @@ void AdiTofDemoView::render() {
         "Point Cloud Image"};
     cvui::init(windows, 1);
 
+#ifdef DEMO_POINT_CLOUD
     cv::viz::Viz3d pointCloudWindow(windows[6]);
+#endif
 
     int frameCount = 0;
     int displayFps = 0;
@@ -814,9 +820,11 @@ void AdiTofDemoView::render() {
         cvui::space(10);
         cvui::endColumn();
 
+#ifdef DEMO_POINT_CLOUD
         cvui::beginColumn(frame, 160, 385);
         cvui::checkbox("Display Point Cloud", &m_pointCloudEnabled);
         cvui::endColumn();
+#endif
 
         cvui::rect(frame, 50, 430, 100, 30, valueColorSTh);
         cvui::text(frame, 60, 440, valueSTh);
@@ -985,11 +993,13 @@ void AdiTofDemoView::render() {
                 m_rgbImage.release();
             }
 
+#ifdef DEMO_POINT_CLOUD
             if (m_pointCloudEnabled) {
                 cv::viz::WCloud cloud(m_pointCloudImage, m_pointCloudColors);
                 pointCloudWindow.showWidget("Cloud", cloud);
                 pointCloudWindow.spinOnce();
             }
+#endif
         }
 
         if (captureBlendedEnabled) {
@@ -1010,11 +1020,13 @@ void AdiTofDemoView::render() {
                 m_rgbImage.release();
             }
 
+#ifdef DEMO_POINT_CLOUD
             if (m_pointCloudEnabled) {
                 cv::viz::WCloud cloud(m_pointCloudImage, m_pointCloudColors);
                 pointCloudWindow.showWidget("Cloud", cloud);
                 pointCloudWindow.spinOnce();
             }
+#endif
         }
 
         if (captureEnabled && irOnlyChecked) {
@@ -1304,6 +1316,7 @@ void AdiTofDemoView::_displayRgbImage() {
     }
 }
 
+#ifdef DEMO_POINT_CLOUD
 void AdiTofDemoView::_displayPointCloudImage() {
     while (!m_stopWorkersFlag) {
         std::unique_lock<std::mutex> lock(m_frameCapturedMutex);
@@ -1358,3 +1371,4 @@ void AdiTofDemoView::_displayPointCloudImage() {
         }
     }
 }
+#endif

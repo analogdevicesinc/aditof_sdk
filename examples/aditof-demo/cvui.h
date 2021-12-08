@@ -66,9 +66,11 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#ifdef DEMO_POINT_CLOUD
 #include <opencv2/viz.hpp>
 #include <opencv2/viz/viz3d.hpp>
-
+#endif
 namespace cvui {
 /**
  Initializes cvui. You must provide the name of the window where
