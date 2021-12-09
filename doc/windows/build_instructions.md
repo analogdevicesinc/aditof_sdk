@@ -135,7 +135,7 @@ Use parameter *-h* or *--help* for more information regarding the parameters.
 
 ### Enabling the point cloud display in aditof-demo
 
- OpenCV needs to be build manually in order to visualize pointCloud data because the prebuild libraries do not come with the viz module installed.
+ OpenCV needs to be built manually in order to visualize pointCloud data because the prebuild libraries do not come with the viz module installed.
  The steps required for building and including the required dependencies are presented below:
  
  Requirements:
