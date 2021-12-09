@@ -29,16 +29,21 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+
 #include <emscripten/bind.h>
-
 #include <aditof/aditof.h>
+// #include "../../sdk/include/aditof/aditof.h"
 
-namespace em = emscripten;
+
+
+
+using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(Module) {
     // General declarations
 
-    enum_<aditof::Status>("Status")
+    emscripten::enum_<aditof::Status>("Status")
         .value("Ok", aditof::Status::OK)
         .value("Busy", aditof::Status::BUSY)
         .value("Unreachable", aditof::Status::UNREACHABLE)
@@ -49,13 +54,13 @@ EMSCRIPTEN_BINDINGS(Module) {
 
     // Frame declarations
 
-    enum_<aditof::FrameDataType>("FrameDataType")
+    emscripten::enum_<aditof::FrameDataType>("FrameDataType")
         .value("FullData", aditof::FrameDataType::FULL_DATA)
         .value("Depth", aditof::FrameDataType::DEPTH)
         .value("IR", aditof::FrameDataType::IR)
         ;
 
-    class_<aditof::FrameDetails>("FrameDetails")
+    emscripten::class_<aditof::FrameDetails>("FrameDetails")
         .constructor<>()
         .property("width", &aditof::FrameDetails::width)
         .property("height", &aditof::FrameDetails::height)
@@ -68,13 +73,13 @@ EMSCRIPTEN_BINDINGS(Module) {
 
     // Camera declarations
 
-    enum_<aditof::ConnectionType>("ConnectionType")
+    emscripten::enum_<aditof::ConnectionType>("ConnectionType")
         .value("Usb", aditof::ConnectionType::USB)
         .value("Network", aditof::ConnectionType::NETWORK)
         .value("OnTarget", aditof::ConnectionType::ON_TARGET)
         ;
 
-    class_<aditof::IntrinsicParameters>("IntrinsicParameters")
+    emscripten::class_<aditof::IntrinsicParameters>("IntrinsicParameters")
         .constructor<>()
         .property("cameraMatrix", &aditof::IntrinsicParameters::cameraMatrix)
         .property("distCoeffs", &aditof::IntrinsicParameters::distCoeffs)
@@ -82,7 +87,7 @@ EMSCRIPTEN_BINDINGS(Module) {
         .property("pixelHeight", &aditof::IntrinsicParameters::pixelHeight)
         ;
 
-    class_<aditof::DepthParameters>("DepthParameters")
+    emscripten::class_<aditof::DepthParameters>("DepthParameters")
         .constructor<>()
         .property("depthGain", &aditof::DepthParameters::depthGain)
         .property("depthOffset", &aditof::DepthParameters::depthOffset)
@@ -90,7 +95,7 @@ EMSCRIPTEN_BINDINGS(Module) {
         .property("maxDepth", &aditof::DepthParameters::maxDepth)
         ;
 
-    class_<aditof::CameraDetails>("CameraDetails")
+    emscripten::class_<aditof::CameraDetails>("CameraDetails")
         .constructor<>()
         .property("cameraId", &aditof::CameraDetails::cameraId)
         .property("mode", &aditof::CameraDetails::mode)
@@ -101,91 +106,91 @@ EMSCRIPTEN_BINDINGS(Module) {
         .property("bitCount", &aditof::CameraDetails::bitCount)
         ;
 
-    // Helpers
+    // // Helpers
 
-    struct frameData {
-        uint16_t *pData;
-        aditof::FrameDetails details;
-    };
+    // // struct frameData {
+    // //     uint16_t *pData;
+    // //     aditof::FrameDetails details;
+    // // };
 
-    class_<frameData>("frameData", buffer_protocol())
-        .constructor<>()
-        .property("pData", pData)
-        .property("details", details)
-        // .def_buffer([](const frameData &f) -> buffer_info {
-        //     return buffer_info(
-        //         f.pData, sizeof(uint16_t),
-        //         format_descriptor<uint16_t>::format(), 2,
-        //         {f.details.height + f.details.rgbHeight,
-        //          f.details.width + f.details.rgbWidth},
-        //         {sizeof(uint16_t) * f.details.width, sizeof(uint16_t)});
-        // })
-        ;
+    // // em::class_<frameData>("frameData", buffer_protocol())
+    // //     .constructor<>()
+    // //     .property("pData", pData)
+    // //     .property("details", details)
+    // //     // .def_buffer([](const frameData &f) -> buffer_info {
+    //     //     return buffer_info(
+    //     //         f.pData, sizeof(uint16_t),
+    //     //         format_descriptor<uint16_t>::format(), 2,
+    //     //         {f.details.height + f.details.rgbHeight,
+    //     //          f.details.width + f.details.rgbWidth},
+    //     //         {sizeof(uint16_t) * f.details.width, sizeof(uint16_t)});
+    //     // })
+    //     ;
 
-    // ADI Time of Flight API
+    // // ADI Time of Flight API
 
     // System
-    class_<aditof::System>("System")
-        .constructor<>()
-        .function("getCameraList", &aditof::System::getCameraList)
-        .function("getCameraListAtIp", &aditof::System::getCameraListAtIp)
-        ;
+    // emscripten::class_<aditof::System>("System")
+    //     .constructor<>()
+    //     .function("getCameraList", &aditof::System::getCameraList)
+    //     .function("getCameraListAtIp", &aditof::System::getCameraListAtIp)
+    //     ;
 
     // Camera
-    class_<aditof::Camera, std::shared_ptr<aditof::Camera>>("Camera")
-        .function("initialize", &aditof::Camera::initialize)
-        .function("start", &aditof::Camera::start)
-        .function("stop", &aditof::Camera::stop)
-        .function("setMode", &aditof::Camera::setMode)
-        .function("getAvailableModes", &aditof::Camera::getAvailableModes)
-        .function("setFrameType", &aditof::Camera::setFrameType)
-        .function("getAvailableFrameTypes", &aditof::Camera::getAvailableFrameTypes)
-        .function("requestFrame", &aditof::Camera::requestFrame)
-        .function("getDetails", &aditof::Camera::getDetails)
-        .function("getAvailableControls", &aditof::Camera::getAvailableControls)
-        .function("setControl", &aditof::Camera::setControl)
-        .function("getControl", &aditof::Camera::getControl)
-        .function("getImageSensors", &aditof::Camera::getImageSensors)
-        .function("getEeproms", &aditof::Camera::getEeproms)
-        .function("getTemperatureSensors", &aditof::Camera::getTemperatureSensors)
-        ;
+    // emscripten::class_<aditof::Camera, std::shared_ptr<aditof::Camera>>("Camera")
+    //     .function("initialize", &aditof::Camera::initialize)
+    //     .function("start", &aditof::Camera::start)
+    //     .function("stop", &aditof::Camera::stop)
+    //     .function("setMode", &aditof::Camera::setMode)
+    //     .function("getAvailableModes", &aditof::Camera::getAvailableModes)
+    //     .function("setFrameType", &aditof::Camera::setFrameType)
+    //     .function("getAvailableFrameTypes", &aditof::Camera::getAvailableFrameTypes)
+    //     .function("requestFrame", &aditof::Camera::requestFrame)
+    //     .function("getDetails", &aditof::Camera::getDetails)
+    //     .function("getAvailableControls", &aditof::Camera::getAvailableControls)
+    //     .function("setControl", &aditof::Camera::setControl)
+    //     .function("getControl", &aditof::Camera::getControl)
+    //     .function("getImageSensors", &aditof::Camera::getImageSensors)
+    //     .function("getEeproms", &aditof::Camera::getEeproms)
+    //     .function("getTemperatureSensors", &aditof::Camera::getTemperatureSensors)
+    //     ;
 
-    // Frame
-    class_<aditof::Frame>("Frame")
-        .constructor<>()
-        .function("setDetails", &aditof::Frame::setDetails)
-        .function("getDetails", &aditof::Frame::getDetails)
-        .function("getData", &aditof::Frame::getData)
-        ;
+    // // Frame
+    // emscripten::class_<aditof::Frame>("Frame")
+    //     .constructor<>()
+    //     .function("setDetails", &aditof::Frame::setDetails)
+    //     .function("getDetails", &aditof::Frame::getDetails)
+    //     .function("getData", &aditof::Frame::getData)
+    //     ;
 
-    // DepthSensorInterface
-    class_<aditof::DepthSensorInterface, std::shared_ptr<aditof::DepthSensorInterface>>("DepthSensorInterface")
-        .function("open", &aditof::DepthSensorInterface::open)
-        .function("start", &aditof::DepthSensorInterface::start)
-        .function("stop", &aditof::DepthSensorInterface::stop)
-        .function("getAvailableFrameTypes", &aditof::DepthSensorInterface::getAvailableFrameTypes)
-        .function("setFrameType", &aditof::DepthSensorInterface::setFrameType)
-        .function("program", &aditof::DepthSensorInterface::program)
-        .function("getFrame", &aditof::DepthSensorInterface::getFrame)
-        .function("readAfeRegisters", &aditof::DepthSensorInterface::readAfeRegisters)
-        .function("writeAfeRegisters", &aditof::DepthSensorInterface::writeAfeRegisters)
-        ;
+    // // DepthSensorInterface
+    // emscripten::class_<aditof::DepthSensorInterface, std::shared_ptr<aditof::DepthSensorInterface>>("DepthSensorInterface")
+    //     .function("open", &aditof::DepthSensorInterface::open)
+    //     .function("start", &aditof::DepthSensorInterface::start)
+    //     .function("stop", &aditof::DepthSensorInterface::stop)
+    //     .function("getAvailableFrameTypes", &aditof::DepthSensorInterface::getAvailableFrameTypes)
+    //     .function("setFrameType", &aditof::DepthSensorInterface::setFrameType)
+    //     .function("program", &aditof::DepthSensorInterface::program)
+    //     .function("getFrame", &aditof::DepthSensorInterface::getFrame)
+    //     .function("readAfeRegisters", &aditof::DepthSensorInterface::readAfeRegisters)
+    //     .function("writeAfeRegisters", &aditof::DepthSensorInterface::writeAfeRegisters)
+    //     ;
 
-    // StorageInterface
-    class_<aditof::StorageInterface, std::shared_ptr<aditof::StorageInterface>>("StorageInterface")
-        .function("open", &aditof::StorageInterface::open)
-        .function("read", &aditof::StorageInterface::read)
-        .function("write", &aditof::StorageInterface::write)
-        .function("close", &aditof::StorageInterface::close)
-        .function("getName", &aditof::StorageInterface::getName)
-        ;
+    // // StorageInterface
+    // emscripten::class_<aditof::StorageInterface, std::shared_ptr<aditof::StorageInterface>>("StorageInterface")
+    //     .function("open", &aditof::StorageInterface::open)
+    //     .function("read", &aditof::StorageInterface::read)
+    //     .function("write", &aditof::StorageInterface::write)
+    //     .function("close", &aditof::StorageInterface::close)
+    //     .function("getName", &aditof::StorageInterface::getName)
+    //     ;
 
-    // TemperatureSensorInterface
-    class_<aditof::TemperatureSensorInterface, std::shared_ptr<aditof::TemperatureSensorInterface>>("TemperatureSensorInterface")
-        .function("open", &aditof::TemperatureSensorInterface::open)
-        .function("read", &aditof::TemperatureSensorInterface::read)
-        .function("close", &aditof::TemperatureSensorInterface::close)
-        .function("getName", &aditof::TemperatureSensorInterface::getName)
-        ;
+    // // TemperatureSensorInterface
+    // emscripten::class_<aditof::TemperatureSensorInterface, std::shared_ptr<aditof::TemperatureSensorInterface>>("TemperatureSensorInterface")
+    //     .function("open", &aditof::TemperatureSensorInterface::open)
+    //     .function("read", &aditof::TemperatureSensorInterface::read)
+    //     .function("close", &aditof::TemperatureSensorInterface::close)
+    //     .function("getName", &aditof::TemperatureSensorInterface::getName)
+    //     ;
 
 }
