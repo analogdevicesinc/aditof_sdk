@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test Webpage</title>
+  </head>
+  <body  onload="draw();">
+    <script type="text/javascript">
+      function draw() {
+        var canvas = document.getElementById('canvas');
+        if (canvas.getContext) {
+          var ctx = canvas.getContext('2d');
+
+          // ctx.fillRect(25, 25, 100, 100);
+          // ctx.clearRect(45, 45, 60, 60);
+          // ctx.strokeRect(50, 50, 50, 50);
+        }
+      }
+
+
+
+    </script>
+	  <script src="./main.js"></script>
+    <button onclick=Module._main()>Hello world!</button>
+    <button onclick=Module.callMyName("Tim")>Call me</button>
+    <canvas id="canvas" width="150" height="150"></canvas>
+  </body>
+</html>
