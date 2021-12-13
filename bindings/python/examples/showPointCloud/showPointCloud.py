@@ -94,7 +94,7 @@ if __name__ == "__main__":
     frameDetails = tof.FrameDetails()
     status = frame.getDetails(frameDetails)
     width = frameDetails.width
-    height = int(frameDetails.height / 2)
+    height = int(frameDetails.height)
 
     # Get intrinsic parameters from camera
     intrinsicParameters = camDetails.intrinsics
@@ -113,10 +113,10 @@ if __name__ == "__main__":
 
     # Create visualizer for depth and ir
     vis_depth = o3d.visualization.Visualizer()
-    vis_depth.create_window("Depth", 2 * width, 2 * height)
+    vis_depth.create_window("Depth", width, height)
 
     vis_ir = o3d.visualization.Visualizer()
-    vis_ir.create_window("IR", 2 * width, 2 * height)
+    vis_ir.create_window("IR", width, height)
 
     # Create visualizer
     vis = o3d.visualization.Visualizer()
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         ir_map = np.array(frame.getData(tof.FrameDataType.IR), dtype="uint16", copy=False)
 
         # Create the IR image
-        ir_map = ir_map[0: int(ir_map.shape[0] / 2), :]
+        ir_map = ir_map[0: int(ir_map.shape[0]), :]
         ir_map = distance_scale_ir * ir_map
         ir_map = np.uint8(ir_map)
         ir_map = cv.cvtColor(ir_map, cv.COLOR_GRAY2RGB)
@@ -144,7 +144,7 @@ if __name__ == "__main__":
         vis_ir.poll_events()
 
         # Create the Depth image
-        new_shape = (int(depth_map.shape[0] / 2), depth_map.shape[1])
+        new_shape = (int(depth_map.shape[0]), depth_map.shape[1])
         depth16bits_map = depth_map = np.resize(depth_map, new_shape)
         depth_map = distance_scale * depth_map
         depth_map = np.uint8(depth_map)
@@ -172,7 +172,7 @@ if __name__ == "__main__":
         if first_time_render_pc:
             vis.add_geometry(point_cloud)
             first_time_render_pc = 0
-        vis.update_geometry()
+        vis.update_geometry(point_cloud)
         vis.poll_events()
         vis.update_renderer()
 
