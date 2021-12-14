@@ -130,13 +130,24 @@ aditof::Status UsbDepthSensor::open() {
     }
 
     m_implData->opened = true;
-
+    m_implData->started = true;
     return status;
 }
 
 aditof::Status UsbDepthSensor::start() {
     using namespace aditof;
 
+    if (m_implData->started) {
+        return Status::OK;
+    }
+    LOG(INFO) << "Starting device";
+    enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (-1 == UsbLinuxUtils::xioctl(m_implData->fd, VIDIOC_STREAMON, &type)) {
+        LOG(WARNING) << "VIDIOC_STREAMON, error:" << errno << "("
+                     << strerror(errno) << ")";
+        return Status::GENERIC_ERROR;
+    }
+    m_implData->started = true;
     return Status::OK;
 }
 

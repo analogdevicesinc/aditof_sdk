@@ -217,11 +217,13 @@ aditof::Status Camera96Tof1::initialize() {
 }
 
 aditof::Status Camera96Tof1::start() {
+    m_devStarted = true;
     return m_depthSensor
         ->start(); // For now we keep the device open all the time
 }
 
 aditof::Status Camera96Tof1::stop() {
+    m_devStarted = false;
     return m_depthSensor
         ->stop(); // For now we keep the device open all the time
 }
@@ -230,6 +232,11 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
                                      const std::string &modeFilename) {
     using namespace aditof;
     Status status = Status::OK;
+
+    if (m_devStarted) {
+        status = m_depthSensor->stop();
+        m_devStarted = false;
+    }
 
     // Set the values specific to the Revision requested
     std::array<rangeStruct, 3> rangeValues =
@@ -347,6 +354,11 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
     }
 
     m_details.mode = mode;
+
+    if (!m_devStarted) {
+        status = m_depthSensor->start();
+        m_devStarted = true;
+    }
 
     return status;
 }

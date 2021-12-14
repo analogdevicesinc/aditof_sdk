@@ -125,9 +125,12 @@ int main(int argc, char **argv) {
         nHandle.advertise<sensor_msgs::Image>("aditof_ir", 5);
     ROS_ASSERT_MSG(ir_img_pubisher, "creating ir_img_pubisher failed");
 
-    ros::Publisher rgb_img_pubisher =
-        nHandle.advertise<sensor_msgs::Image>("aditof_rgb", 5);
-    ROS_ASSERT_MSG(rgb_img_pubisher, "creating rgb_img_pubisher failed");
+    ros::Publisher rgb_img_pubisher;
+    if (m_rgbSensor) {
+        rgb_img_pubisher =
+            nHandle.advertise<sensor_msgs::Image>("aditof_rgb", 5);
+        ROS_ASSERT_MSG(rgb_img_pubisher, "creating rgb_img_pubisher failed");
+    }
 
     ros::Publisher camera_info_pubisher =
         nHandle.advertise<sensor_msgs::CameraInfo>("aditof_camera_info", 5);
@@ -160,13 +163,16 @@ int main(int argc, char **argv) {
     ROS_ASSERT_MSG(irImgMsg,
                    "downcast from AditofSensorMsg to IRImageMsg failed");
 
-    AditofSensorMsg *rgb_img_msg = MessageFactory::create(
-        camera, &frame, MessageType::sensor_msgs_RgbImage, timeStamp);
-    ROS_ASSERT_MSG(rgb_img_msg, "rgb_image message creation failed");
-    RgbImageMsg *rgbImgMsg = dynamic_cast<RgbImageMsg *>(rgb_img_msg);
-    ROS_ASSERT_MSG(rgbImgMsg,
-                   "downcast from AditofSensorMsg to RgbImageMsg failed");
-
+    AditofSensorMsg *rgb_img_msg;
+    RgbImageMsg *rgbImgMsg;
+    if (m_rgbSensor) {
+        rgb_img_msg = MessageFactory::create(
+            camera, &frame, MessageType::sensor_msgs_RgbImage, timeStamp);
+        ROS_ASSERT_MSG(rgb_img_msg, "rgb_image message creation failed");
+        rgbImgMsg = dynamic_cast<RgbImageMsg *>(rgb_img_msg);
+        ROS_ASSERT_MSG(rgbImgMsg,
+                       "downcast from AditofSensorMsg to RgbImageMsg failed");
+    }
     AditofSensorMsg *camera_info_msg = MessageFactory::create(
         camera, &frame, MessageType::sensor_msgs_CameraInfo, timeStamp);
     ROS_ASSERT_MSG(camera_info_msg, "camera_info_msg message creation failed");
@@ -177,10 +183,6 @@ int main(int argc, char **argv) {
 
     f = boost::bind(&callback, _1, _2, camera, depthImgMsg);
     server.setCallback(f);
-
-    if (!m_rgbSensor) {
-        delete rgb_img_msg;
-    }
 
     while (ros::ok()) {
         ros::Time tStamp = ros::Time::now();
