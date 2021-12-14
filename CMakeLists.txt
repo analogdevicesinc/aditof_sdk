@@ -37,6 +37,17 @@ option(USE_3D_SMART "Use 3D Smart camera?" OFF)
 option(WITH_TOOLS "Build tools?" OFF)
 option(IGNORE_TARGET_VERSION "Ignore sdk version on target?" OFF)
 
+# Set camera flags
+if (USE_FXTOF1)
+        add_definitions(-DFXTOF1)
+endif()
+
+# Set jetson platform by default for 3D smart camera
+if (USE_3D_SMART)
+        add_definitions(-DSMART_3D)
+        set(JETSON 1)
+endif()
+
 # Check whether we configure things for remote or we're on target
 set(SELECTED_PLATFORMS 0)
 set(ALL_PLATFORMS DRAGONBOARD;RASPBERRYPI;JETSON;XAVIER;XAVIERNX;TOYBRICK)
@@ -69,19 +80,9 @@ if (ON_TARGET)
     endif()
 endif()
 
-
 if (WITH_NETWORK)
         add_definitions(-DHAS_NETWORK)
 endif()
-
-if (USE_FXTOF1)
-        add_definitions(-DFXTOF1)
-endif()
-
-if (USE_3D_SMART)
-        add_definitions(-DSMART_3D)
-endif()
-
 
 include(FindGit OPTIONAL)
 if (GIT_FOUND)
