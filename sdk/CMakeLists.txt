@@ -142,6 +142,7 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PRIVATE
         src/
+        src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
         $<$<BOOL:${ON_TARGET}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}>
         $<$<BOOL:${ON_TARGET}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}>
         ${Protobuf_INCLUDE_DIRS}
