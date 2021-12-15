@@ -17,6 +17,7 @@ The SD card image already contains all the SDK dependencies and there's no need 
 ### AD-96TOF1-EBZ
 
 ```console
+pi@raspberry:~/workspace/github/aditof_sdk$ git checkout master
 pi@raspberry:~/workspace/github/aditof_sdk$ git pull
 pi@raspberry:~/workspace/github/aditof_sdk$ cd build
 pi@raspberry:~/workspace/github/aditof_sdk/build$ cmake -DRASPBERRYPI=1 ..
@@ -26,6 +27,7 @@ pi@raspberry:~/workspace/github/aditof_sdk/build$ make -j4
 ### AD-FXTOF1-EBZ
 
 ```console
+pi@raspberry:~/workspace/github/aditof_sdk$ git checkout master
 pi@raspberry:~/workspace/github/aditof_sdk$ git pull
 pi@raspberry:~/workspace/github/aditof_sdk$ cd build
 pi@raspberry:~/workspace/github/aditof_sdk/build$ cmake -DRASPBERRYPI=1 -DUSE_FXTOF1=1 ..
