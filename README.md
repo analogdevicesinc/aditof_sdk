@@ -25,7 +25,7 @@ Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green
 
 | Documentation | GitHub master status | Downloads |
 | ------------- | ----------- | ----------- |
-| [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-3dsmartcam1-prz?rev=1637140560#getting_your_system_up_and_running) <br> [Build Instructions](doc/jetson/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) |  [![sdk release](https://img.shields.io/badge/release-sdk-blue.svg)](https://github.com/analogdevicesinc/aditof_sdk/releases/latest) 
+| [User Guide](https://wiki.analog.com/resources/eval/user-guides/ad-3dsmartcam1-prz?rev=1637140560#getting_your_system_up_and_running) <br> [Build Instructions](doc/3dsmartcam1/build_instructions.md) | [![Build Status](https://dev.azure.com/AnalogDevices/3DToF/_apis/build/status/analogdevicesinc.aditof_sdk?branchName=master)](https://dev.azure.com/AnalogDevices/3DToF/_build?view=runs&branchFilter=262) |  [![sdk release](https://img.shields.io/badge/release-sdk-blue.svg)](https://github.com/analogdevicesinc/aditof_sdk/releases/latest) 
 
 ### AD-FXTOF1-EBZ
 Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green.svg)](https://wiki.analog.com/resources/eval/user-guides/ad-fxtof1-ebz)
