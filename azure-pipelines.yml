@@ -62,6 +62,11 @@ jobs:
         DOCKER: "virgilix/nvidia-tegra"
         EXTRA_CMAKE_FLAGS: "-DJETSON=1 -DUSE_FXTOF1=1"
 
+      ubuntu_18_Jetson_3d_smart:
+        imageName: 'ubuntu-18.04'
+        DOCKER: "virgilix/nvidia-tegra"
+        EXTRA_CMAKE_FLAGS: "-DUSE_3D_SMART=1"
+
       #Xavier AGX
       ubuntu_18_Xavier_AGX_96tof1:
         imageName: 'ubuntu-18.04'
