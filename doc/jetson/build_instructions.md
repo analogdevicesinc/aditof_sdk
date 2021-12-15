@@ -17,6 +17,7 @@ The SD card image already contains all the SDK dependencies and there's no need 
 ### AD-96TOF1-EBZ
 
 ```console
+analog@jetson:~/workspace/aditof_sdk$ git checkout master
 analog@jetson:~/workspace/aditof_sdk$ git pull
 analog@jetson:~/workspace/aditof_sdk$ cd build
 analog@jetson:~/workspace/aditof_sdk/build$ cmake -DJETSON=1 ..
@@ -26,6 +27,7 @@ analog@jetson:~/workspace/aditof_sdk/build$ make -j4
 ### AD-FXTOF1-EBZ
 
 ```console
+analog@jetson:~/workspace/aditof_sdk$ git checkout master
 analog@jetson:~/workspace/aditof_sdk$ git pull
 analog@jetson:~/workspace/aditof_sdk$ cd build
 analog@jetson:~/workspace/aditof_sdk/build$ cmake -DJETSON=1 -DUSE_FXTOF1=1 ..

@@ -13,6 +13,9 @@
 * Protocol Buffers v3.9.0
 
 ### Installing the dependencies
+> NOTE: To speed up the process please replace the value from the -j argument in the make/cmake command
+> with the number of cores in your system
+
 * CMake
 
 Windows installer can be downloaded from: https://cmake.org/download/
@@ -23,8 +26,8 @@ git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
 cd glog
 mkdir build_0_3_5 && cd build_0_3_5
 cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=./local_path/glog -G "Visual Studio 16 2019" ..
-cmake --build . --target install --config Debug
-cmake --build . --target install --config Release
+cmake --build . --target install --config Debug -j 4
+cmake --build . --target install --config Release -j 4
 ```
 
 * Libwebsockets:
@@ -34,8 +37,8 @@ git clone --branch v3.2.3 --depth 1 https://github.com/warmcat/libwebsockets
 cd libwebsockets
 mkdir build_3_2_3 && cd build_3_2_3
 cmake -DOPENSSL_ROOT_DIR="C:\OpenSSL-Win64" -DCMAKE_INSTALL_PREFIX=./local_path/websockets -G "Visual Studio 16 2019" ..
-cmake --build . --target install --config Debug
-cmake --build . --target install --config Release
+cmake --build . --target install --config Debug -j 4
+cmake --build . --target install --config Release -j 4
 ```
 
 * Protobuf:
@@ -44,8 +47,8 @@ git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
 cd protobuf
 mkdir build_3_9_0 && cd build_3_9_0
 cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -DCMAKE_INSTALL_PREFIX=./local_path/protobuf -G "Visual Studio 16 2019" ../cmake
-cmake --build . --target install --config Debug
-cmake --build . --target install --config Release
+cmake --build . --target install --config Debug -j 4
+cmake --build . --target install --config Release -j 4
 ```
 
 ### Download and build SDK only
@@ -56,7 +59,7 @@ cd aditof_sdk
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_2_3\local_path\websockets" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=off ..
-cmake --build . --config Release
+cmake --build . --config Release -j 4
 ```
 
 ## Building the SDK with examples
@@ -148,7 +151,7 @@ git clone --branch v8.2.0 --depth 1 https://github.com/Kitware/VTK.git
 cd VTK
 mkdir build_8_2_0 && cd build_8_2_0
 cmake -DCMAKE_INSTALL_PREFIX=./local_path/vtk -G "Visual Studio 16 2019" ..
-cmake --build . --target install --config Release
+cmake --build . --target install --config Release -j 4
 ```
 
 * OpenCV
@@ -159,7 +162,7 @@ cp -r .\opencv_contrib\modules\viz .\opencv\modules\
 cd opencv
 mkdir build_4_5_0 && cd build_4_5_0
 cmake -DWITH_VTK=ON -DBUILD_opencv_viz=ON -DBUILD_opencv_world=ON -DCMAKE_PREFIX_PATH=./local_path/vtk -DCMAKE_INSTALL_PREFIX=./local_path/opencv -G "Visual Studio 16 2019" ..
-cmake --build . --target install --config Release
+cmake --build . --target install --config Release -j 4
 ```
 Add the path from ./local_path/vtk/bin to enviroment variables to load them at runtine.
 
@@ -170,5 +173,5 @@ cd aditof_sdk
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_2_3\local_path\websockets;C:\projects\aditof-sdk\deps\opencv\build_4_5_0\local_path\opencv" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_EXAMPLES=on ..
-cmake --build . --target install --config Release
+cmake --build . --target install --config Release -j 4
 ```
