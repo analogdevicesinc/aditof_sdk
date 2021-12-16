@@ -209,9 +209,9 @@ CALL :install_websockets %config_type% %generator%
 set CMAKE_OPTIONS=-DWITH_PYTHON=on -DWITH_OPENCV=on
 pushd %build_dire%
 cmake -G %generator% -DWITH_PYTHON=on -DWITH_OPENCV=on -DOpenCV_DIR="%openCVPath%\build\x64\%vs%\lib" -DCMAKE_PREFIX_PATH="%deps_install_dir%\glog;%deps_install_dir%\protobuf;%deps_install_dir%\libwebsockets" -DOPENSSL_INCLUDE_DIRS="%openSSLPath%\include" %source_dir%
-cmake --build . --config %config_type%
-cmake --build . --config %config_type% --target copy-dll-opencv 
-cmake --build . --config %config_type% --target copy-dll-example
+cmake --build . --config %config_type% -j 4
+cmake --build . --config %config_type% --target copy-dll-opencv -j 4
+cmake --build . --config %config_type% --target copy-dll-example -j 4
 popd
 EXIT /B %ERRORLEVEL%
 
@@ -253,7 +253,7 @@ git checkout tags/v0.3.5
 if not exist "build_0_3_5" ( mkdir build_0_3_5 )
 pushd build_0_3_5
 cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=%deps_install_dir%\glog -G %generator% ..
-cmake --build . --target install --config %configuration%
+cmake --build . --target install --config %configuration% -j 4
 popd
 popd
 popd
@@ -268,7 +268,7 @@ pushd protobuf
 if not exist "build_3_9_0" ( mkdir build_3_9_0 )
 pushd build_3_9_0
 cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=%deps_install_dir%\protobuf -Dprotobuf_MSVC_STATIC_RUNTIME=OFF -G %generator% ..\cmake\
-cmake --build . --target install --config %configuration%
+cmake --build . --target install --config %configuration% -j 4
 popd
 popd
 popd
@@ -283,7 +283,7 @@ pushd libwebsockets
 if not exist "build_3_2_3" ( mkdir build_3_2_3 )
 pushd build_3_2_3
 cmake -DOPENSSL_ROOT_DIR="%openSSLPath%" -DCMAKE_INSTALL_PREFIX=%deps_install_dir%\libwebsockets -G %generator% ..
-cmake --build . --target install --config %configuration%
+cmake --build . --target install --config %configuration% -j 4
 popd
 popd
 popd
