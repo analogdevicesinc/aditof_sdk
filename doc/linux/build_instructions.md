@@ -25,7 +25,7 @@ git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
 cd glog
 mkdir build_0_3_5 && cd build_0_3_5
 cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=/opt/glog ..
-sudo cmake --build . --target install -j 4
+sudo make -j4 && sudo make install
 ```
 
 * Libwebsockets:
@@ -35,7 +35,7 @@ git clone --branch v3.2.3 --depth 1 https://github.com/warmcat/libwebsockets
 cd libwebsockets
 mkdir build_3_2_3 && cd build_3_2_3
 cmake -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/opt/websockets ..
-sudo cmake --build . --target install -j 4
+sudo make -j4 && sudo make install
 ```
 
 * protobuf:
@@ -44,7 +44,7 @@ git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
 cd protobuf
 mkdir build_3_9_0 && cd build_3_9_0
 cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/opt/protobuf ../cmake
-sudo cmake --build . --target install -j 4
+sudo make -j4 && sudo make install
 ```
 
 
@@ -97,7 +97,7 @@ cp -r ./opencv_contrib/modules/viz ./opencv/modules/
 cd opencv
 mkdir build_4_5_0 && cd build_4_5_0
 cmake -DWITH_VTK=ON -DBUILD_opencv_viz=ON -DBUILD_opencv_world=ON -DCMAKE_PREFIX_PATH="/opt/vtk" -DCMAKE_INSTALL_PREFIX="/opt/opencv" ..
-sudo cmake --build . --target install -j 4
+sudo make -j4 && sudo make install
 ```
 
 Compile the sdk and add OpenCV to CMAKE_PREFIX_PATH:
