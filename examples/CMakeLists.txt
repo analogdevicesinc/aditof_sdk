@@ -5,7 +5,9 @@ project(examples)
 option(WITH_IMGUI "Build ImGui based examples?" OFF)
 
 # Dependecies that can be accessed by any example
-add_subdirectory(deps/imgui)
+if (WITH_IMGUI)
+    add_subdirectory(deps/imgui)
+endif()
 
 # Examples
 add_subdirectory(aditof-demo)
