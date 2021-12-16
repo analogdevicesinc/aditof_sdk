@@ -21,7 +21,7 @@ git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
 cd glog
 mkdir build_0_3_5 && cd build_0_3_5
 cmake -DWITH_GFLAGS=off -DCMAKE_INSTALL_PREFIX=/opt/glog ..
-sudo cmake --build . --target install
+sudo make -j4 && sudo make install
 
 #install libwebsockets
 cd /home/pi/workspace/github
@@ -29,7 +29,7 @@ git clone --branch v3.2.3 --depth 1 https://github.com/warmcat/libwebsockets
 cd libwebsockets
 mkdir build_3_2_3 && cd build_3_2_3
 cmake -DLWS_STATIC_PIC=ON -DCMAKE_INSTALL_PREFIX=/opt/websockets ..
-sudo cmake --build . --target install
+sudo make -j4 && sudo make install
 
 #install protobuf
 cd /home/pi/workspace/github
@@ -37,7 +37,7 @@ git clone --branch v3.9.0 --depth 1 https://github.com/protocolbuffers/protobuf
 cd protobuf
 mkdir build_3_9_0 && cd build_3_9_0
 cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_CXX_FLAGS="-latomic" -DCMAKE_INSTALL_PREFIX=/opt/protobuf ../cmake
-sudo cmake --build . --target install
+sudo make -j4 && sudo make install
 
 #download and build the SDK
 cd /home/pi/workspace/github
