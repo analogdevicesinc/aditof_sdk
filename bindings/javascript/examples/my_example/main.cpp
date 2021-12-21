@@ -1,9 +1,43 @@
 
-
-#include "main.h"
+#include <iostream>
 #include <emscripten/bind.h>
 
 using namespace emscripten;
+
+
+// using namespace std;
+
+class Counter
+{
+
+private:
+	int value;
+
+public:
+
+	Counter()
+	{
+		value = 0;
+	}
+	void increment()
+	{
+		value++;
+		std::cout << value << std::endl;
+	}
+
+	bool isOk()
+	{
+		if(value < 100){
+			return true;
+		}
+		return false;
+	}
+};
+
+
+
+
+
 
 void callMyName(std::string name){
   std::cout << "Hello " + name + "!"<< std::endl;
@@ -14,10 +48,6 @@ int main(int argc, char const *argv[]){
   Counter c;
   
   callMyName("world");
-  // while(c.isOk()){
-  // // while(true) {
-  //   c.increment();
-  // }
 
   return 0;
 }
@@ -29,6 +59,5 @@ EMSCRIPTEN_BINDINGS(module) {
     .constructor<>()
     .function("increment", &Counter::increment)
     .function("isOk", &Counter::isOk)
-    // .property("value", &Counter::value)
     ;
 }

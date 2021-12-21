@@ -130,11 +130,11 @@ EMSCRIPTEN_BINDINGS(Module) {
     // // ADI Time of Flight API
 
     // System
-    // emscripten::class_<aditof::System>("System")
-    //     .constructor<>()
-    //     .function("getCameraList", &aditof::System::getCameraList)
-    //     .function("getCameraListAtIp", &aditof::System::getCameraListAtIp)
-    //     ;
+    emscripten::class_<aditof::System>("System")
+        .constructor<>()
+        .function("getCameraList", &aditof::System::getCameraList)
+        .function("getCameraListAtIp", &aditof::System::getCameraListAtIp)
+        ;
 
     // Camera
     // emscripten::class_<aditof::Camera, std::shared_ptr<aditof::Camera>>("Camera")

@@ -1,0 +1,15 @@
+- am instalat emscripten (un tool care face binding-uri de javascript din C++) de aici: https://emscripten.org/docs/getting_started/downloads.html
+
+- din build am incercat comenzile:
+	emcmake cmake ..
+	emmake make
+	emcc -O2 ./sdk/libaditof.so -o aditofjavascript.js
+
+- si din bindings/javascript/ am incercat comanda:
+ 	em++ --bind -o aditofjavascript.js aditofjavascript.cpp -I../../sdk/include -s LLD_REPORT_UNDEFINED --no-entry
+
+- in acest folder e un fisier similar cu cel de la binding-urile de python, numit aditofjavascript.cpp, folosit pentru crearea binding-urilor; o parte din el e comentata
+
+- in bindings/javascript/examples/ am facut cateva exemple mici de proiecte C++ pe care am reusit sa le portez in javascript, folosind emscripten
+
+- de exemplu, in my_example/ am folosit comanda - em++ --bind -o main.js  main.cpp -s EXPORTED_FUNCTIONS=_main -s INVOKE_RUN=0 - care genereaza un fisier main.js, unul main.wasm 
