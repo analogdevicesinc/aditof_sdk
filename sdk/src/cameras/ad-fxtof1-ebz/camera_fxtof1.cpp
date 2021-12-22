@@ -64,6 +64,7 @@ static const std::vector<std::string> availableControls = {
     "depth_correction",
     "camera_geometry_correction",
     "camera_distortion_correction",
+    "ir_distortion_correction",
     "revision"};
 static const std::string skEepromName = "custom";
 CameraFxTof1::CameraFxTof1(
@@ -74,7 +75,7 @@ CameraFxTof1::CameraFxTof1(
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
       m_availableControls(availableControls), m_depthCorrection(true),
       m_cameraGeometryCorrection(true), m_distortionCorrection(true),
-      m_revision("RevA") {
+      m_irDistorsionCorrection(false), m_revision("RevA") {
 
     // Check Depth Sensor
     if (!depthSensor) {
@@ -432,7 +433,7 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
 
     if ((m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "ir") &&
-        m_distortionCorrection) {
+        m_irDistorsionCorrection) {
         uint16_t *irDataLocation;
         frame->getData(FrameDataType::IR, &irDataLocation);
 
@@ -517,6 +518,10 @@ aditof::Status CameraFxTof1::setControl(const std::string &control,
         m_distortionCorrection = std::stoi(value) != 0;
     }
 
+    if (control == "ir_distortion_correction") {
+        m_irDistorsionCorrection = std::stoi(value) != 0;
+    }
+
     if (control == "revision") {
         m_revision = value;
     }
@@ -554,6 +559,10 @@ aditof::Status CameraFxTof1::getControl(const std::string &control,
 
     if (control == "camera_distortion_correction") {
         value = m_distortionCorrection ? "1" : "0";
+    }
+
+    if (control == "ir_distorsion_correction") {
+        value = m_irDistorsionCorrection ? "1" : "0";
     }
 
     if (control == "revision") {
