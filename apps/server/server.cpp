@@ -246,6 +246,8 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, sigint_handler);
     signal(SIGTERM, sigint_handler);
 
+    LOG(INFO) << "Server built with websockets version:"  << LWS_LIBRARY_VERSION;
+
     struct lws_context_creation_info info;
     memset(&info, 0, sizeof(info));
 
