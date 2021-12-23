@@ -118,7 +118,8 @@ SystemImpl::SystemImpl() {
                   << " | commit: " << ADITOFSDK_GIT_COMMIT;
         sdkRevisionLogged = true;
 #if HAS_NETWORK
-        LOG(INFO) << "SDK built with websockets version:"  << LWS_LIBRARY_VERSION;
+        LOG(INFO) << "SDK built with websockets version:"
+                  << LWS_LIBRARY_VERSION;
 #endif
     }
 }
