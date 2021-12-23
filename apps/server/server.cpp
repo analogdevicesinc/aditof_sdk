@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, sigint_handler);
     signal(SIGTERM, sigint_handler);
 
-    LOG(INFO) << "Server built with websockets version:"  << LWS_LIBRARY_VERSION;
+    LOG(INFO) << "Server built with websockets version:" << LWS_LIBRARY_VERSION;
 
     struct lws_context_creation_info info;
     memset(&info, 0, sizeof(info));
@@ -261,6 +261,13 @@ int main(int argc, char *argv[]) {
     network->context = lws_create_context(&info);
 
     Initialize();
+    int msTimeout;
+// TO DO: After 6-12 months we should remove this #if-else and keep only things related to 3.2.3
+#if LWS_LIBRARY_VERSION_NUMBER > 3002003
+    msTimeout = 0;
+#else
+    msTimeout = 50;
+#endif
 
 #if 0
   /* Note: Simply enabling this won't work, need libwebsocket compiled differently to demonize this */
@@ -271,7 +278,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     while (!interrupted) {
-        lws_service(network->context, 0 /* timeout_ms */);
+        lws_service(network->context, msTimeout /* timeout_ms */);
     }
 
     if (sensors_are_created) {
