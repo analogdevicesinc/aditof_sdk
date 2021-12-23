@@ -53,6 +53,10 @@
 
 #include "aditof/version.h"
 
+#ifdef HAS_NETWORK
+#include <lws_config.h>
+#endif
+
 using namespace aditof;
 
 /* Constructs a camera based on the sensors & other devices provided
@@ -113,6 +117,9 @@ SystemImpl::SystemImpl() {
                   << " | branch: " << ADITOFSDK_GIT_BRANCH
                   << " | commit: " << ADITOFSDK_GIT_COMMIT;
         sdkRevisionLogged = true;
+#if HAS_NETWORK
+        LOG(INFO) << "SDK built with websockets version:"  << LWS_LIBRARY_VERSION;
+#endif
     }
 }
 
