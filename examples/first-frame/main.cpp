@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> frameTypes;
     camera->getAvailableFrameTypes(frameTypes);
     if (frameTypes.empty()) {
-        std::cout << "no frame type avaialble!";
+        std::cout << "no frame type available!";
         return 0;
     }
     status = camera->setFrameType(frameTypes.front());

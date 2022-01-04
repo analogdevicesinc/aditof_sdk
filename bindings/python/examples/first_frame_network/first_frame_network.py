@@ -31,14 +31,23 @@
 #
 import aditofpython as tof
 import numpy as np
+import sys
 
 system = tof.System()
 
+if len(sys.argv) < 2 :
+    print("No ip address provided! Run: python3 first_frame_network.py <ip_address>!")
+    exit(1)
+
+ip = sys.argv[1]
+
 cameras = []
-status = system.getCameraList(cameras)
-print("system.getCameraList()", status)
+status = system.getCameraListAtIp(cameras, ip)
+print("system.getCameraListAtIp()", status)
 
 camera1 = cameras[0]
+status = camera1.initialize()
+print("camera1.initialize()", status)
 
 modes = []
 status = camera1.getAvailableModes(modes)
@@ -49,9 +58,6 @@ types = []
 status = camera1.getAvailableFrameTypes(types)
 print("system.getAvailableFrameTypes()", status)
 print(types)
-
-status = camera1.initialize()
-print("camera1.initialize()", status)
 
 camDetails = tof.CameraDetails()
 status = camera1.getDetails(camDetails)
