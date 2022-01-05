@@ -702,6 +702,11 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
                 m_implData->frameDetails.type == "ir") {
                 buf_data_len /= 2;
         }
+
+        if(m_implData->frameDetails.type == "ir"){
+            irPtr = buffer;
+        }
+        
         /* The frame is read from the device as an array of uint8_t's where
          * every 3 uint8_t's can produce 2 uint16_t's that have only 12 bits
          * in use.
