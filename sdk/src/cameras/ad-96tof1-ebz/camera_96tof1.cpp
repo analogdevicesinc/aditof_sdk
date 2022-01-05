@@ -234,11 +234,6 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
     using namespace aditof;
     Status status = Status::OK;
 
-    if (m_devStarted) {
-        status = m_depthSensor->stop();
-        m_devStarted = false;
-    }
-
     // Set the values specific to the Revision requested
     std::array<rangeStruct, 3> rangeValues =
         RangeValuesForRevision.at(m_revision);
@@ -355,11 +350,6 @@ aditof::Status Camera96Tof1::setMode(const std::string &mode,
     }
 
     m_details.mode = mode;
-
-    if (!m_devStarted) {
-        status = m_depthSensor->start();
-        m_devStarted = true;
-    }
 
     return status;
 }
