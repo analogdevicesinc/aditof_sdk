@@ -102,6 +102,7 @@ class Camera96Tof1 : public aditof::Camera {
     bool m_distortionCorrection;
     bool m_irDistorsionCorrection;
     std::string m_revision;
+    std::string m_frameTypeCache;
 };
 
 #endif // CAMERA_96TOF1_H
