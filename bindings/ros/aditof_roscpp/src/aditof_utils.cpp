@@ -36,6 +36,7 @@
 
 #include <ros/ros.h>
 
+std::mutex mtx_dynamic_rec;
 using namespace aditof;
 
 std::string parseArgs(int argc, char **argv) {
@@ -181,9 +182,14 @@ void disableNoiseReduction(const std::shared_ptr<Camera> &camera) {
 
 void getNewFrame(const std::shared_ptr<Camera> &camera, aditof::Frame *frame) {
     Status status = Status::OK;
-    status = camera->requestFrame(frame);
-    if (status != Status::OK) {
-        LOG(ERROR) << "Could not request frame!";
+
+    try {
+        std::lock_guard<std::mutex> lck(mtx_dynamic_rec);
+        status = camera->requestFrame(frame);
+        if (status != Status::OK) {
+            LOG(ERROR) << "Could not request frame!";
+        }
+    } catch (std::exception &e) {
     }
 }
 

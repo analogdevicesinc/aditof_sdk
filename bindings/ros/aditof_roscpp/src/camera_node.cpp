@@ -42,27 +42,29 @@ using namespace aditof;
 void callback(aditof_roscpp::Aditof_roscppConfig &config, uint32_t level,
               std::shared_ptr<Camera> &camera, DepthImageMsg *depthImgMsg) {
 
-    config.groups.camera_tof.noise_reduction.state = true;
+    try {
+        std::lock_guard<std::mutex> lck(mtx_dynamic_rec);
+        camera->stop();
+        config.groups.camera_tof.noise_reduction.state = true;
+        switch (config.mode) {
+        case 0:
+            setMode(camera, "near");
+            applyNoiseReduction(camera, config.threshold);
+            break;
+        case 1:
+            setMode(camera, "medium");
+            applyNoiseReduction(camera, config.threshold);
+            break;
+        case 2:
+            disableNoiseReduction(camera);
+            setMode(camera, "far");
+            config.threshold = 0;
 
-    switch (config.mode) {
-    case 0:
-        setMode(camera, "near");
-        applyNoiseReduction(camera, config.threshold);
-        break;
-    case 1:
-        setMode(camera, "medium");
-        applyNoiseReduction(camera, config.threshold);
-        break;
-    case 2:
-        disableNoiseReduction(camera);
-        setMode(camera, "far");
-        config.threshold = 0;
-
-        //disable the noise reduction, as it is not supported for this mode
-        config.groups.camera_tof.noise_reduction.state = false;
-        break;
-    }
-    /*
+            //disable the noise reduction, as it is not supported for this mode
+            config.groups.camera_tof.noise_reduction.state = false;
+            break;
+        }
+        /*    
     switch (config.revision) {
     case 0:
         setCameraRevision(camera, "RevA");
@@ -75,15 +77,18 @@ void callback(aditof_roscpp::Aditof_roscppConfig &config, uint32_t level,
         setCameraRevision(camera, "RevC");
         break;
     }*/
-    setIrGammaCorrection(camera, config.ir_gamma);
+        setIrGammaCorrection(camera, config.ir_gamma);
 
-    switch (config.depth_data_format) { //MONO16 - 0, RGBA8 - 1
-    case 0:
-        depthImgMsg->setDepthDataFormat(0);
-        break;
-    case 1:
-        depthImgMsg->setDepthDataFormat(1);
-        break;
+        switch (config.depth_data_format) { //MONO16 - 0, RGBA8 - 1
+        case 0:
+            depthImgMsg->setDepthDataFormat(0);
+            break;
+        case 1:
+            depthImgMsg->setDepthDataFormat(1);
+            break;
+        }
+        camera->start();
+    } catch (std::exception &e) {
     }
 }
 
