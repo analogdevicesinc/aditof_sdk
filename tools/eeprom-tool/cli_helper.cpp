@@ -32,7 +32,7 @@
 #include "cli_helper.h"
 
 const char *helpString = R"V0G0N(
-   Usage: eeprom-tool [(-u | -m | -e <ip>)] [-n <eeprom_name>]  (-h | -l | -w <file_path> | -r <file_path>) 
+   Usage: eeprom-tool [(-u | -m | -n <ip>)] [-e <eeprom_name>]  (-h | -l | -w <file_path> | -r <file_path>) 
    
    Reads or writes the contents of the eeprom memory to or from a file. The connection interface may be mipi, local or network.
    If none is specified the tool tries usb and local.
