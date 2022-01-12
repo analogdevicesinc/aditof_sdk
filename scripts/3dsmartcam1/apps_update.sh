@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd ~/Workspace/
 sudo apt install -y git-lfs
 git clone https://github.com/robotics-ai/tof_process_public
