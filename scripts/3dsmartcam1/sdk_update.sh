@@ -32,6 +32,7 @@ cd ../..
 cd ~/Workspace/aditof_sdk/
 git checkout v3.1.0
 git pull
+git fetch --tags
 sudo rm -rf build || true
 mkdir build && cd build
 cmake -DUSE_3D_SMART=1 -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
