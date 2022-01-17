@@ -35,6 +35,10 @@
 #include "aditof/depth_sensor_interface.h"
 #include "connections/target/v4l_buffer_access_interface.h"
 
+#if defined CUDA_ON_TARGET
+#include "../../../../bindings/cuda_utils/include/cuda_utils.h"
+#endif
+
 #include <memory>
 
 namespace aditof {
@@ -97,6 +101,14 @@ class Addi9036Sensor : public aditof::DepthSensorInterface,
                                             struct VideoDev *dev = nullptr);
     aditof::Status enqueueInternalBufferPrivate(struct v4l2_buffer &buf,
                                                 struct VideoDev *dev = nullptr);
+  
+#if defined CUDA_ON_TARGET
+  private:
+    cudaOnTarget cudaObj;
+
+  public:
+
+#endif
 
   private:
     struct ImplData;
@@ -107,6 +119,7 @@ class Addi9036Sensor : public aditof::DepthSensorInterface,
     std::string m_driverSubPath;
     std::string m_captureDev;
     std::unique_ptr<ImplData> m_implData;
+    double* m_distortion_cache;
 };
 
 #endif // ADDI9036_SENSOR_H

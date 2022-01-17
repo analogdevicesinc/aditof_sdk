@@ -412,6 +412,14 @@ aditof::Status Calibration96Tof1::setMode(const std::string &mode, int range,
         LOG(WARNING) << "Failed to read distortion coeffs from eeprom";
         return status;
     }
+    else{
+                LOG(INFO) << "Camera distortion coefficient parameters:\n"
+                  << "    k1: " << distortionCoeffs[0] << "\n"
+                  << "    k2: " << distortionCoeffs[1] << "\n"
+                  << "    p1: " << distortionCoeffs[2] << "\n"
+                  << "    p2: " << distortionCoeffs[3] << "\n"
+                  << "    k3: " << distortionCoeffs[4];
+    }
     buildDistortionCorrectionCache(cameraMatrix, distortionCoeffs, frameWidth,
                                    frameHeight);
 

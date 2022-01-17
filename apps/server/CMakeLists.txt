@@ -15,3 +15,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE aditof ${Protobuf_LIBRARIES} ${LIB
 target_include_directories(${PROJECT_NAME} PRIVATE ${Protobuf_INCLUDE_DIRS} ${GENERATED_PROTO_FILES_DIR} ${LIBWEBSOCKETS_INCLUDE_DIRS})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 11)
+
+

@@ -99,6 +99,32 @@ Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
       m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData) {
     m_sensorName = "addi9036";
+
+#if defined(CUDA_ON_TARGET)
+    double width_tmp = 640;
+    double height_tmp = 480;
+    double fx_tmp = 374.93;
+    double fy_tmp = 374.889;
+    double cx_tmp = 317.166;
+    double cy_tmp = 235.039;
+    double k1_tmp = -0.157127;
+    double k2_tmp = 0.00268057;
+    double x0_tmp = 317.166;
+    double y0_tmp = 235.039;
+    double gain_tmp = 0.5; // 1.15 for medium
+    double offset_tmp = 0.0;
+    double pixelMaxValue_tmp = 4095.0;
+    double range_tmp = 800; //3000 fir medium
+
+    cudaObj.setParameters(width_tmp, height_tmp, fx_tmp, fy_tmp, cx_tmp, cy_tmp,
+                          k1_tmp, k2_tmp, 0, x0_tmp, y0_tmp, gain_tmp,
+                          offset_tmp, pixelMaxValue_tmp, range_tmp);
+
+    cudaObj.buildGeometryCorrectionCache();
+    cudaObj.buildDistortionCorrectionCache();
+    cudaObj.buildDepthCorrectionCache();
+
+#endif
 }
 
 Addi9036Sensor::~Addi9036Sensor() {
@@ -140,6 +166,9 @@ Addi9036Sensor::~Addi9036Sensor() {
             }
         }
     }
+#if defined(CUDA_ON_TARGET)
+    cudaObj.freeAll();
+#endif
 }
 
 aditof::Status Addi9036Sensor::open() {

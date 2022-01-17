@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 project(adi_tof_project)
+
 
 ####################### Disable In-source builds ##############################
 if( ${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR} )
@@ -82,6 +83,18 @@ endif()
 
 if (WITH_NETWORK)
         add_definitions(-DHAS_NETWORK)
+endif()
+
+if (USE_FXTOF1)
+        add_definitions(-DFXTOF1)
+endif()
+
+if (USE_3D_SMART)
+        add_definitions(-DSMART_3D)
+endif()
+
+if (CUDA_ON_TARGET)
+        add_definitions(-DCUDA_ON_TARGET)
 endif()
 
 include(FindGit OPTIONAL)

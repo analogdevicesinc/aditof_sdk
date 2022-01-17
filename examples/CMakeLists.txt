@@ -10,7 +10,7 @@ if (WITH_IMGUI)
 endif()
 
 # Examples
-add_subdirectory(aditof-demo)
+#add_subdirectory(aditof-demo)
 if (WITH_IMGUI)
     add_subdirectory(aditof-demo-imgui)
 endif()
@@ -27,7 +27,7 @@ endif()
 include(GNUInstallDirs)
 
 install(PROGRAMS
-    $<TARGET_FILE:aditof-demo>
+    #$<TARGET_FILE:aditof-demo>
     $<TARGET_FILE:first-frame>
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

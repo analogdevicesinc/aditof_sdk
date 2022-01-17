@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
     FrameDetails fDetails;
     frame.getDetails(fDetails);
     for (unsigned int i = 0; i < fDetails.width * fDetails.height; ++i) {
-        std::cout << data1[i] << " ";
+        //std::cout << data1[i] << " ";
     }
 
     return 0;

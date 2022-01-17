@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.8)
 project(aditof)
 
 add_definitions(-DSDK_EXPORTS)
 find_package(glog 0.3.5 REQUIRED)
 
-#Enables the use of assert() from <assert.h> only in Debug mode.
+
+# Enables the use of assert() from <assert.h> only in Debug mode.
 if ( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
 	add_definitions(-DNDEBUG)
 endif()
@@ -24,6 +25,7 @@ file(GLOB SOURCES
 file(GLOB HEADERS
     ${CMAKE_SOURCE_DIR}/sdk/include/aditof/*.h
 )
+
 
 # Create some variables and definitions based on the OS (or platform)
 if( WIN32 )
@@ -182,6 +184,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
     )
 endif()
 
+
 if ( RASPBERRYPI )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon -latomic")
     include (${CMAKE_SOURCE_DIR}/cmake/raspberrypi-revision-config.cmake)
@@ -189,6 +192,24 @@ endif()
 
 if ( JETSON )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -latomic")
+endif()
+
+if ( CUDA_ON_TARGET )
+        file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/../bindings/cuda_utils/build")
+        execute_process(
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../bindings/cuda_utils/build/
+            COMMAND cmake .. 
+        )
+        execute_process(
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../bindings/cuda_utils/build/
+            COMMAND make
+        )
+        add_library(libaditof_cuda SHARED IMPORTED)
+        set_target_properties(libaditof_cuda PROPERTIES
+            IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/../bindings/cuda_utils/build/libaditof_cuda.so"
+            IMPORTED_NO_SONAME 1
+        )
+        target_link_libraries(${PROJECT_NAME} PRIVATE libaditof_cuda)
 endif()
 
 if( APPLE )

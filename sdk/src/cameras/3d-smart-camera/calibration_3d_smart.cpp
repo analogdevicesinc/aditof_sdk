@@ -304,6 +304,11 @@ aditof::Status Calibration3D_Smart::setMode(
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to read distortion coefficients from eeprom";
     } else {
+        LOG(INFO) << "Camera distortion coefficient parameters:\n"
+                  << "    k1: " << distortionCoeffs[0] << "\n"
+                  << "    k2: " << distortionCoeffs[1] << "\n"
+                  << "    k3: " << distortionCoeffs[2];
+
         buildDistortionCorrectionCache(frameWidth, frameheight);
     }
 
@@ -391,6 +396,11 @@ void Calibration3D_Smart::buildDepthCalibrationCache(float gain, float offset,
             static_cast<int16_t>(static_cast<float>(current) * gain + offset);
         m_depth_cache[current] = currentValue <= range ? currentValue : range;
     }
+    // std::cout << "CPU depth: \n";
+    // for (int i = 0; i < 10; i++) {
+    //     std::cout << m_depth_cache[i] << ", ";
+    // }
+    // std::cout << "\n\n\n";
 }
 
 // Create a cache to speed up depth geometric camera calibration computation
@@ -425,6 +435,11 @@ void Calibration3D_Smart::buildGeometryCalibrationCache(
             }
         }
     }
+    // std::cout << "CPU geometry: \n";
+    // for (int i = 0; i < 10; i++) {
+    //     std::cout << m_geometry_cache[i] << ", ";
+    // }
+    // std::cout << "\n\n\n";
 }
 
 void Calibration3D_Smart::buildDistortionCorrectionCache(unsigned int width,
@@ -454,6 +469,12 @@ void Calibration3D_Smart::buildDistortionCorrectionCache(unsigned int width,
             m_distortion_cache[j * width + i] = k_calc;
         }
     }
+
+    std::cout << "CPU distortion: \n";
+    for (int i = 0; i < 10; i++) {
+        std::cout << m_distortion_cache[i] << ", ";
+    }
+    std::cout << "\n\n\n";
 }
 
 aditof::Status Calibration3D_Smart::distortionCorrection(uint16_t *frame,
