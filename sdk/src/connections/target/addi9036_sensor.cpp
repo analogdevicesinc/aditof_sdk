@@ -620,61 +620,123 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             return bytesused == (width * height * 3);
         };
 
-        if (width == 668) {
-            unsigned int j = 0;
-            for (unsigned int i = 0; i < (buf_data_len); i += 3) {
-                if ((i != 0) && (i % (336 * 3) == 0)) {
-                    j -= 4;
-                }
-
-                buffer[j] = (((unsigned short)*(pdata[0] + i)) << 4) |
-                            (((unsigned short)*(pdata[0] + i + 2)) & 0x000F);
-                j++;
-
-                buffer[j] =
-                    (((unsigned short)*(pdata[0] + i + 1)) << 4) |
-                    ((((unsigned short)*(pdata[0] + i + 2)) & 0x00F0) >> 4);
-                j++;
-            }
-        } else if (!isBufferPacked(buf[0], width, height)) {
-            // TODO: investigate optimizations for this (arm neon / 1024 bytes
-            // chunks)
-            if (m_implData->frameDetails.type == "depth") {
-                memcpy(buffer, pdata[0], buf[0].bytesused);
-            } else if (m_implData->frameDetails.type == "ir") {
 #if defined(JETSON)
-                memcpy(buffer, pdata[0], buf[0].bytesused);
-#else
-            memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
-#endif
-            } else {
-#if defined(TOYBRICK)
-                unsigned int fullDataWidth =
-                    m_implData->frameDetails.fullDataWidth;
-                unsigned int fullDataHeight =
-                    m_implData->frameDetails.fullDataHeight;
-                uint32_t j = 0, j1 = width * height;
-                for (uint32_t i = 0; i < fullDataHeight; i += 2) {
-                    memcpy(buffer + j, pdata[0] + i * width * 2, width * 2);
-                    j += width;
-                    memcpy(buffer + j1, pdata[0] + (i + 1) * width * 2,
-                           width * 2);
-                    j1 += width;
-                }
-                for (uint32_t i = 0; i < fullDataWidth * fullDataHeight;
-                     i += 2) {
-                    buffer[i] = ((buffer[i] & 0x00FF) << 4) |
-                                ((buffer[i]) & 0xF000) >> 12;
-                    buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
-                                    ((buffer[i + 1]) & 0xF000) >> 12;
-                }
-#elif defined(JETSON)
+
+        if (m_implData->frameDetails.type == "depth") {
+            memcpy(buffer, pdata[0], buf[0].bytesused);
+        } else if (m_implData->frameDetails.type == "ir") {
+
+            memcpy(buffer, pdata[0], buf[0].bytesused);
+        } else {
+
             if (dataType) {
                 memcpy(buffer, pdata[0], buf[0].bytesused);
             } else {
                 memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
             }
+        }
+
+#elif defined(XAVIERNX)
+
+    if (m_implData->frameDetails.type == "depth") {
+        // Not Packed and type == "depth"
+        uint16_t *ptr_depth = (uint16_t *)pdata[0];
+        uint16_t *ptr_buff_depth = buffer;
+        //discard 4 LSB of depth (due to Nvidia RAW memory storage type)
+        for (unsigned int k = 0; k < buf[0].bytesused / 2; k += 2) {
+            ptr_buff_depth[k] = (*(ptr_depth + k) >> 4);
+            ptr_buff_depth[k + 1] = (*(ptr_depth + k + 1) >> 4);
+        }
+    } else if (m_implData->frameDetails.type == "ir") {
+
+        // Not Packed and type == "ir"
+        uint16_t *ptr_ir = (uint16_t *)pdata[1];
+        uint16_t *ptr_buff_ir = buffer;
+        //discard 4 LSB of depth (due to Nvidia RAW memory storage type)
+        for (unsigned int k = 0; k < buf[1].bytesused / 2; k += 2) {
+            ptr_buff_ir[k] = (*(ptr_ir + k) >> 4);
+            ptr_buff_ir[k + 1] = (*(ptr_ir + k + 1) >> 4);
+        }
+    } else {
+        // Not Packed and type == "depth_ir"
+        uint16_t *ptr_depth = (uint16_t *)pdata[0];
+        uint16_t *ptr_ir = (uint16_t *)pdata[1];
+        uint16_t *ptr_buff_depth = buffer;
+        uint16_t *ptr_buff_ir = buffer + (width * height);
+        //discard 4 LSB of depth (due to Nvidia RAW memory storage type)
+        for (unsigned int k = 0; k < buf[0].bytesused / 2; k += 2) {
+            ptr_buff_depth[k] = (*(ptr_depth + k) >> 4);
+            ptr_buff_depth[k + 1] = (*(ptr_depth + k + 1) >> 4);
+        }
+        for (unsigned int k = 0; k < buf[0].bytesused / 2; k += 2) {
+            ptr_buff_ir[k] = (*(ptr_ir + k) >> 4);
+            ptr_buff_ir[k + 1] = (*(ptr_ir + k + 1) >> 4);
+        }
+    }
+
+#elif defined(TOYBRICK)
+
+    // TODO: investigate optimizations for this (arm neon / 1024 bytes
+    // chunks)
+    if (m_implData->frameDetails.type == "depth") {
+        memcpy(buffer, pdata[0], buf[0].bytesused);
+    } else if (m_implData->frameDetails.type == "ir") {
+        memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
+    } else {
+        unsigned int fullDataWidth = m_implData->frameDetails.fullDataWidth;
+        unsigned int fullDataHeight = m_implData->frameDetails.fullDataHeight;
+        uint32_t j = 0, j1 = width * height;
+        for (uint32_t i = 0; i < fullDataHeight; i += 2) {
+            memcpy(buffer + j, pdata[0] + i * width * 2, width * 2);
+            j += width;
+            memcpy(buffer + j1, pdata[0] + (i + 1) * width * 2, width * 2);
+            j1 += width;
+        }
+        for (uint32_t i = 0; i < fullDataWidth * fullDataHeight; i += 2) {
+            buffer[i] =
+                ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
+            buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
+                            ((buffer[i + 1]) & 0xF000) >> 12;
+        }
+        // Not Packed and type == "depth_ir"
+        uint16_t *ptr_depth = (uint16_t *)pdata[0];
+        uint16_t *ptr_ir = (uint16_t *)pdata[1];
+        uint16_t *ptr_buff_depth = buffer;
+        uint16_t *ptr_buff_ir = buffer + (width * height);
+        //discard 4 LSB of depth (due to Nvidia RAW memory storage type)
+        for (unsigned int k = 0; k < buf[0].bytesused / 2; k += 2) {
+            ptr_buff_depth[k] = (*(ptr_depth + k) >> 4);
+            ptr_buff_depth[k + 1] = (*(ptr_depth + k + 1) >> 4);
+        }
+        for (unsigned int k = 0; k < buf[0].bytesused / 2; k += 2) {
+            ptr_buff_ir[k] = (*(ptr_ir + k) >> 4);
+            ptr_buff_ir[k + 1] = (*(ptr_ir + k + 1) >> 4);
+        }
+    }
 #else
+    if (width == 668) {
+        unsigned int j = 0;
+        for (unsigned int i = 0; i < (buf_data_len); i += 3) {
+            if ((i != 0) && (i % (336 * 3) == 0)) {
+                j -= 4;
+            }
+
+            buffer[j] = (((unsigned short)*(pdata[0] + i)) << 4) |
+                        (((unsigned short)*(pdata[0] + i + 2)) & 0x000F);
+            j++;
+
+            buffer[j] = (((unsigned short)*(pdata[0] + i + 1)) << 4) |
+                        ((((unsigned short)*(pdata[0] + i + 2)) & 0x00F0) >> 4);
+            j++;
+        }
+    } else if (!isBufferPacked(buf[0], width, height)) {
+        // TODO: investigate optimizations for this (arm neon / 1024 bytes
+        // chunks)
+        if (m_implData->frameDetails.type == "depth") {
+            memcpy(buffer, pdata[0], buf[0].bytesused);
+        } else if (m_implData->frameDetails.type == "ir") {
+            memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
+        } else {
             // Not Packed and type == "depth_ir"
             uint16_t *ptr_depth = (uint16_t *)pdata[0];
             uint16_t *ptr_ir = (uint16_t *)pdata[1];
@@ -689,11 +751,10 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
                 ptr_buff_ir[k] = (*(ptr_ir + k) >> 4);
                 ptr_buff_ir[k + 1] = (*(ptr_ir + k + 1) >> 4);
             }
-#endif
-            }
+        }
 
-        } else {
-            // clang-format off
+    } else {
+        // clang-format off
         uint16_t *depthPtr = buffer;
         uint16_t *irPtr = buffer + (width * height);
         unsigned int j = 0;
@@ -759,8 +820,10 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             j += 16;
             pdata[0] += 24;
         }
-            // clang-format on
-        }
+        // clang-format on
+    }
+
+#endif
 
         for (uint8_t i = 0; i < m_implData->numVideoDevs; i++) {
             dev = &m_implData->videoDevs[i];
