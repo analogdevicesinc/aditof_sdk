@@ -163,8 +163,8 @@ jobs:
       versionSpec: '3.9'
   - task: Cache@2
     inputs:
-      key: deps_windowsx | "$(imageName)" 
-      restoreKeys: deps_windowsx | "$(imageName)"
+      key: deps_windows1 | "$(imageName)" 
+      restoreKeys: deps_windows1 | "$(imageName)"
       path: $(Agent.BuildDirectory)/s/deps_installed
       cacheHitVar: CACHE_RESTORED
   - task: PowerShell@2
@@ -173,6 +173,12 @@ jobs:
       filePath: ./ci/azure/windows-build/install_deps.ps1
     condition: eq(variables.CACHE_RESTORED, 'false')
     displayName: "Install Dependencies"
+  - task: PowerShell@2
+    inputs:
+      targetType: 'filePath'
+      filePath: ./ci/azure/windows-build/build_sdk.ps1
+    displayName: "Build"
+
 
 
   
