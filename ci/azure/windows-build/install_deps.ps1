@@ -2,7 +2,10 @@ $ARCH=$Env:ARCH
 $GENERATOR=$Env:COMPILER
 
 $local_path=$pwd
-mkdir -p deps_installed/glog deps_installed/protobuf deps_installed/websockets
+mkdir deps
+mkdir -p deps_installed/glog
+mkdir -p deps_installed/protobuf 
+mkdir -p deps_installed/websockets
 
 git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
 cd glog
