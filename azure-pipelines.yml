@@ -188,6 +188,3 @@ jobs:
       pathToPublish: $(Build.ArtifactStagingDirectory)
       artifactName: 'aditof-setup.exe'
     displayName: Publish Installer
-
-  
-  
