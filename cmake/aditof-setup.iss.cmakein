@@ -15,7 +15,7 @@ AppSupportURL="http://www.analog.com"
 AppUpdatesURL="http://www.analog.com"
 AppCopyright="Copyright 2019 Analog Devices, Inc."
 CreateAppDir=yes
-LicenseFile="C:\projects\aditof-sdk\LICENSE"
+LicenseFile="D:\a\1\s\LICENSE"
 OutputBaseFilename=aditof-setup
 OutputDir="C:\"
 Compression=lzma
@@ -37,18 +37,13 @@ Name: "dutch"; MessagesFile: "compiler:Languages\Dutch.isl"
 Name: "finnish"; MessagesFile: "compiler:Languages\Finnish.isl"
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
-Name: "greek"; MessagesFile: "compiler:Languages\Greek.isl"
 Name: "hebrew"; MessagesFile: "compiler:Languages\Hebrew.isl"
-Name: "hungarian"; MessagesFile: "compiler:Languages\Hungarian.isl"
 Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
 Name: "norwegian"; MessagesFile: "compiler:Languages\Norwegian.isl"
 Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"
 Name: "portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
-Name: "scottishgaelic"; MessagesFile: "compiler:Languages\ScottishGaelic.isl"
-Name: "serbiancyrillic"; MessagesFile: "compiler:Languages\SerbianCyrillic.isl"
-Name: "serbianlatin"; MessagesFile: "compiler:Languages\SerbianLatin.isl"
 Name: "slovenian"; MessagesFile: "compiler:Languages\Slovenian.isl"
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
@@ -58,11 +53,11 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-Source: "C:\projects\aditof-sdk\build\sdk\Release\aditof.dll"; DestDir: "{app}"
-Source: "C:\projects\aditof-sdk\build\examples\aditof-demo\Release\aditof-demo.exe"; DestDir: "{app}";
-Source: "C:\tools\opencv\build\x64\vc15\bin\opencv_world341.dll"; DestDir: "{app}";
-Source: "C:\OpenSSL-Win64\bin\libeay32.dll"; DestDir: "{app}";
-Source: "C:\OpenSSL-Win64\bin\ssleay32.dll"; DestDir: "{app}";
+Source: "D:\a\1\s\build\sdk\Release\aditof.dll"; DestDir: "{app}"
+Source: "D:\a\1\s\build\examples\aditof-demo\Release\aditof-demo.exe"; DestDir: "{app}";
+Source: "D:\a\1\s\deps_installed\opencv\build\x64\vc15\bin\opencv_world341.dll"; DestDir: "{app}";
+Source: "D:\a\1\s\deps_installed\OpenSSL-Win64\bin\libcrypto*"; DestDir: "{app}";
+Source: "D:\a\1\s\deps_installed\OpenSSL-Win64\bin\libssl*"; DestDir: "{app}";
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"

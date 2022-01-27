@@ -178,8 +178,9 @@ jobs:
       targetType: 'filePath'
       filePath: ./ci/azure/windows-build/build_sdk.ps1
     displayName: "Build"
-
-
-
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: 'aditof-setup.exe'
   
   
