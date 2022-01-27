@@ -181,6 +181,13 @@ jobs:
   - task: PublishBuildArtifacts@1
     inputs:
       pathToPublish: $(Build.ArtifactStagingDirectory)
+      artifactName: 'aditof_x64_vs16.zip'
+    displayName: PublishLibrary
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: $(Build.ArtifactStagingDirectory)
       artifactName: 'aditof-setup.exe'
+    displayName: PublishInstaller
+
   
   
