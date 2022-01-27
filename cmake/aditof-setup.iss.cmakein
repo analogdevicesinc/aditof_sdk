@@ -53,8 +53,8 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-Source: "D:\a\1\s\build\sdk\Release\aditof.dll"; DestDir: "{app}"
-Source: "D:\a\1\s\build\examples\aditof-demo\Release\aditof-demo.exe"; DestDir: "{app}";
+Source: "D:\a\1\s\build_Release\sdk\Release\aditof.dll"; DestDir: "{app}"
+Source: "D:\a\1\s\build_Release\examples\aditof-demo\Release\aditof-demo.exe"; DestDir: "{app}";
 Source: "D:\a\1\s\deps_installed\opencv\build\x64\vc15\bin\opencv_world341.dll"; DestDir: "{app}";
 Source: "D:\a\1\s\deps_installed\OpenSSL-Win64\bin\libcrypto*"; DestDir: "{app}";
 Source: "D:\a\1\s\deps_installed\OpenSSL-Win64\bin\libssl*"; DestDir: "{app}";
