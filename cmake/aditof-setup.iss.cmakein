@@ -4,6 +4,10 @@
 #define AppExeName "Aditof-Demo.exe"
 #define AppName "Aditof-Demo"
 #define AppDev "Analog Devices"
+#define SourcePath "@CMAKE_SOURCE_DIR@"
+#define BinaryPath "@CMAKE_BINARY_DIR@"
+#define OpenSSLbin "@OPENSSL_INCLUDE_DIRS@/../bin"
+#define OpenCVbin "@OpenCV_DIR@/../bin"
 
 [Setup]
 AppId={{D5F088C2-7EFC-4E04-B4F5-305F125AB360}
@@ -15,7 +19,7 @@ AppSupportURL="http://www.analog.com"
 AppUpdatesURL="http://www.analog.com"
 AppCopyright="Copyright 2019 Analog Devices, Inc."
 CreateAppDir=yes
-LicenseFile="D:\a\1\s\LICENSE"
+LicenseFile="{#SourcePath}/LICENSE"
 OutputBaseFilename=aditof-setup
 OutputDir="C:\"
 Compression=lzma
@@ -53,11 +57,11 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-Source: "D:\a\1\s\build_Release\sdk\Release\aditof.dll"; DestDir: "{app}"
-Source: "D:\a\1\s\build_Release\examples\aditof-demo\Release\aditof-demo.exe"; DestDir: "{app}";
-Source: "C:\tools\opencv\build\x64\vc15\bin\opencv_world341.dll"; DestDir: "{app}";
-Source: "D:\a\1\s\deps_installed\OpenSSL-Win64\bin\libcrypto*"; DestDir: "{app}";
-Source: "D:\a\1\s\deps_installed\OpenSSL-Win64\bin\libssl*"; DestDir: "{app}";
+Source: "{#BinaryPath}\sdk\Release\aditof.dll"; DestDir: "{app}"
+Source: "{#BinaryPath}\examples\aditof-demo\Release\aditof-demo.exe"; DestDir: "{app}";
+Source: "{#OpenCVbin}\opencv_world341.dll"; DestDir: "{app}";
+Source: "{#OpenSSLbin}\libcrypto*"; DestDir: "{app}";
+Source: "{#OpenSSLbin}\libssl*"; DestDir: "{app}";
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"
