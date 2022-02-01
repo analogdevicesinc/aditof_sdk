@@ -38,7 +38,7 @@ Compress-Archive -Path aditof_library -DestinationPath aditof_x64_vs16.zip
 
 #generate Installer
 SET PATH=packages\Tools.InnoSetup.5.6.1\tools
-iscc cmake\aditof-setup.iss.cmakein
+iscc build_Release\aditof-setup.iss
 
 #publish artifacts
 Get-ChildItem $env:BUILD_ARTIFACTSTAGINGDIRECTORY -Force -Recurse | Remove-Item -Force -Recurse
