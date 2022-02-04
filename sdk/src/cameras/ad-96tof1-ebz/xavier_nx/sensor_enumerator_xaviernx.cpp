@@ -33,8 +33,10 @@
 #include "sensor_names.h"
 #include "target_definitions.h"
 
+#include <bits/stdc++.h>
 #include <dirent.h>
 #include <glog/logging.h>
+#include <regex>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,16 +46,114 @@
 
 using namespace aditof;
 
+Status findDevicePathsAtMedia(std::string &dev_name, std::string &subdev_name) {
+    using namespace aditof;
+    using namespace std;
+
+    //DevPaths
+    char *buf;
+    int size = 0;
+    /* Checking for available devices */
+    char cmdDev[96];
+    sprintf(cmdDev, "v4l2-ctl --list-devices | grep addi9036 -A 2 | sed '1d'");
+    FILE *fp = popen(cmdDev, "r");
+    if (!fp) {
+        LOG(WARNING) << "Error running v4l2-ctl";
+        return Status::GENERIC_ERROR;
+    }
+
+    /* Read the media-ctl output stream */
+    buf = (char *)malloc(128 * 1024);
+    while (!feof(fp)) {
+        fread(&buf[size], 1, 1, fp);
+        size++;
+    }
+    pclose(fp);
+    std::string strDev(buf);
+    std::regex e{R"(\/dev\/video\d)"};
+    std::sregex_iterator devIter(strDev.begin(), strDev.end(), e);
+    std::sregex_iterator end;
+    int nrOfDevPaths = 0;
+    while (devIter != end) {
+        for (unsigned i = 0; i < devIter->size(); ++i) {
+            if (nrOfDevPaths == 0)
+                dev_name.append((*devIter)[i]);
+            else {
+                dev_name.append(std::string("|"));
+                dev_name.append((*devIter)[i]);
+            }
+        }
+        ++devIter;
+        nrOfDevPaths++;
+    }
+
+    //SubDevPaths
+    char *subDevBuf;
+    int subDevSize = 0;
+    /* Checking for available devices */
+    char cmdSubDev[2500];
+    sprintf(cmdSubDev, "media-ctl -p");
+    FILE *subDevFp = popen(cmdSubDev, "r");
+    if (!subDevFp) {
+        LOG(WARNING) << "Error running media-ctl";
+        return Status::GENERIC_ERROR;
+    }
+
+    /* Read the media-ctl output stream */
+    subDevBuf = (char *)malloc(2500 * sizeof(char));
+    while (!feof(subDevFp)) {
+        fread(&subDevBuf[subDevSize], 1, 1, subDevFp);
+        subDevSize++;
+    }
+    pclose(subDevFp);
+    std::string strSubDev(subDevBuf);
+    std::regex subE{R"(- entity [\d]+: addi9036[a-zA-Z0-9_.+\-([,)\n /]+)"};
+    std::sregex_iterator subDevIter(strSubDev.begin(), strSubDev.end(), subE);
+    int nrOfSubDevPaths = 0;
+    while (subDevIter != end) {
+        for (unsigned i = 0; i < subDevIter->size(); ++i) {
+            std::string tmp = (*subDevIter)[i];
+            std::regex subsubE{R"(/dev/v[0-9]+l-subdev[0-9]+\b)"};
+            std::sregex_iterator subSubDevIter(tmp.begin(), tmp.end(), subsubE);
+            while (subSubDevIter != end) {
+                for (unsigned j = 0; j < subSubDevIter->size(); ++j) {
+                    if (nrOfSubDevPaths >= 1)
+                        subdev_name.append("|");
+                    subdev_name.append((*subSubDevIter)[j]);
+                }
+                ++subSubDevIter;
+            }
+        }
+        ++subDevIter;
+        nrOfSubDevPaths++;
+    }
+    return Status::OK;
+}
+
 Status TargetSensorEnumerator::searchSensors() {
 
+    Status status = Status::OK;
     LOG(INFO) << "Looking for devices on the target: Xavier NX";
 
     // TO DO: Don't guess the device, find a way to identify it so we are sure
     // we've got the right device and is compatible with the SDK
     SensorInfo sInfo;
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
-    sInfo.driverPath = "/dev/video0|/dev/video1";
-    sInfo.subDevPath = "/dev/v4l-subdev0|/dev/v4l-subdev2";
+    std::string devPath;
+    std::string subdevPath;
+
+    status = findDevicePathsAtMedia(devPath, subdevPath);
+    if (status != Status::OK) {
+        LOG(WARNING) << "failed to find device paths";
+        return status;
+    }
+
+    if (devPath.empty() || subdevPath.empty()) {
+        return Status::GENERIC_ERROR;
+    }
+
+    sInfo.driverPath = devPath;
+    sInfo.subDevPath = subdevPath;
     sInfo.captureDev = CAPTURE_DEVICE_NAME;
     m_sensorsInfo.emplace_back(sInfo);
 
