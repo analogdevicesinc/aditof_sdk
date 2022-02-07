@@ -264,7 +264,12 @@ aditof::Status CameraFxTof1::setMode(const std::string &mode,
         LOG(WARNING) << "Failed to set calibration mode";
         return status;
     }
-
+#if defined XAVIER || defined XAVIERNX
+    // Register set for VC ID. Set Depth on VC=0 and IR on VC=1
+    uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3dc, 0x4001, 0x7c22};
+    uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0xe4, 0x0007, 0x0004};
+    m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+#endif
     // register writes for enabling only one video stream (depth/ ir)
     // must be done here after programming the camera in order for them to
     // work properly. Setting the mode of the camera, programming it
