@@ -132,6 +132,7 @@ Status findDevicePathsAtMedia(std::string &dev_name, std::string &subdev_name) {
 
 Status TargetSensorEnumerator::searchSensors() {
 
+    Status status = Status::OK;
     LOG(INFO) << "Looking for devices on the target: Xavier NX";
 
     // TO DO: Don't guess the device, find a way to identify it so we are sure
