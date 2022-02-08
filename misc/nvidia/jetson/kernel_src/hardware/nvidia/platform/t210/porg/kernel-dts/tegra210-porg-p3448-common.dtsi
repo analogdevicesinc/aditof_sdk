@@ -31,7 +31,6 @@
 #include "porg-platforms/tegra210-porg-camera-adi-tof.dtsi"
 #include <t210-common-platforms/tegra210-ers-hdmi-e2190-1100-a00.dtsi>
 #include <t210-common-platforms/tegra210-dp.dtsi>
-#include <t210-common-platforms/tegra210-thermal-userspace-alert.dtsi>
 #include "porg-platforms/tegra210-porg-thermal.dtsi"
 #include "porg-platforms/tegra210-porg-thermal-fan-est.dtsi"
 #include "porg-platforms/tegra210-porg-keys-p3448-0000-a00.dtsi"
