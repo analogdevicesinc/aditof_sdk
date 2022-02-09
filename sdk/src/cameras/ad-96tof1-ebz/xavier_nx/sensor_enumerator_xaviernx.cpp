@@ -70,6 +70,7 @@ Status findDevicePathsAtMedia(std::string &dev_name, std::string &subdev_name) {
     }
     pclose(fp);
     std::string strDev(buf);
+    free(buf);
     std::regex e{R"(\/dev\/video\d)"};
     std::sregex_iterator devIter(strDev.begin(), strDev.end(), e);
     std::sregex_iterator end;
@@ -107,6 +108,7 @@ Status findDevicePathsAtMedia(std::string &dev_name, std::string &subdev_name) {
     }
     pclose(subDevFp);
     std::string strSubDev(subDevBuf);
+    free(subDevBuf);
     std::regex subE{R"(- entity [\d]+: addi9036[a-zA-Z0-9_.+\-([,)\n /]+)"};
     std::sregex_iterator subDevIter(strSubDev.begin(), strSubDev.end(), subE);
     int nrOfSubDevPaths = 0;
@@ -135,8 +137,6 @@ Status TargetSensorEnumerator::searchSensors() {
     Status status = Status::OK;
     LOG(INFO) << "Looking for devices on the target: Xavier NX";
 
-    // TO DO: Don't guess the device, find a way to identify it so we are sure
-    // we've got the right device and is compatible with the SDK
     SensorInfo sInfo;
     sInfo.sensorType = SensorType::SENSOR_ADDI9036;
     std::string devPath;
