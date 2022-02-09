@@ -264,7 +264,32 @@ aditof::Status CameraFxTof1::setMode(const std::string &mode,
         LOG(WARNING) << "Failed to set calibration mode";
         return status;
     }
-
+#if defined(XAVIER) ||                                                         \
+    defined(                                                                   \
+        XAVIERNX) // XAVIER NX must have two virtual channels constantly open
+    // Register set for VC ID. Set Depth on VC=0 and IR on VC=1
+    uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3dc, 0x4001, 0x7c22};
+    uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0xe4, 0x0007, 0x0004};
+    m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    //enabling both channels
+    uint16_t xavierAfeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
+    uint16_t xavierAfeRegsVal[5] = {0x0006, 0x0004, 0x07, 0x0007, 0x0004};
+    m_depthSensor->writeAfeRegisters(xavierAfeRegsAddr, xavierAfeRegsVal, 5);
+#elif defined(JETSON) //JETSON NANO doesn't support virtual channels
+    if (m_details.frameType.type == "depth") {
+        uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
+        uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
+        m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    } else if (m_details.frameType.type == "ir") {
+        uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
+        uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x05, 0x0007, 0x0004};
+        m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    } else if (m_details.frameType.type == "depth_ir") {
+        uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
+        uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
+        m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+    }
+#else                 //every other device
     // register writes for enabling only one video stream (depth/ ir)
     // must be done here after programming the camera in order for them to
     // work properly. Setting the mode of the camera, programming it
@@ -279,19 +304,14 @@ aditof::Status CameraFxTof1::setMode(const std::string &mode,
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     } else if (m_details.frameType.type == "depth_ir") {
         uint16_t afeRegsAddr[5] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
-#if defined(JETSON)
-        uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x03, 0x0007, 0x0004};
-#else
         uint16_t afeRegsVal[5] = {0x0006, 0x0004, 0x07, 0x0007, 0x0004};
-#endif
         m_depthSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
+#endif
 
     m_details.depthParameters.depthGain = (mode == "near" ? 0.5 : 1.15);
     m_details.depthParameters.depthOffset = 0.0f;
-
     m_details.mode = mode;
-
     return status;
 }
 
