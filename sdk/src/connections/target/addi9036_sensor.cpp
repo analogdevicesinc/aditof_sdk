@@ -401,6 +401,8 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
         fmt.fmt.pix.width = details.fullDataWidth;
 #if defined JETSON
         fmt.fmt.pix.height = details.height;
+#elif defined(XAVIERNX)
+        fmt.fmt.pix.height = details.height * 2;
 #else
         fmt.fmt.pix.height = details.fullDataHeight;
 #endif
