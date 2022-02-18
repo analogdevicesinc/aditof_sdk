@@ -3,7 +3,7 @@
 
 source_dir=$(cd "$(dirname "$0")/../.."; pwd)
 
-. "${source_dir}"/ci/travis/lib.sh
+. "${source_dir}"/ci/azure/lib.sh
 
 print_help() {
         echo "./setup [OPTIONS]"

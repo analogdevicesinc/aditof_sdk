@@ -169,7 +169,7 @@ build_and_install_protobuf() {
 
     pushd ${LIB_BUILD_DIR}
     
-    cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" #${EXTRA_CMAKE_OPTIONS}   
+    cmake ../cmake/ -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" ${EXTRA_CMAKE_OPTIONS}   
     make -j${NUM_JOBS}
     make install
 
