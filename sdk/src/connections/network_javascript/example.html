@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<title>Aditof JS Client</title>
+<link rel="shortcut icon" href="#">
+<script type="text/javascript" src="bundle.js"></script>
+
+<script type="text/javascript">
+    async function main() {
+        let status;
+
+        // adresele sunt de retea /24
+        const ip_address = '10.42.0.220';
+
+        let net = new Network(ip_address);
+        status = await net.ServerConnect();
+
+        var nse = new NetworkSensorEnumerator(net);
+        status = await nse.searchSensors();
+
+        console.log(nse);
+
+        let depth_sensor = nse.getDepthSensors()[1][0];
+        let storage = nse.getStorages()[1][0];
+        let temp_sensor = nse.getTemperatureSensors()[1][0];
+
+        console.log(depth_sensor);
+        console.log(storage);
+        console.log(temp_sensor);
+
+        let address, data, length, bytesCount;
+
+
+        ///////////////////////////////////////////////////////////////////////////////
+        //depth sensor
+        console.log('');
+        console.log('depth sensor testing');
+        console.log('');
+
+        console.log('opened: ', depth_sensor.m_opened);
+        status = await depth_sensor.open();
+        console.log('status open: ', status, depth_sensor.m_opened);
+
+        let firmware, size;
+        firmware = 'asd';
+        size = 3;
+        status = await depth_sensor.program(firmware, size);
+        console.log('status program: ', status);
+
+        // doesn 't work
+        // status = await depth_sensor.start();
+        // console.log('status start: ', status);
+
+        [status, details] = await depth_sensor.getAvailableFrameTypes();
+        console.log('status getAvailableFrameTypes: ', status);
+
+        status = await depth_sensor.setFrameType(new Object());
+        console.log('status setFrameType: ', status);
+
+        // doesn 't work
+        // status = await depth_sensor.getFrame();
+        // console.log('status getFrame: ', status);
+
+
+        address = "asd";
+        data = "qwe";
+        length = 3;
+        status = await depth_sensor.writeAfeRegisters(address, data, length);
+        console.log('status writeAfeRegisters: ', status);
+
+        status = await depth_sensor.readAfeRegisters(address, data, length);
+        console.log('status readAfeRegisters: ', status);
+
+        status = await depth_sensor.stop();
+        console.log('status stop: ', status);
+
+
+        ///////////////////////////////////////////////////////////////////////////////
+        //storage
+
+        console.log("");
+        console.log('storage testing');
+        console.log("");
+
+        status = await storage.open();
+        console.log('status open: ', status);
+
+        address = 1;
+        data = new Uint8Array();
+        bytesCount = 3;
+        status = await storage.write(address, data, bytesCount);
+        console.log('status write: ', status);
+
+        [status, data] = await storage.read(address, bytesCount);
+        console.log('status read: ', status);
+
+        status = await storage.close();
+        console.log('status close: ', status);
+
+
+
+        ///////////////////////////////////////////////////////////////////////////////
+        //temp sensor
+        console.log('');
+        console.log('temp sensor testing');
+        console.log('');
+
+        status = await temp_sensor.open();
+        console.log('status open: ', status);
+
+        [status, temp] = await temp_sensor.read();
+        console.log('status read: ', status);
+
+        status = await temp_sensor.close();
+        console.log('status close: ', status);
+
+    }
+
+    main();
+</script>
+
+
+<body>
+    <div>
+        <h1> AdiTof JS Client </h1>
+        <!-- <input id="ip_input"> -->
+        <!-- <button onclick='net.ServerConnect(document.getElementById("ip_input").value || ip_address)'> Connect to camera </button> -->
+        <br>
+        <br>
+        <!-- <input id="fun_name_input"> -->
+        <!-- <button onclick='net.SendCommand();'> Send </button> -->
+    </div>
+</body>
+
+</html>
+
+</html>
