@@ -69,9 +69,9 @@ lws *Network::web_socket = NULL;
 lws_context *Network::context = NULL;
 ClientRequest Network::send_buff;
 ServerResponse Network::recv_buff;
-mutex Network::m_mutex;
+recursive_mutex Network::m_mutex;
 mutex Network::mutex_recv;
-condition_variable Network::Cond_Var;
+condition_variable_any Network::Cond_Var;
 condition_variable Network::thread_Cond_Var;
 
 bool Network::Send_Successful;
@@ -165,7 +165,7 @@ int Network::ServerConnect(const std::string &ip) {
 
     /*Wait for thread to be ready and server is connected*/
 
-    std::unique_lock<std::mutex> mlock(m_mutex);
+    std::unique_lock<std::recursive_mutex> mlock(m_mutex);
 
     /*Wait till server is connected or timeout of 3 sec*/
     if (Cond_Var.wait_for(mlock, std::chrono::seconds(3),
@@ -219,7 +219,7 @@ int Network::SendCommand() {
 
         lws_callback_on_writable(web_socket);
         /*Acquire the lock*/
-        std::unique_lock<std::mutex> mlock(m_mutex);
+        std::unique_lock<std::recursive_mutex> mlock(m_mutex);
 
         if (Cond_Var.wait_for(mlock, std::chrono::seconds(5),
                               std::bind(&Network::isSend_Successful, this)) ==
@@ -357,7 +357,7 @@ int Network::callback_function(struct lws *wsi,
     switch (reason) {
     case LWS_CALLBACK_CLIENT_ESTABLISHED: {
         /*Notify host SDK that server is connected */
-        std::lock_guard<std::mutex> guard(m_mutex);
+        std::lock_guard<std::recursive_mutex> guard(m_mutex);
         Server_Connected = true;
         Cond_Var.notify_one();
         break;
@@ -416,7 +416,7 @@ int Network::callback_function(struct lws *wsi,
 #ifdef NW_DEBUG
         cout << endl << "Client is sending " << send_buff.func_name() << endl;
 #endif
-        std::lock_guard<std::mutex> guard(m_mutex);
+        std::lock_guard<std::recursive_mutex> guard(m_mutex);
         if (send_buff.func_name().empty()) {
             break;
         }
@@ -447,7 +447,7 @@ int Network::callback_function(struct lws *wsi,
     case LWS_CALLBACK_CLIENT_CLOSED: {
         cout << "Connection Closed" << endl;
         /*Set a flag to indicate server connection is closed abruptly*/
-        std::lock_guard<std::mutex> guard(m_mutex);
+        std::lock_guard<std::recursive_mutex> guard(m_mutex);
         Server_Connected = false;
         web_socket = NULL;
         break;

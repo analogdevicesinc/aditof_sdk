@@ -48,10 +48,10 @@ class Network {
     static struct lws_context *context;
 
     std::thread threadObj;
-    static std::mutex m_mutex;
+    static std::recursive_mutex m_mutex;
     static std::mutex mutex_recv;
     std::mutex thread_mutex;
-    static std::condition_variable Cond_Var;
+    static std::condition_variable_any Cond_Var;
     static std::condition_variable thread_Cond_Var;
 
     static bool Send_Successful;
