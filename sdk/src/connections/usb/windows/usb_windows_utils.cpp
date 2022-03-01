@@ -30,7 +30,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <usb_windows_utils.h>
 
 HRESULT

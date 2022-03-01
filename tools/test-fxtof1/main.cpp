@@ -37,7 +37,8 @@
 #ifdef DATA_HANDLING
 #include <filesystem>
 #endif
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <iostream>
 #include <string.h>
 
@@ -72,8 +73,8 @@ void moveData(std::string eepromID);
 
 int main(int argc, char *argv[]) {
 
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_alsologtostderr = 1;
+    // google::InitGoogleLogging(argv[0]);
+    // FLAGS_alsologtostderr = 1;
 
     bool captureStatus = false;
     bool frameReceived = false;

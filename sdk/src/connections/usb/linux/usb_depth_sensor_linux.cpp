@@ -37,7 +37,8 @@
 
 #include <cmath>
 #include <fcntl.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <linux/usb/video.h>
 #include <linux/uvcvideo.h>
 #include <linux/videodev2.h>

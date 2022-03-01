@@ -36,7 +36,8 @@
 #include "connections/network/network_temperature_sensor.h"
 #include "connections/utils/connection_validator.h"
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 
 using namespace aditof;
 

@@ -34,7 +34,8 @@
 #include "basecode.h"
 
 #include <algorithm>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <math.h>
 
 #define MODE_CFG_SIZE 256

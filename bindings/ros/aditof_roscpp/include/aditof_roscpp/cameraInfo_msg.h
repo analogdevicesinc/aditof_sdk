@@ -36,7 +36,8 @@
 #include <string>
 
 #include <aditof/frame.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 
 #include "aditof_sensor_msg.h"
 #include "aditof_utils.h"

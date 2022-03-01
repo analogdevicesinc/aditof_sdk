@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(aditof)
 
 add_definitions(-DSDK_EXPORTS)
-find_package(glog 0.3.5 REQUIRED)
+# find_package(glog 0.3.5 REQUIRED)
 
 #Enables the use of assert() from <assert.h> only in Debug mode.
 if ( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
@@ -10,11 +10,11 @@ if ( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
 endif()
 
 if ( WITH_NETWORK )
-    find_package(Protobuf 3.9.0 REQUIRED)
-    find_package(Libwebsockets REQUIRED)
+    # find_package(Protobuf 3.9.0 REQUIRED)
+    # find_package(Libwebsockets REQUIRED)
 
-    protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/connections/network/buffer.proto)
-    get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
+    # protobuf_generate_cpp(PROTO_SRCS PROTO_HRDS src/connections/network/buffer.proto)
+    # get_filename_component(GENERATED_PROTO_FILES_DIR ${PROTO_HRDS} DIRECTORY)
 endif()
 
 file(GLOB SOURCES
@@ -127,10 +127,10 @@ add_library(${PROJECT_NAME} SHARED
     $<$<BOOL:${ON_TARGET}>:${ONE_CAMERA_HEADERS}>
     $<$<NOT:$<BOOL:${ON_TARGET}>>:${ALL_CAMERAS_SOURCES}>
     $<$<NOT:$<BOOL:${ON_TARGET}>>:${ALL_CAMERAS_HEADERS}>
-    $<$<BOOL:${WITH_NETWORK}>:${NETWORK_SOURCES}>
-    $<$<BOOL:${WITH_NETWORK}>:${NETWORK_HEADERS}>
-    $<$<BOOL:${WITH_NETWORK}>:${PROTO_SRCS}>
-    $<$<BOOL:${WITH_NETWORK}>:${PROTO_HDRS}>
+    # $<$<BOOL:${WITH_NETWORK}>:${NETWORK_SOURCES}>
+    # $<$<BOOL:${WITH_NETWORK}>:${NETWORK_HEADERS}>
+    # $<$<BOOL:${WITH_NETWORK}>:${PROTO_SRCS}>
+    # $<$<BOOL:${WITH_NETWORK}>:${PROTO_HDRS}>
 )
 
 # Add alias to aditof as aditof::aditof
@@ -145,9 +145,9 @@ target_include_directories(${PROJECT_NAME}
         src/${OS_SPECIFIC_DIR}/${TARGET_SPECIFIC_DIR}
         $<$<BOOL:${WITH_NETWORK}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}>
         $<$<BOOL:${WITH_NETWORK}>:${CMAKE_CURRENT_SOURCE_DIR}/src/${CAMERA_DIR}/${TARGET_SPECIFIC_DIR}>
-        ${Protobuf_INCLUDE_DIRS}
-        ${GENERATED_PROTO_FILES_DIR}
-        ${LIBWEBSOCKETS_INCLUDE_DIRS}
+        # ${Protobuf_INCLUDE_DIRS}
+        # ${GENERATED_PROTO_FILES_DIR}
+        # ${LIBWEBSOCKETS_INCLUDE_DIRS}
         ${OPENSSL_INCLUDE_DIRS}
 )
 
@@ -158,13 +158,13 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 )
 
 if ( WITH_NETWORK )
-    target_link_libraries( ${PROJECT_NAME}
-        PUBLIC
-            glog::glog
-        PRIVATE
-            ${Protobuf_LIBRARIES}
-            ${LIBWEBSOCKETS_LIBRARIES}
-    )
+#     target_link_libraries( ${PROJECT_NAME}
+#         PUBLIC
+#             glog::glog
+#         PRIVATE
+#             ${Protobuf_LIBRARIES}
+#             ${LIBWEBSOCKETS_LIBRARIES}
+#     )
 else()
     target_link_libraries( ${PROJECT_NAME}
         PUBLIC

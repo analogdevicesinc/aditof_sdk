@@ -33,7 +33,8 @@
 #define ADITOF_UTILS_H
 
 #include <aditof/camera.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 
 std::string parseArgs(int argc, char **argv);
 std::shared_ptr<aditof::Camera> initCamera(int argc, char **argv);

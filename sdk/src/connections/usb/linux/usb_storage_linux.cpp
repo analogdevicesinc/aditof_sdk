@@ -34,7 +34,8 @@
 #include "utils.h"
 
 #include <chrono>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <thread>
 
 using namespace aditof;

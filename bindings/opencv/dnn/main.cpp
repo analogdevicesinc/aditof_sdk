@@ -32,7 +32,8 @@
 #include <aditof/camera.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 
 #include <opencv2/dnn.hpp>
 #include <opencv2/dnn/shape_utils.hpp>
@@ -66,8 +67,8 @@ int main(int argc, char *argv[]) {
 
     cv::dnn::Net net = cv::dnn::readNetFromCaffe(PROTOTXT, MODEL);
 
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_alsologtostderr = 1;
+    // google::InitGoogleLogging(argv[0]);
+    // FLAGS_alsologtostderr = 1;
 
     Status status = Status::OK;
 

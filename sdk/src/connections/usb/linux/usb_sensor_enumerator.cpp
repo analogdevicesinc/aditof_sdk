@@ -40,7 +40,8 @@
 
 #include <dirent.h>
 #include <fcntl.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <linux/videodev2.h>
 #include <memory>
 #include <sys/stat.h>

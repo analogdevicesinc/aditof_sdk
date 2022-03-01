@@ -33,7 +33,8 @@
 #include "usb_windows_utils.h"
 
 #include <chrono>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <string>
 #include <thread>
 

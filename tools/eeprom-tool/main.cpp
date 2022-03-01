@@ -33,7 +33,8 @@
 #include "eeprom_tool.h"
 
 #include <algorithm>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <iostream>
 #include <iterator>
 #include <stdio.h>

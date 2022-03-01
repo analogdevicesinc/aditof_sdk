@@ -39,8 +39,8 @@
 using namespace aditof;
 
 std::string parseArgs(int argc, char **argv) {
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_alsologtostderr = 1;
+    // google::InitGoogleLogging(argv[0]);
+    // FLAGS_alsologtostderr = 1;
 
     if (argc > 1) {
         std::string ip = argv[1];

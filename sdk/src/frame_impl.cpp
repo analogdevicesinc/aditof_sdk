@@ -35,7 +35,9 @@
 #include <cmath>
 #include <cstring>
 #include <fstream>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
+
 
 FrameImpl::FrameImpl()
     : m_details{0, 0, 0, 0, 0, 0, ""}, m_depthData(nullptr), m_irData(nullptr),

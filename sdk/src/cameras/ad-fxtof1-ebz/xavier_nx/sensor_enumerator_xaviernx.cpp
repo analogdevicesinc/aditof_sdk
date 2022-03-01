@@ -34,7 +34,8 @@
 #include "target_definitions.h"
 
 #include <dirent.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

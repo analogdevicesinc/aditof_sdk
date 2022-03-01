@@ -32,7 +32,8 @@
 #include "connections/usb/usb_temperature_sensor.h"
 #include "usb_windows_utils.h"
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 
 using namespace aditof;
 

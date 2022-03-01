@@ -31,7 +31,8 @@
  */
 #include "aditofdemoview.h"
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <sstream>
 
 #define CVUI_IMPLEMENTATION

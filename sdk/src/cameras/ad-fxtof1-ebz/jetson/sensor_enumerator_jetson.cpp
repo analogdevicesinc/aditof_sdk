@@ -32,7 +32,8 @@
 #include "connections/target/target_sensor_enumerator.h"
 #include "sensor_names.h"
 #include "target_definitions.h"
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <iostream>
 #include <string>
 #include <sys/stat.h>

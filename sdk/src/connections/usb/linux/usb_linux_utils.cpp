@@ -32,7 +32,8 @@
 #include "usb_linux_utils.h"
 
 #include <errno.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <linux/usb/video.h>
 #include <linux/uvcvideo.h>
 #include <sys/ioctl.h>

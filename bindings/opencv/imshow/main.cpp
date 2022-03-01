@@ -33,7 +33,8 @@
 #include <aditof/depth_sensor_interface.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -46,8 +47,8 @@
 using namespace aditof;
 
 int main(int argc, char *argv[]) {
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_alsologtostderr = 1;
+    // google::InitGoogleLogging(argv[0]);
+    // FLAGS_alsologtostderr = 1;
 
     Status status = Status::OK;
 

@@ -33,7 +33,8 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <linux/fs.h>
 #include <stdio.h>
 #include <string.h>

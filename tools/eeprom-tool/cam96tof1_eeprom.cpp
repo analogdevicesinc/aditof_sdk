@@ -32,7 +32,8 @@
 #include "cam96tof1_eeprom.h"
 #include "eeprom_map.h"
 
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 
 Camera96Tof1Eeprom::Camera96Tof1Eeprom(
     std::shared_ptr<aditof::StorageInterface> _eeprom)

@@ -38,7 +38,8 @@
 #include "../../sdk/src/connections/utils/connection_validator.h"
 
 #include <csignal>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <iostream>
 #include <linux/videodev2.h>
 #include <map>

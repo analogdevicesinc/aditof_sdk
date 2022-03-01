@@ -34,7 +34,8 @@
 
 #include <assert.h>
 #include <cstddef>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <inttypes.h>
 
 namespace aditof {

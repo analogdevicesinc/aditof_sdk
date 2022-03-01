@@ -33,7 +33,8 @@
 
 #include <aditof/depth_sensor_interface.h>
 #include <aditof/temperature_sensor_interface.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <iostream>
 
 AdiTofDemoController::AdiTofDemoController()

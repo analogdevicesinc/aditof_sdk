@@ -39,7 +39,8 @@
 #include <cmath>
 #include <fcntl.h>
 #include <fstream>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <linux/videodev2.h>
 #include <sstream>
 #include <sys/ioctl.h>

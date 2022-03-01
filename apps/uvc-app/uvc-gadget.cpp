@@ -30,7 +30,8 @@
 #include <atomic>
 #include <errno.h>
 #include <fcntl.h>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <linux/usb/ch9.h>
 #include <linux/usb/video.h>
 #include <linux/videodev2.h>
@@ -1996,8 +1997,8 @@ static void usage(const char *argv0) {
 int main(int argc, char *argv[]) {
 
     // Init google logging system
-    google::InitGoogleLogging(argv[0]);
-    FLAGS_alsologtostderr = 1;
+    // google::InitGoogleLogging(argv[0]);
+    // FLAGS_alsologtostderr = 1;
 
     DLOG(INFO) << argv[0] << " "
                << "has started";

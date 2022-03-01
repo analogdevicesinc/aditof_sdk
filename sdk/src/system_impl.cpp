@@ -49,7 +49,8 @@
 
 #include <aditof/camera.h>
 #include <algorithm>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 
 #include "aditof/version.h"
 

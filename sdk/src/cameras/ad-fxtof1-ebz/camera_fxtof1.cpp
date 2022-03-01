@@ -41,7 +41,8 @@
 #include <algorithm>
 #include <array>
 #include <fstream>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <iterator>
 #include <map>
 #include <math.h>

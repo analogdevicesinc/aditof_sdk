@@ -39,7 +39,8 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
-#include <glog/logging.h>
+// #include <glog/logging.h>
+#include <aditof/log_cout.h>
 #include <map>
 #include <math.h>
 
