@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package payload;
+
+enum Status   // This must match precisely the Status list from status_definitions.h
+{
+  OK = 0;
+  BUSY = 1;
+  UNREACHABLE = 2;
+  INVALID_ARGUMENT = 3;
+  UNAVAILABLE = 4;
+  GENERIC_ERROR = 5;
+}
+
+enum ServerStatus
+{
+  REQUEST_ACCEPTED = 0;
+  REQUEST_UNKNOWN = 1;
+}
+
+enum CameraType
+{
+  AD_96TOF1_EBZ = 0;   // AD-96TOF1-EBZ camera
+  AD_FXTOF1_EBZ = 1;   // AD-FXTOF1-EBZ camera
+  SMART_3D_CAMERA = 2; // 3D Smart camera 
+}
+
+message ImagerInfo
+{
+  string name = 10;
+  int32 id = 20;
+}
+
+message StorageInfo
+{
+  string name = 10;
+  int32 id = 20;
+}
+
+message TemperatureSensorInfo
+{
+  string name = 10;
+  int32 id = 20;
+}
+
+message SensorsInfo
+{
+  repeated StorageInfo storages = 10;               // Information about available storages
+  repeated TemperatureSensorInfo temp_sensors = 20; // Information about available temperature sensors
+  repeated ImagerInfo image_sensors = 30;           // Information about available image sensors
+}
+
+message BufferInfo
+{
+  fixed64 timestamp = 10;  //The timestamp of the sent frame
+}
+
+message FrameDetails
+{
+  uint32 width = 10;   // The width of the frame
+  uint32 height = 20;  // The height of the frame
+  string type = 30;    // The type of the frame
+  uint32 full_data_width = 40;   // The full width of the frame
+  uint32 full_data_height = 50;  // The full height of the frame
+  uint32 rgb_width = 60; // The width of a RGB frame
+  uint32 rgb_height = 70; // The height of a RGB frame
+}
+
+message ClientRequest
+{
+  string func_name = 10;                // Name of an API function
+  repeated int32 func_int32_param = 20; // List of function parameters of type int32
+  repeated float func_float_param = 30; // List of function parameters of type float
+  repeated bytes func_bytes_param = 40; // List of function parameters of type byte-array
+  bool expect_reply = 50;               // Whether a response with data is expected or not
+  FrameDetails frame_type = 60;         // Frame type information
+  SensorsInfo sensors_info = 70;        // The sensor for which the request should apply
+  string message_id = 80;               // The ClientRequest must have a message id for coupling with a ServerResponse
+}
+
+message ServerResponse
+{
+  string device_handle = 10;                         // The handle of the device
+  Status status = 20;                                // Status of operation requested by the client request
+  repeated int32 int32_payload = 30;                 // List of structures of type int32 for transporting data back to client
+  repeated float float_payload = 40;                 // List of structures of type float for transporting data back to client
+  repeated bytes bytes_payload = 50;                 // List of structures of type byte-array for transporting data back to client
+  ServerStatus server_status = 60;                   // Status reported by server regarding the client request
+  repeated FrameDetails available_frame_types = 70;  // List of supported frame types
+  SensorsInfo sensors_info = 80;                     // List of information about existing devices on the same platform as the server
+  string message = 90;                               // Additional message (if any)
+  BufferInfo buffer_details = 100;                   // Buffer details
+  CameraType camera_type = 110;                      // The camera for which the SDK on platform has been built
+  string message_id = 120;                           // The ServerResponse must have the same message id as it's ClientRequest
+}

@@ -1,0 +1,8 @@
+{
+    "dependencies": {
+        "google-protobuf": "^3.19.3",
+        "browserify": "^17.0.0",
+        "watchify": "^4.0.0",
+        "websocket-as-promised": "^2.0.1"
+    }
+}
