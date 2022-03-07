@@ -145,7 +145,11 @@ Status UsbSensorEnumerator::searchSensors() {
         }
 
         if (strncmp(reinterpret_cast<const char *>(cap.card),
-                    "ADI TOF DEPTH SENSOR", 20) != 0) {
+                    "ADI TOF DEPTH SENSOR", 20) == 0) {
+            LOG(INFO) << "Found device with card type: 'ADI TOF DEPTH SENSOR'";
+        } else if (fmt.fmt.pix.width == 640 && fmt.fmt.pix.height == 960) {
+            LOG(INFO) << "Found device according to right format type";
+        } else {
             close(fd);
             continue;
         }
