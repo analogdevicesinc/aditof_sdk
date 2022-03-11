@@ -75,6 +75,7 @@ message ClientRequest
   bool expect_reply = 50;               // Whether a response with data is expected or not
   FrameDetails frame_type = 60;         // Frame type information
   SensorsInfo sensors_info = 70;        // The sensor for which the request should apply
+  string message_id = 80;		// The id for the client request
 }
 
 message ServerResponse
@@ -90,4 +91,5 @@ message ServerResponse
   string message = 90;                               // Additional message (if any)
   BufferInfo buffer_details = 100;                   // Buffer details
   CameraType camera_type = 110;                      // The camera for which the SDK on platform has been built
+  string message_id = 120;			     // The id for the server response (must match the one from the client request)
 }
