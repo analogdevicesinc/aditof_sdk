@@ -121,6 +121,7 @@ int Network::callback_function(struct lws *wsi,
             std::cout << "Conn Established" << std::endl;
             Client_Connected = true;
             buff_send.set_message("Connection Allowed");
+            buff_send.set_message_id("00000");
             lws_callback_on_writable(wsi);
             break;
         } else {
@@ -193,7 +194,7 @@ int Network::callback_function(struct lws *wsi,
         CodedOutputStream *coded_output = new CodedOutputStream(&aos);
         buff_send.SerializeToCodedStream(coded_output);
 
-        n = lws_write(wsi, pkt_pad, (siz), LWS_WRITE_TEXT);
+        n = lws_write(wsi, pkt_pad, (siz), LWS_WRITE_BINARY);
         if (lws_partial_buffered(wsi)) {
             latest_sent_msg_is_was_buffered = true;
         }
@@ -715,6 +716,8 @@ void invoke_sdk_api(payload::ClientRequest buff_recv) {
     }
     } // switch
 
+    LOG(INFO) << "This is the received message ID: " << buff_recv.message_id();
+    buff_send.set_message_id(buff_recv.message_id());
     buff_recv.Clear();
 }
 
