@@ -44,6 +44,8 @@
 #include <opencv2/contrib/contrib.hpp>
 #endif
 
+void saveCapture();
+
 class AdiTofDemoView {
   public:
     AdiTofDemoView(std::shared_ptr<AdiTofDemoController> &ctrl,

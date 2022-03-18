@@ -47,11 +47,15 @@ int main(int argc, char **argv) {
     FLAGS_alsologtostderr = 1;
 #endif
 
+    std::thread t1(saveCapture);
+
     std::string version = aditof::getApiVersion();
     auto controller = std::make_shared<AdiTofDemoController>();
     auto view =
         std::make_shared<AdiTofDemoView>(controller, "aditof-demo " + version);
     view->render();
+
+    t1.join();
 
     return 0;
 }

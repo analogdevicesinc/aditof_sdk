@@ -41,6 +41,41 @@
 #define CVUI_IMPLEMENTATION
 #include "cvui.h"
 
+std::string depth_fn = "depth_";
+std::string depht_format = ".raw";
+
+std::string ir_fn = "ir_";
+std::string ir_format = ".raw";
+
+int counter = 0;
+
+uint16_t *depth_data;
+uint16_t *ir_data;
+
+void saveCapture() {
+    int c;
+    c = getchar();
+    while (true) {
+
+        char depth_full_name[200];
+        char ir_full_name[200];
+
+        sprintf(depth_full_name, "depth_%d.raw", counter);
+        sprintf(ir_full_name, "ir_%d.raw", counter);
+
+
+        FILE *output_file_depth =
+            fopen(depth_full_name, "wb+");
+        FILE *output_file_ir = fopen(ir_full_name, "wb+");
+
+        fwrite(depth_data, 640 * 480, sizeof(uint16_t), output_file_depth);
+        fwrite(ir_data, 640 * 480, sizeof(uint16_t), output_file_ir);
+        counter++;
+        printf("Done Writing!\n");
+        c = getchar();
+    }
+}
+
 //#define SHOW_ADVANCED_GUI
 
 namespace detail {
@@ -1141,6 +1176,7 @@ void AdiTofDemoView::_displayDepthImage() {
         lock.unlock(); // Lock is no longer needed
         uint16_t *data;
         localFrame->getData(aditof::FrameDataType::DEPTH, &data);
+        depth_data = data;
 
         aditof::FrameDetails frameDetails;
         localFrame->getDetails(frameDetails);
@@ -1219,6 +1255,8 @@ void AdiTofDemoView::_displayIrImage() {
         } else {
             localFrame->getData(aditof::FrameDataType::IR, &irData);
         }
+
+        ir_data = irData;
 
         aditof::FrameDetails frameDetails;
         localFrame->getDetails(frameDetails);
