@@ -39,7 +39,11 @@
 
 #include <algorithm>
 #include <fstream>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <ios>
 #include <iostream>
 

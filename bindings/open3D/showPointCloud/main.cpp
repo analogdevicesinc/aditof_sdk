@@ -32,7 +32,11 @@
 #include <aditof/camera.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 
 #include "../aditof_open3d.h"
 
@@ -43,8 +47,10 @@ static const uint8_t colormap[3 * 256] = {
 using namespace aditof;
 
 int main(int argc, char *argv[]) {
+#ifndef JS_BINDINGS 
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
+#endif
 
     Status status = Status::OK;
 

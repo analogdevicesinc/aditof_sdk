@@ -36,6 +36,7 @@ option(USE_FXTOF1 "Use FXTOF1 camera?" OFF)
 option(USE_3D_SMART "Use 3D Smart camera?" OFF)
 option(WITH_TOOLS "Build tools?" OFF)
 option(IGNORE_TARGET_VERSION "Ignore sdk version on target?" OFF)
+option(WITH_JS "Build JavaScript bindings?" OFF)
 
 # Set camera flags
 if (USE_FXTOF1)
@@ -78,6 +79,15 @@ if (ON_TARGET)
     if(${SELECTED_CAMERAS} GREATER 1)
     message(FATAL_ERROR "More than one camera was selected. \nPlease select a single camera. CMake will exit.")
     endif()
+
+    if(WITH_JS)
+        message(FATAL_ERROR "Target does not support JavaScript bindings.")
+    endif()
+endif()
+
+if (WITH_JS)
+    set(WITH_NETWORK OFF)
+    add_definitions(-DJS_BINDINGS)
 endif()
 
 if (WITH_NETWORK)

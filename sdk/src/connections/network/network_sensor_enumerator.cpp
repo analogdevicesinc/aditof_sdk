@@ -36,7 +36,11 @@
 #include "connections/network/network_temperature_sensor.h"
 #include "connections/utils/connection_validator.h"
 
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 
 using namespace aditof;
 

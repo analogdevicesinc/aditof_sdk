@@ -31,7 +31,11 @@
  */
 #include "aditofdemoview.h"
 
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <sstream>
 
 #define CVUI_IMPLEMENTATION

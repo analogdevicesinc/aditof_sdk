@@ -34,7 +34,11 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <linux/fs.h>
 #include <stdio.h>
 #include <string.h>

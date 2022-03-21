@@ -40,8 +40,10 @@ std::mutex mtx_dynamic_rec;
 using namespace aditof;
 
 std::string parseArgs(int argc, char **argv) {
+#ifndef JS_BINDINGS
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
+#endif
 
     if (argc > 1) {
         std::string ip = argv[1];

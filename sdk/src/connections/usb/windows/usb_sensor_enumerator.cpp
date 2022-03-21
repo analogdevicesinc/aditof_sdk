@@ -38,7 +38,11 @@
 #include "connections/utils/connection_validator.h"
 #include "utils.h"
 
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 
 #include <atlstr.h>
 #include <memory>

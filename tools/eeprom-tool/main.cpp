@@ -33,7 +33,11 @@
 #include "eeprom_tool.h"
 
 #include <algorithm>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <iostream>
 #include <iterator>
 #include <stdio.h>

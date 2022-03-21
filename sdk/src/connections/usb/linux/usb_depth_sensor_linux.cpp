@@ -37,7 +37,13 @@
 
 #include <cmath>
 #include <fcntl.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#include <cstring>
+#include <unistd.h>
+#endif
 #include <linux/usb/video.h>
 #include <linux/uvcvideo.h>
 #include <linux/videodev2.h>

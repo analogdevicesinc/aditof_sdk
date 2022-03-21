@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 project(aditof)
 
 add_definitions(-DSDK_EXPORTS)
-find_package(glog 0.3.5 REQUIRED)
+if (NOT WITH_JS)
+    find_package(glog 0.3.5 REQUIRED)
+endif()
 
 #Enables the use of assert() from <assert.h> only in Debug mode.
 if ( NOT CMAKE_BUILD_TYPE STREQUAL "Debug" )
@@ -157,19 +159,21 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
                        CXX_STANDARD 11
 )
 
-if ( WITH_NETWORK )
-    target_link_libraries( ${PROJECT_NAME}
-        PUBLIC
-            glog::glog
-        PRIVATE
-            ${Protobuf_LIBRARIES}
-            ${LIBWEBSOCKETS_LIBRARIES}
-    )
-else()
-    target_link_libraries( ${PROJECT_NAME}
-        PUBLIC
-            glog::glog
-    )
+if (NOT WITH_JS)
+    if ( WITH_NETWORK )
+        target_link_libraries( ${PROJECT_NAME}
+            PUBLIC
+                glog::glog
+            PRIVATE
+                ${Protobuf_LIBRARIES}
+                ${LIBWEBSOCKETS_LIBRARIES}
+        )
+    else()
+        target_link_libraries( ${PROJECT_NAME}
+            PUBLIC
+                glog::glog
+        )
+    endif()    
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)

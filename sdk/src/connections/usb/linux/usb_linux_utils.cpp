@@ -32,7 +32,12 @@
 #include "usb_linux_utils.h"
 
 #include <errno.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#include <cstring>
+#endif
 #include <linux/usb/video.h>
 #include <linux/uvcvideo.h>
 #include <sys/ioctl.h>

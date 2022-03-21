@@ -32,7 +32,11 @@
 #include "connections/usb/usb_temperature_sensor.h"
 #include "usb_windows_utils.h"
 
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 
 using namespace aditof;
 

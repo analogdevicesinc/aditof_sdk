@@ -34,7 +34,11 @@
 #include "target_definitions.h"
 
 #include <dirent.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

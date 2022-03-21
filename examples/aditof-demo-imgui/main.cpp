@@ -31,13 +31,19 @@
  */
 
 #include "view.h"
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 
 int main(int argc, char **argv) {
 
     // Init google logging system
+#ifndef JS_BINDINGS 
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
+#endif
 
     auto view =
         std::make_shared<View>();

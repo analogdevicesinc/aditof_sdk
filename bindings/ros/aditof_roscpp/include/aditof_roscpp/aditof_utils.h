@@ -33,7 +33,11 @@
 #define ADITOF_UTILS_H
 
 #include <aditof/camera.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <mutex>
 
 std::string parseArgs(int argc, char **argv);

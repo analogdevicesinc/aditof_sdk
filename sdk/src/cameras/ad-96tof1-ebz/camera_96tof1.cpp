@@ -38,7 +38,11 @@
 #include <algorithm>
 #include <array>
 #include <fstream>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <iterator>
 #include <map>
 #include <math.h>
