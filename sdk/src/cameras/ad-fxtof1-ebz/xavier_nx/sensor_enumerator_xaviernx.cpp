@@ -35,7 +35,11 @@
 
 #include <bits/stdc++.h>
 #include <dirent.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <regex>
 #include <stdio.h>
 #include <stdlib.h>

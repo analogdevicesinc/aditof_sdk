@@ -33,7 +33,11 @@
 
 #include <aditof/depth_sensor_interface.h>
 #include <aditof/temperature_sensor_interface.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <iostream>
 
 AdiTofDemoController::AdiTofDemoController()

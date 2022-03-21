@@ -32,7 +32,11 @@
 #include "calibration_96tof1.h"
 #include "aditof/storage_interface.h"
 
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <math.h>
 
 #define EEPROM_SIZE 131072

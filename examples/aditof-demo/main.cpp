@@ -32,14 +32,20 @@
 #include "aditofdemocontroller.h"
 #include "aditofdemoview.h"
 #include <aditof/version.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <iostream>
 
 int main(int argc, char **argv) {
 
     // Init google logging system
+#ifndef JS_BINDINGS 
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
+#endif
 
     std::string version = aditof::getApiVersion();
     auto controller = std::make_shared<AdiTofDemoController>();

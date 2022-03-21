@@ -35,7 +35,11 @@
 #include <cmath>
 #include <cstring>
 #include <fstream>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 
 FrameImpl::FrameImpl()
     : m_details{0, 0, 0, 0, 0, 0, ""}, m_depthData(nullptr), m_irData(nullptr),

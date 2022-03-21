@@ -35,7 +35,11 @@
 #include "device_utils.h"
 
 #include <atlstr.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <unordered_map>
 
 struct CalibrationData {

@@ -36,7 +36,11 @@
 #include <string>
 
 #include <aditof/frame.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 
 #include "aditof_sensor_msg.h"
 #include "aditof_utils.h"

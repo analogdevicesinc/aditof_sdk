@@ -34,7 +34,12 @@
 #include "basecode.h"
 
 #include <algorithm>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#include <cstring>
+#endif
 #include <math.h>
 
 #define MODE_CFG_SIZE 256

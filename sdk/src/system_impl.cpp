@@ -49,7 +49,11 @@
 
 #include <aditof/camera.h>
 #include <algorithm>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 
 #include "aditof/version.h"
 

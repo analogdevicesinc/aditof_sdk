@@ -41,7 +41,11 @@
 #include "imgui_impl_opengl3.h"
 
 #include <aditof/version.h>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <stdio.h>
 #include <string>
 

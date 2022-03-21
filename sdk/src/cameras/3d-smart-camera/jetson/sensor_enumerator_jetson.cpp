@@ -32,7 +32,11 @@
 #include "connections/target/target_sensor_enumerator.h"
 #include "sensor_names.h"
 #include "target_definitions.h"
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <iostream>
 #include <string>
 #include <sys/stat.h>

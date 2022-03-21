@@ -34,7 +34,11 @@
 
 #include <assert.h>
 #include <cstddef>
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <inttypes.h>
 
 namespace aditof {

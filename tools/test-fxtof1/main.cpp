@@ -37,7 +37,11 @@
 #ifdef DATA_HANDLING
 #include <filesystem>
 #endif
+#ifndef JS_BINDINGS
 #include <glog/logging.h>
+#else
+#include <aditof/log_cout.h>
+#endif
 #include <iostream>
 #include <string.h>
 
@@ -72,8 +76,10 @@ void moveData(std::string eepromID);
 
 int main(int argc, char *argv[]) {
 
+#ifndef JS_BINDINGS 
     google::InitGoogleLogging(argv[0]);
     FLAGS_alsologtostderr = 1;
+#endif
 
     bool captureStatus = false;
     bool frameReceived = false;
