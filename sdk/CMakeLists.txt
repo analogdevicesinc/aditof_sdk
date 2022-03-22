@@ -203,6 +203,19 @@ if( APPLE )
     target_link_libraries( ${PROJECT_NAME} PRIVATE ${LIBUVC_LIB})
 endif( APPLE )
 
+#Systems that don't have builtin atomics, or don't have 8byte support need libatomic linking
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("
+    #include <atomic>
+        return std::atomic<int64_t>{};
+    }
+    " HAVE_BUILTIN_ATOMICS)
+
+if (NOT HAVE_BUILTIN_ATOMICS)
+    target_link_libraries(${PROJECT_NAME} PUBLIC atomic)
+endif()
+
+
 # includes install paths
 include(GNUInstallDirs)
 
