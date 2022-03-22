@@ -29,6 +29,10 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+#ifndef LOG_COUT_H
+#define LOG_COUT_H
+
 #include <iostream>
 
 #define INFO "INFO "
@@ -36,3 +40,5 @@
 #define WARNING "WARNING "
 #define LOG(x) std::cout << x
 #define DLOG(x) std::cout << x
+
+#endif // LOG_COUT_H
