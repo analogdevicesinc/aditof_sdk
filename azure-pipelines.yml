@@ -147,11 +147,19 @@ jobs:
 - job: WindowsBuild
   strategy:
     matrix:
+
       VS2019_Win64:
         imageName: 'windows-2019'
         COMPILER: 'Visual Studio 16 2019'
         ARCH: 'x64'
         artifactName: 'Windows-VS-16-2019-x64'
+
+      VS2022_Win64:
+        imageName: 'windows-2022'
+        COMPILER: 'Visual Studio 17 2022'
+        ARCH: 'x64'
+        artifactName: 'Windows-VS-17-2022-x64'
+
   pool:
       vmImage: $[ variables['imageName'] ]
   steps:
