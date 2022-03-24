@@ -149,13 +149,18 @@ if %generator%=="Visual Studio 16 2019" (
     set vs=15
 )
 
+if %generator%=="Visual Studio 17 2022" (
+    set /a opt=2
+    set vs=15
+)
+
 if %set_generator%==0 (
    set /a opt=1
    set generator="Visual Studio 16 2019"
    set vs=15
    )
 if %opt%==0 (
-    echo Please enter a correct configuration ("Visual Studio 16 2019"^)
+    echo Please enter a correct configuration ("Visual Studio 16 2019"^) or ("Visual Studio 17 2022"^)
     EXIT /B %ERRORLEVEL%
 )
 echo Setup will continue with the generator: %generator%
@@ -228,7 +233,8 @@ ECHO        Specify the directory where the dependencies will be downloaded.
 ECHO -i^|--depsinstalldir
 ECHO        Specify the directory where the dependencies will be installed.
 ECHO -g^|--generator
-ECHO        Visual Studio 16 2019 = Generates Visual Studio 2019 project files.
+ECHO        Visual Studio 16 2019 = Generates Visual Studio 2019 project files. 
+ECHO        Visual Studio 17 2022 = Generates Visual Studio 2022 project files.
 ECHO -c^|--configuration
 ECHO        Release = Configuration for Release build.
 ECHO        Debug   = Configuration for Debug build.
