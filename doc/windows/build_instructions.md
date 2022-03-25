@@ -4,7 +4,8 @@
 ## Building the SDK only
 
 ### Pre-requisites
-* Install MS Visual Studio 16 2019
+* Install MS Visual Studio 16 2019 or Visual Studio 17 2022
+> NOTE: The sdk can be built with both of these IDEs. If you use the second one, just change '16 2019' to '17 2022' wherever it's necessary.
 * Install MS .NET Framework 4.5
 * CMake
 * Glog v0.3.5
