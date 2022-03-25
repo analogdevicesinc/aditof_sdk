@@ -28,6 +28,7 @@ which will generate all the necessary recipes for building and installing. Usefu
 | PYTHON_EXECUTABLE | \<path\> | Path to default python executable used | Specify which python executable should be used for building the python bindings |
 | WITH_REVB | on/off | off | When building for raspberry pi platforms, specify WITH_REVB if you are using hardware revision B, else leave it off |
 | IGNORE_TARGET_VERSION | on/off | off | Specifies if the client sdk should ignore the sdk version installed on the target |
+| WITH_JS | on/off | off | Build the JavaScript bindings |
 
 #### Building and Installing 
 
