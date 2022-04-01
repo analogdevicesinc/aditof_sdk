@@ -21,7 +21,7 @@ For more details on building the SDK on a host platform please check the **User 
 Designed using a modular approach, the 3D ToF platforms enable connectivity to the to a variety of embedded processing platforms. For more details on running the SDK on your processing platform of choice please check the corresponding **User Guide** below.
 
 ### AD-3DSMARTCAM1-PRZ
-Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green.svg)](https://https://wiki.analog.com/resources/eval/user-guides/ad-3dsmartcam1-prz)
+Platform details : [![Hardware](https://img.shields.io/badge/hardware-wiki-green.svg)](https://wiki.analog.com/resources/eval/user-guides/ad-3dsmartcam1-prz)
 
 | Documentation | GitHub master status | Downloads |
 | ------------- | ----------- | ----------- |
