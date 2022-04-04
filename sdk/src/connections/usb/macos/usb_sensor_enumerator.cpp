@@ -30,17 +30,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "connections/usb/usb_sensor_enumerator.h"
+#include "connections/usb/linux/usb_linux_utils.h"
+#include "connections/usb/usb_depth_sensor.h"
+#include "connections/usb/usb_storage.h"
+#include "connections/usb/usb_temperature_sensor.h"
+#include "connections/usb/usb_utils.h"
+#include "connections/utils/connection_validator.h"
+#include "utils.h"
 
 using namespace aditof;
 
+UsbSensorEnumerator::~UsbSensorEnumerator() = default;
+
 Status UsbSensorEnumerator::searchSensors() {
+
     // TO DO: implement this when enabling macos support
 
     return Status::OK;
 }
 
+
+
 Status UsbSensorEnumerator::getDepthSensors(
-    std::vector<std::shared_ptr<DepthSensorInterface>> & /*depthSensors*/) {
+    std::vector<std::shared_ptr<DepthSensorInterface>> &depthSensors) {
 
     // TO DO: implement this when enabling macos support
 
@@ -48,7 +60,7 @@ Status UsbSensorEnumerator::getDepthSensors(
 }
 
 Status UsbSensorEnumerator::getStorages(
-    std::vector<std::shared_ptr<StorageInterface>> & /*storages*/) {
+    std::vector<std::shared_ptr<StorageInterface>> &storages) {
 
     // TO DO: implement this when enabling macos support
 
@@ -57,14 +69,14 @@ Status UsbSensorEnumerator::getStorages(
 
 Status UsbSensorEnumerator::getTemperatureSensors(
     std::vector<std::shared_ptr<TemperatureSensorInterface>>
-        & /*temperatureSensors*/) {
+        &temperatureSensors) {
 
     // TO DO: implement this when enabling macos support
 
     return Status::OK;
 }
 
-Status UsbSensorEnumerator::getCameraTypeOnTarget(CameraType & /*cameraType*/) {
+Status UsbSensorEnumerator::getCameraTypeOnTarget(CameraType &cameraType) {
     // TO DO: implement this when enabling macos support
     return Status::OK;
 }
