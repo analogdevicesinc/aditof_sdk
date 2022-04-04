@@ -40,20 +40,22 @@ using namespace aditof;
 
 struct UsbStorage::ImplData {};
 
-UsbStorage::UsbStorage(const std::string & /*name*/, unsigned char /*id*/) {}
+UsbStorage::UsbStorage(const std::string &name, unsigned char id) {}
 
-aditof::Status UsbStorage::open(void *) {
+UsbStorage::~UsbStorage() = default;
+
+aditof::Status UsbStorage::open(void *handle) {
     // TO DO when enabling macos support
     return Status::UNAVAILABLE;
 }
 
-aditof::Status UsbStorage::read(const uint32_t, uint8_t *, const size_t) {
+aditof::Status UsbStorage::read(const uint32_t address, uint8_t *data,
+                                const size_t bytesCount) {
     // TO DO when enabling macos support
     return Status::UNAVAILABLE;
 }
 
-aditof::Status UsbStorage::write(const uint32_t, const uint8_t *,
-                                 const size_t) {
+aditof::Status UsbStorage::write(const uint32_t address, const uint8_t *data, const size_t bytesCount) {
     // TO DO when enabling macos support
     return Status::UNAVAILABLE;
 }
