@@ -49,8 +49,6 @@ Status UsbSensorEnumerator::searchSensors() {
     return Status::OK;
 }
 
-
-
 Status UsbSensorEnumerator::getDepthSensors(
     std::vector<std::shared_ptr<DepthSensorInterface>> &depthSensors) {
 
