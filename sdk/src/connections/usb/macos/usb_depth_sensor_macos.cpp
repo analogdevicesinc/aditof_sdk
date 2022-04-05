@@ -33,9 +33,6 @@
 
 struct UsbDepthSensor::ImplData {};
 
-//UsbDepthSensor::UsbDepthSensor(
-//    const aditof::DeviceConstructionData & /*data*/) {}
-//
 UsbDepthSensor::UsbDepthSensor(const std::string &driverPath)
     : m_driverPath(driverPath), m_implData(new UsbDepthSensor::ImplData) {}
 
@@ -98,7 +95,7 @@ aditof::Status UsbDepthSensor::program(const uint8_t *firmware, size_t size) {
 }
 
 aditof::Status UsbDepthSensor::getFrame(uint16_t *buffer,
-                                        aditof::BufferInfo *bufferInfo){
+                                        aditof::BufferInfo *bufferInfo) {
     using namespace aditof;
     Status status = Status::OK;
 

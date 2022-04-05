@@ -55,7 +55,8 @@ aditof::Status UsbStorage::read(const uint32_t address, uint8_t *data,
     return Status::UNAVAILABLE;
 }
 
-aditof::Status UsbStorage::write(const uint32_t address, const uint8_t *data, const size_t bytesCount) {
+aditof::Status UsbStorage::write(const uint32_t address, const uint8_t *data,
+                                 const size_t bytesCount) {
     // TO DO when enabling macos support
     return Status::UNAVAILABLE;
 }
