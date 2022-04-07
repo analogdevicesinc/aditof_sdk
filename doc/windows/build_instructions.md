@@ -188,7 +188,7 @@ In order to generate the doxygen documentation you must compile the sdk in the f
 cmake -DCMAKE_PREFIX_PATH="C:\projects\aditof-sdk\deps\glog\build_0_3_5\local_path\glog;C:\projects\aditof-sdk\deps\protobuf\build_3_9_0\local_path\protobuf;C:\projects\aditof-sdk\deps\libwebsockets\build_3_1\local_path\websockets;C:\projects\aditof-sdk\opencv\build" -G "Visual Studio 16 2019" -DOPENSSL_INCLUDE_DIRS="C:\OpenSSL-Win64\include" -DWITH_DOC=on ..
 cmake --build . --target doc -j 4
 ```
-After compilation, the documentation could be found at this path:
+After compilation, the documentation can be found at this path:
 ```console
 build\doc\doxygen_doc\html\index.html
 ```
