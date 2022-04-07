@@ -117,7 +117,7 @@ Requirements:
 * Graphviz
 
 ```console
-sudo apt-get install doxygen doxygen-doc doxygen-gui graphviz
+sudo apt-get install doxygen graphviz
 ```
 
 In order to generate the doxygen documentation you must compile the sdk in the following way:
@@ -125,7 +125,7 @@ In order to generate the doxygen documentation you must compile the sdk in the f
 cmake -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets;/opt/opencv" -DWITH_DOC=on ..
 make -j4 doc
 ```
-After compilation, the documentation could be found at this path:
+After compilation, the documentation can be found at this path:
 ```console
 build/doc/doxygen_doc/html/index.html
 ```
