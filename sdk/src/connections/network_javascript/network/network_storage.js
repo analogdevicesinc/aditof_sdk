@@ -165,3 +165,4 @@ class NetworkStorage extends StorageInterface {
 }
 
 window.NetworkStorage = NetworkStorage;
+
