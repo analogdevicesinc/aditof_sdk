@@ -120,3 +120,4 @@ class NetworkTemperatureSensor extends TemperatureSensorInterface {
 }
 
 window.NetworkTemperatureSensor = NetworkTemperatureSensor;
+

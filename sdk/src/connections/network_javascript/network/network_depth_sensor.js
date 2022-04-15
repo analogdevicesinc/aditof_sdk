@@ -454,3 +454,4 @@ class NetworkDepthSensor extends DepthSensorInterface {
 }
 
 window.NetworkDepthSensor = NetworkDepthSensor;
+

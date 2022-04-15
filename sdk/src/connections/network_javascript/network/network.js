@@ -158,3 +158,4 @@ window.ConnectionType = ConnectionType;
 window.ServerStatus = ServerStatus;
 window.isValidConnection = isValidConnection;
 window.Network = Network;
+
