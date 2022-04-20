@@ -56,18 +56,15 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description='Script to run MobileNet-SSD object detection network ')
-    parser.add_argument("--prototxt", default="MobileNetSSD_deploy.prototxt",
+    parser.add_argument('-p', "--prototxt", default="MobileNetSSD_deploy.prototxt",
                         help='Path to text network file: '
                              'MobileNetSSD_deploy.prototxt')
-    parser.add_argument("--weights", default="MobileNetSSD_deploy.caffemodel",
+    parser.add_argument('-w', "--weights", default="MobileNetSSD_deploy.caffemodel",
                         help='Path to weights: '
                              'MobileNetSSD_deploy.caffemodel')
-    parser.add_argument("--ip", help='Ip address to use network backend')
+    parser.add_argument('-i', "--ip", help='Ip address to use network backend')
     args = parser.parse_args()
-    if args.prototxt:
-        print(args.prototxt)
-    #net = cv.dnn.readNet(args.prototxt, args.weights)
-    net = cv.dnn.readNet('MobileNetSSD_deploy.prototxt', 'MobileNetSSD_deploy.caffemodel')
+
     try:
         net = cv.dnn.readNet(args.prototxt, args.weights)
     except:
@@ -208,7 +205,7 @@ if __name__ == "__main__":
 
                 if class_id in classNames:
                     label_depth = classNames[class_id] + ": " + \
-                            "{0:.3f}".format(distance_map[value_x, value_y] / 1000.0) + " meters"
+                                  "{0:.3f}".format(distance_map[value_x, value_y] / 1000.0) + " meters"
                     label_conf = "Confidence: " + "{0:.4f}".format(confidence)
                     labelSize_depth, baseLine = cv.getTextSize(label_depth, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
                     labelSize_conf = cv.getTextSize(label_conf, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
@@ -230,7 +227,7 @@ if __name__ == "__main__":
                     cv.rectangle(depth_map, (value_x - int(labelSize[0] * 0.5), yLeftBottom),
                                  (value_x + int(labelSize[0] * 0.5), yLeftBottom + 2 * labelSize[1] + 2 * baseLine),
                                  (255, 255, 255), cv.FILLED)
-                    cv.putText(depth_map, label_depth, (value_x - int(labelSize[0] * 0.5),  yLeftBottom + labelSize[1]),
+                    cv.putText(depth_map, label_depth, (value_x - int(labelSize[0] * 0.5), yLeftBottom + labelSize[1]),
                                cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
                     cv.putText(depth_map, label_conf, (value_x - int(labelSize[0] * 0.5), yLeftBottom + 2 * labelSize[1]
                                                        + baseLine),
