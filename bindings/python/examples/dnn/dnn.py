@@ -62,7 +62,9 @@ if __name__ == "__main__":
     parser.add_argument("--weights", default="MobileNetSSD_deploy.caffemodel",
                         help='Path to weights: '
                              'MobileNetSSD_deploy.caffemodel')
+    parser.add_argument("--ip", help='Ip address to use network backend')
     args = parser.parse_args()
+
     try:
         net = cv.dnn.readNetFromCaffe(args.prototxt, args.weights)
     except:
@@ -78,11 +80,21 @@ if __name__ == "__main__":
                   17: 'sheep', 18: 'sofa', 19: 'train', 20: 'tvmonitor'}
 
     system = tof.System()
+    print(system)
 
     cameras = []
-    status = system.getCameraList(cameras)
+    if args.ip:
+        status = system.getCameraListAtIp(cameras, args.ip)
+        if not status:
+            print("system.getCameraListAtIp() failed with status: ", status)
+    else:
+        status = system.getCameraList(cameras)
+        if not status:
+            print("system.getCameraList() failed with status: ", status)
+
+    status = cameras[0].initialize()
     if not status:
-        print("system.getCameraList() failed with status: ", status)
+        print("cameras[0].initialize() failed with status: ", status)
 
     modes = []
     status = cameras[0].getAvailableModes(modes)
@@ -93,10 +105,6 @@ if __name__ == "__main__":
     status = cameras[0].getAvailableFrameTypes(types)
     if not status:
         print("system.getAvailableFrameTypes() failed with status: ", status)
-
-    status = cameras[0].initialize()
-    if not status:
-        print("cameras[0].initialize() failed with status: ", status)
 
     status = cameras[0].setFrameType(types[0])
     if not status:
