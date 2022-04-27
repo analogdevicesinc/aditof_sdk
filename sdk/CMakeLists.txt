@@ -123,8 +123,8 @@ file(GLOB NETWORK_HEADERS
 # Create target and set properties
 add_library(${PROJECT_NAME} SHARED
     ${SOURCES}
-    ${PLATFORM_SOURCES}
-    ${PLATFORM_HEADERS}
+    $<$<NOT:$<BOOL:${WITH_JS}>>:${PLATFORM_SOURCES}>
+    $<$<NOT:$<BOOL:${WITH_JS}>>:${PLATFORM_HEADERS}>
     $<$<BOOL:${ON_TARGET}>:${ONE_CAMERA_SOURCES}>
     $<$<BOOL:${ON_TARGET}>:${ONE_CAMERA_HEADERS}>
     $<$<NOT:$<BOOL:${ON_TARGET}>>:${ALL_CAMERAS_SOURCES}>

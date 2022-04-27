@@ -87,6 +87,7 @@ endif()
 
 if (WITH_JS)
     set(WITH_NETWORK OFF)
+    set(WITH_EXAMPLES OFF)
     add_definitions(-DJS_BINDINGS)
 endif()
 
