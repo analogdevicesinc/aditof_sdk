@@ -74,9 +74,9 @@ class GestureDemo(Frame):
 
         self.cameras = []
 
-        status = system.getCameraListAtIp(self.cameras, "10.42.0.18")
+        status = system.getCameraList(self.cameras)
         if not status:
-            print("system.getCameraListAtIp() failed with status: ", status)
+            print("system.getCameraList failed with status: ", status)
 
         status = self.cameras[0].initialize()
         if not status:
