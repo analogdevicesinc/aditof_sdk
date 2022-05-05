@@ -86,7 +86,7 @@ class ProcessTab(Frame):
         self.cord = list(zip(points_hull[0], points_hull[1]))
         self.dist_map = distance_transform_edt(points)
         self.hand_center = ndimage.center_of_mass(self.dist_map)
-        self.radius = 2 * np.max(self.dist_map)
+        self.radius = 1.75 * np.max(self.dist_map)
 
     # =============================================================================
     def _count_fingers(self):
@@ -98,8 +98,12 @@ class ProcessTab(Frame):
 
         dist = vertices[0:len(vertices) - 1] - vertices[1:len(vertices)]
         cdist = np.sqrt(dist[:, 0] ** 2 + dist[:, 1] ** 2)
-        cdist = (cdist < 5) * 1
+        cdist = (cdist < 15) * 1
         cdist = cdist[0:len(cdist) - 1] - cdist[1:len(cdist)]
+        if cdist[0] != 0:
+            cdist[0] = -1
+        if cdist[len(cdist) - 1] != 0:
+            cdist[len(cdist) - 1] = -1
         dist_idx = np.where(cdist == -1)
         dist_idx = np.array(dist_idx) + 1
 
