@@ -1,0 +1,15 @@
+{
+  "$schema-version": "0.0.1",
+  "description": "",
+  "image": {
+    "repository": "adismartcam.azurecr.io/smartcamera",
+    "tag": {
+      "version": "0.0.1",
+      "platforms": {
+        "arm64v8": "./Dockerfile.arm64v8"
+      }
+    },
+    "buildOptions": []
+  },
+  "language": "c"
+}

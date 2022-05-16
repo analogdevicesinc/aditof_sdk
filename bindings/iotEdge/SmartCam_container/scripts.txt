@@ -1,0 +1,13 @@
+Script on camera:
+
+wget https://swdownloads.analog.com/cse/aditof/smart_camera/img_update/cam_update.tar
+tar -xvf cam_update.tar
+cd cam_update
+sudo bash -y update-script.sh
+y
+
+
+editing connection string:
+
+sudo nano /etc/iotedge/config.yaml
+
