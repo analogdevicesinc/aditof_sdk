@@ -65,3 +65,8 @@ From the <b>IoT Hub > IoT Edge > IoT Edge Deployment</b> section of the Azure po
 | edgeAgent                 | System module that is responsible for connections with the IoT Hub and launching the deployment json                              | [Azure IoT Hub](https://docs.microsoft.com/en-us/azure/iot-hub/?WT.mc_id=julyot-iva-pdecarlo) (Authorization and for obtaining deployment configuration) |
 | edgeHub                   | System Module responsible for inter-module communication and message back to Azure IoT Hub                                       | [Azure IoT Hub](https://docs.microsoft.com/en-us/azure/iot-hub/?WT.mc_id=julyot-iva-pdecarlo) (Ingestion of Device to Cloud Telemetry)                   |
 | Smart Camera module       | To be completed               | Routing must be specified here                                                                     |
+
+After adding all the neccessary modules the target device must be completed with the device id (deviceid='edgeDevice name'), to link the Smart Camera to this deployment. You can do it from the setting of the deployment from the following part:
+
+<p align="center">
+<img width="750" src="../../doc/img/deviceID.png" /></br></p>
