@@ -16,7 +16,22 @@ At "IoT Edge" section of the manu add a new device. This generates a virtual dev
 
 ## 2. Install IoT Edge on <b>Smart Camera</b>
 Run the following code snippet on the camera:
+* Installing moby-engine for container running: 
 ```console
+sudo apt install curl 
+curl https://packages.microsoft.com/config/ubuntu/18.04/multiarch/prod.list > ./microsoft-prod.list
+
+sudo cp ./microsoft-prod.list /etc/apt/sources.list.d/
+
+curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+sudo cp ./microsoft.gpg /etc/apt/trusted.gpg.d/
+
+sudo apt-get update
+sudo apt-get install moby-engine
+```
+* Installing IoT Edge:
+```console
+
 curl -L https://github.com/Azure/azure-iotedge/releases/download/1.0.8-rc1/libiothsm-std_1.0.8.rc1-1_arm64.deb -o libiothsm-std.deb && sudo dpkg -i ./libiothsm-std.deb
 
 curl -L https://github.com/Azure/azure-iotedge/releases/download/1.0.8-rc1/iotedge_1.0.8.rc1-1_arm64.deb -o iotedge.deb && sudo dpkg -i ./iotedge.deb
