@@ -32,9 +32,9 @@ sudo apt-get install moby-engine
 * Installing IoT Edge:
 ```console
 
-curl -L https://github.com/Azure/azure-iotedge/releases/download/1.0.8-rc1/libiothsm-std_1.0.8.rc1-1_arm64.deb -o libiothsm-std.deb && sudo dpkg -i ./libiothsm-std.deb
+curl -L https://github.com/Azure/azure-iotedge/releases/download/1.1.13/libiothsm-std_1.1.13-1_ubuntu18.04_arm64.deb -o libiothsm-std.deb && sudo dpkg -i ./libiothsm-std.deb
 
-curl -L https://github.com/Azure/azure-iotedge/releases/download/1.0.8-rc1/iotedge_1.0.8.rc1-1_arm64.deb -o iotedge.deb && sudo dpkg -i ./iotedge.deb
+curl -L https://github.com/Azure/azure-iotedge/releases/download/1.1.13/iotedge_1.1.13-1_ubuntu18.04_arm64.deb -o iotedge.deb && sudo dpkg -i ./iotedge.deb
 
 apt-get fix && sudo apt-get install -f
 ```
