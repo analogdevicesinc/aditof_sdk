@@ -625,8 +625,8 @@ aditof::Status Calibration96Tof1::distortionCorrection(uint16_t *frame,
             int x_dist = (int)(x_dist_adim * fx + cx);
             int y_dist = (int)(y_dist_adim * fy + cy);
 
-            if (x_dist >= 0 && x_dist < width && y_dist >= 0 &&
-                y_dist < height) {
+            if (x_dist >= 0 && x_dist < (int)width && y_dist >= 0 &&
+                y_dist < (int)height) {
                 buff[j * width + i] = frame[y_dist * width + x_dist];
             } else {
                 buff[j * width + i] = frame[j * width + i];
@@ -651,8 +651,8 @@ aditof::Status Calibration96Tof1::distortionCorrection(uint16_t *frame,
             int x_dist = (int)(x_dist_adim * fx + cx);
             int y_dist = (int)(y_dist_adim * fy + cy);
 
-            if (x_dist >= 0 && x_dist < width && y_dist >= 0 &&
-                y_dist < height) {
+            if (x_dist >= 0 && x_dist < (int)width && y_dist >= 0 &&
+                y_dist < (int)height) {
                 frame[j * width + i] = buff[y_dist * width + x_dist];
             } else {
                 frame[j * width + i] = buff[j * width + i];

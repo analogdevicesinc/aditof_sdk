@@ -216,10 +216,10 @@ int UsbLinuxUtils::uvcExUnitWriteBuffer(int fd, uint8_t selector, int16_t id,
     cq.selector = selector;
 
     while (writtenBytes < bufferLength) {
-        writeLen =
-            bufferLength - writtenBytes > MAX_BUF_SIZE - (nbLeadingBytes + 1)
-                ? MAX_BUF_SIZE - (nbLeadingBytes + 1)
-                : bufferLength - writtenBytes;
+        writeLen = (int)(bufferLength - writtenBytes) >
+                           MAX_BUF_SIZE - (nbLeadingBytes + 1)
+                       ? MAX_BUF_SIZE - (nbLeadingBytes + 1)
+                       : bufferLength - writtenBytes;
         packet[nbLeadingBytes] = writeLen;
         memcpy(&packet[nbLeadingBytes + 1], data + writtenBytes, writeLen);
 
