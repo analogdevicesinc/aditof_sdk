@@ -797,7 +797,7 @@ void AdiTofDemoView::render() {
         }
 
         if (captureEnabled || captureBlendedEnabled) {
-            if (temp_cnt++ > (displayFps < 10) ? 10 : 30) {
+            if (temp_cnt++ > ((displayFps < 10) ? 10 : 30)) {
                 std::pair<float, float> temp = m_ctrl->getTemperature();
                 temp_cnt = 0;
                 sprintf(afe_temp_str, "AFE TEMP: %.1f", temp.first);
