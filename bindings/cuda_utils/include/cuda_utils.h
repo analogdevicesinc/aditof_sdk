@@ -63,6 +63,7 @@ class cudaOnTarget {
 
     void cpyFrameToGPU(uint16_t *frame);
     void cpyFrameFromGPU(uint16_t *frame);
+    void printFrameFromGPU();
 
     void setParameters(double width, double height, double fx, double fy,
                        double cx, double cy, double k1, double k2, double k3,

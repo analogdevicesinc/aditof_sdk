@@ -47,6 +47,8 @@
 #include <sys/stat.h>
 #include <unordered_map>
 
+#include <iostream>
+
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
 #define V4L2_CID_AD_DEV_SET_CHIP_CONFIG 0xA00A00
@@ -652,16 +654,32 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
 #if defined(JETSON)
 
         if (m_implData->frameDetails.type == "depth") {
-            memcpy(buffer, pdata[0], buf[0].bytesused);
+            //memcpy(buffer, pdata[0], buf[0].bytesused);
         } else if (m_implData->frameDetails.type == "ir") {
 
-            memcpy(buffer, pdata[0], buf[0].bytesused);
+            //memcpy(buffer, pdata[0], buf[0].bytesused);
         } else {
 
             if (dataType) {
-                memcpy(buffer, pdata[0], buf[0].bytesused);
+#if defined(CUDA_ON_TARGET)
+                cudaObj.cpyFrameToGPU((uint16_t *)pdata[0]);
+                cudaObj.applyDepthCorrection();
+                cudaObj.applyGeometryCorrection();
+                //cudaObj.applyDistortionCorrection();
+                cudaObj.cpyFrameFromGPU(buffer);
+#else
+                //memcpy(buffer, pdata[0], buf[0].bytesused);
+#endif
+
             } else {
-                memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
+#if defined(CUDA_ON_TARGET)
+                cudaObj.cpyFrameToGPU((uint16_t *)pdata[0]);
+                //cudaObj.applyDistortionCorrection();
+                cudaObj.cpyFrameFromGPU(buffer + (width * height));
+#else
+
+                //memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
+#endif
             }
         }
 

@@ -57,9 +57,10 @@ __global__ void buildDistortionCorrectionCacheCuda(double *m_distortion_cache_d,
     }
 }
 
-__global__ void applyDistortionCorrectionCacheCuda(double *m_distortion_cache_d,
-                                                   double *m_parameters_d,
-                                                   uint16_t *frame) {
+__global__ void
+applyDistortionCorrectionCacheCuda(uint16_t *m_frame_d, uint16_t *tmp_frame,
+                                   double *m_parameters_d,
+                                   double *m_distortion_cache_d) {
 
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
 
@@ -68,7 +69,30 @@ __global__ void applyDistortionCorrectionCacheCuda(double *m_distortion_cache_d,
 
     if (i >= 0 && i < m_parameters_d[0]) {
         if (j >= 0 && j < m_parameters_d[1]) {
-            // TO BE IMPLEMENTED
+
+            double x = (double(i) - m_parameters_d[4]) / m_parameters_d[2];
+            double y = (double(j) - m_parameters_d[5]) / m_parameters_d[3];
+
+            //apply correction
+            double x_dist_adim =
+                x * m_distortion_cache_d[j * (int)m_parameters_d[0] + i];
+            double y_dist_adim =
+                y * m_distortion_cache_d[j * (int)m_parameters_d[0] + i];
+
+            //back to original space
+            int x_dist =
+                (int)(x_dist_adim * m_parameters_d[2] + m_parameters_d[4]);
+            int y_dist =
+                (int)(y_dist_adim * m_parameters_d[3] + m_parameters_d[5]);
+
+            if (x_dist >= 0 && x_dist < (int)m_parameters_d[0] && y_dist >= 0 &&
+                y_dist < (int)m_parameters_d[1]) {
+                m_frame_d[j * (int)m_parameters_d[0] + i] =
+                    tmp_frame[y_dist * (int)m_parameters_d[0] + x_dist];
+            } else {
+                m_frame_d[j * (int)m_parameters_d[0] + i] =
+                    tmp_frame[j * (int)m_parameters_d[0] + i];
+            }
         }
     }
 }
@@ -92,19 +116,20 @@ __global__ void buildGeometryCorrectionCacheCuda(double *m_geometry_cache_d,
     }
 }
 
-__global__ void applyGeometryCorrectionCacheCuda(double *m_geometry_cache_d,
+__global__ void applyGeometryCorrectionCacheCuda(uint16_t *m_frame_d,
                                                  double *m_parameters_d,
-                                                 uint16_t *frame) {
+                                                 double *m_geometry_cache_d
 
+) {
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
 
-    int i = threadPosition % (int)m_parameters_d[0];
-    int j = threadPosition / (int)m_parameters_d[0];
-
-    if (i >= 0 && i < m_parameters_d[0]) {
-        if (j >= 0 && j < m_parameters_d[1]) {
-            // TO BE IMPLEMENTED
-        }
+    if (threadPosition >= 0 &&
+        threadPosition < m_parameters_d[0] * m_parameters_d[1]) {
+        if (m_frame_d[threadPosition] > m_parameters_d[14])
+            m_frame_d[threadPosition] = m_parameters_d[14];
+        else
+            m_frame_d[threadPosition] =
+                m_frame_d[threadPosition] * m_geometry_cache_d[threadPosition];
     }
 }
 
@@ -122,13 +147,16 @@ __global__ void buildDepthCorrectionCacheCuda(uint16_t *m_depth_cache_d,
     }
 }
 
-__global__ void applyDepthCorrectionCacheCuda(uint16_t* m_frame_d, double* m_parameters_d, uint16_t* m_depth_cache_d) {
+__global__ void applyDepthCorrectionCacheCuda(uint16_t *m_frame_d,
+                                              double *m_parameters_d,
+                                              uint16_t *m_depth_cache_d) {
 
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
 
-    if(threadPosition >=0 && threadPosition < m_parameters_d[0]*m_parameters_d[1])
-    {
-        *(m_frame_d + threadPosition) = *(m_depth_cache_d + *(m_frame_d + threadPosition));
+    if (threadPosition >= 0 &&
+        threadPosition < m_parameters_d[0] * m_parameters_d[1]) {
+        *(m_frame_d + threadPosition) =
+            *(m_depth_cache_d + *(m_frame_d + threadPosition));
     }
 }
 
@@ -204,17 +232,21 @@ void cudaOnTarget::buildDepthCorrectionCache() {
     cudaMemcpy(m_depth_cache, m_depth_cache_d,
                sizeof(uint16_t) * m_parameters[13], cudaMemcpyDeviceToHost);
 
-    // std::cout << "GPU depth: \n";
-    // for (int i = 0; i < 10; i++) {
-    //     std::cout << m_depth_cache[i] << ", ";
-    // }
-    // std::cout << "\n\n\n";
+    std::cout << "GPU depth: \n";
+    for (int i = 0; i < 10; i++) {
+        std::cout << m_depth_cache[i] << ", ";
+    }
+    std::cout << "\n\n\n";
 }
 
-void cudaOnTarget::applyGeometryCorrection() {}
-void cudaOnTarget::applyDistortionCorrection() {}
-void cudaOnTarget::applyDepthCorrection() {
-    std::cout << "CUDA_CXX: Building Depth correction\n";
+void cudaOnTarget::applyDistortionCorrection() {
+
+    //create temporary frame buffer
+    uint16_t *tmp_frame;
+    cudaMalloc((void **)&tmp_frame, sizeof(uint16_t) * m_parameters[0] * m_parameters[1]);
+    cudaMemcpy(tmp_frame, m_frame_d,
+               sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
+               cudaMemcpyDeviceToDevice);
 
     //Check if more blocks nedded than resulted from division
     int nrOfBlocks =
@@ -223,7 +255,33 @@ void cudaOnTarget::applyDepthCorrection() {
          m_parameters[0] * m_parameters[1])
             ? m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK + 1
             : m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK;
-    applyDepthCorrectionCacheCuda<<<nrOfBlocks, THREAD_PER_BLOCK>>>(m_frame_d, m_parameters_d, m_depth_cache);
+    applyDistortionCorrectionCacheCuda<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
+        m_frame_d, tmp_frame, m_parameters_d, m_distortion_cache_d);
+    cudaFree(tmp_frame);
+}
+void cudaOnTarget::applyDepthCorrection() {
+
+    //Check if more blocks nedded than resulted from division
+    int nrOfBlocks =
+        ((m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK) *
+             THREAD_PER_BLOCK <
+         m_parameters[0] * m_parameters[1])
+            ? m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK + 1
+            : m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK;
+    applyDepthCorrectionCacheCuda<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
+        m_frame_d, m_parameters_d, m_depth_cache_d);
+}
+
+void cudaOnTarget::applyGeometryCorrection() {
+    //Check if more blocks nedded than resulted from division
+    int nrOfBlocks =
+        ((m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK) *
+             THREAD_PER_BLOCK <
+         m_parameters[0] * m_parameters[1])
+            ? m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK + 1
+            : m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK;
+    applyGeometryCorrectionCacheCuda<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
+        m_frame_d, m_parameters_d, m_geometry_cache_d);
 }
 
 void cudaOnTarget::cpyFrameToGPU(uint16_t *frame) {
@@ -237,6 +295,13 @@ void cudaOnTarget::cpyFrameFromGPU(uint16_t *frame) {
                cudaMemcpyDeviceToHost);
 }
 
+void cudaOnTarget::printFrameFromGPU() {
+    cpyFrameFromGPU(m_frame);
+    for (int i = 0; i < 10; i++) {
+        std::cout << m_frame[i] << ", ";
+    }
+}
+
 void cudaOnTarget::setParameters(double width, double height, double fx,
                                  double fy, double cx, double cy, double k1,
                                  double k2, double k3, double x0, double y0,
@@ -247,7 +312,7 @@ void cudaOnTarget::setParameters(double width, double height, double fx,
                              k2,    k3,     x0, y0, gain, offset, pixelMaxValue,
                              range};
     m_parameters = (double *)malloc(15 * sizeof(double));
-    memcpy(m_parameters, parameters, 15*sizeof(double));
+    memcpy(m_parameters, parameters, 15 * sizeof(double));
 
     cudaMalloc((void **)&m_parameters_d, sizeof(double) * 15);
     cudaMemcpy(m_parameters_d, parameters, sizeof(double) * 15,
@@ -255,6 +320,7 @@ void cudaOnTarget::setParameters(double width, double height, double fx,
 
     //allocating memory for frame
     cudaMalloc((void **)&m_frame_d, sizeof(uint16_t) * width * height);
+    m_frame = (uint16_t *)malloc(sizeof(uint16_t) * width * height);
 }
 
 void cudaOnTarget::freeAll() {
