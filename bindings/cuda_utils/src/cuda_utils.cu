@@ -166,8 +166,6 @@ void cudaOnTarget::buildDistortionCorrectionCache() {
 
     std::cout << "CUDA_CXX: Building Distortion correction\n";
 
-    m_distortion_cache =
-        (double *)malloc(sizeof(double) * m_parameters[0] * m_parameters[1]);
     cudaMalloc((void **)&m_distortion_cache_d,
                sizeof(double) * m_parameters[0] * m_parameters[1]);
 
@@ -175,9 +173,12 @@ void cudaOnTarget::buildDistortionCorrectionCache() {
                                              THREAD_PER_BLOCK,
                                          THREAD_PER_BLOCK>>>(
         m_distortion_cache_d, m_parameters_d);
-    cudaMemcpy(m_distortion_cache, m_distortion_cache_d,
-               sizeof(double) * m_parameters[0] * m_parameters[1],
-               cudaMemcpyDeviceToHost);
+
+    // m_distortion_cache =
+    //     (double *)malloc(sizeof(double) * m_parameters[0] * m_parameters[1]);
+    // cudaMemcpy(m_distortion_cache, m_distortion_cache_d,
+    //            sizeof(double) * m_parameters[0] * m_parameters[1],
+    //            cudaMemcpyDeviceToHost);
 
     // std::cout << "GPU distortion: \n";
     // for (int i = 0; i < 10; i++) {
@@ -190,8 +191,6 @@ void cudaOnTarget::buildGeometryCorrectionCache() {
 
     std::cout << "CUDA_CXX: Building Geometry correction\n";
 
-    m_geometry_cache =
-        (double *)malloc(sizeof(double) * m_parameters[0] * m_parameters[1]);
     cudaMalloc((void **)&m_geometry_cache_d,
                sizeof(double) * m_parameters[0] * m_parameters[1]);
 
@@ -204,9 +203,12 @@ void cudaOnTarget::buildGeometryCorrectionCache() {
             : m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK;
     buildGeometryCorrectionCacheCuda<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
         m_geometry_cache_d, m_parameters_d);
-    cudaMemcpy(m_geometry_cache, m_geometry_cache_d,
-               sizeof(double) * m_parameters[0] * m_parameters[1],
-               cudaMemcpyDeviceToHost);
+
+    // m_geometry_cache =
+    //     (double *)malloc(sizeof(double) * m_parameters[0] * m_parameters[1]);
+    // cudaMemcpy(m_geometry_cache, m_geometry_cache_d,
+    //            sizeof(double) * m_parameters[0] * m_parameters[1],
+    //            cudaMemcpyDeviceToHost);
 
     // std::cout << "GPU geometry: \n";
     // for (int i = 0; i < 10; i++) {
@@ -219,7 +221,6 @@ void cudaOnTarget::buildDepthCorrectionCache() {
 
     std::cout << "CUDA_CXX: Building Depth correction\n";
 
-    m_depth_cache = (uint16_t *)malloc(sizeof(uint16_t) * m_parameters[13]);
     cudaMalloc((void **)&m_depth_cache_d, sizeof(uint16_t) * m_parameters[13]);
 
     //Check if more blocks nedded than resulted from division
@@ -229,21 +230,24 @@ void cudaOnTarget::buildDepthCorrectionCache() {
                          : m_parameters[13] / THREAD_PER_BLOCK;
     buildDepthCorrectionCacheCuda<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
         m_depth_cache_d, m_parameters_d);
-    cudaMemcpy(m_depth_cache, m_depth_cache_d,
-               sizeof(uint16_t) * m_parameters[13], cudaMemcpyDeviceToHost);
 
-    std::cout << "GPU depth: \n";
-    for (int i = 0; i < 10; i++) {
-        std::cout << m_depth_cache[i] << ", ";
-    }
-    std::cout << "\n\n\n";
+    // m_depth_cache = (uint16_t *)malloc(sizeof(uint16_t) * m_parameters[13]);
+    // cudaMemcpy(m_depth_cache, m_depth_cache_d,
+            //    sizeof(uint16_t) * m_parameters[13], cudaMemcpyDeviceToHost);
+
+    // std::cout << "GPU depth: \n";
+    // for (int i = 0; i < 10; i++) {
+    //     std::cout << m_depth_cache[i] << ", ";
+    // }
+    // std::cout << "\n\n\n";
 }
 
 void cudaOnTarget::applyDistortionCorrection() {
 
     //create temporary frame buffer
     uint16_t *tmp_frame;
-    cudaMalloc((void **)&tmp_frame, sizeof(uint16_t) * m_parameters[0] * m_parameters[1]);
+    cudaMalloc((void **)&tmp_frame,
+               sizeof(uint16_t) * m_parameters[0] * m_parameters[1]);
     cudaMemcpy(tmp_frame, m_frame_d,
                sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
                cudaMemcpyDeviceToDevice);
@@ -330,3 +334,5 @@ void cudaOnTarget::freeAll() {
     cudaFree(m_frame_d);
     cudaFree(m_parameters_d);
 }
+
+void cudaOnTarget::loadNetworkModel() {}

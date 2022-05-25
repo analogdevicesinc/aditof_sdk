@@ -296,6 +296,7 @@ aditof::Status RgbSensor::stop() {
     using namespace aditof;
     Status status = Status::OK;
     struct VideoDev *dev;
+    dev = (struct VideoDev *)malloc(sizeof(VideoDev));
     enum v4l2_buf_type type;
 
     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {

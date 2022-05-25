@@ -39,18 +39,26 @@
 
 class cudaOnTarget {
   private:
+
+    //correction cahes
     double *m_geometry_cache_d;
     double *m_distortion_cache_d;
     uint16_t *m_depth_cache_d;
 
-    double *m_geometry_cache;
-    double *m_distortion_cache;
-    uint16_t *m_depth_cache;
+    // double *m_geometry_cache;
+    // double *m_distortion_cache;
+    // uint16_t *m_depth_cache;
 
+    //frames and parameters
     uint16_t *m_frame_d;
     uint16_t *m_frame;
     double *m_parameters_d;
     double *m_parameters;
+
+    //network
+    double *m_nrOfLayers;
+    double *m_nrOfNodes;
+    // double *m
 
   public:
     void buildGeometryCorrectionCache();
@@ -70,6 +78,8 @@ class cudaOnTarget {
                        double x0, double y0, double gain, double offset,
                        double pixelMaxValue, double range);
     void freeAll();
+    void loadNetworkModel();
+
 };
 
 #endif // CUDA_UTILS

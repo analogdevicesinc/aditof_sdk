@@ -32,8 +32,25 @@
 #include <aditof/camera.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
+#include <ctime>
 #include <glog/logging.h>
 #include <iostream>
+#include <chrono>
+#include <iostream>
+#include <sys/time.h>
+#include <ctime>
+
+#include <chrono>
+#include <iostream>
+#include <sys/time.h>
+#include <ctime>
+
+using std::cout; using std::endl;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+
 
 using namespace aditof;
 
@@ -85,36 +102,24 @@ int main(int argc, char *argv[]) {
     }
 
     aditof::Frame frame;
-    while (1)
-    {
-            status = camera->requestFrame(&frame);
-            if (status != Status::OK) {
-                LOG(ERROR) << "Could not request frame!";
-                return 0;
-            } else {
-                LOG(INFO) << "succesfully requested frame!";
-            }
+    while (1) {
+       auto t1 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    
 
-            uint16_t *data1;
-            status = frame.getData(FrameDataType::FULL_DATA, &data1);
-
-            if (status != Status::OK) {
-                LOG(ERROR) << "Could not get frame data!";
-                return 0;
-            }
-
-            if (!data1) {
-                LOG(ERROR) << "no memory allocated in frame";
-                return 0;
-            }
-
-            FrameDetails fDetails;
-            frame.getDetails(fDetails);
-            for (unsigned int i = 0; i < 10;
-                 ++i) {
-               // std::cout << data1[i] << " ";
-            }
+        status = camera->requestFrame(&frame);
+        if (status != Status::OK) {
+            LOG(ERROR) << "Could not request frame!";
+            return 0;
+        } else {
+            //LOG(INFO) << "succesfully requested frame!";
         }
+        FrameDetails fDetails;
+        frame.getDetails(fDetails);
+
+       auto t2 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+
+        std::cout<<"FPS: " << 1/(double)(t2-t1)*1000 << std::endl;
+    }
 
     return 0;
 }
