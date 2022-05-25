@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 project (aditof_cuda LANGUAGES CXX CUDA)
 find_package(CUDA REQUIRED)
 IF(CUDA_FOUND)
+    add_definitions(-DPATH_TO_CNN_JSON="${CMAKE_SOURCE_DIR}/json_model/")
     SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -dlink)
     cuda_compile(cuda_utils cuda_utils.cu)
     add_library(aditof_cuda SHARED

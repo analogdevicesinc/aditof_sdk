@@ -32,14 +32,23 @@
 #ifndef CUDA_UTILS
 #define CUDA_UTILS
 
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <stdint.h>
+#include <string>
 #include <vector>
 
 #define THREAD_PER_BLOCK 1024
 
+struct Layer {
+    std::string name;
+    std::vector<double> weights;
+    std::vector<double> bias;
+};
+
 class cudaOnTarget {
   private:
-
     //correction cahes
     double *m_geometry_cache_d;
     double *m_distortion_cache_d;
@@ -56,9 +65,8 @@ class cudaOnTarget {
     double *m_parameters;
 
     //network
-    double *m_nrOfLayers;
-    double *m_nrOfNodes;
-    // double *m
+    std::vector<Layer> Network;
+    double *network_d;
 
   public:
     void buildGeometryCorrectionCache();
@@ -79,7 +87,11 @@ class cudaOnTarget {
                        double pixelMaxValue, double range);
     void freeAll();
     void loadNetworkModel();
-
+    void readInLayer(std::vector<Layer> &network,
+                                   std::string fileName);
+    std::string getFileNameBias(std::string fileName);
+    std::string getFileNameWeights(std::string fileName);
+    void cpyNetworkToGPU();
 };
 
 #endif // CUDA_UTILS
