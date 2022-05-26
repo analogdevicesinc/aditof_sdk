@@ -30,10 +30,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "../include/cuda_utils.h"
+#include <assert.h>
 #include <iostream>
+#include <stdio.h>
 namespace aditof {};
 
 // -------------------      CUDA        -----------------------------------------------
+
+// Convenience function for checking CUDA runtime API results
+// can be wrapped around any runtime API call. No-op in release builds.
+inline cudaError_t checkCuda(cudaError_t result) {
+#if defined(DEBUG) || defined(_DEBUG)
+    if (result != cudaSuccess) {
+        fprintf(stderr, "CUDA_CXX: DA Runtime Error: %s\n",
+                cudaGetErrorString(result));
+        assert(result == cudaSuccess);
+    }
+#endif
+    return result;
+}
 
 __global__ void buildDistortionCorrectionCacheCuda(double *m_distortion_cache_d,
                                                    double *m_parameters_d) {
@@ -166,8 +181,8 @@ void cudaOnTarget::buildDistortionCorrectionCache() {
 
     std::cout << "CUDA_CXX: Building Distortion correction\n";
 
-    cudaMalloc((void **)&m_distortion_cache_d,
-               sizeof(double) * m_parameters[0] * m_parameters[1]);
+    checkCuda(cudaMalloc((void **)&m_distortion_cache_d,
+                         sizeof(double) * m_parameters[0] * m_parameters[1]));
 
     buildDistortionCorrectionCacheCuda<<<m_parameters[0] * m_parameters[1] /
                                              THREAD_PER_BLOCK,
@@ -176,9 +191,9 @@ void cudaOnTarget::buildDistortionCorrectionCache() {
 
     // m_distortion_cache =
     //     (double *)malloc(sizeof(double) * m_parameters[0] * m_parameters[1]);
-    // cudaMemcpy(m_distortion_cache, m_distortion_cache_d,
+    // checkCuda(cudaMemcpy(m_distortion_cache, m_distortion_cache_d,
     //            sizeof(double) * m_parameters[0] * m_parameters[1],
-    //            cudaMemcpyDeviceToHost);
+    //            cudaMemcpyDeviceToHost));
 
     // std::cout << "GPU distortion: \n";
     // for (int i = 0; i < 10; i++) {
@@ -191,8 +206,8 @@ void cudaOnTarget::buildGeometryCorrectionCache() {
 
     std::cout << "CUDA_CXX: Building Geometry correction\n";
 
-    cudaMalloc((void **)&m_geometry_cache_d,
-               sizeof(double) * m_parameters[0] * m_parameters[1]);
+    checkCuda(cudaMalloc((void **)&m_geometry_cache_d,
+                         sizeof(double) * m_parameters[0] * m_parameters[1]));
 
     //Check if more blocks nedded than resulted from division
     int nrOfBlocks =
@@ -206,9 +221,9 @@ void cudaOnTarget::buildGeometryCorrectionCache() {
 
     // m_geometry_cache =
     //     (double *)malloc(sizeof(double) * m_parameters[0] * m_parameters[1]);
-    // cudaMemcpy(m_geometry_cache, m_geometry_cache_d,
+    // checkCuda(cudaMemcpy(m_geometry_cache, m_geometry_cache_d,
     //            sizeof(double) * m_parameters[0] * m_parameters[1],
-    //            cudaMemcpyDeviceToHost);
+    //            cudaMemcpyDeviceToHost));
 
     // std::cout << "GPU geometry: \n";
     // for (int i = 0; i < 10; i++) {
@@ -221,7 +236,8 @@ void cudaOnTarget::buildDepthCorrectionCache() {
 
     std::cout << "CUDA_CXX: Building Depth correction\n";
 
-    cudaMalloc((void **)&m_depth_cache_d, sizeof(uint16_t) * m_parameters[13]);
+    checkCuda(cudaMalloc((void **)&m_depth_cache_d,
+                         sizeof(uint16_t) * m_parameters[13]));
 
     //Check if more blocks nedded than resulted from division
     int nrOfBlocks = ((m_parameters[13] / THREAD_PER_BLOCK) * THREAD_PER_BLOCK <
@@ -232,8 +248,8 @@ void cudaOnTarget::buildDepthCorrectionCache() {
         m_depth_cache_d, m_parameters_d);
 
     // m_depth_cache = (uint16_t *)malloc(sizeof(uint16_t) * m_parameters[13]);
-    // cudaMemcpy(m_depth_cache, m_depth_cache_d,
-    //    sizeof(uint16_t) * m_parameters[13], cudaMemcpyDeviceToHost);
+    // checkCuda(cudaMemcpy(m_depth_cache, m_depth_cache_d,
+    //    sizeof(uint16_t) * m_parameters[13], cudaMemcpyDeviceToHost));
 
     // std::cout << "GPU depth: \n";
     // for (int i = 0; i < 10; i++) {
@@ -246,11 +262,11 @@ void cudaOnTarget::applyDistortionCorrection() {
 
     //create temporary frame buffer
     uint16_t *tmp_frame;
-    cudaMalloc((void **)&tmp_frame,
-               sizeof(uint16_t) * m_parameters[0] * m_parameters[1]);
-    cudaMemcpy(tmp_frame, m_frame_d,
-               sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
-               cudaMemcpyDeviceToDevice);
+    checkCuda(cudaMalloc((void **)&tmp_frame,
+                         sizeof(uint16_t) * m_parameters[0] * m_parameters[1]));
+    checkCuda(cudaMemcpy(tmp_frame, m_frame_d,
+                         sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
+                         cudaMemcpyDeviceToDevice));
 
     //Check if more blocks nedded than resulted from division
     int nrOfBlocks =
@@ -261,7 +277,7 @@ void cudaOnTarget::applyDistortionCorrection() {
             : m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK;
     applyDistortionCorrectionCacheCuda<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
         m_frame_d, tmp_frame, m_parameters_d, m_distortion_cache_d);
-    cudaFree(tmp_frame);
+    checkCuda(cudaFree(tmp_frame));
 }
 void cudaOnTarget::applyDepthCorrection() {
 
@@ -289,14 +305,14 @@ void cudaOnTarget::applyGeometryCorrection() {
 }
 
 void cudaOnTarget::cpyFrameToGPU(uint16_t *frame) {
-    cudaMemcpy(m_frame_d, frame,
-               sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
-               cudaMemcpyHostToDevice);
+    checkCuda(cudaMemcpy(m_frame_d, frame,
+                         sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
+                         cudaMemcpyHostToDevice));
 }
 void cudaOnTarget::cpyFrameFromGPU(uint16_t *frame) {
-    cudaMemcpy(frame, m_frame_d,
-               sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
-               cudaMemcpyDeviceToHost);
+    checkCuda(cudaMemcpy(frame, m_frame_d,
+                         sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
+                         cudaMemcpyDeviceToHost));
 }
 
 void cudaOnTarget::printFrameFromGPU() {
@@ -318,12 +334,13 @@ void cudaOnTarget::setParameters(double width, double height, double fx,
     m_parameters = (double *)malloc(15 * sizeof(double));
     memcpy(m_parameters, parameters, 15 * sizeof(double));
 
-    cudaMalloc((void **)&m_parameters_d, sizeof(double) * 15);
-    cudaMemcpy(m_parameters_d, parameters, sizeof(double) * 15,
-               cudaMemcpyHostToDevice);
+    checkCuda(cudaMalloc((void **)&m_parameters_d, sizeof(double) * 15));
+    checkCuda(cudaMemcpy(m_parameters_d, parameters, sizeof(double) * 15,
+                         cudaMemcpyHostToDevice));
 
     //allocating memory for frame
-    cudaMalloc((void **)&m_frame_d, sizeof(uint16_t) * width * height);
+    checkCuda(
+        cudaMalloc((void **)&m_frame_d, sizeof(uint16_t) * width * height));
     m_frame = (uint16_t *)malloc(sizeof(uint16_t) * width * height);
 
     //load neural network model
@@ -331,11 +348,11 @@ void cudaOnTarget::setParameters(double width, double height, double fx,
 }
 
 void cudaOnTarget::freeAll() {
-    cudaFree(m_geometry_cache_d);
-    cudaFree(m_distortion_cache_d);
-    cudaFree(m_depth_cache_d);
-    cudaFree(m_frame_d);
-    cudaFree(m_parameters_d);
+    checkCuda(cudaFree(m_geometry_cache_d));
+    checkCuda(cudaFree(m_distortion_cache_d));
+    checkCuda(cudaFree(m_depth_cache_d));
+    checkCuda(cudaFree(m_frame_d));
+    checkCuda(cudaFree(m_parameters_d));
 }
 
 std::string cudaOnTarget::getFileNameWeights(std::string fileName) {
@@ -401,22 +418,21 @@ void cudaOnTarget::loadNetworkModel() {
 }
 
 void cudaOnTarget::cpyNetworkToGPU() {
-    if (Network.size()==0) {
+    if (Network.size() == 0) {
         std::cout << "CUDA_CXX: Please load the model first!\n";
         return;
-    }
-    else
-    {
-        int size_tmp =1;
+    } else {
+        int size_tmp = 1;
         size_tmp += Network.size();
-        for(int i=0;i<Network.size();i++)
-        {
+        for (int i = 0; i < Network.size(); i++) {
             size_tmp += Network[i].weights.size();
             size_tmp += Network[i].bias.size();
         }
+        //allocate memory for network
+        checkCuda(cudaMalloc((void **)&network_d, sizeof(double) * size_tmp));
+
+        //copy data to network
+        // checkCuda(cudaMemcpy(m_parameters_d, parameters, sizeof(double) * 15,
+        //                      cudaMemcpyHostToDevice));
     }
-    cudaMalloc((void **)&network_d, sizeof(double) * size_tmp);
-    
-
-
 }
