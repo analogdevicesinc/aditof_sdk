@@ -227,8 +227,8 @@ void AdiTofDemoView::render() {
         bool checkboxChanged = false;
 
         // Mode checkbox group
-        int btnGroupMode =
-            nearModeChecked << 2 | mediumModeChecked << 1 | farModeChecked;
+        int btnGroupMode = (int)(nearModeChecked << 2) |
+                           (int)(mediumModeChecked << 1) | (int)farModeChecked;
         if (modeCurrentValue != btnGroupMode) {
             int xorValue = modeCurrentValue ^ btnGroupMode;
             modeCurrentValue = xorValue;
@@ -238,8 +238,9 @@ void AdiTofDemoView::render() {
             checkboxChanged = true;
         }
 
-        int btnGroupFrameType =
-            depthIrChecked << 2 | depthOnlyChecked << 1 | irOnlyChecked;
+        int btnGroupFrameType = (int)(depthIrChecked << 2) |
+                                (int)(depthOnlyChecked << 1) |
+                                (int)irOnlyChecked;
         if (frameTypeCurrentValue != btnGroupFrameType) {
             int xorValue = frameTypeCurrentValue ^ btnGroupFrameType;
             frameTypeCurrentValue = xorValue;
@@ -250,8 +251,9 @@ void AdiTofDemoView::render() {
         }
 
         // Level checkbox group
-        int btnGroupLevel =
-            lowLevelChecked << 2 | mediumLevelChecked << 1 | highLevelChecked;
+        int btnGroupLevel = (int)(lowLevelChecked << 2) |
+                            (int)(mediumLevelChecked << 1) |
+                            (int)highLevelChecked;
         if (levelCurrentValue != btnGroupLevel) {
             int xorValue = levelCurrentValue ^ btnGroupLevel;
             levelCurrentValue = xorValue;
@@ -274,7 +276,7 @@ void AdiTofDemoView::render() {
         cvui::endColumn();
 
         // Rev checkbox group
-        int btnGroupRev = revBChecked << 1 | revCChecked;
+        int btnGroupRev = (int)(revBChecked << 1) | (int)revCChecked;
         if (revCurrentValue != btnGroupRev) {
             int xorValue = revCurrentValue ^ btnGroupRev;
             revCurrentValue = xorValue;
@@ -289,7 +291,7 @@ void AdiTofDemoView::render() {
         }
 
         // play button group
-        int btnGroupPlay = livePlayChecked << 1 | playbackChecked;
+        int btnGroupPlay = (int)(livePlayChecked << 1) | (int)playbackChecked;
         if (playCurrentValue != btnGroupPlay) {
             int xorValue = playCurrentValue ^ btnGroupPlay;
             playCurrentValue = xorValue;
@@ -298,7 +300,8 @@ void AdiTofDemoView::render() {
         }
 
         // Creating a group of buttons where only one can be active at a time
-        int btnGroupView = separatedViewChecked << 1 | blendedViewChecked;
+        int btnGroupView =
+            (int)(separatedViewChecked << 1) | (int)blendedViewChecked;
         if (viewCurrentValue != btnGroupView) {
             int xorValue = viewCurrentValue ^ btnGroupView;
             viewCurrentValue = xorValue;
@@ -308,8 +311,9 @@ void AdiTofDemoView::render() {
 
         // Connection mode checkbox group
         if (USBModeChecked == true) {
-            int btnGroupConnection =
-                USBModeChecked << 2 | localModeChecked << 1 | ethModeChecked;
+            int btnGroupConnection = (int)(USBModeChecked << 2) |
+                                     (int)(localModeChecked << 1) |
+                                     (int)ethModeChecked;
             if (connectionCurrentValue != btnGroupConnection) {
                 int xorValue = connectionCurrentValue ^ btnGroupConnection;
                 connectionCurrentValue = xorValue;
@@ -800,8 +804,8 @@ void AdiTofDemoView::render() {
             if (temp_cnt++ > ((displayFps < 10) ? 10 : 30)) {
                 std::pair<float, float> temp = m_ctrl->getTemperature();
                 temp_cnt = 0;
-                sprintf(afe_temp_str, "AFE TEMP: %.1f", temp.first);
-                sprintf(laser_temp_str, "LASER TEMP: %.1f", temp.second);
+                sprintf_s(afe_temp_str, "AFE TEMP: %.1f", temp.first);
+                sprintf_s(laser_temp_str, "LASER TEMP: %.1f", temp.second);
             }
             cvui::text(frame, 20, 580, afe_temp_str);
             cvui::text(frame, 180, 580, laser_temp_str);
@@ -812,7 +816,7 @@ void AdiTofDemoView::render() {
             auto endTime = std::chrono::system_clock::now();
             std::chrono::duration<double> elapsed = endTime - startTime;
             if (elapsed.count() >= 2) {
-                displayFps = frameCount / elapsed.count();
+                displayFps = frameCount / (int)elapsed.count();
                 frameCount = 0;
                 startTime = endTime;
             }
@@ -1081,7 +1085,7 @@ void AdiTofDemoView::render() {
                     try {
                         valueG += pressedValidKey;
                         IRGamma = stof(valueG);
-                    } catch (const std::invalid_argument &ia) {
+                    } catch (const std::invalid_argument) {
                         status = "Input for IRGamma must be float!";
                         valueG = valueG.substr(0, valueG.size() - 1);
                     }
@@ -1155,7 +1159,7 @@ void AdiTofDemoView::_displayDepthImage() {
         m_distanceVal = static_cast<int>(
             m_distanceVal * 0.7 + m_distanceImage.at<ushort>(pointxy) * 0.3);
         char text[20];
-        sprintf(text, "%dmm", m_distanceVal);
+        sprintf_s(text, "%dmm", m_distanceVal);
         m_depthImage.convertTo(
             m_depthImage, CV_8U,
             (255.0 / (m_ctrl->getRangeMax() - m_ctrl->getRangeMin())),

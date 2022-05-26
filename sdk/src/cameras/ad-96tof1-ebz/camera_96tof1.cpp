@@ -216,8 +216,8 @@ aditof::Status Camera96Tof1::initialize() {
                                m_details.intrinsics.distCoeffs);
 
     // For now we use the unit cell size values specified in the datasheet
-    m_details.intrinsics.pixelWidth = 0.0056;
-    m_details.intrinsics.pixelHeight = 0.0056;
+    m_details.intrinsics.pixelWidth = 0.0056f;
+    m_details.intrinsics.pixelHeight = 0.0056f;
     return Status::OK;
 }
 

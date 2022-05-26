@@ -145,7 +145,7 @@ int AditofDemoRecorder::startPlayback(const std::string &fileName, int &fps) {
         return 0;
     }
     m_playbackFile.seekg(0, std::ios_base::end);
-    int fileSize = m_playbackFile.tellg();
+    int fileSize = (int)m_playbackFile.tellg();
     m_playbackFile.seekg(0, std::ios_base::beg);
 
     /* Header version */
@@ -216,7 +216,7 @@ int AditofDemoRecorder::startPlayback(const std::string &fileName, int &fps) {
     float k3;
     m_playbackFile.read(reinterpret_cast<char *>(&k3), sizeof(float));
 
-    int sizeOfHeader = m_playbackFile.tellg();
+    int sizeOfHeader = (int)m_playbackFile.tellg();
     int sizeOfFrame;
     if (rgbEnabled) {
         sizeOfFrame = sizeof(uint16_t) * (frameHeight * frameWidth +

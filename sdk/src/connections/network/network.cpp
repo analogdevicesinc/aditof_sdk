@@ -386,7 +386,8 @@ int Network::callback_function(struct lws *wsi,
             }
 
             // process message
-            google::protobuf::io::ArrayInputStream ais(in, len);
+            google::protobuf::io::ArrayInputStream ais(in,
+                                                       static_cast<int>(len));
             CodedInputStream coded_input(&ais);
             recv_buff.ParseFromCodedStream(&coded_input);
 
