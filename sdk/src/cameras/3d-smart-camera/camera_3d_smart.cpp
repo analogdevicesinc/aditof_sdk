@@ -208,8 +208,8 @@ aditof::Status Camera3D_Smart::initialize() {
                                m_details.intrinsics.distCoeffs);
 
     // For now we use the unit cell size values specified in the datasheet
-    m_details.intrinsics.pixelWidth = 0.0056;
-    m_details.intrinsics.pixelHeight = 0.0056;
+    m_details.intrinsics.pixelWidth = 0.0056f;
+    m_details.intrinsics.pixelHeight = 0.0056f;
 
     // Cache the frame types provided by Depth and RGB sensors
     status = m_rgbdSensor->getAvailableFrameTypes(m_rgbdFrameTypes);
@@ -322,7 +322,7 @@ aditof::Status Camera3D_Smart::setMode(const std::string &mode,
         m_rgbdSensor->writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
 
-    m_details.depthParameters.depthGain = (mode == "near" ? 0.5 : 1.15);
+    m_details.depthParameters.depthGain = (mode == "near" ? 0.5f : 1.15f);
     m_details.depthParameters.depthOffset = 0.0f;
 
     m_details.mode = mode;

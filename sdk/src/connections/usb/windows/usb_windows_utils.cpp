@@ -161,7 +161,8 @@ HRESULT UsbWindowsUtils::UvcExUnitReadBuffer(IBaseFilter *pVideoInputFilter,
         if (id > -1) {
             packet[0] = static_cast<uint8_t>(id);
         }
-        *(reinterpret_cast<uint32_t *>(&packet[posAddrInPacket])) = addr;
+        *(reinterpret_cast<uint32_t *>(&packet[posAddrInPacket])) =
+            static_cast<uint32_t>(addr);
         readlength = bufferLength - readBytes < MAX_BUF_SIZE
                          ? bufferLength - readBytes
                          : MAX_BUF_SIZE;
@@ -231,7 +232,7 @@ HRESULT UsbWindowsUtils::UvcExUnitWriteBuffer(IBaseFilter *pVideoInputFilter,
             return hr;
         }
         writtenBytes += writeLen;
-        address += writeLen;
+        address += static_cast<uint32_t>(writeLen);
     }
 
     return S_OK;
