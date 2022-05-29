@@ -32,25 +32,23 @@
 #include <aditof/camera.h>
 #include <aditof/frame.h>
 #include <aditof/system.h>
+#include <chrono>
 #include <ctime>
 #include <glog/logging.h>
 #include <iostream>
-#include <chrono>
-#include <iostream>
 #include <sys/time.h>
-#include <ctime>
 
 #include <chrono>
+#include <ctime>
 #include <iostream>
 #include <sys/time.h>
-#include <ctime>
 
-using std::cout; using std::endl;
+using std::cout;
+using std::endl;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
-
 
 using namespace aditof;
 
@@ -83,7 +81,7 @@ int main(int argc, char *argv[]) {
         std::cout << "no frame type available!";
         return 0;
     }
-    status = camera->setFrameType("depth_ir_rgb");
+    status = camera->setFrameType("depth");
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set camera frame type!";
         return 0;
@@ -103,22 +101,16 @@ int main(int argc, char *argv[]) {
 
     aditof::Frame frame;
     while (1) {
-       auto t1 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-    
+        auto t1 =
+            duration_cast<milliseconds>(system_clock::now().time_since_epoch())
+                .count();
 
         status = camera->requestFrame(&frame);
-        if (status != Status::OK) {
-            LOG(ERROR) << "Could not request frame!";
-            return 0;
-        } else {
-            //LOG(INFO) << "succesfully requested frame!";
-        }
-        FrameDetails fDetails;
-        frame.getDetails(fDetails);
+        auto t2 =
+            duration_cast<milliseconds>(system_clock::now().time_since_epoch())
+                .count();
 
-       auto t2 = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-
-        std::cout<<"FPS: " << 1/(double)(t2-t1)*1000 << std::endl;
+        std::cout << "FPS: " << 1 / (double)(t2 - t1) * 1000 << std::endl;
     }
 
     return 0;

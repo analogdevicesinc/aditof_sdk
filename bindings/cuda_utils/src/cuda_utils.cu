@@ -353,6 +353,8 @@ void cudaOnTarget::freeAll() {
     checkCuda(cudaFree(m_depth_cache_d));
     checkCuda(cudaFree(m_frame_d));
     checkCuda(cudaFree(m_parameters_d));
+    checkCuda(cudaFree(network_d));
+    checkCuda(cudaFree(layers_d));
 }
 
 std::string cudaOnTarget::getFileNameWeights(std::string fileName) {
@@ -411,8 +413,8 @@ void cudaOnTarget::loadNetworkModel() {
 
     readInLayer(Network, "layer_0");
     readInLayer(Network, "layer_1");
-    readInLayer(Network, "layer_2");
-    readInLayer(Network, "layer_3");
+    // readInLayer(Network, "layer_2");
+    // readInLayer(Network, "layer_3");
 
     cpyNetworkToGPU();
 }
@@ -422,17 +424,107 @@ void cudaOnTarget::cpyNetworkToGPU() {
         std::cout << "CUDA_CXX: Please load the model first!\n";
         return;
     } else {
-        int size_tmp = 1;
-        size_tmp += Network.size();
+        int sizeNetworkTmp = 1;
+        int sizeLayersTmp = Network[0].weights.size() / Network[0].bias.size();
+        sizeNetworkTmp += Network.size();
         for (int i = 0; i < Network.size(); i++) {
-            size_tmp += Network[i].weights.size();
-            size_tmp += Network[i].bias.size();
+            sizeNetworkTmp += Network[i].weights.size();
+            sizeNetworkTmp += Network[i].bias.size();
+            sizeLayersTmp += Network[i].bias.size();
         }
         //allocate memory for network
-        checkCuda(cudaMalloc((void **)&network_d, sizeof(double) * size_tmp));
+        checkCuda(
+            cudaMalloc((void **)&network_d, sizeof(double) * sizeNetworkTmp));
+        checkCuda(
+            cudaMalloc((void **)&layers_d, sizeof(double) * sizeLayersTmp));
+
+        //aproximating at the 7th decimal value !!!
+
+        //serialize network
+        int index = 0;
+        double *serialNetwork;
+        serialNetwork = (double *)malloc(sizeNetworkTmp * sizeof(double));
+        serialNetwork[index++] = (double)Network.size();
+        for (int i = 0; i < serialNetwork[0]; i++)
+            serialNetwork[index++] = Network[i].bias.size();
+        for (int i = 0; i < serialNetwork[0]; i++) {
+            for (int j = 0; j < Network[i].weights.size(); j++)
+                serialNetwork[index++] = Network[i].weights[j];
+            for (int j = 0; j < Network[i].bias.size(); j++)
+                serialNetwork[index++] = Network[i].bias[j];
+        }
+
+        std::cout << "\nSerialized network legth: " << index << std::endl;
 
         //copy data to network
-        // checkCuda(cudaMemcpy(m_parameters_d, parameters, sizeof(double) * 15,
-        //                      cudaMemcpyHostToDevice));
+        checkCuda(cudaMemcpy(network_d, serialNetwork,
+                             sizeof(double) * sizeNetworkTmp,
+                             cudaMemcpyHostToDevice));
+        // free(serialNetwork);
+
+        std::cout << "Serialized Network: \n\n";
+        for (int i = 0; i < index; i++) {
+            std::cout << serialNetwork[i] << ", ";
+        }
+        std::cout << "\n\n";
     }
+}
+
+__global__ void calcNetLayer(double *tmpLayerBefore, double *tmpLayerAfter,
+                             double *inputSize, double *outputSize,
+                             double *weights, double *bias) {
+    int nodePosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
+    if (nodePosition < outputSize[0]) {
+        tmpLayerAfter[nodePosition] = 0.0;
+        for (int i = 0; i < inputSize[0]; i++) {
+            tmpLayerAfter[nodePosition] +=
+                tmpLayerBefore[i] *
+                weights[nodePosition * (int)inputSize[0] + i];
+        }
+        tmpLayerAfter[nodePosition] += bias[nodePosition];
+    }
+}
+void cudaOnTarget::calculateNetworkOutput() {
+
+    int previousLayerIndex = 0;
+    int currentLayerIndex = Network[0].weights.size() / Network[0].bias.size();
+    int currentWeightsIndex = Network.size() + 1;
+    int currentBiasIndex = Network.size() + 1 + Network[0].weights.size();
+
+    for (int currentLayer = 0; currentLayer < Network.size(); currentLayer++) {
+
+        std::cout << "currentWeightsIndex: " << currentWeightsIndex
+                  << "\ncurrentBiasIndex: " << currentBiasIndex << std::endl;
+
+        // Check if more blocks nedded than resulted from division
+        int nrOfBlocks =
+            ((Network[currentLayer].bias.size() / THREAD_PER_BLOCK) *
+                 THREAD_PER_BLOCK <
+             Network[currentLayer].bias.size())
+                ? Network[currentLayer].bias.size() / THREAD_PER_BLOCK + 1
+                : Network[currentLayer].bias.size() / THREAD_PER_BLOCK;
+
+        calcNetLayer<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
+            (layers_d + previousLayerIndex), (layers_d + currentLayerIndex), inputSize_d,
+            (network_d + currentLayer + 1), (network_d + currentWeightsIndex),
+            (network_d + currentBiasIndex));
+
+        currentWeightsIndex +=
+            (inputLayerSize * Network[currentLayer].bias.size() +
+             Network[currentLayer].bias.size());
+        currentBiasIndex += Network[currentLayer].bias.size() +
+                            Network[currentLayer + 1].weights.size();
+
+        inputLayerSize = Network[currentLayer].bias.size();
+    }
+
+    double *outputLayer;
+    outputLayer = (double *)malloc(sizeof(double) * 1);
+
+    checkCuda(cudaMemcpy(outputLayer, layers_d, sizeof(double),
+                         cudaMemcpyDeviceToHost));
+    std::cout << "Output: " << outputLayer[0] << std::endl;
+
+    checkCuda(cudaFree(inputTmp_d));
+    checkCuda(cudaFree(inputSize_d));
 }

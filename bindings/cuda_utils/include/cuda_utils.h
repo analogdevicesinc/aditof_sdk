@@ -67,6 +67,7 @@ class cudaOnTarget {
     //network
     std::vector<Layer> Network;
     double *network_d;
+    double *layers_d;
 
   public:
     void buildGeometryCorrectionCache();
@@ -92,6 +93,7 @@ class cudaOnTarget {
     std::string getFileNameBias(std::string fileName);
     std::string getFileNameWeights(std::string fileName);
     void cpyNetworkToGPU();
+    void calculateNetworkOutput();
 };
 
 #endif // CUDA_UTILS
