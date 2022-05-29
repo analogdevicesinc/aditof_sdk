@@ -66,8 +66,8 @@ class cudaOnTarget {
 
     //network
     std::vector<Layer> Network;
-    double *network_d;
-    double *layers_d;
+    double *m_network_d;
+    double *m_layers_d;
 
   public:
     void buildGeometryCorrectionCache();
