@@ -1,5 +1,5 @@
-ARG DEBIAN_FRONTEND=noninteractive
-FROM arm64v8/ubuntu:bionic AS base
+# ARG DEBIAN_FRONTEND=noninteractive
+FROM nvcr.io/nvidia/l4t-base:r32.4.3 AS base
 
 RUN apt-get update && \
       apt-get -y install sudo
@@ -37,7 +37,7 @@ RUN cd build_protobuf && make -j4 && make install
 RUN git clone https://github.com/analogdevicesinc/aditof_sdk.git
 RUN cd aditof_sdk && mkdir build && cd build && cmake -DWITH_EXAMPLES=off -DUSE_3D_SMART=on -DWITH_NETWORK=on -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" .. && make -j4
 
-# Start server
-USER docker
-EXPOSE 5000
+# # Start server
+# USER docker
+# EXPOSE 5000
 #CMD ./aditof_sdk/build/apps/server/aditof-server

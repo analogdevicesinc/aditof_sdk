@@ -85,3 +85,12 @@ After adding all the neccessary modules the target device must be completed with
 
 <p align="center">
 <img width="750" src="../../doc/img/deviceID.png" /></br></p>
+
+In order to build the docker image use the following command (the ```.``` directory is where the ```Docker``` file for the SmartCamera is located): 
+```console
+sudo docker build -t smartcam .
+```
+And to run with access to the original ```/dev``` and ```/sys``` directories, run the following command:
+```console
+sudo docker run -it -v /dev:/dev -v /sys:/sys smartcam bash
+```
