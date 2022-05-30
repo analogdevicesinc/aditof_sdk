@@ -92,5 +92,5 @@ sudo docker build -t smartcam .
 ```
 And to run with access to the original ```/dev``` and ```/sys``` directories, run the following command:
 ```console
-sudo docker run -it -v /dev:/dev -v /sys:/sys smartcam bash
+sudo docker run -it --rm --privileged -v /dev:/dev -v /sys:/sys smartcam bash
 ```
