@@ -155,6 +155,9 @@ endif()
 if (WITH_ROS)
         add_subdirectory(bindings/ros)
 endif()
+if (CUDA_ON_TARGET)
+        add_definitions(-DCUDA_ON_TARGET)
+endif()
 
 ############################### Install udev rules #######################################
 include (${CMAKE_SOURCE_DIR}/cmake/udev-rules-install.cmake)

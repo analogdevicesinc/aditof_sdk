@@ -351,6 +351,4 @@ void cudaOnTarget::freeAll() {
     checkCuda(cudaFree(m_depth_cache_d));
     checkCuda(cudaFree(m_frame_d));
     checkCuda(cudaFree(m_parameters_d));
-    checkCuda(cudaFree(m_network_d));
-    checkCuda(cudaFree(m_layers_d));
 }
