@@ -41,6 +41,10 @@
 #include <stdint.h>
 #include <vector>
 
+#if defined CUDA_ON_TARGET
+#include "../../../../bindings/cuda_utils/include/cuda_utils.h"
+#endif
+
 #define INTRINSIC 5
 #define DISTORTION_COEFFICIENTS 6
 #ifndef EEPROM_SERIAL_ADDR
@@ -92,6 +96,13 @@ class Calibration3D_Smart {
         uint16_t depth3;
         uint16_t depth2;
     };
+
+#if defined CUDA_ON_TARGET
+  private:
+    cudaOnTarget cudaObj;
+
+  public:
+#endif
 
   private:
     uint16_t *m_depth_cache;
