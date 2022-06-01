@@ -1,9 +1,29 @@
 # Cuda binding for Smart Camera 3D
  Eqipment: 
- 1. Analog Devices Smart Camera
+ 1. Analog Devices Smart Camera (Jetson Nano and FXTOF1)
  2. SSH connection to camera
 
-## Stepps to prepare camera image:
+## Using CUDA cores to optimize frame corrections
+
+1. Clone the repository
+2. Create bild directory and use the following cmake command for ```3D Smart Camera```:
+```console
+cmake -DUSE_3D_SMART=1 -DCUDA_ON_TARGET=1 -DWITH_EXAMPLES=1 -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
+
+```
+or the following command for ```Jetson Nano``` and ```FXTOF1``` setup:
+```console
+cmake -DJETSON=1 -DUSE_FXTOF1=1 -DCUDA_ON_TARGET=1 -DWITH_EXAMPLES=1 -DCMAKE_PREFIX_PATH="/opt/glog;/opt/protobuf;/opt/websockets" ..
+
+```
+3. Make the project with:
+```console
+make -j8
+```
+In order to disable the CUDA cores, set the ```-DCUDA_ON_TARGET``` flag to false.
+
+[```Note```]: The cuda binding rebuild only when running ```cmake``` commands.
+## [```Optional```] In order to install a new camera image with reduced size, use the following instructions
 
 ### 1. On camera
 * Connect to camera via ssh (Either through ethenet connetion or wifi connection)
