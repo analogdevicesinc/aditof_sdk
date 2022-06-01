@@ -323,15 +323,14 @@ void cudaOnTarget::printFrameFromGPU() {
     }
 }
 
-void cudaOnTarget::setParameters(double width, double height, double fx,
-                                 double fy, double cx, double cy, double k1,
-                                 double k2, double k3, double x0, double y0,
-                                 double gain, double offset,
-                                 double pixelMaxValue, double range) {
+void cudaOnTarget::setParameters(double* parameters) {
+
+//Parameter order: 
+// width_tmp, height_tmp, fx_tmp, fy_tmp, cx_tmp, cy_tmp,
+//                           k1_tmp, k2_tmp, 0, x0_tmp, y0_tmp, gain_tmp,
+//                           offset_tmp, pixelMaxValue_tmp, range_tmp
+
     //Moving parameters on GPU memory
-    double parameters[15] = {width, height, fx, fy, cx,   cy,     k1,
-                             k2,    k3,     x0, y0, gain, offset, pixelMaxValue,
-                             range};
     m_parameters = (double *)malloc(15 * sizeof(double));
     memcpy(m_parameters, parameters, 15 * sizeof(double));
 
@@ -341,8 +340,8 @@ void cudaOnTarget::setParameters(double width, double height, double fx,
 
     //allocating memory for frame
     checkCuda(
-        cudaMalloc((void **)&m_frame_d, sizeof(uint16_t) * width * height));
-    m_frame = (uint16_t *)malloc(sizeof(uint16_t) * width * height);
+        cudaMalloc((void **)&m_frame_d, sizeof(uint16_t) * m_parameters[0] * m_parameters[1]));
+    m_frame = (uint16_t *)malloc(sizeof(uint16_t) * m_parameters[0] * m_parameters[1]);
 }
 
 void cudaOnTarget::freeAll() {
