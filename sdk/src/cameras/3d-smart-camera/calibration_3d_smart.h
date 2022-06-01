@@ -100,8 +100,7 @@ class Calibration3D_Smart {
 #if defined CUDA_ON_TARGET
   private:
     cudaOnTarget cudaObj;
-
-  public:
+    double m_cudaParameters[15];
 #endif
 
   private:

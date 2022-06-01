@@ -94,6 +94,10 @@ endif()
 if (WITH_NETWORK)
         add_definitions(-DHAS_NETWORK)
 endif()
+if (CUDA_ON_TARGET)
+        add_definitions(-DCUDA_ON_TARGET)
+endif()
+
 
 include(FindGit OPTIONAL)
 if (GIT_FOUND)
@@ -154,9 +158,6 @@ if (WITH_OPEN3D)
 endif()
 if (WITH_ROS)
         add_subdirectory(bindings/ros)
-endif()
-if (CUDA_ON_TARGET)
-        add_definitions(-DCUDA_ON_TARGET)
 endif()
 
 ############################### Install udev rules #######################################
