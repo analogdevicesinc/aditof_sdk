@@ -188,18 +188,6 @@ void cudaOnTarget::buildDistortionCorrectionCache() {
                                              THREAD_PER_BLOCK,
                                          THREAD_PER_BLOCK>>>(
         m_distortion_cache_d, m_parameters_d);
-
-    // m_distortion_cache =
-    //     (double *)malloc(sizeof(double) * m_parameters[0] * m_parameters[1]);
-    // checkCuda(cudaMemcpy(m_distortion_cache, m_distortion_cache_d,
-    //            sizeof(double) * m_parameters[0] * m_parameters[1],
-    //            cudaMemcpyDeviceToHost));
-
-    // std::cout << "GPU distortion: \n";
-    // for (int i = 0; i < 10; i++) {
-    //     std::cout << m_distortion_cache[i] << ", ";
-    // }
-    // std::cout << "\n\n\n";
 }
 
 void cudaOnTarget::buildGeometryCorrectionCache() {
@@ -218,18 +206,6 @@ void cudaOnTarget::buildGeometryCorrectionCache() {
             : m_parameters[0] * m_parameters[1] / THREAD_PER_BLOCK;
     buildGeometryCorrectionCacheCuda<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
         m_geometry_cache_d, m_parameters_d);
-
-    // m_geometry_cache =
-    //     (double *)malloc(sizeof(double) * m_parameters[0] * m_parameters[1]);
-    // checkCuda(cudaMemcpy(m_geometry_cache, m_geometry_cache_d,
-    //            sizeof(double) * m_parameters[0] * m_parameters[1],
-    //            cudaMemcpyDeviceToHost));
-
-    // std::cout << "GPU geometry: \n";
-    // for (int i = 0; i < 10; i++) {
-    //     std::cout << m_geometry_cache[i] << ", ";
-    // }
-    // std::cout << "\n\n\n";
 }
 
 void cudaOnTarget::buildDepthCorrectionCache() {
@@ -246,16 +222,6 @@ void cudaOnTarget::buildDepthCorrectionCache() {
                          : m_parameters[13] / THREAD_PER_BLOCK;
     buildDepthCorrectionCacheCuda<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
         m_depth_cache_d, m_parameters_d);
-
-    // m_depth_cache = (uint16_t *)malloc(sizeof(uint16_t) * m_parameters[13]);
-    // checkCuda(cudaMemcpy(m_depth_cache, m_depth_cache_d,
-    //    sizeof(uint16_t) * m_parameters[13], cudaMemcpyDeviceToHost));
-
-    // std::cout << "GPU depth: \n";
-    // for (int i = 0; i < 10; i++) {
-    //     std::cout << m_depth_cache[i] << ", ";
-    // }
-    // std::cout << "\n\n\n";
 }
 
 void cudaOnTarget::applyDistortionCorrection() {
@@ -308,7 +274,7 @@ void cudaOnTarget::cpyFrameToGPU(uint16_t *frame) {
     checkCuda(cudaMemcpy(m_frame_d, frame,
                          sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
                          cudaMemcpyHostToDevice));
-    memcpy(m_frame, frame, 640*480*sizeof(uint16_t));
+    memcpy(m_frame, frame, 640 * 480 * sizeof(uint16_t));
 }
 void cudaOnTarget::cpyFrameFromGPU(uint16_t *frame) {
     checkCuda(cudaMemcpy(frame, m_frame_d,
@@ -323,12 +289,12 @@ void cudaOnTarget::printFrameFromGPU() {
     }
 }
 
-void cudaOnTarget::setParameters(double* parameters) {
+void cudaOnTarget::setParameters(double *parameters) {
 
-//Parameter order: 
-// width_tmp, height_tmp, fx_tmp, fy_tmp, cx_tmp, cy_tmp,
-//                           k1_tmp, k2_tmp, 0, x0_tmp, y0_tmp, gain_tmp,
-//                           offset_tmp, pixelMaxValue_tmp, range_tmp
+    //Parameter order:
+    // width_tmp, height_tmp, fx_tmp, fy_tmp, cx_tmp, cy_tmp,
+    //                           k1_tmp, k2_tmp, 0, x0_tmp, y0_tmp, gain_tmp,
+    //                           offset_tmp, pixelMaxValue_tmp, range_tmp
 
     //Moving parameters on GPU memory
     m_parameters = (double *)malloc(15 * sizeof(double));
@@ -339,9 +305,10 @@ void cudaOnTarget::setParameters(double* parameters) {
                          cudaMemcpyHostToDevice));
 
     //allocating memory for frame
-    checkCuda(
-        cudaMalloc((void **)&m_frame_d, sizeof(uint16_t) * m_parameters[0] * m_parameters[1]));
-    m_frame = (uint16_t *)malloc(sizeof(uint16_t) * m_parameters[0] * m_parameters[1]);
+    checkCuda(cudaMalloc((void **)&m_frame_d,
+                         sizeof(uint16_t) * m_parameters[0] * m_parameters[1]));
+    m_frame = (uint16_t *)malloc(sizeof(uint16_t) * m_parameters[0] *
+                                 m_parameters[1]);
 }
 
 void cudaOnTarget::freeAll() {
