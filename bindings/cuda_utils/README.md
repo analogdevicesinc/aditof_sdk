@@ -22,6 +22,13 @@ make -j8
 ```
 In order to disable the CUDA cores, set the ```-DCUDA_ON_TARGET``` flag to false.
 
+4. Install Nvidia-GPU driver api and CUDA:
+```console
+    sudo apt-get update
+    sudo apt-get install nvidia-l4t-jetson-multimedia-api
+    sudo apt-get install nvidia-cuda
+```
+
 [```Note```]: The cuda binding rebuild only when running ```cmake``` commands.
 ## [```Optional```] In order to install a new camera image with reduced size, use the following instructions
 
@@ -39,7 +46,7 @@ In order to disable the CUDA cores, set the ```-DCUDA_ON_TARGET``` flag to false
 * After uploading the file and rebooting the camera you can connect again via ssh, and run the following commands (the installation commands may take a few minutes):
 ```console
     sudo apt-get update
-    sudo apt-get install nvidia-l4t-multimedia-api
+    sudo apt-get install nvidia-l4t-jetson-multimedia-api
     sudo apt-get install nvidia-cuda
 ```
 * add ```nvcc``` to the macro PATH:
