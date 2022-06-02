@@ -41,7 +41,6 @@
 
 #define THREAD_PER_BLOCK 1024
 
-
 class cudaOnTarget {
   private:
     //correction cahes
@@ -72,8 +71,8 @@ class cudaOnTarget {
     void cpyFrameFromGPU(uint16_t *frame);
     void printFrameFromGPU();
 
-    void setParameters(double* parameters);
-    //Order of parameters: 
+    void setParameters(double *parameters);
+    //Order of parameters:
     // double width, double height, double fx, double fy,
     //                    double cx, double cy, double k1, double k2, double k3,
     //                    double x0, double y0, double gain, double offset,

@@ -329,7 +329,7 @@ aditof::Status CalibrationFxTof1::setMode(
         cudaObj.setParameters(m_cudaParameters);
         cudaObj.buildGeometryCorrectionCache();
 #else
-        buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
+        buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameHeight);
 #endif
     }
 
@@ -358,7 +358,8 @@ aditof::Status CalibrationFxTof1::setMode(
         cudaObj.setParameters(m_cudaParameters);
         cudaObj.buildDistortionCorrectionCache();
 #else
-        buildDistortionCorrectionCache(frameWidth, frameheight);
+        buildDistortionCorrectionCache(cameraMatrix, distortionCoeffs,
+                                       frameWidth, frameHeight);
 #endif
     }
 

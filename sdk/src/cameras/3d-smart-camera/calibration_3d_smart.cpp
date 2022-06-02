@@ -283,7 +283,7 @@ setMode - Sets the mode to be used for depth calibration
 aditof::Status Calibration3D_Smart::setMode(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
     const std::string &mode, int range, unsigned int frameWidth,
-    unsigned int frameheight) {
+    unsigned int frameHeight) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -297,7 +297,7 @@ aditof::Status Calibration3D_Smart::setMode(
 #if defined(CUDA_ON_TARGET)
 
     m_cudaParameters[0] = (double)frameWidth;
-    m_cudaParameters[1] = (double)frameheight;
+    m_cudaParameters[1] = (double)frameHeight;
     m_cudaParameters[11] = (double)gain;
     m_cudaParameters[12] = (double)offset;
     m_cudaParameters[13] = (double)pixelMaxValue;
@@ -323,7 +323,7 @@ aditof::Status Calibration3D_Smart::setMode(
 
 #if defined(CUDA_ON_TARGET)
         m_cudaParameters[0] = (double)frameWidth;
-        m_cudaParameters[1] = (double)frameheight;
+        m_cudaParameters[1] = (double)frameHeight;
         m_cudaParameters[2] = (double)cameraMatrix[0]; //fx
         m_cudaParameters[3] = (double)cameraMatrix[4]; //fy
         m_cudaParameters[4] = (double)cameraMatrix[2]; //cx
@@ -331,7 +331,7 @@ aditof::Status Calibration3D_Smart::setMode(
         cudaObj.setParameters(m_cudaParameters);
         cudaObj.buildGeometryCorrectionCache();
 #else
-        buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
+        buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameHeight);
 #endif
     }
 
@@ -346,7 +346,7 @@ aditof::Status Calibration3D_Smart::setMode(
 
 #if defined(CUDA_ON_TARGET)
         m_cudaParameters[0] = (double)frameWidth;
-        m_cudaParameters[1] = (double)frameheight;
+        m_cudaParameters[1] = (double)frameHeight;
         m_cudaParameters[2] = (double)cameraMatrix[0];     //fx
         m_cudaParameters[3] = (double)cameraMatrix[4];     //fy
         m_cudaParameters[4] = (double)cameraMatrix[2];     //cx
@@ -359,7 +359,8 @@ aditof::Status Calibration3D_Smart::setMode(
         cudaObj.setParameters(m_cudaParameters);
         cudaObj.buildDistortionCorrectionCache();
 #else
-        buildDistortionCorrectionCache(frameWidth, frameheight);
+        buildDistortionCorrectionCache(frameWidth, frameHeight);
+
 #endif
     }
 
@@ -424,7 +425,7 @@ calibrateCameraGeometry - Compensate for lens distorsion in the depth data
 aditof::Status
 Calibration3D_Smart::calibrateCameraGeometry(uint16_t *frame,
                                              uint32_t frame_size) {
-  
+
 #if defined(CUDA_ON_TARGET)
     cudaObj.cpyFrameToGPU((uint16_t *)frame);
     cudaObj.applyGeometryCorrection();
@@ -548,14 +549,14 @@ void Calibration3D_Smart::buildDistortionCorrectionCache(unsigned int width,
 aditof::Status Calibration3D_Smart::distortionCorrection(uint16_t *frame,
                                                          unsigned int width,
                                                          unsigned int height) {
-  
+
 #if defined(CUDA_ON_TARGET)
     cudaObj.cpyFrameToGPU((uint16_t *)frame);
     cudaObj.applyDistortionCorrection();
     cudaObj.cpyFrameFromGPU(frame);
     return aditof::Status::OK;
 #else
-  
+
     using namespace aditof;
     double fx = (double)m_intrinsics[2];
     double fy = (double)m_intrinsics[3];
