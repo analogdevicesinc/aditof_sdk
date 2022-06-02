@@ -41,6 +41,11 @@
 
 #define THREAD_PER_BLOCK 1024
 
+struct Layer {
+    std::string name;
+    std::vector<double> weights;
+    std::vector<double> bias;
+};
 
 class cudaOnTarget {
   private:
@@ -59,6 +64,11 @@ class cudaOnTarget {
     double *m_parameters_d;
     double *m_parameters;
 
+    //network
+    std::vector<Layer> Network;
+    double *m_network_d;
+    double *m_layers_d;
+
   public:
     void buildGeometryCorrectionCache();
     void buildDistortionCorrectionCache();
@@ -72,13 +82,20 @@ class cudaOnTarget {
     void cpyFrameFromGPU(uint16_t *frame);
     void printFrameFromGPU();
 
-    void setParameters(double* parameters);
-    //Order of parameters: 
+    void setParameters(double *parameters);
+    //Order of parameters:
     // double width, double height, double fx, double fy,
     //                    double cx, double cy, double k1, double k2, double k3,
     //                    double x0, double y0, double gain, double offset,
     //                    double pixelMaxValue, double range
     void freeAll();
+
+    void loadNetworkModel();
+    void readInLayer(std::vector<Layer> &network, std::string fileName);
+    std::string getFileNameBias(std::string fileName);
+    std::string getFileNameWeights(std::string fileName);
+    void cpyNetworkToGPU();
+    void calculateNetworkOutput();
 };
 
 #endif // CUDA_UTILS
