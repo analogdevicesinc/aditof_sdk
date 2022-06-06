@@ -600,13 +600,16 @@ void cudaOnTarget::calculateNetworkOutput() {
                               m_parameters[0] * m_parameters[1])
                                  ? Network[i].bias.size() / THREAD_PER_BLOCK + 1
                                  : Network[i].bias.size() / THREAD_PER_BLOCK;
+            // save output of last layer in separate array
             if (i == Network.size() - 1) {
                 calcNetLayer<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
                     (m_layers_d + previousLayerIndex),
                     (m_network_d + nodeNumberIndex - 1),
                     (m_subFrameOutputs_d + subFrameParameterIndex / 3), (m_network_d + nodeNumberIndex),
                     (m_network_d + weightIndex), (m_network_d + biasIndex));
-            } else if (i == 0) {
+            } 
+            //first layer, optimized on input
+            else if (i == 0) {
                 calcFirstNetLayer<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
                     m_frame_d, m_frame_width_d, m_frame_height_d,
                     (m_layers_d + layerIndex), m_inputFrame_width_d,
@@ -614,7 +617,9 @@ void cudaOnTarget::calculateNetworkOutput() {
                     (m_network_d + biasIndex), (m_network_d + nodeNumberIndex),
                     (m_subFrameParameters_d + subFrameParameterIndex));
 
-            } else {
+            } 
+            //intermidiate layer
+            else {
                 calcNetLayer<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
                     (m_layers_d + previousLayerIndex),
                     (m_network_d + nodeNumberIndex - 1),
