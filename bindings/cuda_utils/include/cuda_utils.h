@@ -40,6 +40,7 @@
 #include <vector>
 
 #define THREAD_PER_BLOCK 1024
+#define SUBFRAME_NUMBER 1245
 
 struct Layer {
     std::string name;
@@ -69,6 +70,23 @@ class cudaOnTarget {
     double *m_network_d;
     double *m_layers_d;
 
+    int *m_subFrameParameters; // resolution, x_offset, y_offset
+    int *m_subFrameParameters_d;
+
+    double* m_subFrameOutputs;
+    double* m_subFrameOutputs_d;
+
+    int m_frame_width;
+    int *m_frame_width_d;
+    int m_frame_height;
+    int *m_frame_height_d;
+
+    int m_inputFrame_width;
+    int *m_inputFrame_width_d;
+    int m_inputFrame_height;
+    int *m_inputFrame_height_d;
+
+
   public:
     void buildGeometryCorrectionCache();
     void buildDistortionCorrectionCache();
@@ -94,6 +112,7 @@ class cudaOnTarget {
     std::string getFileNameWeights(std::string fileName);
     void cpyNetworkToGPU();
     void calculateNetworkOutput();
+    void loadNetworkParameters();
 };
 
 #endif // CUDA_UTILS

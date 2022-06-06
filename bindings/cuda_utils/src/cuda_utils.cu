@@ -308,7 +308,7 @@ void cudaOnTarget::cpyFrameToGPU(uint16_t *frame) {
     checkCuda(cudaMemcpy(m_frame_d, frame,
                          sizeof(uint16_t) * m_parameters[0] * m_parameters[1],
                          cudaMemcpyHostToDevice));
-    memcpy(m_frame, frame, 640*480*sizeof(uint16_t));
+    memcpy(m_frame, frame, 640 * 480 * sizeof(uint16_t));
 }
 void cudaOnTarget::cpyFrameFromGPU(uint16_t *frame) {
     checkCuda(cudaMemcpy(frame, m_frame_d,
@@ -356,6 +356,8 @@ void cudaOnTarget::freeAll() {
     checkCuda(cudaFree(m_parameters_d));
     checkCuda(cudaFree(m_network_d));
     checkCuda(cudaFree(m_layers_d));
+    checkCuda(cudaFree(m_subFrameParameters_d));
+    checkCuda(cudaFree(m_subFrameOutputs_d));
 }
 
 std::string cudaOnTarget::getFileNameWeights(std::string fileName) {
@@ -418,6 +420,7 @@ void cudaOnTarget::loadNetworkModel() {
     readInLayer(Network, "layer_3");
 
     cpyNetworkToGPU();
+    loadNetworkParameters();
 }
 
 void cudaOnTarget::cpyNetworkToGPU() {
@@ -426,7 +429,7 @@ void cudaOnTarget::cpyNetworkToGPU() {
         return;
     } else {
         int sizeNetworkTmp = 1;
-        int sizeLayersTmp = Network[0].weights.size() / Network[0].bias.size();
+        int sizeLayersTmp = 0;
         sizeNetworkTmp += Network.size();
         for (int i = 0; i < Network.size(); i++) {
             sizeNetworkTmp += Network[i].weights.size();
@@ -463,89 +466,172 @@ void cudaOnTarget::cpyNetworkToGPU() {
                              cudaMemcpyHostToDevice));
         // free(serialNetwork);
 
-        std::cout << "Serialized Network: \n\n";
-        for (int i = 0; i < index; i++) {
-            std::cout << serialNetwork[i] << ", ";
-        }
-        std::cout << "\n\n";
+        // std::cout << "Serialized Network: \n\n";
+        // for (int i = 0; i < index; i++) {
+        //     std::cout << serialNetwork[i] << ", ";
+        // }
+        // std::cout << "\n\n";
     }
 }
 
-__global__ void calcNetLayer(double *tmpLayerBefore, double *tmpLayerAfter,
-                             double *inputSize, double *outputSize,
+void cudaOnTarget::loadNetworkParameters() {
+    int m_inputFrameWidth = 40;  //change to 40
+    int m_inputFrameHeight = 30; //change to 30
+
+    int m_frame_width = 640;
+    int m_frame_height = 480;
+
+    //by current architecture 1245 subframes are generated for processing
+    int totalSubFrameNumber = SUBFRAME_NUMBER;
+
+    m_subFrameParameters = (int *)malloc(sizeof(int) * totalSubFrameNumber * 3);
+    checkCuda(cudaMalloc((void **)&m_subFrameParameters_d,
+                         sizeof(int) * totalSubFrameNumber * 3));
+
+    //allocating memory for output layer calculation
+    m_subFrameOutputs = (double *)malloc(sizeof(double) * totalSubFrameNumber);
+    checkCuda(cudaMalloc((void **)&m_subFrameOutputs_d,
+                         sizeof(double) * totalSubFrameNumber));
+
+    //copy values for frame parameters and input frame parameters
+    checkCuda(cudaMalloc((void **)&m_frame_width_d, sizeof(int)));
+    checkCuda(cudaMemcpy((void **)m_frame_width_d, &m_frame_width, sizeof(int),
+                         cudaMemcpyHostToDevice));
+
+    checkCuda(cudaMalloc((void **)&m_frame_height_d, sizeof(int)));
+    checkCuda(cudaMemcpy((void **)m_frame_height_d, &m_frame_height,
+                         sizeof(int), cudaMemcpyHostToDevice));
+
+    checkCuda(cudaMalloc((void **)&m_inputFrame_width_d, sizeof(int)));
+    checkCuda(cudaMemcpy((void **)m_inputFrame_width_d, &m_inputFrame_width,
+                         sizeof(int), cudaMemcpyHostToDevice));
+
+    checkCuda(cudaMalloc((void **)&m_inputFrame_height_d, sizeof(int)));
+    checkCuda(cudaMemcpy((void **)m_inputFrame_height_d, &m_inputFrame_height,
+                         sizeof(int), cudaMemcpyHostToDevice));
+
+    //generating subframes for different resolutions
+    int poz = 0;
+    for (int resolution = 1; resolution <= 16; resolution *= 2) {
+        int stride_x = resolution * m_inputFrameWidth / 2;
+        int stride_y = resolution * m_inputFrameHeight / 2;
+        for (int x_offset = 0;
+             x_offset <= (m_frame_width - resolution * m_inputFrameWidth);
+             x_offset += stride_x) {
+            for (int y_offset = 0;
+                 y_offset <= (m_frame_height - resolution * m_inputFrameHeight);
+                 y_offset += stride_y) {
+
+                //copy data to GPU memory, order: resolution, x_offset, y_offset
+                m_subFrameParameters[poz++] = resolution;
+                m_subFrameParameters[poz++] = x_offset;
+                m_subFrameParameters[poz++] = y_offset;
+            }
+        }
+    }
+
+    checkCuda(cudaMemcpy((void **)m_subFrameParameters_d, m_subFrameParameters,
+                         sizeof(int) * totalSubFrameNumber * 3,
+                         cudaMemcpyHostToDevice));
+}
+
+__global__ void calcNetLayer(double *inputLayer, double *inputSize,
+                             double *outputLayer, double *outputSize,
                              double *weights, double *bias) {
-    int nodePosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
-    if (nodePosition < outputSize[0]) {
-        tmpLayerAfter[nodePosition] = 0.0;
-        for (int i = 0; i < inputSize[0]; i++) {
-            tmpLayerAfter[nodePosition] +=
-                tmpLayerBefore[i] *
-                weights[nodePosition * (int)inputSize[0] + i];
+
+    int poz = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
+
+    if (poz >= 0 && poz < (int)outputSize[0]) {
+
+        *(outputLayer + poz) = 0;
+        for (int i = 0; i < (int)inputSize[0]; i++) {
+            *(outputLayer + poz) +=
+                (*(inputLayer + i) *
+                 (*(weights + poz * (int)inputSize[0] + i)));
         }
-        tmpLayerAfter[nodePosition] += bias[nodePosition];
-
-        tmpLayerAfter[nodePosition] = 1/(1+exp(-1.0*tmpLayerAfter[nodePosition]));
-
+        *(outputLayer + poz) += *(bias + poz);
     }
 }
+
+__global__ void calcFirstNetLayer(uint16_t *frame, int *frameWidth,
+                                  int *frameHeight, double *layer,
+                                  int *inputWidth, int *inputHeight,
+                                  double *weights, double *bias,
+                                  double *nrOfNodes, int *frameParameters) {
+
+    int poz = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
+
+    if (poz >= 0 && poz < (int)nrOfNodes[0]) {
+
+        *(layer + poz) = 0;
+        for (int i = 0; i < inputWidth[0]; i++) {
+            for (int j = 0; j < inputHeight[0]; j++) {
+                *(layer + poz) +=
+                    (*(weights + poz * inputWidth[0] * inputHeight[0] +
+                       j * inputWidth[0] + i)) *
+                    (*(frame +
+                       (frameParameters[2] + j * frameParameters[0]) *
+                           frameWidth[0] +
+                       (frameParameters[1] + i * frameParameters[2])));
+            }
+        }
+        layer[poz] += bias[poz];
+    }
+}
+
 void cudaOnTarget::calculateNetworkOutput() {
 
-    // std::cout << "Calculating network output...\n";
-    double inputTmp[300];
-    for (int i = 0; i < 300; i++) {
-        inputTmp[i] = m_frame[i * 1024];
+    for (int subFrameParameterIndex = 0;
+         subFrameParameterIndex < SUBFRAME_NUMBER;
+         subFrameParameterIndex += 3) {
+
+        int layerIndex = 0;         //for m_layers_d
+        int previousLayerIndex = 0; //for m_layers_d
+
+        int nodeNumberIndex = 1;              //for m_network_d
+        int weightIndex = 1 + Network.size(); //for m_network_d
+        int biasIndex =
+            1 + Network.size() + Network[0].weights.size(); //for m_network_d
+
+        //calculate first layer using frame input and subFrameParameters
+        for (int i = 0; i < Network.size(); i++) {
+            int nrOfBlocks = ((Network[i].bias.size() / THREAD_PER_BLOCK) *
+                                  THREAD_PER_BLOCK <
+                              m_parameters[0] * m_parameters[1])
+                                 ? Network[i].bias.size() / THREAD_PER_BLOCK + 1
+                                 : Network[i].bias.size() / THREAD_PER_BLOCK;
+            if (i == Network.size() - 1) {
+                calcNetLayer<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
+                    (m_layers_d + previousLayerIndex),
+                    (m_network_d + nodeNumberIndex - 1),
+                    (m_subFrameOutputs_d + subFrameParameterIndex / 3), (m_network_d + nodeNumberIndex),
+                    (m_network_d + weightIndex), (m_network_d + biasIndex));
+            } else if (i == 0) {
+                calcFirstNetLayer<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
+                    m_frame_d, m_frame_width_d, m_frame_height_d,
+                    (m_layers_d + layerIndex), m_inputFrame_width_d,
+                    m_inputFrame_height_d, (m_network_d + weightIndex),
+                    (m_network_d + biasIndex), (m_network_d + nodeNumberIndex),
+                    (m_subFrameParameters_d + subFrameParameterIndex));
+
+            } else {
+                calcNetLayer<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
+                    (m_layers_d + previousLayerIndex),
+                    (m_network_d + nodeNumberIndex - 1),
+                    (m_layers_d + layerIndex), (m_network_d + nodeNumberIndex),
+                    (m_network_d + weightIndex), (m_network_d + biasIndex));
+            }
+
+            weightIndex = biasIndex + Network[i].bias.size();
+            if (i < (Network.size() - 1))
+                biasIndex = weightIndex + Network[i + 1].weights.size();
+            previousLayerIndex = layerIndex;
+            layerIndex += Network[i].bias.size();
+            nodeNumberIndex++;
+        }
     }
-    checkCuda(cudaMemcpy((void **)m_layers_d, &inputTmp, sizeof(double) * 300,
-                         cudaMemcpyHostToDevice));
-    double inputSize = 300.0;
-    double *inputSize_d;
-    checkCuda(cudaMalloc((void **)&inputSize_d, sizeof(double)));
-    checkCuda(cudaMemcpy((void **)inputSize_d, &inputSize, sizeof(double),
-                         cudaMemcpyHostToDevice));
 
-    int previousLayerIndex = 0;
-    int currentLayerIndex = Network[0].weights.size() / Network[0].bias.size();
-    int currentWeightsIndex = Network.size() + 1;
-    int currentBiasIndex = Network.size() + 1 + Network[0].weights.size();
-
-    for (int currentLayer = 0; currentLayer < Network.size(); currentLayer++) {
-
-        // std::cout << "currentWeightsIndex: " << currentWeightsIndex
-        //           << "\ncurrentBiasIndex: " << currentBiasIndex << std::endl;
-
-        // Check if more blocks nedded than resulted from division
-        int nrOfBlocks =
-            ((Network[currentLayer].bias.size() / THREAD_PER_BLOCK) *
-                 THREAD_PER_BLOCK <
-             Network[currentLayer].bias.size())
-                ? Network[currentLayer].bias.size() / THREAD_PER_BLOCK + 1
-                : Network[currentLayer].bias.size() / THREAD_PER_BLOCK;
-
-        calcNetLayer<<<nrOfBlocks, THREAD_PER_BLOCK>>>(
-            (m_layers_d + previousLayerIndex), (m_layers_d + currentLayerIndex),
-            inputSize_d, (m_network_d + currentLayer + 1),
-            (m_network_d + currentWeightsIndex),
-            (m_network_d + currentBiasIndex));
-
-        previousLayerIndex = currentLayerIndex;
-        currentLayerIndex += Network[currentLayer].bias.size();
-
-        currentWeightsIndex +=
-            ((int)inputSize * Network[currentLayer].bias.size() +
-             Network[currentLayer].bias.size());
-        currentBiasIndex += Network[currentLayer].bias.size() +
-                            Network[currentLayer + 1].weights.size();
-        inputSize = (double)Network[currentLayer].bias.size();
-        checkCuda(cudaMemcpy((void **)inputSize_d, &inputSize, sizeof(double),
-                             cudaMemcpyHostToDevice));
-    }
-
-    double *outputLayer;
-    outputLayer = (double *)malloc(sizeof(double) * 1);
-
-    checkCuda(cudaMemcpy(outputLayer, (m_layers_d + previousLayerIndex),
-                         sizeof(double), cudaMemcpyDeviceToHost));
-    std::cout << "Output: " << outputLayer[0] << std::endl;
-
-    checkCuda(cudaFree(inputSize_d));
+    checkCuda(cudaMemcpy((void **)m_subFrameOutputs, m_subFrameOutputs_d,
+                         sizeof(double) * SUBFRAME_NUMBER,
+                         cudaMemcpyDeviceToHost));
 }
