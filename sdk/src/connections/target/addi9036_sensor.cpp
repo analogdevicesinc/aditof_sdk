@@ -680,7 +680,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
                 cudaObj.cpyFrameToGPU((uint16_t *)pdata[0]);
                 cudaObj.applyDepthCorrection();
                 cudaObj.applyGeometryCorrection();
-                cudaObj.applyDistortionCorrection();
+                // cudaObj.applyDistortionCorrection();
                 cudaObj.cpyFrameFromGPU(buffer);
 #else
                 memcpy(buffer, pdata[0], buf[0].bytesused);
@@ -689,7 +689,9 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
             } else {
 #if defined(CUDA_ON_TARGET)
                 cudaObj.cpyFrameToGPU((uint16_t *)pdata[0]);
-                cudaObj.applyDistortionCorrection();
+                cudaObj.applyDepthCorrection();
+                cudaObj.applyGeometryCorrection();
+                // cudaObj.applyDistortionCorrection();
                 cudaObj.cpyFrameFromGPU(buffer + (width * height));
 #else
 
