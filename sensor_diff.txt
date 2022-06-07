@@ -1,0 +1,505 @@
+diff --git a/sdk/src/connections/target/addi9036_sensor.cpp b/sdk/src/connections/target/addi9036_sensor.cpp
+index 2db4730..4e8bb07 100644
+--- a/sdk/src/connections/target/addi9036_sensor.cpp
++++ b/sdk/src/connections/target/addi9036_sensor.cpp
+@@ -35,7 +35,6 @@
+ 
+ #include <algorithm>
+ #include <arm_neon.h>
+-#include <assert.h>
+ #include <cmath>
+ #include <fcntl.h>
+ #include <fstream>
+@@ -77,8 +76,7 @@ struct Addi9036Sensor::ImplData {
+     struct VideoDev *videoDevs;
+     aditof::FrameDetails frameDetails;
+     ImplData()
+-        : numVideoDevs(1),
+-          videoDevs(nullptr), frameDetails{0, 0, 0, 0, 0, 0, ""} {}
++        : numVideoDevs(1), videoDevs(nullptr), frameDetails{0, 0, 0, 0, ""} {}
+ };
+ 
+ // TO DO: This exists in linux_utils.h which is not included on Dragoboard.
+@@ -97,25 +95,21 @@ Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
+                                const std::string &driverSubPath,
+                                const std::string &captureDev)
+     : m_driverPath(driverPath), m_driverSubPath(driverSubPath),
+-      m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData) {
+-    m_sensorName = "addi9036";
+-}
++      m_captureDev(captureDev), m_implData(new Addi9036Sensor::ImplData) {}
+ 
+ Addi9036Sensor::~Addi9036Sensor() {
+     struct VideoDev *dev;
+ 
+     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
+         dev = &m_implData->videoDevs[i];
+-        if (dev && dev->started) {
++        if (dev->started) {
+             stop();
+         }
+     }
+ 
+     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
+         dev = &m_implData->videoDevs[i];
+-        if (!dev) {
+-            continue;
+-        }
++
+         for (unsigned int i = 0; i < dev->nVideoBuffers; i++) {
+             if (munmap(dev->videoBuffers[i].start,
+                        dev->videoBuffers[i].length) == -1) {
+@@ -124,20 +118,16 @@ Addi9036Sensor::~Addi9036Sensor() {
+                     << "errno: " << errno << " error: " << strerror(errno);
+             }
+         }
+-        if (dev) {
+-            free(dev->videoBuffers);
++        free(dev->videoBuffers);
+ 
+-            if (close(dev->fd) == -1) {
+-                LOG(WARNING)
+-                    << "close m_implData->fd error "
+-                    << "errno: " << errno << " error: " << strerror(errno);
+-            }
++        if (close(dev->fd) == -1) {
++            LOG(WARNING) << "close m_implData->fd error "
++                         << "errno: " << errno << " error: " << strerror(errno);
++        }
+ 
+-            if (close(dev->sfd) == -1) {
+-                LOG(WARNING)
+-                    << "close m_implData->sfd error "
+-                    << "errno: " << errno << " error: " << strerror(errno);
+-            }
++        if (close(dev->sfd) == -1) {
++            LOG(WARNING) << "close m_implData->sfd error "
++                         << "errno: " << errno << " error: " << strerror(errno);
+         }
+     }
+ }
+@@ -170,8 +160,6 @@ aditof::Status Addi9036Sensor::open() {
+     }
+ 
+     m_implData->numVideoDevs = driverSubPaths.size();
+-
+-    assert(m_implData->numVideoDevs > 0);
+     m_implData->videoDevs = new VideoDev[m_implData->numVideoDevs];
+ 
+     for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
+@@ -325,27 +313,29 @@ aditof::Status Addi9036Sensor::getAvailableFrameTypes(
+     Status status = Status::OK;
+ 
+     FrameDetails details;
+-    memset(&details, 0, sizeof(FrameDetails));
+ 
+     details.width = aditof::FRAME_WIDTH;
+     details.height = aditof::FRAME_HEIGHT;
+     details.fullDataWidth = details.width;
+-    details.fullDataHeight = details.height * 2;
++    details.fullDataHeight =
++        details.height * ((m_implData->numVideoDevs == 2) ? 1 : 2);
+     details.type = "depth_ir";
+     types.push_back(details);
+ 
+     details.width = aditof::FRAME_WIDTH;
+     details.height = aditof::FRAME_HEIGHT;
+     details.fullDataWidth = details.width;
+-    details.fullDataHeight = details.height;
+-    details.type = "depth";
++    details.fullDataHeight =
++        details.height * ((m_implData->numVideoDevs == 2) ? 1 : 2);
++    details.type = "depth_only";
+     types.push_back(details);
+ 
+     details.width = aditof::FRAME_WIDTH;
+     details.height = aditof::FRAME_HEIGHT;
+     details.fullDataWidth = details.width;
+-    details.fullDataHeight = details.height;
+-    details.type = "ir";
++    details.fullDataHeight =
++        details.height * ((m_implData->numVideoDevs == 2) ? 1 : 2);
++    details.type = "ir_only";
+     types.push_back(details);
+ 
+     return status;
+@@ -376,18 +366,6 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
+             }
+             free(dev->videoBuffers);
+             dev->nVideoBuffers = 0;
+-            //Clear the video buffers from the driver.
+-            CLEAR(req);
+-            req.count = 0;
+-            req.type = dev->videoBuffersType;
+-            req.memory = V4L2_MEMORY_MMAP;
+-
+-            if (xioctl(dev->fd, VIDIOC_REQBUFS, &req) == -1) {
+-                LOG(WARNING)
+-                    << "VIDIOC_REQBUFS error "
+-                    << "errno: " << errno << " error: " << strerror(errno);
+-                return Status::GENERIC_ERROR;
+-            }
+         } else if (dev->nVideoBuffers) {
+             return status;
+         }
+@@ -399,11 +377,8 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
+         fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_SBGGR12;
+ #endif
+         fmt.fmt.pix.width = details.fullDataWidth;
+-#if defined JETSON
+-        fmt.fmt.pix.height = details.height;
+-#else
+         fmt.fmt.pix.height = details.fullDataHeight;
+-#endif
++
+         if (xioctl(dev->fd, VIDIOC_S_FMT, &fmt) == -1) {
+             LOG(WARNING) << "Setting Pixel Format error, errno: " << errno
+                          << " error: " << strerror(errno);
+@@ -412,7 +387,7 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
+ 
+         /* Allocate the video buffers in the driver */
+         CLEAR(req);
+-        req.count = 2;
++        req.count = 4;
+         req.type = dev->videoBuffersType;
+         req.memory = V4L2_MEMORY_MMAP;
+ 
+@@ -483,11 +458,6 @@ aditof::Status Addi9036Sensor::program(const uint8_t *firmware, size_t size) {
+     static unsigned char buf[CTRL_PACKET_SIZE];
+     size_t readBytes = 0;
+ 
+-    if (firmware == nullptr) {
+-        LOG(ERROR) << "Received firmware null pointer";
+-        return Status::INVALID_ARGUMENT;
+-    }
+-
+     if (size <= CTRL_PACKET_SIZE) {
+         memset(buf + size, 0, CTRL_PACKET_SIZE);
+         memcpy(buf, firmware, size);
+@@ -549,130 +519,93 @@ aditof::Status Addi9036Sensor::program(const uint8_t *firmware, size_t size) {
+     return status;
+ }
+ 
+-aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
+-                                        aditof::BufferInfo *bufferInfo) {
++aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer) {
+     using namespace aditof;
+     struct v4l2_buffer buf[m_implData->numVideoDevs];
+     struct VideoDev *dev;
+     Status status;
+ 
+-#if defined(JETSON)
+-    uint8_t dataType = 0;
+-    uint8_t cnt = m_implData->frameDetails.type == "depth_ir" ? 2 : 1;
+-    for (uint8_t idx = 0; idx < cnt; idx++) {
+-#endif
+-        if (buffer == nullptr) {
+-            LOG(ERROR) << "Received buffer null pointer";
+-            return Status::INVALID_ARGUMENT;
++    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
++        dev = &m_implData->videoDevs[i];
++        status = waitForBufferPrivate(dev);
++        if (status != Status::OK) {
++            return status;
+         }
+ 
+-#if defined(JETSON)
+-        if (m_implData->frameDetails.type == "depth_ir") {
+-            const uint16_t address[] = {0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22};
+-            const uint16_t data[2][5] = {
+-                {0x0006, 0x0004, 0x05, 0x0007, 0x0004},
+-                {0x0006, 0x0004, 0x03, 0x0007, 0x0004}};
+-            writeAfeRegisters(address, data[dataType],
+-                              sizeof(address) / sizeof(address[0]));
+-            dataType = !dataType;
++        status = dequeueInternalBufferPrivate(buf[i], dev);
++        if (status != Status::OK) {
++            return status;
+         }
+-#endif
+-
+-        for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
+-            dev = &m_implData->videoDevs[i];
+-            status = waitForBufferPrivate(dev);
+-            if (status != Status::OK) {
+-                return status;
+-            }
++    }
+ 
+-            status = dequeueInternalBufferPrivate(buf[i], dev);
+-            if (status != Status::OK) {
+-                return status;
+-            }
+-        }
++    unsigned int width;
++    unsigned int height;
++    unsigned int buf_data_len;
++    uint8_t *pdata[m_implData->numVideoDevs];
+ 
+-        unsigned int width;
+-        unsigned int height;
+-        unsigned int buf_data_len;
+-        uint8_t *pdata[m_implData->numVideoDevs];
++    width = m_implData->frameDetails.width;
++    height = m_implData->frameDetails.height;
+ 
+-        width = m_implData->frameDetails.width;
+-        height = m_implData->frameDetails.height;
++    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
++        dev = &m_implData->videoDevs[i];
++        status = getInternalBufferPrivate(&pdata[i], buf_data_len, buf[i], dev);
++        if (status != Status::OK) {
++            return status;
++        }
++    }
+ 
+-        for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
+-            dev = &m_implData->videoDevs[i];
+-            status =
+-                getInternalBufferPrivate(&pdata[i], buf_data_len, buf[i], dev);
+-            if (status != Status::OK) {
+-                return status;
+-            }
++    auto isBufferPacked = [](const struct v4l2_buffer &buf, unsigned int width,
++                             unsigned int height) {
++        unsigned int bytesused = 0;
++        if (buf.type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
++            bytesused = buf.m.planes[0].bytesused;
++        } else {
++            bytesused = buf.bytesused;
+         }
+ 
+-        auto isBufferPacked = [](const struct v4l2_buffer &buf,
+-                                 unsigned int width, unsigned int height) {
+-            unsigned int bytesused = 0;
+-            if (buf.type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+-                bytesused = buf.m.planes[0].bytesused;
+-            } else {
+-                bytesused = buf.bytesused;
+-            }
++        return bytesused == (width * height * 3);
++    };
+ 
+-            return bytesused == (width * height * 3);
+-        };
++    if (width == 668) {
++        unsigned int j = 0;
++        for (unsigned int i = 0; i < (buf_data_len); i += 3) {
++            if ((i != 0) && (i % (336 * 3) == 0)) {
++                j -= 4;
++            }
+ 
+-        if (width == 668) {
+-            unsigned int j = 0;
+-            for (unsigned int i = 0; i < (buf_data_len); i += 3) {
+-                if ((i != 0) && (i % (336 * 3) == 0)) {
+-                    j -= 4;
+-                }
++            buffer[j] = (((unsigned short)*(pdata[0] + i)) << 4) |
++                        (((unsigned short)*(pdata[0] + i + 2)) & 0x000F);
++            j++;
+ 
+-                buffer[j] = (((unsigned short)*(pdata[0] + i)) << 4) |
+-                            (((unsigned short)*(pdata[0] + i + 2)) & 0x000F);
+-                j++;
++            buffer[j] = (((unsigned short)*(pdata[0] + i + 1)) << 4) |
++                        ((((unsigned short)*(pdata[0] + i + 2)) & 0x00F0) >> 4);
++            j++;
++        }
++    } else if (!isBufferPacked(buf[0], width, height)) {
++        // TODO: investigate optimizations for this (arm neon / 1024 bytes
++        // chunks)
++        if (m_implData->frameDetails.type == "depth_only") {
++            memcpy(buffer, pdata[0], buf[0].bytesused);
++        } else if (m_implData->frameDetails.type == "ir_only") {
+ 
+-                buffer[j] =
+-                    (((unsigned short)*(pdata[0] + i + 1)) << 4) |
+-                    ((((unsigned short)*(pdata[0] + i + 2)) & 0x00F0) >> 4);
+-                j++;
+-            }
+-        } else if (!isBufferPacked(buf[0], width, height)) {
+-            // TODO: investigate optimizations for this (arm neon / 1024 bytes
+-            // chunks)
+-            if (m_implData->frameDetails.type == "depth") {
+-                memcpy(buffer, pdata[0], buf[0].bytesused);
+-            } else if (m_implData->frameDetails.type == "ir") {
+-#if defined(JETSON)
+-                memcpy(buffer, pdata[0], buf[0].bytesused);
+-#else
+             memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
+-#endif
+-            } else {
+-#if defined(TOYBRICK)
+-                unsigned int fullDataWidth =
+-                    m_implData->frameDetails.fullDataWidth;
+-                unsigned int fullDataHeight =
+-                    m_implData->frameDetails.fullDataHeight;
+-                uint32_t j = 0, j1 = width * height;
+-                for (uint32_t i = 0; i < fullDataHeight; i += 2) {
+-                    memcpy(buffer + j, pdata[0] + i * width * 2, width * 2);
+-                    j += width;
+-                    memcpy(buffer + j1, pdata[0] + (i + 1) * width * 2,
+-                           width * 2);
+-                    j1 += width;
+-                }
+-                for (uint32_t i = 0; i < fullDataWidth * fullDataHeight;
+-                     i += 2) {
+-                    buffer[i] = ((buffer[i] & 0x00FF) << 4) |
+-                                ((buffer[i]) & 0xF000) >> 12;
+-                    buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
+-                                    ((buffer[i + 1]) & 0xF000) >> 12;
+-                }
+-#elif defined(JETSON)
+-            if (dataType) {
+-                memcpy(buffer, pdata[0], buf[0].bytesused);
+-            } else {
+-                memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
++        } else {
++#ifdef TOYBRICK
++            unsigned int fullDataWidth = m_implData->frameDetails.fullDataWidth;
++            unsigned int fullDataHeight =
++                m_implData->frameDetails.fullDataHeight;
++            uint32_t j = 0, j1 = width * height;
++            for (uint32_t i = 0; i < fullDataHeight; i += 2) {
++                memcpy(buffer + j, pdata[0] + i * width * 2, width * 2);
++                j += width;
++                memcpy(buffer + j1, pdata[0] + (i + 1) * width * 2, width * 2);
++                j1 += width;
++            }
++            for (uint32_t i = 0; i < fullDataWidth * fullDataHeight; i += 2) {
++                buffer[i] =
++                    ((buffer[i] & 0x00FF) << 4) | ((buffer[i]) & 0xF000) >> 12;
++                buffer[i + 1] = ((buffer[i + 1] & 0x00FF) << 4) |
++                                ((buffer[i + 1]) & 0xF000) >> 12;
+             }
+ #else
+             // Not Packed and type == "depth_ir"
+@@ -690,23 +623,18 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
+                 ptr_buff_ir[k + 1] = (*(ptr_ir + k + 1) >> 4);
+             }
+ #endif
+-            }
++        }
+ 
+-        } else {
+-            // clang-format off
++    } else {
++        // clang-format off
+         uint16_t *depthPtr = buffer;
+         uint16_t *irPtr = buffer + (width * height);
+         unsigned int j = 0;
+ 
+-        if (m_implData->frameDetails.type == "depth" ||
+-                m_implData->frameDetails.type == "ir") {
++        if (m_implData->frameDetails.type == "depth_only" ||
++                m_implData->frameDetails.type == "ir_only") {
+                 buf_data_len /= 2;
+         }
+-
+-        if(m_implData->frameDetails.type == "ir"){
+-            irPtr = buffer;
+-        }
+-        
+         /* The frame is read from the device as an array of uint8_t's where
+          * every 3 uint8_t's can produce 2 uint16_t's that have only 12 bits
+          * in use.
+@@ -740,10 +668,10 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
+             toStore.val[0] = aBuffer;
+             toStore.val[1] = bBuffer;
+ 
+-            if (m_implData->frameDetails.type == "depth") {
++            if (m_implData->frameDetails.type == "depth_only") {
+                 vst2q_u16(depthPtr, toStore);
+                 depthPtr += 16;
+-            } else if (m_implData->frameDetails.type == "ir") {
++            } else if (m_implData->frameDetails.type == "ir_only") {
+                 vst2q_u16(irPtr, toStore);
+                 irPtr += 16;
+             } else {
+@@ -759,26 +687,16 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
+             j += 16;
+             pdata[0] += 24;
+         }
+-            // clang-format on
+-        }
+-
+-        for (uint8_t i = 0; i < m_implData->numVideoDevs; i++) {
+-            dev = &m_implData->videoDevs[i];
+-            status = enqueueInternalBufferPrivate(buf[i], dev);
+-            if (status != Status::OK) {
+-                return status;
+-            }
+-        }
+-
+-        bufferInfo->timestamp =
+-            buf[0].timestamp.tv_sec * 1000000 + buf[0].timestamp.tv_usec;
++        // clang-format on
++    }
+ 
+-#if defined(JETSON)
+-        if (m_implData->frameDetails.type == "depth_ir") {
+-            usleep(45000);
++    for (unsigned int i = 0; i < m_implData->numVideoDevs; i++) {
++        dev = &m_implData->videoDevs[i];
++        status = enqueueInternalBufferPrivate(buf[i], dev);
++        if (status != Status::OK) {
++            return status;
+         }
+     }
+-#endif
+ 
+     return status;
+ }
+@@ -786,19 +704,6 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
+ aditof::Status Addi9036Sensor::readAfeRegisters(const uint16_t *address,
+                                                 uint16_t *data, size_t length) {
+     using namespace aditof;
+-
+-    if (address == nullptr) {
+-        LOG(ERROR) << "Received AfeRegisters address null pointer";
+-        return Status::INVALID_ARGUMENT;
+-    }
+-
+-    if (data == nullptr) {
+-        LOG(ERROR) << "Received AfeRegisters data null pointer";
+-        return Status::INVALID_ARGUMENT;
+-    }
+-
+-    assert(length > 0);
+-
+     struct VideoDev *dev = &m_implData->videoDevs[0];
+     Status status = Status::OK;
+ 
+@@ -832,18 +737,6 @@ aditof::Status Addi9036Sensor::writeAfeRegisters(const uint16_t *address,
+     using namespace aditof;
+     Status status = Status::OK;
+ 
+-    if (address == nullptr) {
+-        LOG(ERROR) << "Received AfeRegisters address null pointer";
+-        return Status::INVALID_ARGUMENT;
+-    }
+-
+-    if (data == nullptr) {
+-        LOG(ERROR) << "Received AfeRegisters data null pointer";
+-        return Status::INVALID_ARGUMENT;
+-    }
+-
+-    assert(length > 0);
+-
+     static struct v4l2_ext_control extCtrl;
+     static struct v4l2_ext_controls extCtrls;
+     struct VideoDev *dev = &m_implData->videoDevs[0];
+@@ -890,12 +783,6 @@ aditof::Status Addi9036Sensor::getHandle(void **handle) {
+     return aditof::Status::OK;
+ }
+ 
+-aditof::Status Addi9036Sensor::getName(std::string &sensorName) const {
+-    sensorName = m_sensorName;
+-
+-    return aditof::Status::OK;
+-}
+-
+ aditof::Status Addi9036Sensor::waitForBufferPrivate(struct VideoDev *dev) {
+     fd_set fds;
+     struct timeval tv;
