@@ -64,6 +64,13 @@ After installationn the following text should appear on the screen:
 ===============================================================================
 ```
 
+Currently the docker command can not be execued without sudo. To grant these privileges for docker command, run the following settings:
+```console
+sudo groupadd docker
+sudo usermod -aG docker ${USER}
+sudo reboot
+```
+
 As it is mention in the console the user must modify the /etc/iotedge/config.yamlfile in order to link the device to the previously created virtual device. Use the following command:
 
 ```console
