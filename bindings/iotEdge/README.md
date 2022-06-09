@@ -18,7 +18,7 @@ At "IoT Edge" section of the manu add a new device. This generates a virtual dev
 Run the following code snippet on the camera:
 * Installing moby-engine for container running: 
 ```console
-sudo apt install curl 
+sudo apt install -y curl 
 curl https://packages.microsoft.com/config/ubuntu/18.04/multiarch/prod.list > ./microsoft-prod.list
 
 sudo cp ./microsoft-prod.list /etc/apt/sources.list.d/
@@ -27,7 +27,7 @@ curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microso
 sudo cp ./microsoft.gpg /etc/apt/trusted.gpg.d/
 
 sudo apt-get update
-sudo apt-get install moby-engine
+sudo apt-get install -y moby-engine
 ```
 * Installing IoT Edge:
 ```console
