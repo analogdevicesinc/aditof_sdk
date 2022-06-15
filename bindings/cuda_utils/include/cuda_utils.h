@@ -40,7 +40,6 @@
 #include <vector>
 
 #define THREAD_PER_BLOCK 1024
-#define SUBFRAME_NUMBER 1245
 
 struct Layer {
     std::string name;
@@ -54,10 +53,6 @@ class cudaOnTarget {
     double *m_geometry_cache_d;
     double *m_distortion_cache_d;
     uint16_t *m_depth_cache_d;
-
-    // double *m_geometry_cache;
-    // double *m_distortion_cache;
-    // uint16_t *m_depth_cache;
 
     //frames and parameters
     uint16_t *m_frame_d;
@@ -75,16 +70,6 @@ class cudaOnTarget {
 
     double* m_subFrameOutputs;
     double* m_subFrameOutputs_d;
-
-    int m_frame_width;
-    int *m_frame_width_d;
-    int m_frame_height;
-    int *m_frame_height_d;
-
-    int m_inputFrame_width;
-    int *m_inputFrame_width_d;
-    int m_inputFrame_height;
-    int *m_inputFrame_height_d;
 
 
   public:
