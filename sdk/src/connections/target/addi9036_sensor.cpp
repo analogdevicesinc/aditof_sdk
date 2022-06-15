@@ -420,7 +420,11 @@ Addi9036Sensor::setFrameType(const aditof::FrameDetails &details) {
 
         /* Allocate the video buffers in the driver */
         CLEAR(req);
+#if defined DRAGONBOARD
+        req.count = 4;
+#else
         req.count = 2;
+#endif
         req.type = dev->videoBuffersType;
         req.memory = V4L2_MEMORY_MMAP;
 
