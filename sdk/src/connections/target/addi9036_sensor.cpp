@@ -622,18 +622,15 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
 
 #if defined(JETSON)
 
-        if (m_implData->frameDetails.type == "depth") {
-            memcpy(buffer, pdata[0], buf[0].bytesused);
-        } else if (m_implData->frameDetails.type == "ir") {
-
-            memcpy(buffer, pdata[0], buf[0].bytesused);
-        } else {
-
+        if (m_implData->frameDetails.type == "depth_ir") {
             if (dataType) {
                 memcpy(buffer, pdata[0], buf[0].bytesused);
             } else {
                 memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
             }
+        } else {
+
+            memcpy(buffer, pdata[0], buf[0].bytesused);
         }
 
 #elif defined(XAVIERNX)
