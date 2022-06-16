@@ -557,7 +557,7 @@ __global__ void calcFirstNetLayer(double *frame, double *outputLayer,
 
     if (poz >= 0 && poz < (int)nrOfNodes[0]) {
 
-        *(outputLayer + poz) = 0;
+        outputLayer[poz] = 0;
         for (int i = 0; i < INPUT_WIDTH; i++) {
             for (int j = 0; j < INPUT_HEIGHT; j++) {
 
@@ -568,6 +568,13 @@ __global__ void calcFirstNetLayer(double *frame, double *outputLayer,
                 //        (frameParameters[2] + j * frameParameters[0]) *
                 //            FRAME_WIDTH +
                 //        (frameParameters[1] + i * frameParameters[2])));
+ 
+                // outputLayer[poz] +=
+                //     weights[poz * INPUT_WIDTH * INPUT_HEIGHT + j * INPUT_WIDTH +
+                //             i] *
+                //     frame[(frameParameters[2] + j * frameParameters[0]) *
+                //               FRAME_WIDTH +
+                //           frameParameters[1] + i * frameParameters[2]];
 
                 outputLayer[poz] += weights[poz * INPUT_WIDTH * INPUT_HEIGHT +
                                             j * INPUT_WIDTH + i] *
@@ -597,8 +604,6 @@ void cudaOnTarget::calculateNetworkOutput() {
 
         //calculate first layer using frame input and subFrameParameters
         for (int i = 0; i < Network.size(); i++) {
-
-
 
             int nrOfBlocks = ((Network[i].bias.size() / THREAD_PER_BLOCK) *
                                   THREAD_PER_BLOCK <
@@ -633,12 +638,12 @@ void cudaOnTarget::calculateNetworkOutput() {
             }
 
             weightIndex += Network[i].weights.size() + Network[i].bias.size();
-            biasIndex += Network[i].bias.size() + Network[(i < (Network.size()-1))? i+1 : 0].weights.size();
-                
+            biasIndex +=
+                Network[i].bias.size() +
+                Network[(i < (Network.size() - 1)) ? i + 1 : 0].weights.size();
             previousLayerIndex = layerIndex;
             layerIndex += Network[i].bias.size();
             nodeNumberIndex += 1;
-
         }
     }
 
