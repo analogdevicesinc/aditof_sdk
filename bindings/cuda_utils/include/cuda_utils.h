@@ -72,6 +72,9 @@ class cudaOnTarget {
     double* m_subFrameOutputs_d;
 
 
+    double *testFrame;
+
+
   public:
     void buildGeometryCorrectionCache();
     void buildDistortionCorrectionCache();
