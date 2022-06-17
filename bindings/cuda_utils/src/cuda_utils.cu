@@ -568,7 +568,7 @@ __global__ void calcFirstNetLayer(double *frame, double *outputLayer,
                 //        (frameParameters[2] + j * frameParameters[0]) *
                 //            FRAME_WIDTH +
                 //        (frameParameters[1] + i * frameParameters[2])));
- 
+
                 // outputLayer[poz] +=
                 //     weights[poz * INPUT_WIDTH * INPUT_HEIGHT + j * INPUT_WIDTH +
                 //             i] *

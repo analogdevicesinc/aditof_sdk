@@ -47,7 +47,34 @@
 #include <sys/stat.h>
 #include <unordered_map>
 
+#include <aditof/camera.h>
+#include <aditof/frame.h>
+#include <aditof/system.h>
+#include <chrono>
+#include <ctime>
+#include <glog/logging.h>
 #include <iostream>
+#include <sys/time.h>
+
+#include <chrono>
+#include <ctime>
+#include <iostream>
+#include <stdio.h>
+#include <sys/time.h>
+
+using std::cout;
+using std::endl;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+
+#include <fstream>
+#include <iostream>
+
+FILE *fp = fopen("time_gpu.txt", "a+");
+
+FILE *fp2 = fopen("time_cpu.txt", "a+");
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -655,15 +682,39 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
 
         if (m_implData->frameDetails.type == "depth") {
 #if defined(CUDA_ON_TARGET)
+
+            // auto t1 = duration_cast<milliseconds>(
+            //               system_clock::now().time_since_epoch())
+            //               .count();
+
             cudaObj.cpyFrameToGPU((uint16_t *)pdata[0]);
+
+            // auto t2 = duration_cast<milliseconds>(
+            //               system_clock::now().time_since_epoch())
+            //               .count();
+
             cudaObj.applyDepthCorrection();
             cudaObj.applyGeometryCorrection();
-            // cudaObj.applyDistortionCorrection();
-            cudaObj.calculateNetworkOutput();
+            cudaObj.applyDistortionCorrection();
+
+            // auto t3 = duration_cast<milliseconds>(
+            //               system_clock::now().time_since_epoch())
+            //               .count();
+            // cudaObj.calculateNetworkOutput();
             cudaObj.cpyFrameFromGPU(buffer);
 
+            // auto t4 = duration_cast<milliseconds>(
+            //               system_clock::now().time_since_epoch())
+            //               .count();
+
+
 #else
+
+
+
             memcpy(buffer, pdata[0], buf[0].bytesused);
+
+
 #endif
         } else if (m_implData->frameDetails.type == "ir") {
 #if defined(CUDA_ON_TARGET)
@@ -687,16 +738,8 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
 #endif
 
             } else {
-#if defined(CUDA_ON_TARGET)
-                cudaObj.cpyFrameToGPU((uint16_t *)pdata[0]);
-                cudaObj.applyDepthCorrection();
-                cudaObj.applyGeometryCorrection();
-                // cudaObj.applyDistortionCorrection();
-                cudaObj.cpyFrameFromGPU(buffer + (width * height));
-#else
 
                 memcpy(buffer + (width * height), pdata[0], buf[0].bytesused);
-#endif
             }
         }
 

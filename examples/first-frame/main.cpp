@@ -99,8 +99,14 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    FILE *fp;
+    fp = fopen("gpu.txt", "a+");
+
+    float values[300];
+
     aditof::Frame frame;
-    while (1) {
+    for (int i=0;i>-11;i++)
+    {
         auto t1 =
             duration_cast<milliseconds>(system_clock::now().time_since_epoch())
                 .count();
@@ -109,8 +115,14 @@ int main(int argc, char *argv[]) {
         auto t2 =
             duration_cast<milliseconds>(system_clock::now().time_since_epoch())
                 .count();
+        values[i] = 1 / (double)(t2 - t1) * 1000;
+        //std::cout << "FPS: " << 1 / (double)(t2 - t1) * 1000 << std::endl;
+    }
 
-        std::cout << "FPS: " << 1 / (double)(t2 - t1) * 1000 << std::endl;
+    for (int i=0;i<300;i++)
+    {
+    //fprintf(fp, "%f, ", values[i]);
+
     }
 
     return 0;
