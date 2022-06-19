@@ -46,6 +46,20 @@
 #include <map>
 #include <math.h>
 
+
+
+#include <chrono>
+#include <ctime>
+#include <iostream>
+#include <sys/time.h>
+using std::cout;
+using std::endl;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+// FILE *fp3 = fopen("stats/cpu_double.txt", "a+");
+
 struct rangeStruct {
     std::string mode;
     int minDepth;
@@ -73,8 +87,8 @@ CameraFxTof1::CameraFxTof1(
     std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &tSensors)
     : m_depthSensor(depthSensor), m_devStarted(false), m_devProgrammed(false),
       m_eepromInitialized(false), m_tempSensorsInitialized(false),
-      m_availableControls(availableControls), m_depthCorrection(false),
-      m_cameraGeometryCorrection(false), m_distortionCorrection(false),
+      m_availableControls(availableControls), m_depthCorrection(true),
+      m_cameraGeometryCorrection(true), m_distortionCorrection(true),
       m_irDistorsionCorrection(false), m_revision("RevA") {
 
     // Check Depth Sensor
@@ -414,6 +428,10 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
         (m_details.frameType.type == "depth_ir" ||
          m_details.frameType.type == "depth")) {
 
+        auto t1 =
+            duration_cast<milliseconds>(system_clock::now().time_since_epoch())
+                .count();
+
         if (m_depthCorrection) {
             m_calibration.calibrateDepth(frameDataLocation,
                                          m_details.frameType.width *
@@ -429,6 +447,12 @@ aditof::Status CameraFxTof1::requestFrame(aditof::Frame *frame,
                                                m_details.frameType.width,
                                                m_details.frameType.height);
         }
+        auto t2 =
+            duration_cast<milliseconds>(system_clock::now().time_since_epoch())
+                .count();
+        
+            // fprintf(fp3, "%f, ", (double)(t2-t1));
+
     }
 
     if ((m_details.frameType.type == "depth_ir" ||

@@ -64,8 +64,9 @@ inline cudaError_t checkCuda(cudaError_t result) {
     return result;
 }
 
-__global__ void buildDistortionCorrectionCacheCuda(double *m_distortion_cache_d,
-                                                   double *m_parameters_d) {
+__global__ void
+buildDistortionCorrectionCacheCuda(DATA_TYPE *m_distortion_cache_d,
+                                   double *m_parameters_d) {
 
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
 
@@ -89,7 +90,7 @@ __global__ void buildDistortionCorrectionCacheCuda(double *m_distortion_cache_d,
 __global__ void
 applyDistortionCorrectionCacheCuda(uint16_t *m_frame_d, uint16_t *tmp_frame,
                                    double *m_parameters_d,
-                                   double *m_distortion_cache_d) {
+                                   DATA_TYPE *m_distortion_cache_d) {
 
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
 
@@ -126,7 +127,7 @@ applyDistortionCorrectionCacheCuda(uint16_t *m_frame_d, uint16_t *tmp_frame,
     }
 }
 
-__global__ void buildGeometryCorrectionCacheCuda(double *m_geometry_cache_d,
+__global__ void buildGeometryCorrectionCacheCuda(DATA_TYPE *m_geometry_cache_d,
                                                  double *m_parameters_d) {
 
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
@@ -147,7 +148,7 @@ __global__ void buildGeometryCorrectionCacheCuda(double *m_geometry_cache_d,
 
 __global__ void applyGeometryCorrectionCacheCuda(uint16_t *m_frame_d,
                                                  double *m_parameters_d,
-                                                 double *m_geometry_cache_d
+                                                 DATA_TYPE *m_geometry_cache_d
 
 ) {
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
@@ -158,16 +159,17 @@ __global__ void applyGeometryCorrectionCacheCuda(uint16_t *m_frame_d,
             m_frame_d[threadPosition] = m_parameters_d[14];
         else
             m_frame_d[threadPosition] =
-                m_frame_d[threadPosition] * m_geometry_cache_d[threadPosition];
+                (DATA_TYPE)(m_frame_d[threadPosition] *
+                            m_geometry_cache_d[threadPosition]);
     }
 }
 
-__global__ void buildDepthCorrectionCacheCuda(uint16_t *m_depth_cache_d,
+__global__ void buildDepthCorrectionCacheCuda(DATA_TYPE *m_depth_cache_d,
                                               double *m_parameters_d) {
 
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
     if (threadPosition < m_parameters_d[13]) {
-        int16_t currentValue = static_cast<int16_t>(
+        uint16_t currentValue = static_cast<int16_t>(
             static_cast<float>(threadPosition) * m_parameters_d[11] +
             m_parameters_d[12]);
         m_depth_cache_d[threadPosition] = currentValue <= m_parameters_d[14]
@@ -178,14 +180,14 @@ __global__ void buildDepthCorrectionCacheCuda(uint16_t *m_depth_cache_d,
 
 __global__ void applyDepthCorrectionCacheCuda(uint16_t *m_frame_d,
                                               double *m_parameters_d,
-                                              uint16_t *m_depth_cache_d) {
+                                              DATA_TYPE *m_depth_cache_d) {
 
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
 
     if (threadPosition >= 0 &&
         threadPosition < m_parameters_d[0] * m_parameters_d[1]) {
         *(m_frame_d + threadPosition) =
-            *(m_depth_cache_d + *(m_frame_d + threadPosition));
+            (DATA_TYPE)(*(m_depth_cache_d + *(m_frame_d + threadPosition)));
     }
 }
 
@@ -195,8 +197,9 @@ void cudaOnTarget::buildDistortionCorrectionCache() {
 
     std::cout << "CUDA_CXX: Building Distortion correction\n";
 
-    checkCuda(cudaMalloc((void **)&m_distortion_cache_d,
-                         sizeof(double) * m_parameters[0] * m_parameters[1]));
+    checkCuda(
+        cudaMalloc((void **)&m_distortion_cache_d,
+                   sizeof(DATA_TYPE) * m_parameters[0] * m_parameters[1]));
 
     buildDistortionCorrectionCacheCuda<<<m_parameters[0] * m_parameters[1] /
                                              THREAD_PER_BLOCK,
@@ -220,8 +223,9 @@ void cudaOnTarget::buildGeometryCorrectionCache() {
 
     std::cout << "CUDA_CXX: Building Geometry correction\n";
 
-    checkCuda(cudaMalloc((void **)&m_geometry_cache_d,
-                         sizeof(double) * m_parameters[0] * m_parameters[1]));
+    checkCuda(
+        cudaMalloc((void **)&m_geometry_cache_d,
+                   sizeof(DATA_TYPE) * m_parameters[0] * m_parameters[1]));
 
     //Check if more blocks nedded than resulted from division
     int nrOfBlocks =
@@ -251,7 +255,7 @@ void cudaOnTarget::buildDepthCorrectionCache() {
     std::cout << "CUDA_CXX: Building Depth correction\n";
 
     checkCuda(cudaMalloc((void **)&m_depth_cache_d,
-                         sizeof(uint16_t) * m_parameters[13]));
+                         sizeof(DATA_TYPE) * m_parameters[13]));
 
     //Check if more blocks nedded than resulted from division
     int nrOfBlocks = ((m_parameters[13] / THREAD_PER_BLOCK) * THREAD_PER_BLOCK <
@@ -568,7 +572,7 @@ __global__ void calcFirstNetLayer(double *frame, double *outputLayer,
                 //        (frameParameters[2] + j * frameParameters[0]) *
                 //            FRAME_WIDTH +
                 //        (frameParameters[1] + i * frameParameters[2])));
- 
+
                 // outputLayer[poz] +=
                 //     weights[poz * INPUT_WIDTH * INPUT_HEIGHT + j * INPUT_WIDTH +
                 //             i] *

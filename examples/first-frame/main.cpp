@@ -50,7 +50,13 @@ using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
 
+#include <fstream>
+#include <iostream>
+
 using namespace aditof;
+
+FILE *fp = fopen("fps.txt", "a+");
+FILE *fp2 = fopen("frame.txt", "a+");
 
 int main(int argc, char *argv[]) {
 
@@ -100,7 +106,8 @@ int main(int argc, char *argv[]) {
     }
 
     aditof::Frame frame;
-    while (1) {
+    int j = 0;
+    while (j != 300) {
         auto t1 =
             duration_cast<milliseconds>(system_clock::now().time_since_epoch())
                 .count();
@@ -111,6 +118,23 @@ int main(int argc, char *argv[]) {
                 .count();
 
         std::cout << "FPS: " << 1 / (double)(t2 - t1) * 1000 << std::endl;
+        fprintf(fp, "%f, ", 1 / (double)(t2 - t1) * 1000);
+
+        uint16_t *data1;
+        status = frame.getData(FrameDataType::FULL_DATA, &data1);
+        FrameDetails fDetails;
+        frame.getDetails(fDetails);
+        if (j == 299) {
+            for (unsigned int i = 1; i <= fDetails.width * fDetails.height;
+                 ++i) {
+                // std::cout << data1[i] << " ";
+                fprintf(fp2, "%d, ", data1[i]);
+                if(i%20==0)
+                    fprintf(fp2, "\n");
+            }
+        }
+
+        j++;
     }
 
     return 0;

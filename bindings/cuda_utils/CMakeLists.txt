@@ -7,6 +7,7 @@ IF(CUDA_FOUND)
     add_definitions(-DDEBUG=1)
 
     add_definitions(-DPATH_TO_CNN_JSON="${CMAKE_SOURCE_DIR}/json_model/")
+
     SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -dlink)
     cuda_compile(cuda_utils cuda_utils.cu)
     add_library(aditof_cuda SHARED
@@ -20,5 +21,9 @@ IF(CUDA_FOUND)
             PUBLIC_HEADER DESTINATION ../../cuda_lib/)
     install(FILES ${CMAKE_BINARY_DIR}/aditof_cuda.pc
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
+
+    target_compile_options(aditof_cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+        -arch=sm_53
+    >)
 
 ENDIF()

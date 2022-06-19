@@ -38,6 +38,10 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include "cuda_fp16.h"
+
+// #define DATA_TYPE double
+#define DATA_TYPE double
 
 #define THREAD_PER_BLOCK 1024
 
@@ -50,9 +54,9 @@ struct Layer {
 class cudaOnTarget {
   private:
     //correction cahes
-    double *m_geometry_cache_d;
-    double *m_distortion_cache_d;
-    uint16_t *m_depth_cache_d;
+    DATA_TYPE *m_geometry_cache_d;
+    DATA_TYPE *m_distortion_cache_d;
+    DATA_TYPE *m_depth_cache_d;
 
     //frames and parameters
     uint16_t *m_frame_d;
@@ -71,6 +75,7 @@ class cudaOnTarget {
     double* m_subFrameOutputs;
     double* m_subFrameOutputs_d;
 
+  
 
     double *testFrame;
 
