@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
 
     aditof::Frame frame;
     int j = 0;
-    while (j != 300) {
+    while (j < 10) {
         auto t1 =
             duration_cast<milliseconds>(system_clock::now().time_since_epoch())
                 .count();
@@ -120,11 +120,12 @@ int main(int argc, char *argv[]) {
         std::cout << "FPS: " << 1 / (double)(t2 - t1) * 1000 << std::endl;
         fprintf(fp, "%f, ", 1 / (double)(t2 - t1) * 1000);
 
-        uint16_t *data1;
-        status = frame.getData(FrameDataType::FULL_DATA, &data1);
+
+        if (j == 9) {
+                    uint16_t *data1;
+        status = frame.getData(FrameDataType::DEPTH, &data1);
         FrameDetails fDetails;
         frame.getDetails(fDetails);
-        if (j == 299) {
             for (unsigned int i = 1; i <= fDetails.width * fDetails.height;
                  ++i) {
                 // std::cout << data1[i] << " ";

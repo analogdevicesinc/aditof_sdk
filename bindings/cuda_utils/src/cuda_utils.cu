@@ -159,7 +159,7 @@ __global__ void applyGeometryCorrectionCacheCuda(uint16_t *m_frame_d,
             m_frame_d[threadPosition] = m_parameters_d[14];
         else
             m_frame_d[threadPosition] =
-                (DATA_TYPE)(m_frame_d[threadPosition] *
+                ((DATA_TYPE)m_frame_d[threadPosition] *
                             m_geometry_cache_d[threadPosition]);
     }
 }
@@ -169,7 +169,7 @@ __global__ void buildDepthCorrectionCacheCuda(DATA_TYPE *m_depth_cache_d,
 
     int threadPosition = blockIdx.x * THREAD_PER_BLOCK + threadIdx.x;
     if (threadPosition < m_parameters_d[13]) {
-        uint16_t currentValue = static_cast<int16_t>(
+        int16_t currentValue = static_cast<int16_t>(
             static_cast<float>(threadPosition) * m_parameters_d[11] +
             m_parameters_d[12]);
         m_depth_cache_d[threadPosition] = currentValue <= m_parameters_d[14]
@@ -187,7 +187,7 @@ __global__ void applyDepthCorrectionCacheCuda(uint16_t *m_frame_d,
     if (threadPosition >= 0 &&
         threadPosition < m_parameters_d[0] * m_parameters_d[1]) {
         *(m_frame_d + threadPosition) =
-            (DATA_TYPE)(*(m_depth_cache_d + *(m_frame_d + threadPosition)));
+            ((*(m_depth_cache_d) + (DATA_TYPE)(*(m_frame_d + threadPosition))));
     }
 }
 
