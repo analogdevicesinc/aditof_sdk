@@ -41,7 +41,7 @@
 #include "cuda_fp16.h"
 
 // #define DATA_TYPE double
-#define DATA_TYPE double
+#define DATA_TYPE float
 
 #define THREAD_PER_BLOCK 1024
 

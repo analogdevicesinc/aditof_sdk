@@ -15483,14 +15483,16 @@ Addi9036Sensor::Addi9036Sensor(const std::string &driverPath,
 #if defined(CUDA_ON_TARGET)
     double width_tmp = 640;
     double height_tmp = 480;
-    double fx_tmp = 374.93;
-    double fy_tmp = 374.889;
-    double cx_tmp = 317.166;
-    double cy_tmp = 235.039;
-    double k1_tmp = -0.157127;
-    double k2_tmp = 0.00268057;
-    double x0_tmp = 317.166;
-    double y0_tmp = 235.039;
+    double fx_tmp = 373.019;
+    double fy_tmp = 372.943;
+    double cx_tmp = 314.295;
+    double cy_tmp = 229.762;
+
+    double k1_tmp = -0.157202;
+    double k2_tmp = 0.0277307;
+    double x0_tmp = 314.295;
+    double y0_tmp = 229.762;
+
     double gain_tmp = 0.5; // 1.15 for medium
     double offset_tmp = 0.0;
     double pixelMaxValue_tmp = 4095.0;
@@ -16046,7 +16048,7 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
 
             cudaObj.applyDepthCorrection();
             cudaObj.applyGeometryCorrection();
-            cudaObj.applyDistortionCorrection();
+            // cudaObj.applyDistortionCorrection();
             // cudaObj.calculateNetworkOutput();
             auto t3 = duration_cast<milliseconds>(
                           system_clock::now().time_since_epoch())

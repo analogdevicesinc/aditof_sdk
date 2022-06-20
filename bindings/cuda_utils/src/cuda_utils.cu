@@ -104,9 +104,9 @@ applyDistortionCorrectionCacheCuda(uint16_t *m_frame_d, uint16_t *tmp_frame,
             double y = (double(j) - m_parameters_d[5]) / m_parameters_d[3];
 
             //apply correction
-            double x_dist_adim =
+            DATA_TYPE x_dist_adim =
                 x * m_distortion_cache_d[j * (int)m_parameters_d[0] + i];
-            double y_dist_adim =
+            DATA_TYPE y_dist_adim =
                 y * m_distortion_cache_d[j * (int)m_parameters_d[0] + i];
 
             //back to original space
@@ -255,7 +255,7 @@ void cudaOnTarget::buildDepthCorrectionCache() {
     std::cout << "CUDA_CXX: Building Depth correction\n";
 
     checkCuda(cudaMalloc((void **)&m_depth_cache_d,
-                         sizeof(DATA_TYPE) * m_parameters[13]));
+                         sizeof(DATA_TYPE) * (m_parameters[13]+1)));
 
     //Check if more blocks nedded than resulted from division
     int nrOfBlocks = ((m_parameters[13] / THREAD_PER_BLOCK) * THREAD_PER_BLOCK <
