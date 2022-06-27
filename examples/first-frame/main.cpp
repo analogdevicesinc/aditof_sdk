@@ -118,24 +118,9 @@ int main(int argc, char *argv[]) {
                 .count();
 
         std::cout << "FPS: " << 1 / (double)(t2 - t1) * 1000 << std::endl;
-        fprintf(fp, "%f, ", 1 / (double)(t2 - t1) * 1000);
+        // fprintf(fp, "%f, ", 1 / (double)(t2 - t1) * 1000);
 
 
-        if (j == 9) {
-                    uint16_t *data1;
-        status = frame.getData(FrameDataType::DEPTH, &data1);
-        FrameDetails fDetails;
-        frame.getDetails(fDetails);
-            for (unsigned int i = 1; i <= fDetails.width * fDetails.height;
-                 ++i) {
-                // std::cout << data1[i] << " ";
-                fprintf(fp2, "%d, ", data1[i]);
-                if(i%20==0)
-                    fprintf(fp2, "\n");
-            }
-        }
-
-        j++;
     }
 
     return 0;

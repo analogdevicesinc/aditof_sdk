@@ -47,8 +47,8 @@
 
 struct Layer {
     std::string name;
-    std::vector<double> weights;
-    std::vector<double> bias;
+    std::vector<long double> weights;
+    std::vector<long double> bias;
 };
 
 class cudaOnTarget {
