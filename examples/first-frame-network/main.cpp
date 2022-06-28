@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
         std::cout << "no frame type available!";
         return 0;
     }
-    status = camera->setFrameType(frameTypes.front());
+    status = camera->setFrameType("depth");
     if (status != Status::OK) {
         LOG(ERROR) << "Could not set camera frame type!";
         return 0;
@@ -92,32 +92,53 @@ int main(int argc, char *argv[]) {
     }
 
     aditof::Frame frame;
+    while (1) {
+        status = camera->requestFrame(&frame);
+        if (status != Status::OK) {
+            LOG(ERROR) << "Could not request frame!";
+            return 0;
+        } else {
+            LOG(INFO) << "succesfully requested frame!";
+        }
 
-    status = camera->requestFrame(&frame);
-    if (status != Status::OK) {
-        LOG(ERROR) << "Could not request frame!";
-        return 0;
-    } else {
-        LOG(INFO) << "succesfully requested frame!";
-    }
+        uint16_t *data1;
+        status = frame.getData(FrameDataType::DEPTH, &data1);
 
-    uint16_t *data1;
-    status = frame.getData(FrameDataType::FULL_DATA, &data1);
+        if (status != Status::OK) {
+            LOG(ERROR) << "Could not get frame data!";
+            return 0;
+        }
 
-    if (status != Status::OK) {
-        LOG(ERROR) << "Could not get frame data!";
-        return 0;
-    }
+        if (!data1) {
+            LOG(ERROR) << "no memory allocated in frame";
+            return 0;
+        }
 
-    if (!data1) {
-        LOG(ERROR) << "no memory allocated in frame";
-        return 0;
-    }
+        FrameDetails fDetails;
+        frame.getDetails(fDetails);
+        for (unsigned int i = 0; i < fDetails.width * fDetails.height; ++i) {
+            std::cout << data1[i] << " ";
+        }
 
-    FrameDetails fDetails;
-    frame.getDetails(fDetails);
-    for (unsigned int i = 0; i < fDetails.width * fDetails.height; ++i) {
-        std::cout << data1[i] << " ";
+        uint16_t *data2;
+        status = frame.getData(FrameDataType::OBJ, &data2);
+
+        if (status != Status::OK) {
+            LOG(ERROR) << "Could not get frame data!";
+            return 0;
+        }
+
+        if (!data1) {
+            LOG(ERROR) << "no memory allocated in frame";
+            return 0;
+        }
+        std::cout << "\n\n___________________________________________\n\n";
+        for (unsigned int i = 1; i < 300; i = i * 3) {
+            std::cout << data2[i] << ", " << data2[i + 1] << data2[i + 2]
+                      << std::endl;
+        }
+        std::cout
+            << "\n\n__________________________________________________\n\n";
     }
 
     return 0;
