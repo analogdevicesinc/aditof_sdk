@@ -125,6 +125,10 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
         *dataPtr = m_rgbData;
         break;
     }
+    case FrameDataType::OBJ: {
+        *dataPtr = m_objects;
+        break;
+    }
     }
 
     return Status::OK;
@@ -133,12 +137,16 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
 void FrameImpl::allocFrameData(const aditof::FrameDetails &details) {
 
     m_fullData = new uint16_t[details.fullDataWidth * details.fullDataHeight +
-                              details.rgbWidth * details.rgbHeight];
+                              details.rgbWidth * details.rgbHeight + 100*3]; //for object lists
     m_depthData = m_fullData;
+    m_objects = m_depthData + (details.width * details.height);
     if (details.fullDataHeight == details.height)
         m_irData = m_depthData;
     else
-        m_irData = m_fullData + (details.width * details.height);
+        m_irData = m_fullData + (details.width * details.height); //in case of depth this is not relevant
+ 
+    m_rgbData = m_fullData + (details.fullDataWidth * details.fullDataHeight); //there is no rgb
+    
 
-    m_rgbData = m_fullData + (details.fullDataWidth * details.fullDataHeight);
+
 }

@@ -58,6 +58,7 @@ class FrameImpl {
     uint16_t *m_irData;
     uint16_t *m_rgbData;
     uint16_t *m_fullData;
+    uint16_t *m_objects;
 };
 
 #endif // FRAME_IMPL

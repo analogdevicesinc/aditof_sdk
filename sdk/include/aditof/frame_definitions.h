@@ -47,7 +47,8 @@ enum class FrameDataType {
     FULL_DATA, //!< Raw information
     DEPTH,     //!< Depth information
     IR,        //!< Infrared information
-    RGB        //!< RGB information
+    RGB,        //!< RGB information
+    OBJ         //!< detected Objects list in format [nrOfObject, x_offset, y_offset, resolution, ...]
 };
 
 /**
