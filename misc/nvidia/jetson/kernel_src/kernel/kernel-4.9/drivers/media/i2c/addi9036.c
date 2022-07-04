@@ -328,7 +328,9 @@ static int addi9036_g_input_status(struct v4l2_subdev *sd, u32 *status)
 
 static struct v4l2_subdev_video_ops addi9036_subdev_video_ops = {
 	.s_stream = addi9036_s_stream,
-	.g_mbus_config = camera_common_g_mbus_config,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0)
+	.g_mbus_config	= camera_common_g_mbus_config,
+#endif
 	.g_input_status = addi9036_g_input_status,
 };
 
