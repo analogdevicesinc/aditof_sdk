@@ -685,8 +685,8 @@ aditof::Status Addi9036Sensor::getFrame(uint16_t *buffer,
 
             cudaObj.applyDepthCorrection();
             cudaObj.applyGeometryCorrection();
-            // cudaObj.applyDistortionCorrection();
-            cudaObj.calculateNetworkOutput();
+            cudaObj.applyDistortionCorrection();
+            // cudaObj.calculateNetworkOutput();
             auto t3 = duration_cast<milliseconds>(
                           system_clock::now().time_since_epoch())
                           .count();
