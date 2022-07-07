@@ -137,7 +137,7 @@ aditof::Status FrameImpl::getData(aditof::FrameDataType dataType,
 void FrameImpl::allocFrameData(const aditof::FrameDetails &details) {
 
     m_fullData = new uint16_t[details.fullDataWidth * details.fullDataHeight +
-                              details.rgbWidth * details.rgbHeight + 100*3+1]; //for object lists
+                              details.rgbWidth * details.rgbHeight + 301]; //for object lists
     m_depthData = m_fullData;
     m_objects = m_depthData + (details.width * details.height);
     if (details.fullDataHeight == details.height)

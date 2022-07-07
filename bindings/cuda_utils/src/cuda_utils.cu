@@ -330,9 +330,10 @@ void cudaOnTarget::cpyFrameToGPU(uint16_t *frame) {
     memcpy(m_frame, frame, FRAME_WIDTH * FRAME_HEIGHT * sizeof(uint16_t));
 }
 void cudaOnTarget::cpyFrameFromGPU(uint16_t *frame) {
-    checkCuda(cudaMemcpy(frame, m_frame_d,
-                         sizeof(uint16_t) * (m_parameters[0] * m_parameters[1] + 301),
-                         cudaMemcpyDeviceToHost));
+    checkCuda(
+        cudaMemcpy(frame, m_frame_d,
+                   sizeof(uint16_t) * (m_parameters[0] * m_parameters[1] + 301),
+                   cudaMemcpyDeviceToHost));
 }
 
 void cudaOnTarget::printFrameFromGPU() {
@@ -360,7 +361,7 @@ void cudaOnTarget::setParameters(double width, double height, double fx,
 
     //allocating memory for frame
     checkCuda(cudaMalloc((void **)&m_frame_d,
-                         sizeof(uint16_t) * (width * height + 300)));
+                         sizeof(uint16_t) * (width * height + 301)));
     m_frame = (uint16_t *)malloc(sizeof(uint16_t) * width * height);
 
     //load neural network model
@@ -735,26 +736,28 @@ void cudaOnTarget::calculateNetworkOutput() {
     checkCuda(cudaMemcpy(m_subFrameOutputs, m_subFrameOutputs_d,
                          sizeof(double) * SUBFRAME_NUMBER,
                          cudaMemcpyDeviceToHost));
-    uint8_t counter = 1;
+    // uint8_t counter = 1;
     std::cout << "\n___________________________________________________________"
-                 "_\nOutputs: \n";
-    uint16_t *objectList = (uint16_t *)malloc(sizeof(uint16_t) * 301);
-    for (int i = 0; (i < SUBFRAME_NUMBER && counter <= 300); i++) {
-        // std::cout << m_subFrameOutputs[i] << ", ";
+                  "_\nOutputs: \n";
+    // uint16_t *objectList;
+    // objectList = (uint16_t *)malloc(sizeof(uint16_t) * 301);
+     for (int i = 0; (i < SUBFRAME_NUMBER); i++) {
+         // std::cout << m_subFrameOutputs[i] << ", ";
 
-        if (m_subFrameOutputs[i] > TRESHOLD) {
-            std::cout << "X_OFFSET = " << m_subFrameParameters[i * 3 + 1]
-                      << ", Y_OFFSET = " << m_subFrameParameters[i * 3 + 2]
-                      << ", RESOLUTION = " << m_subFrameParameters[i * 3]
-                      << std::endl;
-            objectList[counter++] =
-                m_subFrameParameters[i * 3 + 1] objectList[counter++] =
-                    m_subFrameParameters[i * 3 + 2] objectList[counter++] =
-                        m_subFrameParameters[i * 3]
-        }
-    }
-    objectList[0] = (counter - 1) / 3;
-    cudaMemcpy(m_rame_d, objectList, sizeof(uint16_t)*301,cudaMemcpyHostToDevice)
-    std::cout << "\n___________________________________________________________"
-                 "___________\n";
+         if (m_subFrameOutputs[i] > TRESHOLD) {
+             std::cout << "X_OFFSET = " << m_subFrameParameters[i * 3 + 1]
+                       << ", Y_OFFSET = " << m_subFrameParameters[i * 3 + 2]
+                       << ", RESOLUTION = " << m_subFrameParameters[i * 3]
+                       << std::endl;
+    //         objectList[counter++] = m_subFrameParameters[i * 3 + 1];
+    //         objectList[counter++] = m_subFrameParameters[i * 3 + 2];
+    //         objectList[counter++] = m_subFrameParameters[i * 3];
+         }
+     }
+    // objectList[0] = (counter - 1) / 3;
+    // cudaMemcpy(m_frame_d, objectList, sizeof(uint16_t) * 301,
+    //            cudaMemcpyHostToDevice);
+     std::cout << "\n___________________________________________________________"
+                  "___________\n";
+    // free(objectList);
 }
