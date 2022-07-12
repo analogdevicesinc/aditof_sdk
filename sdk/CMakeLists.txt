@@ -187,7 +187,11 @@ if (CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 if ( RASPBERRYPI )
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon -latomic")
+    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
+        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -latomic")
+    else()
+        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mfpu=neon -latomic")
+    endif()
     include (${CMAKE_SOURCE_DIR}/cmake/raspberrypi-revision-config.cmake)
 endif()
 
