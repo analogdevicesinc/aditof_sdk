@@ -1,5 +1,5 @@
 const WebSocketAsPromised = require('websocket-as-promised');
-const BufferProtobuf = require('../buffer_pb');
+const BufferProtobuf = require('./buffer_pb');
 
 
 // class NetworkHandle {

@@ -71,6 +71,7 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
 
         console.log("status: " + status + "\ncameraType: " + cameraType);
 
+        this.m_cameraType = cameraType;
         return [status, cameraType];
     }
 
@@ -88,6 +89,10 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
             console.log(`ERROR: invalid connection string: ${connectionString}`);
             return Status.GENERIC_ERROR;
         }
+
+
+        console.log('before getCameraType()');
+
         [status, this.m_cameraType] = await this.getCameraType();
         if (status !== Status.OK) {
             console.log("WARNING: Failed to find out the camera type on target. Assumming it's camera: AD-96TOF1-EBZ");
@@ -98,6 +103,8 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
         this.m_network.send_buff.setFuncName("FindSensors");
         this.m_network.send_buff.setExpectReply(true);
 
+        console.log('before findSensor call');
+
         if ((await this.m_network.SendCommand()) !== 0) {
             console.log("WARNING: Send Command Failed");
             return Status.INVALID_ARGUMENT;
@@ -107,6 +114,8 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
             console.log("WARNING: API execution on Target Failed");
             return Status.GENERIC_ERROR;
         }
+
+        console.log('after findSensors');
 
         const sensorsInfo = this.m_network.recv_buff.getSensorsInfo();
         let name, id;
@@ -128,7 +137,9 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
             this.m_temperatureSensorsInfo.push({ name, id });
         }
 
-        return this.m_network.recv_buff.getStatus();
+        let val = this.m_network.recv_buff.getStatus();
+        console.log('val: ', val);
+        return val;
     }
 
     getDepthSensors() {
@@ -166,10 +177,18 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
         let storages = [];
         let storage;
         let status = Status.OK;
+        let i = 0;
+        console.log('the storages are: ');
         for (const nameAndId of this.m_storagesInfo) {
+            // if (i == 0)
+            //     continue;
             let { name, id } = nameAndId;
+            console.log('name: ', name, 'id: ', id);
+
             storage = new NetworkStorage(name, id, this.m_network);
             storages.push(storage);
+            console.log(i + ' --- ' + storages[i].getName());
+            i++;
         }
 
         return [status, storages];
@@ -193,4 +212,3 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
     }
 }
 window.NetworkSensorEnumerator = NetworkSensorEnumerator;
-

@@ -159,10 +159,9 @@ class NetworkStorage extends StorageInterface {
         return status;
     }
     getName() {
-        return [Status.OK, this.m_name];
+        return this.m_name;
     }
 
 }
 
 window.NetworkStorage = NetworkStorage;
-
