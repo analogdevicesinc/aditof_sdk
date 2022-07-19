@@ -63,10 +63,10 @@ if __name__ == "__main__":
                         help='Path to weights: '
                              'MobileNetSSD_deploy.caffemodel')
     parser.add_argument('-i', "--ip", help='Ip address to use network backend')
-    args = parser.parse_args()
+    args = vars(parser.parse_args())
 
     try:
-        net = cv.dnn.readNet(args.prototxt, args.weights)
+        net = cv.dnn.readNet(args["prototxt"], args["weights"])
     except:
         print("Error: Please give the correct location of the prototxt and caffemodel")
         sys.exit(1)
@@ -83,8 +83,8 @@ if __name__ == "__main__":
     print(system)
 
     cameras = []
-    if args.ip:
-        status = system.getCameraListAtIp(cameras, args.ip)
+    if args["ip"]:
+        status = system.getCameraListAtIp(cameras, args["ip"])
         if not status:
             print("system.getCameraListAtIp() failed with status: ", status)
     else:
@@ -141,15 +141,14 @@ if __name__ == "__main__":
         ir_map = np.array(frame.getData(tof.FrameDataType.IR), dtype="uint16", copy=False)
 
         # Creation of the IR image
-        ir_map = ir_map[0: int(ir_map.shape[0] / 2), :]
-        ir_map = distance_scale_ir * ir_map
+        ir_map = ir_map[0 : 480, 0: 640]
+        ir_map = ir_map * distance_scale / 4
         ir_map = np.uint8(ir_map)
         ir_map = cv.flip(ir_map, 1)
         ir_map = cv.cvtColor(ir_map, cv.COLOR_GRAY2RGB)
 
         # Creation of the Depth image
-        new_shape = (int(depth_map.shape[0] / 2), depth_map.shape[1])
-        depth_map = np.resize(depth_map, new_shape)
+        depth_map = depth_map[0: 480, 0: 640]
         depth_map = cv.flip(depth_map, 1)
         distance_map = depth_map
         depth_map = distance_scale * depth_map
@@ -157,7 +156,7 @@ if __name__ == "__main__":
         depth_map = cv.applyColorMap(depth_map, cv.COLORMAP_RAINBOW)
 
         # Combine depth and IR for more accurate results
-        result = cv.addWeighted(ir_map, 0.4, depth_map, 0.6, 0)
+        result = cv.addWeighted(ir_map, 0.4 , depth_map, 0.6 , 0)
 
         # Start the computations for object detection using DNN
         blob = cv.dnn.blobFromImage(result, inScaleFactor, (inWidth, inHeight), (meanVal, meanVal, meanVal), swapRB)
