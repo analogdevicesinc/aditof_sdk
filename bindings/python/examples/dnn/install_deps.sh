@@ -12,6 +12,6 @@ cd ~/Workspace/aditof_sdk/bindings/python/examples/dnn
 cmake .
 
 echo "Copying files to desktop"
-cp ~/Workspace/aditof_sdk/bindidngs/python/examples/dnn/MobileNetSSD_deploy.prototxt ~/Desktop
-cp ~/Workspace/aditof_sdk/bindidngs/python/examples/dnn/MobileNetSSD_deploy.caffemodel ~/Desktop
-cp ~/Workspace/aditof_sdk/bindidngs/python/examples/dnn/dnn.py ~/Desktop
+cp ~/Workspace/aditof_sdk/bindings/python/examples/dnn/MobileNetSSD_deploy.prototxt ~/Desktop
+cp ~/Workspace/aditof_sdk/bindings/python/examples/dnn/MobileNetSSD_deploy.caffemodel ~/Desktop
+cp ~/Workspace/aditof_sdk/bindings/python/examples/dnn/dnn.py ~/Desktop
