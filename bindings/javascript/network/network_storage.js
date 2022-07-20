@@ -1,12 +1,9 @@
-class StorageInterface {}
-
-class NetworkStorage extends StorageInterface {
-    m_name;
-    m_id;
-    m_network;
+class NetworkStorage {
+    m_name; // string
+    m_id; // int
+    m_network; // Network
 
     constructor(name, id, network) {
-        super();
         this.m_name = name;
         this.m_id = id;
         this.m_network = network;
@@ -30,11 +27,6 @@ class NetworkStorage extends StorageInterface {
             return Status.INVALID_ARGUMENT;
         }
 
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
-
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
             return Status.GENERIC_ERROR;
@@ -45,11 +37,12 @@ class NetworkStorage extends StorageInterface {
         return status;
     }
     async read(address, bytesCount) {
+        let data;
         let net = this.m_network;
 
         if (!net.serverConnected) {
             console.log("WARNING: Not connected to server");
-            return Status.UNREACHABLE;
+            return [Status.UNREACHABLE, data];
         }
 
         net.send_buff = new BufferProtobuf.ClientRequest();
@@ -61,28 +54,21 @@ class NetworkStorage extends StorageInterface {
 
         if ((await net.SendCommand()) !== 0) {
             console.log("WARNING: Send Command Failed");
-            return Status.INVALID_ARGUMENT;
+            return [Status.INVALID_ARGUMENT, data];
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
-            return Status.GENERIC_ERROR;
+            return [Status.GENERIC_ERROR, data];
         }
 
         let status = net.recv_buff.getStatus();
 
-        let data;
+        
         if (status === Status.OK) {
-            // memcpy(data, net->recv_buff.bytes_payload(0).c_str(),
-            //        net->recv_buff.bytes_payload(0).length());
             data = net.recv_buff.getBytesPayloadList()[0];
         }
-        console.log('data: ', data.toLocaleString());
+        // console.log('data: ', data.toLocaleString());
 
         return [status, data];
     }
@@ -112,11 +98,6 @@ class NetworkStorage extends StorageInterface {
             return Status.INVALID_ARGUMENT;
         }
 
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
-
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
             return Status.GENERIC_ERROR;
@@ -143,11 +124,6 @@ class NetworkStorage extends StorageInterface {
             console.log("WARNING: Send Command Failed");
             return Status.INVALID_ARGUMENT;
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");

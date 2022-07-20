@@ -1,316 +1,258 @@
-/*
-class Frame;
-class DepthSensorInterface;
-class StorageInterface;
-class TemperatureSensorInterface;
-*/
-
-/*
-
-class Camera3D_Smart : public aditof::Camera {
-  public:
-    Camera3D_Smart(
-        std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-        std::shared_ptr<aditof::DepthSensorInterface> rgbSensor,
-        std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms,
-        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
-            &tSensors);
-
-    Camera3D_Smart(
-        std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
-        std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms,
-        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
-            &tSensors);
-    ~Camera3D_Smart();
-
-  public: // implements Camera
-    aditof::Status initialize() override;
-    aditof::Status start() override;
-    aditof::Status stop() override;
-    aditof::Status setMode(const std::string &mode,
-                           const std::string &modeFilename) override;
-    aditof::Status
-    getAvailableModes(std::vector<std::string> &availableModes) const override;
-    aditof::Status setFrameType(const std::string &frameType) override;
-    aditof::Status getAvailableFrameTypes(
-        std::vector<std::string> &availableFrameTypes) const override;
-    aditof::Status requestFrame(aditof::Frame *frame,
-                                aditof::FrameUpdateCallback cb) override;
-    aditof::Status getDetails(aditof::CameraDetails &details) const override;
-    aditof::Status
-    getAvailableControls(std::vector<std::string> &controls) const override;
-    aditof::Status setControl(const std::string &control,
-                              const std::string &value) override;
-    aditof::Status getControl(const std::string &control,
-                              std::string &value) const override;
-    aditof::Status getImageSensors(
-        std::vector<std::shared_ptr<aditof::DepthSensorInterface>> &sensors)
-        override;
-    aditof::Status
-    getEeproms(std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms)
-        override;
-    aditof::Status getTemperatureSensors(
-        std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>>
-            &sensors) override;
-
-  private:
-    aditof::Status setNoiseReductionTreshold(uint16_t treshold);
-    aditof::Status setIrGammaCorrection(float gamma);
-
-#ifdef BAYER_CONVERSION
-    float verticalKernel(uint8_t *pData, int x, int y, int width, int height);
-    float horizontalKernel(uint8_t *pData, int x, int y, int width, int height);
-    float plusKernel(uint8_t *pData, int x, int y, int width, int height);
-    float crossKernel(uint8_t *pData, int x, int y, int width, int height);
-    float directCopy(uint8_t *buffer, int x, int y, int width, int height);
-    float getValueFromData(uint8_t *pData, int x, int y, int width, int height);
-    void bayer2RGB(uint16_t *buffer, uint8_t *pData, int width, int height);
-#endif
-
-  private:
-    aditof::CameraDetails m_details;
-    std::shared_ptr<aditof::DepthSensorInterface> m_depthSensor;
-    std::shared_ptr<aditof::DepthSensorInterface> m_rgbSensor;
-    std::shared_ptr<aditof::DepthSensorInterface> m_rgbdSensor;
-    std::shared_ptr<aditof::StorageInterface> m_eeprom;
-    std::shared_ptr<aditof::TemperatureSensorInterface> m_temperatureSensor;
-    bool m_devStarted;
-    bool m_devProgrammed;
-    bool m_eepromInitialized;
-    bool m_tempSensorsInitialized;
-    std::vector<std::string> m_availableControls;
-    Calibration3D_Smart m_calibration;
-    uint16_t m_noiseReductionThreshold;
-    float m_irGammaCorrection;
-    bool m_depthCorrection;
-    bool m_cameraGeometryCorrection;
-    bool m_cameraBayerRgbConversion;
-    bool m_cameraDistortionCorrection;
-    bool m_irDistorsionCorrection;
-    std::string m_revision;
-    std::vector<aditof::FrameDetails> m_rgbdFrameTypes;
-    float m_Rw;
-    float m_Gw;
-    float m_Bw;
+class SensorDetails {
+    connectionType; // ConnectionType 
+    constructor(){
+        this.connectionType = ConnectionType.NETWORK;
+    }
 };
 
-*/
+class BufferInfo {
+    timestamp; // long long unsigned int 
+    constructor(){
+        this.timestamp = 0;
+    }
+};
 
-
-class CameraDetails {
-    connection
-
+class DepthParameters {
+    depthGain; // float 
+    depthOffset; // float 
+    maxDepth; // int 
+    minDepth; // int 
+    // constructor(depthGain, depthOffset, maxDepth, minDepth){
+    //     this.depthGain = depthGain;
+    //     this.depthOffset = depthOffset;
+    //     this.maxDepth = maxDepth;
+    //     this.minDepth = minDepth;
+    // }
 }
 
+class IntrinsicParameters {
+    cameraMatrix = []; // float array
+    distCoeffs = []; // float array
+    pixelWidth; // float 
+    pixelHeight; // float 
+    // constructor(cameraMatrix, distCoeffs, pixelWidth, pixelHeight){
+    //     this.cameraMatrix = cameraMatrix;
+    //     this.distCoeffs = distCoeffs;
+    //     this.pixelWidth = pixelWidth;
+    //     this.pixelHeight = pixelHeight;
+    // }
+}
+
+class FrameDetails {
+    width; // unsigned int 
+    height; // unsigned int 
+    fullDataWidth; // unsigned int 
+    fullDataHeight; // unsigned int 
+    rgbWidth; // unsigned int 
+    rgbHeight; // unsigned int 
+    type; // string 
+    // constructor(width, height, fullDataWidth, fullDataHeight, rgbWidth, rgbHeight, type){
+    //     this.width = width;
+    //     this.height = height;
+    //     this.fullDataWidth = fullDataWidth;
+    //     this.fullDataHeight = fullDataHeight;
+    //     this.rgbWidth = rgbWidth;
+    //     this.rgbHeight = rgbHeight;
+    //     this.type = type;
+    // }
+}
+
+class CameraDetails {
+    cameraId; // string 
+    mode; // string 
+    frameType = new FrameDetails(); // FrameDetails 
+    connection = ConnectionType.NETWORK; // ConnectionType.NETWORK 
+    intrinsics = new IntrinsicParameters(); // IntrinsicParameters 
+    depthParameters = new DepthParameters(); // DepthParameters 
+    bitCount; // int 
+    // constructor(cameraId, mode, connection, bitCount){
+    //     this.cameraId = cameraId;
+    //     this.mode = mode;
+    //     this.frameType = new FrameDetails();
+    //     this.connection = ConnectionType.NETWORK ;
+    //     this.intrinsics = new IntrinsicParameters();
+    //     this.depthParameters = new DepthParameters();
+    //     this.bitCount = bitCount;
+    // }
+}
+
+const FrameDataType = {
+    FULL_DATA: 0, // Raw information
+    DEPTH: 1,     // Depth information
+    IR: 2,        // Infrared information
+    RGB: 3        // RGB information
+};
+Object.freeze(FrameDataType);
+
+
+// An array that contains the specific values for each revision
+const RangeValuesForRevision = [
+    {
+        revision: "RevA", 
+        ranges: [
+                    {mode: "near", minDepth: 250, maxDepth: 800}, 
+                    {mode: "medium", minDepth: 300, maxDepth: 3000}
+                ]
+    }];
+
+
+
 const EEPROM_NAME = '24c1024';
+const TEMPERATURE_SENSOR_NAME = 'TMP10X';
+const skCameraName = '3D-Smart-Camera';
+const skCustomMode = "custom";
+const INTRINSIC = 5;
+const DISTORTION_COEFFICIENTS = 6;
+const EEPROM_SERIAL_LENGHT = 12;
+const EEPROM_SERIAL_ADDR = 0x00010014;
+
+const availableControls = ["noise_reduction_threshold", "ir_gamma_correction",
+"depth_correction",          "camera_geometry_correction",
+"bayer_rgb_conversion",      "camera_distortion_correction",
+"ir_distortion_correction",  "revision"];
 
 class Camera3D_Smart {
-    // aditof::CameraDetails 
-    m_details = new CameraDetails();
-
-    // std::shared_ptr<aditof::DepthSensorInterface> 
-    m_depthSensor;
-
-    // std::shared_ptr<aditof::DepthSensorInterface> 
-    m_rgbSensor;
-
-    // std::shared_ptr<aditof::DepthSensorInterface> 
-    m_rgbdSensor;
-
-    // std::shared_ptr<aditof::StorageInterface> 
-    m_eeprom;
-
-    // std::shared_ptr<aditof::TemperatureSensorInterface> 
-    m_temperatureSensor;
-
-    // bool 
-    m_devStarted;
-
-    // bool 
-    m_devProgrammed;
-
-    // bool 
-    m_eepromInitialized;
-
-    // bool 
-    m_tempSensorsInitialized;
-
-    // std::vector<std::string> 
-    m_availableControls;
-
-    // Calibration3D_Smart 
-    m_calibration;
-
-    // uint16_t 
-    m_noiseReductionThreshold;
-
-    // float 
-    m_irGammaCorrection;
-
-    // bool 
-    m_depthCorrection;
-
-    // bool 
-    m_cameraGeometryCorrection;
-
-    // bool 
-    m_cameraBayerRgbConversion;
-
-    // bool 
-    m_cameraDistortionCorrection;
-
-    // bool 
-    m_irDistorsionCorrection;
-
-    // std::string 
-    m_revision;
-
-    // std::vector<aditof::FrameDetails> 
-    m_rgbdFrameTypes;
-
-    // float 
-    m_Rw;
-
-    // float 
-    m_Gw;
-
-    // float 
-    m_Bw;
-
-
-
-    // constructor(depthSensor, rgbSensor, eeproms, tSensors){
+    m_details; // CameraDetails
+    // m_depthSensor;
+    // m_rgbSensor;
+    m_rgbdSensor; // NetworkDepthSensor array
+    m_eeprom; // NetworkStorage array
+    m_temperatureSensor; // NetworkTemperatureSensor array
+    m_devStarted; // bool 
+    m_devProgrammed; // bool 
+    m_eepromInitialized; // bool 
+    m_tempSensorsInitialized; // bool 
+    m_availableControls; // string array
+    m_calibration; // Calibration3D_Smart 
+    m_noiseReductionThreshold; // uint16_t 
+    m_irGammaCorrection; // float 
+    m_depthCorrection; // bool 
+    m_cameraGeometryCorrection; // bool 
+    m_cameraBayerRgbConversion; // bool 
+    m_cameraDistortionCorrection; // bool 
+    m_irDistorsionCorrection; // bool 
+    m_revision; // string 
+    m_rgbdFrameTypes; // FrameDetails array
+    m_Rw; // float 
+    m_Gw; // float 
+    m_Bw; // float 
+    
     constructor(rgbdSensor, eeproms, tSensors) {
+        this.m_details = new CameraDetails();
         this.m_rgbdSensor = rgbdSensor;
         this.m_devStarted = false;
         this.m_devProgrammed = false;
         this.m_eepromInitialized = false;
         this.m_tempSensorsInitialized = false;
-        // this.m_availableControls = availableControls;
+        this.m_availableControls = availableControls;
+        this.m_calibration = new Calibration3D_Smart();
         this.m_depthCorrection = true;
         this.m_cameraGeometryCorrection = true;
         this.m_cameraDistortionCorrection = true;
         this.m_irDistorsionCorrection = false;
         this.m_revision = "RevA";
-
-
         this.m_Rw = 255.0 * 0.25;
         this.m_Gw = 255.0 * 0.35;
         this.m_Bw = 255.0 * 0.25;
+        
 
         // Check Depth Sensor
         if (!rgbdSensor) {
             console.log('WARNING: Invalid instance of a depth sensor');
             return;
         }
-        // aditof::SensorDetails 
         let sDetails = this.m_rgbdSensor.getDetails();
         this.m_details.connection = sDetails.connectionType;
 
         // Look for EEPROM
         let eeprom_exists = false;
-        console.log(typeof eeproms[0]) //NetworkStorage
-        for (let e in eeproms) {
-            console.log('getName(): ', e.m_name);
-            if (e.getName() === EEPROM_NAME) {
+        for(const e of eeproms){
+            if(e.getName() === EEPROM_NAME){
                 eeprom_exists = true;
                 this.m_eeprom = e;
+                break;
             }
         }
-
-        if (eeprom_exists === false) {
-            console.log('WARNING: Could not find ', EEPROM_NAME, ' while looking for storage for camera '); //skCameraName
+        if (!eeprom_exists) {
+            console.log('WARNING: Could not find ', EEPROM_NAME, ' while looking for storage for camera ', skCameraName);
             return;
         }
-
         // Look for the temperature sensor
         let tSensor_exists = false;
-        for (let t in tSensors) {
-            if (t.getName() == TEMPERATURE_SENSOR_NAME) {
+        for (const t of tSensors) {
+            if (t.getName() === TEMPERATURE_SENSOR_NAME) {
                 tSensor_exists = true;
                 this.m_temperatureSensor = t;
+                break;
             }
         }
-        if (tSensor_exists == false) {
+        if (!tSensor_exists) {
             console.log('WARNING: Could not find ', TEMPERATURE_SENSOR_NAME, ' while looking for temperature sensors for camera ', skCameraName);
             return;
         }
     }
 
-    // aditof::Status initialize() override;
-    initialize() {
+    async initialize() {
         let status;
-
         console.log('INFO: Initializing camera');
 
         if (!this.m_rgbdSensor || !this.m_eeprom || !this.m_temperatureSensor) {
-
             console.log('WARNING: Failed to initialize! Not all sensors are available');
             return Status.GENERIC_ERROR;
         }
 
         // Open communication with the depth sensor
-        status = this.m_rgbdSensor.open();
-        if (status != Status.OK) {
+        status = await this.m_rgbdSensor.open();
+        if (status !== Status.OK) {
             console.log('WARNING: Failed to open device');
-            return status;
-        }
-
-        let handle;
-        [status, handle] = this.m_rgbdSensor.getHandle();
-        if (status != Status.OK) {
-            console.log('ERROR: Failed to obtain the handle');
             return status;
         }
 
         this.m_details.bitCount = 12;
 
         // Open communication with EEPROM
-        [status, handle] = this.m_eeprom.open();
-        if (status != Status.OK) {
-            let name = this.m_eeprom.getName();
-            console.log('ERROR: Failed to open EEPROM with name ', name);
+        status = await this.m_eeprom.open();
+        if (status !== Status.OK) {
+            console.log('ERROR: Failed to open EEPROM with name ', this.m_eeprom.getName());
             return status;
         }
         this.m_eepromInitialized = true;
 
         // Open communication with temperature sensor
-        status = this.m_temperatureSensor.open(handle);
-        if (status != Status.OK) {
-            let name = this.m_temperatureSensor.getName();
-            console.log('ERROR: Failed to open temperature sensor with name', name);
+        status = await this.m_temperatureSensor.open();
+        if (status !== Status.OK) {
+            console.log('ERROR: Failed to open temperature sensor with name', this.m_temperatureSensor.getName());
             return status;
         }
         this.m_tempSensorsInitialized = true;
 
         // Read the camera's serial number from eeprom
-        let eepromSerial = Array(EEPROM_SERIAL_LENGHT);
-        status = this.m_eeprom.read(EEPROM_SERIAL_ADDR, eepromSerial, EEPROM_SERIAL_LENGHT);
-        if (status != Status.OK) {
+        let eepromSerial;
+        [status, eepromSerial] = await this.m_eeprom.read(EEPROM_SERIAL_ADDR, EEPROM_SERIAL_LENGHT);
+        if (status !== Status.OK) {
             console.log('ERROR: Failed to read serial from eeprom');
             return status;
         }
 
-        // this.m_details.cameraId = std::string((char *)(eepromSerial), EEPROM_SERIAL_LENGHT);
-        this.m_details.cameraId = eepromSerial;
+        this.m_details.cameraId = new TextDecoder().decode(eepromSerial);
         console.log('INFO: Camera ID: ', this.m_details.cameraId);
 
-        status = this.m_calibration.readCalMap(this.m_eeprom);
-        if (status != Status.OK) {
+        status = await this.m_calibration.readCalMap(this.m_eeprom);
+        if (status !== Status.OK) {
             console.log('WARNING: Failed to read calibration data from eeprom');
             return status;
         }
 
-        this.m_calibration.getIntrinsic(INTRINSIC, m_details.intrinsics.cameraMatrix);
-        this.m_calibration.getIntrinsic(DISTORTION_COEFFICIENTS, m_details.intrinsics.distCoeffs);
+        [status, this.m_details.intrinsics.cameraMatrix] = this.m_calibration.getIntrinsic(INTRINSIC);
+        [status, this.m_details.intrinsics.distCoeffs] = this.m_calibration.getIntrinsic(DISTORTION_COEFFICIENTS);
 
         // For now we use the unit cell size values specified in the datasheet
         this.m_details.intrinsics.pixelWidth = 0.0056;
         this.m_details.intrinsics.pixelHeight = 0.0056;
 
         // Cache the frame types provided by Depth and RGB sensors
-        status = this.m_rgbdSensor.getAvailableFrameTypes(this.m_rgbdFrameTypes);
-        if (status != Status.OK) {
+        [status, this.m_rgbdFrameTypes] = await this.m_rgbdSensor.getAvailableFrameTypes();
+        if (status !== Status.OK) {
             console.log('WARNING: Failed to get the depth sensor frame types');
             return status;
         }
@@ -346,21 +288,30 @@ class Camera3D_Smart {
             return Status.OK;
         }
         // aditof::Status setMode(const std::string &mode, const std::string &modeFilename) override;
-    setMode(mode, modeFilename) {
+    async setMode(mode, modeFilename) {
         let status = Status.OK;
 
         // Set the values specific to the Revision requested
         // std::array<rangeStruct, 3> rangeValues = RangeValuesForRevision.at(m_revision);
-        let rangeValues;
+        
+        let rangeValues = [];
+        for (const rvv of RangeValuesForRevision){
+            if (rvv.revision === this.m_revision){
+                rangeValues = rvv.ranges;
+                break;
+            }
+        }
+        console.log('rangeValues: ', rangeValues);
 
         console.log('INFO: Chosen mode: ', mode);
 
         let mode_found = false;
-        for (let rm in rangeValues) {
-            if (rm.mode == mode) {
-                mode_found = true;
-                this.m_details.depthParameters.maxDepth = rm.maxDepth;
-                this.m_details.depthParameters.minDepth = rm.minDepth;
+        for (const val of rangeValues) {
+            console.log(val.mode, val.maxDepth, val.minDepth);
+            if (val.mode === mode) {
+                mode_found = true;                
+                this.m_details.depthParameters.maxDepth = val.maxDepth;
+                this.m_details.depthParameters.minDepth = val.minDepth;
                 break;
             }
         }
@@ -368,35 +319,35 @@ class Camera3D_Smart {
             this.m_details.depthParameters.maxDepth = 1;
         }
 
-
         console.log('INFO: Camera range for mode: ', mode, ' is: ', this.m_details.depthParameters.minDepth, ' mm and ', this.m_details.depthParameters.maxDepth, ' mm');
 
         if (!this.m_devProgrammed) {
             let firmwareData;
-            status = this.m_calibration.getAfeFirmware(mode, firmwareData);
-            if (status != Status.OK) {
+            [status, firmwareData] = this.m_calibration.getAfeFirmware();
+            console.log(firmwareData);
+            if (status !== Status.OK) {
                 console.log('WARNING: Failed to read firmware from eeprom');
                 return Status.UNREACHABLE;
             } else {
                 console.log('INFO: Found firmware for mode: ', mode);
             }
 
-            console.log('INFO: Firmware size: ', firmwareData.size() * 2, ' bytes');
-            status = this.m_rgbdSensor.program(firmwareData.data(),
-                2 * firmwareData.size());
-            if (status != Status.OK) {
+            console.log('INFO: Firmware size: ', firmwareData.length * 2, ' bytes');
+            status = await this.m_rgbdSensor.program(firmwareData,
+                2 * firmwareData.length);
+            if (status !== Status.OK) {
                 console.log('WARNING: Failed to program AFE');
                 return Status.UNREACHABLE;
             }
             this.m_devProgrammed = true;
         }
 
-        status = this.m_calibration.setMode(this.m_rgbdSensor, mode,
+        status = await this.m_calibration.setMode(this.m_rgbdSensor, mode,
             this.m_details.depthParameters.maxDepth,
             this.m_details.frameType.width,
             this.m_details.frameType.height);
 
-        if (status != Status.OK) {
+        if (status !== Status.OK) {
             console.log('WARNING: Failed to set calibration mode');
             return status;
         }
@@ -408,19 +359,19 @@ class Camera3D_Smart {
         if (this.m_details.frameType.type == 'depth_rgb') {
             let afeRegsAddr = [0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22];
             let afeRegsVal = [0x0006, 0x0004, 0x03, 0x0007, 0x0004];
-            this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+            await this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
         } else if (this.m_details.frameType.type == 'ir_rgb') {
             let afeRegsAddr = [0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22];
             let afeRegsVal = [0x0006, 0x0004, 0x05, 0x0007, 0x0004];
-            this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+            await this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
         } else if (this.m_details.frameType.type == 'depth_ir_rgb') {
             let afeRegsAddr = [0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22];
             let afeRegsVal = [0x0006, 0x0004, 0x03, 0x0007, 0x0004];
 
-            this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
+            await this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
         }
 
-        if (mode == 'near') {
+        if (mode === 'near') {
             this.m_details.depthParameters.depthGain = 0.5;
         } else {
             this.m_details.depthParameters.depthGain = 1.15;
@@ -445,69 +396,84 @@ class Camera3D_Smart {
 
 
     // aditof::Status setFrameType(const std::string &frameType) override;
-    setFrameType(frameType) {
+    async setFrameType(frameType) {
         let status = Status.OK;
 
         if (this.m_devStarted) {
             status = this.m_rgbdSensor.stop();
-            if (status != Status.OK) {
+            if (status !== Status.OK) {
                 return status;
             }
             this.m_devStarted = false;
         }
 
-        // std::vector<FrameDetails> 
-        let detailsList = [];
-        status = this.m_rgbdSensor.getAvailableFrameTypes(detailsList);
-        if (status != Status.OK) {
+        
+        let frameDetailsList;
+        [status, frameDetailsList] = await this.m_rgbdSensor.getAvailableFrameTypes();
+        if (status !== Status.OK) {
             console.log('WARNING: Failed to get available frame types');
             return status;
         }
 
         let typeFound = false;
-        let frameDetailsIt;
-        for (let d in detailsList) {
-            if (d.type == frameType) {
+        let frameDetails;
+        for (const d of frameDetailsList) {
+            if (d.getType() === frameType) {
                 typeFound = true;
-                frameDetailsIt = d;
+                frameDetails = d;
+                
+                console.log('found: ', frameDetails);
+                break;
+
             }
         }
 
-        if (typeFound == false) {
+        if (!typeFound) {
             console.log('WARNING: Frame type: ', frameType, ' not supported by camera');
             return Status.INVALID_ARGUMENT;
         }
 
-        if (this.m_details.frameType != frameDetailsIt) {
+        if (this.m_details.frameType !== frameDetails) {
 
+            
             //Turn off the streaming of data to modify parameters in the driver.
             let afeRegsAddr = [0x4001, 0x7c22];
             let afeRegsVal = [0x0006, 0x0004];
-            this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 2);
+            status = await this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 2);
+            console.log('writeAfeRegisters status:', status);
 
-            status = this.m_rgbdSensor.setFrameType(frameDetailsIt);
+            let details = new FrameDetails(frameDetails.getWidth(), 
+                frameDetails.getHeight(),
+                frameDetails.getFullDataWidth(),
+                frameDetails.getFullDataHeight(),
+                frameDetails.getRgbWidth(),
+                frameDetails.getRgbHeight(),
+                frameDetails.getType());
+            status = await this.m_rgbdSensor.setFrameType(details);
 
-            if (status != Status.OK) {
+            if (status !== Status.OK) {
                 console.log('WARNING: Failed to set frame type of the depth sensor');
                 return status;
             }
-            this.m_details.frameType.type = frameType;
-            this.m_details.frameType.width = frameDetailsIt.width;
-            this.m_details.frameType.height = frameDetailsIt.height;
-            this.m_details.frameType.rgbWidth = frameDetailsIt.rgbWidth;
-            this.m_details.frameType.rgbHeight = frameDetailsIt.rgbHeight;
-            this.m_details.frameType.fullDataWidth = frameDetailsIt.fullDataWidth;
-            this.m_details.frameType.fullDataHeight = frameDetailsIt.fullDataHeight;
+            console.log('frameDetails: ', frameDetails);
+            this.m_details.frameType = details;
+            // this.m_details.frameType.type = frameType;
+            // this.m_details.frameType.width = frameDetailsIt.getWidth();
+            // this.m_details.frameType.height = frameDetailsIt.getHeight();
+            // this.m_details.frameType.rgbWidth = frameDetailsIt.getRgbWidth();
+            // this.m_details.frameType.rgbHeight = frameDetailsIt.getRgbHeight();
+            // this.m_details.frameType.fullDataWidth = frameDetailsIt.getFullDataWidth();
+            // this.m_details.frameType.fullDataHeight = frameDetailsIt.getFullDataHeight();
 
             //Turn on the streaming of data.
-            let afeRegsAddress = [0x4001, 0x7c22];
-            let afeRegsValue = [0x0007, 0x0004];
-            this.m_rgbdSensor.writeAfeRegisters(afeRegsAddress, afeRegsValue, 2);
+            afeRegsAddr = [0x4001, 0x7c22];
+            afeRegsVal = [0x0007, 0x0004];
+            await this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 2);
         }
 
         if (!this.m_devStarted) {
-            status = this.m_rgbdSensor.start();
-            if (status != Status.OK) {
+            status = await this.m_rgbdSensor.start();
+            if (status !== Status.OK) {
                 return status;
             }
             this.m_devStarted = true;
@@ -517,51 +483,52 @@ class Camera3D_Smart {
     }
 
     // aditof::Status getAvailableFrameTypes(std::vector<std::string> &availableFrameTypes) const override;
-    getAvailableFrameTypes() {
+    async getAvailableFrameTypes() {
         let status = Status.OK;
 
         let availableFrameTypes = [];
         // std::vector<FrameDetails> 
-        let frameDetailsList = [];
-        status = this.m_rgbdSensor.getAvailableFrameTypes(frameDetailsList);
-        if (status != Status.OK) {
+        let frameDetailsList;
+        [status, frameDetailsList] = await this.m_rgbdSensor.getAvailableFrameTypes();
+        if (status !== Status.OK) {
             console.log('WARNING: Failed to get available frame types');
             return status;
         }
 
-        for (let item in frameDetailsList) {
-            availableFrameTypes.push(item.type);
+        for (let i = 0; i < frameDetailsList.length; i++) {
+            // console.log(frameDetailsList[i].getType());
+            availableFrameTypes.push(frameDetailsList[i].getType());
         }
 
         return [status, availableFrameTypes];
     }
 
     // aditof::Status requestFrame(aditof::Frame *frame, aditof::FrameUpdateCallback cb) override;
-    requestFrame(frame, cb) {
+    async requestFrame() {
         let status = Status.OK;
-
-        if (frame == null) {
-            console.log('ERROR: Received pointer frame is null');
-            return Status.INVALID_ARGUMENT;
-        }
+        let frame = new Frame();
+        // if (frame == null) {
+        //     console.log('ERROR: Received pointer frame is null');
+        //     return Status.INVALID_ARGUMENT;
+        // }
 
         // FrameDetails 
-        let frameDetails;
-        frameDetails = frame.getDetails();
+        let frameDetails = new FrameDetails();
+        [status, frameDetails] = frame.getDetails();
 
         if (this.m_details.frameType.type != frameDetails.type) {
             frame.setDetails(this.m_details.frameType);
         }
 
         let fullDataLocation;
-        frame.getData(FrameDataType.FULL_DATA, fullDataLocation);
+        [status, fullDataLocation] = frame.getData(FrameDataType.FULL_DATA);
 
         // aditof::BufferInfo 
         let rgbdBufferInfo;
-        status = this.m_rgbdSensor.getFrame(fullDataLocation, rgbdBufferInfo);
+        [status, fullDataLocation] = await this.m_rgbdSensor.getFrame();
         if (status != Status.OK) {
             console.log('WARNING: Failed to get frame from depth sensor');
-            return status;
+            return [status, null];
         }
 
         /*
@@ -586,10 +553,10 @@ class Camera3D_Smart {
         if (this.m_details.mode != skCustomMode && (this.m_details.frameType.type == 'depth_ir_rgb' || this.m_details.frameType.type == 'depth_rgb')) {
 
             let depthDataLocation;
-            frame.getData(FrameDataType.DEPTH, depthDataLocation);
+            [status, depthDataLocation] = frame.getData(FrameDataType.DEPTH);
 
             let irDataLocation;
-            frame.getData(FrameDataType.IR, irDataLocation);
+            [status, irDataLocation] = frame.getData(FrameDataType.IR);
 
             if (this.m_depthCorrection) {
                 this.m_calibration.calibrateDepth(depthDataLocation, this.m_details.frameType.width * this.m_details.frameType.height);
@@ -890,545 +857,13 @@ class Camera3D_Smart {
 
 }
 
-
-
-
-
-
-
-
-
-//CAMERA_DEFINITIONS
-/*
-
-struct IntrinsicParameters {
-    
-     std::vector<float> cameraMatrix;
-
-     
-     std::vector<float> distCoeffs;
- 
-     
-     float pixelWidth;
- 
-     
-     float pixelHeight;
- };
- 
- 
- struct DepthParameters {
-     
-     float depthGain;
- 
-     
-     float depthOffset;
- 
-     
-     int maxDepth;
- 
-     
-     int minDepth;
- };
- 
- 
- struct CameraDetails {
-     
-     std::string cameraId;
- 
-     
-     std::string mode;
- 
-     
-     FrameDetails frameType;
- 
-     
-     ConnectionType connection;
- 
-     
-     IntrinsicParameters intrinsics;
- 
-     
-     DepthParameters depthParameters;
- 
-     
-     int bitCount;
- };
-
-*/
-
-
-
-
-
-
-// Calibration3D_Smart
-/*
-class Calibration3D_Smart {
-  public:
-    Calibration3D_Smart();
-    ~Calibration3D_Smart();
-
-  public:
-    aditof::Status readCalMap(std::shared_ptr<aditof::StorageInterface> eeprom);
-    aditof::Status getAfeFirmware(const std::string &mode,
-                                  std::vector<uint16_t> &data) const;
-    aditof::Status getIntrinsic(float key, std::vector<float> &data) const;
-    aditof::Status setMode(std::shared_ptr<aditof::DepthSensorInterface> sensor,
-                           const std::string &mode, int range,
-                           unsigned int frameWidth, unsigned int frameheight);
-    aditof::Status calibrateDepth(uint16_t *frame, uint32_t frame_size);
-    aditof::Status calibrateCameraGeometry(uint16_t *frame,
-                                           uint32_t frame_size);
-    aditof::Status distortionCorrection(uint16_t *frame, unsigned int width,
-                                        unsigned int height);
-
-  private:
-    void buildDepthCalibrationCache(float gain, float offset,
-                                    int16_t maxPixelValue, int range);
-    void buildGeometryCalibrationCache(const std::vector<float> &cameraMatrix,
-                                       unsigned int width, unsigned int height);
-    void buildDistortionCorrectionCache(unsigned int width,
-                                        unsigned int height);
-
-  private:
-    //! mode_struct - Structure to hold the packet consisting of map of parameters
-   
-      struct mode_struct {
-        uint16_t pulse_cnt;
-        uint8_t depth_pwr[48];
-        uint16_t depth_x0;
-        uint16_t depth_offset[49];
-        uint16_t depth3;
-        uint16_t depth2;
-    };
-
-  private:
-    uint16_t *m_depth_cache;
-    double *m_geometry_cache;
-    double *m_distortion_cache;
-    int m_range;
-    mode_struct m_mode_settings[2];
-    std::vector<float> m_intrinsics;
-    std::vector<uint16_t> m_afe_code;
-    bool m_cal_valid;
-};
-*/
-
-class Calibration3D_Smart {
-
-    // private:
-    //   //! mode_struct - Structure to hold the packet consisting of map of parameters
-    //   /*!
-    //     mode_struct provides structure to hold the packet(sub map) of parameters
-    // */
-    //   struct mode_struct {
-    //       uint16_t pulse_cnt;
-    //       uint8_t depth_pwr[48];
-    //       uint16_t depth_x0;
-    //       uint16_t depth_offset[49];
-    //       uint16_t depth3;
-    //       uint16_t depth2;
-    //   };
-    mode_struct;
-
-    // private:
-    // uint16_t *
-    m_depth_cache;
-    // double *
-    m_geometry_cache;
-    // double *
-    m_distortion_cache;
-    // int 
-    m_range;
-    // mode_struct 
-    m_mode_settings = Array(2);
-    // std::vector<float> 
-    m_intrinsics = [];
-    // std::vector<uint16_t> 
-    m_afe_code = [];
-    // bool 
-    m_cal_valid;
-
-    constructor() {
-        this.m_depth_cache = nullptr;
-        this.m_geometry_cache = nullptr;
-        this.m_distortion_cache = nullptr;
-        this.m_range = 16000;
-        this.m_cal_valid = false;
-        // this.m_afe_code.insert(m_afe_code.end(), &basecode[0],&basecode[ARRAY_SIZE(basecode)]);
-        this.m_afe_code.push(basecode);
-    }
-
-    // aditof::Status Calibration3D_Smart::readCalMap(std::shared_ptr<aditof::StorageInterface> eeprom) {
-    readCalMap(eeprom) {
-        let status = Status.OK;
-        let mode_data = Array(MODE_CFG_SIZE);
-        let float_size = 4;
-        let intrinsic_data = Array((COMMON_SIZE + 1) / float_size);
-
-        /*Read the mode data*/
-        for (let i = 0; i < 2; i++) {
-            eeprom.read(ROMADDR_CFG_BASE[i], mode_data, MODE_CFG_SIZE);
-
-            if (mode_data[0] == 0xFF) {
-                console.log('WARNING: Invalid calibration in EEPROM, using default settings');
-                return Status.OK;
-            }
-
-            this.m_mode_settings[i].pulse_cnt = mode_data[PULSE_CNT_OFFSET] | (mode_data[PULSE_CNT_OFFSET + 1] << 8);
-            // memcpy(m_mode_settings[i].depth_pwr, &mode_data[DEPTH_PWR_OFFSET], DEPTH_PWR_CNT);
-
-            this.m_mode_settings[i].depth_x0 = mode_data[DEPTH_X0_OFFSET] | (mode_data[DEPTH_X0_OFFSET + 1] << 8);
-
-            for (let j = DEPTH_OFFSET_OFFSET; j < DEPTH_OFFSET_OFFSET + DEPTH_OFST_CNT * 2; j += 2) {
-                this.m_mode_settings[i].depth_offset[(j - DEPTH_OFFSET_OFFSET) / 2] = mode_data[j] | (mode_data[j + 1] << 8);
-            }
-            this.m_mode_settings[i].depth3 = mode_data[DEPTH_3_OFFSET] | (mode_data[DEPTH_3_OFFSET + 1] << 8);
-            this.m_mode_settings[i].depth2 = mode_data[DEPTH_2_OFFSET] | (mode_data[DEPTH_2_OFFSET + 1] << 8);
-        }
-
-        /*Replace the settings in the base code with the eeprom values*/
-        for (let i = 0; i < 2; i++) {
-            let afeCodeFound = false;
-            for (let afeCode in this.m_afe_code) {
-                if (afeCode == MODE_REG_BASE_ADDR[i] + R_MODE_PSPACE) {
-                    afeCodeFound = true;
-                    break;
-                }
-            }
-
-            if (!afeCodeFound) {
-                console.log('WARNING: Could not find R_MODE_PSPACE');
-                return Status.INVALID_ARGUMENT;
-            }
-            // let pulse_space = *(it + 1);
-            let pulse_space;
-            let pulse_cnt = this.m_mode_settings[i].pulse_cnt;
-            let pulse_hd = (((pulse_cnt - 1) * pulse_space + 90) / 928 + 3) * 36 + 57;
-
-            afeCodeFound = false;
-            for (let afeCode in this.m_afe_code) {
-                if (afeCode == MODE_REG_BASE_ADDR[i] + R_PULSECNT) {
-                    afeCodeFound = true;
-                    break;
-                }
-            }
-            if (!afeCodeFound) {
-                console.log('WARNING: Could not find R_PULSECNT');
-                return Status.INVALID_ARGUMENT;
-            }
-
-            // *(it + 1) = pulse_cnt;
-
-
-            afeCodeFound = false;
-            for (let afeCode in this.m_afe_code) {
-                if (afeCode == MODE_REG_BASE_ADDR[i] + R_PULSEHD) {
-                    afeCodeFound = true;
-                    break;
-                }
-            }
-            if (!afeCodeFound) {
-                console.log('WARNING: Could not find R_PULSEHD');
-                return Status.INVALID_ARGUMENT;
-            }
-
-            // *(it + 1) = pulse_hd;
-            afeCodeFound = false;
-            for (let afeCode in this.m_afe_code) {
-                if (afeCode == MODE_LCORR_BASE_ADDR[i] + R_DEPTH_2) {
-                    afeCodeFound = true;
-                    break;
-                }
-            }
-            if (!afeCodeFound) {
-                console.log('WARNING: Could not find R_DEPTH_2');
-                return Status.INVALID_ARGUMENT;
-            }
-
-
-            // *(it + 1) = m_mode_settings[i].depth2;
-            afeCodeFound = false;
-            for (let afeCode in this.m_afe_code) {
-                if (afeCode == MODE_LCORR_BASE_ADDR[i] + R_DEPTH_3) {
-                    afeCodeFound = true;
-                    break;
-                }
-            }
-            if (!afeCodeFound) {
-                console.log('WARNING: Could not find R_DEPTH_3');
-                return Status.INVALID_ARGUMENT;
-            }
-
-            // *(it + 1) = m_mode_settings[i].depth3;
-            afeCodeFound = false;
-            for (let afeCode in this.m_afe_code) {
-                if (afeCode == MODE_LCORR_BASE_ADDR[i] + R_DEPTH_OFST) {
-                    afeCodeFound = true;
-                    break;
-                }
-            }
-            if (!afeCodeFound) {
-                console.log('WARNING: Could not find R_DEPTH_OFST');
-                return Status.INVALID_ARGUMENT;
-            }
-
-            for (let j = 0; j < DEPTH_OFST_CNT; j++) {
-                // *it = m_mode_settings[i].depth_offset[j];
-                it += 2;
-            }
-        }
-
-        /*Read the intrinsics and distortion params*/
-
-        let intrinsics_byte = Array(28);
-        let intrinsics_full = Array(7);
-
-        eeprom.read(ROMADDR_COMMOM_BASE, intrinsics_byte, 28);
-
-        for (let i = 0; i < 28; i = i + 4) {
-            intrinsics_full[i / 4] = intrinsics_byte[i] | (intrinsics_byte[i + 1] << 8) | (intrinsics_byte[i + 2] << 16) | (intrinsics_byte[i + 3] << 24);
-        }
-
-        // memcpy(intrinsic_data, &intrinsics_full, 28);
-        // m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0], &intrinsic_data[7]);
-        this.m_intrinsics.push(intrinsic_data);
-        this.m_cal_valid = true;
-
-        return status;
-    }
-
-
-    // aditof::Status Calibration3D_Smart::getAfeFirmware(const std::string &mode, std::vector<uint16_t> &data) const {
-    getAfeFirmware(mode) {
-        return [Status.OK, this.m_afe_code];
-    }
-
-
-    // aditof::Status Calibration3D_Smart::getIntrinsic(float key, std::vector<float> &data) const {
-    getIntrinsic(key) {
-        let data = [];
-        let validParam = (INTRINSIC == key) || (DISTORTION_COEFFICIENTS == key);
-
-        if (!validParam || !this.m_cal_valid) {
-            console.log('WARNING: Invalid intrinsic ', key);
-            return Status.INVALID_ARGUMENT;
-        }
-
-        if (key == INTRINSIC) {
-            let intrinsic = [m_intrinsics[2], 0, m_intrinsics[0], 0, m_intrinsics[3], m_intrinsics[1], 0, 0, 1];
-            // data.insert(data.end(), intrinsic.begin(), intrinsic.end());
-            data.push(intrinsic);
-        } else {
-            let dist_coeff = [m_intrinsics[4], m_intrinsics[5], 0, 0, m_intrinsics[6]];
-            // data.insert(data.end(), dist_coeff.begin(), dist_coeff.end());
-            data.push(dist_coeff);
-        }
-
-        return [Status.OK, data];
-    }
-
-    // aditof::Status Calibration3D_Smart::setMode(std::shared_ptr<aditof::DepthSensorInterface> depthSensor, const std::string &mode, int range, unsigned int frameWidth, unsigned int frameheight) {
-    setMode(depthSensor, mode, range, frameWidth, frameheight) {
-        let status = Status.OK;
-        let cameraMatrix = [];
-        let distortionCoeffs = [];
-        let mode_id = (mode == 'near' ? 0 : 1);
-        let pixelMaxValue = (1 << 12) - 1; // 4095
-        let gain = (mode == 'near' ? 0.5 : 1.15);
-        let offset = 0.0;
-
-        buildDepthCalibrationCache(gain, offset, pixelMaxValue, range);
-        this.m_range = range;
-
-        status = getIntrinsic(INTRINSIC, cameraMatrix);
-        if (status != Status.OK) {
-            console.log('WARNING: Failed to read intrinsic from eeprom');
-        } else {
-            console.log('INFO: Camera intrinsic parameters:\n\tfx: ', cameraMatrix[0], '\n\tfy: ', cameraMatrix[4], '\n\tcx: ', cameraMatrix[2], '\n\tcy: ', cameraMatrix[5]);
-            buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
-        }
-
-        status = getIntrinsic(DISTORTION_COEFFICIENTS, distortionCoeffs);
-        if (status != Status.OK) {
-            console.log('WARNING: Failed to read distortion coefficients from eeprom');
-        } else {
-            buildDistortionCorrectionCache(frameWidth, frameheight);
-        }
-
-        /*Execute the mode change command*/
-        let afeRegsAddr = [0x4000, 0x4001, 0x7c22];
-        let afeRegsVal = [mode_id, 0x0004, 0x0004];
-        depthSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
-
-        return Status.OK;
-    }
-
-
-    // aditof::Status Calibration3D_Smart::calibrateDepth(uint16_t *frame, uint32_t frame_size) {
-    calibrateDepth(frame, frame_size) {
-        let cache = this.m_depth_cache;
-        let end = frame + (frame_size - frame_size % 8);
-        let framePtr = frame;
-
-        for (; framePtr < end; framePtr += 8) {
-            // *framePtr = *(cache + *framePtr);
-            // *(framePtr + 1) = *(cache + *(framePtr + 1));
-            // *(framePtr + 2) = *(cache + *(framePtr + 2));
-            // *(framePtr + 3) = *(cache + *(framePtr + 3));
-            // *(framePtr + 4) = *(cache + *(framePtr + 4));
-            // *(framePtr + 5) = *(cache + *(framePtr + 5));
-            // *(framePtr + 6) = *(cache + *(framePtr + 6));
-            // *(framePtr + 7) = *(cache + *(framePtr + 7));
-        }
-
-        end += (frame_size % 8);
-
-        for (; framePtr < end; framePtr++) {
-            // *framePtr = *(cache + *framePtr);
-        }
-
-        return Status.OK;
-    }
-
-
-    // aditof::Status Calibration3D_Smart::calibrateCameraGeometry(uint16_t *frame, uint32_t frame_size) {
-    calibrateCameraGeometry(frame, frame_size) {
-        if (!this.m_cal_valid) {
-            return Status.OK;
-        }
-
-        for (let i = 0; i < frame_size; i++) {
-            if (frame[i] != this.m_range) {
-                // frame[i] = static_cast<uint16_t>(frame[i] * m_geometry_cache[i]);
-                frame[i] = frame[i] * m_geometry_cache[i];
-            }
-            if (frame[i] > this.m_range) {
-                frame[i] = this.m_range;
-            }
-        }
-
-        return Status.OK;
-    }
-
-    // Create a cache to speed up depth calibration computation
-    // void Calibration3D_Smart::buildDepthCalibrationCache(float gain, float offset, int16_t maxPixelValue, int range) {
-    buildDepthCalibrationCache(gain, offset, maxPixelValue, range) {
-        if (this.m_depth_cache) {
-            // delete[] m_depth_cache;
-        }
-
-        //new uint16_t[maxPixelValue + 1];
-        this.m_depth_cache = Array(maxPixelValue + 1);
-        for (let current = 0; current <= maxPixelValue; ++current) {
-            let currentValue = current * gain + offset;
-            this.m_depth_cache[current] = currentValue <= range ? currentValue : range;
-        }
-    }
-
-    // Create a cache to speed up depth geometric camera calibration computation
-    // void Calibration3D_Smart::buildGeometryCalibrationCache(const std::vector<float> &cameraMatrix, unsigned int width, unsigned int height) {
-    buildGeometryCalibrationCache(cameraMatrix, width, height) {
-        let fx = cameraMatrix[0];
-        let fy = cameraMatrix[4];
-        let x0 = cameraMatrix[2];
-        let y0 = cameraMatrix[5];
-
-        let validParameters = (fx != 0 && fy != 0);
-
-        if (this.m_geometry_cache) {
-            // delete[] m_geometry_cache;
-        }
-
-        //new double[width * height];
-        this.m_geometry_cache = Array(width * height);
-        for (let i = 0; i < height; i++) {
-            for (let j = 0; j < width; j++) {
-
-                if (validParameters) {
-                    let tanXAngle = (x0 - j) / fx;
-                    let tanYAngle = (y0 - i) / fy;
-
-                    this.m_geometry_cache[i * width + j] = 1.0 / sqrt(1 + tanXAngle * tanXAngle + tanYAngle * tanYAngle);
-                } else {
-                    this.m_geometry_cache[i * width + j] = 1;
-                }
-            }
-        }
-    }
-
-    // void Calibration3D_Smart::buildDistortionCorrectionCache(unsigned int width, unsigned int height) {
-    buildDistortionCorrectionCache(width, height) {
-        let fx = this.m_intrinsics[2];
-        let fy = this.m_intrinsics[3];
-        let cx = this.m_intrinsics[0];
-        let cy = this.m_intrinsics[1];
-
-        // std::vector<double> 
-        let k = [m_intrinsics[4], m_intrinsics[5], 0.0, 0.0, m_intrinsics[6]];
-        if (this.m_distortion_cache) {
-            // delete[] m_distortion_cache;
-        }
-
-        // new double[width * height];
-        this.m_distortion_cache = Array(width * height);
-        for (let i = 0; i < width; i++) {
-            for (let j = 0; j < height; j++) {
-                let x = (i - cx) / fx;
-                let y = (j - cy) / fy;
-
-                //DISTORTION_COEFFICIENTS for [k1, k2, p1, p2, k3]
-                let r2 = x * x + y * y;
-                let k_calc = 1 + k[0] * r2 + k[1] * r2 * r2 + k[4] * r2 * r2 * r2;
-                this.m_distortion_cache[j * width + i] = k_calc;
-            }
-        }
-    }
-
-    // aditof::Status Calibration3D_Smart::distortionCorrection(uint16_t *frame, unsigned int width, unsigned int height) {
-    distortionCorrection(frame, width, height) {
-        let fx = this.m_intrinsics[2];
-        let fy = this.m_intrinsics[3];
-        let cx = this.m_intrinsics[0];
-        let cy = this.m_intrinsics[1];
-
-        //new uint16_t[width * height];
-        let buff = Array(width * height);
-
-        for (let i = 0; i < width; i++) {
-            for (let j = 0; j < height; j++) {
-                //transform in dimensionless space
-                let x = (i - cx) / fx;
-                let y = (j - cy) / fy;
-
-                //apply correction
-                let x_dist_adim = x * m_distortion_cache[j * width + i];
-                let y_dist_adim = y * m_distortion_cache[j * width + i];
-
-                //back to original space
-                let x_dist = (x_dist_adim * fx + cx);
-                let y_dist = (y_dist_adim * fy + cy);
-
-                if (x_dist >= 0 && x_dist < width && y_dist >= 0 && y_dist < height) {
-                    buff[j * width + i] = frame[y_dist * width + x_dist];
-                } else {
-                    buff[j * width + i] = frame[j * width + i];
-                }
-            }
-        }
-        // memcpy(frame, buff, width * height * 2);
-        // delete[] buff;
-        return Status.OK;
-    }
-
-
-
-
-}
-
-
-
-
+window.INTRINSIC = INTRINSIC;
+window.DISTORTION_COEFFICIENTS = DISTORTION_COEFFICIENTS;
 window.Camera3D_Smart = Camera3D_Smart;
-window.Calibration3D_Smart = Calibration3D_Smart;
-window.Calibration3D_Smart = Calibration3D_Smart;
+window.CameraDetails = CameraDetails;
+window.DepthParameters = DepthParameters;
+window.IntrinsicParameters = IntrinsicParameters;
+window.FrameDataType = FrameDataType;
+window.FrameDetails = FrameDetails;
+window.BufferInfo = BufferInfo; 
+window.SensorDetails = SensorDetails;

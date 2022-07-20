@@ -1,5 +1,6 @@
-function buildCamera(enumerator) { // NetworkSensorEnumerator
-    console.log('calling buildCamera');
+function buildCamera(networkSensorEnumerator) {    
+    console.assert(networkSensorEnumerator instanceof NetworkSensorEnumerator, "Parameter is not of type NetworkSensorEnumerator");
+
     let status;
     let depthSensors; //DepthSensorInterface
     let storages; //StorageInterface 
@@ -7,19 +8,15 @@ function buildCamera(enumerator) { // NetworkSensorEnumerator
     let camera; //Camera
     let cameraType; //CameraType
 
-    [status, depthSensors] = enumerator.getDepthSensors();
+    [status, depthSensors] = networkSensorEnumerator.getDepthSensors();
     if (depthSensors.length < 1) {
         console.log('ERROR: No imagers found');
-        return null;
+        return camera;
     }
 
-    [status, storages] = enumerator.getStorages();
-    console.log('storages.length: ', storages.length);
-    [status, temperatureSensors] = enumerator.getTemperatureSensors();
-    [Status.OK, cameraType] = enumerator.getCameraTypeOnTarget();
-
-
-    console.log('the camera type is: ', cameraType);
+    [status, storages] = networkSensorEnumerator.getStorages();
+    [status, temperatureSensors] = networkSensorEnumerator.getTemperatureSensors();
+    cameraType = networkSensorEnumerator.getCameraTypeOnTarget();
 
     switch (cameraType) {
         case CameraType.AD_96TOF1_EBZ:
@@ -49,26 +46,21 @@ class SystemImpl {
     constructor() {
         if (!this.sdkRevisionLogged) {
             this.sdkRevisionLogged = true;
-            // console.log('INFO: SDK version: ', ADITOF_API_VERSION, '| branch: ', ADITOFSDK_GIT_BRANCH, ' | commit: ', ADITOFSDK_GIT_COMMIT);
-            // console.log('INFO: SDK built with websockets version: ', LWS_LIBRARY_VERSION);
-
+            // right now, these macros can't be taken from C++
             console.log('INFO: SDK version: ADITOF_API_VERSION | branch: ADITOFSDK_GIT_BRANCH | commit: ADITOFSDK_GIT_COMMIT');
             console.log('INFO: SDK built with websockets version: LWS_LIBRARY_VERSION ');
         }
     }
 
     async getCameraListAtIp(ip) {
-        let cameraList = []; // o lista de objects Camera
+        let cameraList = [];
         let status = Status.OK;
         let camera;
-
         let network = new Network(ip);
-        // status = await net.ServerConnect();
+        
         let networkSensorEnumerator = new NetworkSensorEnumerator(network);
 
         status = await networkSensorEnumerator.searchSensors();
-
-        console.log('status after searching for sensors: ', status);
 
         if (status === Status.OK) {
             camera = buildCamera(networkSensorEnumerator);

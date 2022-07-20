@@ -27,7 +27,7 @@ class FrameImpl {
             }
 
             this.m_details = details;
-            allocFrameData(this.m_details);
+            this.allocFrameData(this.m_details);
 
 
             return status;
