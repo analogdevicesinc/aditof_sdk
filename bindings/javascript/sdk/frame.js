@@ -6,18 +6,17 @@ class FrameImpl {
     m_rgbData; //uint16_t *
     m_fullData; //uint16_t *
     constructor() {
-        this.m_details = new FrameDetails(0, 0, 0, 0, 0, 0, "");
+        this.m_details = new FrameDetails();
         this.m_depthData = null;
         this.m_irData = null;
         this.m_rgbData = null;
         this.m_fullData = null;
     }
 
-    // aditof::Status setDetails(const aditof::FrameDetails &details);
     setDetails(details) {
             let status = Status.OK;
 
-            if (details == this.m_details) {
+            if (details === this.m_details) {
                 console.log('INFO: Same details provided. Doing nothing.');
                 return status;
             }
@@ -32,12 +31,10 @@ class FrameImpl {
 
             return status;
         }
-        // aditof::Status getDetails(aditof::FrameDetails &details) const;
     getDetails() {
-        return [Status.OK, this.m_details];
+        return this.m_details;
     }
 
-    // aditof::Status getData(aditof::FrameDataType dataType, uint16_t **dataPtr);
     getData(dataType) {
         let status = Status.OK;
         let data;
@@ -63,15 +60,19 @@ class FrameImpl {
                     data = this.m_rgbData;
                     break;
                 }
+            default:
+                {
+                    console.log("Error: Unknown frame data type.");
+                    return [Status.GENERIC_ERROR, data];
+                }
         }
         return [status, data];
     }
 
-    // void allocFrameData(const aditof::FrameDetails &details);
     allocFrameData(details) {
-        this.m_fullData = new Array(details.fullDataWidth * details.fullDataHeight + details.rgbWidth * details.rgbHeight);
+        this.m_fullData = new Uint16Array(details.fullDataWidth * details.fullDataHeight + details.rgbWidth * details.rgbHeight);
         this.m_depthData = this.m_fullData;
-        if (details.fullDataHeight == details.height)
+        if (details.fullDataHeight === details.height)
             this.m_irData = this.m_depthData;
         else
             this.m_irData = this.m_fullData + (details.width * details.height);

@@ -17,12 +17,6 @@ class DepthParameters {
     depthOffset; // float 
     maxDepth; // int 
     minDepth; // int 
-    // constructor(depthGain, depthOffset, maxDepth, minDepth){
-    //     this.depthGain = depthGain;
-    //     this.depthOffset = depthOffset;
-    //     this.maxDepth = maxDepth;
-    //     this.minDepth = minDepth;
-    // }
 }
 
 class IntrinsicParameters {
@@ -30,12 +24,6 @@ class IntrinsicParameters {
     distCoeffs = []; // float array
     pixelWidth; // float 
     pixelHeight; // float 
-    // constructor(cameraMatrix, distCoeffs, pixelWidth, pixelHeight){
-    //     this.cameraMatrix = cameraMatrix;
-    //     this.distCoeffs = distCoeffs;
-    //     this.pixelWidth = pixelWidth;
-    //     this.pixelHeight = pixelHeight;
-    // }
 }
 
 class FrameDetails {
@@ -46,15 +34,6 @@ class FrameDetails {
     rgbWidth; // unsigned int 
     rgbHeight; // unsigned int 
     type; // string 
-    // constructor(width, height, fullDataWidth, fullDataHeight, rgbWidth, rgbHeight, type){
-    //     this.width = width;
-    //     this.height = height;
-    //     this.fullDataWidth = fullDataWidth;
-    //     this.fullDataHeight = fullDataHeight;
-    //     this.rgbWidth = rgbWidth;
-    //     this.rgbHeight = rgbHeight;
-    //     this.type = type;
-    // }
 }
 
 class CameraDetails {
@@ -65,15 +44,6 @@ class CameraDetails {
     intrinsics = new IntrinsicParameters(); // IntrinsicParameters 
     depthParameters = new DepthParameters(); // DepthParameters 
     bitCount; // int 
-    // constructor(cameraId, mode, connection, bitCount){
-    //     this.cameraId = cameraId;
-    //     this.mode = mode;
-    //     this.frameType = new FrameDetails();
-    //     this.connection = ConnectionType.NETWORK ;
-    //     this.intrinsics = new IntrinsicParameters();
-    //     this.depthParameters = new DepthParameters();
-    //     this.bitCount = bitCount;
-    // }
 }
 
 const FrameDataType = {
@@ -113,8 +83,6 @@ const availableControls = ["noise_reduction_threshold", "ir_gamma_correction",
 
 class Camera3D_Smart {
     m_details; // CameraDetails
-    // m_depthSensor;
-    // m_rgbSensor;
     m_rgbdSensor; // NetworkDepthSensor array
     m_eeprom; // NetworkStorage array
     m_temperatureSensor; // NetworkTemperatureSensor array
@@ -246,6 +214,9 @@ class Camera3D_Smart {
         [status, this.m_details.intrinsics.cameraMatrix] = this.m_calibration.getIntrinsic(INTRINSIC);
         [status, this.m_details.intrinsics.distCoeffs] = this.m_calibration.getIntrinsic(DISTORTION_COEFFICIENTS);
 
+        console.log('this.m_details', this.m_details);
+        
+
         // For now we use the unit cell size values specified in the datasheet
         this.m_details.intrinsics.pixelWidth = 0.0056;
         this.m_details.intrinsics.pixelHeight = 0.0056;
@@ -262,7 +233,6 @@ class Camera3D_Smart {
         return Status.OK;
     }
 
-    // aditof::Status start() override;
     start() {
         let status;
 
@@ -275,7 +245,6 @@ class Camera3D_Smart {
         return Status.OK;
     }
 
-    // aditof::Status stop() override;
     stop() {
             let status;
             status = this.m_rgbdSensor.stop();
@@ -287,14 +256,11 @@ class Camera3D_Smart {
 
             return Status.OK;
         }
-        // aditof::Status setMode(const std::string &mode, const std::string &modeFilename) override;
-    async setMode(mode, modeFilename) {
+    async setMode(mode) { // modeFilename not used
         let status = Status.OK;
 
-        // Set the values specific to the Revision requested
-        // std::array<rangeStruct, 3> rangeValues = RangeValuesForRevision.at(m_revision);
-        
-        let rangeValues = [];
+        // Set the values specific to the Revision requested        
+        let rangeValues;
         for (const rvv of RangeValuesForRevision){
             if (rvv.revision === this.m_revision){
                 rangeValues = rvv.ranges;
@@ -322,8 +288,8 @@ class Camera3D_Smart {
         console.log('INFO: Camera range for mode: ', mode, ' is: ', this.m_details.depthParameters.minDepth, ' mm and ', this.m_details.depthParameters.maxDepth, ' mm');
 
         if (!this.m_devProgrammed) {
-            let firmwareData;
-            [status, firmwareData] = this.m_calibration.getAfeFirmware();
+            let firmwareData = this.m_calibration.getAfeFirmware();
+
             console.log(firmwareData);
             if (status !== Status.OK) {
                 console.log('WARNING: Failed to read firmware from eeprom');
@@ -367,7 +333,6 @@ class Camera3D_Smart {
         } else if (this.m_details.frameType.type == 'depth_ir_rgb') {
             let afeRegsAddr = [0x4001, 0x7c22, 0xc3da, 0x4001, 0x7c22];
             let afeRegsVal = [0x0006, 0x0004, 0x03, 0x0007, 0x0004];
-
             await this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
         }
 
@@ -384,7 +349,6 @@ class Camera3D_Smart {
     }
 
 
-    // aditof::Status getAvailableModes(std::vector<std::string> &availableModes) const override;
     getAvailableModes() {
         let status = Status.OK;
         let availableModes = [];
@@ -395,7 +359,6 @@ class Camera3D_Smart {
     }
 
 
-    // aditof::Status setFrameType(const std::string &frameType) override;
     async setFrameType(frameType) {
         let status = Status.OK;
 
@@ -407,24 +370,20 @@ class Camera3D_Smart {
             this.m_devStarted = false;
         }
 
-        
         let frameDetailsList;
         [status, frameDetailsList] = await this.m_rgbdSensor.getAvailableFrameTypes();
         if (status !== Status.OK) {
             console.log('WARNING: Failed to get available frame types');
             return status;
         }
-
         let typeFound = false;
         let frameDetails;
         for (const d of frameDetailsList) {
-            if (d.getType() === frameType) {
+            if (d.type === frameType) {
                 typeFound = true;
                 frameDetails = d;
-                
                 console.log('found: ', frameDetails);
                 break;
-
             }
         }
 
@@ -434,37 +393,19 @@ class Camera3D_Smart {
         }
 
         if (this.m_details.frameType !== frameDetails) {
-
-            
             //Turn off the streaming of data to modify parameters in the driver.
             let afeRegsAddr = [0x4001, 0x7c22];
             let afeRegsVal = [0x0006, 0x0004];
             status = await this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 2);
             console.log('writeAfeRegisters status:', status);
-
-            let details = new FrameDetails(frameDetails.getWidth(), 
-                frameDetails.getHeight(),
-                frameDetails.getFullDataWidth(),
-                frameDetails.getFullDataHeight(),
-                frameDetails.getRgbWidth(),
-                frameDetails.getRgbHeight(),
-                frameDetails.getType());
-            status = await this.m_rgbdSensor.setFrameType(details);
+            status = await this.m_rgbdSensor.setFrameType(frameDetails);
 
             if (status !== Status.OK) {
                 console.log('WARNING: Failed to set frame type of the depth sensor');
                 return status;
             }
             console.log('frameDetails: ', frameDetails);
-            this.m_details.frameType = details;
-            // this.m_details.frameType.type = frameType;
-            // this.m_details.frameType.width = frameDetailsIt.getWidth();
-            // this.m_details.frameType.height = frameDetailsIt.getHeight();
-            // this.m_details.frameType.rgbWidth = frameDetailsIt.getRgbWidth();
-            // this.m_details.frameType.rgbHeight = frameDetailsIt.getRgbHeight();
-            // this.m_details.frameType.fullDataWidth = frameDetailsIt.getFullDataWidth();
-            // this.m_details.frameType.fullDataHeight = frameDetailsIt.getFullDataHeight();
-
+            this.m_details.frameType = frameDetails;
             //Turn on the streaming of data.
             afeRegsAddr = [0x4001, 0x7c22];
             afeRegsVal = [0x0007, 0x0004];
@@ -482,7 +423,6 @@ class Camera3D_Smart {
         return status;
     }
 
-    // aditof::Status getAvailableFrameTypes(std::vector<std::string> &availableFrameTypes) const override;
     async getAvailableFrameTypes() {
         let status = Status.OK;
 
@@ -492,43 +432,32 @@ class Camera3D_Smart {
         [status, frameDetailsList] = await this.m_rgbdSensor.getAvailableFrameTypes();
         if (status !== Status.OK) {
             console.log('WARNING: Failed to get available frame types');
-            return status;
+            return [status, availableFrameTypes];
         }
-
-        for (let i = 0; i < frameDetailsList.length; i++) {
-            // console.log(frameDetailsList[i].getType());
-            availableFrameTypes.push(frameDetailsList[i].getType());
+        for (const frameDetail of frameDetailsList) {
+            availableFrameTypes.push(frameDetail.type);
         }
-
         return [status, availableFrameTypes];
     }
 
-    // aditof::Status requestFrame(aditof::Frame *frame, aditof::FrameUpdateCallback cb) override;
     async requestFrame() {
         let status = Status.OK;
         let frame = new Frame();
-        // if (frame == null) {
-        //     console.log('ERROR: Received pointer frame is null');
-        //     return Status.INVALID_ARGUMENT;
-        // }
+        let frameDetails = frame.getDetails();
 
-        // FrameDetails 
-        let frameDetails = new FrameDetails();
-        [status, frameDetails] = frame.getDetails();
-
-        if (this.m_details.frameType.type != frameDetails.type) {
+        if (this.m_details.frameType.type !== frameDetails.type) {
             frame.setDetails(this.m_details.frameType);
         }
 
         let fullDataLocation;
-        [status, fullDataLocation] = frame.getData(FrameDataType.FULL_DATA);
+        // [status, fullDataLocation] = frame.getData(FrameDataType.FULL_DATA);
 
         // aditof::BufferInfo 
-        let rgbdBufferInfo;
+        // let rgbdBufferInfo;
         [status, fullDataLocation] = await this.m_rgbdSensor.getFrame();
         if (status != Status.OK) {
             console.log('WARNING: Failed to get frame from depth sensor');
-            return [status, null];
+            return [status, frame];
         }
 
         /*
@@ -548,9 +477,9 @@ class Camera3D_Smart {
             free(copyOfRgbData);
             }
             // #endif
-            */
+        */
 
-        if (this.m_details.mode != skCustomMode && (this.m_details.frameType.type == 'depth_ir_rgb' || this.m_details.frameType.type == 'depth_rgb')) {
+        if (this.m_details.mode !== skCustomMode && (this.m_details.frameType.type === 'depth_ir_rgb' || this.m_details.frameType.type === 'depth_rgb')) {
 
             let depthDataLocation;
             [status, depthDataLocation] = frame.getData(FrameDataType.DEPTH);
@@ -575,35 +504,29 @@ class Camera3D_Smart {
         return [Status.OK, frame];
     }
 
-    // aditof::Status getDetails(aditof::CameraDetails &details) const override;
     getDetails() {
         return [Status.OK, this.m_details];
     }
 
-    // aditof::Status Camera3D_Smart::getImageSensors(
     getImageSensors() {
         let sensors = [this.m_rgbdSensor];
         return [Status.OK, sensors];
     }
 
-    // aditof::Status Camera3D_Smart::getEeproms(std::vector<std::shared_ptr<aditof::StorageInterface>> &eeproms) {
     getEeproms() {
         let eeproms = [this.m_eeprom];
         return [Status.OK, eeproms];
     }
 
-    // aditof::Status Camera3D_Smart::getTemperatureSensors(std::vector<std::shared_ptr<aditof::TemperatureSensorInterface>> &sensors) {
     getTemperatureSensors() {
         let sensors = [this.m_temperatureSensor];
         return [Status.OK, sensors];
     }
 
-    // aditof::Status getAvailableControls(std::vector<std::string> &controls) const override;
     getAvailableControls(controls) {
         return [Status.OK, this.m_availableControls];
     }
 
-    // aditof::Status setControl(const std::string &control, const std::string &value) override;
     setControl(control, value) {
         let status = Status.OK;
 
@@ -650,7 +573,6 @@ class Camera3D_Smart {
         return status;
     }
 
-    // aditof::Status getControl(const std::string &control, std::string &value) const override;
     getControl(control, value) {
         let status = Status.OK;
 
@@ -699,7 +621,6 @@ class Camera3D_Smart {
         return status;
     }
 
-    // aditof::Status setNoiseReductionTreshold(uint16_t treshold);
     setNoiseReductionTreshold(treshold) {
         // if (this.m_details.mode.compare('far') == 0) {
         if (this.m_details.mode == 'far') {
@@ -717,7 +638,6 @@ class Camera3D_Smart {
         return this.m_rgbdSensor.writeAfeRegisters(afeRegsAddr, afeRegsVal, 5);
     }
 
-    // aditof::Status setIrGammaCorrection(float gamma);
     setIrGammaCorrection(gamma) {
         let status = Status.OK;
         let x_val = [256, 512, 768, 896, 1024, 1536, 2048, 3072, 4096];
@@ -744,7 +664,6 @@ class Camera3D_Smart {
         return status;
     }
 
-    // float verticalKernel(uint8_t *pData, int x, int y, int width, int height);
     verticalKernel(pData, x, y, width, height) {
             let sum = 0;
             let nr = 0;
@@ -758,7 +677,6 @@ class Camera3D_Smart {
             }
             return (sum / (nr > 0 ? nr : 1));
         }
-        // float horizontalKernel(uint8_t *pData, int x, int y, int width, int height);
     horizontalKernel(pData, x, y, width, height) {
             let sum = 0;
             let nr = 0;
@@ -772,7 +690,6 @@ class Camera3D_Smart {
             }
             return (sum / (nr > 0 ? nr : 1));
         }
-        // float plusKernel(uint8_t *pData, int x, int y, int width, int height);
     plusKernel(pData, x, y, width, height) {
             let sum = 0;
             let nr = 0;
@@ -794,7 +711,6 @@ class Camera3D_Smart {
             }
             return (sum / (nr > 0 ? nr : 1));
         }
-        // float crossKernel(uint8_t *pData, int x, int y, int width, int height);
     crossKernel(pData, x, y, width, height) {
             let sum = 0;
             let nr = 0;
@@ -816,18 +732,15 @@ class Camera3D_Smart {
             }
             return (sum / (nr > 0 ? nr : 1));
         }
-        // float directCopy(uint8_t *buffer, int x, int y, int width, int height);
     directCopy(buffer, x, y, width, height) {
             return getValueFromData(pData, x, y, width, height);
         }
-        // float getValueFromData(uint8_t *pData, int x, int y, int width, int height);
     getValueFromData(pData, x, y, width, height) {
             return ((pData[x * width * 2 + y * 2 + 1] << 8) +
                     pData[x * width * 2 + y * 2]) /
                 4095.0 * 255.0;
         }
-        // void bayer2RGB(uint16_t *buffer, uint8_t *pData, int width, int height);
-    bayer2RGB(buffer, pData, width, height) {
+        bayer2RGB(buffer, pData, width, height) {
         //casting into 8 in order to work with it
         rgb = buffer;
 

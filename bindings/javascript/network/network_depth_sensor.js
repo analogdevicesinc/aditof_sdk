@@ -140,7 +140,15 @@ class NetworkDepthSensor {
         }
 
         for (const frameType of net.recv_buff.getAvailableFrameTypesList()) {
-            types.push(frameType);
+            let frameDetails = new FrameDetails();
+            frameDetails.width = frameType.getWidth();
+            frameDetails.height = frameType.getHeight();
+            frameDetails.type = frameType.getType();
+            frameDetails.fullDataWidth = frameType.getFullDataWidth();
+            frameDetails.fullDataHeight = frameType.getFullDataHeight();
+            frameDetails.rgbWidth = frameType.getRgbWidth();
+            frameDetails.rgbHeight = frameType.getRgbHeight();
+            types.push(frameDetails);
         }
 
         let status = net.recv_buff.getStatus();
@@ -256,11 +264,16 @@ class NetworkDepthSensor {
             return [status, buffer];
         }
 
-        buffer = net.recv_buff.getBytesPayloadList()[0];
+        
+        buffer = net.recv_buff.getBytesPayloadList();
+        console.log('buffer: ', buffer);
 
-        if(this.m_bufferInfo){
-            this.m_bufferInfo.timestamp = net.recv_buff.getBufferDetails().getTimestamp();
-        }
+        
+
+        console.log('getBufferDetails: ', net.recv_buff.getBufferDetails());
+        // if(this.m_bufferInfo){
+        //     this.m_bufferInfo.timestamp = net.recv_buff.getBufferDetails().getTimestamp();
+        // }
         
         return [status, buffer];
     }

@@ -1859,39 +1859,21 @@ class Calibration3D_Smart {
     async readCalMap(eeprom) {
         let status = Status.OK;
         let mode_data;
-        let float_size = 4;
-        let intrinsic_data = Array((COMMON_SIZE + 1) / float_size);
+        let intrinsic_data;
 
         /*Read the mode data*/
         for (let i = 0; i < 2; i++) {
             [status, mode_data] = await eeprom.read(ROMADDR_CFG_BASE[i], MODE_CFG_SIZE);
 
-            console.log('this is my mode_data: ', mode_data);
-            // console.log('mode_data len: ', mode_data.length);
-            // console.log(mode_data.buffer);
-                        
-            // const buf = new Buffer(mode_data);
-            // let mode_data16 = new Uint16Array(buf.buffer, buf.byteOffset, buf.byteLength / Uint16Array.BYTES_PER_ELEMENT);
-            // console.log('this is my mode_data on 16 biti: ', mode_data16);
-            // console.log('mode_data16 len: ', mode_data16.length);
-            
-
+            console.log('mode_data: ', mode_data);
 
             if (mode_data[0] == 0xFF) {
                 console.log('WARNING: Invalid calibration in EEPROM, using default settings');
                 return Status.OK;
             }
-
             this.m_mode_settings[i].pulse_cnt = (mode_data[PULSE_CNT_OFFSET] | (mode_data[PULSE_CNT_OFFSET + 1] << 8));
-            
-            // console.log(mode_data[PULSE_CNT_OFFSET], mode_data[PULSE_CNT_OFFSET + 1], (mode_data[PULSE_CNT_OFFSET + 1] << 8));
-            // console.log('pulse_cnt value: ', this.m_mode_settings[i].pulse_cnt);
-            
-
-            // memcpy(m_mode_settings[i].depth_pwr, &mode_data[DEPTH_PWR_OFFSET], DEPTH_PWR_CNT); ?
             for(let k = DEPTH_PWR_OFFSET; k < DEPTH_PWR_OFFSET + DEPTH_PWR_CNT; k++){
                 this.m_mode_settings[i].depth_pwr[k - DEPTH_PWR_OFFSET] = mode_data[k];
-                console.log(k);
             }
             
             this.m_mode_settings[i].depth_x0 = (mode_data[DEPTH_X0_OFFSET] | (mode_data[DEPTH_X0_OFFSET + 1] << 8));
@@ -1903,148 +1885,112 @@ class Calibration3D_Smart {
             this.m_mode_settings[i].depth2 = (mode_data[DEPTH_2_OFFSET] | (mode_data[DEPTH_2_OFFSET + 1] << 8));
         }
 
-        // console.log(this.m_afe_code);    
-
-        // let afeCode = this.m_afe_code;
+        
         let codeLength = this.m_afe_code.length;
         /*Replace the settings in the base code with the eeprom values*/
         for (let i = 0; i < 2; i++) {
-            let iterator = 0;
-            let afeCodeFound = false;
-            while(iterator < codeLength){
+            let iterator;
+
+            for(iterator = 0; iterator < codeLength; iterator++){
                 if(this.m_afe_code[iterator] === MODE_REG_BASE_ADDR[i] + R_MODE_PSPACE){
                     break;
                 }
-                iterator++;
             }
             if(iterator === codeLength){
                 console.log('WARNING: Could not find R_MODE_PSPACE');
                 return Status.INVALID_ARGUMENT;
             }
-            // for (let k = 0; k < this.m_afe_code.length; k++) {
-            //     let afeCode = this.m_afe_code[k];
-            //     if (afeCode == MODE_REG_BASE_ADDR[i] + R_MODE_PSPACE) {
-            //         afeCodeFound = true;
-            //         break;
-            //     }
-            // }
 
-            // if (!afeCodeFound) {
-            //     console.log('WARNING: Could not find R_MODE_PSPACE');
-            //     return Status.INVALID_ARGUMENT;
-            // }
-
-            
-            // let pulse_space = *(it + 1);
-            let pulse_space;
+            let pulse_space = this.m_afe_code[iterator + 1];
             let pulse_cnt = this.m_mode_settings[i].pulse_cnt;
             let pulse_hd = (((pulse_cnt - 1) * pulse_space + 90) / 928 + 3) * 36 + 57;
 
-            afeCodeFound = false;
-            for (let k = 0; k < this.m_afe_code.length; k++) {
-                let afeCode = this.m_afe_code[k];
-                if (afeCode == MODE_REG_BASE_ADDR[i] + R_PULSECNT) {
-                    afeCodeFound = true;
+            for(iterator = 0; iterator < codeLength; iterator++){
+                if(this.m_afe_code[iterator] === MODE_REG_BASE_ADDR[i] + R_PULSECNT){
                     break;
                 }
             }
-            if (!afeCodeFound) {
+            if(iterator === codeLength){
                 console.log('WARNING: Could not find R_PULSECNT');
                 return Status.INVALID_ARGUMENT;
             }
 
-            // *(it + 1) = pulse_cnt;
+            this.m_afe_code[iterator+1] = pulse_cnt;
 
-
-            afeCodeFound = false;
-            for (let k = 0; k < this.m_afe_code.length; k++) {
-                let afeCode = this.m_afe_code[k];
-                if (afeCode == MODE_REG_BASE_ADDR[i] + R_PULSEHD) {
-                    afeCodeFound = true;
+            for(iterator = 0; iterator < codeLength; iterator++){
+                if(this.m_afe_code[iterator] === MODE_REG_BASE_ADDR[i] + R_PULSEHD){
                     break;
                 }
             }
-            if (!afeCodeFound) {
+            if(iterator === codeLength){
                 console.log('WARNING: Could not find R_PULSEHD');
                 return Status.INVALID_ARGUMENT;
             }
 
-            // *(it + 1) = pulse_hd;
-            afeCodeFound = false;
-            for (let k = 0; k < this.m_afe_code.length; k++) {
-                let afeCode = this.m_afe_code[k];
-                if (afeCode == MODE_LCORR_BASE_ADDR[i] + R_DEPTH_2) {
-                    afeCodeFound = true;
+            this.m_afe_code[iterator+1] = pulse_hd;
+
+            for(iterator = 0; iterator < codeLength; iterator++){
+                if(this.m_afe_code[iterator] === MODE_LCORR_BASE_ADDR[i] + R_DEPTH_2){
                     break;
                 }
             }
-            if (!afeCodeFound) {
+            if(iterator === codeLength){
                 console.log('WARNING: Could not find R_DEPTH_2');
                 return Status.INVALID_ARGUMENT;
             }
 
+            this.m_afe_code[iterator+1] = this.m_mode_settings[i].depth2;
 
-            // *(it + 1) = m_mode_settings[i].depth2;
-            afeCodeFound = false;
-            for (let k = 0; k < this.m_afe_code.length; k++) {
-                let afeCode = this.m_afe_code[k];
-                if (afeCode == MODE_LCORR_BASE_ADDR[i] + R_DEPTH_3) {
-                    afeCodeFound = true;
+            for(iterator = 0; iterator < codeLength; iterator++){
+                if(this.m_afe_code[iterator] === MODE_LCORR_BASE_ADDR[i] + R_DEPTH_3){
                     break;
                 }
             }
-            if (!afeCodeFound) {
+            if(iterator === codeLength){
                 console.log('WARNING: Could not find R_DEPTH_3');
                 return Status.INVALID_ARGUMENT;
             }
 
-            // *(it + 1) = m_mode_settings[i].depth3;
-            afeCodeFound = false;
-            for (let k = 0; k < this.m_afe_code.length; k++) {
-                let afeCode = this.m_afe_code[k];
-                if (afeCode == MODE_LCORR_BASE_ADDR[i] + R_DEPTH_OFST) {
-                    afeCodeFound = true;
+            this.m_afe_code[iterator+1] = this.m_mode_settings[i].depth3;
+
+            for(iterator = 0; iterator < codeLength; iterator++){
+                if(this.m_afe_code[iterator] === MODE_LCORR_BASE_ADDR[i] + R_DEPTH_OFST){
                     break;
                 }
             }
-            if (!afeCodeFound) {
+            if(iterator === codeLength){
                 console.log('WARNING: Could not find R_DEPTH_OFST');
                 return Status.INVALID_ARGUMENT;
             }
 
-            // for (let j = 0; j < DEPTH_OFST_CNT; j++) {
-            //     // *it = m_mode_settings[i].depth_offset[j];
-            //     it += 2;
-            // }
+            for (let j = 0; j < DEPTH_OFST_CNT; j++) {
+                this.m_afe_code[iterator] = this.m_mode_settings[i].depth_offset[j];
+                iterator += 2;
+            }
         }
-
         /*Read the intrinsics and distortion params*/
-
-        let intrinsics_byte;// = Array(28);
-        let intrinsics_full = [];// = Array(7);
+        let intrinsics_byte;
+        let intrinsics_full = [];
 
         [status, intrinsics_byte] = await eeprom.read(ROMADDR_COMMOM_BASE, 28);
 
-        for (let i = 0; i < 28; i = i + 4) {
-            intrinsics_full.push(intrinsics_byte[i] | (intrinsics_byte[i + 1] << 8) | (intrinsics_byte[i + 2] << 16) | (intrinsics_byte[i + 3] << 24));
+        for (let i = 0; i < 28; i += 4) {
+            intrinsics_full.push(Buffer.from([intrinsics_byte[i+3], intrinsics_byte[i+2], intrinsics_byte[i+1], intrinsics_byte[i]]).readFloatBE(0).toFixed(3));
         }
-
         intrinsic_data = intrinsics_full;
-        // m_intrinsics.insert(m_intrinsics.end(), &intrinsic_data[0], &intrinsic_data[7]);
-        this.m_intrinsics = intrinsic_data;
-        this.m_cal_valid = true;
+        for(let k = 0; k < 7; k++){
 
+            this.m_intrinsics.push(intrinsic_data[k]);
+        }
+        this.m_cal_valid = true;
         return status;
     }
 
 
-    // aditof::Status Calibration3D_Smart::getAfeFirmware(const std::string &mode, std::vector<uint16_t> &data) const {
     getAfeFirmware() {
-        return [Status.OK, this.m_afe_code];
+        return this.m_afe_code;
     }
 
-
-    // aditof::Status Calibration3D_Smart::getIntrinsic(float key, std::vector<float> &data) const {
     getIntrinsic(key) {
         let data = [];
         let validParam = (INTRINSIC == key) || (DISTORTION_COEFFICIENTS == key);
@@ -2067,11 +2013,10 @@ class Calibration3D_Smart {
         return [Status.OK, data];
     }
 
-    // aditof::Status Calibration3D_Smart::setMode(std::shared_ptr<aditof::DepthSensorInterface> depthSensor, const std::string &mode, int range, unsigned int frameWidth, unsigned int frameheight) {
     async setMode(depthSensor, mode, range, frameWidth, frameheight) {
         let status = Status.OK;
-        let cameraMatrix = [];
-        let distortionCoeffs = [];
+        let cameraMatrix;
+        let distortionCoeffs;
         let mode_id = (mode == 'near' ? 0 : 1);
         let pixelMaxValue = (1 << 12) - 1; // 4095
         let gain = (mode == 'near' ? 0.5 : 1.15);
@@ -2104,7 +2049,6 @@ class Calibration3D_Smart {
     }
 
 
-    // aditof::Status Calibration3D_Smart::calibrateDepth(uint16_t *frame, uint32_t frame_size) {
     calibrateDepth(frame, frame_size) {
         let cache = this.m_depth_cache;
         let end = frame + (frame_size - frame_size % 8);
@@ -2131,16 +2075,15 @@ class Calibration3D_Smart {
     }
 
 
-    // aditof::Status Calibration3D_Smart::calibrateCameraGeometry(uint16_t *frame, uint32_t frame_size) {
     calibrateCameraGeometry(frame, frame_size) {
         if (!this.m_cal_valid) {
             return Status.OK;
         }
 
         for (let i = 0; i < frame_size; i++) {
-            if (frame[i] != this.m_range) {
+            if (frame[i] !== this.m_range) {
                 // frame[i] = static_cast<uint16_t>(frame[i] * m_geometry_cache[i]);
-                frame[i] = frame[i] * m_geometry_cache[i];
+                frame[i] = frame[i] * this.m_geometry_cache[i];
             }
             if (frame[i] > this.m_range) {
                 frame[i] = this.m_range;
@@ -2151,7 +2094,6 @@ class Calibration3D_Smart {
     }
 
     // Create a cache to speed up depth calibration computation
-    // void Calibration3D_Smart::buildDepthCalibrationCache(float gain, float offset, int16_t maxPixelValue, int range) {
     buildDepthCalibrationCache(gain, offset, maxPixelValue, range) {
         // if (this.m_depth_cache) {
             // delete[] m_depth_cache;
@@ -2166,7 +2108,6 @@ class Calibration3D_Smart {
     }
 
     // Create a cache to speed up depth geometric camera calibration computation
-    // void Calibration3D_Smart::buildGeometryCalibrationCache(const std::vector<float> &cameraMatrix, unsigned int width, unsigned int height) {
     buildGeometryCalibrationCache(cameraMatrix, width, height) {
         let fx = cameraMatrix[0];
         let fy = cameraMatrix[4];
@@ -2197,7 +2138,6 @@ class Calibration3D_Smart {
         }
     }
 
-    // void Calibration3D_Smart::buildDistortionCorrectionCache(unsigned int width, unsigned int height) {
     buildDistortionCorrectionCache(width, height) {
         let fx = this.m_intrinsics[2];
         let fy = this.m_intrinsics[3];
@@ -2225,7 +2165,6 @@ class Calibration3D_Smart {
         }
     }
 
-    // aditof::Status Calibration3D_Smart::distortionCorrection(uint16_t *frame, unsigned int width, unsigned int height) {
     distortionCorrection(frame, width, height) {
         let fx = this.m_intrinsics[2];
         let fy = this.m_intrinsics[3];
@@ -2257,6 +2196,7 @@ class Calibration3D_Smart {
             }
         }
         // memcpy(frame, buff, width * height * 2);
+        frame = buff;
         // delete[] buff;
         return Status.OK;
     }

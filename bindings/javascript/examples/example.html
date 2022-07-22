@@ -5,104 +5,31 @@
 <script type="text/javascript" src="../bundle.js"></script>
 
 <script type="text/javascript">
-    async function main() {
-        let status;
-        const ip_address = '192.168.0.106';
-
-        let net = new Network(ip_address);
-        status = await net.ServerConnect();
-
-        var nse = new NetworkSensorEnumerator(net);
-        status = await nse.searchSensors();
-
-        console.log(nse);
-
-        let depth_sensor = nse.getDepthSensors()[1][0];
-        let storage = nse.getStorages()[1][0];
-        let temp_sensor = nse.getTemperatureSensors()[1][0];
-
-        console.log(depth_sensor);
-        console.log(storage);
-        console.log(temp_sensor);
-
-        let address, data, length, bytesCount;
-
-        //depth sensor
-        console.log('');
-        console.log('depth sensor testing');
-        console.log('');
-
-        console.log('opened: ', depth_sensor.m_opened);
-        status = await depth_sensor.open();
-        console.log('status open: ', status, depth_sensor.m_opened);
-
-        let firmware, size;
-        firmware = 'asd';
-        size = 3;
-        status = await depth_sensor.program(firmware, size);
-        console.log('status program: ', status);
-
-        // doesn 't work
-        // status = await depth_sensor.start();
-        // console.log('status start: ', status);
-
-        [status, details] = await depth_sensor.getAvailableFrameTypes();
-        console.log('status getAvailableFrameTypes: ', status);
-
-        status = await depth_sensor.setFrameType(new Object());
-        console.log('status setFrameType: ', status);
-
-        // doesn 't work
-        // status = await depth_sensor.getFrame();
-        // console.log('status getFrame: ', status);
-
-        address = "asd";
-        data = "qwe";
-        length = 3;
-        status = await depth_sensor.writeAfeRegisters(address, data, length);
-        console.log('status writeAfeRegisters: ', status);
-
-        status = await depth_sensor.readAfeRegisters(address, data, length);
-        console.log('status readAfeRegisters: ', status);
-
-        status = await depth_sensor.stop();
-        console.log('status stop: ', status);
-
-        //storage
-        console.log("");
-        console.log('storage testing');
-        console.log("");
-
-        status = await storage.open();
-        console.log('status open: ', status);
-
-        address = 1;
-        data = new Uint8Array();
-        bytesCount = 3;
-        status = await storage.write(address, data, bytesCount);
-        console.log('status write: ', status);
-
-        [status, data] = await storage.read(address, bytesCount);
-        console.log('status read: ', status);
-
-        status = await storage.close();
-        console.log('status close: ', status);
+    
+    function checkIpAddress(ip_address){
+        if(!ip_address){
+            return false;
+        }
+    }
 
 
-        //temperature sensor
-        console.log('');
-        console.log('temp sensor testing');
-        console.log('');
+    async function main(ip_address){
+        
+        // if(!checkIpAddress(ip_address)){
+        //     console.log("Error: ip_address is not defined.");
+        //     return -1;
+        // }
 
-        status = await temp_sensor.open();
-        console.log('status open: ', status);
-
-        [status, temp] = await temp_sensor.read();
-        console.log('status read: ', status);
-
-        status = await temp_sensor.close();
-        console.log('status close: ', status);
-
+        if(document.getElementById("example_options").value === "first_frame_network"){
+            await first_frame_network(ip_address);
+        } else if(document.getElementById("example_options").value === "tof_viewer"){
+            await tof_viewer(ip_address);
+        } else {
+            console.log("No example selected.");
+            return -2;
+        }
+        console.log("Done.");
+        return 0;
     }
 
     async function first_frame_network(ip_address) {
@@ -135,9 +62,7 @@
             return 0;
         }
 
-        // return 0;
-
-        status = await camera.setFrameType(frameTypes[0]);//depth_ir_rgb
+        status = await camera.setFrameType(frameTypes[0]);
         if (status !== Status.OK) {
             console.log('ERROR: Could not set camera frame type!');
             return 0;
@@ -156,18 +81,20 @@
             return 0;
         }
 
-        let frame;// = new Frame();
-        [status, frame] = await camera.requestFrame();
-        if (status !== Status.OK) {
-            console.log('ERROR: Could not request frame!');
-            return 0;
-        } else {
-            console.log('INFO: succesfully requested frame!');
+        let frame;
+        // get first 5 frames
+        for(let k = 0; k < 5; k++){
+            [status, frame] = await camera.requestFrame();
+            if (status !== Status.OK) {
+                console.log('ERROR: Could not request frame!');
+                return 0;
+            } else {
+                console.log('INFO: succesfully requested frame!');
+            }
         }
-
-        // uint16_t *
+        
         let frameData;
-        [status, frameData] = frame.getData(FrameDataType.FULL_DATA);
+        [status, frameData] = frame.getData(FrameDataType.RGB);
 
         if (status !== Status.OK) {
             console.log('ERROR: Could not get frame data!');
@@ -179,31 +106,58 @@
             return 0;
         }
 
-        let fDetails = new FrameDetails();
-        [status, fDetails] = frame.getDetails();
-        for (let i = 0; i < fDetails.height; i++) {
-            for (let j = 0; j < fDetails.width; j++) {
-                console.log(frameData[i * fDetails.width + j]);
-            }
-        }
+        let fDetails;
+        fDetails = frame.getDetails();
+
+
+        console.log('typeof: ', typeof frameData);
+        console.log('len: ', frameData.length);
+        frameData = new Uint8Array(frameData);
+        console.log('len: ', frameData.length);
+        console.log(frameData);
+        
+        
+        console.log(fDetails);
+        
+        // create an image from the frameData array
+        document.getElementById('frame').src = URL.createObjectURL(new Blob([frameData.buffer], { type: 'image/png' } ));
 
     }
 
-    async function tof_viewer(){
-
+    async function tof_viewer(ip_address){
+        console.clear();
+        console.log('Not implemented yet...');
+        // TODO
+        
+        return;
     }
+
 </script>
 
 
 <body>
     <div>
         <h1> AdiTof JS Client </h1>
+        <label for="ip_input">Enter aditof-server's ip address</label>
+        <br>
+        <br>
         <input id="ip_input">
-        <button onclick='first_frame_network(document.getElementById("ip_input").value)'> Connect to the camera </button>
         <br>
         <br>
-        <input id="example_name">
-        <!-- <button onclick='net.SendCommand();'> Send </button> -->
+        <label for="examples">Choose an example</label>
+        <br>
+        <br>
+        <select name="examples" id="example_options">
+            <option value="first_frame_network">First frame network</option>
+            <option value="tof_viewer">Tof viewer</option>
+        </select>
+        <br>
+        <br>
+        <button onclick='main(document.getElementById("ip_input").value)'> Run example </button>
+        <br>
+        <br>
+        <label for="frame">Received frame</label>
+        <img id="frame" height="500">
     </div>
 </body>
 
