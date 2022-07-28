@@ -80,5 +80,17 @@ status = frame.getDetails(frameDetails)
 print("frame.getDetails()", status)
 print("frame details:", "width:", frameDetails.width, "height:", frameDetails.height, "type:", frameDetails.type)
 
-image = np.array(frame.getData(tof.FrameDataType.Depth), copy=False)
-print(image)
+#Depth
+depthImage = np.array(frame.getData(tof.FrameDataType.Depth), copy=False)
+depthImage = depthImage[0: frameDetails.height, 0: frameDetails.width]
+print(depthImage)
+
+#Ir
+irImage = np.array(frame.getData(tof.FrameDataType.IR), copy=False)
+irImage = irImage[0: frameDetails.height, 0: frameDetails.width]
+print(irImage)
+
+##Rgb (only for 3d-smart-camera)
+#rgbImage = np.array(frame.getData(tof.FrameDataType.RGB), copy=False)
+#rgbImage = rgbImage[0: frameDetails.rgbHeight, 0: frameDetails.rgbWidth]
+#print(rgbImage)
