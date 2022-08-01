@@ -131,6 +131,11 @@ if __name__ == "__main__":
     distance_scale_ir = 255.0 / max_value_of_IR_pixel
     distance_scale = 255.0 / camera_range
 
+    frameDetails = tof.FrameDetails()
+    status = frame.getDetails(frameDetails)
+    print("frame.getDetails()", status)
+    print("frame details:", "width:", frameDetails.width, "height:", frameDetails.height, "type:", frameDetails.type)
+
     while True:
         # Capture frame-by-frame
         status = cameras[0].requestFrame(frame)
@@ -141,14 +146,14 @@ if __name__ == "__main__":
         ir_map = np.array(frame.getData(tof.FrameDataType.IR), dtype="uint16", copy=False)
 
         # Creation of the IR image
-        ir_map = ir_map[0 : 480, 0: 640]
-        ir_map = ir_map * distance_scale / 4
+        ir_map = ir_map[0: frameDetails.height, 0: frameDetails.width]
+        ir_map = ir_map * distance_scale_ir
         ir_map = np.uint8(ir_map)
         ir_map = cv.flip(ir_map, 1)
         ir_map = cv.cvtColor(ir_map, cv.COLOR_GRAY2RGB)
 
         # Creation of the Depth image
-        depth_map = depth_map[0: 480, 0: 640]
+        depth_map = depth_map[0: frameDetails.height, 0: frameDetails.width]
         depth_map = cv.flip(depth_map, 1)
         distance_map = depth_map
         depth_map = distance_scale * depth_map
