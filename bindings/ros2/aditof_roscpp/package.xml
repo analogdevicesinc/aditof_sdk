@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>aditof_roscpp</name>
+  <version>0.0.0</version>
+  <description>The aditof_ros package</description>
+
+  <maintainer email="andreea.sandulescu@analog.com">Andreea Sandulescu</maintainer>
+
+  <license>BSD-3-Clause</license>
+
+  <url type="website">https://github.com/analogdevicesinc/aditof_sdk/</url>
+
+  <author email="andreea.sandulescu@analog.com">Andreea Sandulescu</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>sensor_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>dynamic_reconfigure</depend>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+
+</package>

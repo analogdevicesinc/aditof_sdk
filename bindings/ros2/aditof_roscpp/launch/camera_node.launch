@@ -1,0 +1,5 @@
+<launch>
+  <arg name="ip" default='""'/>
+  <node pkg="aditof_roscpp" type="aditof_camera_node" name="aditof_camera_node" args="$(arg ip)" output="screen"/>
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="reconfigParams"/>
+</launch>
