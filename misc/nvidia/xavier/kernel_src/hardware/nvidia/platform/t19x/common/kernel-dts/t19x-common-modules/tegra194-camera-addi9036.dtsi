@@ -16,8 +16,7 @@
  */
 
 / {
-	host1x {
-		vi@15c10000 {
+	tegra-capture-vi {
 			num-channels = <2>;
 			ports {
 				#address-cells = <1>;
@@ -42,47 +41,50 @@
 				};
 			};
 		};
-
+	host1x@13e00000 {
 		nvcsi@15a00000 {
 			num-channels = <2>;
-			#address-cells = <1>;
-			#size-cells = <0>;
+            num-tpg-channels = <36>;
 			channel@0 {
+				status = "okay";
 				reg = <0>;
 				ports {
-					#address-cells = <1>;
-					#size-cells = <0>;
 					port@0 {
-						reg = <0>;
+						status = "okay";
+                        reg = <0>;
 						addi9036_csi_in0: endpoint@0 {
+                            status = "okay";
 							port-index = <4>;
 							bus-width = <2>;
 							remote-endpoint = <&adi9036_out0>;
 						};
 					};
 					port@1 {
-						reg = <1>;
+						status = "okay";
+                        reg = <1>;
 						addi9036_csi_out0: endpoint@1 {
+                            status = "okay";
 							remote-endpoint = <&addi9036_vi_in0>;
 						};
 					};
 				};
 			};
-
 			channel@1 {
+				status = "okay";
 				reg = <1>;
 				ports {
-					#address-cells = <1>;
-					#size-cells = <0>;
 					port@0 {
+						status = "okay";
 						reg = <0>;
 						addi9036_csi_in1: endpoint@0 {
+                            status = "okay";
 							port-index = <4>;
 							bus-width = <2>;
 							remote-endpoint = <&adi9036_out1>;
 						};
 					};
 					port@1 {
+						status = "okay";
 						reg = <1>;
 						addi9036_csi_out1: endpoint@1 {
 							remote-endpoint = <&addi9036_vi_in1>;
@@ -90,11 +92,14 @@
 					};
 				};
 			};
+
 		};
+		
 	};
 
 	i2c@c240000 {
 		adi_tof_cam0@64 {
+            status="okay";
 			compatible = "adi,addi9036";
 			reg = <0x64>;
 			sensor_model = "MN34906BL";
@@ -155,19 +160,22 @@
 		};
 
 		eeprom@56 {
+            status="okay";
 			reg = <0x56>;
 			compatible = "atmel,24c1024";
 			pagesize = <32>;
 		};
 		
 		tmp103: tmp103@73 {
-				compatible = "ti,tmp103";
-				reg = <0x73>;
+            status="okay";
+            compatible = "ti,tmp103";
+            reg = <0x73>;
 		};	
 	};
 
 	i2c@c250000 {
 		adi_tof_cam1@64 {
+            status="okay";
 			compatible = "adi,addi9036";
 			reg = <0x64>;
 			sensor_model = "MN34906BL";
@@ -179,6 +187,7 @@
 			physical_h = "3.584";
 
 			mode0 {				
+                status="okay";
 				mclk_khz = "45000";
 				num_lanes = "2";
 				tegra_sinterface = "serial_e";
@@ -214,10 +223,12 @@
 			ports {
 				#address-cells = <0x1>;
 				#size-cells = <0x0>;
-
+                status="okay";
 				port@0 {
+                    status="okay";
 					reg = <0x0>;
 					adi9036_out1: endpoint {
+                        status="okay";
 						port-index = <4>;
 						remote-endpoint = <&addi9036_csi_in1>;
 						bus-width = <2>;
