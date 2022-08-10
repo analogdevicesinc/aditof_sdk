@@ -1,12 +1,9 @@
-class TemperatureSensorInterface {}
-
-class NetworkTemperatureSensor extends TemperatureSensorInterface {
-    m_name;
-    m_id;
-    m_network;
+class NetworkTemperatureSensor {
+    m_name; // string
+    m_id; // int
+    m_network; // Network
 
     constructor(name, id, network) {
-        super();
         this.m_name = name;
         this.m_id = id;
         this.m_network = network;
@@ -30,11 +27,6 @@ class NetworkTemperatureSensor extends TemperatureSensorInterface {
             return Status.INVALID_ARGUMENT;
         }
 
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
-
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
             return Status.GENERIC_ERROR;
@@ -50,7 +42,7 @@ class NetworkTemperatureSensor extends TemperatureSensorInterface {
 
         if (!net.serverConnected) {
             console.log("WARNING: Not connected to server");
-            return Status.UNREACHABLE;
+            return [Status.UNREACHABLE, temperature];
         }
 
         net.send_buff = new BufferProtobuf.ClientRequest();
@@ -60,17 +52,12 @@ class NetworkTemperatureSensor extends TemperatureSensorInterface {
 
         if ((await net.SendCommand()) !== 0) {
             console.log("WARNING: Send Command Failed");
-            return Status.INVALID_ARGUMENT;
+            return [Status.INVALID_ARGUMENT, temperature];
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
-            return Status.GENERIC_ERROR;
+            return [Status.GENERIC_ERROR, temperature];
         }
 
         let status = net.recv_buff.getStatus();
@@ -99,11 +86,6 @@ class NetworkTemperatureSensor extends TemperatureSensorInterface {
             return Status.INVALID_ARGUMENT;
         }
 
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
-
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
             return Status.GENERIC_ERROR;
@@ -114,7 +96,7 @@ class NetworkTemperatureSensor extends TemperatureSensorInterface {
         return status;
     }
     getName() {
-        return [Status.OK, this.m_name];
+        return this.m_name;
     }
 
 }

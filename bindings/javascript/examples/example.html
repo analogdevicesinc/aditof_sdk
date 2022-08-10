@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<title>Aditof JS Client</title>
+<link rel="shortcut icon" href="#">
+<script type="text/javascript" src="../bundle.js"></script>
+
+<script type="text/javascript">
+    
+    function checkIpAddress(ip_address){
+        if(!ip_address){
+            return false;
+        }
+    }
+
+
+    async function main(ip_address){
+        
+        // if(!checkIpAddress(ip_address)){
+        //     console.log("Error: ip_address is not defined.");
+        //     return -1;
+        // }
+
+        if(document.getElementById("example_options").value === "first_frame_network"){
+            await first_frame_network(ip_address);
+        } else if(document.getElementById("example_options").value === "tof_viewer"){
+            await tof_viewer(ip_address);
+        } else {
+            console.log("No example selected.");
+            return -2;
+        }
+        console.log("Done.");
+        return 0;
+    }
+
+    async function first_frame_network(ip_address) {
+        let status;
+
+        console.clear();
+        console.log('\n\n\n\nHello World! ... First frame network running ... ');
+
+
+        let system = new System();
+        let cameras = [];
+
+        [status, cameras] = await system.getCameraListAtIp(ip_address);
+        if (!cameras.length) {
+            console.log('WARNING: No cameras found');
+            return 0;
+        }
+
+        let camera = cameras[0];
+        status = await camera.initialize();
+        if (status !== Status.OK) {
+            console.log('ERROR: Could not initialize camera!');
+            return 0;
+        }
+
+        let frameTypes = [];
+        [status, frameTypes] = await camera.getAvailableFrameTypes();
+        if (!frameTypes.length) {
+            console.log('ERROR: no frame type available!');
+            return 0;
+        }
+
+        status = await camera.setFrameType(frameTypes[0]);
+        if (status !== Status.OK) {
+            console.log('ERROR: Could not set camera frame type!');
+            return 0;
+        }
+
+        let modes = [];
+        [status, modes] = camera.getAvailableModes();
+        if (!modes.length) {
+            console.log('ERROR: no camera modes available!');
+            return 0;
+        }
+
+        status = await camera.setMode(modes[0]);
+        if (status !== Status.OK) {
+            console.log('ERROR: Could not set camera mode!');
+            return 0;
+        }
+
+        let frame;
+        // get first 5 frames
+        for(let k = 0; k < 5; k++){
+            [status, frame] = await camera.requestFrame();
+            if (status !== Status.OK) {
+                console.log('ERROR: Could not request frame!');
+                return 0;
+            } else {
+                console.log('INFO: succesfully requested frame!');
+            }
+        }
+        
+        let frameData;
+        [status, frameData] = frame.getData(FrameDataType.RGB);
+
+        if (status !== Status.OK) {
+            console.log('ERROR: Could not get frame data!');
+            return 0;
+        }
+
+        if (!frameData) {
+            console.log('ERROR: no memory allocated in frame');
+            return 0;
+        }
+
+        let fDetails;
+        fDetails = frame.getDetails();
+
+
+        console.log('typeof: ', typeof frameData);
+        console.log('len: ', frameData.length);
+        frameData = new Uint8Array(frameData);
+        console.log('len: ', frameData.length);
+        console.log(frameData);
+        
+        
+        console.log(fDetails);
+        
+        // create an image from the frameData array
+        document.getElementById('frame').src = URL.createObjectURL(new Blob([frameData.buffer], { type: 'image/png' } ));
+
+    }
+
+    async function tof_viewer(ip_address){
+        console.clear();
+        console.log('Not implemented yet...');
+        // TODO
+        
+        return;
+    }
+
+</script>
+
+
+<body>
+    <div>
+        <h1> AdiTof JS Client </h1>
+        <label for="ip_input">Enter aditof-server's ip address</label>
+        <br>
+        <br>
+        <input id="ip_input">
+        <br>
+        <br>
+        <label for="examples">Choose an example</label>
+        <br>
+        <br>
+        <select name="examples" id="example_options">
+            <option value="first_frame_network">First frame network</option>
+            <option value="tof_viewer">Tof viewer</option>
+        </select>
+        <br>
+        <br>
+        <button onclick='main(document.getElementById("ip_input").value)'> Run example </button>
+        <br>
+        <br>
+        <label for="frame">Received frame</label>
+        <img id="frame" height="500">
+    </div>
+</body>
+
+</html>
+
+</html>

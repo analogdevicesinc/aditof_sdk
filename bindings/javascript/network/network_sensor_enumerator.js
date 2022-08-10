@@ -1,14 +1,11 @@
-class SensorEnumeratorInterface {}
-
-class NetworkSensorEnumerator extends SensorEnumeratorInterface {
-    m_network;
-    m_cameraType;
-    m_imageSensorsInfo;
+class NetworkSensorEnumerator{
+    m_network; // Network
+    m_cameraType; // CameraType
+    m_imageSensorsInfo; 
     m_storagesInfo;
     m_temperatureSensorsInfo;
 
     constructor(network) {
-        super();
         this.m_network = network;
         this.m_cameraType = -1;
         this.m_imageSensorsInfo = [];
@@ -40,7 +37,7 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
             connectionString = this.m_network.recv_buff.getMessage();
         }
 
-        console.log("status: " + status + "\nconnectionString: " + connectionString);
+        // console.log("status: " + status + "\nconnectionString: " + connectionString);
 
         return [status, connectionString];
     }
@@ -69,8 +66,9 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
             cameraType = this.m_network.recv_buff.getCameraType();
         }
 
-        console.log("status: " + status + "\ncameraType: " + cameraType);
+        // console.log("status: " + status + "\ncameraType: " + cameraType);
 
+        this.m_cameraType = cameraType;
         return [status, cameraType];
     }
 
@@ -88,6 +86,7 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
             console.log(`ERROR: invalid connection string: ${connectionString}`);
             return Status.GENERIC_ERROR;
         }
+
         [status, this.m_cameraType] = await this.getCameraType();
         if (status !== Status.OK) {
             console.log("WARNING: Failed to find out the camera type on target. Assumming it's camera: AD-96TOF1-EBZ");
@@ -133,39 +132,20 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
 
     getDepthSensors() {
         let depthSensors = [];
-        let sensor;
-        let status = Status.OK;
-        // if (this.m_imageSensorsInfo.length > 0) {
-        //     let { name, id } = this.m_imageSensorsInfo[0]; //front
-        //     sensor = new NetworkDepthSensor(name, id, this.m_network);
-        //     depthSensors.push(sensor);
-
-        //     let communicationHandle;
-        //     status = sensor.getHandle(communicationHandle);
-        //     if (status !== Status.OK) {
-        //         console.log("ERROR: Failed to obtain the handle");
-        //         return [status, depthSensors];
-        //     }
-        //     for (let i = 1; i < this.m_imageSensorsInfo.length; i++) {
-        //         let { name, id } = this.m_imageSensorsInfo[i];
-        //         sensor = new NetworkDepthSensor(name, id, communicationHandle);
-        //         depthSensors.push(sensor);
-        //     }
-        // }
+        let sensor, status = Status.OK;
+        
         for (const nameAndId of this.m_imageSensorsInfo) {
             let { name, id } = nameAndId;
             sensor = new NetworkDepthSensor(name, id, this.m_network);
             depthSensors.push(sensor);
         }
-
-
         return [status, depthSensors];
     }
 
     getStorages() {
         let storages = [];
-        let storage;
-        let status = Status.OK;
+        let storage, status = Status.OK;
+
         for (const nameAndId of this.m_storagesInfo) {
             let { name, id } = nameAndId;
             storage = new NetworkStorage(name, id, this.m_network);
@@ -177,8 +157,8 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
 
     getTemperatureSensors() {
         let temperatureSensors = [];
-        let tSensor;
-        let status = Status.OK;
+        let tSensor, status = Status.OK;
+
         for (const nameAndId of this.m_temperatureSensorsInfo) {
             let { name, id } = nameAndId;
             tSensor = new NetworkTemperatureSensor(name, id, this.m_network);
@@ -189,8 +169,7 @@ class NetworkSensorEnumerator extends SensorEnumeratorInterface {
     }
 
     getCameraTypeOnTarget() {
-        return [Status.OK, this.m_cameraType];
+        return this.m_cameraType;
     }
 }
 window.NetworkSensorEnumerator = NetworkSensorEnumerator;
-

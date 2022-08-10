@@ -1,10 +1,5 @@
 const WebSocketAsPromised = require('websocket-as-promised');
-const BufferProtobuf = require('../buffer_pb');
-
-
-// class NetworkHandle {
-//     net;//network
-// };
+const BufferProtobuf = require('./buffer_pb');
 
 
 const Status = {
@@ -49,7 +44,7 @@ Object.freeze(ServerStatus);
 function isValidConnection(targetVersionString) {
     // getServerVersion(): functie din SDK - se va compila cu emscripten
     // targetVersionString.localeCompare(getServerVersion()) === 0;
-    console.log("inside isValidConnection");
+    console.log('isValidConnection? ', targetVersionString);
     return true;
 }
 
@@ -58,8 +53,8 @@ function isValidConnection(targetVersionString) {
 
 
 class Network {
-    ip_address;
-    wsp;
+    ip_address; // string
+    wsp; // WebSocketAsPromised
     sendSuccessful; // bool 
     dataReceived; // bool 
     serverConnected; // bool 
@@ -113,7 +108,6 @@ class Network {
         this.serverConnected = false;
         this.send_buff = new BufferProtobuf.ClientRequest();
         this.recv_buff = new BufferProtobuf.ServerResponse();
-        // console.log("created network");
     }
 
     async ServerConnect() {
@@ -133,6 +127,7 @@ class Network {
         }
         try {
             this.recv_buff = await this.wsp.sendRequest(this.send_buff, {
+                // set a random string as the request ID 
                 requestId: (Math.random() + 1).toString(36).substring(7),
             });
             console.log('recv_buff is: ', this.recv_buff);
@@ -150,7 +145,6 @@ class Network {
 
 window.WebSocketAsPromised = WebSocketAsPromised;
 window.BufferProtobuf = BufferProtobuf;
-// window.ip_address = ip_address;
 window.Status = Status;
 window.CameraType = CameraType;
 window.FrameDataType = FrameDataType;

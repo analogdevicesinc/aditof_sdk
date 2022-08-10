@@ -1,19 +1,19 @@
-class DepthSensorInterface {}
-
-class NetworkDepthSensor extends DepthSensorInterface {
-    m_name;
-    m_id;
-    m_network;
-    m_opened;
-    m_sensorDetails;
-    m_bufferInfo;
+class NetworkDepthSensor {
+    m_name; // string
+    m_id; // int
+    m_network; // Network
+    m_opened; // bool
+    frameDetails_cache; // FrameDetails 
+    m_sensorDetails; // SensorDetails
+    m_bufferInfo; // BufferInfo
 
     constructor(name, id, network) {
-        super();
         this.m_name = name;
         this.m_id = id;
         this.m_network = network;
         this.m_opened = false;
+        this.m_sensorDetails = new SensorDetails();
+        this.m_bufferInfo = new BufferInfo();
     }
 
     async open() {
@@ -40,11 +40,6 @@ class NetworkDepthSensor extends DepthSensorInterface {
             return Status.INVALID_ARGUMENT;
         }
 
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
-
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
             return Status.GENERIC_ERROR;
@@ -66,14 +61,6 @@ class NetworkDepthSensor extends DepthSensorInterface {
             return Status.UNREACHABLE;
         }
 
-        // net.send_buff.setFuncName("Start");
-        // // net.send_buff.mutable_sensors_info().add_image_sensors().setId(this.m_id);
-        // net.send_buff.setSensorsInfo(new BufferProtobuf.SensorsInfo());
-        // net.send_buff.getSensorsInfo().addImageSensors().setId(this.m_id);
-        // console.log('id: ', net.send_buff.getSensorsInfo().getImageSensorsList()[0].getId());
-        // net.send_buff.setExpectReply(true);
-
-
         net.send_buff = new BufferProtobuf.ClientRequest();
         net.send_buff.setFuncName("Start");
         net.send_buff.setSensorsInfo(new BufferProtobuf.SensorsInfo());
@@ -85,11 +72,6 @@ class NetworkDepthSensor extends DepthSensorInterface {
             console.log("WARNING: Send Command Failed");
             return Status.INVALID_ARGUMENT;
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
@@ -110,10 +92,6 @@ class NetworkDepthSensor extends DepthSensorInterface {
             return Status.UNREACHABLE;
         }
 
-        // net.send_buff.setFuncName("Stop");
-        // net.send_buff.mutable_sensors_info().add_image_sensors().setId(this.m_id);
-        // net.send_buff.setExpectReply(true);
-
         net.send_buff = new BufferProtobuf.ClientRequest();
         net.send_buff.setFuncName("Stop");
         net.send_buff.setSensorsInfo(new BufferProtobuf.SensorsInfo());
@@ -125,11 +103,6 @@ class NetworkDepthSensor extends DepthSensorInterface {
             console.log("WARNING: Send Command Failed");
             return Status.INVALID_ARGUMENT;
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
@@ -143,16 +116,12 @@ class NetworkDepthSensor extends DepthSensorInterface {
 
     async getAvailableFrameTypes() {
         let net = this.m_network;
-        let details = [];
+        let types = [];
 
         if (!net.serverConnected) {
             console.log("WARNING: Not connected to server");
-            return Status.UNREACHABLE;
+            return [Status.UNREACHABLE, types];
         }
-
-        // net.send_buff.setFuncName("GetAvailableFrameTypes");
-        // net.send_buff.mutable_sensors_info().add_image_sensors().setId(this.m_id);
-        // net.send_buff.setExpectReply(true);
 
         net.send_buff = new BufferProtobuf.ClientRequest();
         net.send_buff.setFuncName("GetAvailableFrameTypes");
@@ -162,29 +131,32 @@ class NetworkDepthSensor extends DepthSensorInterface {
 
         if ((await net.SendCommand()) !== 0) {
             console.log("WARNING: Send Command Failed");
-            return Status.INVALID_ARGUMENT;
+            return [Status.INVALID_ARGUMENT, types];
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
-            return Status.GENERIC_ERROR;
+            return [Status.GENERIC_ERROR, types];
         }
 
-
         for (const frameType of net.recv_buff.getAvailableFrameTypesList()) {
-            details.push(frameType);
+            let frameDetails = new FrameDetails();
+            frameDetails.width = frameType.getWidth();
+            frameDetails.height = frameType.getHeight();
+            frameDetails.type = frameType.getType();
+            frameDetails.fullDataWidth = frameType.getFullDataWidth();
+            frameDetails.fullDataHeight = frameType.getFullDataHeight();
+            frameDetails.rgbWidth = frameType.getRgbWidth();
+            frameDetails.rgbHeight = frameType.getRgbHeight();
+            types.push(frameDetails);
         }
 
         let status = net.recv_buff.getStatus();
 
-        return [status, details];
+        return [status, types];
     }
     async setFrameType(details) {
+        console.assert(details instanceof FrameDetails, "Parameter is not of type FrameDetails.");
         let net = this.m_network;
 
         if (!net.serverConnected) {
@@ -192,23 +164,10 @@ class NetworkDepthSensor extends DepthSensorInterface {
             return Status.UNREACHABLE;
         }
 
-        // net.send_buff.setFuncName("SetFrameType");
-        // net.send_buff.mutable_sensors_info().add_image_sensors().setId(this.m_id);
-        // net.send_buff.mutable_frame_type().setWidth(details.width);
-        // net.send_buff.mutable_frame_type().setHeight(details.height);
-        // net.send_buff.mutable_frame_type().setType(details.type);
-        // net.send_buff.mutable_frame_type().setFullDataWidth(details.fullDataWidth);
-        // net.send_buff.mutable_frame_type().setFullDataHeight(details.fullDataHeight);
-        // net.send_buff.mutable_frame_type().setRgbWidth(details.rgbWidth);
-        // net.send_buff.mutable_frame_type().setRgbHeight(details.rgbHeight);
-        // net.send_buff.setExpectReply(true);
-
         net.send_buff = new BufferProtobuf.ClientRequest();
         net.send_buff.setFuncName("SetFrameType");
-
         net.send_buff.setSensorsInfo(new BufferProtobuf.SensorsInfo());
         net.send_buff.getSensorsInfo().addImageSensors().setId(this.m_id);
-
         net.send_buff.setFrameType(new BufferProtobuf.FrameDetails());
         net.send_buff.getFrameType().setWidth(details.width);
         net.send_buff.getFrameType().setHeight(details.height);
@@ -224,11 +183,6 @@ class NetworkDepthSensor extends DepthSensorInterface {
             return Status.INVALID_ARGUMENT;
         }
 
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
-
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
             return Status.GENERIC_ERROR;
@@ -237,18 +191,18 @@ class NetworkDepthSensor extends DepthSensorInterface {
         let status = net.recv_buff.getStatus();
 
         if (status === Status.OK) {
-            this.m_sensorDetails = details;
+            this.frameDetails_cache = details;
         }
 
         return status;
     }
     async program(firmware, size) {
-        if (firmware === null) { // nullptr
+        if (firmware === null) {
             console.log("ERROR: Received firmware null pointer");
             return Status.INVALID_ARGUMENT;
         }
-
-        //assert(size > 0);
+        
+        console.assert(size > 0, "Size parameter is negative.");
 
         let net = this.m_network;
 
@@ -257,21 +211,18 @@ class NetworkDepthSensor extends DepthSensorInterface {
             return Status.UNREACHABLE;
         }
 
+        let firmware8 = new Uint8Array(new Uint16Array(firmware).buffer);
+
         net.send_buff = new BufferProtobuf.ClientRequest();
         net.send_buff.setFuncName("Program");
-        net.send_buff.addFuncInt32Param(size); // static_cast<::google::int32>(size)
-        net.send_buff.addFuncBytesParam(firmware, size);
+        net.send_buff.addFuncBytesParam(firmware8, size);
+        net.send_buff.addFuncInt32Param(size);
         net.send_buff.setExpectReply(true);
 
         if ((await net.SendCommand()) !== 0) {
             console.log("WARNING: Send Command Failed");
             return Status.INVALID_ARGUMENT;
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
@@ -283,119 +234,93 @@ class NetworkDepthSensor extends DepthSensorInterface {
         return status;
     }
     async getFrame() {
-        // let buffer;
-        // if (buffer === null) { //nullptr
-        //     console.log("ERROR: Received buffer null pointer");
-        //     return Status.INVALID_ARGUMENT;
-        // }
-
+        let buffer;
         let net = this.m_network;
 
         if (!net.serverConnected) {
             console.log("WARNING: Not connected to server");
-            return Status.UNREACHABLE;
+            return [Status.UNREACHABLE, buffer];
         }
 
         net.send_buff = new BufferProtobuf.ClientRequest();
         net.send_buff.setFuncName("GetFrame");
-
         net.send_buff.setSensorsInfo(new BufferProtobuf.SensorsInfo());
         net.send_buff.getSensorsInfo().addImageSensors().setId(this.m_id);
-
-        // net.send_buff.mutable_sensors_info().add_image_sensors().setId(this.m_id);
-
         net.send_buff.setExpectReply(true);
 
         if ((await net.SendCommand()) !== 0) {
             console.log("WARNING: Send Command Failed");
-            return Status.INVALID_ARGUMENT;
+            return [Status.INVALID_ARGUMENT, buffer];
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
-            return Status.GENERIC_ERROR;
+            return [Status.GENERIC_ERROR, buffer];
         }
 
         let status = net.recv_buff.getStatus();
         if (status !== Status.OK) {
             console.log("WARNING: getFrame() failed on target");
-            return status;
+            return [status, buffer];
         }
 
-        // memcpy(buffer, net->recv_buff.bytes_payload(0).c_str(),
-        //        net->recv_buff.bytes_payload(0).length());
+        
+        buffer = net.recv_buff.getBytesPayloadList();
+        console.log('buffer: ', buffer);
 
+        
 
-        // let aha = (net.recv_buff.getBytesPayloadList()[0]);
-        // console.log("aha: ", aha);
-
-        let buffer = net.recv_buff.getBytesPayloadList()[0];
-
-
-        // undefined
-        // this.m_bufferInfo.timestamp = net.recv_buff.getBufferDetails().getTimestamp();
-
-
-
-        return status;
+        console.log('getBufferDetails: ', net.recv_buff.getBufferDetails());
+        // if(this.m_bufferInfo){
+        //     this.m_bufferInfo.timestamp = net.recv_buff.getBufferDetails().getTimestamp();
+        // }
+        
+        return [status, buffer];
     }
 
-    async readAfeRegisters(address, data, length) {
+    async readAfeRegisters(address, length) {
+        let address8, data;
+
         if (address === null) {
             console.log("ERROR: Received AfeRegisters address null pointer");
-            return Status.INVALID_ARGUMENT;
+            return [Status.INVALID_ARGUMENT, data];
         }
+        console.assert(length > 0, "Length parameter is negative.");
 
-        if (data === null) {
-            console.log("ERROR: Received AfeRegisters data null pointer");
-            return Status.INVALID_ARGUMENT;
-        }
-
-        //assert(length > 0);
+        address8 = new Uint8Array(new Uint16Array(address).buffer);
+        data = new Uint8Array();
 
         let net = this.m_network;
 
         if (!net.serverConnected) {
             console.log("WARNING: Not connected to server");
-            return Status.UNREACHABLE;
+            return [Status.UNREACHABLE, data];
         }
 
         net.send_buff = new BufferProtobuf.ClientRequest();
         net.send_buff.setFuncName("ReadAfeRegisters");
-        net.send_buff.addFuncInt32Param(length);
-        net.send_buff.addFuncBytesParam(address, length);
+        net.send_buff.addFuncBytesParam(address8, length);
         net.send_buff.addFuncBytesParam(data, length);
+        net.send_buff.addFuncInt32Param(length);
         net.send_buff.setExpectReply(true);
 
         if ((await net.SendCommand()) !== 0) {
             console.log("WARNING: Send Command Failed");
-            return Status.INVALID_ARGUMENT;
+            return [Status.INVALID_ARGUMENT, data];
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
-            return Status.GENERIC_ERROR;
+            return [Status.GENERIC_ERROR, data];
         }
 
         let status = net.recv_buff.getStatus();
 
         if (status === Status.OK) {
-            // memcpy(data, net->recv_buff.bytes_payload(0).c_str(),
-            //        net->recv_buff.bytes_payload(0).length());
-            data = net.recv_buff.bytes_payload(0).c_str();
+            data = net.recv_buff.getBytesPayloadList()[0];
         }
 
-        return status;
+        return [status, data];
     }
     async writeAfeRegisters(address, data, length) {
         if (address === null) {
@@ -408,7 +333,7 @@ class NetworkDepthSensor extends DepthSensorInterface {
             return Status.INVALID_ARGUMENT;
         }
 
-        // assert(length > 0);
+        console.assert(length > 0, "Length parameter is negative.");
 
         let net = this.m_network;
 
@@ -417,22 +342,22 @@ class NetworkDepthSensor extends DepthSensorInterface {
             return Status.UNREACHABLE;
         }
 
+        let address8 = new Uint8Array(new Uint16Array(address).buffer);
+        let data8 = new Uint8Array(new Uint16Array(data).buffer);
+        // console.log(address, address8);
+        // console.log(data, data8);
+
         net.send_buff = new BufferProtobuf.ClientRequest();
         net.send_buff.setFuncName("WriteAfeRegisters");
+        net.send_buff.addFuncBytesParam(address8, length * 2);
+        net.send_buff.addFuncBytesParam(data8, length * 2);
         net.send_buff.addFuncInt32Param(length);
-        net.send_buff.addFuncBytesParam(address, length);
-        net.send_buff.addFuncBytesParam(data, length);
         net.send_buff.setExpectReply(true);
 
         if ((await net.SendCommand()) !== 0) {
             console.log("WARNING: Send Command Failed");
             return Status.INVALID_ARGUMENT;
         }
-
-        // if (net.recv_server_data() !== 0) {
-        //     console.log("WARNING: Receive Data Failed");
-        //     return Status.GENERIC_ERROR;
-        // }
 
         if (net.recv_buff.getServerStatus() !== ServerStatus.REQUEST_ACCEPTED) {
             console.log("WARNING: API execution on Target Failed");
@@ -445,10 +370,10 @@ class NetworkDepthSensor extends DepthSensorInterface {
     }
 
     getDetails() {
-        return [Status.OK, this.m_sensorDetails];
+        return this.m_sensorDetails;
     }
     getName() {
-        return [Status.OK, this.m_name];
+        return this.m_name;
     }
 
 }
