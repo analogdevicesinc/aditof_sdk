@@ -18,7 +18,7 @@ mkdir -p deps_installed/Debug/websockets
 cp -r C:/'Program Files'/OpenSSL-Win64 deps_installed
 
 #Install glog
-git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
+git clone  --depth 1 https://github.com/google/glog
 cd glog
 mkdir build_0_3_5_Release
 mkdir build_0_3_5_Debug

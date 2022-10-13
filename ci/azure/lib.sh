@@ -280,7 +280,7 @@ get_deps_source_code() {
     fi
 
     [ -d "glog" ] || {
-        git clone --branch v0.3.5 --depth 1 https://github.com/google/glog
+        git clone  --depth 1 https://github.com/google/glog
     }
 
     [ -d "protobuf" ] || {
