@@ -253,7 +253,7 @@ EXIT /B 0
 set configuration=%~1
 echo "Installing glog with config=%configuration% and generator=%generator%"
 pushd %deps_dir%
-if not exist "glog" ( git clone  --depth 1 https://github.com/google/glog )
+if not exist "glog" ( git clone --branch v0.6.0 --depth 1 https://github.com/google/glog )
 pushd glog
 git checkout tags/v0.3.5
 if not exist "build_0_3_5" ( mkdir build_0_3_5 )
