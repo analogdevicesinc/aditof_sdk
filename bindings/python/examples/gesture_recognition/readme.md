@@ -36,6 +36,8 @@ results on some of these test cases. The goal is to have it perform adequately f
 
 ### The Challenge
 
+How many fingers am I holding up ?
+
 The functions that handle the algorithm are the following:
  * _detect_hand() - line 89
  * _count_fingers() - line 103
@@ -47,6 +49,6 @@ Participants will have to edit these in order to modify the algorithm.
 To submit your results, please archive the gesture_recognition directory and send 
 us the .zip file, with the subject: "3D ToF Python Challenge"
 
-Address : Melinda.Zerkula@analog.com
+Address : cristina.suteu@analog.com
 
 
