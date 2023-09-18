@@ -3,6 +3,7 @@ from skimage import measure
 from scipy.spatial import ConvexHull
 from scipy.ndimage import distance_transform_edt
 
+# These are empirical values, which were found by trial and error
 pixel_no_threshold = 200
 analyzed_region_distance = 38.25
 hand_radius_error = 1.9
@@ -25,9 +26,10 @@ class ProcessTab:
     # =============================================================================
     def _depth_img_hist(self):
         # hist[0] = number of elements
-        # hist[1] = distance normalized to 255
+        # hist[1] = distance normalized to 255 (this was done in notebook.py)
         counts, bins = np.histogram(self.depth_img.ravel(), 512)
         hist = [counts, bins]
+
         start = 1
         while start < (len(hist[0]) - 2) and hist[0][start] < pixel_no_threshold:
             start += 1
@@ -35,7 +37,8 @@ class ProcessTab:
 
         stop = int((hist[1][start] + analyzed_region_distance - hist[1][0]) / bin_step)
 
-        self.stop_distance = hist[1][stop]
+        self.stop_distance =  hist[1][stop]
+        # Analyze the pixel only if it is closer than a threshold
         self.binary_img = (self.depth_img < self.stop_distance) * 1
 
     # =============================================================================
@@ -45,6 +48,7 @@ class ProcessTab:
         props = measure.regionprops(labels)
         if len(props) == 0:
             raise Exception("No object found.")
+
         props.sort(key=lambda x: x.area, reverse=True)
         self.max_area = props[0]
         points = props[0].filled_image
@@ -55,8 +59,8 @@ class ProcessTab:
 
         # Compute the distance of non-zero points (hand) to the nearest zero point (background)
         self.dist_map = distance_transform_edt(points)
+        # Indices of hand center, i.e. the point farthest from the background
         self.hand_center = tuple(arr[0] for arr in np.where(self.dist_map == np.max(self.dist_map)))
-
         self.radius = hand_radius_error * np.max(self.dist_map)
 
     # =============================================================================
@@ -71,21 +75,22 @@ class ProcessTab:
                          [vertices[-1] - vertices[0]], axis=0)
 
         # distance bw 2 consecutive vertices
+        # In cdist variables the distance units are pixels
         cdist = np.sqrt(dist[:, 0] ** 2 + dist[:, 1] ** 2)
 
         # This is just some formula invented by me. It is not optimal.
-        # It is used to make cdist_threshold inversely proportional to distance_threshold,
-        # while keeping it lower than 25
+        # It is used to make cdist_threshold inversely proportional to stop_distance,
+        # while keeping it between 0 and 25
         cdist_threshold = np.sqrt(1 - self.stop_distance / 255) * 25
-        cdist = (cdist <= cdist_threshold) * 1
+        cdist_bin = (cdist <= cdist_threshold) * 1
 
         # Used to check whether a cdist smaller than the threshold
         # is following a cdist bigger than the threshold
-        cdist_diff = np.append(cdist[0:len(cdist) - 1] - cdist[1:len(cdist)],
-                               [cdist[-1] - cdist[0]], axis=0)
+        cdist_diff = np.append(cdist_bin[0:len(cdist_bin) - 1] - cdist_bin[1:len(cdist_bin)],
+                               [cdist_bin[-1] - cdist_bin[0]], axis=0)
 
         # Indices of vertices which correspond to fingertips
-        dist_idx = np.where((cdist_diff == -1) | ((cdist_diff == 0) & (cdist == 0)))
+        dist_idx = np.where((cdist_diff == -1) | ((cdist_diff == 0) & (cdist_bin == 0)))
         dist_idx = np.array(dist_idx) + 1
         # dist_idx is a double list
         dist_idx = dist_idx[0]
@@ -123,3 +128,4 @@ class ProcessTab:
             self.resultVar = "Found " + str(len(self.fingers[0])) + " extended fingers. Rock"
         else:
             self.resultVar = "Found " + str(len(self.fingers[0])) + " extended fingers. Unknown gesture"
+
