@@ -122,7 +122,7 @@ class GestureDemo(Frame):
         distance_scale = 255.0 / camera_range
         tof_frame = tof.Frame()
         computation_delay_start = time.time()
-        daniels_process_results = []
+        process_results = []
         executor = concurrent.futures.ProcessPoolExecutor()
 
         while True:
@@ -148,22 +148,22 @@ class GestureDemo(Frame):
             cv.namedWindow('Depth image', cv.WINDOW_AUTOSIZE)
             cv.imshow('Depth image', img)
 
-            # if daniels_process_results != []:
-            daniels_process_results = self.update_display(daniels_process_results)
+            # if process_results != []:
+            process_results = self.update_display(process_results)
 
             # Process image every 1s
             if (time.time() - computation_delay_start) <= 1: continue
 
             p = executor.submit(calc_process, depth_map)
-            daniels_process_results.append(p)
+            process_results.append(p)
             computation_delay_start = time.time()
 
         executor.shutdown()
         cv.destroyWindow("Depth image")
 
-    def update_display(self, daniels_process_results):
+    def update_display(self, process_results):
         to_delete = []
-        processes = concurrent.futures.as_completed(daniels_process_results)
+        processes = concurrent.futures.as_completed(process_results)
         for p in processes:
             try:
                 result, self.box_start_point, self.box_end_point = p.result()
@@ -175,7 +175,7 @@ class GestureDemo(Frame):
                 self.update()
                 to_delete.append(p)
 
-        return [p for p in daniels_process_results if p not in to_delete]
+        return [p for p in process_results if p not in to_delete]
 
 
 if __name__ == '__main__':
