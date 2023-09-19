@@ -76,7 +76,8 @@ class ProcessTab:
 
         # distance bw 2 consecutive vertices
         # In cdist variables the distance units are pixels
-        cdist = np.sqrt(dist[:, 0] ** 2 + dist[:, 1] ** 2)
+        ##### Task 1 - Use formula
+        cdist = 10
 
         # This is just some formula invented by me. It is not optimal.
         # It is used to make cdist_threshold inversely proportional to stop_distance,
@@ -90,7 +91,8 @@ class ProcessTab:
                                [cdist_bin[-1] - cdist_bin[0]], axis=0)
 
         # Indices of vertices which correspond to fingertips
-        dist_idx = np.where((cdist_diff == -1) | ((cdist_diff == 0) & (cdist_bin == 0)))
+        ##### Task 2 - Keep np.where and modify the condition
+        dist_idx = np.where(cdist_diff == 1)
         dist_idx = np.array(dist_idx) + 1
         # dist_idx is a double list
         dist_idx = dist_idx[0]
@@ -106,11 +108,8 @@ class ProcessTab:
             stop = dist_idx[i+1] if (i+1 < len(dist_idx)) else len(vertices)
             for j in range(dist_idx[i], stop):
                 vertex_dist_from_center = vertices[j] - self.hand_center
-                vertex_cdist_from_center = np.sqrt(vertex_dist_from_center[0] ** 2 +
-                                                   vertex_dist_from_center[1] ** 2)
-                if finger_cdist[i] < vertex_cdist_from_center:
-                    finger_cdist[i] = vertex_cdist_from_center
-                    dist_idx[i] = j
+                ##### Task 3 - use formula, update finger_cdist
+                vertex_cdist_from_center = 30
 
         # Select actual fingertips
         self.fingers = np.where(np.logical_and(finger_cdist > self.radius,
