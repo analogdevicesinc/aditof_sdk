@@ -37,6 +37,7 @@ option(USE_3D_SMART "Use 3D Smart camera?" OFF)
 option(WITH_TOOLS "Build tools?" OFF)
 option(IGNORE_TARGET_VERSION "Ignore sdk version on target?" OFF)
 option(WITH_JS "Build JavaScript bindings?" OFF)
+option(CUDA_ON_TARGET "Build cuda_utils bindings?" OFF)
 
 # Set camera flags
 if (USE_FXTOF1)
@@ -94,6 +95,10 @@ endif()
 if (WITH_NETWORK)
         add_definitions(-DHAS_NETWORK)
 endif()
+if (CUDA_ON_TARGET)
+        add_definitions(-DCUDA_ON_TARGET)
+endif()
+
 
 include(FindGit OPTIONAL)
 if (GIT_FOUND)
