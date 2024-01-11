@@ -1,5 +1,5 @@
 #install OpenCV
-cinst opencv --version 3.4.1
+choco install opencv --version 3.4.1
 
 #build sdk
 mkdir build_Release
