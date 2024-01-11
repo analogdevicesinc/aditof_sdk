@@ -60,8 +60,6 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "{#BinaryPath}\sdk\Release\aditof.dll"; DestDir: "{app}"
 Source: "{#BinaryPath}\examples\aditof-demo\Release\aditof-demo.exe"; DestDir: "{app}";
 Source: "{#OpenCVbin}\opencv_world341.dll"; DestDir: "{app}";
-Source: "{#OpenSSLbin}\libcrypto*"; DestDir: "{app}";
-Source: "{#OpenSSLbin}\libssl*"; DestDir: "{app}";
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"
