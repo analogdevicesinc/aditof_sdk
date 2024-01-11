@@ -1,4 +1,4 @@
-FROM raspbian/stretch
+FROM balenalib/raspberrypi3:bullseye
 
 RUN mkdir -p aditof-deps
 WORKDIR aditof-deps
