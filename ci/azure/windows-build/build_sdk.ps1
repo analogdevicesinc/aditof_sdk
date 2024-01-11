@@ -6,11 +6,11 @@ mkdir build_Release
 mkdir build_Debug
 
 cd build_Release
-cmake -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="../deps_installed/Release/glog;../deps_installed/Release/protobuf;../deps_installed/Release/websockets;..\deps_installed\OpenSSL-Win64" -DOpenCV_DIR="C:/tools/opencv/build/x64/vc15/lib" -DOPENSSL_INCLUDE_DIRS="..\deps_installed\OpenSSL-Win64\include" ..
+cmake -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="../deps_installed/Release/glog;../deps_installed/Release/protobuf;../deps_installed/Release/websockets;..\deps_installed\OpenSSL-Win64" -DOpenCV_DIR="C:/tools/opencv/build/x64/vc15/lib" ..
 cmake --build . --target install --config Release -j 4
 
 cd ../build_Debug
-cmake -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="../deps_installed/Debug/glog;../deps_installed/Debug/protobuf;../deps_installed/Debug/websockets;..\deps_installed\OpenSSL-Win64" -DOpenCV_DIR="C:/tools/opencv/build/x64/vc15/lib" -DOPENSSL_INCLUDE_DIRS="..\deps_installed\OpenSSL-Win64\include" ..
+cmake -DWITH_OPENCV=on -DWITH_PYTHON=on -DCMAKE_PREFIX_PATH="../deps_installed/Debug/glog;../deps_installed/Debug/protobuf;../deps_installed/Debug/websockets;..\deps_installed\OpenSSL-Win64" -DOpenCV_DIR="C:/tools/opencv/build/x64/vc15/lib" ..
 cmake --build . --target install --config Debug -j 4
 
 #generate developer kit binaries
@@ -32,8 +32,6 @@ cp build_Debug\sdk\Debug\aditof.pdb aditof_library\lib\aditofd.pdb
 
 #copy python, openSSL, openCV
 cp build_Release\bindings\python\Release\aditofpython* aditof_library\bin\python
-cp deps_installed\OpenSSL-Win64\bin\libcrypto* aditof_library\bin
-cp deps_installed\OpenSSL-Win64\bin\libssl* aditof_library\bin
 Compress-Archive -Path aditof_library -DestinationPath aditof_x64_vs16.zip
 
 #generate Installer
