@@ -48,7 +48,8 @@
 
 using namespace aditof;
 
-aditof::Status findDepthSensor(std::string &media,std::string &dev,std::string &subdev){
+aditof::Status findDepthSensor(std::string &media, std::string &dev,
+                               std::string &subdev) {
 
     char *buf;
     int size = 0;
@@ -106,9 +107,9 @@ aditof::Status findDepthSensor(std::string &media,std::string &dev,std::string &
                 if (found1 == std::string::npos) {
                     break;
                 }
-                dev = entities[idx].substr(
-                    found + strlen("device node name "),
-                    found1 - found - strlen("device node name ") - 2);
+                dev = entities[idx].substr(found + strlen("device node name "),
+                                           found1 - found -
+                                               strlen("device node name ") - 2);
                 break;
             }
             found = entities[idx].find("ENABLED", found);
@@ -138,8 +139,8 @@ aditof::Status findDepthSensor(std::string &media,std::string &dev,std::string &
             break;
         }
         subdev = entities[idx].substr(found + strlen("device node name "),
-                                           found1 - found -
-                                               strlen("device node name ") - 2);
+                                      found1 - found -
+                                          strlen("device node name ") - 2);
         break;
     }
 
