@@ -39,12 +39,12 @@ jobs:
       #RP
       Raspberry_96tof1:
         imageName: 'ubuntu-20.04'
-        DOCKER: "danielguramulta/aditof-sdk-raspbian"
+        DOCKER: "septimiuvana/aditof-raspberrypi-docker"
         EXTRA_CMAKE_FLAGS: "-DRASPBERRY=1"
 
       Raspberry_fxtof1:
         imageName: 'ubuntu-20.04'
-        DOCKER: "danielguramulta/aditof-sdk-raspbian"
+        DOCKER: "septimiuvana/aditof-raspberrypi-docker"
         EXTRA_CMAKE_FLAGS: "-DRASPBERRY=1 -DUSE_FXTOF1=1"
 
       #Jetson
