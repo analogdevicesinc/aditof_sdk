@@ -148,7 +148,7 @@ aditof::Status findDepthSensor(std::string &media, std::string &dev,
 }
 
 Status TargetSensorEnumerator::searchSensors() {
-    Status status = Status::ok;
+    Status status = Status::OK;
     LOG(INFO) << "Looking for sensors on the target: Raspberry PI";
 
     // Find all media device paths
