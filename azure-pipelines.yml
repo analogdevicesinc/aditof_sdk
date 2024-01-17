@@ -40,12 +40,12 @@ jobs:
       Raspberry_96tof1:
         imageName: 'ubuntu-20.04'
         DOCKER: "septimiuvana/aditof-raspberrypi-docker"
-        EXTRA_CMAKE_FLAGS: "-DRASPBERRY=1"
+        EXTRA_CMAKE_FLAGS: "-DRASPBERRYPI=1"
 
       Raspberry_fxtof1:
         imageName: 'ubuntu-20.04'
         DOCKER: "septimiuvana/aditof-raspberrypi-docker"
-        EXTRA_CMAKE_FLAGS: "-DRASPBERRY=1 -DUSE_FXTOF1=1"
+        EXTRA_CMAKE_FLAGS: "-DRASPBERRYPI=1 -DUSE_FXTOF1=1"
 
       #Jetson
       ubuntu_20_Jetson_96tof1:
