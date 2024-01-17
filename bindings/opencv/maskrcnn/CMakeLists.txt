@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 
 project(aditof-opencv-maskrcnn)
 
+if (RASPBERRYPI)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+endif()
+
 add_executable(${PROJECT_NAME} main.cpp)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/mscoco_labels.names
