@@ -2,5 +2,7 @@ build/
 
 sdk/include/aditof/version.h
 
+.idea/
+
 *.temp/
 .vscode*
