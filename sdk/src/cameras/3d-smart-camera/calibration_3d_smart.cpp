@@ -89,6 +89,10 @@ Calibration3D_Smart::~Calibration3D_Smart() {
     if (m_distortion_cache) {
         delete[] m_distortion_cache;
     }
+
+#if defined(CUDA_ON_TARGET)
+    cudaObj.freeAll();
+#endif
 }
 
 //! ReadCalMap - Read the entire calibration map
@@ -279,7 +283,7 @@ setMode - Sets the mode to be used for depth calibration
 aditof::Status Calibration3D_Smart::setMode(
     std::shared_ptr<aditof::DepthSensorInterface> depthSensor,
     const std::string &mode, int range, unsigned int frameWidth,
-    unsigned int frameheight) {
+    unsigned int frameHeight) {
     using namespace aditof;
 
     Status status = Status::OK;
@@ -290,7 +294,21 @@ aditof::Status Calibration3D_Smart::setMode(
     float gain = (mode == "near" ? 0.5f : 1.15f);
     float offset = 0.0;
 
+#if defined(CUDA_ON_TARGET)
+
+    m_cudaParameters[0] = (double)frameWidth;
+    m_cudaParameters[1] = (double)frameHeight;
+    m_cudaParameters[11] = (double)gain;
+    m_cudaParameters[12] = (double)offset;
+    m_cudaParameters[13] = (double)pixelMaxValue;
+    m_cudaParameters[14] = (double)range;
+    cudaObj.setParameters(m_cudaParameters);
+    cudaObj.buildDepthCorrectionCache();
+#else
     buildDepthCalibrationCache(gain, offset, pixelMaxValue, range);
+
+#endif
+
     m_range = range;
 
     status = getIntrinsic(INTRINSIC, cameraMatrix);
@@ -302,14 +320,48 @@ aditof::Status Calibration3D_Smart::setMode(
                   << "    fy: " << cameraMatrix[4] << "\n"
                   << "    cx: " << cameraMatrix[2] << "\n"
                   << "    cy: " << cameraMatrix[5];
-        buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameheight);
+
+#if defined(CUDA_ON_TARGET)
+        m_cudaParameters[0] = (double)frameWidth;
+        m_cudaParameters[1] = (double)frameHeight;
+        m_cudaParameters[2] = (double)cameraMatrix[0]; //fx
+        m_cudaParameters[3] = (double)cameraMatrix[4]; //fy
+        m_cudaParameters[4] = (double)cameraMatrix[2]; //cx
+        m_cudaParameters[5] = (double)cameraMatrix[5]; //cy
+        cudaObj.setParameters(m_cudaParameters);
+        cudaObj.buildGeometryCorrectionCache();
+#else
+        buildGeometryCalibrationCache(cameraMatrix, frameWidth, frameHeight);
+#endif
     }
 
     status = getIntrinsic(DISTORTION_COEFFICIENTS, distortionCoeffs);
     if (status != Status::OK) {
         LOG(WARNING) << "Failed to read distortion coefficients from eeprom";
     } else {
-        buildDistortionCorrectionCache(frameWidth, frameheight);
+        LOG(INFO) << "Camera distortion coefficient parameters:\n"
+                  << "    k1: " << distortionCoeffs[0] << "\n"
+                  << "    k2: " << distortionCoeffs[1] << "\n"
+                  << "    k3: " << distortionCoeffs[2];
+
+#if defined(CUDA_ON_TARGET)
+        m_cudaParameters[0] = (double)frameWidth;
+        m_cudaParameters[1] = (double)frameHeight;
+        m_cudaParameters[2] = (double)cameraMatrix[0];     //fx
+        m_cudaParameters[3] = (double)cameraMatrix[4];     //fy
+        m_cudaParameters[4] = (double)cameraMatrix[2];     //cx
+        m_cudaParameters[5] = (double)cameraMatrix[5];     //cy
+        m_cudaParameters[6] = (double)distortionCoeffs[0]; //k1
+        m_cudaParameters[7] = (double)distortionCoeffs[1]; //k2
+        m_cudaParameters[8] = (double)distortionCoeffs[2]; //k3
+        m_cudaParameters[9] = (double)cameraMatrix[2];     //x0
+        m_cudaParameters[10] = (double)cameraMatrix[5];    //y0
+        cudaObj.setParameters(m_cudaParameters);
+        cudaObj.buildDistortionCorrectionCache();
+#else
+        buildDistortionCorrectionCache(frameWidth, frameHeight);
+
+#endif
     }
 
     /*Execute the mode change command*/
@@ -328,6 +380,13 @@ calibrateDepth - Calibrate the depth data using the gain and offset
 */
 aditof::Status Calibration3D_Smart::calibrateDepth(uint16_t *frame,
                                                    uint32_t frame_size) {
+
+#if defined(CUDA_ON_TARGET)
+    cudaObj.cpyFrameToGPU((uint16_t *)frame);
+    cudaObj.applyDepthCorrection();
+    cudaObj.cpyFrameFromGPU(frame);
+    return aditof::Status::OK;
+#else
     using namespace aditof;
 
     uint16_t *cache = m_depth_cache;
@@ -353,6 +412,8 @@ aditof::Status Calibration3D_Smart::calibrateDepth(uint16_t *frame,
     }
 
     return Status::OK;
+
+#endif
 }
 
 //! calibrateCameraGeometry - Compensate for lens distorsion in the depth data
@@ -364,6 +425,13 @@ calibrateCameraGeometry - Compensate for lens distorsion in the depth data
 aditof::Status
 Calibration3D_Smart::calibrateCameraGeometry(uint16_t *frame,
                                              uint32_t frame_size) {
+
+#if defined(CUDA_ON_TARGET)
+    cudaObj.cpyFrameToGPU((uint16_t *)frame);
+    cudaObj.applyGeometryCorrection();
+    cudaObj.cpyFrameFromGPU(frame);
+    return aditof::Status::OK;
+#else
     using namespace aditof;
 
     if (!m_cal_valid) {
@@ -380,6 +448,7 @@ Calibration3D_Smart::calibrateCameraGeometry(uint16_t *frame,
     }
 
     return Status::OK;
+#endif
 }
 
 // Create a cache to speed up depth calibration computation
@@ -396,6 +465,11 @@ void Calibration3D_Smart::buildDepthCalibrationCache(float gain, float offset,
             static_cast<int16_t>(static_cast<float>(current) * gain + offset);
         m_depth_cache[current] = currentValue <= range ? currentValue : range;
     }
+    // std::cout << "CPU depth: \n";
+    // for (int i = 0; i < 10; i++) {
+    //     std::cout << m_depth_cache[i] << ", ";
+    // }
+    // std::cout << "\n\n\n";
 }
 
 // Create a cache to speed up depth geometric camera calibration computation
@@ -430,6 +504,11 @@ void Calibration3D_Smart::buildGeometryCalibrationCache(
             }
         }
     }
+    // std::cout << "CPU geometry: \n";
+    // for (int i = 0; i < 10; i++) {
+    //     std::cout << m_geometry_cache[i] << ", ";
+    // }
+    // std::cout << "\n\n\n";
 }
 
 void Calibration3D_Smart::buildDistortionCorrectionCache(unsigned int width,
@@ -459,11 +538,25 @@ void Calibration3D_Smart::buildDistortionCorrectionCache(unsigned int width,
             m_distortion_cache[j * width + i] = k_calc;
         }
     }
+
+    std::cout << "CPU distortion: \n";
+    for (int i = 0; i < 10; i++) {
+        std::cout << m_distortion_cache[i] << ", ";
+    }
+    std::cout << "\n\n\n";
 }
 
 aditof::Status Calibration3D_Smart::distortionCorrection(uint16_t *frame,
                                                          unsigned int width,
                                                          unsigned int height) {
+
+#if defined(CUDA_ON_TARGET)
+    cudaObj.cpyFrameToGPU((uint16_t *)frame);
+    cudaObj.applyDistortionCorrection();
+    cudaObj.cpyFrameFromGPU(frame);
+    return aditof::Status::OK;
+#else
+
     using namespace aditof;
     double fx = (double)m_intrinsics[2];
     double fy = (double)m_intrinsics[3];
@@ -498,4 +591,5 @@ aditof::Status Calibration3D_Smart::distortionCorrection(uint16_t *frame,
     memcpy(frame, buff, width * height * 2);
     delete[] buff;
     return Status::OK;
+#endif
 }

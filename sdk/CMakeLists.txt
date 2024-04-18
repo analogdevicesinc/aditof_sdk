@@ -199,6 +199,24 @@ if ( JETSON )
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -latomic")
 endif()
 
+if ( CUDA_ON_TARGET )
+        file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/../bindings/cuda_utils/build")
+        execute_process(
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../bindings/cuda_utils/build/
+            COMMAND cmake .. 
+        )
+        execute_process(
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/../bindings/cuda_utils/build/
+            COMMAND make
+        )
+        add_library(libaditof_cuda SHARED IMPORTED)
+        set_target_properties(libaditof_cuda PROPERTIES
+            IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/../bindings/cuda_utils/build/libaditof_cuda.so"
+            IMPORTED_NO_SONAME 1
+        )
+        target_link_libraries(${PROJECT_NAME} PRIVATE libaditof_cuda)
+endif()
+
 if( APPLE )
     find_library( LIBUVC_LIB libuvc.dylib /usr/local/lib/ )
     if( NOT LIBUVC_LIB)
